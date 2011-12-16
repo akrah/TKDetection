@@ -2,12 +2,14 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QButtonGroup>
 
 namespace Ui {
 	class MainWindow;
 }
 
 class Billon;
+class SliceView;
 class SliceHistogram;
 
 class MainWindow : public QMainWindow
@@ -15,30 +17,31 @@ class MainWindow : public QMainWindow
 	Q_OBJECT
 
 public:
-	explicit MainWindow(QWidget *parent = 0);
+	explicit MainWindow( QWidget *parent = 0 );
 	~MainWindow();
 
-private:
-	void openDicom(const QString &);
-	void drawAverageSlice();
+	bool eventFilter(QObject *obj, QEvent *event);
 
-	void enableImageModifiers(bool);
+private:
+	void updateBillon();
 
 private slots:
 	void openDicom();
 	void closeImage();
-	void updateImage();
-	void setImage(const int);
-	void changeAverageSliceVisibility(bool);
+	void redrawSlice();
+	void drawSlice( const int &sliceNumber );
+	void drawSliceType( const int &buttonId );
 
 private:
 	Ui::MainWindow *ui;
 
-	Billon *_cube;
-	QImage *_image;
+	Billon *_billon;
+	SliceView *_sliceView;
+	SliceHistogram *_sliceHistogram;
+
 	unsigned int _currentSlice;
 
-	SliceHistogram *_sliceHistogram;
+	QButtonGroup _groupSliceView;
 };
 
 #endif // MAINWINDOW_H

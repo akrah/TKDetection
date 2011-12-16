@@ -15,20 +15,22 @@ SOURCES  *= main.cpp \
 			mainwindow.cpp \
 			billon.cpp \
 			dicomreader.cpp \
-			slicehistogram.cpp
+			slicehistogram.cpp \
+	sliceview.cpp
 
 HEADERS  *= mainwindow.h \
 			billon.h \
 			dicomreader.h \
-			slicehistogram.h
+			slicehistogram.h \
+	sliceview.h
 
 FORMS    *= mainwindow.ui
 
 ITK_PATH  = /usr/local/include/InsightToolkit/
 
-INCLUDEPATH  *= \
+INCLUDEPATH  += \
+				/usr/include/ \
 				/usr/local/include \
-				/usr/include \
 				$${ITK_PATH}/IO/ \
 				$${ITK_PATH}/Common/ \
 				$${ITK_PATH}/ \

@@ -2,6 +2,7 @@
 #define SLICEHISTOGRAM_H
 
 #include <QWidget>
+#include <vector>
 
 class Billon;
 
@@ -12,15 +13,17 @@ class SliceHistogram : public QWidget
 	Q_OBJECT
 
 public:
-	explicit SliceHistogram(QWidget *parent = 0);
+	explicit SliceHistogram( QWidget *parent = 0 );
 
-	void update(const Billon &);
+	void setModel(const Billon *billon);
+	void update();
 
 protected:
-	void paintEvent(QPaintEvent *);
+	void paintEvent(QPaintEvent *event);
 
 private:
-	QList<uint> _graph;
+	const Billon *_billon;
+	std::vector<float> _graph;
 };
 
 #endif // SLICEHISTOGRAM_H

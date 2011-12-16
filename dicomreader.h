@@ -21,7 +21,7 @@ namespace DicomReader {
 	 * \param	repository Chemin vers le fichier source
 	 * \return	l'image 3D correspondant au fichier lu
 	 */
-	Billon* read( QString );
+	Billon* read( const QString & );
 }
 
 #endif // DICOMREADER_H
