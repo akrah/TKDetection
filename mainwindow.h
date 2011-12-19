@@ -3,13 +3,13 @@
 
 #include <QMainWindow>
 #include <QButtonGroup>
+#include "sliceview.h"
 
 namespace Ui {
 	class MainWindow;
 }
 
 class Billon;
-class SliceView;
 class SliceHistogram;
 
 class MainWindow : public QMainWindow
@@ -28,9 +28,7 @@ private:
 private slots:
 	void openDicom();
 	void closeImage();
-	void redrawSlice();
-	void drawSlice( const int &sliceNumber );
-	void drawSliceType( const int &buttonId );
+	void adaptToSliceType(const SliceType &type);
 
 private:
 	Ui::MainWindow *ui;

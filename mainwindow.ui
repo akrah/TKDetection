@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>797</width>
-    <height>776</height>
+    <width>783</width>
+    <height>555</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -30,6 +30,33 @@
     </item>
     <item>
      <layout class="QVBoxLayout" name="verticalLayout_3">
+      <item>
+       <layout class="QFormLayout" name="formLayout_2">
+        <property name="topMargin">
+         <number>0</number>
+        </property>
+        <item row="0" column="0">
+         <widget class="QLabel" name="label">
+          <property name="text">
+           <string>N° coupe</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="1">
+         <widget class="QLabel" name="_sliceNumber">
+          <property name="text">
+           <string>Aucune coupe présente</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
       <item>
        <widget class="QLabel" name="_labelImage">
         <property name="sizePolicy">
@@ -78,54 +105,37 @@
        </spacer>
       </item>
       <item>
-       <layout class="QFormLayout" name="formLayout">
-        <property name="fieldGrowthPolicy">
-         <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
+       <widget class="QGroupBox" name="groupBox">
+        <property name="title">
+         <string>Type de coupe</string>
         </property>
-        <property name="topMargin">
-         <number>0</number>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
         </property>
-        <item row="0" column="0">
-         <widget class="QLabel" name="label">
-          <property name="text">
-           <string>N° coupe</string>
-          </property>
-          <property name="alignment">
-           <set>Qt::AlignCenter</set>
-          </property>
-         </widget>
-        </item>
-        <item row="0" column="1">
-         <widget class="QLabel" name="_sliceNumber">
-          <property name="text">
-           <string>Aucune coupe présente</string>
-          </property>
-          <property name="alignment">
-           <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-          </property>
-         </widget>
-        </item>
-        <item row="1" column="0">
-         <widget class="QLabel" name="label_2">
-          <property name="text">
-           <string>Seuil bas</string>
-          </property>
-         </widget>
-        </item>
-        <item row="1" column="1">
-         <widget class="QSpinBox" name="_lowThreshold"/>
-        </item>
-        <item row="2" column="0">
-         <widget class="QLabel" name="label_3">
-          <property name="text">
-           <string>Seuil haut</string>
-          </property>
-         </widget>
-        </item>
-        <item row="2" column="1">
-         <widget class="QSpinBox" name="_highThreshold"/>
-        </item>
-       </layout>
+        <layout class="QVBoxLayout" name="verticalLayout">
+         <item>
+          <widget class="QRadioButton" name="_originalSlice">
+           <property name="text">
+            <string>Coupe originale</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QRadioButton" name="_averageSlice">
+           <property name="text">
+            <string>Coupe moyenne</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QRadioButton" name="_medianSlice">
+           <property name="text">
+            <string>Coupe médiane</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
       </item>
       <item>
        <spacer name="verticalSpacer_3">
@@ -141,24 +151,35 @@
        </spacer>
       </item>
       <item>
-       <widget class="QRadioButton" name="_originalSlice">
-        <property name="text">
-         <string>Coupe originale</string>
+       <widget class="QGroupBox" name="groupBox_2">
+        <property name="title">
+         <string>Seuillage</string>
         </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QRadioButton" name="_averageSlice">
-        <property name="text">
-         <string>Coupe moyenne</string>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
         </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QRadioButton" name="_medianSlice">
-        <property name="text">
-         <string>Coupe médiane</string>
-        </property>
+        <layout class="QFormLayout" name="formLayout_3">
+         <item row="0" column="0">
+          <widget class="QLabel" name="label_2">
+           <property name="text">
+            <string>Seuil bas</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="1">
+          <widget class="QSpinBox" name="_lowThreshold"/>
+         </item>
+         <item row="1" column="0">
+          <widget class="QLabel" name="label_3">
+           <property name="text">
+            <string>Seuil haut</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="1">
+          <widget class="QSpinBox" name="_highThreshold"/>
+         </item>
+        </layout>
        </widget>
       </item>
       <item>
@@ -196,7 +217,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>797</width>
+     <width>783</width>
      <height>25</height>
     </rect>
    </property>
