@@ -23,11 +23,11 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), ui(new Ui::Main
 	ui->_imageSlider->setSingleStep(1);
 	ui->_imageSlider->setPageStep(10);
 	ui->_imageSlider->setTickInterval(1);
-	ui->_imageSlider->setTickPosition(QSlider::TicksBelow);
+	ui->_imageSlider->setTickPosition(QSlider::TicksAbove);
 
-	_groupSliceView.addButton(ui->_originalSlice,CURRENT_SLICE);
-	_groupSliceView.addButton(ui->_averageSlice,AVERAGE_SLICE);
-	_groupSliceView.addButton(ui->_medianSlice,MEDIAN_SLICE);
+	_groupSliceView.addButton(ui->_originalSlice,SliceType::CURRENT_SLICE);
+	_groupSliceView.addButton(ui->_averageSlice,SliceType::AVERAGE_SLICE);
+	_groupSliceView.addButton(ui->_medianSlice,SliceType::MEDIAN_SLICE);
 	_groupSliceView.setExclusive(true);
 	ui->_originalSlice->setChecked(true);
 
@@ -51,7 +51,7 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), ui(new Ui::Main
 
 	// Évènements reçus de la vue en coupe
 	QObject::connect(_sliceView, SIGNAL(updated(QPixmap)), ui->_labelImage, SLOT(setPixmap(QPixmap)));
-	QObject::connect(_sliceView, SIGNAL(typeOfViewChanged(SliceType)), this, SLOT(adaptToSliceType(SliceType)));
+	QObject::connect(_sliceView, SIGNAL(typeOfViewChanged(SliceType::SliceType)), this, SLOT(adaptToSliceType(SliceType::SliceType)));
 
 	// Évènements déclenchés par les actions du menu
 	QObject::connect(ui->_actionOpenDicom, SIGNAL(triggered()), this, SLOT(openDicom()));
@@ -87,15 +87,15 @@ void MainWindow::closeImage() {
 	updateBillon();
 }
 
-void MainWindow::adaptToSliceType(const SliceType &type) {
+void MainWindow::adaptToSliceType(const SliceType::SliceType &type) {
 	switch (type) {
-		case AVERAGE_SLICE :
-		case MEDIAN_SLICE :
+		case SliceType::AVERAGE_SLICE :
+		case SliceType::MEDIAN_SLICE :
 			ui->_imageSlider->setEnabled(false);
 			ui->_highThreshold->setEnabled(false);
 			ui->_lowThreshold->setEnabled(false);
 			break;
-		case CURRENT_SLICE :
+		case SliceType::CURRENT_SLICE :
 		default :
 			ui->_imageSlider->setEnabled(true);
 			ui->_highThreshold->setEnabled(true);
@@ -107,15 +107,12 @@ void MainWindow::updateBillon() {
 	if ( _billon != 0 ) {
 		ui->_lowThreshold->setMinimum(_billon->minValue());
 		ui->_lowThreshold->setMaximum(_billon->maxValue());
-		std::cout << "ui->_lowThreshold->setValue(_billon->minValue());" << std::endl;
 		ui->_lowThreshold->setValue(_billon->minValue());
 		ui->_highThreshold->setMinimum(_billon->minValue());
 		ui->_highThreshold->setMaximum(_billon->maxValue());
-		std::cout << "ui->_maxThreshold->setValue(_billon->maxValue());" << std::endl;
 		ui->_highThreshold->setValue(_billon->maxValue());
 	}
 
-	std::cout << "ui->_imageSlider->setValue(0)" << std::endl;
 	ui->_imageSlider->setValue(0);
 	ui->_imageSlider->setRange(0,_billon!=0?_billon->n_slices-1:0);
 
@@ -124,7 +121,7 @@ void MainWindow::updateBillon() {
 
 	_sliceView->setModel(_billon);
 	_sliceHistogram->setModel(_billon);
-	_sliceView->drawSlice();
+	_sliceView->update();
 }
 
 bool MainWindow::eventFilter(QObject *obj, QEvent *event) {

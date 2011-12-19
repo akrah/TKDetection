@@ -28,7 +28,7 @@ private:
 private slots:
 	void openDicom();
 	void closeImage();
-	void adaptToSliceType(const SliceType &type);
+	void adaptToSliceType(const SliceType::SliceType &type);
 
 private:
 	Ui::MainWindow *ui;

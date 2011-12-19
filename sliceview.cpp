@@ -3,7 +3,9 @@
 #include "billon.h"
 #include <QPainter>
 
-SliceView::SliceView() : QObject(0), QPixmap(), _billon(0), _currentSlice(0), _lowThreshold(0), _highThreshold(0), _typeOfView(CURRENT_SLICE) {
+#define RESTRICT_TO_INTERVAL(x,min,max) qMax((min),qMin((max),(x)))
+
+SliceView::SliceView() : QObject(0), QPixmap(), _billon(0), _currentSlice(0), _lowThreshold(0), _highThreshold(0), _typeOfView(SliceType::CURRENT_SLICE) {
 }
 
 int SliceView::currentSlice() const {
@@ -20,71 +22,34 @@ void SliceView::setModel( const Billon *billon ) {
 }
 
 void SliceView::drawSlice( const int &sliceNumber ) {
+	if ( (_billon != 0) && (sliceNumber > -1) && (sliceNumber < static_cast<int>(_billon->n_slices)) ) _currentSlice = sliceNumber;
+	update();
+}
+
+void SliceView::update() {
 	if ( _billon != 0 ) {
-		if ( (sliceNumber > -1) && (sliceNumber < static_cast<int>(_billon->n_slices)) ) _currentSlice = sliceNumber;
-
-		const uint width = _billon->n_cols;
-		const uint height = _billon->n_rows;
-		const uint depth = _billon->n_slices;
-		const float minValue = _lowThreshold;
-		const float maxValue = _highThreshold;
-
-		QImage image(width,height,QImage::Format_ARGB32);
-		int c;
-		float fact;
-		QRgb * line;
-
 		switch (_typeOfView) {
+			// Affichage de la coupe courante
+			case SliceType::CURRENT_SLICE:
+				drawCurrentSlice();
+				break;
 			// Affichage de la coupe moyenne
-			case AVERAGE_SLICE :
-				fact = (255.0/(depth*(maxValue-minValue)));
-				for (unsigned int j=0 ; j<height ; j++) {
-					line = (QRgb *) image.scanLine(j);
-					for (unsigned int i=0 ; i<width ; i++) {
-						c = 0;
-						for (unsigned int k=0 ; k<depth ; k++) {
-							c += qMax(minValue,qMin(maxValue,(float)_billon->at(j,i,k)))-minValue;
-						}
-						c = c*fact;
-						line[i] = qRgb(c,c,c);
-					}
-				}
+			case SliceType::AVERAGE_SLICE :
+				drawAverageSlice();
 				break;
 			// Affichage de la coupe médiane
-			case MEDIAN_SLICE :
-				fact = 255.0/(maxValue-minValue);
-				for (unsigned int j=0 ; j<height ; j++) {
-					line = (QRgb *) image.scanLine(j);
-					for (unsigned int i=0 ; i<width ; i++) {
-						ivec tab(depth);
-						for (unsigned int k=0 ; k<depth ; k++) {
-							tab(k) = qMax(minValue,qMin(maxValue,(float)_billon->at(j,i,k)))-minValue;
-						}
-						c = median(tab)*fact;
-						line[i] = qRgb(c,c,c);
-					}
-				}
-				break;
-			// Affichage de la coupe courante
-			case CURRENT_SLICE:
-				fact = 255.0/(maxValue-minValue);
-				for (unsigned int j=0 ; j<height ; j++) {
-					line = (QRgb *) image.scanLine(j);
-					for (unsigned int i=0 ; i<width ; i++) {
-						c = _billon->at(j,i,_currentSlice);
-						c = (qMax(minValue,qMin(maxValue,(float)c))-minValue)*fact;
-						line[i] = qRgb(c,c,c);
-					}
-				}
+			case SliceType::MEDIAN_SLICE :
+				drawMedianSlice();
 				break;
 			default :
-				image.fill(0xff333333);
+				QImage image(width(),height(),QImage::Format_ARGB32);
+				image.fill(0xff555555);
+				convertFromImage(image);
 		}
-		convertFromImage(image);
 	}
 	else {
 		QImage image(width(),height(),QImage::Format_ARGB32);
-		image.fill(0x00555555);
+		image.fill(0xff555555);
 		convertFromImage(image);
 	}
 	emit updated(*this);
@@ -92,18 +57,92 @@ void SliceView::drawSlice( const int &sliceNumber ) {
 
 void SliceView::setLowThreshold(const int &threshold) {
 	_lowThreshold = threshold;
-	drawSlice();
+	update();
 	emit thresholdUpdated();
 }
 
 void SliceView::setHighThreshold(const int &threshold) {
 	_highThreshold = threshold;
-	drawSlice();
+	update();
 	emit thresholdUpdated();
 }
 
 void SliceView::setTypeOfView(const int &type) {
-	_typeOfView = type;
-	drawSlice();
-	emit typeOfViewChanged(type);
+	if ( type > SliceType::__SLICE_TYPE_MIN && type < SliceType::__SLICE_TYPE_MAX ) {
+		_typeOfView = static_cast<SliceType::SliceType>(type);
+		update();
+		emit typeOfViewChanged(_typeOfView);
+	}
+}
+
+void SliceView::drawCurrentSlice() {
+	const imat &slice = _billon->slice(_currentSlice);
+	const uint width = slice.n_cols;
+	const uint height = slice.n_rows;
+	const float minValue = _lowThreshold;
+	const float maxValue = _highThreshold;
+	const float fact = 255.0/(maxValue-minValue);
+
+	QImage image(width,height,QImage::Format_ARGB32);
+	QRgb * line = (QRgb *) image.bits();
+
+	for (unsigned int j=0 ; j<height ; j++) {
+		for (unsigned int i=0 ; i<width ; i++) {
+			const int c = (RESTRICT_TO_INTERVAL(static_cast<float>(slice.at(j,i)),minValue,maxValue)-minValue)*fact;
+			*(line++) = qRgb(c,c,c);
+		}
+	}
+
+	convertFromImage(image);
+}
+
+void SliceView::drawAverageSlice() {
+	const Billon &billon = *_billon;
+	const uint width = billon.n_cols;
+	const uint height = billon.n_rows;
+	const uint depth = billon.n_slices;
+	const float minValue = _lowThreshold;
+	const float maxValue = _highThreshold;
+	const float fact = 255.0/(depth*(maxValue-minValue));
+
+	QImage image(width,height,QImage::Format_ARGB32);
+	int c;
+	QRgb * line = (QRgb *) image.bits();
+
+	for (unsigned int j=0 ; j<height ; j++) {
+		for (unsigned int i=0 ; i<width ; i++) {
+			c = depth*(-minValue);
+			for (unsigned int k=0 ; k<depth ; k++) {
+				c += RESTRICT_TO_INTERVAL(static_cast<float>(billon.at(j,i,k)),minValue,maxValue);
+			}
+			c *= fact;
+			*(line++) = qRgb(c,c,c);
+		}
+	}
+	convertFromImage(image);
+}
+
+void SliceView::drawMedianSlice() {
+	const Billon &billon = *_billon;
+	const uint width = billon.n_cols;
+	const uint height = billon.n_rows;
+	const uint depth = billon.n_slices;
+	const float minValue = _lowThreshold;
+	const float maxValue = _highThreshold;
+	const float fact = 255.0/(maxValue-minValue);
+
+	QImage image(width,height,QImage::Format_ARGB32);
+	QRgb * line =(QRgb *) image.bits();
+
+	for (unsigned int j=0 ; j<height ; j++) {
+		for (unsigned int i=0 ; i<width ; i++) {
+			ivec tab(depth);
+			for (unsigned int k=0 ; k<depth ; k++) {
+				tab(k) = RESTRICT_TO_INTERVAL(static_cast<float>(billon.at(j,i,k)),minValue,maxValue);
+			}
+			const int c = (median(tab)-minValue)*fact;
+			*(line++) = qRgb(c,c,c);
+		}
+	}
+	convertFromImage(image);
 }

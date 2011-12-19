@@ -5,11 +5,15 @@
 
 class Billon;
 
-enum SliceType {
-	CURRENT_SLICE,
-	AVERAGE_SLICE,
-	MEDIAN_SLICE
-};
+namespace SliceType {
+	enum SliceType {
+		__SLICE_TYPE_MIN,
+		CURRENT_SLICE,
+		AVERAGE_SLICE,
+		MEDIAN_SLICE,
+		__SLICE_TYPE_MAX
+	};
+}
 
 class SliceView : public QObject, public QPixmap
 {
@@ -24,22 +28,28 @@ public:
 
 public slots:
 	void drawSlice( const int &sliceNumber = -1 );
+	void update();
 	void setLowThreshold(const int &threshold);
 	void setHighThreshold(const int &threshold);
-	void setTypeOfView(const SliceType &type = CURRENT_SLICE);
+	void setTypeOfView(const int &type = SliceType::CURRENT_SLICE);
+
+private :
+	void drawCurrentSlice();
+	void drawAverageSlice();
+	void drawMedianSlice();
 
 signals:
 	void updated(const QPixmap &);
 	void thresholdUpdated();
-	void typeOfViewChanged(const SliceType &);
+	void typeOfViewChanged(const SliceType::SliceType &);
 
 private:
 	const Billon * _billon;
 
-	unsigned int _currentSlice;
+	int _currentSlice;
 	int _lowThreshold;
 	int _highThreshold;
-	int _typeOfView;
+	SliceType::SliceType _typeOfView;
 };
 
 #endif // SLICEVIEW_H
