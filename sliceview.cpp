@@ -3,13 +3,12 @@
 #include "billon.h"
 #include <QPainter>
 
-#define RESTRICT_TO_INTERVAL(x,min,max) qMax((min),qMin((max),(x)))
-
-SliceView::SliceView() : QObject(0), QPixmap(), _billon(0), _currentSlice(0), _lowThreshold(0), _highThreshold(0), _typeOfView(SliceType::CURRENT) {
+namespace {
+	template<class T>
+	inline T RESTRICT_TO_INTERVAL(T x, T min, T max) { return qMax((min),qMin((max),(x))); }
 }
 
-int SliceView::currentSlice() const {
-	return _currentSlice;
+SliceView::SliceView() : QObject(0), QPixmap(), _billon(0), _currentSlice(0), _lowThreshold(0), _highThreshold(0), _typeOfView(SliceType::CURRENT) {
 }
 
 void SliceView::setModel( const Billon *billon ) {
@@ -79,8 +78,8 @@ void SliceView::drawCurrentSlice() {
 	const imat &slice = _billon->slice(_currentSlice);
 	const uint width = slice.n_cols;
 	const uint height = slice.n_rows;
-	const float minValue = _lowThreshold;
-	const float maxValue = _highThreshold;
+	const int minValue = _lowThreshold;
+	const int maxValue = _highThreshold;
 	const float fact = 255.0/(maxValue-minValue);
 
 	QImage image(width,height,QImage::Format_ARGB32);
@@ -88,7 +87,7 @@ void SliceView::drawCurrentSlice() {
 
 	for (unsigned int j=0 ; j<height ; j++) {
 		for (unsigned int i=0 ; i<width ; i++) {
-			const int c = (RESTRICT_TO_INTERVAL(static_cast<float>(slice.at(j,i)),minValue,maxValue)-minValue)*fact;
+			const int c = (RESTRICT_TO_INTERVAL(slice.at(j,i),minValue,maxValue)-minValue)*fact;
 			*(line++) = qRgb(c,c,c);
 		}
 	}
@@ -101,8 +100,8 @@ void SliceView::drawAverageSlice() {
 	const uint width = billon.n_cols;
 	const uint height = billon.n_rows;
 	const uint depth = billon.n_slices;
-	const float minValue = _lowThreshold;
-	const float maxValue = _highThreshold;
+	const int minValue = _lowThreshold;
+	const int maxValue = _highThreshold;
 	const float fact = 255.0/(depth*(maxValue-minValue));
 
 	QImage image(width,height,QImage::Format_ARGB32);
@@ -113,7 +112,7 @@ void SliceView::drawAverageSlice() {
 		for (unsigned int i=0 ; i<width ; i++) {
 			c = depth*(-minValue);
 			for (unsigned int k=0 ; k<depth ; k++) {
-				c += RESTRICT_TO_INTERVAL(static_cast<float>(billon.at(j,i,k)),minValue,maxValue);
+				c += RESTRICT_TO_INTERVAL(billon.at(j,i,k),minValue,maxValue);
 			}
 			c *= fact;
 			*(line++) = qRgb(c,c,c);
@@ -127,8 +126,8 @@ void SliceView::drawMedianSlice() {
 	const uint width = billon.n_cols;
 	const uint height = billon.n_rows;
 	const uint depth = billon.n_slices;
-	const float minValue = _lowThreshold;
-	const float maxValue = _highThreshold;
+	const int minValue = _lowThreshold;
+	const int maxValue = _highThreshold;
 	const float fact = 255.0/(maxValue-minValue);
 
 	QImage image(width,height,QImage::Format_ARGB32);
@@ -138,7 +137,7 @@ void SliceView::drawMedianSlice() {
 		for (unsigned int i=0 ; i<width ; i++) {
 			ivec tab(depth);
 			for (unsigned int k=0 ; k<depth ; k++) {
-				tab(k) = RESTRICT_TO_INTERVAL(static_cast<float>(billon.at(j,i,k)),minValue,maxValue);
+				tab(k) = RESTRICT_TO_INTERVAL(billon.at(j,i,k),minValue,maxValue);
 			}
 			const int c = (median(tab)-minValue)*fact;
 			*(line++) = qRgb(c,c,c);

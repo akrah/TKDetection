@@ -1,29 +1,46 @@
 #ifndef SLICEHISTOGRAM_H
 #define SLICEHISTOGRAM_H
 
-#include <QWidget>
-#include <vector>
+#include <qwt_plot_histogram.h>
 
 class Billon;
+class QwtIntervalSample;
 
 #define HISTOGRAM_HEIGHT 200
 
-class SliceHistogram : public QWidget
+class SliceHistogram : public QObject, public QwtPlotHistogram
 {
 	Q_OBJECT
 
 public:
-	explicit SliceHistogram( QWidget *parent = 0 );
+	explicit SliceHistogram( QwtPlot* parent = 0 );
 
-	void setModel(const Billon *billon);
-	void update();
+	void setModel( const Billon *billon );
 
-protected:
-	void paintEvent(QPaintEvent *event);
+public slots:
+	void setLowThreshold( const int &threshold );
+	void setHighThreshold( const int &threshold );
+	void constructHistogram();
+
+signals:
+	void histogramUpdated();
 
 private:
 	const Billon *_billon;
-	std::vector<float> _graph;
+	QVector<QwtIntervalSample> _datas;
+
+	int _lowThreshold;
+	int _highThreshold;
 };
+
+inline
+void SliceHistogram::setLowThreshold(const int &threshold) {
+	_lowThreshold = threshold;
+}
+
+inline
+void SliceHistogram::setHighThreshold(const int &threshold) {
+	_highThreshold = threshold;
+}
 
 #endif // SLICEHISTOGRAM_H

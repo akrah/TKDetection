@@ -15,8 +15,8 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), ui(new Ui::Main
 	ui->setupUi(this);
 
 	// Initialisation des vues
-	_sliceHistogram = new SliceHistogram(ui->_histogramContainer);
 	_sliceView = new SliceView();
+	_sliceHistogram = new SliceHistogram(ui->_plotSliceHistogram);
 
 	// Paramétrisation des composant graphiques
 	ui->_labelSliceView->installEventFilter(this);
@@ -25,6 +25,8 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), ui(new Ui::Main
 	ui->_sliderSelectSlice->setPageStep(10);
 	ui->_sliderSelectSlice->setTickInterval(1);
 	ui->_sliderSelectSlice->setTickPosition(QSlider::TicksAbove);
+
+	ui->_plotSliceHistogram->enableAxis(QwtPlot::yLeft,false);
 
 	_groupSliceView.addButton(ui->_radioOriginalSlice,SliceType::CURRENT);
 	_groupSliceView.addButton(ui->_radioAverageSlice,SliceType::AVERAGE);
@@ -39,22 +41,30 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), ui(new Ui::Main
 
 	/**** Mise en place de la communication MVC ****/
 
-	// Évènements déclenchés par le slider
+	// Évènements déclenchés par le slider de n° de coupe
 	QObject::connect(ui->_sliderSelectSlice, SIGNAL(valueChanged(int)), _sliceView, SLOT(drawSlice(int)));
 	QObject::connect(ui->_sliderSelectSlice, SIGNAL(valueChanged(int)), ui->_labelSliceNumber, SLOT(setNum(int)));
 
 	// Évènements déclenchés par les boutons de sélection de la vue
 	QObject::connect(&_groupSliceView, SIGNAL(buttonClicked(int)), _sliceView, SLOT(setTypeOfView(int)));
 
-	// Évènements déclenchés par le seuillage
+	// Évènements déclenchés par le slider de seuillage
 	QObject::connect(ui->_spansliderSliceThreshold, SIGNAL(lowerPositionChanged(int)), _sliceView, SLOT(setLowThreshold(int)));
+	QObject::connect(ui->_spansliderSliceThreshold, SIGNAL(lowerPositionChanged(int)), _sliceHistogram, SLOT(setLowThreshold(int)));
 	QObject::connect(ui->_spansliderSliceThreshold, SIGNAL(lowerValueChanged(int)), ui->_labelMinThreshold, SLOT(setNum(int)));
 	QObject::connect(ui->_spansliderSliceThreshold, SIGNAL(upperPositionChanged(int)), _sliceView, SLOT(setHighThreshold(int)));
+	QObject::connect(ui->_spansliderSliceThreshold, SIGNAL(upperPositionChanged(int)), _sliceHistogram, SLOT(setHighThreshold(int)));
 	QObject::connect(ui->_spansliderSliceThreshold, SIGNAL(upperValueChanged(int)), ui->_labelMaxThreshold, SLOT(setNum(int)));
+
+	// Évènements déclenchés par le bouton de mise à jour de l'histogramme
+	QObject::connect(ui->_buttonUpdateHistogram, SIGNAL(clicked()), _sliceHistogram, SLOT(constructHistogram()));
 
 	// Évènements reçus de la vue en coupe
 	QObject::connect(_sliceView, SIGNAL(updated(QPixmap)), ui->_labelSliceView, SLOT(setPixmap(QPixmap)));
 	QObject::connect(_sliceView, SIGNAL(typeOfViewChanged(SliceType::SliceType)), this, SLOT(adaptToSliceType(SliceType::SliceType)));
+
+	// Évènements reçus de la vue histogramme
+	QObject::connect(_sliceHistogram, SIGNAL(histogramUpdated()), ui->_plotSliceHistogram, SLOT(replot()));
 
 	// Évènements déclenchés par les actions du menu
 	QObject::connect(ui->_actionOpenDicom, SIGNAL(triggered()), this, SLOT(openDicom()));
@@ -70,7 +80,7 @@ MainWindow::~MainWindow() {
 }
 
 void MainWindow::openDicom() {
-	QString folderName = QFileDialog::getExistingDirectory(0,"Sélection du répertoire DICOM",QDir::homePath(),QFileDialog::ShowDirsOnly);
+	QString folderName = QFileDialog::getExistingDirectory(0,tr("Sélection du répertoire DICOM"),QDir::homePath(),QFileDialog::ShowDirsOnly);
 	if ( !folderName.isEmpty() ) {
 		// Lecture des fichiers DICOM
 		if ( _billon != 0 ) {
@@ -116,7 +126,9 @@ void MainWindow::updateBillon() {
 	ui->_sliderSelectSlice->setRange(0,_billon!=0?_billon->n_slices-1:0);
 
 	if ( _billon != 0 )	ui->_labelSliceNumber->setNum(0);
-	else ui->_labelSliceNumber->setText("Aucune coupe présente.");
+	else ui->_labelSliceNumber->setText(tr("Aucune coupe présente."));
+
+	ui->_plotSliceHistogram->setAxisScale(QwtPlot::xBottom,0,(_billon != 0)?_billon->n_slices:1);
 
 	_sliceView->setModel(_billon);
 	_sliceHistogram->setModel(_billon);
