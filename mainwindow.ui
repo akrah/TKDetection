@@ -16,19 +16,6 @@
   <widget class="QWidget" name="centralWidget">
    <layout class="QHBoxLayout" name="horizontalLayout">
     <item>
-     <spacer name="horizontalSpacer_4">
-      <property name="orientation">
-       <enum>Qt::Horizontal</enum>
-      </property>
-      <property name="sizeHint" stdset="0">
-       <size>
-        <width>40</width>
-        <height>20</height>
-       </size>
-      </property>
-     </spacer>
-    </item>
-    <item>
      <layout class="QVBoxLayout" name="verticalLayout_3">
       <item>
        <layout class="QFormLayout" name="formLayout_2">
@@ -46,7 +33,7 @@
          </widget>
         </item>
         <item row="0" column="1">
-         <widget class="QLabel" name="_sliceNumber">
+         <widget class="QLabel" name="_labelSliceNumber">
           <property name="text">
            <string>Aucune coupe présente</string>
           </property>
@@ -58,34 +45,21 @@
        </layout>
       </item>
       <item>
-       <widget class="QLabel" name="_labelImage">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
+       <widget class="QLabel" name="_labelSliceView">
         <property name="text">
          <string/>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QSlider" name="_imageSlider">
+       <widget class="QSlider" name="_sliderSelectSlice">
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QWidget" name="_histogramContainer" native="true">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-       </widget>
+       <widget class="QWidget" name="_histogramContainer" native="true"/>
       </item>
      </layout>
     </item>
@@ -114,21 +88,21 @@
         </property>
         <layout class="QVBoxLayout" name="verticalLayout">
          <item>
-          <widget class="QRadioButton" name="_originalSlice">
+          <widget class="QRadioButton" name="_radioOriginalSlice">
            <property name="text">
             <string>Coupe originale</string>
            </property>
           </widget>
          </item>
          <item>
-          <widget class="QRadioButton" name="_averageSlice">
+          <widget class="QRadioButton" name="_radioAverageSlice">
            <property name="text">
             <string>Coupe moyenne</string>
            </property>
           </widget>
          </item>
          <item>
-          <widget class="QRadioButton" name="_medianSlice">
+          <widget class="QRadioButton" name="_radioMedianSlice">
            <property name="text">
             <string>Coupe médiane</string>
            </property>
@@ -158,26 +132,30 @@
         <property name="alignment">
          <set>Qt::AlignCenter</set>
         </property>
-        <layout class="QFormLayout" name="formLayout_3">
-         <item row="0" column="0">
-          <widget class="QLabel" name="label_2">
+        <layout class="QHBoxLayout" name="horizontalLayout_2">
+         <item>
+          <widget class="QLabel" name="_labelMinThreshold">
            <property name="text">
-            <string>Seuil bas</string>
+            <string>0</string>
            </property>
           </widget>
          </item>
-         <item row="0" column="1">
-          <widget class="QSpinBox" name="_lowThreshold"/>
-         </item>
-         <item row="1" column="0">
-          <widget class="QLabel" name="label_3">
-           <property name="text">
-            <string>Seuil haut</string>
+         <item>
+          <widget class="QxtSpanSlider" name="_spansliderSliceThreshold">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="handleMovementMode">
+            <enum>QxtSpanSlider::NoOverlapping</enum>
            </property>
           </widget>
          </item>
-         <item row="1" column="1">
-          <widget class="QSpinBox" name="_highThreshold"/>
+         <item>
+          <widget class="QLabel" name="_labelMaxThreshold">
+           <property name="text">
+            <string>0</string>
+           </property>
+          </widget>
          </item>
         </layout>
        </widget>
@@ -196,19 +174,6 @@
        </spacer>
       </item>
      </layout>
-    </item>
-    <item>
-     <spacer name="horizontalSpacer_3">
-      <property name="orientation">
-       <enum>Qt::Horizontal</enum>
-      </property>
-      <property name="sizeHint" stdset="0">
-       <size>
-        <width>40</width>
-        <height>20</height>
-       </size>
-      </property>
-     </spacer>
     </item>
    </layout>
   </widget>
@@ -258,6 +223,13 @@
   </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
+ <customwidgets>
+  <customwidget>
+   <class>QxtSpanSlider</class>
+   <extends>QSlider</extends>
+   <header>QxtSpanSlider</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>

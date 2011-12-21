@@ -5,7 +5,7 @@
 
 #define RESTRICT_TO_INTERVAL(x,min,max) qMax((min),qMin((max),(x)))
 
-SliceView::SliceView() : QObject(0), QPixmap(), _billon(0), _currentSlice(0), _lowThreshold(0), _highThreshold(0), _typeOfView(SliceType::CURRENT_SLICE) {
+SliceView::SliceView() : QObject(0), QPixmap(), _billon(0), _currentSlice(0), _lowThreshold(0), _highThreshold(0), _typeOfView(SliceType::CURRENT) {
 }
 
 int SliceView::currentSlice() const {
@@ -30,15 +30,15 @@ void SliceView::update() {
 	if ( _billon != 0 ) {
 		switch (_typeOfView) {
 			// Affichage de la coupe courante
-			case SliceType::CURRENT_SLICE:
+			case SliceType::CURRENT:
 				drawCurrentSlice();
 				break;
 			// Affichage de la coupe moyenne
-			case SliceType::AVERAGE_SLICE :
+			case SliceType::AVERAGE :
 				drawAverageSlice();
 				break;
 			// Affichage de la coupe médiane
-			case SliceType::MEDIAN_SLICE :
+			case SliceType::MEDIAN :
 				drawMedianSlice();
 				break;
 			default :
@@ -68,7 +68,7 @@ void SliceView::setHighThreshold(const int &threshold) {
 }
 
 void SliceView::setTypeOfView(const int &type) {
-	if ( type > SliceType::__SLICE_TYPE_MIN && type < SliceType::__SLICE_TYPE_MAX ) {
+	if ( type > SliceType::_SLICE_TYPE_MIN_ && type < SliceType::_SLICE_TYPE_MAX_ ) {
 		_typeOfView = static_cast<SliceType::SliceType>(type);
 		update();
 		emit typeOfViewChanged(_typeOfView);

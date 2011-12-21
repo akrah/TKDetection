@@ -1,19 +1,10 @@
 #ifndef SLICEVIEW_H
 #define SLICEVIEW_H
 
+#include "defines.h"
 #include <QPixmap>
 
 class Billon;
-
-namespace SliceType {
-	enum SliceType {
-		__SLICE_TYPE_MIN,
-		CURRENT_SLICE,
-		AVERAGE_SLICE,
-		MEDIAN_SLICE,
-		__SLICE_TYPE_MAX
-	};
-}
 
 class SliceView : public QObject, public QPixmap
 {
@@ -31,7 +22,7 @@ public slots:
 	void update();
 	void setLowThreshold(const int &threshold);
 	void setHighThreshold(const int &threshold);
-	void setTypeOfView(const int &type = SliceType::CURRENT_SLICE);
+	void setTypeOfView(const int &type = SliceType::CURRENT);
 
 private :
 	void drawCurrentSlice();

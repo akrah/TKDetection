@@ -3,13 +3,14 @@
 
 #include <QMainWindow>
 #include <QButtonGroup>
-#include "sliceview.h"
+#include "defines.h"
 
 namespace Ui {
 	class MainWindow;
 }
 
 class Billon;
+class SliceView;
 class SliceHistogram;
 
 class MainWindow : public QMainWindow
