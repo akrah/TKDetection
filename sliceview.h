@@ -43,4 +43,8 @@ private:
 	SliceType::SliceType _typeOfView;
 };
 
+inline int SliceView::currentSlice() const {
+	return _currentSlice;
+}
+
 #endif // SLICEVIEW_H

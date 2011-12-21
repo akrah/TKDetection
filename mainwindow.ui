@@ -16,7 +16,7 @@
   <widget class="QWidget" name="centralWidget">
    <layout class="QHBoxLayout" name="horizontalLayout">
     <item>
-     <layout class="QVBoxLayout" name="verticalLayout_3">
+     <layout class="QVBoxLayout" name="_layoutSliceView">
       <item>
        <layout class="QFormLayout" name="formLayout_2">
         <property name="topMargin">
@@ -59,7 +59,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QWidget" name="_histogramContainer" native="true"/>
+       <widget class="QwtPlot" name="_plotSliceHistogram"/>
       </item>
      </layout>
     </item>
@@ -132,28 +132,42 @@
         <property name="alignment">
          <set>Qt::AlignCenter</set>
         </property>
-        <layout class="QHBoxLayout" name="horizontalLayout_2">
+        <layout class="QVBoxLayout" name="verticalLayout_3">
          <item>
-          <widget class="QLabel" name="_labelMinThreshold">
-           <property name="text">
-            <string>0</string>
+          <layout class="QHBoxLayout" name="horizontalLayout_2">
+           <property name="topMargin">
+            <number>20</number>
            </property>
-          </widget>
+           <item>
+            <widget class="QLabel" name="_labelMinThreshold">
+             <property name="text">
+              <string>0</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QxtSpanSlider" name="_spansliderSliceThreshold">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="handleMovementMode">
+              <enum>QxtSpanSlider::NoOverlapping</enum>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLabel" name="_labelMaxThreshold">
+             <property name="text">
+              <string>0</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
          </item>
          <item>
-          <widget class="QxtSpanSlider" name="_spansliderSliceThreshold">
-           <property name="orientation">
-            <enum>Qt::Horizontal</enum>
-           </property>
-           <property name="handleMovementMode">
-            <enum>QxtSpanSlider::NoOverlapping</enum>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QLabel" name="_labelMaxThreshold">
+          <widget class="QPushButton" name="_buttonUpdateHistogram">
            <property name="text">
-            <string>0</string>
+            <string>Mettre à jour l'histogramme</string>
            </property>
           </widget>
          </item>
@@ -224,6 +238,11 @@
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <customwidgets>
+  <customwidget>
+   <class>QwtPlot</class>
+   <extends>QFrame</extends>
+   <header>qwt_plot.h</header>
+  </customwidget>
   <customwidget>
    <class>QxtSpanSlider</class>
    <extends>QSlider</extends>

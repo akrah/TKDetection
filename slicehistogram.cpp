@@ -1,71 +1,51 @@
 #include "slicehistogram.h"
 
 #include "billon.h"
-#include <QPainter>
 
-SliceHistogram::SliceHistogram( QWidget *parent ) : QWidget(parent), _billon(0) {
+namespace {
+	template<class T>
+	inline T RESTRICT_TO_INTERVAL(T x, T min, T max) { return qMax((min),qMin((max),(x))); }
+}
+
+SliceHistogram::SliceHistogram( QwtPlot *parent ) : QObject(), QwtPlotHistogram(), _billon(0), _lowThreshold(0), _highThreshold(0) {
+	attach(parent);
 }
 
 void SliceHistogram::setModel( const Billon *billon ) {
 	_billon = billon;
-	_graph.clear();
-	update();
+	if ( _billon != 0 ) {
+		_lowThreshold = _billon->minValue();
+		_highThreshold = _billon->maxValue();
+	}
+	constructHistogram();
 }
 
-void SliceHistogram::update() {
+void SliceHistogram::constructHistogram() {
+	_datas.clear();
 	if ( _billon != 0 ) {
-		const uint width = _billon->n_cols;
-		const uint height = _billon->n_rows;
-		const uint depth = _billon->n_slices;
-		const float min = _billon->minValue();
+		const Billon &billon = *_billon;
+		const uint width = billon.n_cols;
+		const uint height = billon.n_rows;
+		const uint depth = billon.n_slices;
+		const uint nbPixels = height*width;
+		const int minValue = _lowThreshold;
+		const int maxValue = _highThreshold;
 
-		_graph.clear();
-		_graph.reserve(depth);
-		setFixedSize(width,HISTOGRAM_HEIGHT);
+		_datas.reserve(depth-1);
 
-		float cumul, max;
-		max = 0;
-		for (unsigned int k=0 ; k<depth ; k++) {
-			const imat &slice = _billon->slice(k);
+		float cumul;
+		for (unsigned int k=1 ; k<depth ; k++) {
+			const imat &slice = billon.slice(k);
+			const imat &prevSlice = billon.slice(k-1);
 			cumul = 0;
 			for (unsigned int j=0 ; j<height ; j++) {
 				for (unsigned int i=0 ; i<width ; i++) {
-					cumul += (slice.at(j,i)-min);
+					cumul += qAbs(RESTRICT_TO_INTERVAL(slice.at(j,i),minValue,maxValue) - RESTRICT_TO_INTERVAL(prevSlice.at(j,i),minValue,maxValue));
 				}
 			}
-			_graph.push_back(cumul);
-			if ( cumul>max ) max = cumul;
-		}
-
-		const float fact = 200.0/max;
-		for ( unsigned int i=0 ; i<depth ; i++ ) {
-			_graph[i] = _graph[i]*fact;
+			_datas.append(QwtIntervalSample(cumul/nbPixels,k,k+1));
 		}
 	}
-	repaint();
-}
-
-void SliceHistogram::paintEvent(QPaintEvent *event) {
-	QPainter painter(this);
-	painter.setRenderHint(QPainter::Antialiasing);
-
-	const int graphSize = _graph.size();
-	if ( graphSize == 0 ) {
-		painter.drawLine(0,0,((QWidget*)parent())->width(),((QWidget*)parent())->height());
-		painter.drawLine(((QWidget*)parent())->width(),0,0,((QWidget*)parent())->height());
-	}
-	else {
-		const float stickWidth = (float)width()/(float)graphSize;
-
-//		// Dessiner la courbe
-		for ( int i=0 ; i<graphSize-1 ; i++ ) {
-			painter.drawLine(i*stickWidth,HISTOGRAM_HEIGHT-_graph[i],(i+1)*stickWidth,HISTOGRAM_HEIGHT-_graph[i+1]);
-		}
-
-		// Dessiner un graphe plein
-//		for ( int i=0 ; i<graphSize ; i++ ) {
-//			//painter.drawLine((i+0.5)*stickWidth,HISTOGRAM_HEIGHT-_graph[i],(i+0.5)*stickWidth,HISTOGRAM_HEIGHT);
-//			painter.drawRect(i*stickWidth,HISTOGRAM_HEIGHT-_graph[i],stickWidth,_graph[i]);
-//		}
-	}
+	static_cast<QwtIntervalSeriesData *>(data())->setSamples(_datas);
+	emit histogramUpdated();
 }

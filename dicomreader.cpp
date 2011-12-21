@@ -111,13 +111,13 @@ namespace DicomReader {
 
 			billon->setMaxValue(max);
 			billon->setMinValue(min);
-			cout << "min = " << min << " et max = " << max << std::endl;
+			cout << "min = " << min << QObject::tr(" et max = ").toStdString() << max << std::endl;
 
 			return billon;
 		}
 
 		QString getTag( const std::string &entryId, const itk::MetaDataDictionary &dictionary ) {
-			QString value = "undefined";
+			QString value = QObject::tr("indéfinie");
 
 			itk::MetaDataObject<std::string>::ConstPointer entryValue = 0;
 			itk::MetaDataDictionary::ConstIterator tagItr = dictionary.Find(entryId);

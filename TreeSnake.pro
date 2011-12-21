@@ -7,8 +7,8 @@
 QT       *= core gui
 CONFIG   *= qt thread
 
-#CONFIG   += qxt
-#QXT      += core gui
+#CONFIG   *= qxt
+#QXT      *= core gui
 
 TARGET	  = Visu
 TEMPLATE  = app
@@ -19,21 +19,24 @@ SOURCES  *= main.cpp \
 			billon.cpp \
 			dicomreader.cpp \
 			slicehistogram.cpp \
-			sliceview.cpp
+			sliceview.cpp \
+			#marrowextractor.cpp
 
 HEADERS  *= mainwindow.h \
 			billon.h \
 			dicomreader.h \
 			slicehistogram.h \
 			sliceview.h \
-			defines.h
+			defines.h \
+			#marrowextractor.h
 
 FORMS    *= mainwindow.ui
 
 ITK_PATH  = /usr/local/include/InsightToolkit/
 QXT_PATH  = /usr/include/qxt
+QWT_PATH  = /usr/include/qwt
 
-INCLUDEPATH  += \
+INCLUDEPATH  *= \
 				$${ITK_PATH}/IO/ \
 				$${ITK_PATH}/Common/ \
 				$${ITK_PATH}/ \
@@ -42,9 +45,11 @@ INCLUDEPATH  += \
 				$${ITK_PATH}/gdcm/src/ \
 				$${ITK_PATH}/Utilities/ \
 				$${QXT_PATH}/QxtGui/ \
-				$${QXT_PATH}/QxtCore/
+				$${QXT_PATH}/QxtCore/ \
+				$${QWT_PATH}
 
 QMAKE_LIBDIR *= /usr/local/lib/InsightToolkit/
+
 LIBS  *= \
 		-lITKIO \
 		-litkgdcm \
@@ -65,4 +70,5 @@ LIBS  *= \
 		-litkvnl_algo \
 		-litkv3p_netlib \
 		-litkvnl \
-		-lQxtGui
+		-lQxtGui \
+		-lqwt
