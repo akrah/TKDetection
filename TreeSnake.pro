@@ -10,7 +10,7 @@ CONFIG   *= qt thread
 #CONFIG   *= qxt
 #QXT      *= core gui
 
-TARGET	  = Visu
+TARGET	  = TreeSnake
 TEMPLATE  = app
 
 
@@ -20,15 +20,17 @@ SOURCES  *= main.cpp \
 			dicomreader.cpp \
 			slicehistogram.cpp \
 			sliceview.cpp \
-			#marrowextractor.cpp
+			marrowextractor.cpp \
+    marrowextractor_def.cpp
 
 HEADERS  *= mainwindow.h \
 			billon.h \
 			dicomreader.h \
 			slicehistogram.h \
 			sliceview.h \
-			defines.h \
-			#marrowextractor.h
+			marrowextractor.h \
+	marrowextractor_def.h \
+	sliceview_def.h
 
 FORMS    *= mainwindow.ui
 
@@ -37,6 +39,7 @@ QXT_PATH  = /usr/include/qxt
 QWT_PATH  = /usr/include/qwt
 
 INCLUDEPATH  *= \
+				/usr/local/include/ \
 				$${ITK_PATH}/IO/ \
 				$${ITK_PATH}/Common/ \
 				$${ITK_PATH}/ \

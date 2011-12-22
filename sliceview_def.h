@@ -1,5 +1,5 @@
-#ifndef SLICE_TYPE_H
-#define SLICE_TYPE_H
+#ifndef SLICEVIEW_DEF_H
+#define SLICEVIEW_DEF_H
 
 // Types de coupe possibles
 namespace SliceType {
@@ -12,4 +12,4 @@ namespace SliceType {
 	};
 }
 
-#endif // SLICE_TYPE_H
+#endif // SLICEVIEW_DEF_H

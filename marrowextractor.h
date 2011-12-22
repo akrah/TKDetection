@@ -1,35 +1,26 @@
 #ifndef MARROWEXTRACTOR_H
 #define MARROWEXTRACTOR_H
 
+#include "marrowextractor_def.h"
+#include <QList>
 #include <armadillo>
 
-
-/**
- * \file	marrowextractor.h
- * \brief	fichier d'entête de l'extraction de la moëlle
- * \author	Adrien KRAHENBUHL
- * \date	21 décembre 2011
- */
+using namespace arma;
 
 class MarrowExtractor {
-
-/**
- * \class	MarrowExtractor
- * \brief	Classe regroupant les fonctions nécessaires à l'extraction de la moëlle
- */
 
 public:
 	MarrowExtractor();
 
 	/**
-	 * \fn		QList<Coord>* extractMoelle( icube *matrix, QList<int> *, int coupe_min, int coupe_max )
-	 * \brief	Extrait la moelle d'une matrice et la donne sous frome d'une liste des coordonnées des voxels qui la compose
-	 * \param	matrix Matrice contenant l'ensemble des points
-	 * \param	coupe_min première coupe valide
-	 * \param	coupe_max dernière coupe valide
-	 * \return	la liste de coordonnées de la moelle de la matrice
+	 * \fn		QList<Coord>* process( const icube &image, int sliceMin, int sliceMax )
+	 * \brief	Extrait la moelle d'une matrice sous forme d'une liste des coordonnées des voxels qui la compose
+	 * \param	image Image 2D
+	 * \param	sliceMin Première coupe à traiter
+	 * \param	sliceMax Dernière coupe à traiter
+	 * \return	la liste des coordonnées de la moelle
 	 */
-	QList<Coord> * extractMoelle( icube *, int coupe_min, int coupe_max );
+	Marrow* process( const icube &image, int sliceMin, int sliceMax );
 
 	/********************************************************
 	 * Get functions
@@ -38,7 +29,7 @@ public:
 	 * \fn		int getFalseCutPercent()
 	 * \return	le pourcentage de coupes fausses lors de l'extraction de la moelle
 	 */
-	int falseCutPercent();
+	int falseCutPercent(void);
 
 	/**
 	 * \fn		int getWindowWidth()
@@ -73,19 +64,19 @@ public:
 	 * \fn		void setFalseCutPercent( int percentage )
 	 * \param	percentage Le pourcentage de coupes fausses lors de l'extraction de la moelle
 	 */
-	void setFalseCutPercent( int );
+	void setFalseCutPercent( int percentage );
 
 	/**
 	 * \fn		void setWindowWidth( int width )
 	 * \param	width Largeur de la fenêtre du voisinage de la moelle
 	 */
-	void setWindowWidth( int );
+	void setWindowWidth( int width );
 
 	/**
 	 * \fn		void setWindowHeight( int height )
 	 * \param	height Hauteur de la fenêtre du voisinage de la moelle
 	 */
-	void setWindowHeight( int );
+	void setWindowHeight( int height );
 
 	/**
 	 * \fn		void setBinarizationThreshold( int threshold )
@@ -93,95 +84,146 @@ public:
 	 *
 	 * En dessous de ce seuil, ou égal à ce seuil, un voxel sera considéré comme blanc.
 	 */
-	void setBinarizationThreshold( int );
+	void setBinarizationThreshold( int threshold );
 
 	/**
 	 * \fn		void setMarrowLag( int lag )
 	 * \param	lag Distance maximal entre deux voxel pour qu'ils soient acceptés comme appartenant à la moelle
 	 */
-	void setMarrowLag( int );
+	void setMarrowLag( int lag );
 
 private:
 	/**
-	 * \fn		Coord transHough(imat *matrix, int width, int height, int *x, int *y, int* z, int *max, int* nbptcontour);
-	 * \brief	Transformée de hough sur une coupe
-	 * \param	matrix matrice contenant l'ensemble des points
-	 * \param	width largeur de la fenetre
-	 * \param	height hauteur de la fenetre
-	 * \param	x coordonnee x de l'origine (coin superieur gauche)
-	 * \param	y coordonnee y de l'origine (coin superieur gauche)
-	 * \param	z coordonnee z de l'origine (coin superieur gauche)
-	 * \param	max valeur maximale de la coupe
-	 * \param	nbptcontour nombre de point de contour
-	 * \return	coordonnée de la moelle pour la coupe donnée
+	 * \fn		Coord transHough(const imat &slice, int width, int height, int *x, int *y, int* z, int *sliceMaxValue, int* nbContourPoints);
+	 * \brief	Transformée de Hough sur une coupe
+	 * \param	slice Coupe à traiter
+	 * \param	width Largeur de la fenetre
+	 * \param	height Hauteur de la fenetre
+	 * \param	x Coordonnee x de l'origine (coin superieur gauche)
+	 * \param	y Coordonnee y de l'origine (coin superieur gauche)
+	 * \param	slieceMaxValue Valeur maximale de la coupe
+	 * \param	nbContourPoints Nombre de points de contour
+	 * \return	les coordonnées de la moelle pour la coupe traitée
 	 */
-	Coord transHough(imat *, int , int , int *, int *, int *, int *, int *);
+	Coord2D transHough( const imat &slice, int width, int height, int *x, int *y, int *sliceMaxValue, int *nbContourPoints );
+
 	/**
-	 * \fn		fmat * contour(imat *matrix, fmat **orientation);
-	 * \brief	detection des contour
-	 * \param	matrix matrice contenant l'ensemble des points
-	 * \param	orientation matrice contenant le gradient de chaque point du contour
+	 * \fn		fmat * contour(const imat &slice, fmat **orientation);
+	 * \brief	Détection des contour
+	 * \param	slice Coupe à traiter
+	 * \param	orientation Matrice contenant le gradient de chaque point du contour
 	 * \return	matrice de contour
 	 */
-	fmat * contour(imat *, fmat **);
+	fmat * contour( const imat &slice, fmat **orientation );
+
 	/**
-	 * \fn		imat * convolution(imat *, fcolvec, frowvec);
-	 * \brief	effectue le produit de convolution d'un filtre separable sur une matrice
-	 * \param	matrix matrice sur laquelle il faut effectuer le produit de convolution
-	 * \param	vecteur colonne du filtre separable
-	 * \param	vecteur ligne du filtre separable
+	 * \fn		imat * convolution(const imat &slice, fcolvec verticalFilter, frowvec horizontalFilter);
+	 * \brief	Effectue le produit de convolution d'un filtre separable sur une matrice
+	 * \param	slice Coupe à traiter
+	 * \param	verticalFilter Vecteur colonne du filtre separable
+	 * \param	horizontalFilter Vecteur ligne du filtre separable
 	 * \return	matrice apres convolution
 	 */
-	imat * convolution(imat *, fcolvec, frowvec);
+	imat * convolution( const imat &slice, fcolvec verticalFilter, frowvec horizontalFilter );
+
 	/**
-	 * \fn		int * trace_droite(int x_origine, int y_origine, float orientation, int width, int height, int *longueur);
-	 * \brief	trace une droite de coordonné x_origine et y_origine et d'angle orientation
-	 * \param	x_origine coordonnée x de l'origine de la droite
-	 * \param	y_origine coordonnée y de l'origine de la droite
-	 * \param	orientation angle de la droite
-	 * \param	largeur de l'image sur laquelle on veux tracer
-	 * \param	hauteur de l'image sur laquelle on veux tracer
-	 * \param	longueur de la droite
-	 * \return	tableau de int contenant l'ensemble des points a tracer chaque valeur est un indice de la combinaison y*width+x
+	 * \fn		int * drawLine(int xOrigine, int yOrigine, float orientation, int width, int height, int *length);
+	 * \brief	Trace un un segment d'origine x_origine et y_origine et d'angle orientation
+	 * \param	xOrigine Coordonnée x de l'origine du segment
+	 * \param	yOrigine Coordonnée y de l'origine du segment
+	 * \param	orientation Angle de la droite avec l'axe des abscisses
+	 * \param	width Largeur de la coupe sur laquelle on veux tracer le segment
+	 * \param	height Hauteur de la coupe sur laquelle on veux tracer le segment
+	 * \param	length Longueur du segment
+	* \return	un tableau d'entiers contenant l'ensemble des points du segment. Chaque valeur est un indice de la combinaison y*width+x
 	 */
-	int * trace_droite(int, int, float, int, int, int *);
+	int * drawLine( int xOrigine, int yOrigine, float orientation, int width, int height, int *length );
+
 	/**
-	 * \fn		int arrondi(float value);
-	 * \brief	permet d'arrondir une valeur float en la valeur int la plus proche
-	 * \param	value valeur a convertir
-	 * \return	valeur arrondie
+	 * \fn		static int floatCompare(const void *first, const void *second);
+	 * \brief	Compare deux élement
+	 * \param	first Premier élement à comparer
+	 * \param	second Deuxième élement à comparer
+	 * \return	0 si first == second; une valeur positive si first > second; negative si first < second
 	 */
-	int arrondi(float);
+	static int floatCompare( const void *first, const void *second );
+
 	/**
-	 * \fn		static int float_cmp(const void *a, const void *b);
-	 * \brief	compare deux element
-	 * \param	a premier element a copoarer
-	 * \param	b deuxieme element a copoarer
-	 * \return	0 si a = b; positive si a > b; negative si a < b
+	 * \fn		void minSlice(const imat &slice, int *minValue, int *maxValue, Coord *coordMax);
+	 * \brief	Calcul les valeurs minimum et maximum d'une coupe ainsi que la liste des coordonnées ou apparrait la valeur maximum
 	 */
-	static int float_cmp(const void *a, const void *b);
+	void minSlice( const imat &slice, int *minValue, int *maxValue, Coord2D *coordMax );
+
 	/**
-	 * \fn		void minMatrix(imat *matrix, int *min, int *mon, Coord *coordmax);
-	 * \brief	retourn la valeur minimum ainsi que maximum d'un matrice et retourne les coordonnées de la valeur maximum
+	 * \fn		void corrigeMoelle(QList<Coord> *moelle, float *listMax, float seuilHough);
+	 * \brief	Corrige les valeur erronées de la moelle
 	 */
-	void minMatrix(imat *, int *min, int *max, Coord *coordmax);
-	/**
-	 * \fn		void corrige_moelle(QList<Coord> *moelle, float *listmax, float seuilhough, Coord moyenne);
-	 * \brief	corrige les valeur erronées de la moelle
-	 * \param	moelle
-	 * \param	listmax
-	 * \param	seuilhough
-	 * \param	moyenne
-	 */
-	void corrige_moelle(RegressiveElementLinearly *, float *, float);
+	void correctMarrow( QList<Coord2D> &marrow, float *listMax, float seuilHough );
 
 private:
 
-	int falseCutPercent;			/*!< Pourcentage de coupes fausses */
-	int windowWidth;				/*!< Largeur de la fenêtre de voisinage */
-	int windowHeight;				/*!< Hauteur de la fenêtre de voisinage */
-	float binarizationThreshold;	/*!< Valeur du seuil de binarisation d'une image en niveau de gris */
-	int marrowLag;					/*!< Décalage maximal de la position de la moelle sur 2 coupes consécutives */
+	int _falseCutPercent;			/*!< Pourcentage de coupes fausses */
+	int _windowWidth;				/*!< Largeur de la fenêtre de voisinage */
+	int _windowHeight;				/*!< Hauteur de la fenêtre de voisinage */
+	float _binarizationThreshold;	/*!< Valeur du seuil de binarisation d'une image en niveau de gris */
+	int _marrowLag;					/*!< Décalage maximal de la position de la moelle sur 2 coupes consécutives */
 };
+
+
+/********************************************************
+ * Get functions
+ ********************************************************/
+inline
+int MarrowExtractor::falseCutPercent() {
+	return _falseCutPercent;
+}
+
+inline
+int MarrowExtractor::windowWidth() {
+	return _windowWidth;
+}
+
+inline
+int MarrowExtractor::windowHeight() {
+	return _windowHeight;
+}
+
+inline
+int MarrowExtractor::binarizationThreshold() {
+	return _binarizationThreshold;
+}
+
+inline
+int MarrowExtractor::marrowLag() {
+	return _marrowLag;
+}
+
+/********************************************************
+ * Set functions
+ ********************************************************/
+inline
+void MarrowExtractor::setFalseCutPercent( int percentage ) {
+	_falseCutPercent = percentage;
+}
+
+inline
+void MarrowExtractor::setWindowWidth( int width ) {
+	_windowWidth = width;
+}
+
+inline
+void MarrowExtractor::setWindowHeight( int height ) {
+	_windowHeight = height;
+}
+
+inline
+void MarrowExtractor::setBinarizationThreshold( int threshold ) {
+	_binarizationThreshold = threshold;
+}
+
+inline void MarrowExtractor::setMarrowLag( int lag ) {
+	_marrowLag = lag;
+}
+
 
 #endif // MARROWEXTRACTOR_H

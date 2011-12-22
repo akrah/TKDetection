@@ -8,16 +8,21 @@ namespace {
 	inline T RESTRICT_TO_INTERVAL(T x, T min, T max) { return qMax((min),qMin((max),(x))); }
 }
 
-SliceView::SliceView() : QObject(0), QPixmap(), _billon(0), _currentSlice(0), _lowThreshold(0), _highThreshold(0), _typeOfView(SliceType::CURRENT) {
+SliceView::SliceView() : QObject(0), QPixmap(), _billon(0), _marrow(0), _currentSlice(0), _lowThreshold(0), _highThreshold(0), _typeOfView(SliceType::CURRENT) {
 }
 
 void SliceView::setModel( const Billon *billon ) {
 	_billon = billon;
+	_marrow = 0;
 	_currentSlice = 0;
 	if ( _billon != 0 ) {
 		_lowThreshold = _billon->minValue();
 		_highThreshold = _billon->maxValue();
 	}
+}
+
+void SliceView::setModel( const Marrow* marrow ) {
+	_marrow = marrow;
 }
 
 void SliceView::drawSlice( const int &sliceNumber ) {
@@ -31,6 +36,7 @@ void SliceView::update() {
 			// Affichage de la coupe courante
 			case SliceType::CURRENT:
 				drawCurrentSlice();
+				drawMarrow();
 				break;
 			// Affichage de la coupe moyenne
 			case SliceType::AVERAGE :
@@ -144,4 +150,23 @@ void SliceView::drawMedianSlice() {
 		}
 	}
 	convertFromImage(image);
+}
+
+void SliceView::drawMarrow() {
+	if ( _marrow != 0 ) {
+		const Marrow &marrow = (*_marrow);
+		if ( (_currentSlice>=marrow.begin) && (_currentSlice<=marrow.end) ) {
+			const Coord2D &coordToDraw = marrow(_currentSlice-marrow.begin);
+			std::cout << "Affichage de la moelle en " << coordToDraw << std::endl;
+
+			QPainterPath myPath;
+			myPath.addEllipse(coordToDraw.x-5,coordToDraw.y-5,10,10);
+			QColor color(100,200,100);
+
+			QPainter painter(this);
+			painter.setBrush(color);
+			painter.setPen(color);
+			painter.drawPath(myPath);
+		}
+	}
 }

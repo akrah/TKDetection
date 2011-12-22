@@ -5,13 +5,14 @@
 #include "sliceview.h"
 #include "dicomreader.h"
 #include "slicehistogram.h"
+#include "marrowextractor.h"
 
 #include <iostream>
 
 #include <QFileDialog>
 #include <QMouseEvent>
 
-MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), ui(new Ui::MainWindow), _billon(0), _sliceView(0), _sliceHistogram(0), _currentSlice(0) {
+MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), ui(new Ui::MainWindow), _billon(0), _sliceView(0), _sliceHistogram(0), _marrow(0), _currentSlice(0) {
 	ui->setupUi(this);
 
 	// Initialisation des vues
@@ -59,6 +60,9 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), ui(new Ui::Main
 	// Évènements déclenchés par le bouton de mise à jour de l'histogramme
 	QObject::connect(ui->_buttonUpdateHistogram, SIGNAL(clicked()), _sliceHistogram, SLOT(constructHistogram()));
 
+	// Évènements déclenchés par le bouton de calcul de la moelle
+	QObject::connect(ui->_buttonMarrow, SIGNAL(clicked()), this, SLOT(computeMarrow()));
+
 	// Évènements reçus de la vue en coupe
 	QObject::connect(_sliceView, SIGNAL(updated(QPixmap)), ui->_labelSliceView, SLOT(setPixmap(QPixmap)));
 	QObject::connect(_sliceView, SIGNAL(typeOfViewChanged(SliceType::SliceType)), this, SLOT(adaptToSliceType(SliceType::SliceType)));
@@ -73,6 +77,7 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), ui(new Ui::Main
 }
 
 MainWindow::~MainWindow() {
+	if ( _marrow != 0 ) delete _marrow;
 	if ( _sliceHistogram != 0 ) delete _sliceHistogram;
 	if ( _sliceView != 0 ) delete _sliceView;
 	if ( _billon != 0 ) delete _billon;
@@ -86,6 +91,10 @@ void MainWindow::openDicom() {
 		if ( _billon != 0 ) {
 			delete _billon;
 			_billon = 0;
+		}
+		if ( _marrow != 0 ) {
+			delete _marrow;
+			_marrow = 0;
 		}
 		_billon = DicomReader::read(folderName);
 		updateBillon();
@@ -114,6 +123,15 @@ void MainWindow::adaptToSliceType(const SliceType::SliceType &type) {
 	}
 }
 
+void MainWindow::computeMarrow() {
+	if ( _billon != 0 ) {
+		if ( _marrow == 0 ) delete _marrow;
+		MarrowExtractor extractor;
+		_marrow = extractor.process(*_billon,0,_billon->n_slices-1);
+		_sliceView->setModel(_marrow);
+	}
+}
+
 void MainWindow::updateBillon() {
 	if ( _billon != 0 ) {
 		ui->_spansliderSliceThreshold->setMinimum(_billon->minValue());
@@ -131,6 +149,7 @@ void MainWindow::updateBillon() {
 	ui->_plotSliceHistogram->setAxisScale(QwtPlot::xBottom,0,(_billon != 0)?_billon->n_slices:1);
 
 	_sliceView->setModel(_billon);
+	_sliceView->setModel(_marrow);
 	_sliceHistogram->setModel(_billon);
 	_sliceView->update();
 }

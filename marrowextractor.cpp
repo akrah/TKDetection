@@ -1,135 +1,92 @@
-#include "inc/marrowextractor.h"
+#include "marrowextractor.h"
 
-MarrowExtractor::MarrowExtractor() {
-	falseCutPercent = FALSE_CUT_PERCENT;
-	windowWidth = NEIGHBORHOOD_WINDOW_WIDTH;
-	windowHeight = NEIGHBORHOOD_WINDOW_HEIGHT;
-	binarizationThreshold = BINARIZATION_THRESHOLD;
-	marrowLag = MARROW_LAG;
+namespace {
+	template<class T>
+	inline T RESTRICT_TO_INTERVAL(T x, T min, T max) { return qMax((min),qMin((max),(x))); }
 }
 
-/********************************************************
- * Get functions
- ********************************************************/
-int MarrowExtractor::getFalseCutPercent() {
-	return falseCutPercent;
-}
-
-int MarrowExtractor::getWindowWidth() {
-	return windowWidth;
-}
-
-int MarrowExtractor::getWindowHeight() {
-	return windowHeight;
-}
-
-int MarrowExtractor::getBinarizationThreshold() {
-	return binarizationThreshold;
-}
-
-int MarrowExtractor::getMarrowLag() {
-	return marrowLag;
-}
-
-/********************************************************
- * Set functions
- ********************************************************/
-void MarrowExtractor::setFalseCutPercent( int percentage ) {
-	falseCutPercent = percentage;
-}
-
-void MarrowExtractor::setWindowWidth( int width ) {
-	windowWidth = width;
-}
-
-void MarrowExtractor::setWindowHeight( int height ) {
-	windowHeight = height;
-}
-
-void MarrowExtractor::setBinarizationThreshold( int threshold ) {
-	binarizationThreshold = threshold;
-}
-
-void MarrowExtractor::setMarrowLag( int lag ) {
-	marrowLag = lag;
+MarrowExtractor::MarrowExtractor() :
+	_falseCutPercent(MarrowExtractorDefaultsParameters::FALSE_CUT_PERCENT),
+	_windowWidth(MarrowExtractorDefaultsParameters::NEIGHBORHOOD_WINDOW_WIDTH),
+	_windowHeight(MarrowExtractorDefaultsParameters::NEIGHBORHOOD_WINDOW_HEIGHT),
+	_binarizationThreshold(MarrowExtractorDefaultsParameters::BINARIZATION_THRESHOLD),
+	_marrowLag(MarrowExtractorDefaultsParameters::MARROW_LAG)
+{
 }
 
 /********************************************************
  * Fonction principale d'extraction de la moelle
  ********************************************************/
 
-RegressiveElementLinearly * MarrowExtractor::extractMoelle( icube *matrix, QList<int> *listeCoupe,
-		int coupe_min, int coupe_max)
-{
-	// ARRANGER : à quoi sert listeCoupe ?
+Marrow* MarrowExtractor::process( const icube &image, int sliceMin, int sliceMax ) {
+	const int width = image.n_cols;
+	const int height = image.n_rows;
+	const int depth = image.n_slices;
+	sliceMin = RESTRICT_TO_INTERVAL(sliceMin,0,depth-1);
+	sliceMax = RESTRICT_TO_INTERVAL(sliceMax,sliceMin,depth-1);
 
-	RegressiveElementLinearly *listMoelle = new RegressiveElementLinearly();
-	float listMaxStand[matrix->n_slices], *listMaxStand2;
-	Coord coordprec,coordcurrent;
-	int max,x,y,z,xprec,yprec,width,height, nbptcontour;
-	float decalage,seuilhoughstand;
-	width = matrix->n_cols;
-	height = matrix->n_rows;
-	max=x=y=0;
+	Coord2D coordPrec,coordCurrent;
+	float maxStandList[depth];
+	float *maxStandList2 = 0;
+	float shift,houghStandThreshold;
+	int max,x,y, nbContourPoints;
 
-	coupe_min = std::min (std::max (coupe_min, 0), int (matrix->n_slices) - 1);
-	coupe_max = std::min (std::max (coupe_max, coupe_min), int (matrix->n_slices) - 1);
-	z = coupe_min;
+	max = x = y = 0;
+
+	Marrow *marrow = new Marrow(sliceMin,sliceMax);
+	QList<Coord2D> &marrowList = marrow->list;
 
 	//extraction de la moelle de la premiere coupe sur la totalité de la coupe
 	//nous permet d'avoir un coordonnée a laquelle appliqué la fenetre
-	transHough( &( matrix->slice(coupe_min) ), width, height, &x, &y, &z, &max, &nbptcontour );
+	transHough( image.slice(sliceMin), width, height, &x, &y, &max, &nbContourPoints );
 
 
 
 	//calcul la coordonnée d'origine de la fenetre
-	x = x - (windowWidth/2);
-	x = x < 0 ? 0 : (x > (width - windowWidth) ? width - windowWidth : x);
-	y = y - (windowHeight/2);
-	y = y < 0 ? 0 : (y > (height - windowHeight) ? height - windowHeight : y);
+	x = x - (_windowWidth/2);
+	x = x < 0 ? 0 : (x > (width - _windowWidth) ? width - _windowWidth : x);
+	y = y - (_windowHeight/2);
+	y = y < 0 ? 0 : (y > (height - _windowHeight) ? height - _windowHeight : y);
 	//extraction de la moelle de la premiere coupe sur la coupe redimensionnée
-	coordcurrent = transHough( &( matrix->slice(coupe_min) ), windowWidth, windowHeight, &x, &y, &z, &max, &nbptcontour );
+	coordCurrent = transHough( image.slice(sliceMin), _windowWidth, _windowHeight, &x, &y, &max, &nbContourPoints );
 
-	for (int i = 0; i < coupe_min; ++ i) {
-		listMoelle->append(coordcurrent);
-		listMaxStand[i]=0.;
+	for (int i = 0; i < sliceMin; ++ i) {
+		marrowList.append(coordCurrent);
+		maxStandList[i]=0.;
 	}
-	listMoelle->append(coordcurrent);	// pour coupe_min
-	listMaxStand[coupe_min] = ((float)max)/nbptcontour;
+	marrowList.append(coordCurrent);	// pour sliceMin
+	maxStandList[sliceMin] = ((float)max)/nbContourPoints;
 
 	//extraction des coupes suivantes
 	std::cerr << "extractMoelle : ";
-	for(int i=coupe_min + 1; i<= coupe_max; i++){
+	for(int i=sliceMin + 1; i<= sliceMax; i++) {
 		//~ if(!listeCoupe->contains(i)){
 			std::cerr << " " << i;
-			z=i;
-			xprec = x;
-			yprec = y;
-			coordprec = listMoelle->last();
-			x = x - (windowWidth/2);
-			x = x < 0 ? 0 : (x > (width - windowWidth) ? width - windowWidth : x);
-			y = y - (windowHeight/2);
-			y = y < 0 ? 0 : (y > (height - windowHeight) ? height - windowHeight : y);
+			coordPrec = marrowList.last();
+			x = x - (_windowWidth/2);
+			x = x < 0 ? 0 : (x > (width - _windowWidth) ? width - _windowWidth : x);
+			y = y - (_windowHeight/2);
+			y = y < 0 ? 0 : (y > (height - _windowHeight) ? height - _windowHeight : y);
 			//extraction de la moelle de la coupe i
-			coordcurrent = transHough( &( matrix->slice(i) ), windowWidth, windowHeight, &x, &y, &z, &max, &nbptcontour );
-			listMoelle->append(coordcurrent);
-			decalage = sqrt(pow((double) (listMoelle->last().x - coordprec.x),(double) 2.0) + pow( (double)(listMoelle->last().y - coordprec.y), (double)2.0) );
+			coordCurrent = transHough( image.slice(i), _windowWidth, _windowHeight, &x, &y, &max, &nbContourPoints );
+			marrowList.append(coordCurrent);
+			shift = sqrt(pow((double) (marrowList.last().x - coordPrec.x),(double) 2.0) + pow( (double)(marrowList.last().y - coordPrec.y), (double)2.0) );
 			//si le resultat obtenu a un decalage trop important avec la coupe precedente alors on recommence l'extraction sur l'ensemble de la coupe
-			if(decalage > marrowLag && width > windowWidth && height > windowHeight){
+			if(shift > _marrowLag && width > _windowWidth && height > _windowHeight){
 				std::cerr << "*";
-				// std::cerr << "   :> decalage=" << decalage << ">" << marrowLag << "\n";
+				// std::cerr << "   :> decalage=" << decalage << ">" << _marrowLag << "\n";
 
-				listMoelle->removeLast();
+				marrowList.removeLast();
 				x = y = 0;
-				transHough( &( matrix->slice(i) ), width, height, &x, &y, &z, &max, &nbptcontour );
-				x = x - (windowWidth/2);
-				x = x < 0 ? 0 : (x > (width - windowWidth) ? width - windowWidth : x);
-				y = y - (windowHeight/2);
-				y = y < 0 ? 0 : (y > (height - windowHeight) ? height - windowHeight : y);
-				coordcurrent = transHough( &( matrix->slice(i) ), windowWidth, windowHeight, &x, &y, &z, &max, &nbptcontour );
-				listMoelle->append(coordcurrent);
+				transHough(image.slice(i), width, height, &x, &y, &max, &nbContourPoints );
+				x = x - (_windowWidth/2);
+				x = x < 0 ? 0 : (x > (width - _windowWidth) ? width - _windowWidth : x);
+				y = y - (_windowHeight/2);
+				y = y < 0 ? 0 : (y > (height - _windowHeight) ? height - _windowHeight : y);
+				coordCurrent = transHough( image.slice(i), _windowWidth, _windowHeight, &x, &y, &max, &nbContourPoints );
+				marrowList.append(coordCurrent);
 			}
-			listMaxStand[i] = ((float)max)/nbptcontour;
+			maxStandList[i] = ((float)max)/nbContourPoints;
 			if (i % 20 == 0) {
 				std::cerr << std::endl;
 			}
@@ -140,55 +97,55 @@ RegressiveElementLinearly * MarrowExtractor::extractMoelle( icube *matrix, QList
 	}
 	std::cerr << "\n";
 
-	coordcurrent = listMoelle->last();
-	for (int i = coupe_max +1; i < int (matrix->n_slices); ++ i) {
-		listMoelle->append(coordcurrent);
-		listMaxStand[i]=0.;
+	coordCurrent = marrowList.last();
+	for ( int i = sliceMax+1 ; i<depth ; i++ ) {
+		marrowList.append(coordCurrent);
+		maxStandList[i]=0.;
 	}
 
-	std::cerr << "nbCoupes=" << matrix->n_slices << " listMoelle.size()=" << listMoelle->size() << "\n";
+	std::cerr << "nbCoupes=" << depth << " listMoelle.size()=" << marrowList.size() << "\n";
 
 	//calcul du seuil a partir du quel les coupes sont considerées comme erronées
-	listMaxStand2 = new float[matrix->n_slices];
-	memcpy(listMaxStand2, listMaxStand, matrix->n_slices*sizeof(float));
+	maxStandList2 = new float[depth];
+	memcpy(maxStandList2, maxStandList, depth*sizeof(float));
 
-	qsort(listMaxStand2, matrix->n_slices, sizeof(float), &float_cmp);
+	qsort(maxStandList2, depth, sizeof(float), &floatCompare);
 
-	int nfc = (falseCutPercent*matrix->n_slices)/100;
-	seuilhoughstand = nfc > 0 ? (listMaxStand2[nfc]+listMaxStand2[nfc-1])/2 : listMaxStand2[nfc];
+	int nfc = (_falseCutPercent*depth)/100;
+	houghStandThreshold = nfc > 0 ? (maxStandList2[nfc]+maxStandList2[nfc-1])/2 : maxStandList2[nfc];
 
-	delete [] listMaxStand2;
+	delete [] maxStandList2;
 
 	// applique la coorection a la moelle
-	corrige_moelle(listMoelle, listMaxStand, seuilhoughstand);
+	correctMarrow(marrowList, maxStandList, houghStandThreshold);
 
-	return listMoelle;
+	return marrow;
 }
 
 /******************************************************************
  * Fonctions secondaires appelées lors de l'extraction de la moelle
  ******************************************************************/
-Coord MarrowExtractor::transHough(imat *coupe, int width, int height, int *x, int *y, int *z, int *max, int *nbptcontour) {
+Coord2D MarrowExtractor::transHough(const imat &slice, int width, int height, int *x, int *y, int *sliceMaxValue, int *nbContourPoints) {
 	int x_accu, y_accu, longueur, min;
 	int *droite;
 	imat *tabaccu;
 	fmat *orientation, *cont;
-	Coord coordmax;
+	Coord2D coordmax;
 	orientation = 0;
 	{ // bloc de limitation de vie de la variable voisinage
 		// attention x represente les colonne et y les lignes
-		imat voisinage = coupe->submat( *y, *x, (unsigned int)( (*y)+height-1 ), (unsigned int)( (*x)+width-1 ) );
-		cont = contour(&voisinage, &orientation);
+		const imat voisinage = slice.submat( *y, *x, (unsigned int)( (*y)+height-1 ), (unsigned int)( (*x)+width-1 ) );
+		cont = contour(voisinage, &orientation);
 	}
 	tabaccu = new imat(width, height);
 	tabaccu->zeros();
 	//verifie orientation et table d'accumlation tous les points se trouvent a 0
-	*nbptcontour = 0;
+	*nbContourPoints = 0;
 	for(unsigned int i=0; i<cont->n_rows; i++){
 		for(unsigned int j=0; j<cont->n_cols; j++){
 			if(cont->at(i,j) == 1){
-				*nbptcontour += 1;
-				droite = trace_droite(j, i, orientation->at(i,j), width, height, &longueur);
+				*nbContourPoints += 1;
+				droite = drawLine(j, i, orientation->at(i,j), width, height, &longueur);
 				for(int k=0; k<longueur; k++){
 					y_accu = droite[k]/width;
 					x_accu = droite[k]-(y_accu*width);
@@ -203,36 +160,40 @@ Coord MarrowExtractor::transHough(imat *coupe, int width, int height, int *x, in
 	delete orientation;
 
 	//min et max globaux
-	min = *max = tabaccu->at(0,0);
+	min = *sliceMaxValue = tabaccu->at(0,0);
 	coordmax.x = coordmax.y = 0;
 
-	minMatrix(tabaccu, &min, max, &coordmax);
+	minSlice(*tabaccu, &min, sliceMaxValue, &coordmax);
 
 	delete tabaccu;
+
 	*x += coordmax.x;
 	*y += coordmax.y;
 
-	return (Coord){*x, *y, *z};
+	return (Coord2D){*x, *y};
 }
 
-fmat * MarrowExtractor::contour(imat *coupe, fmat **orientation) {
+fmat * MarrowExtractor::contour(const imat &slice, fmat **orientation) {
+	const uint height = slice.n_rows;
+	const uint width = slice.n_cols;
+
 	fcolvec filtre1 = "1 2 1";			//filtre Sobel Gx
 	frowvec filtre2 = "-1 0 1";
 	imat *resultatGX, *resultatGY;
-	fmat norm = fmat(coupe->n_rows, coupe->n_cols);
-	fmat *contour = new fmat(coupe->n_rows, coupe->n_cols);
+	fmat norm = fmat(height, width);
+	fmat *contour = new fmat(height, width);
 
-	*orientation = new fmat(coupe->n_rows, coupe->n_cols);
+	*orientation = new fmat(height, width);
 	(*orientation)->zeros();
-	resultatGX = convolution(coupe, filtre1, filtre2);		//convolution Sobel GX
+	resultatGX = convolution(slice, filtre1, filtre2);		//convolution Sobel GX
 	filtre1 = "1 0 -1";										//filtre Sobel Gy
 	filtre2 = "1 2 1";
-	resultatGY = convolution(coupe, filtre1, filtre2);		//convolution Sobel GY
+	resultatGY = convolution(slice, filtre1, filtre2);		//convolution Sobel GY
 
-	for (unsigned int i=0; i<norm.n_rows; i++) {
-		for (unsigned int j=0; j<norm.n_cols; j++) {
-			norm(i,j) = sqrt(resultatGX->at(i,j)*resultatGX->at(i,j)+resultatGY->at(i,j)*resultatGY->at(i,j))/4;
-			if (norm(i,j)>binarizationThreshold && i>0 && i<norm.n_rows-1 && j>0 && j<norm.n_cols-1 ) {
+	for (unsigned int i=0; i<height; i++) {
+		for (unsigned int j=0; j<width; j++) {
+			norm.at(i,j) = sqrt(resultatGX->at(i,j)*resultatGX->at(i,j)+resultatGY->at(i,j)*resultatGY->at(i,j))/4;
+			if (norm.at(i,j)>_binarizationThreshold && i>0 && i<norm.n_rows-1 && j>0 && j<norm.n_cols-1 ) {
 				contour->at(i,j) = 1;
 				if(resultatGX->at(i,j) != 0) {
 					// Fred : pas de raison de faire une division entière ici :
@@ -250,10 +211,13 @@ fmat * MarrowExtractor::contour(imat *coupe, fmat **orientation) {
 	return contour;
 }
 
-imat * MarrowExtractor::convolution(imat *pictures, fcolvec filtre1, frowvec filtre2) {
-	imat *resultat = new imat(pictures->n_rows, pictures->n_cols);
+imat * MarrowExtractor::convolution(const imat &slice, fcolvec verticalFilter, frowvec horizontalFilter) {
+	const uint height = slice.n_rows;
+	const uint width = slice.n_cols;
+	imat *resultat = new imat(height, width);
+
 	fmat tmpSum;
-	fvec sum = fvec(pictures->n_cols);
+	fvec sum = fvec(width);
 	resultat->zeros();
 	int kOffset;
 	int kCenter;
@@ -263,33 +227,33 @@ imat * MarrowExtractor::convolution(imat *pictures, fcolvec filtre1, frowvec fil
 	//convolve horizontal direction
 
 	//find center position of kernel
-	kCenter = filtre2.n_cols/2;
-	endIndex = pictures->n_cols-kCenter;
+	kCenter = horizontalFilter.n_cols/2;
+	endIndex = width-kCenter;
 
-	tmpSum = fmat(pictures->n_rows, pictures->n_cols);
+	tmpSum = fmat(height, width);
 	tmpSum.zeros();
-	for (unsigned int i=0; i<pictures->n_rows; i++) { //height pictures (nb rows)
+	for (unsigned int i=0; i<height; i++) { //height pictures (nb rows)
 		kOffset = 0;
 		//index=0 to index=kCenter-1
 		for (int j=0; j<kCenter; j++) {
 			for (int k=kCenter+kOffset, m=0; k>=0; k--, m++) {
-				tmpSum(i,j) += pictures->at(i,m) * filtre2[k];
+				tmpSum(i,j) += slice.at(i,m) * horizontalFilter[k];
 			}
 			kOffset++;
 		}
 		//index=kCenter to index=(width pictures)-kCenter-1)
 		for (int j=kCenter; j<endIndex; j++) {
 			lag = j-kCenter;
-			for (int k=filtre2.n_cols-1, m=0; k >= 0; k--, m++) {
-				tmpSum(i,j) += pictures->at(i,(lag+m)) * filtre2[k];
+			for (int k=horizontalFilter.n_cols-1, m=0; k >= 0; k--, m++) {
+				tmpSum(i,j) += slice.at(i,(lag+m)) * horizontalFilter[k];
 			}
 		}
 		//index=(width pictures)-kCenter to index=(width pictures)-1
 		kOffset = 1;
-		for (unsigned int j=endIndex; j<pictures->n_cols; j++) {
+		for (unsigned int j=endIndex; j<width; j++) {
 			lag = j-kCenter;
-			for (int k=filtre2.n_cols-1, m=0; k >= kOffset; k--, m++) {
-				tmpSum(i,j) += pictures->at(i,lag+m) * filtre2[k];
+			for (int k=horizontalFilter.n_cols-1, m=0; k >= kOffset; k--, m++) {
+				tmpSum(i,j) += slice.at(i,lag+m) * horizontalFilter[k];
 			}
 			kOffset++;
 		}
@@ -299,8 +263,8 @@ imat * MarrowExtractor::convolution(imat *pictures, fcolvec filtre1, frowvec fil
 	//convolve vertical direction
 
 	//find center position of kernel
-	kCenter = filtre1.n_rows/2;
-	endIndex = pictures->n_cols-kCenter;
+	kCenter = verticalFilter.n_rows/2;
+	endIndex = width-kCenter;
 
 	sum.zeros();
 
@@ -309,12 +273,12 @@ imat * MarrowExtractor::convolution(imat *pictures, fcolvec filtre1, frowvec fil
 	for (int i=0; i <kCenter; i++) {
 		lag = -i;
 		for (int k = kCenter + kOffset; k>=0; k--) {			//convolve with partial kernel
-			for (unsigned int j=0; j<pictures->n_cols; j++) {
-				sum[j] += tmpSum(i+lag,j) * filtre1[k];
+			for (unsigned int j=0; j<width; j++) {
+				sum[j] += tmpSum(i+lag,j) * verticalFilter[k];
 			}
 			lag++;
 		}
-		for (unsigned int n=0; n<pictures->n_cols; n++) {				//convert to output format
+		for (unsigned int n=0; n<width; n++) {				//convert to output format
 			if(sum[n]>=0)
 				resultat->at(i,n) = (int)(sum[n] + 0.5f);
 			else
@@ -326,13 +290,13 @@ imat * MarrowExtractor::convolution(imat *pictures, fcolvec filtre1, frowvec fil
 	//index=kCenter to index=(height pictures)-kCenter-1
 	for (int i=kCenter; i<endIndex; i++) {
 		lag = -kCenter;
-		for (int k=filtre1.n_rows-1; k>=0; k--) {				//convolve with full kernel
-			for(unsigned int j=0; j<pictures->n_cols; j++){
-				sum[j] += tmpSum(i+lag,j) * filtre1[k];
+		for (int k=verticalFilter.n_rows-1; k>=0; k--) {				//convolve with full kernel
+			for(unsigned int j=0; j<width; j++){
+				sum[j] += tmpSum(i+lag,j) * verticalFilter[k];
 			}
 			lag++;
 		}
-		for (unsigned int n=0; n<pictures->n_cols; n++) {				//convert to output format
+		for (unsigned int n=0; n<width; n++) {				//convert to output format
 			if(sum[n]>=0)
 				resultat->at(i,n) = (int)(sum[n] + 0.5f);
 			else
@@ -342,15 +306,15 @@ imat * MarrowExtractor::convolution(imat *pictures, fcolvec filtre1, frowvec fil
 	}
 	//index=(height pictures)-kcenter to index=(height pictures)-1
 	kOffset = 1;
-	for (unsigned int i=endIndex; i<pictures->n_rows; i++) {
+	for (unsigned int i=endIndex; i<height; i++) {
 		lag = -kCenter;
-		for (int k=filtre1.n_rows-1; k>=kOffset; k--) {			//convolve with partial kernel
-			for (unsigned int j=0; j<pictures->n_cols; j++) {			//height p	corrigeictures
-				sum[j] += tmpSum(i+lag,j) * filtre1[k];
+		for (int k=verticalFilter.n_rows-1; k>=kOffset; k--) {			//convolve with partial kernel
+			for (unsigned int j=0; j<width; j++) {			//height p	corrigeictures
+				sum[j] += tmpSum(i+lag,j) * verticalFilter[k];
 			}
 			lag++;
 		}
-		for (unsigned int n=0; n<pictures->n_cols; n++) {				//convert to output format
+		for (unsigned int n=0; n<width; n++) {				//convert to output format
 			if(sum[n]>=0)
 				resultat->at(i,n) = (int)(sum[n] + 0.5f);
 			else
@@ -364,7 +328,7 @@ imat * MarrowExtractor::convolution(imat *pictures, fcolvec filtre1, frowvec fil
 }
 
 
-int * MarrowExtractor::trace_droite(int x_origine, int y_origine, float orientation_ORI, int width, int height, int *longueur) {
+int * MarrowExtractor::drawLine(int xOrigine, int yOrigine, float orientation_ORI, int width, int height, int *length) {
 	float orientation = -orientation_ORI;	// orientation au sens de Fleur = - orientation_ORI
 	int x, y, k1=0, k2=0;
 	int dim = floor(sqrt(pow(width,2.0)+pow(height,2.0)));
@@ -378,9 +342,9 @@ int * MarrowExtractor::trace_droite(int x_origine, int y_origine, float orientat
 	// 1er et 5e octant
 	if ((orientation >= 0)  && (orientation < 1)) {		//entre 0 et 45		[0;45[
 		// 1er octant
-		temp = y_origine;
-		for(x=x_origine; x<width; x++){
-			 y= arrondi(temp);
+		temp = yOrigine;
+		for(x=xOrigine; x<width; x++){
+			 y= roundf(temp);
 			 if(y>=height)
 				 break;
 			 droite1[k1] = y*width+x;
@@ -389,9 +353,9 @@ int * MarrowExtractor::trace_droite(int x_origine, int y_origine, float orientat
 		}
 
 		//5e octant
-		temp = y_origine - orientation;
-		for(x=x_origine-1; x>=0; x--){
-			y = arrondi(temp);
+		temp = yOrigine - orientation;
+		for(x=xOrigine-1; x>=0; x--){
+			y = roundf(temp);
 			if(y<0)
 				break;
 			droite2[k2] = y*width+x;
@@ -403,9 +367,9 @@ int * MarrowExtractor::trace_droite(int x_origine, int y_origine, float orientat
 	// 4e et 8e octant
 	if ((orientation < 0) && (orientation > -1)) {		//entre 0 et -45	]0;-45[
 		//8e octant
-		temp = y_origine;
-		for(x=x_origine; x<width; x++){
-			y=arrondi(temp);
+		temp = yOrigine;
+		for(x=xOrigine; x<width; x++){
+			y=roundf(temp);
 			if(y<0)
 				break;
 			droite1[k1] = y*width+x;
@@ -414,9 +378,9 @@ int * MarrowExtractor::trace_droite(int x_origine, int y_origine, float orientat
 		}
 
 		//4e octant
-		temp = y_origine-orientation;
-		for(x=x_origine-1; x>=0; x--){
-			y = arrondi(temp);
+		temp = yOrigine-orientation;
+		for(x=xOrigine-1; x>=0; x--){
+			y = roundf(temp);
 			if(y>=height)
 				break;
 			droite2[k2] = y*width+x;
@@ -425,12 +389,12 @@ int * MarrowExtractor::trace_droite(int x_origine, int y_origine, float orientat
 		}
 	}
 
-  	// 2e et 6e octant	corrigé
+	// 2e et 6e octant	corrigé
 	if (orientation >= 1) {		//entre 45 et 90	[45;90]
 		//2e octant
-		temp = x_origine;
-		for(y=y_origine; y<height; y++){
-			x = arrondi(temp);
+		temp = xOrigine;
+		for(y=yOrigine; y<height; y++){
+			x = roundf(temp);
 			if(x>=width)
 				break;
 			droite1[k1] = y*width+x;
@@ -439,9 +403,9 @@ int * MarrowExtractor::trace_droite(int x_origine, int y_origine, float orientat
 		}
 
 		//6e octant
-		temp=x_origine-(1/orientation);
-		for(y=y_origine-1; y>=0; y--){
-			x = arrondi(temp);
+		temp=xOrigine-(1/orientation);
+		for(y=yOrigine-1; y>=0; y--){
+			x = roundf(temp);
 			if(x<0)
 				break;
 			droite2[k2] = y*width+x;
@@ -453,9 +417,9 @@ int * MarrowExtractor::trace_droite(int x_origine, int y_origine, float orientat
 	// 3e et 7e octant	corrigé
 	if (orientation <= -1) {	//entre -45 et -90		[-45;-90]
 		//7e octant
-		temp = x_origine-(1/orientation);
-		for (y=y_origine-1; y>=0; y--) {
-			x = arrondi(temp);
+		temp = xOrigine-(1/orientation);
+		for (y=yOrigine-1; y>=0; y--) {
+			x = roundf(temp);
 			if(x>=width)
 				break;
 			droite1[k1] = y*width+x;
@@ -463,9 +427,9 @@ int * MarrowExtractor::trace_droite(int x_origine, int y_origine, float orientat
 			temp -= 1/orientation;
 		}
 		//3e octant
-		temp = x_origine;
-		for (y=y_origine; y<height; y++) {
-			x = arrondi(temp);
+		temp = xOrigine;
+		for (y=yOrigine; y<height; y++) {
+			x = roundf(temp);
 			if(x<0)
 				break;
 			droite2[k2] = y*width+x;
@@ -473,7 +437,7 @@ int * MarrowExtractor::trace_droite(int x_origine, int y_origine, float orientat
 			temp += 1/orientation;
 		}
 	}
-	*longueur = k1 + k2;
+	*length = k1 + k2;
 
 	for (int i=0, j=k2-1; i<k2; i++, j--) {
 		droite[i]=droite2[j];
@@ -488,32 +452,14 @@ int * MarrowExtractor::trace_droite(int x_origine, int y_origine, float orientat
 
 }
 
-inline
-int MarrowExtractor::arrondi(float x) {
-	return roundf (x);
-}
-
-void MarrowExtractor::minMatrix(imat *matrix, int *min, int *max, Coord *coordmax) {
-	for(unsigned int i=1; i<matrix->n_rows-1; i++){
-		for(unsigned int j=1; j<matrix->n_cols-1; j++){
-			if(matrix->at(i,j) < *min){
-				*min = matrix->at(i,j);
-			}else if(matrix->at(i,j) > *max){
-				*max = matrix->at(i,j);
-				*coordmax = (Coord){j,i,0};
-			}
-		}
-	}
-}
-
-int MarrowExtractor::float_cmp(const void *a, const void *b)
+int MarrowExtractor::floatCompare(const void *first, const void *second)
 {
-	// const float *fa = (const float *)a; // casting pointer types
-	// const float *fb = (const float *)b;
+	// const float *fa = (const float *)first; // casting pointer types
+	// const float *fb = (const float *)second;
 	// Ca ne marche pas !!! : return *fa  - *fb;
 	// return (*fb > *fa) ? -1: ((*fa > *fb) ? 1 : 0);
-	const float va = * (const float *)a;
-	const float vb = * (const float *)b;
+	const float va = * (const float *)first;
+	const float vb = * (const float *)second;
 	return (vb > va)
 		? -1
 		: ((va > vb) ? 1 : 0);
@@ -521,61 +467,80 @@ int MarrowExtractor::float_cmp(const void *a, const void *b)
 	and positive if a > b */
 }
 
-void MarrowExtractor::corrige_moelle(RegressiveElementLinearly *moelle, float *listMax, float seuilHough ) {
-	int coupedebut, coupefin, i=0, x1, y1, x2, y2, newx, newy;
+void MarrowExtractor::minSlice(const imat &slice, int *minValue, int *maxValue, Coord2D *coordmax) {
+	const uint height = slice.n_rows-1;
+	const uint width = slice.n_cols-1;
+
+	for ( uint i=1 ; i<height ; i++ ) {
+		for ( uint j=1; j<width ; j++ ) {
+			const int value = slice.at(i,j);
+			if ( value < *minValue ) {
+				*minValue = value;
+			}
+			else if ( value > *maxValue ) {
+				*maxValue = value;
+				*coordmax = (Coord2D){j,i};
+			}
+		}
+	}
+}
+
+void MarrowExtractor::correctMarrow( QList<Coord2D> &moelle, float *listMax, float seuilHough ) {
+	const int marrowSize = moelle.size();
+	int startSlice, endSlice, i=0, x1, y1, x2, y2, newx, newy;
 	float ax, ay;
 	std::cerr << "Coupes interpolées :\n";
-	while(i < moelle->size() && moelle->size() >2){
+	while(i < marrowSize && marrowSize >2){
 		if(listMax[i] < seuilHough){
-			coupedebut = i;
+			startSlice = i;
 			i++;
-			while(listMax[i]<seuilHough && i < moelle->size()) {i++;}
-			coupefin = i-1;
-			if(coupedebut == 0){
+			while(listMax[i]<seuilHough && i < marrowSize) {i++;}
+			endSlice = i-1;
+			if(startSlice == 0){
 				ax = 9999;
 				ay = 9999;
-				x1 = moelle->at(coupefin+1).x;
-				y1 = moelle->at(coupefin+1).y;
-			}else if(coupefin == moelle->size()-1){
+				x1 = moelle.at(endSlice+1).x;
+				y1 = moelle.at(endSlice+1).y;
+			}else if(endSlice == marrowSize-1){
 				ax = 9999;
 				ay = 9999;
-				x1 = moelle->at(coupedebut-1).x;
-				y1 = moelle->at(coupedebut-1).y;
+				x1 = moelle.at(startSlice-1).x;
+				y1 = moelle.at(startSlice-1).y;
 			}else {
-				x1 = moelle->at(coupedebut-1).x;
-				x2 = moelle->at(coupefin+1).x;
-				y1 = moelle->at(coupedebut-1).y;
-				y2 = moelle->at(coupefin+1).y;
+				x1 = moelle.at(startSlice-1).x;
+				x2 = moelle.at(endSlice+1).x;
+				y1 = moelle.at(startSlice-1).y;
+				y2 = moelle.at(endSlice+1).y;
 				if(x1!=x2){
-					ax = (float)((coupefin+1) - (coupedebut-1) ) / (x2-x1);
+					ax = (float)((endSlice+1) - (startSlice-1) ) / (x2-x1);
 				}else{
 					ax = 9999;
 				}
 				if(y1!=y2){
-					ay = (float)((coupefin+1) - (coupedebut-1) ) / (y2-y1);
+					ay = (float)((endSlice+1) - (startSlice-1) ) / (y2-y1);
 				}else{
 					ay = 9999;
 				}
 			}
 
-			if (coupefin > coupedebut) {
-				std::cerr << coupedebut << "-" << coupefin << ' ';
-			} else if (coupefin == coupedebut) {
-				std::cerr << coupedebut << ' ';
+			if (endSlice > startSlice) {
+				std::cerr << startSlice << "-" << endSlice << ' ';
+			} else if (endSlice == startSlice) {
+				std::cerr << startSlice << ' ';
 			}
 
-			for(int j=coupedebut; j<=coupefin; j++){
+			for(int j=startSlice; j<=endSlice; j++){
 				if(ax != 9999){
-					newx = arrondi((j-(coupedebut-1)+ax*x1)/ax);
+					newx = roundf((j-(startSlice-1)+ax*x1)/ax);
 				}else{
 					newx = x1;
 				}
 				if(ay != 9999){
-					newy = arrondi((j-(coupedebut-1)+ay*y1)/ay);
+					newy = roundf((j-(startSlice-1)+ay*y1)/ay);
 				}else{
 					newy = y1;
 				}
-				moelle->replace(j, (Coord){newx, newy, moelle->at(j).z});
+				moelle.replace(j, (Coord2D){newx, newy});
 			}
 		}
 		i++;

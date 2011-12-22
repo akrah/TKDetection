@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>783</width>
-    <height>555</height>
+    <width>882</width>
+    <height>674</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -175,13 +175,6 @@
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="_buttonUpdateHistogram">
-        <property name="text">
-         <string>Mettre à jour l'histogramme</string>
-        </property>
-       </widget>
-      </item>
-      <item>
        <spacer name="verticalSpacer_2">
         <property name="orientation">
          <enum>Qt::Vertical</enum>
@@ -194,6 +187,22 @@
         </property>
        </spacer>
       </item>
+      <item>
+       <widget class="QGroupBox" name="groupBox_3">
+        <property name="title">
+         <string>Moelle</string>
+        </property>
+        <layout class="QVBoxLayout" name="verticalLayout_4">
+         <item>
+          <widget class="QPushButton" name="_buttonMarrow">
+           <property name="text">
+            <string>Calculer et afficher la moelle</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+      </item>
      </layout>
     </item>
    </layout>
@@ -203,7 +212,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>783</width>
+     <width>882</width>
      <height>25</height>
     </rect>
    </property>

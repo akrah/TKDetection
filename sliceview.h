@@ -1,7 +1,8 @@
 #ifndef SLICEVIEW_H
 #define SLICEVIEW_H
 
-#include "defines.h"
+#include "sliceview_def.h"
+#include "marrowextractor_def.h"
 #include <QPixmap>
 
 class Billon;
@@ -14,6 +15,7 @@ public:
 	explicit SliceView();
 
 	void setModel( const Billon * billon );
+	void setModel( const Marrow* marrow );
 
 	int currentSlice() const;
 
@@ -28,6 +30,7 @@ private :
 	void drawCurrentSlice();
 	void drawAverageSlice();
 	void drawMedianSlice();
+	void drawMarrow();
 
 signals:
 	void updated(const QPixmap &);
@@ -36,6 +39,7 @@ signals:
 
 private:
 	const Billon * _billon;
+	const Marrow *_marrow;
 
 	int _currentSlice;
 	int _lowThreshold;

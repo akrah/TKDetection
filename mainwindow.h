@@ -3,7 +3,8 @@
 
 #include <QMainWindow>
 #include <QButtonGroup>
-#include "defines.h"
+#include "sliceview_def.h"
+#include "marrowextractor_def.h"
 
 namespace Ui {
 	class MainWindow;
@@ -30,6 +31,7 @@ private slots:
 	void openDicom();
 	void closeImage();
 	void adaptToSliceType(const SliceType::SliceType &type);
+	void computeMarrow();
 
 private:
 	Ui::MainWindow *ui;
@@ -37,6 +39,7 @@ private:
 	Billon *_billon;
 	SliceView *_sliceView;
 	SliceHistogram *_sliceHistogram;
+	Marrow *_marrow;
 
 	unsigned int _currentSlice;
 
