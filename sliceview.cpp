@@ -8,7 +8,11 @@ namespace {
 	inline T RESTRICT_TO_INTERVAL(T x, T min, T max) { return qMax((min),qMin((max),(x))); }
 }
 
-SliceView::SliceView() : QObject(0), QPixmap(), _billon(0), _marrow(0), _currentSlice(0), _lowThreshold(0), _highThreshold(0), _typeOfView(SliceType::CURRENT) {
+SliceView::SliceView() : QObject(0), _pix(0), _billon(0), _marrow(0), _currentSlice(0), _lowThreshold(0), _highThreshold(0), _typeOfView(SliceType::CURRENT), _drawMarrow(false) {
+}
+
+SliceView::~SliceView() {
+	if ( _pix != 0 ) delete _pix;
 }
 
 void SliceView::setModel( const Billon *billon ) {
@@ -19,10 +23,15 @@ void SliceView::setModel( const Billon *billon ) {
 		_lowThreshold = _billon->minValue();
 		_highThreshold = _billon->maxValue();
 	}
+	else {
+		_lowThreshold = _highThreshold = 0;
+	}
+	update();
 }
 
 void SliceView::setModel( const Marrow* marrow ) {
 	_marrow = marrow;
+	update();
 }
 
 void SliceView::drawSlice( const int &sliceNumber ) {
@@ -31,12 +40,20 @@ void SliceView::drawSlice( const int &sliceNumber ) {
 }
 
 void SliceView::update() {
+	int width = 0;
+	int height = 0;
+	if ( _pix != 0 ) {
+		width = _pix->width();
+		height = _pix->height();
+		delete _pix;
+		_pix = 0;
+	}
 	if ( _billon != 0 ) {
 		switch (_typeOfView) {
 			// Affichage de la coupe courante
 			case SliceType::CURRENT:
 				drawCurrentSlice();
-				drawMarrow();
+				if ( _drawMarrow ) drawMarrow();
 				break;
 			// Affichage de la coupe moyenne
 			case SliceType::AVERAGE :
@@ -47,17 +64,17 @@ void SliceView::update() {
 				drawMedianSlice();
 				break;
 			default :
-				QImage image(width(),height(),QImage::Format_ARGB32);
+				QImage image(width,height,QImage::Format_ARGB32);
 				image.fill(0xff555555);
-				convertFromImage(image);
+				_pix = new QPixmap(QPixmap::fromImage(image));
 		}
 	}
 	else {
-		QImage image(width(),height(),QImage::Format_ARGB32);
+		QImage image(width,height,QImage::Format_ARGB32);
 		image.fill(0xff555555);
-		convertFromImage(image);
+		_pix = new QPixmap(QPixmap::fromImage(image));
 	}
-	emit updated(*this);
+	emit updated(*_pix);
 }
 
 void SliceView::setLowThreshold(const int &threshold) {
@@ -80,6 +97,11 @@ void SliceView::setTypeOfView(const int &type) {
 	}
 }
 
+void SliceView::drawMarrow( bool enable ) {
+	_drawMarrow = enable;
+	update();
+}
+
 void SliceView::drawCurrentSlice() {
 	const imat &slice = _billon->slice(_currentSlice);
 	const uint width = slice.n_cols;
@@ -98,7 +120,7 @@ void SliceView::drawCurrentSlice() {
 		}
 	}
 
-	convertFromImage(image);
+	_pix = new QPixmap(QPixmap::fromImage(image));
 }
 
 void SliceView::drawAverageSlice() {
@@ -124,7 +146,7 @@ void SliceView::drawAverageSlice() {
 			*(line++) = qRgb(c,c,c);
 		}
 	}
-	convertFromImage(image);
+	_pix = new QPixmap(QPixmap::fromImage(image));
 }
 
 void SliceView::drawMedianSlice() {
@@ -149,7 +171,7 @@ void SliceView::drawMedianSlice() {
 			*(line++) = qRgb(c,c,c);
 		}
 	}
-	convertFromImage(image);
+	_pix = new QPixmap(QPixmap::fromImage(image));
 }
 
 void SliceView::drawMarrow() {
@@ -163,7 +185,7 @@ void SliceView::drawMarrow() {
 			myPath.addEllipse(coordToDraw.x-5,coordToDraw.y-5,10,10);
 			QColor color(100,200,100);
 
-			QPainter painter(this);
+			QPainter painter(_pix);
 			painter.setBrush(color);
 			painter.setPen(color);
 			painter.drawPath(myPath);

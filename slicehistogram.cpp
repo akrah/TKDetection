@@ -1,13 +1,14 @@
 #include "slicehistogram.h"
 
 #include "billon.h"
+#include <qwt_plot.h>
 
 namespace {
 	template<class T>
 	inline T RESTRICT_TO_INTERVAL(T x, T min, T max) { return qMax((min),qMin((max),(x))); }
 }
 
-SliceHistogram::SliceHistogram( QwtPlot *parent ) : QObject(), QwtPlotHistogram(), _billon(0), _lowThreshold(0), _highThreshold(0) {
+SliceHistogram::SliceHistogram( QwtPlot *parent ) : QObject(), QwtPlotHistogram(),  _billon(0), _lowThreshold(0), _highThreshold(0) {
 	attach(parent);
 }
 
@@ -16,6 +17,9 @@ void SliceHistogram::setModel( const Billon *billon ) {
 	if ( _billon != 0 ) {
 		_lowThreshold = _billon->minValue();
 		_highThreshold = _billon->maxValue();
+	}
+	else {
+		_lowThreshold = _highThreshold = 0;
 	}
 	constructHistogram();
 }

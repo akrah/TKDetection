@@ -7,12 +7,13 @@
 
 class Billon;
 
-class SliceView : public QObject, public QPixmap
+class SliceView : public QObject
 {
 	Q_OBJECT
 
 public:
 	explicit SliceView();
+	~SliceView();
 
 	void setModel( const Billon * billon );
 	void setModel( const Marrow* marrow );
@@ -25,6 +26,7 @@ public slots:
 	void setLowThreshold(const int &threshold);
 	void setHighThreshold(const int &threshold);
 	void setTypeOfView(const int &type = SliceType::CURRENT);
+	void drawMarrow( bool enable );
 
 private :
 	void drawCurrentSlice();
@@ -38,6 +40,7 @@ signals:
 	void typeOfViewChanged(const SliceType::SliceType &);
 
 private:
+	QPixmap *_pix;
 	const Billon * _billon;
 	const Marrow *_marrow;
 
@@ -45,6 +48,7 @@ private:
 	int _lowThreshold;
 	int _highThreshold;
 	SliceType::SliceType _typeOfView;
+	bool _drawMarrow;
 };
 
 inline int SliceView::currentSlice() const {

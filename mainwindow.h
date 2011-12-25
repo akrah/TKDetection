@@ -22,16 +22,18 @@ public:
 	explicit MainWindow( QWidget *parent = 0 );
 	~MainWindow();
 
-	bool eventFilter(QObject *obj, QEvent *event);
-
-private:
-	void updateBillon();
+	bool eventFilter( QObject *obj, QEvent *event );
 
 private slots:
 	void openDicom();
 	void closeImage();
-	void adaptToSliceType(const SliceType::SliceType &type);
-	void computeMarrow();
+	void adaptToSliceType( const SliceType::SliceType &type );
+	void newMarrow();
+	void updateHistogram();
+
+private:
+	void updateComponentsState();
+	void newBillon(const QString &folderName = "");
 
 private:
 	Ui::MainWindow *ui;

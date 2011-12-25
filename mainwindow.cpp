@@ -61,14 +61,15 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), ui(new Ui::Main
 	QObject::connect(ui->_buttonUpdateHistogram, SIGNAL(clicked()), _sliceHistogram, SLOT(constructHistogram()));
 
 	// Évènements déclenchés par le bouton de calcul de la moelle
-	QObject::connect(ui->_buttonMarrow, SIGNAL(clicked()), this, SLOT(computeMarrow()));
+	QObject::connect(ui->_buttonComputeMarrow, SIGNAL(clicked()), this, SLOT(newMarrow()));
+	QObject::connect(ui->_checkDrawMarrow, SIGNAL(toggled(bool)), _sliceView, SLOT(drawMarrow(bool)));
 
 	// Évènements reçus de la vue en coupe
 	QObject::connect(_sliceView, SIGNAL(updated(QPixmap)), ui->_labelSliceView, SLOT(setPixmap(QPixmap)));
 	QObject::connect(_sliceView, SIGNAL(typeOfViewChanged(SliceType::SliceType)), this, SLOT(adaptToSliceType(SliceType::SliceType)));
 
 	// Évènements reçus de la vue histogramme
-	QObject::connect(_sliceHistogram, SIGNAL(histogramUpdated()), ui->_plotSliceHistogram, SLOT(replot()));
+	QObject::connect(_sliceHistogram, SIGNAL(histogramUpdated()), this, SLOT(updateHistogram()));
 
 	// Évènements déclenchés par les actions du menu
 	QObject::connect(ui->_actionOpenDicom, SIGNAL(triggered()), this, SLOT(openDicom()));
@@ -88,25 +89,15 @@ void MainWindow::openDicom() {
 	QString folderName = QFileDialog::getExistingDirectory(0,tr("Sélection du répertoire DICOM"),QDir::homePath(),QFileDialog::ShowDirsOnly);
 	if ( !folderName.isEmpty() ) {
 		// Lecture des fichiers DICOM
-		if ( _billon != 0 ) {
-			delete _billon;
-			_billon = 0;
-		}
-		if ( _marrow != 0 ) {
-			delete _marrow;
-			_marrow = 0;
-		}
-		_billon = DicomReader::read(folderName);
-		updateBillon();
+		newBillon(folderName);
+		updateComponentsState();
 	}
 }
 
 void MainWindow::closeImage() {
-	if ( _billon != 0 ) {
-		delete _billon;
-		_billon = 0;
-	}
-	updateBillon();
+	newBillon();
+	newMarrow();
+	updateComponentsState();
 }
 
 void MainWindow::adaptToSliceType(const SliceType::SliceType &type) {
@@ -115,44 +106,73 @@ void MainWindow::adaptToSliceType(const SliceType::SliceType &type) {
 		case SliceType::MEDIAN :
 			ui->_sliderSelectSlice->setEnabled(false);
 			ui->_spansliderSliceThreshold->setEnabled(false);
+			ui->_buttonComputeMarrow->setEnabled(false);
+			ui->_buttonUpdateHistogram->setEnabled(false);
+			ui->_checkDrawMarrow->setEnabled(false);
 			break;
 		case SliceType::CURRENT :
 		default :
 			ui->_sliderSelectSlice->setEnabled(true);
 			ui->_spansliderSliceThreshold->setEnabled(true);
+			ui->_buttonComputeMarrow->setEnabled(true);
+			ui->_buttonUpdateHistogram->setEnabled(true);
+			ui->_checkDrawMarrow->setEnabled(true);
 	}
 }
 
-void MainWindow::computeMarrow() {
+void MainWindow::newMarrow() {
+	if ( _marrow != 0 ) {
+		delete _marrow;
+		_marrow = 0;
+	}
 	if ( _billon != 0 ) {
-		if ( _marrow == 0 ) delete _marrow;
 		MarrowExtractor extractor;
 		_marrow = extractor.process(*_billon,0,_billon->n_slices-1);
-		_sliceView->setModel(_marrow);
 	}
+	_sliceView->setModel(_marrow);
 }
 
-void MainWindow::updateBillon() {
+void MainWindow::updateHistogram() {
+	ui->_plotSliceHistogram->setAxisScale(QwtPlot::xBottom,0,(_billon != 0)?_billon->n_slices:0);
+	ui->_plotSliceHistogram->replot();
+}
+
+void MainWindow::updateComponentsState() {
+	uint minValue, maxValue, nbSlices;
 	if ( _billon != 0 ) {
-		ui->_spansliderSliceThreshold->setMinimum(_billon->minValue());
-		ui->_spansliderSliceThreshold->setLowerValue(_billon->minValue());
-		ui->_spansliderSliceThreshold->setMaximum(_billon->maxValue());
-		ui->_spansliderSliceThreshold->setUpperValue(_billon->maxValue());
+		minValue = _billon->minValue();
+		maxValue = _billon->maxValue();
+		nbSlices = _billon->n_slices;
+	}
+	else {
+		minValue = maxValue = 0;
+		nbSlices = 1;
 	}
 
+	ui->_spansliderSliceThreshold->setMinimum(minValue);
+	ui->_spansliderSliceThreshold->setLowerValue(minValue);
+	ui->_spansliderSliceThreshold->setMaximum(maxValue);
+	ui->_spansliderSliceThreshold->setUpperValue(maxValue);
+
 	ui->_sliderSelectSlice->setValue(0);
-	ui->_sliderSelectSlice->setRange(0,_billon!=0?_billon->n_slices-1:0);
+	ui->_sliderSelectSlice->setRange(0,nbSlices-1);
 
 	if ( _billon != 0 )	ui->_labelSliceNumber->setNum(0);
 	else ui->_labelSliceNumber->setText(tr("Aucune coupe présente."));
-
-	ui->_plotSliceHistogram->setAxisScale(QwtPlot::xBottom,0,(_billon != 0)?_billon->n_slices:1);
-
-	_sliceView->setModel(_billon);
-	_sliceView->setModel(_marrow);
-	_sliceHistogram->setModel(_billon);
-	_sliceView->update();
 }
+
+void MainWindow::newBillon( const QString &folderName ) {
+	if ( _billon != 0 ) {
+		delete _billon;
+		_billon = 0;
+	}
+	if ( !folderName.isEmpty() ) {
+		_billon = DicomReader::read(folderName);
+	}
+	_sliceView->setModel(_billon);
+	_sliceHistogram->setModel(_billon);
+}
+
 
 bool MainWindow::eventFilter(QObject *obj, QEvent *event) {
 	if (obj == ui->_labelSliceView) {
