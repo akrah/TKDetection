@@ -3,6 +3,7 @@
 
 #include <QMainWindow>
 #include <QButtonGroup>
+
 #include "sliceview_def.h"
 #include "marrowextractor_def.h"
 
@@ -13,6 +14,8 @@ namespace Ui {
 class Billon;
 class SliceView;
 class SliceHistogram;
+
+#include <qwt_plot_curve.h>
 
 class MainWindow : public QMainWindow
 {
@@ -27,25 +30,24 @@ public:
 private slots:
 	void openDicom();
 	void closeImage();
-	void adaptToSliceType( const SliceType::SliceType &type );
-	void newMarrow();
-	void updateHistogram();
+	void adaptGraphicsComponentsToSliceType( const SliceType::SliceType &type );
+	void computeNewMarrow();
+	void redrawHistogram();
+	void highlightHistogramSlice( const int &slicePosition );
 
 private:
-	void updateComponentsState();
-	void newBillon(const QString &folderName = "");
+	void updateGraphicsComponentsValues();
+	void openNewBillon(const QString &folderName = "");
 
 private:
-	Ui::MainWindow *ui;
+	Ui::MainWindow *_ui;
+	QButtonGroup _groupSliceView;
 
 	Billon *_billon;
 	SliceView *_sliceView;
 	SliceHistogram *_sliceHistogram;
 	Marrow *_marrow;
-
-	unsigned int _currentSlice;
-
-	QButtonGroup _groupSliceView;
+	QwtPlotCurve _histogramCursor;
 };
 
 #endif // MAINWINDOW_H

@@ -3,9 +3,10 @@
 
 #include "sliceview_def.h"
 #include "marrowextractor_def.h"
-#include <QPixmap>
+#include <QObject>
 
 class Billon;
+class QPixmap;
 
 class SliceView : public QObject
 {
@@ -51,7 +52,13 @@ private:
 	bool _drawMarrow;
 };
 
-inline int SliceView::currentSlice() const {
+
+/**********************************
+ * Définition des fonctions inline
+ **********************************/
+
+inline
+int SliceView::currentSlice() const {
 	return _currentSlice;
 }
 

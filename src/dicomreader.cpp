@@ -1,15 +1,15 @@
-#include "dicomreader.h"
+#include "inc/dicomreader.h"
 
-#include "billon.h"
+#include "inc/billon.h"
 
 #include <QObject>
 #include <algorithm>
 
-#include <itkImageFileWriter.h>
+#include <itkMetaDataDictionary.h>
+#include <itkImage.h>
 #include <itkImageSeriesReader.h>
 #include <itkGDCMImageIO.h>
 #include <itkGDCMSeriesFileNames.h>
-
 
 /**
  * \file	dicomreader.cpp
@@ -23,7 +23,7 @@ namespace DicomReader {
 	// Déclaration de fonctions privées
 	namespace {
 		Billon* makeBillonFromDicomWithITK( const QString &repository );
-		QString getTag( const std::string &entryId, const itk::MetaDataDictionary & dictionary );
+		QString getTag( const std::string &entryId, const itk::MetaDataDictionary &dictionary );
 	}
 
 
@@ -41,6 +41,7 @@ namespace DicomReader {
 
 	// Implémentation des fonction privées
 	namespace {
+		inline
 		Billon* makeBillonFromDicomWithITK( const QString &repository ) {
 
 			// Définition des type de l'image
@@ -70,7 +71,7 @@ namespace DicomReader {
 			}
 
 			// Dictionnaire
-			const itk::MetaDataDictionary & dictionary = dicomIO->GetMetaDataDictionary();
+			const itk::MetaDataDictionary &dictionary = dicomIO->GetMetaDataDictionary();
 
 			// Recherche de tag dans le fichier
 			bool size_ok;
@@ -92,7 +93,7 @@ namespace DicomReader {
 			Billon * const billon = new Billon( height, width, depth );
 
 			const ImageType::Pointer image = reader->GetOutput();
-			itk::ImageRegionConstIterator< ImageType > in( image,image->GetRequestedRegion() );
+			itk::ImageRegionConstIterator< ImageType > in( image,image->GetBufferedRegion() );
 			int max, min;
 			max = min = in.Get();
 
@@ -100,7 +101,7 @@ namespace DicomReader {
 				imat &slice = billon->slice(k);
 				for ( uint j=0; j<height; j++ ) {
 					for ( uint i=0; i<width; i++ ) {
-						const int current = in.Get();
+						const int current = in.Value();
 						slice.at(j,i) = current;
 						if ( current>max ) max = current;
 						else if ( current<min ) min = current;
@@ -116,6 +117,7 @@ namespace DicomReader {
 			return billon;
 		}
 
+		inline
 		QString getTag( const std::string &entryId, const itk::MetaDataDictionary &dictionary ) {
 			QString value = QObject::tr("indéfinie");
 

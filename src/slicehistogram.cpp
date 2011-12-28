@@ -1,6 +1,6 @@
-#include "slicehistogram.h"
+#include "inc/slicehistogram.h"
 
-#include "billon.h"
+#include "inc/billon.h"
 #include <qwt_plot.h>
 
 namespace {
@@ -47,7 +47,7 @@ void SliceHistogram::constructHistogram() {
 					cumul += qAbs(RESTRICT_TO_INTERVAL(slice.at(j,i),minValue,maxValue) - RESTRICT_TO_INTERVAL(prevSlice.at(j,i),minValue,maxValue));
 				}
 			}
-			_datas.append(QwtIntervalSample(cumul/nbPixels,k,k+1));
+			_datas.append(QwtIntervalSample(cumul/nbPixels,k-1,k));
 		}
 	}
 	static_cast<QwtIntervalSeriesData *>(data())->setSamples(_datas);

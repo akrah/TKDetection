@@ -6,8 +6,6 @@
 class Billon;
 class QwtIntervalSample;
 
-#define HISTOGRAM_HEIGHT 200
-
 class SliceHistogram : public QObject, public QwtPlotHistogram
 {
 	Q_OBJECT
@@ -32,6 +30,10 @@ private:
 	int _lowThreshold;
 	int _highThreshold;
 };
+
+/**********************************
+ * Définition des fonctions inline
+ **********************************/
 
 inline
 void SliceHistogram::setLowThreshold(const int &threshold) {

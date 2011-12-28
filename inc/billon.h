@@ -1,5 +1,5 @@
-#ifndef IMAGE3D_H
-#define IMAGE3D_H
+#ifndef BILLON_H
+#define BILLON_H
 
 #include <armadillo>
 
@@ -22,6 +22,10 @@ private:
 	int _maxValue;
 };
 
+/**********************************
+ * Définition des fonctions inline
+ **********************************/
+
 inline
 int Billon::minValue() const {
 	return _minValue;
@@ -42,4 +46,4 @@ void Billon::setMaxValue( const int min ) {
 	_maxValue = min;
 }
 
-#endif // IMAGE3D_H
+#endif // BILLON_H

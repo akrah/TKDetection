@@ -1,10 +1,8 @@
 #ifndef DICOMREADER_H
 #define DICOMREADER_H
 
-#include <QString>
-#include <itkMetaDataDictionary.h>
-
 class Billon;
+class QString;
 
 /**
  * \file	iodicom.h

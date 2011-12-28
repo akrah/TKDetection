@@ -1,9 +1,9 @@
 #ifndef MARROWEXTRACTOR_H
 #define MARROWEXTRACTOR_H
 
-#include "marrowextractor_def.h"
 #include <QList>
 #include <armadillo>
+#include "marrowextractor_def.h"
 
 using namespace arma;
 
@@ -170,9 +170,10 @@ private:
 };
 
 
-/********************************************************
- * Get functions
- ********************************************************/
+
+/**********************************
+ * Définition des fonctions inline
+ **********************************/
 inline
 int MarrowExtractor::falseCutPercent() {
 	return _falseCutPercent;
@@ -198,9 +199,6 @@ int MarrowExtractor::marrowLag() {
 	return _marrowLag;
 }
 
-/********************************************************
- * Set functions
- ********************************************************/
 inline
 void MarrowExtractor::setFalseCutPercent( int percentage ) {
 	_falseCutPercent = percentage;

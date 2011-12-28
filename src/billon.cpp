@@ -1,4 +1,4 @@
-#include "billon.h"
+#include "inc/billon.h"
 
 Billon::Billon() : icube(0,0,0), _minValue(0), _maxValue(0) {
 }

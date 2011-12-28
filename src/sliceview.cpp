@@ -1,6 +1,6 @@
-#include "sliceview.h"
+#include "inc/sliceview.h"
 
-#include "billon.h"
+#include "inc/billon.h"
 #include <QPainter>
 
 namespace {

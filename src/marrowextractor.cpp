@@ -1,4 +1,4 @@
-#include "marrowextractor.h"
+#include "inc/marrowextractor.h"
 
 namespace {
 	template<class T>

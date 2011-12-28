@@ -1,7 +1,7 @@
 #include <QtGui/QApplication>
 #include <QTextCodec>
 
-#include "mainwindow.h"
+#include "inc/mainwindow.h"
 
 int main(int argc, char *argv[])
 {
