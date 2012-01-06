@@ -37,7 +37,7 @@ void SliceHistogram::constructHistogram() {
 
 		_datas.reserve(depth-1);
 
-		float cumul;
+		double cumul;
 		for (unsigned int k=1 ; k<depth ; k++) {
 			const imat &slice = billon.slice(k);
 			const imat &prevSlice = billon.slice(k-1);

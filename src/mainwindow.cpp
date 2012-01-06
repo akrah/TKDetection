@@ -11,6 +11,7 @@
 
 #include <QFileDialog>
 #include <QMouseEvent>
+#include <QPainter>
 
 
 MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::MainWindow), _billon(0), _sliceView(0), _sliceHistogram(0), _marrow(0) {
@@ -38,7 +39,6 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 	_groupSliceView.addButton(_ui->_radioAverageSlice,SliceType::AVERAGE);
 	_groupSliceView.addButton(_ui->_radioMedianSlice,SliceType::MEDIAN);
 	_groupSliceView.setExclusive(true);
-	_ui->_radioOriginalSlice->setChecked(true);
 
 	// Raccourcis des actions du menu
 	_ui->_actionOpenDicom->setShortcut(Qt::CTRL + Qt::Key_O);
@@ -81,6 +81,9 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 	QObject::connect(_ui->_actionOpenDicom, SIGNAL(triggered()), this, SLOT(openDicom()));
 	QObject::connect(_ui->_actionCloseImage, SIGNAL(triggered()), this, SLOT(closeImage()));
 	QObject::connect(_ui->_actionQuit, SIGNAL(triggered()), this, SLOT(close()));
+
+	_ui->_radioOriginalSlice->click();
+	//updateGraphicsComponentsValues();
 }
 
 MainWindow::~MainWindow() {
@@ -95,11 +98,44 @@ MainWindow::~MainWindow() {
  * Public
  ****************************************/
 
+#include "inc/piechart.h"
+
 bool MainWindow::eventFilter(QObject *obj, QEvent *event) {
 	if (obj == _ui->_labelSliceView) {
 		if ( _billon != 0 && event->type() == QEvent::MouseButtonPress ) {
 			QMouseEvent *mouseEvent = static_cast<QMouseEvent*>(event);
-			std::cout << obj->objectName().toStdString() << " : ( " << mouseEvent->x() << ", " << mouseEvent->y() << ", " << _sliceView->currentSlice() << " )" << std::endl;
+			const int x = mouseEvent->x();
+			const int y = mouseEvent->y();
+			std::cout << obj->objectName().toStdString() << " : ( " << x << ", " << y << ", " << _sliceView->currentSliceIndex() << " )" << std::endl;
+
+			QPixmap pix(*(_ui->_labelSliceView->pixmap()));
+			const int b1 = y-x;
+			const int b2 = y+x;
+			const int width = pix.width();
+			const int height = pix.height();
+
+			PiePart part;
+			part._orientation = 3.*PI/8.;
+			part._angle = PI/4.;
+			const double a_l = - part.leftFactor();
+			const double b_l = y - (a_l*x);
+			const double a_r = - part.rightFactor();
+			const double b_r = y - (a_r*x);
+
+			QPainter painter(&pix);
+//				painter.drawEllipse(x-10,y-10,20,20);
+//				painter.drawLine(x,0,x,height);
+//				painter.drawLine(0,y,width,y);
+//				painter.drawLine(0,b1,width,width+b1);
+//				painter.drawLine(0,b2,width,-width+b2);
+				painter.drawLine(0,b_l,width,a_l*width+b_l);
+				painter.drawLine(0,b_r,width,a_r*width+b_r);
+
+				std::cout << " y = a_l * x + b_l ==> " << y << " = " << a_l << " * " << x << " + " << b_l << " = " << a_l*x+b_l << std::endl;
+				std::cout << " y = a_r * x + b_r ==> " << y << " = " << a_r << " * " << x << " + " << b_r << " = " << a_r*x+b_r << std::endl;
+
+			_ui->_labelSliceView->setPixmap(pix);
+
 			return true;
 		}
 		else {
@@ -142,11 +178,12 @@ void MainWindow::adaptGraphicsComponentsToSliceType(const SliceType::SliceType &
 			break;
 		case SliceType::CURRENT :
 		default :
-			_ui->_sliderSelectSlice->setEnabled(true);
-			_ui->_spansliderSliceThreshold->setEnabled(true);
-			_ui->_buttonComputeMarrow->setEnabled(true);
-			_ui->_buttonUpdateHistogram->setEnabled(true);
-			_ui->_checkDrawMarrow->setEnabled(true);
+			const bool existBillon = _billon != 0;
+			_ui->_sliderSelectSlice->setEnabled(existBillon);
+			_ui->_spansliderSliceThreshold->setEnabled(existBillon);
+			_ui->_buttonComputeMarrow->setEnabled(existBillon);
+			_ui->_buttonUpdateHistogram->setEnabled(existBillon);
+			_ui->_checkDrawMarrow->setEnabled(existBillon);
 	}
 }
 
@@ -187,8 +224,10 @@ void MainWindow::updateGraphicsComponentsValues() {
 		minValue = _billon->minValue();
 		maxValue = _billon->maxValue();
 		nbSlices = _billon->n_slices;
+		_ui->_buttonComputeMarrow->setEnabled(true);
 	}
 	else {
+		_ui->_buttonComputeMarrow->setEnabled(false);
 		minValue = maxValue = 0;
 		nbSlices = 1;
 	}
@@ -203,6 +242,8 @@ void MainWindow::updateGraphicsComponentsValues() {
 
 	if ( _billon != 0 )	_ui->_labelSliceNumber->setNum(0);
 	else _ui->_labelSliceNumber->setText(tr("Aucune coupe présente."));
+
+	adaptGraphicsComponentsToSliceType(_sliceView->sliceType());
 }
 
 void MainWindow::openNewBillon( const QString &folderName ) {

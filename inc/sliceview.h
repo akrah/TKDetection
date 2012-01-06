@@ -19,7 +19,9 @@ public:
 	void setModel( const Billon * billon );
 	void setModel( const Marrow* marrow );
 
-	int currentSlice() const;
+	int currentSliceIndex() const;
+	const QPixmap * pixmap() const;
+	SliceType::SliceType sliceType() const;
 
 public slots:
 	void drawSlice( const int &sliceNumber = -1 );
@@ -42,6 +44,7 @@ signals:
 
 private:
 	QPixmap *_pix;
+
 	const Billon * _billon;
 	const Marrow *_marrow;
 
@@ -58,8 +61,18 @@ private:
  **********************************/
 
 inline
-int SliceView::currentSlice() const {
+int SliceView::currentSliceIndex() const {
 	return _currentSlice;
+}
+
+inline
+const QPixmap * SliceView::pixmap() const {
+	return _pix;
+}
+
+inline
+SliceType::SliceType SliceView::sliceType() const {
+	return _typeOfView;
 }
 
 #endif // SLICEVIEW_H

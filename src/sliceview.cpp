@@ -108,7 +108,7 @@ void SliceView::drawCurrentSlice() {
 	const uint height = slice.n_rows;
 	const int minValue = _lowThreshold;
 	const int maxValue = _highThreshold;
-	const float fact = 255.0/(maxValue-minValue);
+	const double fact = 255.0/(maxValue-minValue);
 
 	QImage image(width,height,QImage::Format_ARGB32);
 	QRgb * line = (QRgb *) image.bits();
@@ -130,7 +130,7 @@ void SliceView::drawAverageSlice() {
 	const uint depth = billon.n_slices;
 	const int minValue = _lowThreshold;
 	const int maxValue = _highThreshold;
-	const float fact = 255.0/(depth*(maxValue-minValue));
+	const double fact = 255.0/(depth*(maxValue-minValue));
 
 	QImage image(width,height,QImage::Format_ARGB32);
 	int c;
@@ -156,7 +156,7 @@ void SliceView::drawMedianSlice() {
 	const uint depth = billon.n_slices;
 	const int minValue = _lowThreshold;
 	const int maxValue = _highThreshold;
-	const float fact = 255.0/(maxValue-minValue);
+	const double fact = 255.0/(maxValue-minValue);
 
 	QImage image(width,height,QImage::Format_ARGB32);
 	QRgb * line =(QRgb *) image.bits();

@@ -21,17 +21,19 @@ SOURCES  *= main.cpp \
 			mainwindow.cpp \
 			marrowextractor.cpp \
 			marrowextractor_def.cpp \
+			piechart.cpp \
 			slicehistogram.cpp \
-			sliceview.cpp
+			sliceview.cpp \
 
 HEADERS  *= billon.h \
 			dicomreader.h \
 			mainwindow.h \
 			marrowextractor.h \
 			marrowextractor_def.h \
+			piechart.h \
 			slicehistogram.h \
 			sliceview.h \
-			sliceview_def.h
+			sliceview_def.h \
 
 FORMS    *= mainwindow.ui
 
@@ -40,6 +42,8 @@ QXT_PATH  = /usr/include/qxt
 QWT_PATH  = /usr/include/qwt
 
 INCLUDEPATH  *= \
+				/usr/include/c++/4.6/ \
+				/usr/include/ \
 				/usr/local/include/ \
 				$${ITK_PATH}/IO/ \
 				$${ITK_PATH}/Common/ \
