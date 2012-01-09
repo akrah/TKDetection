@@ -98,7 +98,7 @@ MainWindow::~MainWindow() {
  * Public
  ****************************************/
 
-#include "inc/piechart.h"
+#include "inc/piepart.h"
 
 bool MainWindow::eventFilter(QObject *obj, QEvent *event) {
 	if (obj == _ui->_labelSliceView) {
@@ -114,25 +114,61 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *event) {
 			const int width = pix.width();
 			const int height = pix.height();
 
-			PiePart part;
-			part._orientation = 3.*PI/8.;
-			part._angle = PI/4.;
-			const double a_l = - part.leftFactor();
-			const double b_l = y - (a_l*x);
-			const double a_r = - part.rightFactor();
-			const double b_r = y - (a_r*x);
-
 			QPainter painter(&pix);
-//				painter.drawEllipse(x-10,y-10,20,20);
+
+			PiePart part( 76.*PI/8., PI/4. );
+
+			const double leftAngle = part.leftAngle();
+			if ( leftAngle != PI/2. && leftAngle != 3.*PI/2. ) {
+				const double a_l = -tan(leftAngle);
+				const double b_l = y - (a_l*x);
+				if ( leftAngle < PI/2. || leftAngle > 3.*PI/2. ) {
+					painter.drawLine(x,y,width,a_l*width+b_l);
+				}
+				else {
+					painter.drawLine(0,b_l,x,y);
+				}
+			}
+			else {
+				if ( leftAngle == PI/2. ) {
+					painter.drawLine(x,0,x,y);
+				}
+				else if ( leftAngle == 3.*PI/2. ) {
+					painter.drawLine(x,y,x,height);
+				}
+			}
+
+			const double rightAngle = part.rightAngle();
+			if ( rightAngle != PI/2. && rightAngle != 3.*PI/2. ) {
+				const double a_r = -tan(rightAngle);
+				const double b_r = y - (a_r*x);
+				if ( rightAngle < PI/2. || rightAngle > 3.*PI/2. ) {
+					painter.drawLine(x,y,width,a_r*width+b_r);
+				}
+				else {
+					painter.drawLine(0,b_r,x,y);
+				}
+			}
+			else {
+				if ( rightAngle == PI/2. ) {
+					painter.drawLine(x,0,x,y);
+				}
+				else if ( rightAngle == 3.*PI/2. ) {
+					painter.drawLine(x,y,x,height);
+				}
+			}
+
+			//				painter.drawEllipse(x-10,y-10,20,20);
 //				painter.drawLine(x,0,x,height);
 //				painter.drawLine(0,y,width,y);
 //				painter.drawLine(0,b1,width,width+b1);
 //				painter.drawLine(0,b2,width,-width+b2);
-				painter.drawLine(0,b_l,width,a_l*width+b_l);
-				painter.drawLine(0,b_r,width,a_r*width+b_r);
 
-				std::cout << " y = a_l * x + b_l ==> " << y << " = " << a_l << " * " << x << " + " << b_l << " = " << a_l*x+b_l << std::endl;
-				std::cout << " y = a_r * x + b_r ==> " << y << " = " << a_r << " * " << x << " + " << b_r << " = " << a_r*x+b_r << std::endl;
+//			painter.drawLine(0,b_l,width,a_l*width+b_l);
+//			painter.drawLine(0,b_r,width,a_r*width+b_r);
+
+//				std::cout << " y = a_l * x + b_l ==> " << y << " = " << a_l << " * " << x << " + " << b_l << " = " << a_l*x+b_l << std::endl;
+//				std::cout << " y = a_r * x + b_r ==> " << y << " = " << a_r << " * " << x << " + " << b_r << " = " << a_r*x+b_r << std::endl;
 
 			_ui->_labelSliceView->setPixmap(pix);
 
