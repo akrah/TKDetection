@@ -13,7 +13,7 @@ public:
 	double angle() const;
 	QList<PiePart> sectors() const;
 
-	int sectorOfAngle( double angle ) const;
+	int partOfAngle( double angle ) const;
 
 	void setOrientation( double orientation );
 	void setSectorsNumber( int nbSectors );

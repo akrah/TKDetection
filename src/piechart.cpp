@@ -27,7 +27,7 @@ QList<PiePart> PieChart::sectors() const {
 	return _sectors;
 }
 
-int PieChart::sectorOfAngle( double angle ) const {
+int PieChart::partOfAngle( double angle ) const {
 	int sectorId;
 	bool ok = false;
 	const int nbSectors = _sectors.size();

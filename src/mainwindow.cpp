@@ -13,6 +13,8 @@
 #include <QMouseEvent>
 #include <QPainter>
 
+#include <qwt_dial_needle.h>
+
 
 MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::MainWindow), _billon(0), _sliceView(0), _sliceHistogram(0), _marrow(0) {
 	_ui->setupUi(this);
@@ -166,7 +168,7 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *event) {
 //				}
 //			}
 
-			std::cout << "Secteur du clic : " << chart.sectorOfAngle( TWO_PI-ANGLE(256,256,x,y) ) << std::endl;
+			std::cout << "Secteur du clic : " << chart.partOfAngle( TWO_PI-ANGLE(256,256,x,y) ) << std::endl;
 
 //			PiePart part( 0., PI/4. );
 

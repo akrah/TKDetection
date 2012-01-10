@@ -24,7 +24,8 @@ SOURCES  *= main.cpp \
 			piechart.cpp \
 			slicehistogram.cpp \
 			sliceview.cpp \
-			src/piepart.cpp
+			src/piepart.cpp \
+	src/piecharthistograms.cpp
 
 HEADERS  *= billon.h \
 			dicomreader.h \
@@ -35,7 +36,8 @@ HEADERS  *= billon.h \
 			slicehistogram.h \
 			sliceview.h \
 			sliceview_def.h \
-			inc/piepart.h
+			inc/piepart.h \
+	inc/piecharthistograms.h
 
 FORMS    *= mainwindow.ui
 
@@ -44,8 +46,8 @@ QXT_PATH  = /usr/include/qxt
 QWT_PATH  = /usr/include/qwt
 
 INCLUDEPATH  *= \
-				/usr/include/c++/4.6/ \
-				/usr/include/ \
+#				/usr/include/c++/4.6/ \
+#				/usr/include/ \
 				/usr/local/include/ \
 				$${ITK_PATH}/IO/ \
 				$${ITK_PATH}/Common/ \

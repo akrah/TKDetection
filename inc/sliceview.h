@@ -17,7 +17,7 @@ public:
 	~SliceView();
 
 	void setModel( const Billon * billon );
-	void setModel( const Marrow* marrow );
+	void setModel( const Marrow * marrow );
 
 	int currentSliceIndex() const;
 	const QPixmap * pixmap() const;

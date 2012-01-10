@@ -243,14 +243,75 @@
           <item>
            <widget class="QGroupBox" name="groupBox_4">
             <property name="title">
-             <string>Forme</string>
+             <string>Paramètres</string>
             </property>
             <layout class="QFormLayout" name="formLayout">
-             <item row="0" column="0">
+             <property name="fieldGrowthPolicy">
+              <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
+             </property>
+             <item row="1" column="0">
               <widget class="QLabel" name="label_2">
                <property name="text">
-                <string>Orientation</string>
+                <string>Orientation (en degrés)</string>
                </property>
+              </widget>
+             </item>
+             <item row="1" column="1">
+              <widget class="QSpinBox" name="_spinSectorsOrientation">
+               <property name="buttonSymbols">
+                <enum>QAbstractSpinBox::UpDownArrows</enum>
+               </property>
+               <property name="maximum">
+                <number>360</number>
+               </property>
+              </widget>
+             </item>
+             <item row="2" column="0">
+              <widget class="QLabel" name="label_3">
+               <property name="text">
+                <string>Angle (en degrés)</string>
+               </property>
+              </widget>
+             </item>
+             <item row="2" column="1">
+              <widget class="QSpinBox" name="_spinSectorsAngle"/>
+             </item>
+             <item row="3" column="1">
+              <widget class="QDialogButtonBox" name="_buttonsSectorsParameters">
+               <property name="standardButtons">
+                <set>QDialogButtonBox::Apply|QDialogButtonBox::Cancel</set>
+               </property>
+               <property name="centerButtons">
+                <bool>true</bool>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </item>
+          <item>
+           <widget class="QGroupBox" name="groupBox_5">
+            <property name="title">
+             <string>Histogrammes</string>
+            </property>
+            <layout class="QVBoxLayout" name="verticalLayout_8">
+             <item>
+              <widget class="QPushButton" name="_buttonSectorsGraphes">
+               <property name="text">
+                <string>Générer</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QStackedWidget" name="_stackedSectorsHistograms">
+               <property name="frameShape">
+                <enum>QFrame::NoFrame</enum>
+               </property>
+               <property name="currentIndex">
+                <number>0</number>
+               </property>
+               <widget class="QWidget" name="page"/>
+               <widget class="QWidget" name="page_2"/>
               </widget>
              </item>
             </layout>
