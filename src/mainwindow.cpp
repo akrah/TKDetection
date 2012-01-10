@@ -99,6 +99,16 @@ MainWindow::~MainWindow() {
  ****************************************/
 
 #include "inc/piepart.h"
+#include "inc/piechart.h"
+
+namespace {
+	inline double ANGLE( double xo, double yo, double x2, double y2 ) {
+		const double x_diff = x2-xo;
+		double arcos = std::acos(x_diff / sqrt(pow(x_diff,2)+pow(y2-yo,2)));
+		if ( yo > y2 ) arcos = TWO_PI-arcos;
+		return arcos;
+	}
+}
 
 bool MainWindow::eventFilter(QObject *obj, QEvent *event) {
 	if (obj == _ui->_labelSliceView) {
@@ -109,54 +119,96 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *event) {
 			std::cout << obj->objectName().toStdString() << " : ( " << x << ", " << y << ", " << _sliceView->currentSliceIndex() << " )" << std::endl;
 
 			QPixmap pix(*(_ui->_labelSliceView->pixmap()));
-			const int b1 = y-x;
-			const int b2 = y+x;
+			const int b1 = 0;
+			const int b2 = 256;
 			const int width = pix.width();
 			const int height = pix.height();
 
 			QPainter painter(&pix);
 
-			PiePart part( 76.*PI/8., PI/4. );
+			PieChart chart(PI/8,8);
+			QList<PiePart> sectors = chart.sectors();
+			const int sectorsSize = sectors.size();
 
-			const double leftAngle = part.leftAngle();
-			if ( leftAngle != PI/2. && leftAngle != 3.*PI/2. ) {
-				const double a_l = -tan(leftAngle);
-				const double b_l = y - (a_l*x);
-				if ( leftAngle < PI/2. || leftAngle > 3.*PI/2. ) {
-					painter.drawLine(x,y,width,a_l*width+b_l);
-				}
-				else {
-					painter.drawLine(0,b_l,x,y);
-				}
-			}
-			else {
-				if ( leftAngle == PI/2. ) {
-					painter.drawLine(x,0,x,y);
-				}
-				else if ( leftAngle == 3.*PI/2. ) {
-					painter.drawLine(x,y,x,height);
-				}
+			QList<QColor> colors;
+			for ( int i=0 ; i<sectorsSize ; ++i ) {
+				colors.append(QColor(255*i/sectorsSize,255-255*i/sectorsSize,0));
 			}
 
-			const double rightAngle = part.rightAngle();
-			if ( rightAngle != PI/2. && rightAngle != 3.*PI/2. ) {
-				const double a_r = -tan(rightAngle);
-				const double b_r = y - (a_r*x);
-				if ( rightAngle < PI/2. || rightAngle > 3.*PI/2. ) {
-					painter.drawLine(x,y,width,a_r*width+b_r);
+			for ( int i=0 ; i<sectorsSize ; ++i ) {
+				painter.setPen(colors.at(i));
+				const double rightAngle = TWO_PI-sectors.at(i).rightAngle();
+				if ( rightAngle != PI/2. && rightAngle != 3.*PI/2. ) {
+					const double a_l = tan(rightAngle);
+					const double b_l = 256 - (a_l*256);
+					if ( rightAngle < PI/2. || rightAngle > 3.*PI/2. ) {
+						painter.drawLine(256,256,width,a_l*width+b_l);
+					}
+					else {
+						painter.drawLine(0,b_l,256,256);
+					}
 				}
 				else {
-					painter.drawLine(0,b_r,x,y);
+					if ( rightAngle == PI/2. ) {
+						painter.drawLine(256,256,256,height);
+					}
+					else if ( rightAngle == 3.*PI/2. ) {
+						painter.drawLine(256,0,256,256);
+					}
 				}
 			}
-			else {
-				if ( rightAngle == PI/2. ) {
-					painter.drawLine(x,0,x,y);
-				}
-				else if ( rightAngle == 3.*PI/2. ) {
-					painter.drawLine(x,y,x,height);
-				}
-			}
+
+//			for ( int j=0 ; j<512 ; j++ ) {
+//				for (int i=0 ; i<512 ; ++i) {
+//					const int sectorIdx = chart.sectorOfAngle( TWO_PI-ANGLE(256,256,i,j) );
+//					painter.setPen(colors.at(sectorIdx));
+//					painter.drawPoint(i,j);
+//				}
+//			}
+
+			std::cout << "Secteur du clic : " << chart.sectorOfAngle( TWO_PI-ANGLE(256,256,x,y) ) << std::endl;
+
+//			PiePart part( 0., PI/4. );
+
+//			const double leftAngle = part.leftAngle();
+//			if ( leftAngle != PI/2. && leftAngle != 3.*PI/2. ) {
+//				const double a_l = -tan(leftAngle);
+//				const double b_l = y - (a_l*x);
+//				if ( leftAngle < PI/2. || leftAngle > 3.*PI/2. ) {
+//					painter.drawLine(x,y,width,a_l*width+b_l);
+//				}
+//				else {
+//					painter.drawLine(0,b_l,x,y);
+//				}
+//			}
+//			else {
+//				if ( leftAngle == PI/2. ) {
+//					painter.drawLine(x,0,x,y);
+//				}
+//				else if ( leftAngle == 3.*PI/2. ) {
+//					painter.drawLine(x,y,x,height);
+//				}
+//			}
+
+//			const double rightAngle = part.rightAngle();
+//			if ( rightAngle != PI/2. && rightAngle != 3.*PI/2. ) {
+//				const double a_r = -tan(rightAngle);
+//				const double b_r = y - (a_r*x);
+//				if ( rightAngle < PI/2. || rightAngle > 3.*PI/2. ) {
+//					painter.drawLine(x,y,width,a_r*width+b_r);
+//				}
+//				else {
+//					painter.drawLine(0,b_r,x,y);
+//				}
+//			}
+//			else {
+//				if ( rightAngle == PI/2. ) {
+//					painter.drawLine(x,0,x,y);
+//				}
+//				else if ( rightAngle == 3.*PI/2. ) {
+//					painter.drawLine(x,y,x,height);
+//				}
+//			}
 
 			//				painter.drawEllipse(x-10,y-10,20,20);
 //				painter.drawLine(x,0,x,height);

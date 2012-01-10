@@ -9,19 +9,22 @@
 class PiePart
 {
 public:
-	PiePart( double angle, double orientation );
+	PiePart();
+	PiePart( double orientation, double angle );
 
 	double angle() const;
 	double orientation() const;
 	double rightAngle() const;
 	double leftAngle() const;
 
+	bool contains( double angle ) const;
+
 	void setAngle( double angle );
 	void setOrientation( double orientation );
 
 private:
-	double _angle;
 	double _orientation;
+	double _angle;
 	double _leftAngle;
 	double _rightAngle;
 };
