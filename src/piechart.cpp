@@ -1,19 +1,15 @@
 #include "inc/piechart.h"
 
+#include "inc/pie_def.h"
 #include "inc/piepart.h"
-
-namespace {
-	inline double ANGLE( double xo, double yo, double x2, double y2 ) {
-		const double x_diff = x2-xo;
-		double arcos = std::acos(x_diff / sqrt(pow(x_diff,2)+pow(y2-yo,2)));
-		if ( yo > y2 ) arcos = -arcos+TWO_PI;
-		return arcos;
-	}
-}
 
 PieChart::PieChart( double orientation, int nbSectors ) : _orientation(orientation), _angle(TWO_PI/static_cast<double>(nbSectors)) {
 	updateSectors();
 }
+
+/*******************************
+ * Public getters
+ *******************************/
 
 double PieChart::orientation() const {
 	return _orientation;
@@ -37,6 +33,10 @@ int PieChart::partOfAngle( double angle ) const {
 	return (sectorId<nbSectors)?sectorId:0;
 }
 
+/*******************************
+ * Public setters
+ *******************************/
+
 void PieChart::setOrientation( double orientation ) {
 	_orientation = orientation;
 	updateSectors();
@@ -46,6 +46,10 @@ void PieChart::setSectorsNumber( int nbSectors ) {
 	_angle = TWO_PI/static_cast<double>(nbSectors);
 	updateSectors();
 }
+
+/*******************************
+ * Private setters
+ *******************************/
 
 void PieChart::updateSectors() {
 	_sectors.clear();

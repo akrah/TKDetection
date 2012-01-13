@@ -269,20 +269,24 @@
              <item row="2" column="0">
               <widget class="QLabel" name="label_3">
                <property name="text">
-                <string>Angle (en degrés)</string>
+                <string>Nombre de secteurs</string>
                </property>
               </widget>
              </item>
              <item row="2" column="1">
-              <widget class="QSpinBox" name="_spinSectorsAngle"/>
+              <widget class="QSpinBox" name="_spinSectorsNumber">
+               <property name="maximum">
+                <number>360</number>
+               </property>
+               <property name="value">
+                <number>8</number>
+               </property>
+              </widget>
              </item>
              <item row="3" column="1">
-              <widget class="QDialogButtonBox" name="_buttonsSectorsParameters">
-               <property name="standardButtons">
-                <set>QDialogButtonBox::Apply|QDialogButtonBox::Cancel</set>
-               </property>
-               <property name="centerButtons">
-                <bool>true</bool>
+              <widget class="QPushButton" name="_buttonUpdateSectors">
+               <property name="text">
+                <string>Générer</string>
                </property>
               </widget>
              </item>
@@ -291,16 +295,56 @@
           </item>
           <item>
            <widget class="QGroupBox" name="groupBox_5">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
             <property name="title">
              <string>Histogrammes</string>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout_8">
              <item>
-              <widget class="QPushButton" name="_buttonSectorsGraphes">
-               <property name="text">
-                <string>Générer</string>
+              <layout class="QFormLayout" name="formLayout_2">
+               <property name="fieldGrowthPolicy">
+                <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
                </property>
-              </widget>
+               <property name="topMargin">
+                <number>0</number>
+               </property>
+               <item row="0" column="0">
+                <widget class="QLabel" name="label_4">
+                 <property name="text">
+                  <string>Orientation utilisée</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="0" column="1">
+                <widget class="QLabel" name="_labelSectorsOrientation">
+                 <property name="text">
+                  <string>Aucune</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="1" column="0">
+                <widget class="QLabel" name="label_6">
+                 <property name="text">
+                  <string>Nombre de secteurs</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="1" column="1">
+                <widget class="QLabel" name="_labelSectorsNumber">
+                 <property name="text">
+                  <string>Aucun</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+             <item>
+              <widget class="QComboBox" name="_comboSelectSector"/>
              </item>
              <item>
               <widget class="QStackedWidget" name="_stackedSectorsHistograms">
@@ -308,10 +352,8 @@
                 <enum>QFrame::NoFrame</enum>
                </property>
                <property name="currentIndex">
-                <number>0</number>
+                <number>-1</number>
                </property>
-               <widget class="QWidget" name="page"/>
-               <widget class="QWidget" name="page_2"/>
               </widget>
              </item>
             </layout>

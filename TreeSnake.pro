@@ -25,7 +25,7 @@ SOURCES  *= main.cpp \
 			slicehistogram.cpp \
 			sliceview.cpp \
 			src/piepart.cpp \
-	src/piecharthistograms.cpp
+			src/piecharthistograms.cpp
 
 HEADERS  *= billon.h \
 			dicomreader.h \
@@ -37,7 +37,8 @@ HEADERS  *= billon.h \
 			sliceview.h \
 			sliceview_def.h \
 			inc/piepart.h \
-	inc/piecharthistograms.h
+			inc/piecharthistograms.h \
+			inc/pie_def.h
 
 FORMS    *= mainwindow.ui
 

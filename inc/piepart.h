@@ -1,11 +1,6 @@
 #ifndef PIEPART_H
 #define PIEPART_H
 
-#include <cmath>
-
-#define PI      (4*atan(1.0))
-#define TWO_PI  (2*PI)
-
 class PiePart
 {
 public:

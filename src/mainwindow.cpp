@@ -6,6 +6,10 @@
 #include "inc/dicomreader.h"
 #include "inc/slicehistogram.h"
 #include "inc/marrowextractor.h"
+#include "inc/pie_def.h"
+#include "inc/piepart.h"
+#include "inc/piechart.h"
+#include "inc/piecharthistograms.h"
 
 #include <iostream>
 
@@ -13,14 +17,10 @@
 #include <QMouseEvent>
 #include <QPainter>
 
-#include <qwt_dial_needle.h>
-
-
-MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::MainWindow), _billon(0), _sliceView(0), _sliceHistogram(0), _marrow(0) {
+MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::MainWindow), _billon(0), _sliceView(new SliceView()), _sliceHistogram(0), _marrow(0), _pieChart(new PieChart(0,1)), _pieChartHistograms(new PieChartHistograms()) {
 	_ui->setupUi(this);
 
 	// Initialisation des vues
-	_sliceView = new SliceView();
 	_sliceHistogram = new SliceHistogram(_ui->_plotSliceHistogram);
 
 	// Paramétrisation des composant graphiques
@@ -52,17 +52,19 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 	// Évènements déclenchés par le slider de n° de coupe
 	QObject::connect(_ui->_sliderSelectSlice, SIGNAL(valueChanged(int)), _sliceView, SLOT(drawSlice(int)));
 	QObject::connect(_ui->_sliderSelectSlice, SIGNAL(valueChanged(int)), _ui->_labelSliceNumber, SLOT(setNum(int)));
-	QObject::connect(_ui->_sliderSelectSlice, SIGNAL(valueChanged(int)), this, SLOT(highlightHistogramSlice(int)));
+	QObject::connect(_ui->_sliderSelectSlice, SIGNAL(valueChanged(int)), this, SLOT(highlightSliceHistogram(int)));
 
 	// Évènements déclenchés par les boutons de sélection de la vue
 	QObject::connect(&_groupSliceView, SIGNAL(buttonClicked(int)), _sliceView, SLOT(setTypeOfView(int)));
 
 	// Évènements déclenchés par le slider de seuillage
-	QObject::connect(_ui->_spansliderSliceThreshold, SIGNAL(lowerPositionChanged(int)), _sliceView, SLOT(setLowThreshold(int)));
-	QObject::connect(_ui->_spansliderSliceThreshold, SIGNAL(lowerPositionChanged(int)), _sliceHistogram, SLOT(setLowThreshold(int)));
+	QObject::connect(_ui->_spansliderSliceThreshold, SIGNAL(lowerValueChanged(int)), _sliceView, SLOT(setLowThreshold(int)));
+	QObject::connect(_ui->_spansliderSliceThreshold, SIGNAL(lowerValueChanged(int)), _sliceHistogram, SLOT(setLowThreshold(int)));
+	QObject::connect(_ui->_spansliderSliceThreshold, SIGNAL(lowerValueChanged(int)), _pieChartHistograms, SLOT(setLowThreshold(int)));
 	QObject::connect(_ui->_spansliderSliceThreshold, SIGNAL(lowerValueChanged(int)), _ui->_labelMinThreshold, SLOT(setNum(int)));
-	QObject::connect(_ui->_spansliderSliceThreshold, SIGNAL(upperPositionChanged(int)), _sliceView, SLOT(setHighThreshold(int)));
-	QObject::connect(_ui->_spansliderSliceThreshold, SIGNAL(upperPositionChanged(int)), _sliceHistogram, SLOT(setHighThreshold(int)));
+	QObject::connect(_ui->_spansliderSliceThreshold, SIGNAL(upperValueChanged(int)), _sliceView, SLOT(setHighThreshold(int)));
+	QObject::connect(_ui->_spansliderSliceThreshold, SIGNAL(upperValueChanged(int)), _sliceHistogram, SLOT(setHighThreshold(int)));
+	QObject::connect(_ui->_spansliderSliceThreshold, SIGNAL(upperValueChanged(int)), _pieChartHistograms, SLOT(setHighThreshold(int)));
 	QObject::connect(_ui->_spansliderSliceThreshold, SIGNAL(upperValueChanged(int)), _ui->_labelMaxThreshold, SLOT(setNum(int)));
 
 	// Évènements déclenchés par le bouton de mise à jour de l'histogramme
@@ -77,7 +79,15 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 	QObject::connect(_sliceView, SIGNAL(typeOfViewChanged(SliceType::SliceType)), this, SLOT(adaptGraphicsComponentsToSliceType(SliceType::SliceType)));
 
 	// Évènements reçus de la vue histogramme
-	QObject::connect(_sliceHistogram, SIGNAL(histogramUpdated()), this, SLOT(redrawHistogram()));
+	QObject::connect(_sliceHistogram, SIGNAL(histogramUpdated()), this, SLOT(redrawSliceHistogram()));
+
+	// Évènements déclenchés par les bouton associès aux histogrammes de secteurs
+	QObject::connect(_ui->_buttonUpdateSectors, SIGNAL(clicked()), this, SLOT(updateSectorsHistograms()));
+	QObject::connect(_ui->_comboSelectSector, SIGNAL(currentIndexChanged(int)), _ui->_stackedSectorsHistograms, SLOT(setCurrentIndex(int)));
+	QObject::connect(_ui->_comboSelectSector, SIGNAL(currentIndexChanged(int)), this, SLOT(drawCurrentSector()));
+
+	// Évènements déclenchés par les classes relatives aux secteirs angulaires
+	QObject::connect(_pieChartHistograms, SIGNAL(histogramsUpdated()), this, SLOT(updateSectorsHistogramsView()));
 
 	// Évènements déclenchés par les actions du menu
 	QObject::connect(_ui->_actionOpenDicom, SIGNAL(triggered()), this, SLOT(openDicom()));
@@ -85,10 +95,14 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 	QObject::connect(_ui->_actionQuit, SIGNAL(triggered()), this, SLOT(close()));
 
 	_ui->_radioOriginalSlice->click();
-	//updateGraphicsComponentsValues();
 }
 
 MainWindow::~MainWindow() {
+	if ( _pieChart != 0 ) delete _pieChart;
+	if ( _pieChartHistograms != 0 ) delete _pieChartHistograms;
+	while ( !_pieChartPlots.isEmpty() ) {
+		_pieChartPlots.removeLast();
+	}
 	if ( _marrow != 0 ) delete _marrow;
 	if ( _sliceHistogram != 0 ) delete _sliceHistogram;
 	if ( _sliceView != 0 ) delete _sliceView;
@@ -96,150 +110,36 @@ MainWindow::~MainWindow() {
 	if ( _ui != 0 ) delete _ui;
 }
 
-/****************************************
- * Public
- ****************************************/
-
-#include "inc/piepart.h"
-#include "inc/piechart.h"
-
-namespace {
-	inline double ANGLE( double xo, double yo, double x2, double y2 ) {
-		const double x_diff = x2-xo;
-		double arcos = std::acos(x_diff / sqrt(pow(x_diff,2)+pow(y2-yo,2)));
-		if ( yo > y2 ) arcos = TWO_PI-arcos;
-		return arcos;
-	}
-}
+/*******************************
+ * Public fonctions
+ *******************************/
 
 bool MainWindow::eventFilter(QObject *obj, QEvent *event) {
+	bool res = true;
 	if (obj == _ui->_labelSliceView) {
 		if ( _billon != 0 && event->type() == QEvent::MouseButtonPress ) {
 			QMouseEvent *mouseEvent = static_cast<QMouseEvent*>(event);
 			const int x = mouseEvent->x();
 			const int y = mouseEvent->y();
-			std::cout << obj->objectName().toStdString() << " : ( " << x << ", " << y << ", " << _sliceView->currentSliceIndex() << " )" << std::endl;
+			const int sector = _pieChart->partOfAngle( TWO_PI-ANGLE(256,256,x,y) );
 
-			QPixmap pix(*(_ui->_labelSliceView->pixmap()));
-			const int b1 = 0;
-			const int b2 = 256;
-			const int width = pix.width();
-			const int height = pix.height();
-
-			QPainter painter(&pix);
-
-			PieChart chart(PI/8,8);
-			QList<PiePart> sectors = chart.sectors();
-			const int sectorsSize = sectors.size();
-
-			QList<QColor> colors;
-			for ( int i=0 ; i<sectorsSize ; ++i ) {
-				colors.append(QColor(255*i/sectorsSize,255-255*i/sectorsSize,0));
+			if ( _pieChartHistograms != 0 && _ui->_comboSelectSector->count() > sector) {
+				_ui->_comboSelectSector->setCurrentIndex(sector);
 			}
-
-			for ( int i=0 ; i<sectorsSize ; ++i ) {
-				painter.setPen(colors.at(i));
-				const double rightAngle = TWO_PI-sectors.at(i).rightAngle();
-				if ( rightAngle != PI/2. && rightAngle != 3.*PI/2. ) {
-					const double a_l = tan(rightAngle);
-					const double b_l = 256 - (a_l*256);
-					if ( rightAngle < PI/2. || rightAngle > 3.*PI/2. ) {
-						painter.drawLine(256,256,width,a_l*width+b_l);
-					}
-					else {
-						painter.drawLine(0,b_l,256,256);
-					}
-				}
-				else {
-					if ( rightAngle == PI/2. ) {
-						painter.drawLine(256,256,256,height);
-					}
-					else if ( rightAngle == 3.*PI/2. ) {
-						painter.drawLine(256,0,256,256);
-					}
-				}
-			}
-
-//			for ( int j=0 ; j<512 ; j++ ) {
-//				for (int i=0 ; i<512 ; ++i) {
-//					const int sectorIdx = chart.sectorOfAngle( TWO_PI-ANGLE(256,256,i,j) );
-//					painter.setPen(colors.at(sectorIdx));
-//					painter.drawPoint(i,j);
-//				}
-//			}
-
-			std::cout << "Secteur du clic : " << chart.partOfAngle( TWO_PI-ANGLE(256,256,x,y) ) << std::endl;
-
-//			PiePart part( 0., PI/4. );
-
-//			const double leftAngle = part.leftAngle();
-//			if ( leftAngle != PI/2. && leftAngle != 3.*PI/2. ) {
-//				const double a_l = -tan(leftAngle);
-//				const double b_l = y - (a_l*x);
-//				if ( leftAngle < PI/2. || leftAngle > 3.*PI/2. ) {
-//					painter.drawLine(x,y,width,a_l*width+b_l);
-//				}
-//				else {
-//					painter.drawLine(0,b_l,x,y);
-//				}
-//			}
-//			else {
-//				if ( leftAngle == PI/2. ) {
-//					painter.drawLine(x,0,x,y);
-//				}
-//				else if ( leftAngle == 3.*PI/2. ) {
-//					painter.drawLine(x,y,x,height);
-//				}
-//			}
-
-//			const double rightAngle = part.rightAngle();
-//			if ( rightAngle != PI/2. && rightAngle != 3.*PI/2. ) {
-//				const double a_r = -tan(rightAngle);
-//				const double b_r = y - (a_r*x);
-//				if ( rightAngle < PI/2. || rightAngle > 3.*PI/2. ) {
-//					painter.drawLine(x,y,width,a_r*width+b_r);
-//				}
-//				else {
-//					painter.drawLine(0,b_r,x,y);
-//				}
-//			}
-//			else {
-//				if ( rightAngle == PI/2. ) {
-//					painter.drawLine(x,0,x,y);
-//				}
-//				else if ( rightAngle == 3.*PI/2. ) {
-//					painter.drawLine(x,y,x,height);
-//				}
-//			}
-
-			//				painter.drawEllipse(x-10,y-10,20,20);
-//				painter.drawLine(x,0,x,height);
-//				painter.drawLine(0,y,width,y);
-//				painter.drawLine(0,b1,width,width+b1);
-//				painter.drawLine(0,b2,width,-width+b2);
-
-//			painter.drawLine(0,b_l,width,a_l*width+b_l);
-//			painter.drawLine(0,b_r,width,a_r*width+b_r);
-
-//				std::cout << " y = a_l * x + b_l ==> " << y << " = " << a_l << " * " << x << " + " << b_l << " = " << a_l*x+b_l << std::endl;
-//				std::cout << " y = a_r * x + b_r ==> " << y << " = " << a_r << " * " << x << " + " << b_r << " = " << a_r*x+b_r << std::endl;
-
-			_ui->_labelSliceView->setPixmap(pix);
-
-			return true;
 		}
 		else {
-			return false;
+			res = false;
 		}
 	 }
 	else {
-		 return QMainWindow::eventFilter(obj, event);
+		 res = QMainWindow::eventFilter(obj, event);
 	 }
+	return res;
 }
 
-/****************************************
+/*******************************
  * Private slots
- ****************************************/
+ *******************************/
 
 void MainWindow::openDicom() {
 	QString folderName = QFileDialog::getExistingDirectory(0,tr("Sélection du répertoire DICOM"),QDir::homePath(),QFileDialog::ShowDirsOnly);
@@ -253,6 +153,7 @@ void MainWindow::openDicom() {
 void MainWindow::closeImage() {
 	openNewBillon();
 	computeNewMarrow();
+	updateSectorsHistogramsView();
 	updateGraphicsComponentsValues();
 }
 
@@ -289,14 +190,14 @@ void MainWindow::computeNewMarrow() {
 	_sliceView->setModel(_marrow);
 }
 
-void MainWindow::redrawHistogram() {
+void MainWindow::redrawSliceHistogram() {
 	_ui->_plotSliceHistogram->setAxisScale(QwtPlot::xBottom,0,(_billon != 0)?_billon->n_slices:0);
 	_ui->_plotSliceHistogram->replot();
-	highlightHistogramSlice(_ui->_sliderSelectSlice->value());
+	highlightSliceHistogram(_ui->_sliderSelectSlice->value());
 }
 
 
-void MainWindow::highlightHistogramSlice( const int &slicePosition ) {
+void MainWindow::highlightSliceHistogram( const int &slicePosition ) {
 	double height = _sliceHistogram->sample(slicePosition).value;
 	double x[4] = {slicePosition,slicePosition, slicePosition+1,slicePosition+1};
 	double y[4] = {0,height,height,0};
@@ -304,23 +205,126 @@ void MainWindow::highlightHistogramSlice( const int &slicePosition ) {
 	_ui->_plotSliceHistogram->replot();
 }
 
-/****************************************
- * Private
- ****************************************/
+void MainWindow::updateSectorsHistograms() {
+	_pieChart->setOrientation(_ui->_spinSectorsOrientation->value());
+	_pieChart->setSectorsNumber(_ui->_spinSectorsNumber->value());
+
+	_pieChartHistograms->setModel(_pieChart);
+	_pieChartHistograms->setModel(_billon);
+	_pieChartHistograms->setBillonInterval(_ui->_sliderSelectSlice->value(),_ui->_sliderSelectSlice->value());
+	_pieChartHistograms->computeHistograms();
+}
+
+void MainWindow::updateSectorsHistogramsView() {
+	while ( !_pieChartPlots.isEmpty() ) {
+		_ui->_stackedSectorsHistograms->removeWidget(_pieChartPlots.last());
+		_pieChartPlots.removeLast();
+	}
+
+	_ui->_comboSelectSector->clear();
+
+	const int nbHistograms = _pieChartHistograms->count();
+	if ( nbHistograms != 0 ) {
+
+		_pieChartPlots.reserve(nbHistograms);
+		for ( int i=0 ; i<nbHistograms ; ++i ) {
+			QwtPlot * plot = new QwtPlot();
+			_pieChartPlots.append(plot);
+			_ui->_stackedSectorsHistograms->addWidget(plot);
+			_ui->_comboSelectSector->addItem(tr("Secteur %1").arg(i));
+		}
+
+		_pieChartHistograms->attach(_pieChartPlots);
+
+		for ( int i=0 ; i<nbHistograms ; ++i ) {
+			_pieChartPlots[i]->replot();
+		}
+
+		_ui->_labelSectorsOrientation->setNum(_ui->_spinSectorsOrientation->value());
+		_ui->_labelSectorsNumber->setNum(_ui->_spinSectorsNumber->value());
+		_ui->_stackedSectorsHistograms->setCurrentIndex(0);
+	}
+	else {
+		_ui->_labelSectorsOrientation->setText(tr("Aucune"));
+		_ui->_labelSectorsNumber->setText(tr("Aucun"));
+	}
+
+}
+
+void MainWindow::drawCurrentSector() {
+
+	QList<PiePart> sectors = _pieChart->sectors();
+	QPixmap pix(*(_sliceView->pixmap()));
+	QPainter painter(&pix);
+
+	const int sectorIdx = qMax(0,_ui->_comboSelectSector->currentIndex());
+	const int width = pix.width();
+	const int height = pix.height();
+
+	painter.setPen(QColor(0,255,0));
+	const double rightAngle = TWO_PI-sectors.at(sectorIdx).rightAngle();
+	if ( rightAngle != PI/2. && rightAngle != 3.*PI/2. ) {
+		const double a_r = tan(rightAngle);
+		const double b_r = 256 - (a_r*256);
+		if ( rightAngle < PI/2. || rightAngle > 3.*PI/2. ) {
+			painter.drawLine(256,256,width,a_r*width+b_r);
+		}
+		else {
+			painter.drawLine(0,b_r,256,256);
+		}
+	}
+	else {
+		if ( rightAngle == PI/2. ) {
+			painter.drawLine(256,256,256,height);
+		}
+		else if ( rightAngle == 3.*PI/2. ) {
+			painter.drawLine(256,0,256,256);
+		}
+	}
+
+	painter.setPen(QColor(0,255,0));
+	const double leftAngle = TWO_PI-sectors.at(sectorIdx).leftAngle();
+	if ( leftAngle != PI/2. && leftAngle != 3.*PI/2. ) {
+		const double a_l = tan(leftAngle);
+		const double b_l = 256 - (a_l*256);
+		if ( leftAngle < PI/2. || leftAngle > 3.*PI/2. ) {
+			painter.drawLine(256,256,width,a_l*width+b_l);
+		}
+		else {
+			painter.drawLine(0,b_l,256,256);
+		}
+	}
+	else {
+		if ( leftAngle == PI/2. ) {
+			painter.drawLine(256,256,256,height);
+		}
+		else if ( leftAngle == 3.*PI/2. ) {
+			painter.drawLine(256,0,256,256);
+		}
+	}
+
+	_ui->_labelSliceView->setPixmap(pix);
+}
+
+/*******************************
+ * Private functions
+ *******************************/
 
 void MainWindow::updateGraphicsComponentsValues() {
-	uint minValue, maxValue, nbSlices;
+	int minValue, maxValue, nbSlices;
+	bool enable = true;
 	if ( _billon != 0 ) {
 		minValue = _billon->minValue();
 		maxValue = _billon->maxValue();
 		nbSlices = _billon->n_slices;
-		_ui->_buttonComputeMarrow->setEnabled(true);
 	}
 	else {
-		_ui->_buttonComputeMarrow->setEnabled(false);
 		minValue = maxValue = 0;
 		nbSlices = 1;
+		enable = false;
 	}
+
+	_ui->_buttonComputeMarrow->setEnabled(enable);
 
 	_ui->_spansliderSliceThreshold->setMinimum(minValue);
 	_ui->_spansliderSliceThreshold->setLowerValue(minValue);
@@ -346,4 +350,5 @@ void MainWindow::openNewBillon( const QString &folderName ) {
 	}
 	_sliceView->setModel(_billon);
 	_sliceHistogram->setModel(_billon);
+	_pieChartHistograms->setModel(_billon);
 }

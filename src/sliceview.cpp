@@ -19,13 +19,7 @@ void SliceView::setModel( const Billon *billon ) {
 	_billon = billon;
 	_marrow = 0;
 	_currentSlice = 0;
-	if ( _billon != 0 ) {
-		_lowThreshold = _billon->minValue();
-		_highThreshold = _billon->maxValue();
-	}
-	else {
-		_lowThreshold = _highThreshold = 0;
-	}
+	_lowThreshold = _highThreshold = 0;
 	update();
 }
 

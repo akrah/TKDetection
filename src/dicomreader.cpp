@@ -11,13 +11,6 @@
 #include <itkGDCMImageIO.h>
 #include <itkGDCMSeriesFileNames.h>
 
-/**
- * \file	dicomreader.cpp
- * \brief	Lecteur de fichiers DICOM
- * \author	Adrien KRAHENBUHL et Laurent HORY
- * \date	22 Juillet 2010
- */
-
 namespace DicomReader {
 
 	// Déclaration de fonctions privées

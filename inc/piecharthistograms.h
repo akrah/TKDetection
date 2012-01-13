@@ -1,30 +1,51 @@
 #ifndef PIECHARTHISTOGRAMS_H
 #define PIECHARTHISTOGRAMS_H
 
+#include <QObject>
 #include <QList>
 
-class imat;
 class PieChart;
 class QwtPlot;
+class QwtPlotHistogram;
+class Billon;
 
-class PieChartHistograms
+class PieChartHistograms : public QObject
 {
+	Q_OBJECT
+
 public:
 	PieChartHistograms();
+	~PieChartHistograms();
 
-	void setModel( const imat * slice );
+	int count() const;
+
+	void setModel( const Billon * billon );
 	void setModel( const PieChart * pieChart );
-
-	const QList<QwtPlot> &histograms();
+	void attach( const QList<QwtPlot *> & plots );
+	void clear();
 
 private:
+	bool intervalIsValid() const;
+
+public slots:
+	void setBillonInterval( const int &sliceMin, const int &sliceMax );
+	void setLowThreshold( const int &threshold );
+	void setHighThreshold( const int &threshold );
 	void computeHistograms();
 
+signals:
+	void histogramsUpdated();
+
 private:
-	const imat *_slice;
+	const Billon *_billon;
 	const PieChart *_pieChart;
 
-	QList<QwtPlot> _histograms;
+	int _beginSlice;
+	int _endSlice;
+	int _lowThreshold;
+	int _highThreshold;
+
+	QList<QwtPlotHistogram *> _histograms;
 };
 
 #endif // PIECHARTHISTOGRAMS_H

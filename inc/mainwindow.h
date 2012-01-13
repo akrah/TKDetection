@@ -7,6 +7,8 @@
 #include "sliceview_def.h"
 #include "marrowextractor_def.h"
 
+#include <qwt_plot_curve.h>
+
 namespace Ui {
 	class MainWindow;
 }
@@ -14,8 +16,8 @@ namespace Ui {
 class Billon;
 class SliceView;
 class SliceHistogram;
-
-#include <qwt_plot_curve.h>
+class PieChart;
+class PieChartHistograms;
 
 class MainWindow : public QMainWindow
 {
@@ -32,8 +34,11 @@ private slots:
 	void closeImage();
 	void adaptGraphicsComponentsToSliceType( const SliceType::SliceType &type );
 	void computeNewMarrow();
-	void redrawHistogram();
-	void highlightHistogramSlice( const int &slicePosition );
+	void redrawSliceHistogram();
+	void highlightSliceHistogram( const int &slicePosition );
+	void updateSectorsHistograms();
+	void updateSectorsHistogramsView();
+	void drawCurrentSector();
 
 private:
 	void updateGraphicsComponentsValues();
@@ -48,6 +53,10 @@ private:
 	SliceHistogram *_sliceHistogram;
 	Marrow *_marrow;
 	QwtPlotCurve _histogramCursor;
+
+	PieChart *_pieChart;
+	PieChartHistograms *_pieChartHistograms;
+	QList<QwtPlot *> _pieChartPlots;
 };
 
 #endif // MAINWINDOW_H

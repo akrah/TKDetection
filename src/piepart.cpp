@@ -1,5 +1,7 @@
 #include "inc/piepart.h"
 
+#include "inc/pie_def.h"
+
 PiePart::PiePart() : _orientation(0.), _angle(TWO_PI) {
 	setAngle(_angle);
 }
@@ -7,6 +9,10 @@ PiePart::PiePart() : _orientation(0.), _angle(TWO_PI) {
 PiePart::PiePart( double orientation, double angle ) : _orientation(orientation), _angle(angle) {
 	setAngle(angle);
 }
+
+/*******************************
+ * Public getters
+ *******************************/
 
 double PiePart::angle() const {
 	return _angle;
@@ -28,6 +34,10 @@ bool PiePart::contains( double angle ) const {
 	bool contains = ( (_rightAngle > _leftAngle) && ( angle<_leftAngle || angle>=_rightAngle ) ) || ( (_rightAngle < _leftAngle) && ( angle<_leftAngle && angle>=_rightAngle ) );
 	return contains;
 }
+
+/*******************************
+ * Public setters
+ *******************************/
 
 void PiePart::setAngle( double angle ) {
 	_angle = angle;
