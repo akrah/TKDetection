@@ -4,6 +4,8 @@
 #include <QList>
 #include "marrow_def.h"
 
+class QPainter;
+
 class Marrow : public QList<Coord2D>
 {
 public:
@@ -12,6 +14,8 @@ public:
 
 	int beginSlice() const;
 	int endSlice() const;
+
+	void draw( QPainter &painter, int sliceIdx ) const;
 
 private:
 	int _begin;

@@ -9,96 +9,75 @@ namespace {
 	inline T RESTRICT_TO_INTERVAL(T x, T min, T max) { return qMax((min),qMin((max),(x))); }
 }
 
-SliceView::SliceView() : QObject(0), _pix(0), _billon(0), _marrow(0), _currentSlice(0), _lowThreshold(0), _highThreshold(0), _typeOfView(SliceType::CURRENT), _drawMarrow(false) {
+SliceView::SliceView() : QObject(0), _billon(0), _lowThreshold(0), _highThreshold(0), _typeOfView(SliceType::CURRENT) {
 }
 
 SliceView::~SliceView() {
-	if ( _pix != 0 ) delete _pix;
 }
+
+/*******************************
+ * Public getters
+ *******************************/
+
+SliceType::SliceType SliceView::sliceType() const {
+	return _typeOfView;
+}
+
+/*******************************
+ * Public setters
+ *******************************/
 
 void SliceView::setModel( const Billon *billon ) {
 	_billon = billon;
-	_marrow = 0;
-	_currentSlice = 0;
-	_lowThreshold = _highThreshold = 0;
-	update();
 }
 
-void SliceView::setModel( const Marrow* marrow ) {
-	_marrow = marrow;
-	update();
-}
+/*******************************
+ * Public slots
+ *******************************/
 
-void SliceView::drawSlice( const int &sliceNumber ) {
-	if ( (_billon != 0) && (sliceNumber > -1) && (sliceNumber < static_cast<int>(_billon->n_slices)) ) _currentSlice = sliceNumber;
-	update();
-}
-
-void SliceView::update() {
-	int width = 0;
-	int height = 0;
-	if ( _pix != 0 ) {
-		width = _pix->width();
-		height = _pix->height();
-		delete _pix;
-		_pix = 0;
-	}
-	if ( _billon != 0 ) {
+void SliceView::drawSlice( QPainter &painter, const int &sliceNumber ) {
+	if ( _billon != 0 && sliceNumber > -1 && sliceNumber < static_cast<int>(_billon->n_slices)) {
 		switch (_typeOfView) {
-			// Affichage de la coupe courante
-			case SliceType::CURRENT:
-				drawCurrentSlice();
-				if ( _drawMarrow ) drawMarrow();
-				break;
 			// Affichage de la coupe moyenne
 			case SliceType::AVERAGE :
-				drawAverageSlice();
+				drawAverageSlice( painter);
 				break;
 			// Affichage de la coupe médiane
 			case SliceType::MEDIAN :
-				drawMedianSlice();
+				drawMedianSlice( painter );
 				break;
+			case SliceType::CURRENT:
 			default :
-				QImage image(width,height,QImage::Format_ARGB32);
-				image.fill(0xff555555);
-				_pix = new QPixmap(QPixmap::fromImage(image));
+				// Affichage de la coupe courante
+				drawCurrentSlice( painter, sliceNumber );
+				break;
 		}
 	}
-	else {
-		QImage image(width,height,QImage::Format_ARGB32);
-		image.fill(0xff555555);
-		_pix = new QPixmap(QPixmap::fromImage(image));
-	}
-	emit updated(*_pix);
 }
 
 void SliceView::setLowThreshold(const int &threshold) {
 	_lowThreshold = threshold;
-	update();
 	emit thresholdUpdated();
 }
 
 void SliceView::setHighThreshold(const int &threshold) {
 	_highThreshold = threshold;
-	update();
 	emit thresholdUpdated();
 }
 
 void SliceView::setTypeOfView(const int &type) {
 	if ( type > SliceType::_SLICE_TYPE_MIN_ && type < SliceType::_SLICE_TYPE_MAX_ ) {
-		_typeOfView = static_cast<SliceType::SliceType>(type);
-		update();
+		_typeOfView = static_cast<const SliceType::SliceType>(type);
 		emit typeOfViewChanged(_typeOfView);
 	}
 }
 
-void SliceView::drawMarrow( bool enable ) {
-	_drawMarrow = enable;
-	update();
-}
+/*******************************
+ * Private functions
+ *******************************/
 
-void SliceView::drawCurrentSlice() {
-	const imat &slice = _billon->slice(_currentSlice);
+void SliceView::drawCurrentSlice( QPainter &painter, const int &sliceNumber ) {
+	const imat &slice = _billon->slice(sliceNumber);
 	const uint width = slice.n_cols;
 	const uint height = slice.n_rows;
 	const int minValue = _lowThreshold;
@@ -115,10 +94,10 @@ void SliceView::drawCurrentSlice() {
 		}
 	}
 
-	_pix = new QPixmap(QPixmap::fromImage(image));
+	painter.drawImage(0,0,image);
 }
 
-void SliceView::drawAverageSlice() {
+void SliceView::drawAverageSlice( QPainter &painter ) {
 	const Billon &billon = *_billon;
 	const uint width = billon.n_cols;
 	const uint height = billon.n_rows;
@@ -141,10 +120,11 @@ void SliceView::drawAverageSlice() {
 			*(line++) = qRgb(c,c,c);
 		}
 	}
-	_pix = new QPixmap(QPixmap::fromImage(image));
+
+	painter.drawImage(0,0,image);
 }
 
-void SliceView::drawMedianSlice() {
+void SliceView::drawMedianSlice( QPainter &painter ) {
 	const Billon &billon = *_billon;
 	const uint width = billon.n_cols;
 	const uint height = billon.n_rows;
@@ -166,23 +146,6 @@ void SliceView::drawMedianSlice() {
 			*(line++) = qRgb(c,c,c);
 		}
 	}
-	_pix = new QPixmap(QPixmap::fromImage(image));
-}
 
-void SliceView::drawMarrow() {
-	if ( _marrow != 0 ) {
-		if ( (_currentSlice>=_marrow->beginSlice()) && (_currentSlice<=_marrow->endSlice()) ) {
-			const Coord2D &coordToDraw = _marrow->at(_currentSlice-_marrow->beginSlice());
-			std::cout << "Affichage de la moelle en " << coordToDraw << std::endl;
-
-			QPainterPath ellipsePath;
-			ellipsePath.addEllipse(coordToDraw.x-5,coordToDraw.y-5,10,10);
-			QColor color(100,200,100);
-
-			QPainter painter(_pix);
-			painter.setBrush(color);
-			painter.setPen(color);
-			painter.drawPath(ellipsePath);
-		}
-	}
+	painter.drawImage(0,0,image);
 }

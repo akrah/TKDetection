@@ -37,7 +37,7 @@ private slots:
 	void highlightSliceHistogram( const int &slicePosition );
 	void updateSectorsHistograms();
 	void updateSectorsHistogramsView();
-	void drawCurrentSector();
+	void drawSlice( int sliceNumber );
 
 private:
 	void updateGraphicsComponentsValues();
@@ -45,6 +45,7 @@ private:
 
 private:
 	Ui::MainWindow *_ui;
+	QPixmap _pix;
 	QButtonGroup _groupSliceView;
 
 	Billon *_billon;

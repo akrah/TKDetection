@@ -52,12 +52,16 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 	/**** Mise en place de la communication MVC ****/
 
 	// Évènements déclenchés par le slider de n° de coupe
-	QObject::connect(_ui->_sliderSelectSlice, SIGNAL(valueChanged(int)), _sliceView, SLOT(drawSlice(int)));
+	QObject::connect(_ui->_sliderSelectSlice, SIGNAL(valueChanged(int)), this, SLOT(drawSlice(int)));
 	QObject::connect(_ui->_sliderSelectSlice, SIGNAL(valueChanged(int)), _ui->_labelSliceNumber, SLOT(setNum(int)));
 	QObject::connect(_ui->_sliderSelectSlice, SIGNAL(valueChanged(int)), this, SLOT(highlightSliceHistogram(int)));
 
 	// Évènements déclenchés par les boutons de sélection de la vue
 	QObject::connect(&_groupSliceView, SIGNAL(buttonClicked(int)), _sliceView, SLOT(setTypeOfView(int)));
+
+	// Évènements reçus de la vue en coupe
+	//QObject::connect(_sliceView, SIGNAL(updated(QPixmap)), _ui->_labelSliceView, SLOT(setPixmap(QPixmap)));
+	QObject::connect(_sliceView, SIGNAL(typeOfViewChanged(SliceType::SliceType)), this, SLOT(adaptGraphicsComponentsToSliceType(SliceType::SliceType)));
 
 	// Évènements déclenchés par le slider de seuillage
 	QObject::connect(_ui->_spansliderSliceThreshold, SIGNAL(lowerValueChanged(int)), _sliceView, SLOT(setLowThreshold(int)));
@@ -74,11 +78,7 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 
 	// Évènements déclenchés par les bouton associès à la moelle
 	QObject::connect(_ui->_buttonComputeMarrow, SIGNAL(clicked()), this, SLOT(computeNewMarrow()));
-	QObject::connect(_ui->_checkDrawMarrow, SIGNAL(toggled(bool)), _sliceView, SLOT(drawMarrow(bool)));
-
-	// Évènements reçus de la vue en coupe
-	QObject::connect(_sliceView, SIGNAL(updated(QPixmap)), _ui->_labelSliceView, SLOT(setPixmap(QPixmap)));
-	QObject::connect(_sliceView, SIGNAL(typeOfViewChanged(SliceType::SliceType)), this, SLOT(adaptGraphicsComponentsToSliceType(SliceType::SliceType)));
+	//QObject::connect(_ui->_checkDrawMarrow, SIGNAL(toggled(bool)), _sliceView, SLOT(drawMarrow(bool)));
 
 	// Évènements reçus de la vue histogramme
 	QObject::connect(_sliceHistogram, SIGNAL(histogramUpdated()), this, SLOT(redrawSliceHistogram()));
@@ -86,9 +86,9 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 	// Évènements déclenchés par les bouton associès aux histogrammes de secteurs
 	QObject::connect(_ui->_buttonUpdateSectors, SIGNAL(clicked()), this, SLOT(updateSectorsHistograms()));
 	QObject::connect(_ui->_comboSelectSector, SIGNAL(currentIndexChanged(int)), _ui->_stackedSectorsHistograms, SLOT(setCurrentIndex(int)));
-	QObject::connect(_ui->_comboSelectSector, SIGNAL(currentIndexChanged(int)), this, SLOT(drawCurrentSector()));
+	//QObject::connect(_ui->_comboSelectSector, SIGNAL(currentIndexChanged(int)), this, SLOT(drawCurrentSector()));
 
-	// Évènements déclenchés par les classes relatives aux secteirs angulaires
+	// Évènements déclenchés par les classes relatives aux secteurs angulaires
 	QObject::connect(_pieChartHistograms, SIGNAL(histogramsUpdated()), this, SLOT(updateSectorsHistogramsView()));
 
 	// Évènements déclenchés par les actions du menu
@@ -192,7 +192,6 @@ void MainWindow::computeNewMarrow() {
 		MarrowExtractor extractor;
 		_marrow = extractor.process(*_billon,0,_billon->n_slices-1);
 	}
-	_sliceView->setModel(_marrow);
 	_pieChartHistograms->setModel(_marrow);
 }
 
@@ -255,61 +254,24 @@ void MainWindow::updateSectorsHistogramsView() {
 
 }
 
-void MainWindow::drawCurrentSector() {
-
-	QList<PiePart> sectors = _pieChart->sectors();
-	QPixmap pix(*(_sliceView->pixmap()));
-	QPainter painter(&pix);
-
-	const int sectorIdx = qMax(0,_ui->_comboSelectSector->currentIndex());
-	const int width = pix.width();
-	const int height = pix.height();
-	const int centerX = _marrow!=0 ? _marrow->at(_ui->_sliderSelectSlice->value()).x:width/2;
-	const int centerY = _marrow!=0 ? _marrow->at(_ui->_sliderSelectSlice->value()).y:height/2;
-
-	painter.setPen(QColor(0,255,0));
-	const double rightAngle = TWO_PI-sectors.at(sectorIdx).rightAngle();
-	if ( rightAngle != PI/2. && rightAngle != 3.*PI/2. ) {
-		const double a_r = tan(rightAngle);
-		const double b_r = centerY - (a_r*centerX);
-		if ( rightAngle < PI/2. || rightAngle > 3.*PI/2. ) {
-			painter.drawLine(centerX,centerY,width,a_r*width+b_r);
-		}
-		else {
-			painter.drawLine(0,b_r,centerX,centerY);
+void MainWindow::drawSlice( int sliceNumber ) {
+	if ( _billon != 0 ) {
+		_pix = QPixmap::fromImage(QImage(_billon->n_cols,_billon->n_rows,QImage::Format_ARGB32));
+		QPainter painter(&_pix);
+		if ( _sliceView != 0 ) _sliceView->drawSlice(painter,sliceNumber);
+		if ( _marrow != 0 ) _marrow->draw(painter,sliceNumber);
+		if ( _pieChart != 0 && !_pieChartPlots.isEmpty() ) {
+			Coord2D center(_pix.width()/2,_pix.height()/2);
+			if ( _marrow != 0 && sliceNumber >= _marrow->beginSlice() && sliceNumber <= _marrow->endSlice()) {
+				center = _marrow->at(sliceNumber-_marrow->beginSlice());
+			}
+			_pieChart->draw(painter,_ui->_comboSelectSector->currentIndex(), center);
 		}
 	}
 	else {
-		if ( rightAngle == PI/2. ) {
-			painter.drawLine(centerX,centerY,centerX,height);
-		}
-		else if ( rightAngle == 3.*PI/2. ) {
-			painter.drawLine(centerX,0,centerX,centerY);
-		}
+		_pix = QPixmap::fromImage(QImage(0,0));
 	}
-
-	painter.setPen(QColor(0,255,0));
-	const double leftAngle = TWO_PI-sectors.at(sectorIdx).leftAngle();
-	if ( leftAngle != PI/2. && leftAngle != 3.*PI/2. ) {
-		const double a_l = tan(leftAngle);
-		const double b_l = centerY - (a_l*centerX);
-		if ( leftAngle < PI/2. || leftAngle > 3.*PI/2. ) {
-			painter.drawLine(centerX,centerY,width,a_l*width+b_l);
-		}
-		else {
-			painter.drawLine(0,b_l,centerX,centerY);
-		}
-	}
-	else {
-		if ( leftAngle == PI/2. ) {
-			painter.drawLine(centerX,centerY,centerX,height);
-		}
-		else if ( leftAngle == 3.*PI/2. ) {
-			painter.drawLine(centerX,0,centerX,centerY);
-		}
-	}
-
-	_ui->_labelSliceView->setPixmap(pix);
+	_ui->_labelSliceView->setPixmap(_pix);
 }
 
 /*******************************
@@ -319,6 +281,7 @@ void MainWindow::drawCurrentSector() {
 void MainWindow::updateGraphicsComponentsValues() {
 	int minValue, maxValue, nbSlices;
 	bool enable = true;
+
 	if ( _billon != 0 ) {
 		minValue = _billon->minValue();
 		maxValue = _billon->maxValue();

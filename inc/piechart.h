@@ -2,7 +2,10 @@
 #define PIECHART_H
 
 #include <QList>
+#include "inc/marrow_def.h"
+
 class PiePart;
+class QPainter;
 
 class PieChart
 {
@@ -16,6 +19,8 @@ public:
 
 	void setOrientation( double orientation );
 	void setSectorsNumber( int nbSectors );
+
+	void draw( QPainter &painter, int sectorIdx, Coord2D center ) const;
 
 private:
 	void updateSectors();

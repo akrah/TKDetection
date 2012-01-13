@@ -7,6 +7,7 @@
 class Billon;
 class QPixmap;
 class Marrow;
+class QPainter;
 
 class SliceView : public QObject
 {
@@ -16,63 +17,31 @@ public:
 	explicit SliceView();
 	~SliceView();
 
-	void setModel( const Billon * billon );
-	void setModel( const Marrow * marrow );
-
-	int currentSliceIndex() const;
-	const QPixmap * pixmap() const;
 	SliceType::SliceType sliceType() const;
 
+	void setModel( const Billon * billon );
+
 public slots:
-	void drawSlice( const int &sliceNumber = -1 );
-	void update();
-	void setLowThreshold(const int &threshold);
-	void setHighThreshold(const int &threshold);
-	void setTypeOfView(const int &type = SliceType::CURRENT);
-	void drawMarrow( bool enable );
+	void drawSlice( QPainter &painter, const int &sliceNumber );
+	void setLowThreshold( const int &threshold );
+	void setHighThreshold( const int &threshold );
+	void setTypeOfView( const int &type = SliceType::CURRENT );
 
 private :
-	void drawCurrentSlice();
-	void drawAverageSlice();
-	void drawMedianSlice();
-	void drawMarrow();
+	void drawCurrentSlice( QPainter &painter, const int &sliceNumber );
+	void drawAverageSlice( QPainter &painter );
+	void drawMedianSlice( QPainter &painter );
 
 signals:
-	void updated(const QPixmap &);
 	void thresholdUpdated();
-	void typeOfViewChanged(const SliceType::SliceType &);
+	void typeOfViewChanged( const SliceType::SliceType & );
 
 private:
-	QPixmap *_pix;
-
 	const Billon * _billon;
-	const Marrow *_marrow;
 
-	int _currentSlice;
 	int _lowThreshold;
 	int _highThreshold;
 	SliceType::SliceType _typeOfView;
-	bool _drawMarrow;
 };
-
-
-/**********************************
- * Définition des fonctions inline
- **********************************/
-
-inline
-int SliceView::currentSliceIndex() const {
-	return _currentSlice;
-}
-
-inline
-const QPixmap * SliceView::pixmap() const {
-	return _pix;
-}
-
-inline
-SliceType::SliceType SliceView::sliceType() const {
-	return _typeOfView;
-}
 
 #endif // SLICEVIEW_H

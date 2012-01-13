@@ -3,6 +3,8 @@
 #include "inc/pie_def.h"
 #include "inc/piepart.h"
 
+#include <QPainter>
+
 PieChart::PieChart( double orientation, int nbSectors ) : _orientation(orientation), _angle(TWO_PI/static_cast<double>(nbSectors)) {
 	updateSectors();
 }
@@ -45,6 +47,46 @@ void PieChart::setOrientation( double orientation ) {
 void PieChart::setSectorsNumber( int nbSectors ) {
 	_angle = TWO_PI/static_cast<double>(nbSectors);
 	updateSectors();
+}
+
+void PieChart::draw( QPainter &painter, int sectorIdx, Coord2D center ) const {
+	const int width = painter.window().width();
+	const int height = painter.window().height();
+	const int centerX = center.x;
+	const int centerY = center.y;
+
+	// Liste qui va contenir les angles des deux côté du secteur à dessiner
+	// Permet de factoriser le code de calcul des coordonnées juste en dessous
+	QList<double> twoSides;
+	twoSides.append( TWO_PI-_sectors.at(sectorIdx).rightAngle() );
+	twoSides.append( TWO_PI-_sectors.at(sectorIdx).leftAngle() );
+
+	painter.setPen(QColor(0,255,0));
+
+	// Dessin des deux côtés du secteur
+	int angle, x1,y1,x2,y2;
+	while ( !twoSides.isEmpty() ) {
+		// Calcul des coordonnées du segment à tracer
+		angle = twoSides.takeLast();
+		x1 = x2 = centerX;
+		y1 = y2 = centerY;
+		if ( angle == PI/2. ) y2 = height;
+		else if ( angle == 3.*PI/2. ) y1 = 0;
+		else {
+			const double a = tan(angle);
+			const double b = centerY - (a*centerX);
+			if ( angle < PI/2. || angle > 3.*PI/2. ) {
+				x2 = width;
+				y2 = a*width+b;
+			}
+			else {
+				x1 = 0;
+				y1 = b;
+			}
+		}
+		// Tracé du segment droit
+		painter.drawLine(x1,y1,x2,y2);
+	}
 }
 
 /*******************************
