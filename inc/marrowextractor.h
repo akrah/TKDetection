@@ -2,10 +2,12 @@
 #define MARROWEXTRACTOR_H
 
 #include <QList>
-#include <armadillo>
-#include "marrowextractor_def.h"
+#include "marrow_def.h"
 
+#include <armadillo>
 using namespace arma;
+
+class Marrow;
 
 class MarrowExtractor {
 

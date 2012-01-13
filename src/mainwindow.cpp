@@ -2,6 +2,7 @@
 
 #include "ui_mainwindow.h"
 #include "inc/billon.h"
+#include "inc/marrow.h"
 #include "inc/sliceview.h"
 #include "inc/dicomreader.h"
 #include "inc/slicehistogram.h"
@@ -17,11 +18,12 @@
 #include <QMouseEvent>
 #include <QPainter>
 
-MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::MainWindow), _billon(0), _sliceView(new SliceView()), _sliceHistogram(0), _marrow(0), _pieChart(new PieChart(0,1)), _pieChartHistograms(new PieChartHistograms()) {
+MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::MainWindow), _billon(0), _marrow(0), _sliceView(new SliceView()), _sliceHistogram(0), _pieChart(new PieChart(0,1)), _pieChartHistograms(new PieChartHistograms()) {
 	_ui->setupUi(this);
 
 	// Initialisation des vues
 	_sliceHistogram = new SliceHistogram(_ui->_plotSliceHistogram);
+	_pieChartHistograms->setModel(_pieChart);
 
 	// Paramétrisation des composant graphiques
 	_ui->_labelSliceView->installEventFilter(this);
@@ -98,11 +100,11 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 }
 
 MainWindow::~MainWindow() {
-	if ( _pieChart != 0 ) delete _pieChart;
-	if ( _pieChartHistograms != 0 ) delete _pieChartHistograms;
 	while ( !_pieChartPlots.isEmpty() ) {
 		_pieChartPlots.removeLast();
 	}
+	if ( _pieChartHistograms != 0 ) delete _pieChartHistograms;
+	if ( _pieChart != 0 ) delete _pieChart;
 	if ( _marrow != 0 ) delete _marrow;
 	if ( _sliceHistogram != 0 ) delete _sliceHistogram;
 	if ( _sliceView != 0 ) delete _sliceView;
@@ -117,13 +119,16 @@ MainWindow::~MainWindow() {
 bool MainWindow::eventFilter(QObject *obj, QEvent *event) {
 	bool res = true;
 	if (obj == _ui->_labelSliceView) {
-		if ( _billon != 0 && event->type() == QEvent::MouseButtonPress ) {
+		if ( _billon != 0 && _pieChartHistograms != 0 && event->type() == QEvent::MouseButtonPress ) {
 			QMouseEvent *mouseEvent = static_cast<QMouseEvent*>(event);
 			const int x = mouseEvent->x();
 			const int y = mouseEvent->y();
-			const int sector = _pieChart->partOfAngle( TWO_PI-ANGLE(256,256,x,y) );
+			const int centerX = _marrow!=0 ? _marrow->at(_ui->_sliderSelectSlice->value()).x:_billon->n_cols/2;
+			const int centerY = _marrow!=0 ? _marrow->at(_ui->_sliderSelectSlice->value()).y:_billon->n_rows/2;
 
-			if ( _pieChartHistograms != 0 && _ui->_comboSelectSector->count() > sector) {
+			const int sector = _pieChart->partOfAngle( TWO_PI-ANGLE(centerX,centerY,x,y) );
+
+			if ( _ui->_comboSelectSector->count() > sector) {
 				_ui->_comboSelectSector->setCurrentIndex(sector);
 			}
 		}
@@ -188,6 +193,7 @@ void MainWindow::computeNewMarrow() {
 		_marrow = extractor.process(*_billon,0,_billon->n_slices-1);
 	}
 	_sliceView->setModel(_marrow);
+	_pieChartHistograms->setModel(_marrow);
 }
 
 void MainWindow::redrawSliceHistogram() {
@@ -209,8 +215,6 @@ void MainWindow::updateSectorsHistograms() {
 	_pieChart->setOrientation(_ui->_spinSectorsOrientation->value());
 	_pieChart->setSectorsNumber(_ui->_spinSectorsNumber->value());
 
-	_pieChartHistograms->setModel(_pieChart);
-	_pieChartHistograms->setModel(_billon);
 	_pieChartHistograms->setBillonInterval(_ui->_sliderSelectSlice->value(),_ui->_sliderSelectSlice->value());
 	_pieChartHistograms->computeHistograms();
 }
@@ -260,25 +264,27 @@ void MainWindow::drawCurrentSector() {
 	const int sectorIdx = qMax(0,_ui->_comboSelectSector->currentIndex());
 	const int width = pix.width();
 	const int height = pix.height();
+	const int centerX = _marrow!=0 ? _marrow->at(_ui->_sliderSelectSlice->value()).x:width/2;
+	const int centerY = _marrow!=0 ? _marrow->at(_ui->_sliderSelectSlice->value()).y:height/2;
 
 	painter.setPen(QColor(0,255,0));
 	const double rightAngle = TWO_PI-sectors.at(sectorIdx).rightAngle();
 	if ( rightAngle != PI/2. && rightAngle != 3.*PI/2. ) {
 		const double a_r = tan(rightAngle);
-		const double b_r = 256 - (a_r*256);
+		const double b_r = centerY - (a_r*centerX);
 		if ( rightAngle < PI/2. || rightAngle > 3.*PI/2. ) {
-			painter.drawLine(256,256,width,a_r*width+b_r);
+			painter.drawLine(centerX,centerY,width,a_r*width+b_r);
 		}
 		else {
-			painter.drawLine(0,b_r,256,256);
+			painter.drawLine(0,b_r,centerX,centerY);
 		}
 	}
 	else {
 		if ( rightAngle == PI/2. ) {
-			painter.drawLine(256,256,256,height);
+			painter.drawLine(centerX,centerY,centerX,height);
 		}
 		else if ( rightAngle == 3.*PI/2. ) {
-			painter.drawLine(256,0,256,256);
+			painter.drawLine(centerX,0,centerX,centerY);
 		}
 	}
 
@@ -286,20 +292,20 @@ void MainWindow::drawCurrentSector() {
 	const double leftAngle = TWO_PI-sectors.at(sectorIdx).leftAngle();
 	if ( leftAngle != PI/2. && leftAngle != 3.*PI/2. ) {
 		const double a_l = tan(leftAngle);
-		const double b_l = 256 - (a_l*256);
+		const double b_l = centerY - (a_l*centerX);
 		if ( leftAngle < PI/2. || leftAngle > 3.*PI/2. ) {
-			painter.drawLine(256,256,width,a_l*width+b_l);
+			painter.drawLine(centerX,centerY,width,a_l*width+b_l);
 		}
 		else {
-			painter.drawLine(0,b_l,256,256);
+			painter.drawLine(0,b_l,centerX,centerY);
 		}
 	}
 	else {
 		if ( leftAngle == PI/2. ) {
-			painter.drawLine(256,256,256,height);
+			painter.drawLine(centerX,centerY,centerX,height);
 		}
 		else if ( leftAngle == 3.*PI/2. ) {
-			painter.drawLine(256,0,256,256);
+			painter.drawLine(centerX,0,centerX,centerY);
 		}
 	}
 

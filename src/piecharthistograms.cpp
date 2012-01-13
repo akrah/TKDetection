@@ -1,6 +1,7 @@
 #include "inc/piecharthistograms.h"
 
 #include "inc/billon.h"
+#include "inc/marrow.h"
 #include "inc/pie_def.h"
 #include "inc/piechart.h"
 #include "inc/piepart.h"
@@ -11,7 +12,7 @@ namespace {
 	inline T RESTRICT_TO_INTERVAL(T x, T min, T max) { return qMax((min),qMin((max),(x))); }
 }
 
-PieChartHistograms::PieChartHistograms() : QObject(), _billon(0), _pieChart(0), _beginSlice(-1), _endSlice(-1), _lowThreshold(0), _highThreshold(0) {
+PieChartHistograms::PieChartHistograms() : QObject(), _billon(0), _marrow(0), _pieChart(0), _beginSlice(-1), _endSlice(-1), _lowThreshold(0), _highThreshold(0) {
 }
 
 PieChartHistograms::~PieChartHistograms() {
@@ -36,6 +37,10 @@ void PieChartHistograms::setModel( const Billon *billon ) {
 
 void PieChartHistograms::setModel( const PieChart * pieChart ) {
 	_pieChart = pieChart;
+}
+
+void PieChartHistograms::setModel( const Marrow * marrow ) {
+	_marrow = marrow;
 }
 
 void PieChartHistograms::attach( const QList<QwtPlot *> & plots ) {
@@ -100,15 +105,21 @@ void PieChartHistograms::computeHistograms() {
 		}
 
 		const int sliceWidth = _billon->n_cols;
+		const int sliceMiddleX = sliceWidth/2;
 		const int sliceHeight = _billon->n_rows;
+		const int sliceMiddleY = sliceHeight/2;
+		const bool existMarrow = _marrow != 0;
+		int centerX, centerY;
 
 		// Calcul des histogrammes en parcourant l'ensemble les tranches _beginSlice à _endSlice du billon
 		for ( int k=_beginSlice ; k<=_endSlice ; ++k ) {
+			centerX = existMarrow?_marrow->at(k).x:sliceMiddleX;
+			centerY = existMarrow?_marrow->at(k).y:sliceMiddleY;
 			for ( int j=0 ; j<sliceHeight ; ++j ) {
 				for ( int i=0 ; i<sliceWidth ; ++i ) {
-					const int sectorIdx = _pieChart->partOfAngle( TWO_PI-ANGLE(256,256,i,j) );
-					const int value = RESTRICT_TO_INTERVAL(_billon->at(j,i,k),_lowThreshold,_highThreshold)-_lowThreshold;
-					if (value != 0)	datas[sectorIdx][value].value++;
+					const int sectorIdx = _pieChart->partOfAngle( TWO_PI-ANGLE(centerX,centerY,i,j) );
+					const int pixVal = RESTRICT_TO_INTERVAL(_billon->at(j,i,k),_lowThreshold,_highThreshold)-_lowThreshold;
+					datas[sectorIdx][pixVal].value += 1.;
 				}
 			}
 		}

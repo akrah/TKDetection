@@ -1,6 +1,7 @@
 #include "inc/sliceview.h"
 
 #include "inc/billon.h"
+#include "inc/marrow.h"
 #include <QPainter>
 
 namespace {
@@ -170,19 +171,18 @@ void SliceView::drawMedianSlice() {
 
 void SliceView::drawMarrow() {
 	if ( _marrow != 0 ) {
-		const Marrow &marrow = (*_marrow);
-		if ( (_currentSlice>=marrow.begin) && (_currentSlice<=marrow.end) ) {
-			const Coord2D &coordToDraw = marrow(_currentSlice-marrow.begin);
+		if ( (_currentSlice>=_marrow->beginSlice()) && (_currentSlice<=_marrow->endSlice()) ) {
+			const Coord2D &coordToDraw = _marrow->at(_currentSlice-_marrow->beginSlice());
 			std::cout << "Affichage de la moelle en " << coordToDraw << std::endl;
 
-			QPainterPath myPath;
-			myPath.addEllipse(coordToDraw.x-5,coordToDraw.y-5,10,10);
+			QPainterPath ellipsePath;
+			ellipsePath.addEllipse(coordToDraw.x-5,coordToDraw.y-5,10,10);
 			QColor color(100,200,100);
 
 			QPainter painter(_pix);
 			painter.setBrush(color);
 			painter.setPen(color);
-			painter.drawPath(myPath);
+			painter.drawPath(ellipsePath);
 		}
 	}
 }

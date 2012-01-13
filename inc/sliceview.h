@@ -2,11 +2,11 @@
 #define SLICEVIEW_H
 
 #include "sliceview_def.h"
-#include "marrowextractor_def.h"
 #include <QObject>
 
 class Billon;
 class QPixmap;
+class Marrow;
 
 class SliceView : public QObject
 {

@@ -4,10 +4,11 @@
 #include <QObject>
 #include <QList>
 
+class Billon;
+class Marrow;
 class PieChart;
 class QwtPlot;
 class QwtPlotHistogram;
-class Billon;
 
 class PieChartHistograms : public QObject
 {
@@ -21,6 +22,7 @@ public:
 
 	void setModel( const Billon * billon );
 	void setModel( const PieChart * pieChart );
+	void setModel( const Marrow * marrow );
 	void attach( const QList<QwtPlot *> & plots );
 	void clear();
 
@@ -38,6 +40,7 @@ signals:
 
 private:
 	const Billon *_billon;
+	const Marrow *_marrow;
 	const PieChart *_pieChart;
 
 	int _beginSlice;

@@ -20,12 +20,14 @@ SOURCES  *= main.cpp \
 			dicomreader.cpp \
 			mainwindow.cpp \
 			marrowextractor.cpp \
-			marrowextractor_def.cpp \
 			piechart.cpp \
 			slicehistogram.cpp \
 			sliceview.cpp \
 			src/piepart.cpp \
-			src/piecharthistograms.cpp
+			src/piecharthistograms.cpp \
+			src/marrow.cpp \
+			src/marrow_def.cpp \
+    src/marrowextractor_def.cpp
 
 HEADERS  *= billon.h \
 			dicomreader.h \
@@ -38,7 +40,9 @@ HEADERS  *= billon.h \
 			sliceview_def.h \
 			inc/piepart.h \
 			inc/piecharthistograms.h \
-			inc/pie_def.h
+			inc/pie_def.h \
+			inc/marrow.h \
+			inc/marrow_def.h
 
 FORMS    *= mainwindow.ui
 

@@ -5,8 +5,6 @@
 #include <QButtonGroup>
 
 #include "sliceview_def.h"
-#include "marrowextractor_def.h"
-
 #include <qwt_plot_curve.h>
 
 namespace Ui {
@@ -14,6 +12,7 @@ namespace Ui {
 }
 
 class Billon;
+class Marrow;
 class SliceView;
 class SliceHistogram;
 class PieChart;
@@ -49,9 +48,9 @@ private:
 	QButtonGroup _groupSliceView;
 
 	Billon *_billon;
+	Marrow *_marrow;
 	SliceView *_sliceView;
 	SliceHistogram *_sliceHistogram;
-	Marrow *_marrow;
 	QwtPlotCurve _histogramCursor;
 
 	PieChart *_pieChart;

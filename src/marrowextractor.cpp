@@ -1,5 +1,8 @@
 #include "inc/marrowextractor.h"
 
+#include "inc/marrow.h"
+#include "inc/marrowextractor_def.h"
+
 namespace {
 	template<class T>
 	inline T RESTRICT_TO_INTERVAL(T x, T min, T max) { return qMax((min),qMin((max),(x))); }
@@ -34,7 +37,6 @@ Marrow* MarrowExtractor::process( const icube &image, int sliceMin, int sliceMax
 	max = x = y = 0;
 
 	Marrow *marrow = new Marrow(sliceMin,sliceMax);
-	QList<Coord2D> &marrowList = marrow->list;
 
 	//extraction de la moelle de la premiere coupe sur la totalité de la coupe
 	//nous permet d'avoir un coordonnée a laquelle appliqué la fenetre
@@ -51,10 +53,10 @@ Marrow* MarrowExtractor::process( const icube &image, int sliceMin, int sliceMax
 	coordCurrent = transHough( image.slice(sliceMin), _windowWidth, _windowHeight, &x, &y, &max, &nbContourPoints );
 
 	for (int i = 0; i < sliceMin; ++ i) {
-		marrowList.append(coordCurrent);
+		marrow->append(coordCurrent);
 		maxStandList[i]=0.;
 	}
-	marrowList.append(coordCurrent);	// pour sliceMin
+	marrow->append(coordCurrent);	// pour sliceMin
 	maxStandList[sliceMin] = ((float)max)/nbContourPoints;
 
 	//extraction des coupes suivantes
@@ -62,21 +64,21 @@ Marrow* MarrowExtractor::process( const icube &image, int sliceMin, int sliceMax
 	for(int i=sliceMin + 1; i<= sliceMax; i++) {
 		//~ if(!listeCoupe->contains(i)){
 			std::cerr << " " << i;
-			coordPrec = marrowList.last();
+			coordPrec = marrow->last();
 			x = x - (_windowWidth/2);
 			x = x < 0 ? 0 : (x > (width - _windowWidth) ? width - _windowWidth : x);
 			y = y - (_windowHeight/2);
 			y = y < 0 ? 0 : (y > (height - _windowHeight) ? height - _windowHeight : y);
 			//extraction de la moelle de la coupe i
 			coordCurrent = transHough( image.slice(i), _windowWidth, _windowHeight, &x, &y, &max, &nbContourPoints );
-			marrowList.append(coordCurrent);
-			shift = sqrt(pow((double) (marrowList.last().x - coordPrec.x),(double) 2.0) + pow( (double)(marrowList.last().y - coordPrec.y), (double)2.0) );
+			marrow->append(coordCurrent);
+			shift = sqrt(pow((double) (marrow->last().x - coordPrec.x),(double) 2.0) + pow( (double)(marrow->last().y - coordPrec.y), (double)2.0) );
 			//si le resultat obtenu a un decalage trop important avec la coupe precedente alors on recommence l'extraction sur l'ensemble de la coupe
 			if(shift > _marrowLag && width > _windowWidth && height > _windowHeight){
 				std::cerr << "*";
 				// std::cerr << "   :> decalage=" << decalage << ">" << _marrowLag << "\n";
 
-				marrowList.removeLast();
+				marrow->removeLast();
 				x = y = 0;
 				transHough(image.slice(i), width, height, &x, &y, &max, &nbContourPoints );
 				x = x - (_windowWidth/2);
@@ -84,7 +86,7 @@ Marrow* MarrowExtractor::process( const icube &image, int sliceMin, int sliceMax
 				y = y - (_windowHeight/2);
 				y = y < 0 ? 0 : (y > (height - _windowHeight) ? height - _windowHeight : y);
 				coordCurrent = transHough( image.slice(i), _windowWidth, _windowHeight, &x, &y, &max, &nbContourPoints );
-				marrowList.append(coordCurrent);
+				marrow->append(coordCurrent);
 			}
 			maxStandList[i] = ((float)max)/nbContourPoints;
 			if (i % 20 == 0) {
@@ -97,13 +99,13 @@ Marrow* MarrowExtractor::process( const icube &image, int sliceMin, int sliceMax
 	}
 	std::cerr << "\n";
 
-	coordCurrent = marrowList.last();
+	coordCurrent = marrow->last();
 	for ( int i = sliceMax+1 ; i<depth ; i++ ) {
-		marrowList.append(coordCurrent);
+		marrow->append(coordCurrent);
 		maxStandList[i]=0.;
 	}
 
-	std::cerr << "nbCoupes=" << depth << " listMoelle.size()=" << marrowList.size() << "\n";
+	std::cerr << "nbCoupes=" << depth << " listMoelle.size()=" << marrow->size() << "\n";
 
 	//calcul du seuil a partir du quel les coupes sont considerées comme erronées
 	maxStandList2 = new float[depth];
@@ -117,7 +119,7 @@ Marrow* MarrowExtractor::process( const icube &image, int sliceMin, int sliceMax
 	delete [] maxStandList2;
 
 	// applique la coorection a la moelle
-	correctMarrow(marrowList, maxStandList, houghStandThreshold);
+	correctMarrow(*marrow, maxStandList, houghStandThreshold);
 
 	return marrow;
 }
