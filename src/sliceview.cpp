@@ -16,19 +16,17 @@ SliceView::~SliceView() {
 }
 
 /*******************************
- * Public getters
- *******************************/
-
-SliceType::SliceType SliceView::sliceType() const {
-	return _typeOfView;
-}
-
-/*******************************
  * Public setters
  *******************************/
 
 void SliceView::setModel( const Billon *billon ) {
 	_billon = billon;
+}
+
+void SliceView::setTypeOfView( const SliceType::SliceType &type ) {
+	if ( type > SliceType::_SLICE_TYPE_MIN_ && type < SliceType::_SLICE_TYPE_MAX_ ) {
+		_typeOfView = type;
+	}
 }
 
 /*******************************
@@ -57,19 +55,10 @@ void SliceView::drawSlice( QPainter &painter, const int &sliceNumber ) {
 
 void SliceView::setLowThreshold(const int &threshold) {
 	_lowThreshold = threshold;
-	emit thresholdUpdated();
 }
 
 void SliceView::setHighThreshold(const int &threshold) {
 	_highThreshold = threshold;
-	emit thresholdUpdated();
-}
-
-void SliceView::setTypeOfView(const int &type) {
-	if ( type > SliceType::_SLICE_TYPE_MIN_ && type < SliceType::_SLICE_TYPE_MAX_ ) {
-		_typeOfView = static_cast<const SliceType::SliceType>(type);
-		emit typeOfViewChanged(_typeOfView);
-	}
 }
 
 /*******************************

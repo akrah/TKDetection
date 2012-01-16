@@ -12,11 +12,11 @@ namespace {
 	inline T RESTRICT_TO_INTERVAL(T x, T min, T max) { return qMax((min),qMin((max),(x))); }
 }
 
-PieChartHistograms::PieChartHistograms() : QObject(), _billon(0), _marrow(0), _pieChart(0), _beginSlice(-1), _endSlice(-1), _lowThreshold(0), _highThreshold(0) {
+PieChartHistograms::PieChartHistograms() :  _billon(0), _marrow(0), _pieChart(0), _beginSlice(-1), _endSlice(-1), _lowThreshold(0), _highThreshold(0) {
 }
 
 PieChartHistograms::~PieChartHistograms() {
-	clear();
+	clearAll();
 }
 
 /*******************************
@@ -51,31 +51,6 @@ void PieChartHistograms::attach( const QList<QwtPlot *> & plots ) {
 	}
 }
 
-void PieChartHistograms::clear() {
-	while ( !_histograms.isEmpty() ) {
-		_histograms.removeLast();
-	}
-}
-
-/*******************************
- * Private functions
- *******************************/
-
-bool PieChartHistograms::intervalIsValid() const {
-	bool ok = _beginSlice>-1 && _billon != 0 && _endSlice<static_cast<int>(_billon->n_slices) && _beginSlice<=_endSlice;
-	return ok;
-}
-
-/*******************************
- * Public slots
- *******************************/
-
-void PieChartHistograms::setBillonInterval( const int &beginSlice, const int &endSlice ) {
-	const bool ok = beginSlice>=0 && beginSlice<=endSlice;
-	_beginSlice = ok?beginSlice:-1;
-	_endSlice = ok?endSlice:-1;
-}
-
 void PieChartHistograms::setLowThreshold( const int &threshold ) {
 	_lowThreshold = threshold;
 }
@@ -84,7 +59,14 @@ void PieChartHistograms::setHighThreshold( const int &threshold ) {
 	_highThreshold = threshold;
 }
 
+void PieChartHistograms::setBillonInterval( const int &beginSlice, const int &endSlice ) {
+	const bool ok = beginSlice>=0 && beginSlice<=endSlice;
+	_beginSlice = ok?beginSlice:-1;
+	_endSlice = ok?endSlice:-1;
+}
+
 void PieChartHistograms::computeHistograms() {
+	clearAll();
 	if ( _billon != 0 && _pieChart != 0 && intervalIsValid()  ) {
 
 		const QList<PiePart> &sectors = _pieChart->sectors();
@@ -119,7 +101,7 @@ void PieChartHistograms::computeHistograms() {
 				for ( int i=0 ; i<sliceWidth ; ++i ) {
 					const int sectorIdx = _pieChart->partOfAngle( TWO_PI-ANGLE(centerX,centerY,i,j) );
 					const int pixVal = RESTRICT_TO_INTERVAL(_billon->at(j,i,k),_lowThreshold,_highThreshold)-_lowThreshold;
-					datas[sectorIdx][pixVal].value += 1.;
+					if ( pixVal ) datas[sectorIdx][pixVal].value += 1.;
 				}
 			}
 		}
@@ -130,7 +112,20 @@ void PieChartHistograms::computeHistograms() {
 			_histograms.append(new QwtPlotHistogram());
 			static_cast<QwtIntervalSeriesData *>(_histograms.last()->data())->setSamples(datas[i]);
 		}
+	}
+}
 
-		emit histogramsUpdated();
+/*******************************
+ * Private functions
+ *******************************/
+
+bool PieChartHistograms::intervalIsValid() const {
+	bool ok = _beginSlice>-1 && _billon != 0 && _endSlice<static_cast<int>(_billon->n_slices) && _beginSlice<=_endSlice;
+	return ok;
+}
+
+void PieChartHistograms::clearAll() {
+	while ( !_histograms.isEmpty() ) {
+		_histograms.removeLast();
 	}
 }

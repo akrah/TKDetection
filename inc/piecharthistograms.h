@@ -1,7 +1,6 @@
 #ifndef PIECHARTHISTOGRAMS_H
 #define PIECHARTHISTOGRAMS_H
 
-#include <QObject>
 #include <QList>
 
 class Billon;
@@ -10,10 +9,8 @@ class PieChart;
 class QwtPlot;
 class QwtPlotHistogram;
 
-class PieChartHistograms : public QObject
+class PieChartHistograms
 {
-	Q_OBJECT
-
 public:
 	PieChartHistograms();
 	~PieChartHistograms();
@@ -24,19 +21,16 @@ public:
 	void setModel( const PieChart * pieChart );
 	void setModel( const Marrow * marrow );
 	void attach( const QList<QwtPlot *> & plots );
-	void clear();
+
+	void setLowThreshold( const int &threshold );
+	void setHighThreshold( const int &threshold );
+	void setBillonInterval( const int &sliceMin, const int &sliceMax );
+
+	void computeHistograms();
 
 private:
 	bool intervalIsValid() const;
-
-public slots:
-	void setBillonInterval( const int &sliceMin, const int &sliceMax );
-	void setLowThreshold( const int &threshold );
-	void setHighThreshold( const int &threshold );
-	void computeHistograms();
-
-signals:
-	void histogramsUpdated();
+	void clearAll();
 
 private:
 	const Billon *_billon;

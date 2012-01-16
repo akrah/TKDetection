@@ -17,24 +17,18 @@ public:
 	explicit SliceView();
 	~SliceView();
 
-	SliceType::SliceType sliceType() const;
-
 	void setModel( const Billon * billon );
+	void setTypeOfView( const SliceType::SliceType &type );
 
 public slots:
 	void drawSlice( QPainter &painter, const int &sliceNumber );
 	void setLowThreshold( const int &threshold );
 	void setHighThreshold( const int &threshold );
-	void setTypeOfView( const int &type = SliceType::CURRENT );
 
 private :
 	void drawCurrentSlice( QPainter &painter, const int &sliceNumber );
 	void drawAverageSlice( QPainter &painter );
 	void drawMedianSlice( QPainter &painter );
-
-signals:
-	void thresholdUpdated();
-	void typeOfViewChanged( const SliceType::SliceType & );
 
 private:
 	const Billon * _billon;

@@ -31,17 +31,23 @@ public:
 private slots:
 	void openDicom();
 	void closeImage();
-	void adaptGraphicsComponentsToSliceType( const SliceType::SliceType &type );
-	void computeNewMarrow();
-	void redrawSliceHistogram();
-	void highlightSliceHistogram( const int &slicePosition );
-	void updateSectorsHistograms();
-	void updateSectorsHistogramsView();
 	void drawSlice( int sliceNumber );
+	void setTypeOfView( const int &type );
+	void setLowThreshold( const int &threshold );
+	void setHighThreshold( const int &threshold );
+	void updateSliceHistogram();
+	void highlightSliceHistogram( const int &slicePosition );
+	void updateMarrow();
+	void updateSectorsHistograms();
+	void setMinimumSectorsInterval( const int &value );
+	void setMaximumSectorsInterval( const int &value );
+	void selectSectorHistogram( const int &sectorIdx );
 
 private:
-	void updateGraphicsComponentsValues();
 	void openNewBillon(const QString &folderName = "");
+	void drawSlice();
+	void updateComponentsValues();
+	void enabledComponents();
 
 private:
 	Ui::MainWindow *_ui;

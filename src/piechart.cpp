@@ -64,7 +64,7 @@ void PieChart::draw( QPainter &painter, int sectorIdx, Coord2D center ) const {
 	painter.setPen(QColor(0,255,0));
 
 	// Dessin des deux côtés du secteur
-	int angle, x1,y1,x2,y2;
+	double angle, x1,y1,x2,y2;
 	while ( !twoSides.isEmpty() ) {
 		// Calcul des coordonnées du segment à tracer
 		angle = twoSides.takeLast();

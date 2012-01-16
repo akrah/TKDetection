@@ -14,14 +14,10 @@ public:
 	explicit SliceHistogram( QwtPlot* parent = 0 );
 
 	void setModel( const Billon *billon );
-
-public slots:
 	void setLowThreshold( const int &threshold );
 	void setHighThreshold( const int &threshold );
-	void constructHistogram();
 
-signals:
-	void histogramUpdated();
+	void constructHistogram();
 
 private:
 	const Billon *_billon;

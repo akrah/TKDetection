@@ -51,5 +51,4 @@ void SliceHistogram::constructHistogram() {
 		}
 	}
 	static_cast<QwtIntervalSeriesData *>(data())->setSamples(_datas);
-	emit histogramUpdated();
 }
