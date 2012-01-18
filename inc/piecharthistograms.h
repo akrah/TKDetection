@@ -27,6 +27,7 @@ public:
 	void setBillonInterval( const int &sliceMin, const int &sliceMax );
 
 	void computeHistograms();
+	void computeHistograms2();
 
 private:
 	bool intervalIsValid() const;

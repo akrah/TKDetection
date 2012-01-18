@@ -3,8 +3,11 @@
 
 #include <cmath>
 
-#define PI      (4*atan(1.0))
-#define TWO_PI  (2*PI)
+#define PI				(4*atan(1.0))
+#define TWO_PI			(2*PI)
+#define PI_ON_TWO		(PI/2.)
+#define THREE_PI_ON_TWO	(3.*PI_ON_TWO)
+#define DEG_TO_RAD_FACT	(PI/180.)
 
 namespace {
 	inline double ANGLE( double xo, double yo, double x2, double y2 ) {

@@ -39,11 +39,6 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 	_groupSliceView.addButton(_ui->_radioMedianSlice,SliceType::MEDIAN);
 	_groupSliceView.setExclusive(true);
 
-	// Raccourcis des actions du menu
-	_ui->_actionOpenDicom->setShortcut(Qt::CTRL + Qt::Key_O);
-	_ui->_actionCloseImage->setShortcut(Qt::CTRL + Qt::Key_W);
-	_ui->_actionQuit->setShortcut(Qt::CTRL + Qt::Key_Q);
-
 	/**** Mise en place de la communication MVC ****/
 
 	// Évènements déclenchés par le slider de n° de coupe
@@ -72,9 +67,12 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 	QObject::connect(_ui->_spinMaxSectorSlice, SIGNAL(valueChanged(int)), this, SLOT(updateMinimumSectorsIntervalExtremum(int)));
 	QObject::connect(_ui->_buttonSliceMaximalSector, SIGNAL(clicked()), this, SLOT(setMaximumSectorsIntervalToCurrentSlice()));
 
-	// Évènements déclenchés par les actions du menu
+	// Raccourcis des actions du menu
+	_ui->_actionOpenDicom->setShortcut(Qt::CTRL + Qt::Key_O);
 	QObject::connect(_ui->_actionOpenDicom, SIGNAL(triggered()), this, SLOT(openDicom()));
+	_ui->_actionCloseImage->setShortcut(Qt::CTRL + Qt::Key_W);
 	QObject::connect(_ui->_actionCloseImage, SIGNAL(triggered()), this, SLOT(closeImage()));
+	_ui->_actionQuit->setShortcut(Qt::CTRL + Qt::Key_Q);
 	QObject::connect(_ui->_actionQuit, SIGNAL(triggered()), this, SLOT(close()));
 
 	_ui->_radioCurrentSlice->click();
@@ -241,7 +239,7 @@ void MainWindow::updateMarrow() {
 
 void MainWindow::updateSectorsHistograms() {
 	if ( _pieChart != 0 ) {
-		_pieChart->setOrientation(_ui->_spinSectorsOrientation->value());
+		_pieChart->setOrientation(_ui->_spinSectorsOrientation->value()*DEG_TO_RAD_FACT);
 		_pieChart->setSectorsNumber(_ui->_spinSectorsNumber->value());
 	}
 
@@ -376,5 +374,4 @@ void MainWindow::enabledComponents() {
 	_ui->_spansliderSliceThreshold->setEnabled(enable);
 	_ui->_buttonComputeMarrow->setEnabled(enable);
 	_ui->_buttonUpdateSliceHistogram->setEnabled(enable);
-	_ui->_checkDrawMarrow->setEnabled(enable);
 }

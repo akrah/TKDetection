@@ -5,6 +5,19 @@
 
 #include <QPainter>
 
+#include <cmath>
+#include <limits>
+
+#define DOUBLE_ERR_POS 0.0000000001
+#define DOUBLE_ERR_NEG (-DOUBLE_ERR_POS)
+
+namespace {
+	bool IS_EQUAL( const double & v1, const double &v2 ) {
+		const double diff = v1 - v2;
+		return diff < DOUBLE_ERR_POS && diff > DOUBLE_ERR_NEG;
+	}
+}
+
 PieChart::PieChart( double orientation, int nbSectors ) : _orientation(orientation), _angle(TWO_PI/static_cast<double>(nbSectors)) {
 	updateSectors();
 }
@@ -21,8 +34,8 @@ double PieChart::angle() const {
 	return _angle;
 }
 
-QList<PiePart> PieChart::sectors() const {
-	return _sectors;
+int PieChart::nbSectors() const {
+	return (TWO_PI/_angle);
 }
 
 int PieChart::partOfAngle( const double &angle ) const {
@@ -70,12 +83,12 @@ void PieChart::draw( QPainter &painter, const int &sectorIdx, const Coord2D &cen
 		angle = twoSides.takeLast();
 		x1 = x2 = centerX;
 		y1 = y2 = centerY;
-		if ( angle == PI/2. ) y2 = height;
-		else if ( angle == 3.*PI/2. ) y1 = 0;
+		if ( IS_EQUAL(angle,PI_ON_TWO) ) y2 = height;
+		else if ( IS_EQUAL(angle,THREE_PI_ON_TWO) ) y1 = 0;
 		else {
 			const double a = tan(angle);
 			const double b = centerY - (a*centerX);
-			if ( angle < PI/2. || angle > 3.*PI/2. ) {
+			if ( angle < PI_ON_TWO || angle > THREE_PI_ON_TWO ) {
 				x2 = width;
 				y2 = a*width+b;
 			}
@@ -84,6 +97,7 @@ void PieChart::draw( QPainter &painter, const int &sectorIdx, const Coord2D &cen
 				y1 = b;
 			}
 		}
+
 		// Tracé du segment droit
 		painter.drawLine(x1,y1,x2,y2);
 	}

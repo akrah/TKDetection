@@ -14,7 +14,7 @@ public:
 
 	double orientation() const;
 	double angle() const;
-	QList<PiePart> sectors() const;
+	int nbSectors() const;
 	int partOfAngle( const double &angle ) const;
 
 	void setOrientation( const double &orientation );
