@@ -15,12 +15,12 @@ public:
 	double orientation() const;
 	double angle() const;
 	QList<PiePart> sectors() const;
-	int partOfAngle( double angle ) const;
+	int partOfAngle( const double &angle ) const;
 
-	void setOrientation( double orientation );
-	void setSectorsNumber( int nbSectors );
+	void setOrientation( const double &orientation );
+	void setSectorsNumber( const int &nbSectors );
 
-	void draw( QPainter &painter, int sectorIdx, Coord2D center ) const;
+	void draw( QPainter &painter, const int &sectorIdx, const Coord2D &center ) const;
 
 private:
 	void updateSectors();

@@ -31,7 +31,7 @@ public:
 private slots:
 	void openDicom();
 	void closeImage();
-	void drawSlice( int sliceNumber );
+	void drawSlice( const int &sliceNumber );
 	void setTypeOfView( const int &type );
 	void setLowThreshold( const int &threshold );
 	void setHighThreshold( const int &threshold );
@@ -39,9 +39,11 @@ private slots:
 	void highlightSliceHistogram( const int &slicePosition );
 	void updateMarrow();
 	void updateSectorsHistograms();
-	void setMinimumSectorsInterval( const int &value );
-	void setMaximumSectorsInterval( const int &value );
 	void selectSectorHistogram( const int &sectorIdx );
+	void setMinimumSectorsIntervalToCurrentSlice();
+	void setMaximumSectorsIntervalToCurrentSlice();
+	void updateMinimumSectorsIntervalExtremum( const int &value );
+	void updateMaximumSectorsIntervalExtremum( const int &value );
 
 private:
 	void openNewBillon(const QString &folderName = "");

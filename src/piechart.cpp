@@ -25,7 +25,7 @@ QList<PiePart> PieChart::sectors() const {
 	return _sectors;
 }
 
-int PieChart::partOfAngle( double angle ) const {
+int PieChart::partOfAngle( const double &angle ) const {
 	int sectorId;
 	bool ok = false;
 	const int nbSectors = _sectors.size();
@@ -39,17 +39,17 @@ int PieChart::partOfAngle( double angle ) const {
  * Public setters
  *******************************/
 
-void PieChart::setOrientation( double orientation ) {
+void PieChart::setOrientation( const double &orientation ) {
 	_orientation = orientation;
 	updateSectors();
 }
 
-void PieChart::setSectorsNumber( int nbSectors ) {
+void PieChart::setSectorsNumber( const int &nbSectors ) {
 	_angle = TWO_PI/static_cast<double>(nbSectors);
 	updateSectors();
 }
 
-void PieChart::draw( QPainter &painter, int sectorIdx, Coord2D center ) const {
+void PieChart::draw( QPainter &painter, const int &sectorIdx, const Coord2D &center ) const {
 	const int width = painter.window().width();
 	const int height = painter.window().height();
 	const int centerX = center.x;

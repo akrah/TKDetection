@@ -67,12 +67,10 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 	// Évènements déclenchés par les bouton associès aux histogrammes de secteurs
 	QObject::connect(_ui->_buttonUpdateSectors, SIGNAL(clicked()), this, SLOT(updateSectorsHistograms()));
 	QObject::connect(_ui->_comboSelectSector, SIGNAL(currentIndexChanged(int)), this, SLOT(selectSectorHistogram(int)));
-
-	// Évènements déclenchés par le slider d'interval de secteurs
-	QObject::connect(_ui->_spansliderSectorSlices, SIGNAL(lowerValueChanged(int)), this, SLOT(setMinimumSectorsInterval(int)));
-	QObject::connect(_ui->_spinMinSectorSlice, SIGNAL(valueChanged(int)), this, SLOT(setMinimumSectorsInterval(int)));
-	QObject::connect(_ui->_spansliderSectorSlices, SIGNAL(upperValueChanged(int)), this, SLOT(setMaximumSectorsInterval(int)));
-	QObject::connect(_ui->_spinMaxSectorSlice, SIGNAL(valueChanged(int)), this, SLOT(setMaximumSectorsInterval(int)));
+	QObject::connect(_ui->_spinMinSectorSlice, SIGNAL(valueChanged(int)), this, SLOT(updateMaximumSectorsIntervalExtremum(int)));
+	QObject::connect(_ui->_buttonSliceMinimalSector, SIGNAL(clicked()), this, SLOT(setMinimumSectorsIntervalToCurrentSlice()));
+	QObject::connect(_ui->_spinMaxSectorSlice, SIGNAL(valueChanged(int)), this, SLOT(updateMinimumSectorsIntervalExtremum(int)));
+	QObject::connect(_ui->_buttonSliceMaximalSector, SIGNAL(clicked()), this, SLOT(setMaximumSectorsIntervalToCurrentSlice()));
 
 	// Évènements déclenchés par les actions du menu
 	QObject::connect(_ui->_actionOpenDicom, SIGNAL(triggered()), this, SLOT(openDicom()));
@@ -150,7 +148,7 @@ void MainWindow::closeImage() {
 	drawSlice();
 }
 
-void MainWindow::drawSlice( int sliceNumber ) {
+void MainWindow::drawSlice( const int &sliceNumber ) {
 	if ( _billon != 0 ) {
 		_ui->_labelSliceNumber->setNum(sliceNumber);
 		_pix = QPixmap::fromImage(QImage(_billon->n_cols,_billon->n_rows,QImage::Format_ARGB32));
@@ -158,7 +156,7 @@ void MainWindow::drawSlice( int sliceNumber ) {
 		if ( _sliceView != 0 ) _sliceView->drawSlice(painter,sliceNumber);
 		if ( _sliceHistogram != 0 ) highlightSliceHistogram(sliceNumber);
 		if ( _marrow != 0 ) _marrow->draw(painter,sliceNumber);
-		if ( _pieChart != 0 && !_pieChartPlots.isEmpty() ) {
+		if ( _pieChart != 0 && !_pieChartPlots.isEmpty() && sliceNumber >= _ui->_spinMinSectorSlice->value() && sliceNumber <= _ui->_spinMaxSectorSlice->value()) {
 			Coord2D center(_pix.width()/2,_pix.height()/2);
 			if ( _marrow != 0 && sliceNumber >= _marrow->beginSlice() && sliceNumber <= _marrow->endSlice()) {
 				center = _marrow->at(sliceNumber-_marrow->beginSlice());
@@ -255,7 +253,7 @@ void MainWindow::updateSectorsHistograms() {
 	_ui->_comboSelectSector->clear();
 
 	if ( _pieChartHistograms != 0 ) {
-		_pieChartHistograms->setBillonInterval(_ui->_spansliderSectorSlices->lowerValue(),_ui->_spansliderSectorSlices->upperValue());
+		_pieChartHistograms->setBillonInterval(_ui->_spinMinSectorSlice->value(),_ui->_spinMaxSectorSlice->value());
 		_pieChartHistograms->computeHistograms();
 
 		const int nbHistograms = _pieChartHistograms->count();
@@ -287,31 +285,25 @@ void MainWindow::updateSectorsHistograms() {
 	selectSectorHistogram(0);
 }
 
-void MainWindow::setMinimumSectorsInterval( const int &value ) {
-	_ui->_spansliderSectorSlices->blockSignals(true);
-		_ui->_spansliderSectorSlices->setLowerValue(value);
-	_ui->_spansliderSectorSlices->blockSignals(false);
-
-	_ui->_spinMinSectorSlice->blockSignals(true);
-		_ui->_spinMinSectorSlice->setValue(value);
-		_ui->_spinMaxSectorSlice->setMinimum(value);
-	_ui->_spinMinSectorSlice->blockSignals(false);
-}
-
-void MainWindow::setMaximumSectorsInterval( const int &value ) {
-	_ui->_spansliderSectorSlices->blockSignals(true);
-		_ui->_spansliderSectorSlices->setUpperValue(value);
-	_ui->_spansliderSectorSlices->blockSignals(false);
-
-	_ui->_spinMaxSectorSlice->blockSignals(true);
-		_ui->_spinMaxSectorSlice->setValue(value);
-		_ui->_spinMinSectorSlice->setMaximum(value);
-	_ui->_spinMaxSectorSlice->blockSignals(false);
-}
-
 void MainWindow::selectSectorHistogram( const int &sectorIdx ) {
 	_ui->_stackedSectorsHistograms->setCurrentIndex(sectorIdx);
 	drawSlice();
+}
+
+void MainWindow::setMinimumSectorsIntervalToCurrentSlice() {
+	_ui->_spinMinSectorSlice->setValue(_ui->_sliderSelectSlice->value());
+}
+
+void MainWindow::setMaximumSectorsIntervalToCurrentSlice() {
+	_ui->_spinMaxSectorSlice->setValue(_ui->_sliderSelectSlice->value());
+}
+
+void MainWindow::updateMinimumSectorsIntervalExtremum( const int &value ) {
+	_ui->_spinMinSectorSlice->setMaximum(value);
+}
+
+void MainWindow::updateMaximumSectorsIntervalExtremum( const int &value ) {
+	_ui->_spinMaxSectorSlice->setMinimum(value);
 }
 
 /*******************************
@@ -363,11 +355,6 @@ void MainWindow::updateComponentsValues() {
 	_ui->_spinMaxThreshold->setMinimum(minValue);
 	_ui->_spinMaxThreshold->setMaximum(maxValue);
 	_ui->_spinMaxThreshold->setValue(maxValue);
-
-	_ui->_spansliderSectorSlices->setMinimum(0);
-	_ui->_spansliderSectorSlices->setMaximum(nbSlices-1);
-	_ui->_spansliderSectorSlices->setLowerValue(0);
-	_ui->_spansliderSectorSlices->setUpperValue(nbSlices-1);
 
 	_ui->_spinMinSectorSlice->setMinimum(0);
 	_ui->_spinMinSectorSlice->setMaximum(nbSlices-1);

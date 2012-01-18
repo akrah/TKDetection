@@ -12,6 +12,10 @@ SliceHistogram::SliceHistogram( QwtPlot *parent ) : QObject(), QwtPlotHistogram(
 	attach(parent);
 }
 
+/*******************************
+ * Public setters
+ *******************************/
+
 void SliceHistogram::setModel( const Billon *billon ) {
 	_billon = billon;
 	if ( _billon != 0 ) {
@@ -22,6 +26,14 @@ void SliceHistogram::setModel( const Billon *billon ) {
 		_lowThreshold = _highThreshold = 0;
 	}
 	constructHistogram();
+}
+
+void SliceHistogram::setLowThreshold( const int &threshold ) {
+	_lowThreshold = threshold;
+}
+
+void SliceHistogram::setHighThreshold( const int &threshold ) {
+	_highThreshold = threshold;
 }
 
 void SliceHistogram::constructHistogram() {

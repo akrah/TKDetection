@@ -249,84 +249,103 @@
             <property name="title">
              <string>Paramètres</string>
             </property>
-            <layout class="QVBoxLayout" name="verticalLayout_9">
-             <item>
-              <layout class="QFormLayout" name="formLayout">
-               <item row="0" column="1">
-                <widget class="QSpinBox" name="_spinSectorsOrientation">
-                 <property name="buttonSymbols">
-                  <enum>QAbstractSpinBox::UpDownArrows</enum>
-                 </property>
+            <layout class="QFormLayout" name="formLayout_3">
+             <property name="fieldGrowthPolicy">
+              <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
+             </property>
+             <item row="0" column="0">
+              <widget class="QLabel" name="label_2">
+               <property name="text">
+                <string>Orientation (en degrés)</string>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="1">
+              <widget class="QSpinBox" name="_spinSectorsOrientation">
+               <property name="buttonSymbols">
+                <enum>QAbstractSpinBox::UpDownArrows</enum>
+               </property>
+               <property name="maximum">
+                <number>360</number>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="0">
+              <widget class="QLabel" name="label_3">
+               <property name="text">
+                <string>Nombre de secteurs</string>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="1">
+              <widget class="QSpinBox" name="_spinSectorsNumber">
+               <property name="maximum">
+                <number>360</number>
+               </property>
+               <property name="value">
+                <number>8</number>
+               </property>
+              </widget>
+             </item>
+             <item row="2" column="0">
+              <widget class="QLabel" name="label_7">
+               <property name="text">
+                <string>Coupe minimale</string>
+               </property>
+              </widget>
+             </item>
+             <item row="2" column="1">
+              <layout class="QHBoxLayout" name="horizontalLayout_5">
+               <item>
+                <widget class="QSpinBox" name="_spinMinSectorSlice">
                  <property name="maximum">
-                  <number>360</number>
+                  <number>0</number>
                  </property>
                 </widget>
                </item>
-               <item row="0" column="0">
-                <widget class="QLabel" name="label_2">
+               <item>
+                <widget class="QPushButton" name="_buttonSliceMinimalSector">
                  <property name="text">
-                  <string>Orientation (en degrés)</string>
-                 </property>
-                </widget>
-               </item>
-               <item row="1" column="1">
-                <widget class="QSpinBox" name="_spinSectorsNumber">
-                 <property name="maximum">
-                  <number>360</number>
-                 </property>
-                 <property name="value">
-                  <number>8</number>
-                 </property>
-                </widget>
-               </item>
-               <item row="1" column="0">
-                <widget class="QLabel" name="label_3">
-                 <property name="text">
-                  <string>Nombre de secteurs</string>
-                 </property>
-                </widget>
-               </item>
-               <item row="2" column="1">
-                <widget class="QPushButton" name="_buttonUpdateSectors">
-                 <property name="text">
-                  <string>Générer</string>
+                  <string>Coupe courante</string>
                  </property>
                 </widget>
                </item>
               </layout>
              </item>
-             <item>
-              <widget class="QLabel" name="label_5">
+             <item row="3" column="0">
+              <widget class="QLabel" name="label_8">
                <property name="text">
-                <string>Intervalle des coupes</string>
+                <string>Coupe maximale</string>
                </property>
               </widget>
              </item>
-             <item>
-              <layout class="QHBoxLayout" name="horizontalLayout_4">
+             <item row="3" column="1">
+              <layout class="QHBoxLayout" name="horizontalLayout_6">
                <property name="bottomMargin">
                 <number>0</number>
                </property>
                <item>
-                <widget class="QSpinBox" name="_spinMinSectorSlice"/>
-               </item>
-               <item>
-                <widget class="QxtSpanSlider" name="_spansliderSectorSlices">
+                <widget class="QSpinBox" name="_spinMaxSectorSlice">
                  <property name="maximum">
                   <number>0</number>
-                 </property>
-                 <property name="orientation">
-                  <enum>Qt::Horizontal</enum>
-                 </property>
-                 <property name="handleMovementMode">
-                  <enum>QxtSpanSlider::NoCrossing</enum>
                  </property>
                 </widget>
                </item>
                <item>
-                <widget class="QSpinBox" name="_spinMaxSectorSlice"/>
+                <widget class="QPushButton" name="_buttonSliceMaximalSector">
+                 <property name="text">
+                  <string>Coupe courante</string>
+                 </property>
+                </widget>
                </item>
               </layout>
+             </item>
+             <item row="4" column="1">
+              <widget class="QPushButton" name="_buttonUpdateSectors">
+               <property name="text">
+                <string>Générer</string>
+               </property>
+              </widget>
              </item>
             </layout>
            </widget>

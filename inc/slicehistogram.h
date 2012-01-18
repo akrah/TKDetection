@@ -27,18 +27,4 @@ private:
 	int _highThreshold;
 };
 
-/**********************************
- * Définition des fonctions inline
- **********************************/
-
-inline
-void SliceHistogram::setLowThreshold(const int &threshold) {
-	_lowThreshold = threshold;
-}
-
-inline
-void SliceHistogram::setHighThreshold(const int &threshold) {
-	_highThreshold = threshold;
-}
-
 #endif // SLICEHISTOGRAM_H

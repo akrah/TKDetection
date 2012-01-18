@@ -9,41 +9,17 @@ class Billon : public icube
 {
 public:
 	Billon();
-	Billon(int,int,int);
+	Billon( const int &width, const int &height, const int &depth );
 
 	int minValue() const;
 	int maxValue() const;
 
-	void setMinValue( const int );
-	void setMaxValue( const int );
+	void setMinValue( const int &value );
+	void setMaxValue( const int &value );
 
 private:
 	int _minValue;
 	int _maxValue;
 };
-
-/**********************************
- * Définition des fonctions inline
- **********************************/
-
-inline
-int Billon::minValue() const {
-	return _minValue;
-}
-
-inline
-int Billon::maxValue() const {
-	return _maxValue;
-}
-
-inline
-void Billon::setMinValue( const int max ) {
-	_minValue = max;
-}
-
-inline
-void Billon::setMaxValue( const int min ) {
-	_maxValue = min;
-}
 
 #endif // BILLON_H

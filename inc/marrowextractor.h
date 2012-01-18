@@ -31,7 +31,7 @@ public:
 	 * \fn		int getFalseCutPercent()
 	 * \return	le pourcentage de coupes fausses lors de l'extraction de la moelle
 	 */
-	int falseCutPercent(void);
+	int falseCutPercent();
 
 	/**
 	 * \fn		int getWindowWidth()
@@ -66,19 +66,19 @@ public:
 	 * \fn		void setFalseCutPercent( int percentage )
 	 * \param	percentage Le pourcentage de coupes fausses lors de l'extraction de la moelle
 	 */
-	void setFalseCutPercent( int percentage );
+	void setFalseCutPercent( const int &percentage );
 
 	/**
 	 * \fn		void setWindowWidth( int width )
 	 * \param	width Largeur de la fenêtre du voisinage de la moelle
 	 */
-	void setWindowWidth( int width );
+	void setWindowWidth( const int &width );
 
 	/**
 	 * \fn		void setWindowHeight( int height )
 	 * \param	height Hauteur de la fenêtre du voisinage de la moelle
 	 */
-	void setWindowHeight( int height );
+	void setWindowHeight( const int &height );
 
 	/**
 	 * \fn		void setBinarizationThreshold( int threshold )
@@ -86,13 +86,13 @@ public:
 	 *
 	 * En dessous de ce seuil, ou égal à ce seuil, un voxel sera considéré comme blanc.
 	 */
-	void setBinarizationThreshold( int threshold );
+	void setBinarizationThreshold( const int &threshold );
 
 	/**
 	 * \fn		void setMarrowLag( int lag )
 	 * \param	lag Distance maximal entre deux voxel pour qu'ils soient acceptés comme appartenant à la moelle
 	 */
-	void setMarrowLag( int lag );
+	void setMarrowLag( const int &lag );
 
 private:
 	/**
@@ -202,26 +202,26 @@ int MarrowExtractor::marrowLag() {
 }
 
 inline
-void MarrowExtractor::setFalseCutPercent( int percentage ) {
+void MarrowExtractor::setFalseCutPercent( const int &percentage ) {
 	_falseCutPercent = percentage;
 }
 
 inline
-void MarrowExtractor::setWindowWidth( int width ) {
+void MarrowExtractor::setWindowWidth( const int &width ) {
 	_windowWidth = width;
 }
 
 inline
-void MarrowExtractor::setWindowHeight( int height ) {
+void MarrowExtractor::setWindowHeight( const int &height ) {
 	_windowHeight = height;
 }
 
 inline
-void MarrowExtractor::setBinarizationThreshold( int threshold ) {
+void MarrowExtractor::setBinarizationThreshold( const int &threshold ) {
 	_binarizationThreshold = threshold;
 }
 
-inline void MarrowExtractor::setMarrowLag( int lag ) {
+inline void MarrowExtractor::setMarrowLag( const int &lag ) {
 	_marrowLag = lag;
 }
 

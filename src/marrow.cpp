@@ -1,13 +1,16 @@
 #include "inc/marrow.h"
 
 #include <QPainter>
-#include <iostream>
 
 Marrow::Marrow() : QList<Coord2D>(), _begin(0), _end(0) {
 }
 
-Marrow::Marrow( int begin, int end ) : QList<Coord2D>(), _begin(begin), _end(end) {
+Marrow::Marrow( const int &begin, const int &end ) : QList<Coord2D>(), _begin(begin), _end(end) {
 }
+
+/*******************************
+ * Public getters
+ *******************************/
 
 int Marrow::beginSlice() const {
 	return _begin;
@@ -17,10 +20,13 @@ int Marrow::endSlice() const {
 	return _end;
 }
 
-void Marrow::draw( QPainter &painter, int sliceIdx ) const {
+/*******************************
+ * Public setters
+ *******************************/
+
+void Marrow::draw( QPainter &painter, const int &sliceIdx ) const {
 	if ( (sliceIdx>=_begin) && (sliceIdx<=_end) ) {
 		const Coord2D &coordToDraw = at(sliceIdx-_begin);
-		std::cout << "Affichage de la moelle en " << coordToDraw << std::endl;
 
 		QPainterPath ellipsePath;
 		ellipsePath.addEllipse(coordToDraw.x-5,coordToDraw.y-5,10,10);
