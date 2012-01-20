@@ -101,7 +101,7 @@
     <item>
      <widget class="QTabWidget" name="_tabs">
       <property name="currentIndex">
-       <number>1</number>
+       <number>2</number>
       </property>
       <widget class="QWidget" name="_tabGeneral">
        <attribute name="title">
@@ -169,9 +169,6 @@
                </property>
                <property name="orientation">
                 <enum>Qt::Horizontal</enum>
-               </property>
-               <property name="handleMovementMode">
-                <enum>QxtSpanSlider::NoOverlapping</enum>
                </property>
               </widget>
              </item>
@@ -428,6 +425,21 @@
         </item>
        </layout>
       </widget>
+      <widget class="QWidget" name="tab">
+       <attribute name="title">
+        <string>Page</string>
+       </attribute>
+       <widget class="QwtPolarPlot" name="_polarTest">
+        <property name="geometry">
+         <rect>
+          <x>30</x>
+          <y>30</y>
+          <width>400</width>
+          <height>400</height>
+         </rect>
+        </property>
+       </widget>
+      </widget>
      </widget>
     </item>
    </layout>
@@ -483,6 +495,11 @@
    <class>QwtPlot</class>
    <extends>QFrame</extends>
    <header>qwt_plot.h</header>
+  </customwidget>
+  <customwidget>
+   <class>QwtPolarPlot</class>
+   <extends>QFrame</extends>
+   <header>qwt_polar_plot.h</header>
   </customwidget>
   <customwidget>
    <class>QxtSpanSlider</class>

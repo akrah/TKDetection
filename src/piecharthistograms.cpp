@@ -158,7 +158,7 @@ void PieChartHistograms::computeHistograms() {
 				for ( int i=0 ; i<sliceWidth ; ++i ) {
 					const int sectorIdx = _pieChart->partOfAngle( TWO_PI-ANGLE(centerX,centerY,i,j) );
 					const int diffVal = std::abs(RESTRICT_TO_INTERVAL(_billon->at(j,i,k),_lowThreshold,_highThreshold)-RESTRICT_TO_INTERVAL(_billon->at(j,i,previousSlice),_lowThreshold,_highThreshold));
-					if ( diffVal != 0 ) {
+					if ( diffVal > 140 ) {
 						datas[sectorIdx][diffVal].value += 1.;
 						sectorsSum[sectorIdx].second += diffVal;
 					}
@@ -167,13 +167,13 @@ void PieChartHistograms::computeHistograms() {
 		}
 
 		for ( int i=0 ; i<nbSectors ; ++i ) {
-			std::cout << "Secteur " << std::setw(3) << sectorsSum[i].first << " : " << std::setw(8) << sectorsSum[i].second << std::endl;
+			std::cout << "Sect. " << std::setw(3) << sectorsSum[i].first << " : " << std::setw(8) << sectorsSum[i].second << std::endl;
 		}
 
 		std::sort(sectorsSum.begin(),sectorsSum.end(),myfunction);
 
 		for ( int i=0 ; i<nbSectors ; ++i ) {
-			std::cout << "Secteur " << std::setw(3) << sectorsSum[i].first << " : " << std::setw(8) << sectorsSum[i].second << std::endl;
+			std::cout << i << ") Sect. " << std::setw(3) << sectorsSum[i].first << " : " << std::setw(8) << sectorsSum[i].second << std::endl;
 		}
 
 

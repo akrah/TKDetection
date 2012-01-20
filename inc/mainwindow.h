@@ -18,6 +18,37 @@ class SliceHistogram;
 class PieChart;
 class PieChartHistograms;
 
+#include <qwt_polar_curve.h>
+
+class PointsPolarSeries: public QwtSeriesData<QwtPointPolar>
+{
+public:
+	PointsPolarSeries() : QwtSeriesData<QwtPointPolar>() {}
+	~PointsPolarSeries() {}
+
+	virtual size_t size() const {
+		return _data.size();
+	}
+
+	virtual QwtPointPolar sample( size_t i ) const
+	{
+		return _data[i%_data.size()];
+	}
+
+	virtual QRectF boundingRect() const
+	{
+		if ( d_boundingRect.width() < 0.0 ) d_boundingRect = qwtBoundingRect( *this );
+		return d_boundingRect;
+	}
+
+	void append( QwtPointPolar point ) {
+		_data.append(point);
+	}
+
+protected:
+	QVector<QwtPointPolar> _data;
+};
+
 class MainWindow : public QMainWindow
 {
 	Q_OBJECT
@@ -65,6 +96,9 @@ private:
 	PieChart *_pieChart;
 	PieChartHistograms *_pieChartHistograms;
 	QList<QwtPlot *> _pieChartPlots;
+
+	QwtPolarCurve courbe;
+	PointsPolarSeries *datas;
 };
 
 #endif // MAINWINDOW_H

@@ -10,7 +10,7 @@ class QPainter;
 class PieChart
 {
 public:
-	PieChart( double orientation, int nbSectors );
+	PieChart( const double &orientation, const int &nbSectors );
 
 	double orientation() const;
 	double angle() const;

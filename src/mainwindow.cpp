@@ -76,6 +76,14 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 	QObject::connect(_ui->_actionQuit, SIGNAL(triggered()), this, SLOT(close()));
 
 	_ui->_radioCurrentSlice->click();
+
+	datas = new PointsPolarSeries();
+	int sum = 120;
+	for ( int i=0 ; i<sum ; ++i ) {
+		datas->append(QwtPointPolar(i*720.0/sum,i));
+	}
+	courbe.setData(datas);
+	courbe.attach(_ui->_polarTest);
 }
 
 MainWindow::~MainWindow() {

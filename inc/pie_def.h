@@ -10,7 +10,7 @@
 #define DEG_TO_RAD_FACT	(PI/180.)
 
 namespace {
-	inline double ANGLE( double xo, double yo, double x2, double y2 ) {
+	inline double ANGLE( const double &xo, const double &yo, const double &x2, const double &y2 ) {
 		const double x_diff = x2-xo;
 		double arcos = std::acos(x_diff / sqrt(pow(x_diff,2)+pow(y2-yo,2)));
 		if ( yo > y2 ) arcos = -arcos+TWO_PI;

@@ -6,7 +6,7 @@ class QString;
 
 namespace DicomReader {
 
-	Billon* read( const QString & );
+	Billon* read( const QString &repository );
 }
 
 #endif // DICOMREADER_H

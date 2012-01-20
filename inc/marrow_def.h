@@ -6,15 +6,15 @@
 typedef struct coord2d {
 	int x, y;
 	coord2d() : x(0), y(0) {}
-	coord2d(int x, int y) : x(x), y(y) {}
+	coord2d(const int &x, const int &y) : x(x), y(y) {}
 } Coord2D;
 
 typedef struct coord3d {
 	int x, y, z;
 	coord3d() : x(0), y(0), z(0) {}
-	coord3d(int x, int y, int z) : x(x), y(y), z(z) {}
+	coord3d(const int &x, const int &y, const int &z) : x(x), y(y), z(z) {}
 } Coord3D;
 
-std::ostream& operator<<( std::ostream &flux, Coord2D const& coord );
+std::ostream& operator<<( std::ostream &flux, const Coord2D & coord );
 
 #endif // MARROW_DEF_H

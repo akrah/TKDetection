@@ -18,7 +18,7 @@ namespace {
 	}
 }
 
-PieChart::PieChart( double orientation, int nbSectors ) : _orientation(orientation), _angle(TWO_PI/static_cast<double>(nbSectors)) {
+PieChart::PieChart( const double &orientation, const int &nbSectors ) : _orientation(orientation), _angle(TWO_PI/static_cast<double>(nbSectors)) {
 	updateSectors();
 }
 

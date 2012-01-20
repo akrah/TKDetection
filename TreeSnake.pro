@@ -4,88 +4,75 @@
 #
 #-------------------------------------------------
 
-QT       *= core gui
-CONFIG   *= qt thread
+QT			*=	core gui
+CONFIG		*=	qwt qxt qwtpolar
 
-#CONFIG   *= qxt
-#QXT      *= core gui
+QXT			=	core gui
 
-TEMPLATE  = app
-TARGET	  = TreeSnake
+TEMPLATE	=	app
+TARGET		=	TreeSnake
 
-DEPENDPATH *= ./src/ ./inc/	./ui/
+DEPENDPATH	*=	./src/ ./inc/ ./ui/
 
-SOURCES  *= main.cpp \
-			billon.cpp \
-			dicomreader.cpp \
-			mainwindow.cpp \
-			marrowextractor.cpp \
-			piechart.cpp \
-			slicehistogram.cpp \
-			sliceview.cpp \
-			src/piepart.cpp \
-			src/piecharthistograms.cpp \
-			src/marrow.cpp \
-			src/marrow_def.cpp \
-    src/marrowextractor_def.cpp
+SOURCES		=	main.cpp \
+				billon.cpp \
+				dicomreader.cpp \
+				mainwindow.cpp \
+				marrow.cpp \
+				marrow_def.cpp \
+				marrowextractor.cpp \
+				marrowextractor_def.cpp \
+				piechart.cpp \
+				piecharthistograms.cpp \
+				piepart.cpp \
+				slicehistogram.cpp \
+				sliceview.cpp
 
-HEADERS  *= billon.h \
-			dicomreader.h \
-			mainwindow.h \
-			marrowextractor.h \
-			marrowextractor_def.h \
-			piechart.h \
-			slicehistogram.h \
-			sliceview.h \
-			sliceview_def.h \
-			inc/piepart.h \
-			inc/piecharthistograms.h \
-			inc/pie_def.h \
-			inc/marrow.h \
-			inc/marrow_def.h
+HEADERS		=	billon.h \
+				dicomreader.h \
+				mainwindow.h \
+				marrow.h \
+				marrow_def.h \
+				marrowextractor.h \
+				marrowextractor_def.h \
+				pie_def.h \
+				piepart.h \
+				piecharthistograms.h \
+				piechart.h \
+				slicehistogram.h \
+				sliceview.h \
+				sliceview_def.h
 
-FORMS    *= mainwindow.ui
+FORMS		=	mainwindow.ui
 
-ITK_PATH  = /usr/local/include/InsightToolkit
-QXT_PATH  = /usr/include/qxt
-QWT_PATH  = /usr/include/qwt
+ITK_PATH	=	/usr/local/include/InsightToolkit
 
-INCLUDEPATH  *= \
-#				/usr/include/c++/4.6/ \
-#				/usr/include/ \
-				/usr/local/include/ \
-				$${ITK_PATH}/IO/ \
+INCLUDEPATH	*=	$${ITK_PATH}/IO/ \
 				$${ITK_PATH}/Common/ \
 				$${ITK_PATH}/ \
 				$${ITK_PATH}/Utilities/vxl/vcl/ \
 				$${ITK_PATH}/Utilities/vxl/core/ \
 				$${ITK_PATH}/gdcm/src/ \
-				$${ITK_PATH}/Utilities/ \
-				$${QXT_PATH}/QxtGui/ \
-				$${QXT_PATH}/QxtCore/ \
-				$${QWT_PATH}
+				$${ITK_PATH}/Utilities/
 
-QMAKE_LIBDIR *= /usr/local/lib/InsightToolkit/
+QMAKE_LIBDIR *=	/usr/local/lib/InsightToolkit/
 
-LIBS  *= \
-		-lITKIO \
-		-litkgdcm \
-		-litkjpeg8 \
-		-litktiff \
-		-lITKMetaIO \
-		-lITKNrrdIO \
-		-litkpng \
-		-litkzlib \
-		-lITKDICOMParser \
-		-litkjpeg12 \
-		-litkjpeg16 \
-		-litkopenjpeg \
-		-lITKniftiio \
-		-lITKznz \
-		-lITKCommon \
-		-litksys \
-		-litkvnl_algo \
-		-litkv3p_netlib \
-		-litkvnl \
-		-lQxtGui \
-		-lqwt
+LIBS		*=	-lITKIO \
+				-litkgdcm \
+				-litkjpeg8 \
+				-litktiff \
+				-lITKMetaIO \
+				-lITKNrrdIO \
+				-litkpng \
+				-litkzlib \
+				-lITKDICOMParser \
+				-litkjpeg12 \
+				-litkjpeg16 \
+				-litkopenjpeg \
+				-lITKniftiio \
+				-lITKznz \
+				-lITKCommon \
+				-litksys \
+				-litkvnl_algo \
+				-litkv3p_netlib \
+				-litkvnl
