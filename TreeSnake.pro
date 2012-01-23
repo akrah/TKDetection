@@ -26,7 +26,8 @@ SOURCES		=	main.cpp \
 				piecharthistograms.cpp \
 				piepart.cpp \
 				slicehistogram.cpp \
-				sliceview.cpp
+				sliceview.cpp \
+    src/pointpolarseriesdata.cpp
 
 HEADERS		=	billon.h \
 				dicomreader.h \
@@ -41,7 +42,8 @@ HEADERS		=	billon.h \
 				piechart.h \
 				slicehistogram.h \
 				sliceview.h \
-				sliceview_def.h
+				sliceview_def.h \
+    inc/pointpolarseriesdata.h
 
 FORMS		=	mainwindow.ui
 

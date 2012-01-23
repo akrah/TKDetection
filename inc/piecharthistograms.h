@@ -8,6 +8,8 @@ class Marrow;
 class PieChart;
 class QwtPlot;
 class QwtPlotHistogram;
+class QwtPolarPlot;
+class QwtPolarCurve;
 
 class PieChartHistograms
 {
@@ -21,6 +23,7 @@ public:
 	void setModel( const PieChart * pieChart );
 	void setModel( const Marrow * marrow );
 	void attach( const QList<QwtPlot *> & plots );
+	void attach( QwtPolarPlot * polarPlot );
 
 	void setLowThreshold( const int &threshold );
 	void setHighThreshold( const int &threshold );
@@ -44,6 +47,7 @@ private:
 	int _highThreshold;
 
 	QList<QwtPlotHistogram *> _histograms;
+	QwtPolarCurve *_polarCurve;
 };
 
 #endif // PIECHARTHISTOGRAMS_H

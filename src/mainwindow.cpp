@@ -76,14 +76,6 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 	QObject::connect(_ui->_actionQuit, SIGNAL(triggered()), this, SLOT(close()));
 
 	_ui->_radioCurrentSlice->click();
-
-	datas = new PointsPolarSeries();
-	int sum = 120;
-	for ( int i=0 ; i<sum ; ++i ) {
-		datas->append(QwtPointPolar(i*720.0/sum,i));
-	}
-	courbe.setData(datas);
-	courbe.attach(_ui->_polarTest);
 }
 
 MainWindow::~MainWindow() {
@@ -257,6 +249,8 @@ void MainWindow::updateSectorsHistograms() {
 	}
 
 	_ui->_comboSelectSector->clear();
+	_ui->_polarTest->detachItems(QwtPolarItem::Rtti_PolarCurve,false);
+	_ui->_polarTest->replot();
 
 	if ( _pieChartHistograms != 0 ) {
 		_pieChartHistograms->setBillonInterval(_ui->_spinMinSectorSlice->value(),_ui->_spinMaxSectorSlice->value());
@@ -274,10 +268,12 @@ void MainWindow::updateSectorsHistograms() {
 			}
 
 			_pieChartHistograms->attach(_pieChartPlots);
+			_pieChartHistograms->attach(_ui->_polarTest);
 
 			for ( int i=0 ; i<nbHistograms ; ++i ) {
 				_pieChartPlots[i]->replot();
 			}
+			_ui->_polarTest->replot();
 
 			_ui->_labelSectorsOrientation->setNum(_ui->_spinSectorsOrientation->value());
 			_ui->_labelSectorsNumber->setNum(_ui->_spinSectorsNumber->value());
