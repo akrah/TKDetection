@@ -1,6 +1,7 @@
 #ifndef BILLON_H
 #define BILLON_H
 
+#include <qglobal.h>
 #include <armadillo>
 
 using namespace arma;

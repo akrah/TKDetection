@@ -16,7 +16,7 @@ class Marrow;
 class SliceView;
 class SliceHistogram;
 class PieChart;
-class PieChartHistograms;
+class PieChartDiagrams;
 
 class MainWindow : public QMainWindow
 {
@@ -44,6 +44,7 @@ private slots:
 	void setMaximumSectorsIntervalToCurrentSlice();
 	void updateMinimumSectorsIntervalExtremum( const int &value );
 	void updateMaximumSectorsIntervalExtremum( const int &value );
+	void setMinimalDifferenceForSectors( const int &minimalDifference );
 
 private:
 	void openNewBillon(const QString &folderName = "");
@@ -63,7 +64,7 @@ private:
 	QwtPlotCurve _histogramCursor;
 
 	PieChart *_pieChart;
-	PieChartHistograms *_pieChartHistograms;
+	PieChartDiagrams *_pieChartDiagrams;
 	QList<QwtPlot *> _pieChartPlots;
 };
 

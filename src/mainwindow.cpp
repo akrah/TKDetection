@@ -2,28 +2,26 @@
 
 #include "ui_mainwindow.h"
 #include "inc/billon.h"
+#include "inc/global.h"
 #include "inc/marrow.h"
 #include "inc/sliceview.h"
 #include "inc/dicomreader.h"
 #include "inc/slicehistogram.h"
 #include "inc/marrowextractor.h"
-#include "inc/pie_def.h"
 #include "inc/piepart.h"
 #include "inc/piechart.h"
-#include "inc/piecharthistograms.h"
-
-#include <iostream>
+#include "inc/piechartdiagrams.h"
 
 #include <QFileDialog>
 #include <QMouseEvent>
 #include <QPainter>
 
-MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::MainWindow), _billon(0), _marrow(0), _sliceView(new SliceView()), _sliceHistogram(0), _pieChart(new PieChart(0,1)), _pieChartHistograms(new PieChartHistograms()) {
+MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::MainWindow), _billon(0), _marrow(0), _sliceView(new SliceView()), _sliceHistogram(0), _pieChart(new PieChart(0,1)), _pieChartDiagrams(new PieChartDiagrams()) {
 	_ui->setupUi(this);
 
 	// Initialisation des vues
 	_sliceHistogram = new SliceHistogram(_ui->_plotSliceHistogram);
-	_pieChartHistograms->setModel(_pieChart);
+	_pieChartDiagrams->setModel(_pieChart);
 
 	// Paramétrisation des composant graphiques
 	_ui->_labelSliceView->installEventFilter(this);
@@ -66,6 +64,7 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 	QObject::connect(_ui->_buttonSliceMinimalSector, SIGNAL(clicked()), this, SLOT(setMinimumSectorsIntervalToCurrentSlice()));
 	QObject::connect(_ui->_spinMaxSectorSlice, SIGNAL(valueChanged(int)), this, SLOT(updateMinimumSectorsIntervalExtremum(int)));
 	QObject::connect(_ui->_buttonSliceMaximalSector, SIGNAL(clicked()), this, SLOT(setMaximumSectorsIntervalToCurrentSlice()));
+	QObject::connect(_ui->_spinMinimumIntensityForSum, SIGNAL(valueChanged(int)), this, SLOT(setMinimalDifferenceForSectors(int)));
 
 	// Raccourcis des actions du menu
 	_ui->_actionOpenDicom->setShortcut(Qt::CTRL + Qt::Key_O);
@@ -82,7 +81,7 @@ MainWindow::~MainWindow() {
 	while ( !_pieChartPlots.isEmpty() ) {
 		_pieChartPlots.removeLast();
 	}
-	if ( _pieChartHistograms != 0 ) delete _pieChartHistograms;
+	if ( _pieChartDiagrams != 0 ) delete _pieChartDiagrams;
 	if ( _pieChart != 0 ) delete _pieChart;
 	if ( _marrow != 0 ) delete _marrow;
 	if ( _sliceHistogram != 0 ) delete _sliceHistogram;
@@ -98,7 +97,7 @@ MainWindow::~MainWindow() {
 bool MainWindow::eventFilter(QObject *obj, QEvent *event) {
 	bool res = true;
 	if (obj == _ui->_labelSliceView) {
-		if ( _billon != 0 && _pieChartHistograms != 0 && event->type() == QEvent::MouseButtonPress ) {
+		if ( _billon != 0 && _pieChartDiagrams != 0 && event->type() == QEvent::MouseButtonPress ) {
 			QMouseEvent *mouseEvent = static_cast<QMouseEvent*>(event);
 			const int x = mouseEvent->x();
 			const int y = mouseEvent->y();
@@ -178,7 +177,7 @@ void MainWindow::setTypeOfView( const int &type ) {
 void MainWindow::setLowThreshold( const int &threshold ) {
 	if ( _sliceView != 0 ) _sliceView->setLowThreshold(threshold);
 	if ( _sliceHistogram ) _sliceHistogram->setLowThreshold(threshold);
-	if ( _pieChartHistograms != 0 ) _pieChartHistograms->setLowThreshold(threshold);
+	if ( _pieChartDiagrams != 0 ) _pieChartDiagrams->setLowThreshold(threshold);
 
 	_ui->_spansliderSliceThreshold->blockSignals(true);
 		_ui->_spansliderSliceThreshold->setLowerValue(threshold);
@@ -195,7 +194,7 @@ void MainWindow::setLowThreshold( const int &threshold ) {
 void MainWindow::setHighThreshold( const int &threshold ) {
 	if ( _sliceView != 0 ) _sliceView->setHighThreshold(threshold);
 	if ( _sliceHistogram ) _sliceHistogram->setHighThreshold(threshold);
-	if ( _pieChartHistograms != 0 ) _pieChartHistograms->setHighThreshold(threshold);
+	if ( _pieChartDiagrams != 0 ) _pieChartDiagrams->setHighThreshold(threshold);
 
 	_ui->_spansliderSliceThreshold->blockSignals(true);
 		_ui->_spansliderSliceThreshold->setUpperValue(threshold);
@@ -217,9 +216,9 @@ void MainWindow::updateSliceHistogram() {
 
 
 void MainWindow::highlightSliceHistogram( const int &slicePosition ) {
-	double height = _sliceHistogram->sample(slicePosition).value;
-	double x[4] = {slicePosition,slicePosition, slicePosition+1,slicePosition+1};
-	double y[4] = {0,height,height,0};
+	qreal height = _sliceHistogram->sample(slicePosition).value;
+	qreal x[4] = {slicePosition,slicePosition, slicePosition+1,slicePosition+1};
+	qreal y[4] = {0,height,height,0};
 	_histogramCursor.setSamples(x,y,4);
 	_ui->_plotSliceHistogram->replot();
 }
@@ -233,7 +232,7 @@ void MainWindow::updateMarrow() {
 		MarrowExtractor extractor;
 		_marrow = extractor.process(*_billon,0,_billon->n_slices-1);
 	}
-	_pieChartHistograms->setModel(_marrow);
+	_pieChartDiagrams->setModel(_marrow);
 	drawSlice();
 }
 
@@ -252,11 +251,11 @@ void MainWindow::updateSectorsHistograms() {
 	_ui->_polarTest->detachItems(QwtPolarItem::Rtti_PolarCurve,false);
 	_ui->_polarTest->replot();
 
-	if ( _pieChartHistograms != 0 ) {
-		_pieChartHistograms->setBillonInterval(_ui->_spinMinSectorSlice->value(),_ui->_spinMaxSectorSlice->value());
-		_pieChartHistograms->computeHistograms();
+	if ( _pieChartDiagrams != 0 ) {
+		_pieChartDiagrams->setBillonInterval(_ui->_spinMinSectorSlice->value(),_ui->_spinMaxSectorSlice->value());
+		_pieChartDiagrams->compute();
 
-		const int nbHistograms = _pieChartHistograms->count();
+		const int nbHistograms = _pieChartDiagrams->count();
 		if ( nbHistograms != 0 ) {
 
 			_pieChartPlots.reserve(nbHistograms);
@@ -267,8 +266,8 @@ void MainWindow::updateSectorsHistograms() {
 				_ui->_comboSelectSector->addItem(tr("Secteur %1").arg(i));
 			}
 
-			_pieChartHistograms->attach(_pieChartPlots);
-			_pieChartHistograms->attach(_ui->_polarTest);
+			_pieChartDiagrams->attach(_pieChartPlots);
+			_pieChartDiagrams->attach(_ui->_polarTest);
 
 			for ( int i=0 ; i<nbHistograms ; ++i ) {
 				_pieChartPlots[i]->replot();
@@ -308,6 +307,12 @@ void MainWindow::updateMaximumSectorsIntervalExtremum( const int &value ) {
 	_ui->_spinMaxSectorSlice->setMinimum(value);
 }
 
+void MainWindow::setMinimalDifferenceForSectors( const int &minimalDifference ) {
+	if ( _pieChartDiagrams != 0 ) {
+		_pieChartDiagrams->setMinimalDifference(minimalDifference);
+	}
+}
+
 /*******************************
  * Private functions
  *******************************/
@@ -322,7 +327,7 @@ void MainWindow::openNewBillon( const QString &folderName ) {
 	}
 	if ( _sliceView != 0 ) _sliceView->setModel(_billon);
 	if ( _sliceHistogram != 0 ) _sliceHistogram->setModel(_billon);
-	if ( _pieChartHistograms != 0 ) _pieChartHistograms->setModel(_billon);
+	if ( _pieChartDiagrams != 0 ) _pieChartDiagrams->setModel(_billon);
 }
 
 void MainWindow::drawSlice() {
@@ -369,6 +374,8 @@ void MainWindow::updateComponentsValues() {
 	_ui->_sliderSelectSlice->setValue(0);
 	_ui->_sliderSelectSlice->setRange(0,nbSlices-1);
 
+	_ui->_spinMinimumIntensityForSum->setRange(0,maxValue-minValue);
+
 	enabledComponents();
 }
 
@@ -378,4 +385,8 @@ void MainWindow::enabledComponents() {
 	_ui->_spansliderSliceThreshold->setEnabled(enable);
 	_ui->_buttonComputeMarrow->setEnabled(enable);
 	_ui->_buttonUpdateSliceHistogram->setEnabled(enable);
+	_ui->_buttonSliceMaximalSector->setEnabled(enable);
+	_ui->_buttonSliceMinimalSector->setEnabled(enable);
+	_ui->_buttonUpdateSectors->setEnabled(enable);
+	_ui->_comboSelectSector->setEnabled(enable);
 }

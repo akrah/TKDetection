@@ -23,11 +23,11 @@ SOURCES		=	main.cpp \
 				marrowextractor.cpp \
 				marrowextractor_def.cpp \
 				piechart.cpp \
-				piecharthistograms.cpp \
+				piechartdiagrams.cpp \
 				piepart.cpp \
+				pointpolarseriesdata.cpp \
 				slicehistogram.cpp \
 				sliceview.cpp \
-    src/pointpolarseriesdata.cpp
 
 HEADERS		=	billon.h \
 				dicomreader.h \
@@ -36,14 +36,14 @@ HEADERS		=	billon.h \
 				marrow_def.h \
 				marrowextractor.h \
 				marrowextractor_def.h \
-				pie_def.h \
 				piepart.h \
-				piecharthistograms.h \
+				piechartdiagrams.h \
 				piechart.h \
+				pointpolarseriesdata.h \
 				slicehistogram.h \
 				sliceview.h \
 				sliceview_def.h \
-    inc/pointpolarseriesdata.h
+	inc/global.h
 
 FORMS		=	mainwindow.ui
 

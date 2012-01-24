@@ -1,5 +1,5 @@
-#ifndef PIECHARTHISTOGRAMS_H
-#define PIECHARTHISTOGRAMS_H
+#ifndef PIECHARTDIAGRAMS_H
+#define PIECHARTDIAGRAMS_H
 
 #include <QList>
 
@@ -11,26 +11,27 @@ class QwtPlotHistogram;
 class QwtPolarPlot;
 class QwtPolarCurve;
 
-class PieChartHistograms
+class PieChartDiagrams
 {
 public:
-	PieChartHistograms();
-	~PieChartHistograms();
+	PieChartDiagrams();
+	~PieChartDiagrams();
 
 	int count() const;
 
-	void setModel( const Billon * billon );
-	void setModel( const PieChart * pieChart );
-	void setModel( const Marrow * marrow );
+	void setModel( const Billon * const billon );
+	void setModel( const PieChart * const pieChart );
+	void setModel( const Marrow * const marrow );
+
 	void attach( const QList<QwtPlot *> & plots );
-	void attach( QwtPolarPlot * polarPlot );
+	void attach( QwtPolarPlot * const polarPlot );
 
 	void setLowThreshold( const int &threshold );
 	void setHighThreshold( const int &threshold );
 	void setBillonInterval( const int &sliceMin, const int &sliceMax );
+	void setMinimalDifference( const int &minimalDifference );
 
-	void computeHistograms();
-	void computeHistograms2();
+	void compute();
 
 private:
 	bool intervalIsValid() const;
@@ -45,9 +46,10 @@ private:
 	int _endSlice;
 	int _lowThreshold;
 	int _highThreshold;
+	int _minimalDifference;
 
 	QList<QwtPlotHistogram *> _histograms;
 	QwtPolarCurve *_polarCurve;
 };
 
-#endif // PIECHARTHISTOGRAMS_H
+#endif // PIECHARTDIAGRAMS_H

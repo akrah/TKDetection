@@ -1,12 +1,8 @@
 #include "inc/slicehistogram.h"
 
 #include "inc/billon.h"
+#include "inc/global.h"
 #include <qwt_plot.h>
-
-namespace {
-	template<class T>
-	inline T RESTRICT_TO_INTERVAL(T x, T min, T max) { return qMax((min),qMin((max),(x))); }
-}
 
 SliceHistogram::SliceHistogram( QwtPlot *parent ) : QObject(), QwtPlotHistogram(),  _billon(0), _lowThreshold(0), _highThreshold(0) {
 	attach(parent);
@@ -49,17 +45,17 @@ void SliceHistogram::constructHistogram() {
 
 		_datas.reserve(depth-1);
 
-		double cumul;
-		for (unsigned int k=1 ; k<depth ; k++) {
+		qreal cumul;
+		for (uint k=1 ; k<depth ; k++) {
 			const imat &slice = billon.slice(k);
 			const imat &prevSlice = billon.slice(k-1);
 			cumul = 0;
-			for (unsigned int j=0 ; j<height ; j++) {
-				for (unsigned int i=0 ; i<width ; i++) {
+			for (uint j=0 ; j<height ; j++) {
+				for (uint i=0 ; i<width ; i++) {
 					cumul += qAbs(RESTRICT_TO_INTERVAL(slice.at(j,i),minValue,maxValue) - RESTRICT_TO_INTERVAL(prevSlice.at(j,i),minValue,maxValue));
 				}
 			}
-			_datas.append(QwtIntervalSample(cumul/nbPixels,k-1,k));
+			if ( cumul != 0 ) _datas.append(QwtIntervalSample(cumul/nbPixels,k-1,k));
 		}
 	}
 	static_cast<QwtIntervalSeriesData *>(data())->setSamples(_datas);

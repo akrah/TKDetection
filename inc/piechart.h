@@ -10,14 +10,14 @@ class QPainter;
 class PieChart
 {
 public:
-	PieChart( const double &orientation, const int &nbSectors );
+	PieChart( const qreal &orientation, const int &nbSectors );
 
-	double orientation() const;
-	double angle() const;
+	qreal orientation() const;
+	qreal angle() const;
 	int nbSectors() const;
-	int partOfAngle( const double &angle ) const;
+	int partOfAngle( const qreal &angle ) const;
 
-	void setOrientation( const double &orientation );
+	void setOrientation( const qreal &orientation );
 	void setSectorsNumber( const int &nbSectors );
 
 	void draw( QPainter &painter, const int &sectorIdx, const Coord2D &center ) const;
@@ -26,8 +26,8 @@ private:
 	void updateSectors();
 
 private:
-	double _orientation;
-	double _angle;
+	qreal _orientation;
+	qreal _angle;
 
 	QList<PiePart> _sectors;
 };

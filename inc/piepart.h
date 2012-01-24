@@ -1,27 +1,29 @@
 #ifndef PIEPART_H
 #define PIEPART_H
 
+#include <QtGlobal>
+
 class PiePart
 {
 public:
 	PiePart();
-	PiePart( const double &orientation, const double &angle );
+	PiePart( const qreal &orientation, const qreal &angle );
 
-	double angle() const;
-	double orientation() const;
-	double rightAngle() const;
-	double leftAngle() const;
+	qreal angle() const;
+	qreal orientation() const;
+	qreal rightAngle() const;
+	qreal leftAngle() const;
 
-	bool contains( const double &angle ) const;
+	bool contains( const qreal &angle ) const;
 
-	void setAngle( const double &angle );
-	void setOrientation( const double &orientation );
+	void setAngle( const qreal &angle );
+	void setOrientation( const qreal &orientation );
 
 private:
-	double _orientation;
-	double _angle;
-	double _leftAngle;
-	double _rightAngle;
+	qreal _orientation;
+	qreal _angle;
+	qreal _leftAngle;
+	qreal _rightAngle;
 };
 
 #endif // PIEPART_H

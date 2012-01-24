@@ -1,13 +1,9 @@
 #include "inc/sliceview.h"
 
 #include "inc/billon.h"
+#include "inc/global.h"
 #include "inc/marrow.h"
 #include <QPainter>
-
-namespace {
-	template<class T>
-	inline T RESTRICT_TO_INTERVAL(T x, T min, T max) { return qMax((min),qMin((max),(x))); }
-}
 
 SliceView::SliceView() : QObject(0), _billon(0), _lowThreshold(0), _highThreshold(0), _typeOfView(SliceType::CURRENT) {
 }
@@ -71,13 +67,13 @@ void SliceView::drawCurrentSlice( QPainter &painter, const int &sliceNumber ) {
 	const uint height = slice.n_rows;
 	const int minValue = _lowThreshold;
 	const int maxValue = _highThreshold;
-	const double fact = 255.0/(maxValue-minValue);
+	const qreal fact = 255.0/(maxValue-minValue);
 
 	QImage image(width,height,QImage::Format_ARGB32);
 	QRgb * line = (QRgb *) image.bits();
 
-	for (unsigned int j=0 ; j<height ; j++) {
-		for (unsigned int i=0 ; i<width ; i++) {
+	for (uint j=0 ; j<height ; j++) {
+		for (uint i=0 ; i<width ; i++) {
 			const int c = (RESTRICT_TO_INTERVAL(slice.at(j,i),minValue,maxValue)-minValue)*fact;
 			*(line++) = qRgb(c,c,c);
 		}
@@ -99,10 +95,10 @@ void SliceView::drawAverageSlice( QPainter &painter ) {
 	int c;
 	QRgb * line = (QRgb *) image.bits();
 
-	for (unsigned int j=0 ; j<height ; j++) {
-		for (unsigned int i=0 ; i<width ; i++) {
+	for (uint j=0 ; j<height ; j++) {
+		for (uint i=0 ; i<width ; i++) {
 			c = depth*(-minValue);
-			for (unsigned int k=0 ; k<depth ; k++) {
+			for (uint k=0 ; k<depth ; k++) {
 				c += RESTRICT_TO_INTERVAL(billon.at(j,i,k),minValue,maxValue);
 			}
 			c *= fact;
@@ -125,10 +121,10 @@ void SliceView::drawMedianSlice( QPainter &painter ) {
 	QImage image(width,height,QImage::Format_ARGB32);
 	QRgb * line =(QRgb *) image.bits();
 
-	for (unsigned int j=0 ; j<height ; j++) {
-		for (unsigned int i=0 ; i<width ; i++) {
+	for (uint j=0 ; j<height ; j++) {
+		for (uint i=0 ; i<width ; i++) {
 			ivec tab(depth);
-			for (unsigned int k=0 ; k<depth ; k++) {
+			for (uint k=0 ; k<depth ; k++) {
 				tab(k) = RESTRICT_TO_INTERVAL(billon.at(j,i,k),minValue,maxValue);
 			}
 			const int c = (median(tab)-minValue)*fact;

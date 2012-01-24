@@ -2,11 +2,7 @@
 
 #include "inc/marrow.h"
 #include "inc/marrowextractor_def.h"
-
-namespace {
-	template<class T>
-	inline T RESTRICT_TO_INTERVAL(T x, T min, T max) { return qMax((min),qMin((max),(x))); }
-}
+#include "inc/global.h"
 
 MarrowExtractor::MarrowExtractor() :
 	_falseCutPercent(MarrowExtractorDefaultsParameters::FALSE_CUT_PERCENT),
@@ -136,15 +132,15 @@ Coord2D MarrowExtractor::transHough(const imat &slice, int width, int height, in
 	orientation = 0;
 	{ // bloc de limitation de vie de la variable voisinage
 		// attention x represente les colonne et y les lignes
-		const imat voisinage = slice.submat( *y, *x, (unsigned int)( (*y)+height-1 ), (unsigned int)( (*x)+width-1 ) );
+		const imat voisinage = slice.submat( *y, *x, (uint)( (*y)+height-1 ), (uint)( (*x)+width-1 ) );
 		cont = contour(voisinage, &orientation);
 	}
 	tabaccu = new imat(width, height);
 	tabaccu->zeros();
 	//verifie orientation et table d'accumlation tous les points se trouvent a 0
 	*nbContourPoints = 0;
-	for(unsigned int i=0; i<cont->n_rows; i++){
-		for(unsigned int j=0; j<cont->n_cols; j++){
+	for(uint i=0; i<cont->n_rows; i++){
+		for(uint j=0; j<cont->n_cols; j++){
 			if(cont->at(i,j) == 1){
 				*nbContourPoints += 1;
 				droite = drawLine(j, i, orientation->at(i,j), width, height, &longueur);
@@ -192,8 +188,8 @@ fmat * MarrowExtractor::contour(const imat &slice, fmat **orientation) {
 	filtre2 = "1 2 1";
 	resultatGY = convolution(slice, filtre1, filtre2);		//convolution Sobel GY
 
-	for (unsigned int i=0; i<height; i++) {
-		for (unsigned int j=0; j<width; j++) {
+	for (uint i=0; i<height; i++) {
+		for (uint j=0; j<width; j++) {
 			norm.at(i,j) = sqrt(resultatGX->at(i,j)*resultatGX->at(i,j)+resultatGY->at(i,j)*resultatGY->at(i,j))/4;
 			if (norm.at(i,j)>_binarizationThreshold && i>0 && i<norm.n_rows-1 && j>0 && j<norm.n_cols-1 ) {
 				contour->at(i,j) = 1;
@@ -234,7 +230,7 @@ imat * MarrowExtractor::convolution(const imat &slice, fcolvec verticalFilter, f
 
 	tmpSum = fmat(height, width);
 	tmpSum.zeros();
-	for (unsigned int i=0; i<height; i++) { //height pictures (nb rows)
+	for (uint i=0; i<height; i++) { //height pictures (nb rows)
 		kOffset = 0;
 		//index=0 to index=kCenter-1
 		for (int j=0; j<kCenter; j++) {
@@ -252,7 +248,7 @@ imat * MarrowExtractor::convolution(const imat &slice, fcolvec verticalFilter, f
 		}
 		//index=(width pictures)-kCenter to index=(width pictures)-1
 		kOffset = 1;
-		for (unsigned int j=endIndex; j<width; j++) {
+		for (uint j=endIndex; j<width; j++) {
 			lag = j-kCenter;
 			for (int k=horizontalFilter.n_cols-1, m=0; k >= kOffset; k--, m++) {
 				tmpSum(i,j) += slice.at(i,lag+m) * horizontalFilter[k];
@@ -275,12 +271,12 @@ imat * MarrowExtractor::convolution(const imat &slice, fcolvec verticalFilter, f
 	for (int i=0; i <kCenter; i++) {
 		lag = -i;
 		for (int k = kCenter + kOffset; k>=0; k--) {			//convolve with partial kernel
-			for (unsigned int j=0; j<width; j++) {
+			for (uint j=0; j<width; j++) {
 				sum[j] += tmpSum(i+lag,j) * verticalFilter[k];
 			}
 			lag++;
 		}
-		for (unsigned int n=0; n<width; n++) {				//convert to output format
+		for (uint n=0; n<width; n++) {				//convert to output format
 			if(sum[n]>=0)
 				resultat->at(i,n) = (int)(sum[n] + 0.5f);
 			else
@@ -293,12 +289,12 @@ imat * MarrowExtractor::convolution(const imat &slice, fcolvec verticalFilter, f
 	for (int i=kCenter; i<endIndex; i++) {
 		lag = -kCenter;
 		for (int k=verticalFilter.n_rows-1; k>=0; k--) {				//convolve with full kernel
-			for(unsigned int j=0; j<width; j++){
+			for(uint j=0; j<width; j++){
 				sum[j] += tmpSum(i+lag,j) * verticalFilter[k];
 			}
 			lag++;
 		}
-		for (unsigned int n=0; n<width; n++) {				//convert to output format
+		for (uint n=0; n<width; n++) {				//convert to output format
 			if(sum[n]>=0)
 				resultat->at(i,n) = (int)(sum[n] + 0.5f);
 			else
@@ -308,15 +304,15 @@ imat * MarrowExtractor::convolution(const imat &slice, fcolvec verticalFilter, f
 	}
 	//index=(height pictures)-kcenter to index=(height pictures)-1
 	kOffset = 1;
-	for (unsigned int i=endIndex; i<height; i++) {
+	for (uint i=endIndex; i<height; i++) {
 		lag = -kCenter;
 		for (int k=verticalFilter.n_rows-1; k>=kOffset; k--) {			//convolve with partial kernel
-			for (unsigned int j=0; j<width; j++) {			//height p	corrigeictures
+			for (uint j=0; j<width; j++) {			//height p	corrigeictures
 				sum[j] += tmpSum(i+lag,j) * verticalFilter[k];
 			}
 			lag++;
 		}
-		for (unsigned int n=0; n<width; n++) {				//convert to output format
+		for (uint n=0; n<width; n++) {				//convert to output format
 			if(sum[n]>=0)
 				resultat->at(i,n) = (int)(sum[n] + 0.5f);
 			else
