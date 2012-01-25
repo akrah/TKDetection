@@ -1,6 +1,6 @@
 #include "inc/piepart.h"
 
-#include "inc/pie_def.h"
+#include "inc/global.h"
 
 PiePart::PiePart() : _orientation(0.), _angle(TWO_PI) {
 	setAngle(_angle);

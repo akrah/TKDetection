@@ -44,12 +44,23 @@ void PieChartDiagrams::attach( const QList<QwtPlot *> & plots ) {
 	const int nbPlots = plots.size();
 	const int nbHistograms = _histograms.size();
 	for ( int i=0 ; i<nbPlots && i<nbHistograms ; ++i ) {
-		if ( _histograms[i] != 0 && plots[i] != 0 )	_histograms[i]->attach(plots[i]);
+		if ( _histograms[i] != 0 && plots[i] != 0 ) {
+			_histograms[i]->attach(plots[i]);
+		}
 	}
 }
 
 void PieChartDiagrams::attach( QwtPolarPlot * const polarPlot ) {
-	if ( _polarCurve != 0 ) _polarCurve->attach(polarPlot);
+	if ( _polarCurve != 0 && polarPlot != 0 ) {
+		_polarCurve->attach(polarPlot);
+	}
+}
+
+void PieChartDiagrams::detach() {
+	if ( _polarCurve != 0 ) _polarCurve->detach();
+	for ( int i=0 ; i<_histograms.size() ; ++i ) {
+		if ( _histograms[i] != 0 ) _histograms[i]->detach();
+	}
 }
 
 void PieChartDiagrams::setLowThreshold( const int &threshold ) {
@@ -139,7 +150,7 @@ void PieChartDiagrams::compute() {
  *******************************/
 
 bool PieChartDiagrams::intervalIsValid() const {
-	bool ok = _beginSlice>-1 && _billon != 0 && _endSlice<static_cast<int>(_billon->n_slices) && _beginSlice<=_endSlice;
+	bool ok = (_beginSlice > -1) && (_billon != 0) && (_endSlice < static_cast<int>(_billon->n_slices)) && (_beginSlice <= _endSlice);
 	return ok;
 }
 

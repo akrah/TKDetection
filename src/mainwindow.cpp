@@ -16,11 +16,10 @@
 #include <QMouseEvent>
 #include <QPainter>
 
-MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::MainWindow), _billon(0), _marrow(0), _sliceView(new SliceView()), _sliceHistogram(0), _pieChart(new PieChart(0,1)), _pieChartDiagrams(new PieChartDiagrams()) {
+MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::MainWindow), _billon(0), _marrow(0), _sliceView(new SliceView()), _sliceHistogram(new SliceHistogram()), _pieChart(new PieChart(0,1)), _pieChartDiagrams(new PieChartDiagrams()) {
 	_ui->setupUi(this);
 
 	// Initialisation des vues
-	_sliceHistogram = new SliceHistogram(_ui->_plotSliceHistogram);
 	_pieChartDiagrams->setModel(_pieChart);
 
 	// Paramétrisation des composant graphiques
@@ -209,14 +208,18 @@ void MainWindow::setHighThreshold( const int &threshold ) {
 }
 
 void MainWindow::updateSliceHistogram() {
-	if ( _sliceHistogram ) _sliceHistogram->constructHistogram();
+	if ( _sliceHistogram != 0 ) {
+		_sliceHistogram->detach();
+		_sliceHistogram->constructHistogram();
+		_sliceHistogram->attach(_ui->_plotSliceHistogram);
+	}
 	_ui->_plotSliceHistogram->setAxisScale(QwtPlot::xBottom,0,(_billon != 0)?_billon->n_slices:0);
 	highlightSliceHistogram(_ui->_sliderSelectSlice->value());
 }
 
 
 void MainWindow::highlightSliceHistogram( const int &slicePosition ) {
-	qreal height = _sliceHistogram->sample(slicePosition).value;
+	qreal height = _sliceHistogram->value(slicePosition);
 	qreal x[4] = {slicePosition,slicePosition, slicePosition+1,slicePosition+1};
 	qreal y[4] = {0,height,height,0};
 	_histogramCursor.setSamples(x,y,4);
@@ -237,6 +240,8 @@ void MainWindow::updateMarrow() {
 }
 
 void MainWindow::updateSectorsHistograms() {
+	_pieChartDiagrams->detach();
+
 	if ( _pieChart != 0 ) {
 		_pieChart->setOrientation(_ui->_spinSectorsOrientation->value()*DEG_TO_RAD_FACT);
 		_pieChart->setSectorsNumber(_ui->_spinSectorsNumber->value());
@@ -248,8 +253,7 @@ void MainWindow::updateSectorsHistograms() {
 	}
 
 	_ui->_comboSelectSector->clear();
-	_ui->_polarTest->detachItems(QwtPolarItem::Rtti_PolarCurve,false);
-	_ui->_polarTest->replot();
+	_ui->_polarSectorSum->replot();
 
 	if ( _pieChartDiagrams != 0 ) {
 		_pieChartDiagrams->setBillonInterval(_ui->_spinMinSectorSlice->value(),_ui->_spinMaxSectorSlice->value());
@@ -267,12 +271,12 @@ void MainWindow::updateSectorsHistograms() {
 			}
 
 			_pieChartDiagrams->attach(_pieChartPlots);
-			_pieChartDiagrams->attach(_ui->_polarTest);
+			_pieChartDiagrams->attach(_ui->_polarSectorSum);
 
 			for ( int i=0 ; i<nbHistograms ; ++i ) {
 				_pieChartPlots[i]->replot();
 			}
-			_ui->_polarTest->replot();
+			_ui->_polarSectorSum->replot();
 
 			_ui->_labelSectorsOrientation->setNum(_ui->_spinSectorsOrientation->value());
 			_ui->_labelSectorsNumber->setNum(_ui->_spinSectorsNumber->value());

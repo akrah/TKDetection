@@ -25,6 +25,7 @@ public:
 
 	void attach( const QList<QwtPlot *> & plots );
 	void attach( QwtPolarPlot * const polarPlot );
+	void detach();
 
 	void setLowThreshold( const int &threshold );
 	void setHighThreshold( const int &threshold );

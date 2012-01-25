@@ -386,7 +386,7 @@
            <enum>QTabWidget::West</enum>
           </property>
           <property name="currentIndex">
-           <number>0</number>
+           <number>1</number>
           </property>
           <widget class="QWidget" name="tab_1">
            <attribute name="title">
@@ -449,7 +449,7 @@
            </attribute>
            <layout class="QVBoxLayout" name="verticalLayout_8">
             <item>
-             <widget class="QwtPolarPlot" name="_polarTest">
+             <widget class="QwtPolarPlot" name="_polarSectorSum">
               <property name="plotBackground">
                <brush brushstyle="SolidPattern">
                 <color alpha="255">
