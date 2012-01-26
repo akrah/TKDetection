@@ -29,7 +29,7 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 
 	_histogramCursor.attach(_ui->_plotSliceHistogram);
 	_histogramCursor.setBrush(Qt::red);
-	_histogramCursor.setPen(QPen(Qt::red));
+
 
 	_groupSliceView.addButton(_ui->_radioCurrentSlice,SliceType::CURRENT);
 	_groupSliceView.addButton(_ui->_radioAverageSlice,SliceType::AVERAGE);
@@ -211,7 +211,9 @@ void MainWindow::updateSliceHistogram() {
 	if ( _sliceHistogram != 0 ) {
 		_sliceHistogram->detach();
 		_sliceHistogram->constructHistogram();
+		_histogramCursor.detach();
 		_sliceHistogram->attach(_ui->_plotSliceHistogram);
+		_histogramCursor.attach(_ui->_plotSliceHistogram);
 	}
 	_ui->_plotSliceHistogram->setAxisScale(QwtPlot::xBottom,0,(_billon != 0)?_billon->n_slices:0);
 	highlightSliceHistogram(_ui->_sliderSelectSlice->value());

@@ -31,8 +31,10 @@ private:
 	const Billon *_billon;
 
 	QwtPlotHistogram *_histogram;
-	QVector<QwtIntervalSample> _datas;
-	QList<int> _pics;
+	QVector<QwtIntervalSample> _datasHistogram;
+
+	QwtPlotHistogram *_histogramMaximums;
+	QVector<QwtIntervalSample> _datasMaximums;
 
 	int _lowThreshold;
 	int _highThreshold;
