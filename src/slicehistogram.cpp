@@ -43,11 +43,11 @@ void SliceHistogram::setModel( const Billon *billon ) {
 
 void SliceHistogram::attach( QwtPlot * const plot ) {
 	if ( plot != 0 ) {
-		if ( _histogramMaximums != 0 ) {
-			_histogramMaximums->attach(plot);
-		}
 		if ( _histogram != 0 ) {
 			_histogram->attach(plot);
+		}
+		if ( _histogramMaximums != 0 ) {
+			_histogramMaximums->attach(plot);
 		}
 	}
 }

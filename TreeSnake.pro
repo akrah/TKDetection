@@ -4,9 +4,10 @@
 #
 #-------------------------------------------------
 
-QT			*=	core gui
-CONFIG		*=	qwt qxt qwtpolar
+ITK_VERSION =   itk3
 
+QT			*=	core gui
+CONFIG		*=	qwt qxt qwtpolar $${ITK_VERSION}
 QXT			=	core gui
 
 TEMPLATE	=	app
@@ -31,6 +32,7 @@ SOURCES		=	main.cpp \
 
 HEADERS		=	billon.h \
 				dicomreader.h \
+				global.h \
 				mainwindow.h \
 				marrow.h \
 				marrow_def.h \
@@ -43,38 +45,60 @@ HEADERS		=	billon.h \
 				slicehistogram.h \
 				sliceview.h \
 				sliceview_def.h \
-	inc/global.h
 
 FORMS		=	mainwindow.ui
 
-ITK_PATH	=	/usr/local/include/InsightToolkit
+itk3 {
+	ITK_PATH	=	/usr/local/include/InsightToolkit/
+	INCLUDEPATH	*=	$${ITK_PATH}/ \
+					$${ITK_PATH}/IO/ \
+					$${ITK_PATH}/Common/ \
+					$${ITK_PATH}/gdcm/src/ \
+					$${ITK_PATH}/Utilities/ \
+					$${ITK_PATH}/Utilities/vxl/vcl/ \
+					$${ITK_PATH}/Utilities/vxl/core/ \
 
-INCLUDEPATH	*=	$${ITK_PATH}/IO/ \
-				$${ITK_PATH}/Common/ \
-				$${ITK_PATH}/ \
-				$${ITK_PATH}/Utilities/vxl/vcl/ \
-				$${ITK_PATH}/Utilities/vxl/core/ \
-				$${ITK_PATH}/gdcm/src/ \
-				$${ITK_PATH}/Utilities/
+	QMAKE_LIBDIR *=	/usr/local/lib/
 
-QMAKE_LIBDIR *=	/usr/local/lib/InsightToolkit/
+	LIBS		*=	-lITKIO \
+					-litkgdcm \
+					-litkjpeg8 \
+					-litktiff \
+					-lITKMetaIO \
+					-lITKNrrdIO \
+					-litkpng \
+					-litkzlib \
+					-lITKDICOMParser \
+					-litkjpeg12 \
+					-litkjpeg16 \
+					-litkopenjpeg \
+					-lITKniftiio \
+					-lITKznz \
+					-lITKCommon \
+					-litksys \
+					-litkvnl_algo \
+					-litkv3p_netlib \
+					-litkvnl
+} else:itk4 {
+	ITK_PATH	=	/usr/local/include/ITK-4.0/
+	INCLUDEPATH	*=	$${ITK_PATH}/
 
-LIBS		*=	-lITKIO \
-				-litkgdcm \
-				-litkjpeg8 \
-				-litktiff \
-				-lITKMetaIO \
-				-lITKNrrdIO \
-				-litkpng \
-				-litkzlib \
-				-lITKDICOMParser \
-				-litkjpeg12 \
-				-litkjpeg16 \
-				-litkopenjpeg \
-				-lITKniftiio \
-				-lITKznz \
-				-lITKCommon \
-				-litksys \
-				-litkvnl_algo \
-				-litkv3p_netlib \
-				-litkvnl
+	QMAKE_LIBDIR *=	/usr/local/lib/
+
+	LIBS		*=	\
+				-lITKCommon-4.0 \
+				-litksys-4.0 \
+				-lITKIOGDCM-4.0 \
+				-lITKIOImageBase-4.0 \
+				-lITKIOMeta-4.0
+#				-litkgdcmCommon-4.0 \
+#				-litkgdcmDICT-4.0 \
+#				-litkgdcmDSED-4.0 \
+#				-litkgdcmIOD-4.0 \
+#				-litkgdcmjpeg12-4.0 \
+#				-litkgdcmjpeg16-4.0 \
+#				-litkgdcmjpeg8-4.0 \
+#				-litkgdcmMSFF-4.0 \
+#				-litkgdcmuuid-4.0 \
+#				-lITKDICOMParser-4.0
+}
