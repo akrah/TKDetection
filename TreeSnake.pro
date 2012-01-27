@@ -1,13 +1,20 @@
-#-------------------------------------------------
+#-----------------------------------------------------
+#
+# Fichier de configuration de compilation de TreeSnake
 #
 # Project created by QtCreator 2011-12-08T16:51:12
 #
-#-------------------------------------------------
+#                Adrien Krähenbühl
+#
+#-----------------------------------------------------
 
-ITK_VERSION =   itk3
+# Version d'ITK installée : itk3 | itk4
+ITK_VERSION =   itk4
+
+#------------ NE PAS MODIFIER EN DESSOUS ------------#
 
 QT			*=	core gui
-CONFIG		*=	qwt qxt qwtpolar $${ITK_VERSION}
+CONFIG		*=	qwt qxt qwtpolar
 QXT			=	core gui
 
 TEMPLATE	=	app
@@ -48,8 +55,10 @@ HEADERS		=	billon.h \
 
 FORMS		=	mainwindow.ui
 
+CONFIG += $${ITK_VERSION}
 itk3 {
-	ITK_PATH	=	/usr/local/include/InsightToolkit/
+# SI ITK_VERSION = itk3
+	ITK_PATH	 =	/usr/local/include/InsightToolkit/
 	INCLUDEPATH	*=	$${ITK_PATH}/ \
 					$${ITK_PATH}/IO/ \
 					$${ITK_PATH}/Common/ \
@@ -80,25 +89,28 @@ itk3 {
 					-litkv3p_netlib \
 					-litkvnl
 } else:itk4 {
-	ITK_PATH	=	/usr/local/include/ITK-4.0/
+# SI ITK_VERSION = itk4
+	ITK_PATH	 =	/usr/local/include/ITK-4.0/
 	INCLUDEPATH	*=	$${ITK_PATH}/
 
-	QMAKE_LIBDIR *=	/usr/local/lib/
-
 	LIBS		*=	\
-				-lITKCommon-4.0 \
-				-litksys-4.0 \
 				-lITKIOGDCM-4.0 \
-				-lITKIOImageBase-4.0 \
-				-lITKIOMeta-4.0
-#				-litkgdcmCommon-4.0 \
-#				-litkgdcmDICT-4.0 \
-#				-litkgdcmDSED-4.0 \
-#				-litkgdcmIOD-4.0 \
-#				-litkgdcmjpeg12-4.0 \
-#				-litkgdcmjpeg16-4.0 \
-#				-litkgdcmjpeg8-4.0 \
-#				-litkgdcmMSFF-4.0 \
-#				-litkgdcmuuid-4.0 \
-#				-lITKDICOMParser-4.0
+					-litkgdcmDICT-4.0 \
+					-litkgdcmMSFF-4.0 \
+						-litkgdcmIOD-4.0 \
+						-litkgdcmDSED-4.0 \
+							-litkzlib-4.0 \
+						-litkgdcmCommon-4.0 \
+						-litkgdcmuuid-4.0 \
+						-litkopenjpeg-4.0 \
+						-litkgdcmjpeg12-4.0 \
+						-litkgdcmjpeg16-4.0 \
+						-litkgdcmjpeg8-4.0 \
+					-lITKIOImageBase-4.0 \
+						-lITKCommon-4.0 \
+							-litksys-4.0 \
+							-litkvnl_algo-4.0 \
+							-litkv3p_netlib-4.0 \
+							-litkvnl-4.0
+
 }
