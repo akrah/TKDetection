@@ -54,7 +54,7 @@ private:
 
 private:
 	Ui::MainWindow *_ui;
-	QPixmap _pix;
+	QImage _pix;
 	QButtonGroup _groupSliceView;
 
 	Billon *_billon;

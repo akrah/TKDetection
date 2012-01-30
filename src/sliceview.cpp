@@ -5,10 +5,7 @@
 #include "inc/marrow.h"
 #include <QPainter>
 
-SliceView::SliceView() : QObject(0), _billon(0), _lowThreshold(0), _highThreshold(0), _typeOfView(SliceType::CURRENT) {
-}
-
-SliceView::~SliceView() {
+SliceView::SliceView() : _billon(0), _lowThreshold(0), _highThreshold(0), _typeOfView(SliceType::CURRENT) {
 }
 
 /*******************************

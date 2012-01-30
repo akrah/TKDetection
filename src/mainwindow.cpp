@@ -147,7 +147,7 @@ void MainWindow::closeImage() {
 void MainWindow::drawSlice( const int &sliceNumber ) {
 	if ( _billon != 0 ) {
 		_ui->_labelSliceNumber->setNum(sliceNumber);
-		_pix = QPixmap::fromImage(QImage(_billon->n_cols,_billon->n_rows,QImage::Format_ARGB32));
+		_pix = QImage(_billon->n_cols,_billon->n_rows,QImage::Format_ARGB32);
 		QPainter painter(&_pix);
 		if ( _sliceView != 0 ) _sliceView->drawSlice(painter,sliceNumber);
 		if ( _sliceHistogram != 0 ) highlightSliceHistogram(sliceNumber);
@@ -162,9 +162,9 @@ void MainWindow::drawSlice( const int &sliceNumber ) {
 	}
 	else {
 		_ui->_labelSliceNumber->setText(tr("Aucune"));
-		_pix = QPixmap::fromImage(QImage(0,0));
+		_pix = QImage(0,0);
 	}
-	_ui->_labelSliceView->setPixmap(_pix);
+	_ui->_labelSliceView->setPixmap(QPixmap::fromImage(_pix));
 }
 
 void MainWindow::setTypeOfView( const int &type ) {
