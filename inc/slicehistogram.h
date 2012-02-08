@@ -15,7 +15,9 @@ public:
 	SliceHistogram();
 	~SliceHistogram();
 
-	qreal value( const int &index );
+	qreal value( const int &index ) const;
+	int nbMaximums() const;
+	int sliceOfIemeMaximum( const int &maximumIndex ) const;
 
 	void setModel( const Billon *billon );
 

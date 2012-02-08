@@ -16,7 +16,7 @@
 #include <QMouseEvent>
 #include <QPainter>
 
-MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::MainWindow), _billon(0), _marrow(0), _sliceView(new SliceView()), _sliceHistogram(new SliceHistogram()), _pieChart(new PieChart(0,1)), _pieChartDiagrams(new PieChartDiagrams()) {
+MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::MainWindow), _billon(0), _marrow(0), _sliceView(new SliceView()), _sliceHistogram(new SliceHistogram()), _pieChart(new PieChart(0,1)), _pieChartDiagrams(new PieChartDiagrams()), _currentMaximum(0) {
 	_ui->setupUi(this);
 
 	// Initialisation des vues
@@ -34,6 +34,7 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 	_groupSliceView.addButton(_ui->_radioCurrentSlice,SliceType::CURRENT);
 	_groupSliceView.addButton(_ui->_radioAverageSlice,SliceType::AVERAGE);
 	_groupSliceView.addButton(_ui->_radioMedianSlice,SliceType::MEDIAN);
+	_groupSliceView.addButton(_ui->_radioMovementSlice,SliceType::MOVEMENT);
 	_groupSliceView.setExclusive(true);
 
 	/**** Mise en place de la communication MVC ****/
@@ -50,8 +51,10 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 	QObject::connect(_ui->_spansliderSliceThreshold, SIGNAL(upperValueChanged(int)), this, SLOT(setHighThreshold(int)));
 	QObject::connect(_ui->_spinMaxThreshold, SIGNAL(valueChanged(int)), this, SLOT(setHighThreshold(int)));
 
-	// Évènements déclenchés par le bouton de mise à jour de l'histogramme
+	// Évènements déclenchés par les boutons relatifs à l'histogramme de cumul des intensités
 	QObject::connect(_ui->_buttonUpdateSliceHistogram, SIGNAL(clicked()), this, SLOT(updateSliceHistogram()));
+	QObject::connect(_ui->_buttonPreviousMaximum, SIGNAL(clicked()), this, SLOT(previousMaximumInSliceHistogram()));
+	QObject::connect(_ui->_buttonNextMaximum, SIGNAL(clicked()), this, SLOT(nextMaximumInSliceHistogram()));
 
 	// Évènements déclenchés par les bouton associès à la moelle
 	QObject::connect(_ui->_buttonComputeMarrow, SIGNAL(clicked()), this, SLOT(updateMarrow()));
@@ -319,6 +322,28 @@ void MainWindow::setMinimalDifferenceForSectors( const int &minimalDifference ) 
 	}
 }
 
+void MainWindow::previousMaximumInSliceHistogram() {
+	if ( _sliceHistogram != 0 ) {
+		const int nbMaximums = _sliceHistogram->nbMaximums();
+		_currentMaximum = nbMaximums <= 0 ? -1 : _currentMaximum < 0 ? 0 : _currentMaximum == 0 ? nbMaximums-1 : ( _currentMaximum - 1 ) % nbMaximums;
+		int sliceIndex = _sliceHistogram->sliceOfIemeMaximum(_currentMaximum);
+		if ( sliceIndex > -1 ) {
+			drawSlice(sliceIndex);
+		}
+	}
+}
+
+void MainWindow::nextMaximumInSliceHistogram() {
+	if ( _sliceHistogram != 0 ) {
+		const int nbMaximums = _sliceHistogram->nbMaximums();
+		_currentMaximum = nbMaximums>0 ? ( _currentMaximum + 1 ) % nbMaximums : -1;
+		int sliceIndex = _sliceHistogram->sliceOfIemeMaximum(_currentMaximum);
+		if ( sliceIndex > -1 ) {
+			drawSlice(sliceIndex);
+		}
+	}
+}
+
 /*******************************
  * Private functions
  *******************************/
@@ -386,7 +411,7 @@ void MainWindow::updateComponentsValues() {
 }
 
 void MainWindow::enabledComponents() {
-	const bool enable = (_billon != 0) && ( _groupSliceView.checkedId() == SliceType::CURRENT );
+	const bool enable = (_billon != 0) && ( _groupSliceView.checkedId() == SliceType::CURRENT || _groupSliceView.checkedId() == SliceType::MOVEMENT );
 	_ui->_sliderSelectSlice->setEnabled(enable);
 	_ui->_spansliderSliceThreshold->setEnabled(enable);
 	_ui->_buttonComputeMarrow->setEnabled(enable);

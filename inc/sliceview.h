@@ -23,6 +23,7 @@ private :
 	void drawCurrentSlice( QPainter &painter, const int &sliceNumber );
 	void drawAverageSlice( QPainter &painter );
 	void drawMedianSlice( QPainter &painter );
+	void drawMovementSlice( QPainter &painter, const int &sliceNumber );
 
 private:
 	const Billon * _billon;

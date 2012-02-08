@@ -45,6 +45,8 @@ private slots:
 	void updateMinimumSectorsIntervalExtremum( const int &value );
 	void updateMaximumSectorsIntervalExtremum( const int &value );
 	void setMinimalDifferenceForSectors( const int &minimalDifference );
+	void previousMaximumInSliceHistogram();
+	void nextMaximumInSliceHistogram();
 
 private:
 	void openNewBillon(const QString &folderName = "");
@@ -66,6 +68,8 @@ private:
 	PieChart *_pieChart;
 	PieChartDiagrams *_pieChartDiagrams;
 	QList<QwtPlot *> _pieChartPlots;
+
+	int _currentMaximum;
 };
 
 #endif // MAINWINDOW_H

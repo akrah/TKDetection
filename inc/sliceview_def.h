@@ -8,6 +8,7 @@ namespace SliceType {
 		CURRENT,
 		AVERAGE,
 		MEDIAN,
+		MOVEMENT,
 		_SLICE_TYPE_MAX_
 	};
 }

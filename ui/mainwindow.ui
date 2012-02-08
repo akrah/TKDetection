@@ -71,11 +71,44 @@
        </layout>
       </item>
       <item>
-       <widget class="QLabel" name="_labelSliceView">
-        <property name="text">
-         <string/>
+       <layout class="QHBoxLayout" name="horizontalLayout_7">
+        <property name="bottomMargin">
+         <number>0</number>
         </property>
-       </widget>
+        <item>
+         <spacer name="horizontalSpacer_3">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item>
+         <widget class="QLabel" name="_labelSliceView">
+          <property name="text">
+           <string/>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <spacer name="horizontalSpacer_4">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+       </layout>
       </item>
       <item>
        <widget class="QSlider" name="_sliderSelectSlice">
@@ -96,12 +129,33 @@
       <item>
        <widget class="QwtPlot" name="_plotSliceHistogram"/>
       </item>
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout_4">
+        <property name="bottomMargin">
+         <number>0</number>
+        </property>
+        <item>
+         <widget class="QPushButton" name="_buttonPreviousMaximum">
+          <property name="text">
+           <string>Maximum précédent</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="_buttonNextMaximum">
+          <property name="text">
+           <string>Maximum suivant</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
      </layout>
     </item>
     <item>
      <widget class="QTabWidget" name="_tabs">
       <property name="currentIndex">
-       <number>1</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="_tabGeneral">
        <attribute name="title">
@@ -135,6 +189,13 @@
             <widget class="QRadioButton" name="_radioMedianSlice">
              <property name="text">
               <string>Coupe médiane</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QRadioButton" name="_radioMovementSlice">
+             <property name="text">
+              <string>Coupe de mouvements</string>
              </property>
             </widget>
            </item>

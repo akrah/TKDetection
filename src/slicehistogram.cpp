@@ -18,12 +18,31 @@ SliceHistogram::~SliceHistogram() {
  * Public getters
  *******************************/
 
-qreal SliceHistogram::value( const int &index ) {
+qreal SliceHistogram::value( const int &index ) const {
 	qreal res = 0.;
 	if ( index > -1 && _datasHistogram.size() > index ) {
 		res = _datasHistogram.at(index).value;
 	}
 	return res;
+}
+
+int SliceHistogram::nbMaximums() const {
+	int nbMaximums;
+	if ( _histogramMaximums == 0  ) {
+		nbMaximums = 0;
+	}
+	else {
+		nbMaximums = _histogramMaximums->dataSize();
+	}
+	return nbMaximums;
+}
+
+int SliceHistogram::sliceOfIemeMaximum( const int &maximumIndex ) const {
+	int sliceIndex = -1;
+	if ( _histogramMaximums != 0 && maximumIndex>-1 && maximumIndex<static_cast<int>(_histogramMaximums->dataSize()) ) {
+		sliceIndex = static_cast<QwtIntervalSample>(_histogramMaximums->data()->sample(maximumIndex)).interval.minValue();
+	}
+	return sliceIndex;
 }
 
 /*******************************
@@ -101,17 +120,18 @@ void SliceHistogram::constructHistogram() {
 		for ( int i=1 ; i<_datasHistogram.size()-1 ; ++i ) {
 			if ( (_datasHistogram.at(i).value > _datasHistogram.at(i-1).value) && (_datasHistogram.at(i).value > _datasHistogram.at(i+1).value ) ) {
 				pics.append(i);
+				_datasMaximums.append(_datasHistogram.at(i));
 				qDebug() << i;
 			}
 		}
 
-		qDebug() << "Pics significatifs :";
-		for ( int i=1 ; i<pics.size()-1 ; ++i ) {
-			if ( (_datasHistogram.at(pics.at(i)).value > _datasHistogram.at(pics.at(i-1)).value) && (_datasHistogram.at(pics.at(i)).value > _datasHistogram.at(pics.at(i+1)).value ) ) {
-				_datasMaximums.append(_datasHistogram.at(pics.at(i)));
-				qDebug() << pics.at(i);
-			}
-		}
+//		qDebug() << "Pics significatifs :";
+//		for ( int i=1 ; i<pics.size()-1 ; ++i ) {
+//			if ( (_datasHistogram.at(pics.at(i)).value > _datasHistogram.at(pics.at(i-1)).value) && (_datasHistogram.at(pics.at(i)).value > _datasHistogram.at(pics.at(i+1)).value ) ) {
+//				_datasMaximums.append(_datasHistogram.at(pics.at(i)));
+//				qDebug() << pics.at(i);
+//			}
+//		}
 	}
 	_histogram->setSamples(_datasHistogram);
 	_histogramMaximums->setSamples(_datasMaximums);
