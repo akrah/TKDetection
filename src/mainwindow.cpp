@@ -24,12 +24,12 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 
 	// Paramétrisation des composant graphiques
 	_ui->_labelSliceView->installEventFilter(this);
+	_ui->_labelSliceView->installEventFilter(&_sliceZoomer);
 
 	_ui->_plotSliceHistogram->enableAxis(QwtPlot::yLeft,false);
 
 	_histogramCursor.attach(_ui->_plotSliceHistogram);
 	_histogramCursor.setBrush(Qt::red);
-
 
 	_groupSliceView.addButton(_ui->_radioCurrentSlice,SliceType::CURRENT);
 	_groupSliceView.addButton(_ui->_radioAverageSlice,SliceType::AVERAGE);
@@ -68,6 +68,10 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 	QObject::connect(_ui->_buttonSliceMaximalSector, SIGNAL(clicked()), this, SLOT(setMaximumSectorsIntervalToCurrentSlice()));
 	QObject::connect(_ui->_spinMinimumIntensityForSum, SIGNAL(valueChanged(int)), this, SLOT(setMinimalDifferenceForSectors(int)));
 
+	// Évènements déclenchés par la souris sur le visualiseur de coupes
+	QObject::connect(&_sliceZoomer, SIGNAL(zoomFactorChanged(qreal,QPoint)), this, SLOT(zoomInSliceView(qreal,QPoint)));
+	QObject::connect(&_sliceZoomer, SIGNAL(isMovedFrom(QPoint)), this, SLOT(dragInSliceView(QPoint)));
+
 	// Raccourcis des actions du menu
 	_ui->_actionOpenDicom->setShortcut(Qt::CTRL + Qt::Key_O);
 	QObject::connect(_ui->_actionOpenDicom, SIGNAL(triggered()), this, SLOT(openDicom()));
@@ -96,30 +100,27 @@ MainWindow::~MainWindow() {
  * Public fonctions
  *******************************/
 
+#include <QScrollBar>
+
 bool MainWindow::eventFilter(QObject *obj, QEvent *event) {
-	bool res = true;
-	if (obj == _ui->_labelSliceView) {
-		if ( _billon != 0 && _pieChartDiagrams != 0 && event->type() == QEvent::MouseButtonPress ) {
-			QMouseEvent *mouseEvent = static_cast<QMouseEvent*>(event);
-			const int x = mouseEvent->x();
-			const int y = mouseEvent->y();
-			const int centerX = _marrow!=0 ? _marrow->at(_ui->_sliderSelectSlice->value()).x:_billon->n_cols/2;
-			const int centerY = _marrow!=0 ? _marrow->at(_ui->_sliderSelectSlice->value()).y:_billon->n_rows/2;
+	if ( obj == _ui->_labelSliceView ) {
+		if ( event->type() == QEvent::MouseButtonPress ) {
+			const QMouseEvent *mouseEvent = static_cast<const QMouseEvent*>(event);
+			if ( (mouseEvent->button() == Qt::LeftButton) && _billon != 0 && _pieChartDiagrams != 0 ) {
+				const int x = mouseEvent->x()/_sliceZoomer.factor();
+				const int y = mouseEvent->y()/_sliceZoomer.factor();
+				const int centerX = _marrow!=0 ? _marrow->at(_ui->_sliderSelectSlice->value()).x:_billon->n_cols/2;
+				const int centerY = _marrow!=0 ? _marrow->at(_ui->_sliderSelectSlice->value()).y:_billon->n_rows/2;
 
-			const int sector = _pieChart->partOfAngle( TWO_PI-ANGLE(centerX,centerY,x,y) );
+				const int sector = _pieChart->partOfAngle( TWO_PI-ANGLE(centerX,centerY,x,y) );
 
-			if ( sector > -1 && sector < _ui->_comboSelectSector->count()) {
-				_ui->_comboSelectSector->setCurrentIndex(sector);
+				if ( sector > -1 && sector < _ui->_comboSelectSector->count()) {
+					_ui->_comboSelectSector->setCurrentIndex(sector);
+				}
 			}
 		}
-		else {
-			res = false;
-		}
-	 }
-	else {
-		 res = QMainWindow::eventFilter(obj, event);
-	 }
-	return res;
+	}
+	return QMainWindow::eventFilter(obj, event);
 }
 
 /*******************************
@@ -161,13 +162,13 @@ void MainWindow::drawSlice( const int &sliceNumber ) {
 				center = _marrow->at(sliceNumber-_marrow->beginSlice());
 			}
 			_pieChart->draw(painter,_ui->_comboSelectSector->currentIndex(), center);
-		}
+		};
 	}
 	else {
 		_ui->_labelSliceNumber->setText(tr("Aucune"));
 		_pix = QImage(0,0);
 	}
-	_ui->_labelSliceView->setPixmap(QPixmap::fromImage(_pix));
+	_ui->_labelSliceView->setPixmap(_billon != 0 ? QPixmap::fromImage(_pix).scaled(_pix.width()*_sliceZoomer.factor(),_pix.height()*_sliceZoomer.factor(),Qt::KeepAspectRatio) : QPixmap::fromImage(_pix));
 }
 
 void MainWindow::setTypeOfView( const int &type ) {
@@ -344,6 +345,19 @@ void MainWindow::nextMaximumInSliceHistogram() {
 	}
 }
 
+void MainWindow::zoomInSliceView( const qreal &zoomFactor, const QPoint &focalPoint ) {
+	_ui->_labelSliceView->setPixmap(_billon != 0 ? QPixmap::fromImage(_pix).scaled(_pix.width()*zoomFactor,_pix.height()*zoomFactor,Qt::KeepAspectRatio) : QPixmap::fromImage(_pix));
+	QScrollArea &scrollArea = *(_ui->_scrollSliceView);
+	scrollArea.horizontalScrollBar()->setValue(focalPoint.x()-scrollArea.horizontalScrollBar()->value()/zoomFactor);
+	scrollArea.verticalScrollBar()->setValue(focalPoint.y()-scrollArea.verticalScrollBar()->value()/zoomFactor);
+}
+
+void MainWindow::dragInSliceView( const QPoint &motionVector ) {
+	QScrollArea &scrollArea = *(_ui->_scrollSliceView);
+	scrollArea.horizontalScrollBar()->setValue(scrollArea.horizontalScrollBar()->value()-motionVector.x());
+	scrollArea.verticalScrollBar()->setValue(scrollArea.verticalScrollBar()->value()-motionVector.y());
+}
+
 /*******************************
  * Private functions
  *******************************/
@@ -374,11 +388,13 @@ void MainWindow::updateComponentsValues() {
 		maxValue = _billon->maxValue();
 		nbSlices = _billon->n_slices;
 		_ui->_labelSliceNumber->setNum(0);
+		_ui->_scrollSliceView->setFixedSize(_billon->n_cols,_billon->n_rows);
 	}
 	else {
 		minValue = maxValue = 0;
 		nbSlices = 1;
 		_ui->_labelSliceNumber->setText(tr("Aucune coupe présente."));
+		_ui->_scrollSliceView->setFixedSize(0,0);
 	}
 
 	_ui->_spansliderSliceThreshold->setMinimum(minValue);
@@ -406,6 +422,7 @@ void MainWindow::updateComponentsValues() {
 	_ui->_sliderSelectSlice->setRange(0,nbSlices-1);
 
 	_ui->_spinMinimumIntensityForSum->setRange(0,maxValue-minValue);
+
 
 	enabledComponents();
 }

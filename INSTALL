@@ -103,8 +103,8 @@ PRE-REQUIS
 	I] Si vous rencontrez des problèmes lors de la compilation de TreeSnake :
 	
 		1) Vérifiez que les deux fichiers suivants existent :
-			- /usr/share/qt4/mkspecs/features/
-			- /usr/share/qt4/mkspecs/features/
+			- /usr/share/qt4/mkspecs/features/qwtpolar.prf
+			- /usr/share/qt4/mkspecs/features/qwtpolarconfig.pri
 	
 			S'ils n'existent pas :
 	

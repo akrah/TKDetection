@@ -5,6 +5,7 @@
 #include <QButtonGroup>
 
 #include "sliceview_def.h"
+#include "slicezoomer.h"
 #include <qwt_plot_curve.h>
 
 namespace Ui {
@@ -47,6 +48,8 @@ private slots:
 	void setMinimalDifferenceForSectors( const int &minimalDifference );
 	void previousMaximumInSliceHistogram();
 	void nextMaximumInSliceHistogram();
+	void zoomInSliceView( const qreal &zoomFactor, const QPoint &focalPoint );
+	void dragInSliceView( const QPoint &motionVector );
 
 private:
 	void openNewBillon(const QString &folderName = "");
@@ -68,6 +71,8 @@ private:
 	PieChart *_pieChart;
 	PieChartDiagrams *_pieChartDiagrams;
 	QList<QwtPlot *> _pieChartPlots;
+
+	SliceZoomer _sliceZoomer;
 
 	int _currentMaximum;
 };

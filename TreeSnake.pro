@@ -36,6 +36,7 @@ SOURCES		=	main.cpp \
 				pointpolarseriesdata.cpp \
 				slicehistogram.cpp \
 				sliceview.cpp \
+    src/slicezoomer.cpp
 
 HEADERS		=	billon.h \
 				dicomreader.h \
@@ -52,6 +53,7 @@ HEADERS		=	billon.h \
 				slicehistogram.h \
 				sliceview.h \
 				sliceview_def.h \
+    inc/slicezoomer.h
 
 FORMS		=	mainwindow.ui
 

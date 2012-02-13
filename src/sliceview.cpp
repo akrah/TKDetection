@@ -139,6 +139,7 @@ void SliceView::drawMedianSlice( QPainter &painter ) {
 }
 
 void SliceView::drawMovementSlice( QPainter &painter, const int &sliceNumber ) {
+	const imat &currentSlice = _billon->slice(sliceNumber);
 	const imat &nextSlice = sliceNumber < static_cast<int>(_billon->n_slices)-1 ? _billon->slice(sliceNumber+1) : _billon->slice(sliceNumber);
 	const imat &previousSlice = sliceNumber > 0 ? _billon->slice(sliceNumber-1) : _billon->slice(sliceNumber);
 	const uint width = nextSlice.n_cols;
@@ -154,7 +155,7 @@ void SliceView::drawMovementSlice( QPainter &painter, const int &sliceNumber ) {
 	for (uint j=0 ; j<height ; j++) {
 		for (uint i=0 ; i<width ; i++) {
 			color = qAbs(((RESTRICT_TO_INTERVAL(nextSlice.at(j,i),minValue,maxValue)-minValue)*fact) - ((RESTRICT_TO_INTERVAL(previousSlice.at(j,i),minValue,maxValue)-minValue)*fact));
-			if ( color > 5 ) *(line++) = qRgb(0,255,0);
+			if ( color > 5 && (( currentSlice.at(i,j) > nextSlice.at(j,i) && currentSlice.at(i,j) < previousSlice.at(j,i) ) || ( currentSlice.at(i,j) < nextSlice.at(j,i) && currentSlice.at(i,j) > previousSlice.at(j,i) )) ) *(line++) = qRgb(255,255,255);
 			else *(line++) = qRgb(0,0,0);
 		}
 	}

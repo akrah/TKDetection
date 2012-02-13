@@ -168,7 +168,7 @@ Coord2D MarrowExtractor::transHough(const imat &slice, int width, int height, in
 	*x += coordmax.x;
 	*y += coordmax.y;
 
-	return (Coord2D){*x, *y};
+	return Coord2D(*x, *y);
 }
 
 fmat * MarrowExtractor::contour(const imat &slice, fmat **orientation) {
@@ -477,7 +477,7 @@ void MarrowExtractor::minSlice(const imat &slice, int *minValue, int *maxValue, 
 			}
 			else if ( value > *maxValue ) {
 				*maxValue = value;
-				*coordmax = (Coord2D){j,i};
+				*coordmax = Coord2D(j,i);
 			}
 		}
 	}
@@ -538,7 +538,7 @@ void MarrowExtractor::correctMarrow( QList<Coord2D> &moelle, float *listMax, flo
 				}else{
 					newy = y1;
 				}
-				moelle.replace(j, (Coord2D){newx, newy});
+				moelle.replace(j, Coord2D(newx, newy));
 			}
 		}
 		i++;

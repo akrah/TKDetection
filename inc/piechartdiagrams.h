@@ -18,6 +18,7 @@ public:
 	~PieChartDiagrams();
 
 	int count() const;
+	int minimalDifference() const;
 
 	void setModel( const Billon * const billon );
 	void setModel( const PieChart * const pieChart );

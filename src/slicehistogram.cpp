@@ -120,18 +120,27 @@ void SliceHistogram::constructHistogram() {
 		for ( int i=1 ; i<_datasHistogram.size()-1 ; ++i ) {
 			if ( (_datasHistogram.at(i).value > _datasHistogram.at(i-1).value) && (_datasHistogram.at(i).value > _datasHistogram.at(i+1).value ) ) {
 				pics.append(i);
-				_datasMaximums.append(_datasHistogram.at(i));
+				//_datasMaximums.append(_datasHistogram.at(i));
 				qDebug() << i;
 			}
 		}
 
-//		qDebug() << "Pics significatifs :";
-//		for ( int i=1 ; i<pics.size()-1 ; ++i ) {
-//			if ( (_datasHistogram.at(pics.at(i)).value > _datasHistogram.at(pics.at(i-1)).value) && (_datasHistogram.at(pics.at(i)).value > _datasHistogram.at(pics.at(i+1)).value ) ) {
-//				_datasMaximums.append(_datasHistogram.at(pics.at(i)));
-//				qDebug() << pics.at(i);
-//			}
-//		}
+		qDebug() << "Pics significatifs :";
+		QList<int> pics2;
+		for ( int i=1 ; i<pics.size()-1 ; ++i ) {
+			if ( (_datasHistogram.at(pics.at(i)).value > _datasHistogram.at(pics.at(i-1)).value) && (_datasHistogram.at(pics.at(i)).value > _datasHistogram.at(pics.at(i+1)).value ) ) {
+				pics2.append(i);
+				qDebug() << pics.at(i);
+			}
+		}
+
+		qDebug() << "Pics 3émé niveau :";
+		for ( int i=1 ; i<pics2.size()-1 ; ++i ) {
+			if ( (_datasHistogram.at(pics2.at(i)).value > _datasHistogram.at(pics2.at(i-1)).value) && (_datasHistogram.at(pics2.at(i)).value > _datasHistogram.at(pics2.at(i+1)).value ) ) {
+				_datasMaximums.append(_datasHistogram.at(pics2.at(i)));
+				qDebug() << pics2.at(i);
+			}
+		}
 	}
 	_histogram->setSamples(_datasHistogram);
 	_histogramMaximums->setSamples(_datasMaximums);

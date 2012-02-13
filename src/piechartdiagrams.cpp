@@ -9,7 +9,7 @@
 #include <qwt_plot_histogram.h>
 #include <qwt_polar_curve.h>
 
-PieChartDiagrams::PieChartDiagrams() :  _billon(0), _marrow(0), _pieChart(0), _beginSlice(-1), _endSlice(-1), _lowThreshold(0), _highThreshold(0), _minimalDifference(140), _polarCurve(0) {
+PieChartDiagrams::PieChartDiagrams() :  _billon(0), _marrow(0), _pieChart(0), _beginSlice(-1), _endSlice(-1), _lowThreshold(0), _highThreshold(0), _minimalDifference(0), _polarCurve(0) {
 }
 
 PieChartDiagrams::~PieChartDiagrams() {
@@ -22,6 +22,10 @@ PieChartDiagrams::~PieChartDiagrams() {
 
 int PieChartDiagrams::count() const {
 	return _histograms.size();
+}
+
+int PieChartDiagrams::minimalDifference() const {
+	return _minimalDifference;
 }
 
 /*******************************
