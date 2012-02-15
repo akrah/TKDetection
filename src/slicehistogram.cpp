@@ -127,14 +127,17 @@ void SliceHistogram::constructHistogram() {
 
 		qDebug() << "Pics significatifs :";
 		QList<int> pics2;
+		pics2.append(pics.first());
 		for ( int i=1 ; i<pics.size()-1 ; ++i ) {
 			if ( (_datasHistogram.at(pics.at(i)).value > _datasHistogram.at(pics.at(i-1)).value) && (_datasHistogram.at(pics.at(i)).value > _datasHistogram.at(pics.at(i+1)).value ) ) {
-				pics2.append(i);
+				pics2.append(pics.at(i));
+				//_datasMaximums.append(_datasHistogram.at(pics.at(i)));
 				qDebug() << pics.at(i);
 			}
 		}
+		pics2.append(pics.last());
 
-		qDebug() << "Pics 3émé niveau :";
+		qDebug() << "Pics 3èmé niveau :";
 		for ( int i=1 ; i<pics2.size()-1 ; ++i ) {
 			if ( (_datasHistogram.at(pics2.at(i)).value > _datasHistogram.at(pics2.at(i-1)).value) && (_datasHistogram.at(pics2.at(i)).value > _datasHistogram.at(pics2.at(i+1)).value ) ) {
 				_datasMaximums.append(_datasHistogram.at(pics2.at(i)));

@@ -44,6 +44,8 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 
 	// Évènements déclenchés par les boutons de sélection de la vue
 	QObject::connect(&_groupSliceView, SIGNAL(buttonClicked(int)), this, SLOT(setTypeOfView(int)));
+	QObject::connect(_ui->_sliderMotionThreshold, SIGNAL(valueChanged(int)), this, SLOT(setMotionThreshold(int)));
+	QObject::connect(_ui->_spinMotionThreshold, SIGNAL(valueChanged(int)), this, SLOT(setMotionThreshold(int)));
 
 	// Évènements déclenchés par le slider de seuillage
 	QObject::connect(_ui->_spansliderSliceThreshold, SIGNAL(lowerValueChanged(int)), this, SLOT(setLowThreshold(int)));
@@ -242,6 +244,7 @@ void MainWindow::updateMarrow() {
 		_marrow = extractor.process(*_billon,0,_billon->n_slices-1);
 	}
 	_pieChartDiagrams->setModel(_marrow);
+	_sliceView->setModel(_marrow);
 	drawSlice();
 }
 
@@ -356,6 +359,22 @@ void MainWindow::dragInSliceView( const QPoint &motionVector ) {
 	QScrollArea &scrollArea = *(_ui->_scrollSliceView);
 	scrollArea.horizontalScrollBar()->setValue(scrollArea.horizontalScrollBar()->value()-motionVector.x());
 	scrollArea.verticalScrollBar()->setValue(scrollArea.verticalScrollBar()->value()-motionVector.y());
+}
+
+void MainWindow::setMotionThreshold( const int &threshold ) {
+	if ( _sliceView != 0 ) {
+		_sliceView->setMotionThreshold(threshold);
+
+		_ui->_spinMotionThreshold->blockSignals(true);
+			_ui->_spinMotionThreshold->setValue(threshold);
+		_ui->_spinMotionThreshold->blockSignals(false);
+
+		_ui->_sliderMotionThreshold->blockSignals(true);
+			_ui->_sliderMotionThreshold->setValue(threshold);
+		_ui->_sliderMotionThreshold->blockSignals(false);
+
+		drawSlice();
+	}
 }
 
 /*******************************

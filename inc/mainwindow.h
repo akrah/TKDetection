@@ -50,6 +50,7 @@ private slots:
 	void nextMaximumInSliceHistogram();
 	void zoomInSliceView( const qreal &zoomFactor, const QPoint &focalPoint );
 	void dragInSliceView( const QPoint &motionVector );
+	void setMotionThreshold( const int &threshold );
 
 private:
 	void openNewBillon(const QString &folderName = "");

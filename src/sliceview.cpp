@@ -5,7 +5,7 @@
 #include "inc/marrow.h"
 #include <QPainter>
 
-SliceView::SliceView() : _billon(0), _lowThreshold(0), _highThreshold(0), _typeOfView(SliceType::CURRENT) {
+SliceView::SliceView() : _billon(0), _marrow(0), _lowThreshold(0), _highThreshold(0), _typeOfView(SliceType::CURRENT), _motionThreshold(0) {
 }
 
 /*******************************
@@ -16,10 +16,19 @@ void SliceView::setModel( const Billon *billon ) {
 	_billon = billon;
 }
 
+void SliceView::setModel( const Marrow *marrow ) {
+	_marrow = marrow;
+}
+
 void SliceView::setTypeOfView( const SliceType::SliceType &type ) {
 	if ( type > SliceType::_SLICE_TYPE_MIN_ && type < SliceType::_SLICE_TYPE_MAX_ ) {
 		_typeOfView = type;
 	}
+}
+
+
+void SliceView::setMotionThreshold( const int &threshold ) {
+	_motionThreshold = threshold;
 }
 
 /*******************************
@@ -27,7 +36,7 @@ void SliceView::setTypeOfView( const SliceType::SliceType &type ) {
  *******************************/
 
 void SliceView::drawSlice( QPainter &painter, const int &sliceNumber ) {
-	if ( _billon != 0 && sliceNumber > -1 && sliceNumber < static_cast<int>(_billon->n_slices)) {
+	if ( _billon != 0 && sliceNumber > -1 && sliceNumber < static_cast<int>(_billon->n_slices) ) {
 		switch (_typeOfView) {
 			// Affichage de la coupe moyenne
 			case SliceType::AVERAGE :
@@ -139,26 +148,130 @@ void SliceView::drawMedianSlice( QPainter &painter ) {
 }
 
 void SliceView::drawMovementSlice( QPainter &painter, const int &sliceNumber ) {
+	const int previousIndex = sliceNumber > 0 ? sliceNumber-1 : sliceNumber;
 	const imat &currentSlice = _billon->slice(sliceNumber);
-	const imat &nextSlice = sliceNumber < static_cast<int>(_billon->n_slices)-1 ? _billon->slice(sliceNumber+1) : _billon->slice(sliceNumber);
-	const imat &previousSlice = sliceNumber > 0 ? _billon->slice(sliceNumber-1) : _billon->slice(sliceNumber);
-	const uint width = nextSlice.n_cols;
-	const uint height = nextSlice.n_rows;
-	const int minValue = _lowThreshold;
-	const int maxValue = _highThreshold;
+	const imat &previousSlice = _billon->slice(previousIndex);
+
+	const uint width = currentSlice.n_cols;
+	const uint height = currentSlice.n_rows;
+	const int &minValue = _lowThreshold;
+	const int &maxValue = _highThreshold;
 	const qreal fact = 255.0/(maxValue-minValue);
+	const QRgb backgroud = qRgb(0,0,0);
+	const QRgb foreground = qRgb(0,200,200);
+
+	const Coord2D marrowShift = _marrow != 0 ? _marrow->at(sliceNumber).shiftTo(_marrow->at(previousIndex)) : Coord2D(0,0);
+	const int &xShift = marrowShift.x;
+	const int &yShift = marrowShift.y;
 
 	QImage image(width,height,QImage::Format_ARGB32);
 	QRgb * line = (QRgb *) image.bits();
-	int color;
+	int pixelAbsDiff, color;
 
-	for (uint j=0 ; j<height ; j++) {
-		for (uint i=0 ; i<width ; i++) {
-			color = qAbs(((RESTRICT_TO_INTERVAL(nextSlice.at(j,i),minValue,maxValue)-minValue)*fact) - ((RESTRICT_TO_INTERVAL(previousSlice.at(j,i),minValue,maxValue)-minValue)*fact));
-			if ( color > 5 && (( currentSlice.at(i,j) > nextSlice.at(j,i) && currentSlice.at(i,j) < previousSlice.at(j,i) ) || ( currentSlice.at(i,j) < nextSlice.at(j,i) && currentSlice.at(i,j) > previousSlice.at(j,i) )) ) *(line++) = qRgb(255,255,255);
-			else *(line++) = qRgb(0,0,0);
+	// TODO : Changer le parcours de l'image pour commencer au bon endroit et effectuer les bon saut de ligne
+
+	//image.fill(0xff000000);
+	if ( yShift > 0 ) line += yShift*width;
+	for (int j=(yShift>=0?yShift:0) ; j<(yShift>=0?height-yShift:height) ; j++) {
+		if ( xShift < 0 ) line += xShift;
+		for (int i=(xShift>=0?xShift:0) ; i<(xShift>=0?width-xShift:width) ; i++) {
+			pixelAbsDiff = qAbs(((RESTRICT_TO_INTERVAL(currentSlice.at(j,i),minValue,maxValue)-minValue)*fact) - ((RESTRICT_TO_INTERVAL(previousSlice.at(j-yShift,i-xShift),minValue,maxValue)-minValue)*fact));
+			//if ( pixelAbsDiff > 5 && (( currentSlice.at(i,j) >= nextSlice.at(j,i) && currentSlice.at(i,j) <= previousSlice.at(j,i) ) || ( currentSlice.at(i,j) <= nextSlice.at(j,i) && currentSlice.at(i,j) >= previousSlice.at(j,i) )) ) *(line++) = foreground;
+			if ( pixelAbsDiff > _motionThreshold ) *line = foreground;
+			else {
+				color = (RESTRICT_TO_INTERVAL(currentSlice.at(j,i),minValue,maxValue)-minValue)*fact;
+				*line = qRgb(color,color,color);
+			}
+			line++;
 		}
 	}
+
+	// Suppressionndes points isolés
+//	line = ((QRgb *) image.bits()) + width + 1;
+//	for (uint j=1 ; j<height-1 ; j++) {
+//		for (uint i=1 ; i<width-1 ; i++) {
+//			const QRgb &color = *(line-width-1);
+//			if (                             *(line-width) == color && *(line-width+1) == color &&
+//				 *(line-1)       == color &&                           *(line+1)       == color &&
+//				 *(line+width-1) == color && *(line+width) == color && *(line+width+1) == color ) {
+//				*line = color;
+//			}
+//			line++;
+//		}
+//		line+=2;
+//	}
+
+//	// Erosion
+//	QImage imageErodee(image);
+//	line = ((QRgb *) image.bits()) + width + 1;
+//	QRgb * lineErodee = ((QRgb *) imageErodee.bits()) + width + 1;
+//	for (uint j=1 ; j<height-1 ; j++) {
+//		for (uint i=1 ; i<width-1 ; i++) {
+//			if ( *(line) == backgroud ) {
+//				*(lineErodee-width-1) = backgroud; *(lineErodee-width) = backgroud; *(lineErodee-width+1) = backgroud;
+//				*(lineErodee-1) = backgroud; *(lineErodee+1) = backgroud;
+//				*(lineErodee+width-1) = backgroud; *(lineErodee+width) = backgroud; *(lineErodee+width+1) = backgroud;
+//			}
+//			line++;
+//			lineErodee++;
+//		}
+//		line+=2;
+//		lineErodee+=2;
+//	}
+
+//	// Erosion
+//	image = imageErodee.copy(0,0,width,height);
+//	line = ((QRgb *) image.bits()) + width + 1;
+//	lineErodee = ((QRgb *) imageErodee.bits()) + width + 1;
+//	for (uint j=1 ; j<height-1 ; j++) {
+//		for (uint i=1 ; i<width-1 ; i++) {
+//			if ( *(line) == backgroud ) {
+//				*(lineErodee-width-1) = backgroud; *(lineErodee-width) = backgroud; *(lineErodee-width+1) = backgroud;
+//				*(lineErodee-1) = backgroud; *(lineErodee+1) = backgroud;
+//				*(lineErodee+width-1) = backgroud; *(lineErodee+width) = backgroud; *(lineErodee+width+1) = backgroud;
+//			}
+//			line++;
+//			lineErodee++;
+//		}
+//		line+=2;
+//		lineErodee+=2;
+//	}
+
+//	// Erosion
+//	image = imageErodee.copy(0,0,width,height);
+//	line = ((QRgb *) image.bits()) + width + 1;
+//	lineErodee = ((QRgb *) imageErodee.bits()) + width + 1;
+//	for (uint j=1 ; j<height-1 ; j++) {
+//		for (uint i=1 ; i<width-1 ; i++) {
+//			if ( *(line) == backgroud ) {
+//				*(lineErodee-width-1) = backgroud; *(lineErodee-width) = backgroud; *(lineErodee-width+1) = backgroud;
+//				*(lineErodee-1) = backgroud; *(lineErodee+1) = backgroud;
+//				*(lineErodee+width-1) = backgroud; *(lineErodee+width) = backgroud; *(lineErodee+width+1) = backgroud;
+//			}
+//			line++;
+//			lineErodee++;
+//		}
+//		line+=2;
+//		lineErodee+=2;
+//	}
+
+//	// Dilatation
+//	image = imageErodee.copy(0,0,width,height);
+//	line = ((QRgb *) image.bits()) + width + 1;
+//	lineErodee = ((QRgb *) imageErodee.bits()) + width + 1;
+//	for (uint j=1 ; j<height-1 ; j++) {
+//		for (uint i=1 ; i<width-1 ; i++) {
+//			if ( *(line) == foreground ) {
+//				*(lineErodee-width-1) = foreground; *(lineErodee-width) = foreground; *(lineErodee-width+1) = foreground;
+//				*(lineErodee-1) = foreground; *(lineErodee+1) = foreground;
+//				*(lineErodee+width-1) = foreground; *(lineErodee+width) = foreground; *(lineErodee+width+1) = foreground;
+//			}
+//			line++;
+//			lineErodee++;
+//		}
+//		line+=2;
+//		lineErodee+=2;
+//	}
 
 	painter.drawImage(0,0,image);
 }
