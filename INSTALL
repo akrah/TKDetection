@@ -88,6 +88,13 @@ PRE-REQUIS
 	> make
 	> sudo make install
 
+	I] Si la liste des widgets de Qxt n'apparait pas dans la liste des widgets de QtDesigner :
+
+		> sudo ln -s /usr/local/Qxt/lib/libQxtGui.so.0 /usr/lib/
+		> sudo ln -s /usr/local/Qxt/lib/libQxtCore.so.0 /usr/lib/
+		
+		Relancez QtDesigner.
+
 5) QwtPolar
    ********
 

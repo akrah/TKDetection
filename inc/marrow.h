@@ -15,11 +15,13 @@ public:
 	int beginSlice() const;
 	int endSlice() const;
 
+	void centerMarrow( const bool &enable );
 	void draw( QPainter &painter, const int &sliceIdx ) const;
 
 private:
 	int _begin;
 	int _end;
+	bool _isCenteredMarrow;
 };
 
 #endif // MARROW_H
