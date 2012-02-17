@@ -21,7 +21,7 @@ public:
 	void setLowThreshold( const int &threshold );
 	void setHighThreshold( const int &threshold );
 	void setMotionThreshold( const int &threshold );
-	void centerMarrow( const bool &enable );
+	void enableMotionWithBackground( const bool &enable );
 
 	void drawSlice( QPainter &painter, const int &sliceNumber );
 
@@ -41,7 +41,7 @@ private:
 	SliceType::SliceType _typeOfView;
 
 	int _motionThreshold;
-	bool _isCenterMarrow;
+	bool _motionWithBackground;
 };
 
 #endif // SLICEVIEW_H

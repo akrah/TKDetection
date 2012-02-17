@@ -46,7 +46,7 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 	QObject::connect(&_groupSliceView, SIGNAL(buttonClicked(int)), this, SLOT(setTypeOfView(int)));
 	QObject::connect(_ui->_sliderMotionThreshold, SIGNAL(valueChanged(int)), this, SLOT(setMotionThreshold(int)));
 	QObject::connect(_ui->_spinMotionThreshold, SIGNAL(valueChanged(int)), this, SLOT(setMotionThreshold(int)));
-	QObject::connect(_ui->_checkCenterOnMarrow, SIGNAL(toggled(bool)), this, SLOT(enableCenterViewOnMarrow(bool)));
+	QObject::connect(_ui->_checkDrawMovementWithBackground, SIGNAL(toggled(bool)), this, SLOT(enableMovementWithBackground(bool)));
 
 	// Évènements déclenchés par le slider de seuillage
 	QObject::connect(_ui->_spansliderSliceThreshold, SIGNAL(lowerValueChanged(int)), this, SLOT(setLowThreshold(int)));
@@ -112,8 +112,8 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *event) {
 			if ( (mouseEvent->button() == Qt::LeftButton) && _billon != 0 && _pieChartDiagrams != 0 ) {
 				const int x = mouseEvent->x()/_sliceZoomer.factor();
 				const int y = mouseEvent->y()/_sliceZoomer.factor();
-				const int centerX = (_marrow !=0 && !_ui->_checkCenterOnMarrow->isChecked()) ? _marrow->at(_ui->_sliderSelectSlice->value()).x:_billon->n_cols/2;
-				const int centerY = (_marrow !=0 && !_ui->_checkCenterOnMarrow->isChecked()) ? _marrow->at(_ui->_sliderSelectSlice->value()).y:_billon->n_rows/2;
+				const int centerX = (_marrow !=0) ? _marrow->at(_ui->_sliderSelectSlice->value()).x:_billon->n_cols/2;
+				const int centerY = (_marrow !=0) ? _marrow->at(_ui->_sliderSelectSlice->value()).y:_billon->n_rows/2;
 
 				const int sector = _pieChart->partOfAngle( TWO_PI-ANGLE(centerX,centerY,x,y) );
 
@@ -161,7 +161,7 @@ void MainWindow::drawSlice( const int &sliceNumber ) {
 		if ( _marrow != 0 ) _marrow->draw(painter,sliceNumber);
 		if ( _pieChart != 0 && !_pieChartPlots.isEmpty() && sliceNumber >= _ui->_spinMinSectorSlice->value() && sliceNumber <= _ui->_spinMaxSectorSlice->value()) {
 			Coord2D center(_pix.width()/2,_pix.height()/2);
-			if ( _marrow != 0 && !_ui->_checkCenterOnMarrow->isChecked() && sliceNumber >= _marrow->beginSlice() && sliceNumber <= _marrow->endSlice()) {
+			if ( _marrow != 0 && sliceNumber >= _marrow->beginSlice() && sliceNumber <= _marrow->endSlice()) {
 				center = _marrow->at(sliceNumber-_marrow->beginSlice());
 			}
 			_pieChart->draw(painter,_ui->_comboSelectSector->currentIndex(), center);
@@ -243,7 +243,6 @@ void MainWindow::updateMarrow() {
 	if ( _billon != 0 ) {
 		MarrowExtractor extractor;
 		_marrow = extractor.process(*_billon,0,_billon->n_slices-1);
-		_marrow->centerMarrow(_ui->_checkCenterOnMarrow->isChecked());
 	}
 	_pieChartDiagrams->setModel(_marrow);
 	_sliceView->setModel(_marrow);
@@ -353,14 +352,14 @@ void MainWindow::nextMaximumInSliceHistogram() {
 void MainWindow::zoomInSliceView( const qreal &zoomFactor, const QPoint &focalPoint ) {
 	_ui->_labelSliceView->setPixmap(_billon != 0 ? QPixmap::fromImage(_pix).scaled(_pix.width()*zoomFactor,_pix.height()*zoomFactor,Qt::KeepAspectRatio) : QPixmap::fromImage(_pix));
 	QScrollArea &scrollArea = *(_ui->_scrollSliceView);
-	scrollArea.horizontalScrollBar()->setValue(focalPoint.x()-scrollArea.horizontalScrollBar()->value()/zoomFactor);
-	scrollArea.verticalScrollBar()->setValue(focalPoint.y()-scrollArea.verticalScrollBar()->value()/zoomFactor);
+	scrollArea.horizontalScrollBar()->setValue(focalPoint.x()/(qreal)(_ui->_labelSliceView->pixmap()->width())*(scrollArea.horizontalScrollBar()->maximum()*(1./0.9)));
+	scrollArea.verticalScrollBar()->setValue(focalPoint.y()/(qreal)(_ui->_labelSliceView->pixmap()->height())*(scrollArea.verticalScrollBar()->maximum()*(1./0.9)));
 }
 
 void MainWindow::dragInSliceView( const QPoint &motionVector ) {
 	QScrollArea &scrollArea = *(_ui->_scrollSliceView);
-	scrollArea.horizontalScrollBar()->setValue(scrollArea.horizontalScrollBar()->value()-motionVector.x());
-	scrollArea.verticalScrollBar()->setValue(scrollArea.verticalScrollBar()->value()-motionVector.y());
+	if ( motionVector.x() != 0 ) scrollArea.horizontalScrollBar()->setValue(scrollArea.horizontalScrollBar()->value()-motionVector.x());
+	if ( motionVector.y() != 0 ) scrollArea.verticalScrollBar()->setValue(scrollArea.verticalScrollBar()->value()-motionVector.y());
 }
 
 void MainWindow::setMotionThreshold( const int &threshold ) {
@@ -379,13 +378,13 @@ void MainWindow::setMotionThreshold( const int &threshold ) {
 	}
 }
 
-void MainWindow::enableCenterViewOnMarrow( const bool &enable ) {
-	if ( _sliceView != 0 || _marrow != 0 ) {
-		if ( _marrow != 0 ) _marrow->centerMarrow(enable);
-		if ( _sliceView != 0 ) _sliceView->centerMarrow(enable);
+void MainWindow::enableMovementWithBackground( const bool &enable ) {
+	if ( _sliceView != 0 ) {
+		_sliceView->enableMotionWithBackground(enable);
 		drawSlice();
 	}
 }
+
 
 /*******************************
  * Private functions
