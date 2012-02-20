@@ -186,8 +186,8 @@ void SliceView::drawMovementSlice( QPainter &painter, const int &sliceNumber ) {
 				if ( pixelAbsDiff > _motionThreshold ) *line = foreground;
 				else {
 					const int color = (RESTRICT_TO_INTERVAL(currentSlice.at(j,i),minValue,maxValue)-minValue)*fact;
-					//*line = qRgb(color,color,color);
-					*line = background;
+					*line = qRgb(color,color,color);
+					//*line = background;
 				}
 				line++;
 			}
@@ -204,165 +204,81 @@ void SliceView::drawMovementSlice( QPainter &painter, const int &sliceNumber ) {
 		}
 	}
 
-//	// Calcul du mouvement en alignant les coupes par rapport à la moelle la moelle
-//	const Coord2D marrowShift = _marrow->at(sliceNumber).shiftTo(_marrow->at(previousIndex));
-//	const int &xShift = marrowShift.x;
-//	const int &yShift = marrowShift.y;
-//	image.fill(0xff000000);
-//	if ( yShift < 0 ) line += -yShift*width;
-//	for (int j=(yShift>=0?0:-yShift) ; j<(yShift>=0?height-yShift:height) ; j++) {
-//		if ( xShift < 0 ) line += -xShift;
-//		for (int i=(xShift>=0?0:-xShift) ; i<(xShift>=0?width-xShift:width) ; i++) {
-//			pixelAbsDiff = qAbs(((RESTRICT_TO_INTERVAL(currentSlice.at(j,i),minValue,maxValue)-minValue)*fact) - ((RESTRICT_TO_INTERVAL(previousSlice.at(j+yShift,i+xShift),minValue,maxValue)-minValue)*fact));
-//			if ( pixelAbsDiff > _motionThreshold ) *line = foreground;
-//			else {
-////				const int color = (RESTRICT_TO_INTERVAL(currentSlice.at(j,i),minValue,maxValue)-minValue)*fact;
-////				*line = qRgb(color,color,color);
-//				*line = background;
-//			}
-//			line++;
-//		}
-//		if ( xShift > 0 ) line += xShift;
-//	}
-
 	// Suppressionndes points isolés
 	const int rayon = 2;
-	QList<int> indexToCompare;
-	indexToCompare.append(-rayon*width-rayon);
-	indexToCompare.append(rayon*width-rayon);
-	indexToCompare.append(-rayon*width+rayon);
-	indexToCompare.append(rayon*width+rayon);
+	const int rayonWidth = rayon*width;
+	const int heightMinusRayon = height-rayon;
+	const int widthMinusRayon = width-rayon;
+	const int nbCompare = rayon*8;
+	const int nbChange = qPow(2*rayon-1,2);
+	int indexToCompare[nbCompare];
+	int indexToChange[nbChange];
+	const int *supCompare = indexToCompare+nbCompare;
+	const int *supChange = indexToChange+nbChange;
+	int inc;
+
+	inc = 0;
+	indexToCompare[inc++] = -rayonWidth-rayon;
+	indexToCompare[inc++] = rayonWidth-rayon;
+	indexToCompare[inc++] = -rayonWidth+rayon;
+	indexToCompare[inc++] = rayonWidth+rayon;
 	for ( int i=-rayon+1 ; i<rayon ; i++ ) {
-		indexToCompare.append(-rayon*width+i);
-		indexToCompare.append(rayon*width+i);
-		indexToCompare.append(i*width-rayon);
-		indexToCompare.append(i*width+rayon);
+		indexToCompare[inc++] = -rayonWidth+i;
+		indexToCompare[inc++] = rayonWidth+i;
+		indexToCompare[inc++] = i*width-rayon;
+		indexToCompare[inc++] = i*width+rayon;
 	}
-	QList<int> indexToChange;
+
+	inc = 0;
 	for ( int j=-rayon+1 ; j<rayon ; j++ ) {
 		for ( int i=-rayon+1 ; i<rayon ; i++ ) {
-			indexToChange.append(j*width+i);
+			indexToChange[inc++] = j*width+i;
 		}
 	}
 
-//	line = ((QRgb *) image.bits()) + width + 1;
-//	if ( _motionWithBackground ) {
-//		for (uint j=1 ; j<height-1 ; j++) {
-//			for (uint i=1 ; i<width-1 ; i++) {
-//				if ( *line           == foreground &&
-//					 *(line-width-1) != foreground && *(line-width) != foreground && *(line-width+1) != foreground &&
-//					 *(line-1)       != foreground &&                                *(line+1)       != foreground &&
-//					 *(line+width-1) != foreground && *(line+width) != foreground && *(line+width+1) != foreground ) {
-//								const int color = (RESTRICT_TO_INTERVAL(currentSlice.at(j,i),minValue,maxValue)-minValue)*fact;
-//								*line = qRgb(color,color,color);
-//				}
-//				line++;
-//			}
-//			line+=2;
-//		}
-//	}
-//	else {
-//		for (uint j=1 ; j<height-1 ; j++) {
-//			for (uint i=1 ; i<width-1 ; i++) {
-//				if ( *line           == foreground &&
-//					 *(line-width-1) != foreground && *(line-width) != foreground && *(line-width+1) != foreground &&
-//					 *(line-1)       != foreground &&                                *(line+1)       != foreground &&
-//					 *(line+width-1) != foreground && *(line+width) != foreground && *(line+width+1) != foreground ) {
-//								*line = background;
-//				}
-//				line++;
-//			}
-//			line+=2;
-//		}
-//	}
-
-	line = ((QRgb *) image.bits()) + rayon*width + rayon;
+	bool isBackground;
+	int *pointer;
+	line = ((QRgb *) image.bits()) + rayonWidth + rayon;
 	if ( _motionWithBackground ) {
-//		for (uint j=2 ; j<height-2 ; j++) {
-//			for (uint i=2 ; i<width-2 ; i++) {
-//				if ( *(line-2*width-2) != foreground && *(line-2*width-1) != foreground && *(line-2*width) != foreground && *(line-2*width+1) != foreground && *(line-2*width+2) != foreground &&
-//					 *(line-width-2)   != foreground &&                                                                                                        *(line-width+2)   != foreground &&
-//					 *(line-2)         != foreground &&                                                                                                        *(line+2)         != foreground &&
-//					 *(line+width-2)   != foreground &&                                                                                                        *(line+width+2)   != foreground &&
-//					 *(line+2*width-2) != foreground && *(line+2*width-1) != foreground && *(line+2*width) != foreground && *(line+2*width+1) != foreground && *(line+2*width+2) != foreground ) {
-//								const int color = (RESTRICT_TO_INTERVAL(currentSlice.at(j,i),minValue,maxValue)-minValue)*fact;
-//								const QRgb rgbColor = qRgb(color,color,color);
-//								*(line-width-1) = rgbColor; *(line-width) = rgbColor; *(line-width+1) = rgbColor;
-//								*(line-1)       = rgbColor; *(line)       = rgbColor; *(line+1)       = rgbColor;
-//								*(line+width-1) = rgbColor; *(line+width) = rgbColor; *(line+width+1) = rgbColor;
-//				}
-//				line++;
-//			}
-//			line+=4;
-//		}
-//	}
-//	else {
-		QListIterator<int> iterCompare(indexToCompare);
-		QListIterator<int> iterChange(indexToChange);
-		for (uint j=rayon ; j<height-rayon ; j++) {
-			for (uint i=rayon ; i<width-rayon ; i++) {
-//				if ( *(line-2*width-2) != foreground && *(line-2*width-1) != foreground && *(line-2*width) != foreground && *(line-2*width+1) != foreground && *(line-2*width+2) != foreground &&
-//					 *(line-width-2)   != foreground &&                                                                                                        *(line-width+2)   != foreground &&
-//					 *(line-2)         != foreground &&                                                                                                        *(line+2)         != foreground &&
-//					 *(line+width-2)   != foreground &&                                                                                                        *(line+width+2)   != foreground &&
-//					 *(line+2*width-2) != foreground && *(line+2*width-1) != foreground && *(line+2*width) != foreground && *(line+2*width+1) != foreground && *(line+2*width+2) != foreground ) {
-//								*(line-width-1) = background; *(line-width) = background; *(line-width+1) = background;
-//								*(line-1)       = background; *(line)       = background; *(line+1)       = background;
-//								*(line+width-1) = background; *(line+width) = background; *(line+width+1) = background;
-//				}
-//				line++;
-				bool isBackground = true;
-				iterCompare.toFront();
-				while ( isBackground && iterCompare.hasNext() ) {
-					isBackground &= (*(line+iterCompare.next()) != foreground);
+		for (int j=rayon ; j<heightMinusRayon ; j++) {
+			for (int i=rayon ; i<widthMinusRayon ; i++) {
+				isBackground = true;
+				pointer = indexToCompare;
+				while ( isBackground && pointer != supCompare ) {
+					isBackground &= (*(line+*(pointer++)) != foreground);
 				}
 				if ( isBackground ) {
-					iterChange.toFront();
-					while ( iterChange.hasNext() ) {
-						*(line+iterChange.next()) = background;
+					pointer = indexToChange;
+					while ( pointer != supChange ) {
+						const int color = (RESTRICT_TO_INTERVAL(currentSlice.at(j,i),minValue,maxValue)-minValue)*fact;
+						*(line+*(pointer++)) = qRgb(color,color,color);
+						//*(line+*(pointer++)) = background;
 					}
 				}
 				line++;
 			}
-			line+=4;
+			line+=rayon*2;
 		}
 	}
-
-//	// Erosion
-//	image = imageErodee.copy(0,0,width,height);
-//	line = ((QRgb *) image.bits()) + width + 1;
-//	lineErodee = ((QRgb *) imageErodee.bits()) + width + 1;
-//	for (uint j=1 ; j<height-1 ; j++) {
-//		for (uint i=1 ; i<width-1 ; i++) {
-//			if ( *(line) == background ) {
-//				*(lineErodee-width-1) = background; *(lineErodee-width) = background; *(lineErodee-width+1) = background;
-//				*(lineErodee-1) = background; *(lineErodee+1) = background;
-//				*(lineErodee+width-1) = background; *(lineErodee+width) = background; *(lineErodee+width+1) = background;
-//			}
-//			line++;
-//			lineErodee++;
-//		}
-//		line+=2;
-//		lineErodee+=2;
-//	}
-
-//	// Dilatation
-//	image = imageErodee.copy(0,0,width,height);
-//	line = ((QRgb *) image.bits()) + width + 1;
-//	lineErodee = ((QRgb *) imageErodee.bits()) + width + 1;
-//	for (uint j=1 ; j<height-1 ; j++) {
-//		for (uint i=1 ; i<width-1 ; i++) {
-//			if ( *(line) == foreground ) {
-//				*(lineErodee-width-1) = foreground; *(lineErodee-width) = foreground; *(lineErodee-width+1) = foreground;
-//				*(lineErodee-1) = foreground; *(lineErodee+1) = foreground;
-//				*(lineErodee+width-1) = foreground; *(lineErodee+width) = foreground; *(lineErodee+width+1) = foreground;
-//			}
-//			line++;
-//			lineErodee++;
-//		}
-//		line+=2;
-//		lineErodee+=2;
-//	}
+	else {
+		for (int j=rayon ; j<heightMinusRayon ; j++) {
+			for (int i=rayon ; i<widthMinusRayon ; i++) {
+				isBackground = true;
+				pointer = indexToCompare;
+				while ( isBackground && pointer != supCompare ) {
+					isBackground &= (*(line+*(pointer++)) != foreground);
+				}
+				if ( isBackground ) {
+					pointer = indexToChange;
+					while ( pointer != supChange ) {
+						*(line+*(pointer++)) = background;
+					}
+				}
+				line++;
+			}
+			line+=rayon*2;
+		}
+	}
 
 	painter.drawImage(0,0,image);
 }
