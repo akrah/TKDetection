@@ -36,7 +36,8 @@ SOURCES		=	main.cpp \
 				pointpolarseriesdata.cpp \
 				slicehistogram.cpp \
 				sliceview.cpp \
-				slicezoomer.cpp
+				slicezoomer.cpp \
+	src/opticalflow.cpp
 
 HEADERS		=	billon.h \
 				dicomreader.h \
@@ -53,9 +54,13 @@ HEADERS		=	billon.h \
 				slicehistogram.h \
 				sliceview.h \
 				sliceview_def.h \
-				slicezoomer.h
+				slicezoomer.h \
+	inc/opticalflow.h
 
 FORMS		=	mainwindow.ui
+
+INCLUDEPATH *=  /usr/include/ \
+				/usr/local/include/
 
 CONFIG += $${ITK_VERSION}
 itk3 {

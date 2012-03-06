@@ -51,7 +51,9 @@ private slots:
 	void zoomInSliceView( const qreal &zoomFactor, const QPoint &focalPoint );
 	void dragInSliceView( const QPoint &motionVector );
 	void setMotionThreshold( const int &threshold );
+	void setMotionGroupMinimumRadius( const int &radius );
 	void enableMovementWithBackground( const bool &enable );
+	void useNextSliceInsteadOfCurrentSlice( const bool &enable );
 
 private:
 	void openNewBillon(const QString &folderName = "");

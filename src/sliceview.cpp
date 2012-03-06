@@ -3,9 +3,11 @@
 #include "inc/billon.h"
 #include "inc/global.h"
 #include "inc/marrow.h"
+#include "inc/opticalflow.h"
 #include <QPainter>
 
-SliceView::SliceView() : _billon(0), _marrow(0), _lowThreshold(0), _highThreshold(0), _typeOfView(SliceType::CURRENT), _motionThreshold(0), _motionWithBackground(false) {
+SliceView::SliceView() : _billon(0), _marrow(0), _lowThreshold(0), _highThreshold(0), _typeOfView(SliceType::CURRENT),
+	_motionThreshold(0), _motionGroupMinimumRadius(1), _motionWithBackground(false), _useNextSliceInsteadOfCurrentSlice(false) {
 }
 
 /*******************************
@@ -38,8 +40,16 @@ void SliceView::setMotionThreshold( const int &threshold ) {
 	_motionThreshold = threshold;
 }
 
+void SliceView::setMotionGroupMinimumRadius( const int &radius ) {
+	_motionGroupMinimumRadius = qMax(radius,0);
+}
+
 void SliceView::enableMotionWithBackground( const bool &enable ) {
 	_motionWithBackground = enable;
+}
+
+void SliceView::useNextSliceInsteadOfCurrentSlice( const bool &enable ) {
+	_useNextSliceInsteadOfCurrentSlice = enable;
 }
 
 void SliceView::drawSlice( QPainter &painter, const int &sliceNumber ) {
@@ -56,6 +66,9 @@ void SliceView::drawSlice( QPainter &painter, const int &sliceNumber ) {
 			// Affichage de la coupe de mouvements
 			case SliceType::MOVEMENT :
 				drawMovementSlice( painter, sliceNumber );
+				break;
+			case SliceType::FLOW :
+				drawFlowSlice( painter, sliceNumber );
 				break;
 			case SliceType::CURRENT:
 			default :
@@ -163,29 +176,29 @@ void SliceView::drawMedianSlice( QPainter &painter ) {
 }
 
 void SliceView::drawMovementSlice( QPainter &painter, const int &sliceNumber ) {
-	const int previousIndex = sliceNumber > 0 ? sliceNumber-1 : sliceNumber;
-	const imat &currentSlice = _billon->slice(sliceNumber);
-	const imat &previousSlice = _billon->slice(previousIndex);
 
-	const uint width = currentSlice.n_cols;
-	const uint height = currentSlice.n_rows;
-	const int &minValue = _lowThreshold;
-	const int &maxValue = _highThreshold;
-	const qreal fact = 255.0/(maxValue-minValue);
-	const QRgb background = qRgb(0,0,0);
-	const QRgb foreground = qRgb(0,200,200);
+	const imat &previousSlice = _billon->slice(sliceNumber > 0 ? sliceNumber-1 : sliceNumber+1);
+	const imat &toCompareSlice = _billon->slice(_useNextSliceInsteadOfCurrentSlice && sliceNumber < static_cast<int>(_billon->n_slices)-1 ? sliceNumber+1 : sliceNumber );
+
+	const int width = previousSlice.n_cols;
+	const int height = previousSlice.n_rows;
+	const qreal fact = 255.0/(_highThreshold-_lowThreshold);
 
 	QImage image(width,height,QImage::Format_ARGB32);
-	QRgb * line = (QRgb *) image.bits();
-	int pixelAbsDiff;
+	const QRgb background = qRgb(0,0,0);
+	const QRgb foreground = qRgb(0,200,200);
+	QRgb *line;
 
+	int i, j, color, pixelAbsDiff;
+
+	line = (QRgb *) image.bits();
 	if ( _motionWithBackground ) {
-		for (uint j=0 ; j<height ; j++) {
-			for (uint i=0 ; i<width ; i++) {
-				pixelAbsDiff = qAbs(((RESTRICT_TO_INTERVAL(currentSlice.at(j,i),minValue,maxValue)-minValue)*fact) - ((RESTRICT_TO_INTERVAL(previousSlice.at(j,i),minValue,maxValue)-minValue)*fact));
+		for ( j=0 ; j<height ; j++) {
+			for ( i=0 ; i<width ; i++) {
+				pixelAbsDiff = qAbs(((RESTRICT_TO_INTERVAL(previousSlice.at(j,i),_lowThreshold,_highThreshold)-_lowThreshold)*fact) - ((RESTRICT_TO_INTERVAL(toCompareSlice.at(j,i),_lowThreshold,_highThreshold)-_lowThreshold)*fact));
 				if ( pixelAbsDiff > _motionThreshold ) *line = foreground;
 				else {
-					const int color = (RESTRICT_TO_INTERVAL(currentSlice.at(j,i),minValue,maxValue)-minValue)*fact;
+					color = (RESTRICT_TO_INTERVAL(previousSlice.at(j,i),_lowThreshold,_highThreshold)-_lowThreshold)*fact;
 					*line = qRgb(color,color,color);
 					//*line = background;
 				}
@@ -194,9 +207,9 @@ void SliceView::drawMovementSlice( QPainter &painter, const int &sliceNumber ) {
 		}
 	}
 	else {
-		for (uint j=0 ; j<height ; j++) {
-			for (uint i=0 ; i<width ; i++) {
-				pixelAbsDiff = qAbs(((RESTRICT_TO_INTERVAL(currentSlice.at(j,i),minValue,maxValue)-minValue)*fact) - ((RESTRICT_TO_INTERVAL(previousSlice.at(j,i),minValue,maxValue)-minValue)*fact));
+		for ( j=0 ; j<height ; j++) {
+			for ( i=0 ; i<width ; i++) {
+				pixelAbsDiff = qAbs(((RESTRICT_TO_INTERVAL(previousSlice.at(j,i),_lowThreshold,_highThreshold)-_lowThreshold)*fact) - ((RESTRICT_TO_INTERVAL(toCompareSlice.at(j,i),_lowThreshold,_highThreshold)-_lowThreshold)*fact));
 				if ( pixelAbsDiff > _motionThreshold ) *line = foreground;
 				else *line = background;
 				line++;
@@ -205,80 +218,110 @@ void SliceView::drawMovementSlice( QPainter &painter, const int &sliceNumber ) {
 	}
 
 	// Suppressionndes points isolés
-	const int rayon = 2;
-	const int rayonWidth = rayon*width;
-	const int heightMinusRayon = height-rayon;
-	const int widthMinusRayon = width-rayon;
-	const int nbCompare = rayon*8;
-	const int nbChange = qPow(2*rayon-1,2);
-	int indexToCompare[nbCompare];
-	int indexToChange[nbChange];
-	const int *supCompare = indexToCompare+nbCompare;
-	const int *supChange = indexToChange+nbChange;
-	int inc;
+	if ( _motionGroupMinimumRadius > 0 ) {
+		const int productRadiusWidth = _motionGroupMinimumRadius*width;
+		const int diffHeightRadius = height-_motionGroupMinimumRadius;
+		const int diffWidthRadius = width-_motionGroupMinimumRadius;
+		const int nbCompare = _motionGroupMinimumRadius*8;
+		const int nbChange = qPow(2*_motionGroupMinimumRadius-1,2);
 
-	inc = 0;
-	indexToCompare[inc++] = -rayonWidth-rayon;
-	indexToCompare[inc++] = rayonWidth-rayon;
-	indexToCompare[inc++] = -rayonWidth+rayon;
-	indexToCompare[inc++] = rayonWidth+rayon;
-	for ( int i=-rayon+1 ; i<rayon ; i++ ) {
-		indexToCompare[inc++] = -rayonWidth+i;
-		indexToCompare[inc++] = rayonWidth+i;
-		indexToCompare[inc++] = i*width-rayon;
-		indexToCompare[inc++] = i*width+rayon;
-	}
+		int indexToCompare[nbCompare];
+		int indexToChange[nbChange];
+		const int *supCompare = indexToCompare+nbCompare;
+		const int *supChange = indexToChange+nbChange;
+		int *pointer;
 
-	inc = 0;
-	for ( int j=-rayon+1 ; j<rayon ; j++ ) {
-		for ( int i=-rayon+1 ; i<rayon ; i++ ) {
-			indexToChange[inc++] = j*width+i;
+		bool isBackground;
+		int counter;
+
+		counter = 0;
+		indexToCompare[counter++] = -productRadiusWidth-_motionGroupMinimumRadius;
+		indexToCompare[counter++] = -productRadiusWidth+_motionGroupMinimumRadius;
+		indexToCompare[counter++] = productRadiusWidth-_motionGroupMinimumRadius;
+		indexToCompare[counter++] = productRadiusWidth+_motionGroupMinimumRadius;
+		for ( i=-_motionGroupMinimumRadius+1 ; i<_motionGroupMinimumRadius ; i++ ) {
+			indexToCompare[counter++] = -productRadiusWidth+i;
+			indexToCompare[counter++] = productRadiusWidth+i;
+			indexToCompare[counter++] = i*width-_motionGroupMinimumRadius;
+			indexToCompare[counter++] = i*width+_motionGroupMinimumRadius;
 		}
-	}
 
-	bool isBackground;
-	int *pointer;
-	line = ((QRgb *) image.bits()) + rayonWidth + rayon;
-	if ( _motionWithBackground ) {
-		for (int j=rayon ; j<heightMinusRayon ; j++) {
-			for (int i=rayon ; i<widthMinusRayon ; i++) {
-				isBackground = true;
-				pointer = indexToCompare;
-				while ( isBackground && pointer != supCompare ) {
-					isBackground &= (*(line+*(pointer++)) != foreground);
-				}
-				if ( isBackground ) {
-					pointer = indexToChange;
-					while ( pointer != supChange ) {
-						const int color = (RESTRICT_TO_INTERVAL(currentSlice.at(j,i),minValue,maxValue)-minValue)*fact;
-						*(line+*(pointer++)) = qRgb(color,color,color);
-						//*(line+*(pointer++)) = background;
-					}
-				}
-				line++;
+		counter = 0;
+		for ( j=-_motionGroupMinimumRadius+1 ; j<_motionGroupMinimumRadius ; j++ ) {
+			for ( i=-_motionGroupMinimumRadius+1 ; i<_motionGroupMinimumRadius ; i++ ) {
+				indexToChange[counter++] = j*width+i;
 			}
-			line+=rayon*2;
 		}
-	}
-	else {
-		for (int j=rayon ; j<heightMinusRayon ; j++) {
-			for (int i=rayon ; i<widthMinusRayon ; i++) {
-				isBackground = true;
-				pointer = indexToCompare;
-				while ( isBackground && pointer != supCompare ) {
-					isBackground &= (*(line+*(pointer++)) != foreground);
-				}
-				if ( isBackground ) {
-					pointer = indexToChange;
-					while ( pointer != supChange ) {
-						*(line+*(pointer++)) = background;
+
+		line = ((QRgb *) image.bits()) + productRadiusWidth + _motionGroupMinimumRadius;
+		if ( _motionWithBackground ) {
+			for ( j=_motionGroupMinimumRadius ; j<diffHeightRadius ; j++) {
+				for ( i=_motionGroupMinimumRadius ; i<diffWidthRadius ; i++) {
+					isBackground = true;
+					pointer = indexToCompare;
+					while ( pointer != supCompare ) {
+						isBackground &= (*(line+*pointer) != foreground);
+						pointer++;
 					}
+					if ( isBackground ) {
+						pointer = indexToChange;
+						while ( pointer != supChange ) {
+							const int &pointerValue = *pointer;
+							color = (RESTRICT_TO_INTERVAL(previousSlice.at( j+pointerValue/width, i+(pointerValue/width)%width ),_lowThreshold,_highThreshold)-_lowThreshold)*fact;
+							*(line+pointerValue) = qRgb(color,color,color);
+							//*(line+pointerValue) = background;
+							pointer++;
+						}
+					}
+					line++;
 				}
-				line++;
+				line+=(2*_motionGroupMinimumRadius);
 			}
-			line+=rayon*2;
+		}
+		else {
+			for ( j=_motionGroupMinimumRadius ; j<diffHeightRadius ; j++) {
+				for ( i=_motionGroupMinimumRadius ; i<diffWidthRadius ; i++) {
+					isBackground = true;
+					pointer = indexToCompare;
+					while ( pointer != supCompare ) {
+						isBackground &= (*(line+*(pointer++)) != foreground);
+					}
+					if ( isBackground ) {
+						pointer = indexToChange;
+						while ( pointer != supChange ) {
+							*(line+*(pointer++)) = background;
+						}
+					}
+					line++;
+				}
+				line+=_motionGroupMinimumRadius*2;
+			}
 		}
 	}
 
 	painter.drawImage(0,0,image);
+}
+
+void SliceView::drawFlowSlice( QPainter &painter, const int &sliceNumber ) {
+
+	const imat &currentSlice = _billon->slice(sliceNumber);
+
+	const int width = currentSlice.n_cols;
+	const int height = currentSlice.n_rows;
+
+	int i, j;
+
+	painter.setPen(Qt::white);
+
+	OpticalFlow flow(_billon);
+	VectorsField *field = flow.computeFlowOnSlice(sliceNumber);
+
+	for ( j=5 ; j<height-1 ; j+=5 ) {
+		for ( i=5 ; i<width-1 ; i+=5 ) {
+			//if ( qSqrt(qPow((*field)[j][i].x(),2) + qPow((*field)[j][i].y(),2)) > 1 )
+				painter.drawLine(i,j,i+(*field)[j][i].x(),j+(*field)[j][i].y());
+		}
+	}
+
+	delete field;
 }

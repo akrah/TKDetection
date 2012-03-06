@@ -21,7 +21,9 @@ public:
 	void setLowThreshold( const int &threshold );
 	void setHighThreshold( const int &threshold );
 	void setMotionThreshold( const int &threshold );
+	void setMotionGroupMinimumRadius( const int &radius );
 	void enableMotionWithBackground( const bool &enable );
+	void useNextSliceInsteadOfCurrentSlice( const bool &enable );
 
 	void drawSlice( QPainter &painter, const int &sliceNumber );
 
@@ -30,6 +32,7 @@ private :
 	void drawAverageSlice( QPainter &painter );
 	void drawMedianSlice( QPainter &painter );
 	void drawMovementSlice( QPainter &painter, const int &sliceNumber );
+	void drawFlowSlice( QPainter &painter, const int &sliceNumber );
 
 private:
 	const Billon * _billon;
@@ -41,7 +44,9 @@ private:
 	SliceType::SliceType _typeOfView;
 
 	int _motionThreshold;
+	int _motionGroupMinimumRadius;
 	bool _motionWithBackground;
+	bool _useNextSliceInsteadOfCurrentSlice;
 };
 
 #endif // SLICEVIEW_H

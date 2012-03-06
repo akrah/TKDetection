@@ -9,6 +9,7 @@ namespace SliceType {
 		AVERAGE,
 		MEDIAN,
 		MOVEMENT,
+		FLOW,
 		_SLICE_TYPE_MAX_
 	};
 }

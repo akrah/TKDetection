@@ -35,6 +35,7 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 	_groupSliceView.addButton(_ui->_radioAverageSlice,SliceType::AVERAGE);
 	_groupSliceView.addButton(_ui->_radioMedianSlice,SliceType::MEDIAN);
 	_groupSliceView.addButton(_ui->_radioMovementSlice,SliceType::MOVEMENT);
+	_groupSliceView.addButton(_ui->_radioFlowSlice,SliceType::FLOW);
 	_groupSliceView.setExclusive(true);
 
 	/**** Mise en place de la communication MVC ****/
@@ -46,7 +47,9 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 	QObject::connect(&_groupSliceView, SIGNAL(buttonClicked(int)), this, SLOT(setTypeOfView(int)));
 	QObject::connect(_ui->_sliderMotionThreshold, SIGNAL(valueChanged(int)), this, SLOT(setMotionThreshold(int)));
 	QObject::connect(_ui->_spinMotionThreshold, SIGNAL(valueChanged(int)), this, SLOT(setMotionThreshold(int)));
-	QObject::connect(_ui->_checkDrawMovementWithBackground, SIGNAL(toggled(bool)), this, SLOT(enableMovementWithBackground(bool)));
+	QObject::connect(_ui->_checkDrawMotionWithBackground, SIGNAL(toggled(bool)), this, SLOT(enableMovementWithBackground(bool)));
+	QObject::connect(_ui->_spinMovementMinimumRadius, SIGNAL(valueChanged(int)), this, SLOT(setMotionGroupMinimumRadius(int)));
+	QObject::connect(_ui->_checkUseNextSlice, SIGNAL(toggled(bool)), this, SLOT(useNextSliceInsteadOfCurrentSlice(bool)));
 
 	// Évènements déclenchés par le slider de seuillage
 	QObject::connect(_ui->_spansliderSliceThreshold, SIGNAL(lowerValueChanged(int)), this, SLOT(setLowThreshold(int)));
@@ -154,18 +157,29 @@ void MainWindow::closeImage() {
 void MainWindow::drawSlice( const int &sliceNumber ) {
 	if ( _billon != 0 ) {
 		_ui->_labelSliceNumber->setNum(sliceNumber);
-		_pix = QImage(_billon->n_cols,_billon->n_rows,QImage::Format_ARGB32);
+		_pix.fill(0xff000000);
 		QPainter painter(&_pix);
-		if ( _sliceView != 0 ) _sliceView->drawSlice(painter,sliceNumber);
+		if ( _sliceView != 0 ) {
+			painter.save();
+			_sliceView->drawSlice(painter,sliceNumber);
+			painter.restore();
+		}
 		if ( _sliceHistogram != 0 ) highlightSliceHistogram(sliceNumber);
-		if ( _marrow != 0 ) _marrow->draw(painter,sliceNumber);
+		if ( _marrow != 0 ) {
+			painter.save();
+			_marrow->draw(painter,sliceNumber);
+			painter.restore();
+		}
 		if ( _pieChart != 0 && !_pieChartPlots.isEmpty() && sliceNumber >= _ui->_spinMinSectorSlice->value() && sliceNumber <= _ui->_spinMaxSectorSlice->value()) {
 			Coord2D center(_pix.width()/2,_pix.height()/2);
 			if ( _marrow != 0 && sliceNumber >= _marrow->beginSlice() && sliceNumber <= _marrow->endSlice()) {
 				center = _marrow->at(sliceNumber-_marrow->beginSlice());
 			}
+			painter.save();
 			_pieChart->draw(painter,_ui->_comboSelectSector->currentIndex(), center);
+			painter.restore();
 		};
+		painter.end();
 	}
 	else {
 		_ui->_labelSliceNumber->setText(tr("Aucune"));
@@ -378,9 +392,23 @@ void MainWindow::setMotionThreshold( const int &threshold ) {
 	}
 }
 
+void MainWindow::setMotionGroupMinimumRadius( const int &radius ) {
+	if ( _sliceView != 0 ) {
+		_sliceView->setMotionGroupMinimumRadius(radius);
+		drawSlice();
+	}
+}
+
 void MainWindow::enableMovementWithBackground( const bool &enable ) {
 	if ( _sliceView != 0 ) {
 		_sliceView->enableMotionWithBackground(enable);
+		drawSlice();
+	}
+}
+
+void MainWindow::useNextSliceInsteadOfCurrentSlice( const bool &enable ) {
+	if ( _sliceView != 0 ) {
+		_sliceView->useNextSliceInsteadOfCurrentSlice(enable);
 		drawSlice();
 	}
 }
@@ -394,9 +422,11 @@ void MainWindow::openNewBillon( const QString &folderName ) {
 	if ( _billon != 0 ) {
 		delete _billon;
 		_billon = 0;
+		_pix = QImage(0,0,QImage::Format_ARGB32);
 	}
 	if ( !folderName.isEmpty() ) {
 		_billon = DicomReader::read(folderName);
+		_pix = QImage(_billon->n_cols,_billon->n_rows,QImage::Format_ARGB32);
 	}
 	if ( _sliceView != 0 ) _sliceView->setModel(_billon);
 	if ( _sliceHistogram != 0 ) _sliceHistogram->setModel(_billon);
@@ -456,7 +486,7 @@ void MainWindow::updateComponentsValues() {
 }
 
 void MainWindow::enabledComponents() {
-	const bool enable = (_billon != 0) && ( _groupSliceView.checkedId() == SliceType::CURRENT || _groupSliceView.checkedId() == SliceType::MOVEMENT );
+	const bool enable = (_billon != 0) && ( _groupSliceView.checkedId() == SliceType::CURRENT || _groupSliceView.checkedId() == SliceType::MOVEMENT || _groupSliceView.checkedId() == SliceType::FLOW );
 	_ui->_sliderSelectSlice->setEnabled(enable);
 	_ui->_spansliderSliceThreshold->setEnabled(enable);
 	_ui->_buttonComputeMarrow->setEnabled(enable);
