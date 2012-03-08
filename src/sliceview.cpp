@@ -7,7 +7,8 @@
 #include <QPainter>
 
 SliceView::SliceView() : _billon(0), _marrow(0), _lowThreshold(0), _highThreshold(0), _typeOfView(SliceType::CURRENT),
-	_motionThreshold(0), _motionGroupMinimumRadius(1), _motionWithBackground(false), _useNextSliceInsteadOfCurrentSlice(false) {
+	_motionThreshold(0), _motionGroupMinimumRadius(1), _motionWithBackground(false), _useNextSliceInsteadOfCurrentSlice(false),
+	_flowAlpha(FLOW_ALPHA_DEFAULT), _flowEpsilon(FLOW_EPSILON_DEFAULT), _flowMaximumIterations(FLOW_MAXIMUM_ITERATIONS) {
 }
 
 /*******************************
@@ -22,18 +23,18 @@ void SliceView::setModel( const Marrow *marrow ) {
 	_marrow = marrow;
 }
 
-void SliceView::setTypeOfView( const SliceType::SliceType &type ) {
-	if ( type > SliceType::_SLICE_TYPE_MIN_ && type < SliceType::_SLICE_TYPE_MAX_ ) {
-		_typeOfView = type;
-	}
-}
-
 void SliceView::setLowThreshold(const int &threshold) {
 	_lowThreshold = threshold;
 }
 
 void SliceView::setHighThreshold(const int &threshold) {
 	_highThreshold = threshold;
+}
+
+void SliceView::setTypeOfView( const SliceType::SliceType &type ) {
+	if ( type > SliceType::_SLICE_TYPE_MIN_ && type < SliceType::_SLICE_TYPE_MAX_ ) {
+		_typeOfView = type;
+	}
 }
 
 void SliceView::setMotionThreshold( const int &threshold ) {
@@ -50,6 +51,30 @@ void SliceView::enableMotionWithBackground( const bool &enable ) {
 
 void SliceView::useNextSliceInsteadOfCurrentSlice( const bool &enable ) {
 	_useNextSliceInsteadOfCurrentSlice = enable;
+}
+
+qreal SliceView::flowAlpha() const {
+	return _flowAlpha;
+}
+
+qreal SliceView::flowEpsilon() const {
+	return _flowEpsilon;
+}
+
+int SliceView::flowMaximumIterations() const {
+	return _flowMaximumIterations;
+}
+
+void SliceView::setFlowAlpha( const qreal &alpha ) {
+	_flowAlpha = alpha;
+}
+
+void SliceView::setFlowEpsilon( const qreal &epsilon ) {
+	_flowEpsilon = epsilon;
+}
+
+void SliceView::setFlowMaximumIterations( const int &maxIter ) {
+	_flowMaximumIterations = maxIter;
 }
 
 void SliceView::drawSlice( QPainter &painter, const int &sliceNumber ) {
@@ -311,17 +336,33 @@ void SliceView::drawFlowSlice( QPainter &painter, const int &sliceNumber ) {
 
 	int i, j;
 
-	painter.setPen(Qt::white);
 
-	OpticalFlow flow(_billon);
-	VectorsField *field = flow.computeFlowOnSlice(sliceNumber);
+	VectorsField *field = OpticalFlow::compute(*_billon,sliceNumber,_flowAlpha,_flowEpsilon,_flowMaximumIterations);
 
-	for ( j=5 ; j<height-1 ; j+=5 ) {
-		for ( i=5 ; i<width-1 ; i+=5 ) {
-			//if ( qSqrt(qPow((*field)[j][i].x(),2) + qPow((*field)[j][i].y(),2)) > 1 )
-				painter.drawLine(i,j,i+(*field)[j][i].x(),j+(*field)[j][i].y());
+	QImage image(width,height,QImage::Format_ARGB32);
+	QRgb * line =(QRgb *) image.bits();
+	qreal angle, norme;
+	QColor color;
+
+	for ( j=0 ; j<height-1 ; j++) {
+		for ( i=0 ; i<width-1 ; i++) {
+			angle = (ANGLE(0,0,(*field)[j][i].x(),(*field)[j][i].y())+PI_ON_FOUR)*RAD_TO_DEG_FACT;
+			if (angle>360.) angle -= 360.;
+			norme = qMin(qSqrt( qPow((*field)[j][i].x(),2) + qPow((*field)[j][i].y(),2) )*20.,255.);
+			color.setHsv(angle,norme,norme);
+			*(line++) = color.rgb();
 		}
+		line++;
 	}
+
+	painter.drawImage(0,0,image);
+
+//	painter.setPen(Qt::white);
+//	for ( j=5 ; j<height-1 ; j+=5 ) {
+//		for ( i=5 ; i<width-1 ; i+=5 ) {
+//			painter.drawLine(i,j,i+(*field)[j][i].x(),j+(*field)[j][i].y());
+//		}
+//	}
 
 	delete field;
 }

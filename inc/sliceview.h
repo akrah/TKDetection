@@ -1,6 +1,7 @@
 #ifndef SLICEVIEW_H
 #define SLICEVIEW_H
 
+#include <QtGlobal>
 #include "sliceview_def.h"
 
 class Billon;
@@ -16,14 +17,22 @@ public:
 	void setModel( const Billon * billon );
 	void setModel( const Marrow * marrow );
 
-	void setTypeOfView( const SliceType::SliceType &type );
-
 	void setLowThreshold( const int &threshold );
 	void setHighThreshold( const int &threshold );
+
+	void setTypeOfView( const SliceType::SliceType &type );
+
 	void setMotionThreshold( const int &threshold );
 	void setMotionGroupMinimumRadius( const int &radius );
 	void enableMotionWithBackground( const bool &enable );
 	void useNextSliceInsteadOfCurrentSlice( const bool &enable );
+
+	qreal flowAlpha() const;
+	qreal flowEpsilon() const;
+	int flowMaximumIterations() const;
+	void setFlowAlpha( const qreal &alpha );
+	void setFlowEpsilon( const qreal &epsilon );
+	void setFlowMaximumIterations( const int &maxIter );
 
 	void drawSlice( QPainter &painter, const int &sliceNumber );
 
@@ -47,6 +56,10 @@ private:
 	int _motionGroupMinimumRadius;
 	bool _motionWithBackground;
 	bool _useNextSliceInsteadOfCurrentSlice;
+
+	qreal _flowAlpha;
+	qreal _flowEpsilon;
+	int _flowMaximumIterations;
 };
 
 #endif // SLICEVIEW_H

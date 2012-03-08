@@ -54,6 +54,7 @@ private slots:
 	void setMotionGroupMinimumRadius( const int &radius );
 	void enableMovementWithBackground( const bool &enable );
 	void useNextSliceInsteadOfCurrentSlice( const bool &enable );
+	void flowApplied();
 
 private:
 	void openNewBillon(const QString &folderName = "");

@@ -55,7 +55,8 @@ HEADERS		=	billon.h \
 				sliceview.h \
 				sliceview_def.h \
 				slicezoomer.h \
-	inc/opticalflow.h
+	inc/opticalflow.h \
+    inc/opticalflow_def.h
 
 FORMS		=	mainwindow.ui
 

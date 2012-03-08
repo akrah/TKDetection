@@ -15,6 +15,7 @@
 #include <QFileDialog>
 #include <QMouseEvent>
 #include <QPainter>
+#include <QScrollBar>
 
 MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::MainWindow), _billon(0), _marrow(0), _sliceView(new SliceView()), _sliceHistogram(new SliceHistogram()), _pieChart(new PieChart(0,1)), _pieChartDiagrams(new PieChartDiagrams()), _currentMaximum(0) {
 	_ui->setupUi(this);
@@ -38,6 +39,10 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 	_groupSliceView.addButton(_ui->_radioFlowSlice,SliceType::FLOW);
 	_groupSliceView.setExclusive(true);
 
+	_ui->_spinFlowAlpha->setValue(_sliceView->flowAlpha());
+	_ui->_spinFlowEpsilon->setValue(_sliceView->flowEpsilon());
+	_ui->_spinFlowMaximumIterations->setValue(_sliceView->flowMaximumIterations());
+
 	/**** Mise en place de la communication MVC ****/
 
 	// Évènements déclenchés par le slider de n° de coupe
@@ -47,9 +52,11 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 	QObject::connect(&_groupSliceView, SIGNAL(buttonClicked(int)), this, SLOT(setTypeOfView(int)));
 	QObject::connect(_ui->_sliderMotionThreshold, SIGNAL(valueChanged(int)), this, SLOT(setMotionThreshold(int)));
 	QObject::connect(_ui->_spinMotionThreshold, SIGNAL(valueChanged(int)), this, SLOT(setMotionThreshold(int)));
-	QObject::connect(_ui->_checkDrawMotionWithBackground, SIGNAL(toggled(bool)), this, SLOT(enableMovementWithBackground(bool)));
+	QObject::connect(_ui->_sliderMovementMinimumRadius, SIGNAL(valueChanged(int)), this, SLOT(setMotionGroupMinimumRadius(int)));
 	QObject::connect(_ui->_spinMovementMinimumRadius, SIGNAL(valueChanged(int)), this, SLOT(setMotionGroupMinimumRadius(int)));
+	QObject::connect(_ui->_checkDrawMotionWithBackground, SIGNAL(toggled(bool)), this, SLOT(enableMovementWithBackground(bool)));
 	QObject::connect(_ui->_checkUseNextSlice, SIGNAL(toggled(bool)), this, SLOT(useNextSliceInsteadOfCurrentSlice(bool)));
+	QObject::connect(_ui->_buttonFlowApplied, SIGNAL(clicked()), this, SLOT(flowApplied()));
 
 	// Évènements déclenchés par le slider de seuillage
 	QObject::connect(_ui->_spansliderSliceThreshold, SIGNAL(lowerValueChanged(int)), this, SLOT(setLowThreshold(int)));
@@ -105,8 +112,6 @@ MainWindow::~MainWindow() {
 /*******************************
  * Public fonctions
  *******************************/
-
-#include <QScrollBar>
 
 bool MainWindow::eventFilter(QObject *obj, QEvent *event) {
 	if ( obj == _ui->_labelSliceView ) {
@@ -190,7 +195,19 @@ void MainWindow::drawSlice( const int &sliceNumber ) {
 
 void MainWindow::setTypeOfView( const int &type ) {
 	enabledComponents();
-	if ( _sliceView != 0 ) _sliceView->setTypeOfView( static_cast<const SliceType::SliceType>(type) );
+	if ( _sliceView != 0 ) {
+		_sliceView->setTypeOfView( static_cast<const SliceType::SliceType>(type) );
+		switch (type) {
+			case SliceType::MOVEMENT:
+				_ui->_toolboxSliceParameters->setCurrentWidget(_ui->_pageMotionParameters);
+				break;
+			case SliceType::FLOW:
+				_ui->_toolboxSliceParameters->setCurrentWidget(_ui->_pageFlowParameters);
+				break;
+			default:
+				break;
+		}
+	}
 	drawSlice();
 }
 
@@ -395,6 +412,15 @@ void MainWindow::setMotionThreshold( const int &threshold ) {
 void MainWindow::setMotionGroupMinimumRadius( const int &radius ) {
 	if ( _sliceView != 0 ) {
 		_sliceView->setMotionGroupMinimumRadius(radius);
+
+		_ui->_spinMovementMinimumRadius->blockSignals(true);
+			_ui->_spinMovementMinimumRadius->setValue(radius);
+		_ui->_spinMovementMinimumRadius->blockSignals(false);
+
+		_ui->_sliderMovementMinimumRadius->blockSignals(true);
+			_ui->_sliderMovementMinimumRadius->setValue(radius);
+		_ui->_sliderMovementMinimumRadius->blockSignals(false);
+
 		drawSlice();
 	}
 }
@@ -413,6 +439,33 @@ void MainWindow::useNextSliceInsteadOfCurrentSlice( const bool &enable ) {
 	}
 }
 
+void MainWindow::flowApplied() {
+	if ( _sliceView != 0 ) {
+		const qreal currentAlpha = _sliceView->flowAlpha();
+		const qreal currentEpsilon = _sliceView->flowEpsilon();
+		const qreal currentMaxIter = _sliceView->flowMaximumIterations();
+
+		const qreal newAlpha = _ui->_spinFlowAlpha->value();
+		const qreal newEpsilon = _ui->_spinFlowEpsilon->value();
+		const qreal newMaxIter = _ui->_spinFlowMaximumIterations->value();
+
+		bool hasModification = false;
+		if ( currentAlpha != newAlpha ) {
+			_sliceView->setFlowAlpha(newAlpha);
+			hasModification = true;
+		}
+		if ( currentEpsilon != newEpsilon ) {
+			_sliceView->setFlowEpsilon(newEpsilon);
+			hasModification = true;
+		}
+		if ( currentMaxIter != newMaxIter ) {
+			_sliceView->setFlowMaximumIterations(newMaxIter);
+			hasModification = true;
+		}
+
+		if ( hasModification ) drawSlice();
+	}
+}
 
 /*******************************
  * Private functions
