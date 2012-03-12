@@ -17,6 +17,9 @@
    <set>QMainWindow::AllowTabbedDocks|QMainWindow::AnimatedDocks</set>
   </property>
   <widget class="QWidget" name="centralWidget">
+   <property name="layoutDirection">
+    <enum>Qt::LeftToRight</enum>
+   </property>
    <layout class="QVBoxLayout" name="verticalLayout_5">
     <item>
      <layout class="QHBoxLayout" name="horizontalLayout_3">
@@ -77,20 +80,13 @@
        <number>0</number>
       </property>
       <item>
-       <spacer name="horizontalSpacer_4">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>40</width>
-          <height>20</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
-      <item>
        <widget class="QScrollArea" name="_scrollSliceView">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
         <property name="frameShape">
          <enum>QFrame::NoFrame</enum>
         </property>
@@ -117,8 +113,8 @@
           <rect>
            <x>0</x>
            <y>0</y>
-           <width>189</width>
-           <height>300</height>
+           <width>76</width>
+           <height>76</height>
           </rect>
          </property>
          <layout class="QHBoxLayout" name="horizontalLayout_8">
@@ -144,19 +140,6 @@
          </layout>
         </widget>
        </widget>
-      </item>
-      <item>
-       <spacer name="horizontalSpacer_3">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>40</width>
-          <height>20</height>
-         </size>
-        </property>
-       </spacer>
       </item>
      </layout>
     </item>
@@ -192,6 +175,26 @@
        <widget class="QPushButton" name="_buttonNextMaximum">
         <property name="text">
          <string>Maximum suivant</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" name="horizontalLayout">
+      <property name="bottomMargin">
+       <number>0</number>
+      </property>
+      <item>
+       <widget class="QPushButton" name="_buttonUpdateSliceHistogram">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="text">
+         <string>Mettre à jour l'histogramme</string>
         </property>
        </widget>
       </item>
@@ -242,8 +245,8 @@
     <number>2</number>
    </attribute>
    <widget class="QWidget" name="dockWidgetContents_2">
-    <layout class="QGridLayout" name="gridLayout">
-     <item row="0" column="0">
+    <layout class="QVBoxLayout" name="verticalLayout_4">
+     <item>
       <widget class="QTabWidget" name="_tabs">
        <property name="currentIndex">
         <number>0</number>
@@ -314,7 +317,7 @@
                  <x>0</x>
                  <y>0</y>
                  <width>382</width>
-                 <height>198</height>
+                 <height>231</height>
                 </rect>
                </property>
                <attribute name="label">
@@ -472,8 +475,8 @@
                 <rect>
                  <x>0</x>
                  <y>0</y>
-                 <width>322</width>
-                 <height>144</height>
+                 <width>382</width>
+                 <height>231</height>
                 </rect>
                </property>
                <attribute name="label">
@@ -641,13 +644,6 @@
               </item>
              </layout>
             </item>
-            <item>
-             <widget class="QPushButton" name="_buttonUpdateSliceHistogram">
-              <property name="text">
-               <string>Mettre à jour l'histogramme</string>
-              </property>
-             </widget>
-            </item>
            </layout>
           </widget>
          </item>
@@ -663,9 +659,15 @@
            <property name="title">
             <string>Moelle</string>
            </property>
-           <layout class="QVBoxLayout" name="verticalLayout_4">
+           <layout class="QHBoxLayout" name="horizontalLayout_11">
             <item>
              <widget class="QPushButton" name="_buttonComputeMarrow">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
               <property name="text">
                <string>Calculer la moelle</string>
               </property>

@@ -1,7 +1,8 @@
 #ifndef DICOMREADER_H
 #define DICOMREADER_H
 
-class Billon;
+#include "billon_def.h"
+
 class QString;
 
 namespace DicomReader {

@@ -2,7 +2,6 @@
 
 #include "inc/billon.h"
 
-#include <QObject>
 #include <QDebug>
 
 #include <itkMetaDataDictionary.h>
@@ -88,7 +87,7 @@ namespace DicomReader {
 			max = min = in.Value();
 
 			for ( uint k=0; k<depth; k++ ) {
-				imat &slice = billon->slice(k);
+				arma::imat &slice = billon->slice(k);
 				for ( uint j=0; j<height; j++ ) {
 					for ( uint i=0; i<width; i++ ) {
 						const int &current = in.Value();

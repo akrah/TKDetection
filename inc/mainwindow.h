@@ -12,7 +12,7 @@ namespace Ui {
 	class MainWindow;
 }
 
-class Billon;
+#include "billon_def.h"
 class Marrow;
 class SliceView;
 class SliceHistogram;

@@ -4,7 +4,7 @@
 #include <QtGlobal>
 #include "sliceview_def.h"
 
-class Billon;
+#include "billon_def.h"
 class Marrow;
 class QPainter;
 

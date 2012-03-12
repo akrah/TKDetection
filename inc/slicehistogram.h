@@ -3,7 +3,7 @@
 
 #include <QVector>
 
-class Billon;
+#include "billon_def.h"
 class QwtPlotHistogram;
 class QwtIntervalSample;
 class QwtPlot;

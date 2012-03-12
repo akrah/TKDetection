@@ -104,8 +104,8 @@ void SliceHistogram::constructHistogram() {
 
 		qreal cumul;
 		for ( uint k=1 ; k<depth ; ++k ) {
-			const imat &slice = billon.slice(k);
-			const imat &prevSlice = billon.slice(k-1);
+			const arma::imat &slice = billon.slice(k);
+			const arma::imat &prevSlice = billon.slice(k-1);
 			cumul = 0;
 			for ( uint j=0 ; j<height ; ++j ) {
 				for ( uint i=0 ; i<width ; ++i ) {

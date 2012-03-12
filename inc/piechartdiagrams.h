@@ -3,7 +3,7 @@
 
 #include <QList>
 
-class Billon;
+#include "billon_def.h"
 class Marrow;
 class PieChart;
 class QwtPlot;

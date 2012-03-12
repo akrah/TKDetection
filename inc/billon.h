@@ -4,23 +4,48 @@
 #include <qglobal.h>
 #include <armadillo>
 
-using namespace arma;
-
-class Billon : public icube
+template< typename T >
+class BillonTpl : public arma::Cube<T>
 {
 public:
-	Billon();
-	Billon( const int &width, const int &height, const int &depth );
+	BillonTpl();
+	BillonTpl( const int &width, const int &height, const int &depth );
 
-	int minValue() const;
-	int maxValue() const;
+	T minValue() const;
+	T maxValue() const;
 
-	void setMinValue( const int &value );
-	void setMaxValue( const int &value );
+	void setMinValue( const T &value );
+	void setMaxValue( const T &value );
 
-private:
-	int _minValue;
-	int _maxValue;
+protected:
+	T _minValue;
+	T _maxValue;
 };
+
+template< typename T >
+BillonTpl<T>::BillonTpl() : arma::Cube<T>(), _minValue((T)0), _maxValue((T)0) {}
+
+template< typename T >
+BillonTpl<T>::BillonTpl( const int &width, const int &height, const int &depth ) : arma::Cube<T>(height,width,depth), _minValue((T)0), _maxValue((T)0) {}
+
+template< typename T >
+T BillonTpl<T>::minValue() const {
+	return _minValue;
+}
+
+template< typename T >
+T BillonTpl<T>::maxValue() const {
+	return _maxValue;
+}
+
+template< typename T >
+void BillonTpl<T>::setMinValue( const T &value ) {
+	_minValue = value;
+}
+
+template< typename T >
+void BillonTpl<T>::setMaxValue( const T &value ) {
+	_maxValue = value;
+}
 
 #endif // BILLON_H
