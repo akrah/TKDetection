@@ -4,7 +4,7 @@
 // Types de coupe possibles
 namespace SliceType {
 	enum SliceType {
-		_SLICE_TYPE_MIN_,
+		_SLICE_TYPE_MIN_ = -1,
 		CURRENT,
 		AVERAGE,
 		MEDIAN,

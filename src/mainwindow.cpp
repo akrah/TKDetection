@@ -11,17 +11,19 @@
 #include "inc/piepart.h"
 #include "inc/piechart.h"
 #include "inc/piechartdiagrams.h"
+#include "inc/datexport.h"
 
 #include <QFileDialog>
 #include <QMouseEvent>
 #include <QPainter>
 #include <QScrollBar>
 
-MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::MainWindow), _billon(0), _marrow(0), _sliceView(new SliceView()), _sliceHistogram(new SliceHistogram()), _pieChart(new PieChart(0,1)), _pieChartDiagrams(new PieChartDiagrams()), _currentMaximum(0) {
+MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::MainWindow), _billon(0), _marrow(0), _sliceView(new SliceView()), _sliceHistogram(new SliceHistogram()), _pieChart(new PieChart(0,1)), _pieChartDiagrams(new PieChartDiagrams()), _currentSlice(0), _currentMaximum(0) {
 	_ui->setupUi(this);
 
 	// Initialisation des vues
 	_pieChartDiagrams->setModel(_pieChart);
+	_pieChartDiagrams->setModel(&_sliceInterval);
 
 	// Paramétrisation des composant graphiques
 	_ui->_labelSliceView->installEventFilter(this);
@@ -32,12 +34,11 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 	_histogramCursor.attach(_ui->_plotSliceHistogram);
 	_histogramCursor.setBrush(Qt::red);
 
-	_groupSliceView.addButton(_ui->_radioCurrentSlice,SliceType::CURRENT);
-	_groupSliceView.addButton(_ui->_radioAverageSlice,SliceType::AVERAGE);
-	_groupSliceView.addButton(_ui->_radioMedianSlice,SliceType::MEDIAN);
-	_groupSliceView.addButton(_ui->_radioMovementSlice,SliceType::MOVEMENT);
-	_groupSliceView.addButton(_ui->_radioFlowSlice,SliceType::FLOW);
-	_groupSliceView.setExclusive(true);
+	_ui->_comboSliceType->insertItem(SliceType::CURRENT,tr("Coupe originale"));
+	_ui->_comboSliceType->insertItem(SliceType::AVERAGE,tr("Coupe moyenne"));
+	_ui->_comboSliceType->insertItem(SliceType::MEDIAN,tr("Coupe médiane"));
+	_ui->_comboSliceType->insertItem(SliceType::MOVEMENT,tr("Coupe de mouvements"));
+	_ui->_comboSliceType->insertItem(SliceType::FLOW,tr("Coupe de flots optiques"));
 
 	_ui->_spinFlowAlpha->setValue(_sliceView->flowAlpha());
 	_ui->_spinFlowEpsilon->setValue(_sliceView->flowEpsilon());
@@ -49,7 +50,7 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 	QObject::connect(_ui->_sliderSelectSlice, SIGNAL(valueChanged(int)), this, SLOT(drawSlice(int)));
 
 	// Évènements déclenchés par les boutons de sélection de la vue
-	QObject::connect(&_groupSliceView, SIGNAL(buttonClicked(int)), this, SLOT(setTypeOfView(int)));
+	QObject::connect(_ui->_comboSliceType, SIGNAL(activated(int)), this, SLOT(setTypeOfView(int)));
 	QObject::connect(_ui->_sliderMotionThreshold, SIGNAL(valueChanged(int)), this, SLOT(setMotionThreshold(int)));
 	QObject::connect(_ui->_spinMotionThreshold, SIGNAL(valueChanged(int)), this, SLOT(setMotionThreshold(int)));
 	QObject::connect(_ui->_sliderMovementMinimumRadius, SIGNAL(valueChanged(int)), this, SLOT(setMotionGroupMinimumRadius(int)));
@@ -75,15 +76,18 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 	// Évènements déclenchés par les bouton associès aux histogrammes de secteurs
 	QObject::connect(_ui->_buttonUpdateSectors, SIGNAL(clicked()), this, SLOT(updateSectorsHistograms()));
 	QObject::connect(_ui->_comboSelectSector, SIGNAL(currentIndexChanged(int)), this, SLOT(selectSectorHistogram(int)));
-	QObject::connect(_ui->_spinMinSectorSlice, SIGNAL(valueChanged(int)), this, SLOT(updateMaximumSectorsIntervalExtremum(int)));
-	QObject::connect(_ui->_buttonSliceMinimalSector, SIGNAL(clicked()), this, SLOT(setMinimumSectorsIntervalToCurrentSlice()));
-	QObject::connect(_ui->_spinMaxSectorSlice, SIGNAL(valueChanged(int)), this, SLOT(updateMinimumSectorsIntervalExtremum(int)));
-	QObject::connect(_ui->_buttonSliceMaximalSector, SIGNAL(clicked()), this, SLOT(setMaximumSectorsIntervalToCurrentSlice()));
 	QObject::connect(_ui->_spinMinimumIntensityForSum, SIGNAL(valueChanged(int)), this, SLOT(setMinimalDifferenceForSectors(int)));
 
 	// Évènements déclenchés par la souris sur le visualiseur de coupes
 	QObject::connect(&_sliceZoomer, SIGNAL(zoomFactorChanged(qreal,QPoint)), this, SLOT(zoomInSliceView(qreal,QPoint)));
 	QObject::connect(&_sliceZoomer, SIGNAL(isMovedFrom(QPoint)), this, SLOT(dragInSliceView(QPoint)));
+
+	// Évènements déclenchés par les boutons relatifs aux intervalles de coupes
+	QObject::connect(_ui->_spinMinSlice, SIGNAL(valueChanged(int)), &_sliceInterval, SLOT(setMin(int)));
+	QObject::connect(_ui->_buttonMinSlice, SIGNAL(clicked()), this, SLOT(setMinimumOfSlicesIntervalToCurrentSlice()));
+	QObject::connect(_ui->_spinMaxSlice, SIGNAL(valueChanged(int)), &_sliceInterval, SLOT(setMax(int)));
+	QObject::connect(_ui->_buttonMaxSlice, SIGNAL(clicked()), this, SLOT(setMaximumOfSlicesIntervalToCurrentSlice()));
+	QObject::connect(_ui->_buttonDatExport, SIGNAL(clicked()), this, SLOT(exportInDat()));
 
 	// Raccourcis des actions du menu
 	_ui->_actionOpenDicom->setShortcut(Qt::CTRL + Qt::Key_O);
@@ -93,7 +97,7 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 	_ui->_actionQuit->setShortcut(Qt::CTRL + Qt::Key_Q);
 	QObject::connect(_ui->_actionQuit, SIGNAL(triggered()), this, SLOT(close()));
 
-	_ui->_radioCurrentSlice->click();
+	_ui->_comboSliceType->setCurrentIndex(SliceType::CURRENT);
 }
 
 MainWindow::~MainWindow() {
@@ -120,8 +124,8 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *event) {
 			if ( (mouseEvent->button() == Qt::LeftButton) && _billon != 0 && _pieChartDiagrams != 0 ) {
 				const int x = mouseEvent->x()/_sliceZoomer.factor();
 				const int y = mouseEvent->y()/_sliceZoomer.factor();
-				const int centerX = (_marrow !=0) ? _marrow->at(_ui->_sliderSelectSlice->value()).x:_billon->n_cols/2;
-				const int centerY = (_marrow !=0) ? _marrow->at(_ui->_sliderSelectSlice->value()).y:_billon->n_rows/2;
+				const int centerX = (_marrow !=0) ? _marrow->at(_currentSlice).x:_billon->n_cols/2;
+				const int centerY = (_marrow !=0) ? _marrow->at(_currentSlice).y:_billon->n_rows/2;
 
 				const int sector = _pieChart->partOfAngle( TWO_PI-ANGLE(centerX,centerY,x,y) );
 
@@ -160,6 +164,7 @@ void MainWindow::closeImage() {
 }
 
 void MainWindow::drawSlice( const int &sliceNumber ) {
+	_currentSlice = sliceNumber;
 	if ( _billon != 0 ) {
 		_ui->_labelSliceNumber->setNum(sliceNumber);
 		_pix.fill(0xff000000);
@@ -175,7 +180,7 @@ void MainWindow::drawSlice( const int &sliceNumber ) {
 			_marrow->draw(painter,sliceNumber);
 			painter.restore();
 		}
-		if ( _pieChart != 0 && !_pieChartPlots.isEmpty() && sliceNumber >= _ui->_spinMinSectorSlice->value() && sliceNumber <= _ui->_spinMaxSectorSlice->value()) {
+		if ( _pieChart != 0 && !_pieChartPlots.isEmpty() && sliceNumber >= _sliceInterval.min() && sliceNumber <= _sliceInterval.max()) {
 			Coord2D center(_pix.width()/2,_pix.height()/2);
 			if ( _marrow != 0 && sliceNumber >= _marrow->beginSlice() && sliceNumber <= _marrow->endSlice()) {
 				center = _marrow->at(sliceNumber-_marrow->beginSlice());
@@ -254,7 +259,7 @@ void MainWindow::updateSliceHistogram() {
 		_histogramCursor.attach(_ui->_plotSliceHistogram);
 	}
 	_ui->_plotSliceHistogram->setAxisScale(QwtPlot::xBottom,0,(_billon != 0)?_billon->n_slices:0);
-	highlightSliceHistogram(_ui->_sliderSelectSlice->value());
+	highlightSliceHistogram(_currentSlice);
 }
 
 
@@ -297,7 +302,6 @@ void MainWindow::updateSectorsHistograms() {
 	_ui->_polarSectorSum->replot();
 
 	if ( _pieChartDiagrams != 0 ) {
-		_pieChartDiagrams->setBillonInterval(_ui->_spinMinSectorSlice->value(),_ui->_spinMaxSectorSlice->value());
 		_pieChartDiagrams->compute();
 
 		const int nbHistograms = _pieChartDiagrams->count();
@@ -336,20 +340,16 @@ void MainWindow::selectSectorHistogram( const int &sectorIdx ) {
 	drawSlice();
 }
 
-void MainWindow::setMinimumSectorsIntervalToCurrentSlice() {
-	_ui->_spinMinSectorSlice->setValue(_ui->_sliderSelectSlice->value());
+void MainWindow::setMinimumOfSlicesIntervalToCurrentSlice() {
+	_ui->_spinMaxSlice->setMinimum(_currentSlice);
+	_ui->_spinMinSlice->setMaximum(qMax(_currentSlice,_ui->_spinMinSlice->maximum()));
+	_ui->_spinMinSlice->setValue(_currentSlice);
 }
 
-void MainWindow::setMaximumSectorsIntervalToCurrentSlice() {
-	_ui->_spinMaxSectorSlice->setValue(_ui->_sliderSelectSlice->value());
-}
-
-void MainWindow::updateMinimumSectorsIntervalExtremum( const int &value ) {
-	_ui->_spinMinSectorSlice->setMaximum(value);
-}
-
-void MainWindow::updateMaximumSectorsIntervalExtremum( const int &value ) {
-	_ui->_spinMaxSectorSlice->setMinimum(value);
+void MainWindow::setMaximumOfSlicesIntervalToCurrentSlice() {
+	_ui->_spinMinSlice->setMaximum(_currentSlice);
+	_ui->_spinMaxSlice->setMinimum(qMin(_currentSlice,_ui->_spinMaxSlice->minimum()));
+	_ui->_spinMaxSlice->setValue(_currentSlice);
 }
 
 void MainWindow::setMinimalDifferenceForSectors( const int &minimalDifference ) {
@@ -467,6 +467,12 @@ void MainWindow::flowApplied() {
 	}
 }
 
+void MainWindow::exportInDat() {
+	if ( _billon != 0 ) {
+		DatExport::process( *_billon, _sliceInterval, "output3.dat" );
+	}
+}
+
 /*******************************
  * Private functions
  *******************************/
@@ -487,7 +493,7 @@ void MainWindow::openNewBillon( const QString &folderName ) {
 }
 
 void MainWindow::drawSlice() {
-	drawSlice(_ui->_sliderSelectSlice->value());
+	drawSlice(_currentSlice);
 }
 
 void MainWindow::updateComponentsValues() {
@@ -521,13 +527,13 @@ void MainWindow::updateComponentsValues() {
 	_ui->_spinMaxThreshold->setMaximum(maxValue);
 	_ui->_spinMaxThreshold->setValue(maxValue);
 
-	_ui->_spinMinSectorSlice->setMinimum(0);
-	_ui->_spinMinSectorSlice->setMaximum(nbSlices-1);
-	_ui->_spinMinSectorSlice->setValue(0);
+	_ui->_spinMinSlice->setMinimum(0);
+	_ui->_spinMinSlice->setMaximum(nbSlices-1);
+	_ui->_spinMinSlice->setValue(0);
 
-	_ui->_spinMaxSectorSlice->setMinimum(0);
-	_ui->_spinMaxSectorSlice->setMaximum(nbSlices-1);
-	_ui->_spinMaxSectorSlice->setValue(nbSlices-1);
+	_ui->_spinMaxSlice->setMinimum(0);
+	_ui->_spinMaxSlice->setMaximum(nbSlices-1);
+	_ui->_spinMaxSlice->setValue(nbSlices-1);
 
 	_ui->_sliderSelectSlice->setValue(0);
 	_ui->_sliderSelectSlice->setRange(0,nbSlices-1);
@@ -539,13 +545,14 @@ void MainWindow::updateComponentsValues() {
 }
 
 void MainWindow::enabledComponents() {
-	const bool enable = (_billon != 0) && ( _groupSliceView.checkedId() == SliceType::CURRENT || _groupSliceView.checkedId() == SliceType::MOVEMENT || _groupSliceView.checkedId() == SliceType::FLOW );
+	const int sliceType = _ui->_comboSliceType->currentIndex();
+	const bool enable = (_billon != 0) && ( sliceType == SliceType::CURRENT || sliceType == SliceType::MOVEMENT || sliceType == SliceType::FLOW );
 	_ui->_sliderSelectSlice->setEnabled(enable);
 	_ui->_spansliderSliceThreshold->setEnabled(enable);
 	_ui->_buttonComputeMarrow->setEnabled(enable);
 	_ui->_buttonUpdateSliceHistogram->setEnabled(enable);
-	_ui->_buttonSliceMaximalSector->setEnabled(enable);
-	_ui->_buttonSliceMinimalSector->setEnabled(enable);
+	_ui->_buttonMaxSlice->setEnabled(enable);
+	_ui->_buttonMinSlice->setEnabled(enable);
 	_ui->_buttonUpdateSectors->setEnabled(enable);
 	_ui->_comboSelectSector->setEnabled(enable);
 }

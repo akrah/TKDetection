@@ -172,19 +172,18 @@
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="_buttonNextMaximum">
-        <property name="text">
-         <string>Maximum suivant</string>
+       <spacer name="horizontalSpacer_3">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
         </property>
-       </widget>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
       </item>
-     </layout>
-    </item>
-    <item>
-     <layout class="QHBoxLayout" name="horizontalLayout">
-      <property name="bottomMargin">
-       <number>0</number>
-      </property>
       <item>
        <widget class="QPushButton" name="_buttonUpdateSliceHistogram">
         <property name="sizePolicy">
@@ -195,6 +194,26 @@
         </property>
         <property name="text">
          <string>Mettre à jour l'histogramme</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <spacer name="horizontalSpacer_4">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item>
+       <widget class="QPushButton" name="_buttonNextMaximum">
+        <property name="text">
+         <string>Maximum suivant</string>
         </property>
        </widget>
       </item>
@@ -235,7 +254,7 @@
    <property name="minimumSize">
     <size>
      <width>450</width>
-     <height>601</height>
+     <height>683</height>
     </size>
    </property>
    <property name="floating">
@@ -266,39 +285,7 @@
            </property>
            <layout class="QVBoxLayout" name="verticalLayout">
             <item>
-             <widget class="QRadioButton" name="_radioCurrentSlice">
-              <property name="text">
-               <string>Coupe originale</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QRadioButton" name="_radioAverageSlice">
-              <property name="text">
-               <string>Coupe moyenne</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QRadioButton" name="_radioMedianSlice">
-              <property name="text">
-               <string>Coupe médiane</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QRadioButton" name="_radioMovementSlice">
-              <property name="text">
-               <string>Coupe de mouvements</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QRadioButton" name="_radioFlowSlice">
-              <property name="text">
-               <string>Coupe de flots optiques</string>
-              </property>
-             </widget>
+             <widget class="QComboBox" name="_comboSliceType"/>
             </item>
             <item>
              <widget class="QToolBox" name="_toolboxSliceParameters">
@@ -317,7 +304,7 @@
                  <x>0</x>
                  <y>0</y>
                  <width>382</width>
-                 <height>231</height>
+                 <height>152</height>
                 </rect>
                </property>
                <attribute name="label">
@@ -476,7 +463,7 @@
                  <x>0</x>
                  <y>0</y>
                  <width>382</width>
-                 <height>231</height>
+                 <height>152</height>
                 </rect>
                </property>
                <attribute name="label">
@@ -605,72 +592,61 @@
               </widget>
              </widget>
             </item>
-           </layout>
-          </widget>
-         </item>
-         <item>
-          <widget class="Line" name="line">
-           <property name="orientation">
-            <enum>Qt::Horizontal</enum>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QGroupBox" name="groupBox_2">
-           <property name="title">
-            <string>Seuillage</string>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
-           </property>
-           <layout class="QVBoxLayout" name="verticalLayout_3">
             <item>
-             <layout class="QHBoxLayout" name="horizontalLayout_2">
-              <item>
-               <widget class="QSpinBox" name="_spinMinThreshold"/>
-              </item>
-              <item>
-               <widget class="QxtSpanSlider" name="_spansliderSliceThreshold">
-                <property name="maximum">
-                 <number>0</number>
-                </property>
-                <property name="orientation">
-                 <enum>Qt::Horizontal</enum>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QSpinBox" name="_spinMaxThreshold"/>
-              </item>
-             </layout>
+             <widget class="QGroupBox" name="groupBox_2">
+              <property name="title">
+               <string>Seuillage</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignCenter</set>
+              </property>
+              <layout class="QVBoxLayout" name="verticalLayout_3">
+               <item>
+                <layout class="QHBoxLayout" name="horizontalLayout_2">
+                 <item>
+                  <widget class="QSpinBox" name="_spinMinThreshold"/>
+                 </item>
+                 <item>
+                  <widget class="QxtSpanSlider" name="_spansliderSliceThreshold">
+                   <property name="maximum">
+                    <number>0</number>
+                   </property>
+                   <property name="orientation">
+                    <enum>Qt::Horizontal</enum>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QSpinBox" name="_spinMaxThreshold"/>
+                 </item>
+                </layout>
+               </item>
+              </layout>
+             </widget>
             </item>
-           </layout>
-          </widget>
-         </item>
-         <item>
-          <widget class="Line" name="line_3">
-           <property name="orientation">
-            <enum>Qt::Horizontal</enum>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QGroupBox" name="groupBox_3">
-           <property name="title">
-            <string>Moelle</string>
-           </property>
-           <layout class="QHBoxLayout" name="horizontalLayout_11">
             <item>
-             <widget class="QPushButton" name="_buttonComputeMarrow">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
+             <widget class="QGroupBox" name="groupBox_3">
+              <property name="title">
+               <string>Moelle</string>
               </property>
-              <property name="text">
-               <string>Calculer la moelle</string>
-              </property>
+              <layout class="QHBoxLayout" name="horizontalLayout_11">
+               <property name="margin">
+                <number>0</number>
+               </property>
+               <item>
+                <widget class="QPushButton" name="_buttonComputeMarrow">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
+                 <property name="text">
+                  <string>Calculer la moelle</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
              </widget>
             </item>
            </layout>
@@ -730,74 +706,6 @@
           </widget>
          </item>
          <item>
-          <widget class="QGroupBox" name="groupBox_7">
-           <property name="title">
-            <string>Intervalle de coupes</string>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
-           </property>
-           <layout class="QFormLayout" name="formLayout_3">
-            <property name="fieldGrowthPolicy">
-             <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
-            </property>
-            <item row="0" column="0">
-             <widget class="QLabel" name="label_7">
-              <property name="text">
-               <string>Coupe minimale</string>
-              </property>
-             </widget>
-            </item>
-            <item row="0" column="1">
-             <layout class="QHBoxLayout" name="horizontalLayout_5">
-              <item>
-               <widget class="QSpinBox" name="_spinMinSectorSlice">
-                <property name="maximum">
-                 <number>0</number>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QPushButton" name="_buttonSliceMinimalSector">
-                <property name="text">
-                 <string>Coupe courante</string>
-                </property>
-               </widget>
-              </item>
-             </layout>
-            </item>
-            <item row="1" column="0">
-             <widget class="QLabel" name="label_8">
-              <property name="text">
-               <string>Coupe maximale</string>
-              </property>
-             </widget>
-            </item>
-            <item row="1" column="1">
-             <layout class="QHBoxLayout" name="horizontalLayout_6">
-              <property name="bottomMargin">
-               <number>0</number>
-              </property>
-              <item>
-               <widget class="QSpinBox" name="_spinMaxSectorSlice">
-                <property name="maximum">
-                 <number>0</number>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QPushButton" name="_buttonSliceMaximalSector">
-                <property name="text">
-                 <string>Coupe courante</string>
-                </property>
-               </widget>
-              </item>
-             </layout>
-            </item>
-           </layout>
-          </widget>
-         </item>
-         <item>
           <widget class="QGroupBox" name="groupBox_5">
            <property name="title">
             <string>Somme des intensités</string>
@@ -824,13 +732,6 @@
           <widget class="QPushButton" name="_buttonUpdateSectors">
            <property name="text">
             <string>Calcul des histogrammes</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="Line" name="line_2">
-           <property name="orientation">
-            <enum>Qt::Horizontal</enum>
            </property>
           </widget>
          </item>
@@ -921,6 +822,81 @@
          </item>
         </layout>
        </widget>
+      </widget>
+     </item>
+     <item>
+      <widget class="QGroupBox" name="groupBox_7">
+       <property name="title">
+        <string>Intervalle de coupes</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignCenter</set>
+       </property>
+       <layout class="QFormLayout" name="formLayout_3">
+        <property name="fieldGrowthPolicy">
+         <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
+        </property>
+        <item row="0" column="0">
+         <widget class="QLabel" name="label_7">
+          <property name="text">
+           <string>Coupe minimale</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="0">
+         <widget class="QLabel" name="label_8">
+          <property name="text">
+           <string>Coupe maximale</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="1">
+         <layout class="QHBoxLayout" name="horizontalLayout_6">
+          <property name="bottomMargin">
+           <number>0</number>
+          </property>
+          <item>
+           <widget class="QSpinBox" name="_spinMaxSlice">
+            <property name="maximum">
+             <number>0</number>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="_buttonMaxSlice">
+            <property name="text">
+             <string>Coupe courante</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item row="0" column="1">
+         <layout class="QHBoxLayout" name="horizontalLayout_5">
+          <item>
+           <widget class="QSpinBox" name="_spinMinSlice">
+            <property name="maximum">
+             <number>0</number>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="_buttonMinSlice">
+            <property name="text">
+             <string>Coupe courante</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item row="2" column="1">
+         <widget class="QPushButton" name="_buttonDatExport">
+          <property name="text">
+           <string>Exporter en .dat</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
       </widget>
      </item>
     </layout>

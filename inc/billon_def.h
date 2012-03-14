@@ -3,6 +3,7 @@
 
 template<typename T> class BillonTpl;
 
-typedef BillonTpl<int>   Billon;
+typedef int __billon_type__;
+typedef BillonTpl<__billon_type__>   Billon;
 
 #endif // BILLON_DEF_H

@@ -5,11 +5,12 @@
 #include "inc/marrow.h"
 #include "inc/piechart.h"
 #include "inc/piepart.h"
+#include "inc/slicesinterval.h"
 #include "inc/pointpolarseriesdata.h"
 #include <qwt_plot_histogram.h>
 #include <qwt_polar_curve.h>
 
-PieChartDiagrams::PieChartDiagrams() :  _billon(0), _marrow(0), _pieChart(0), _beginSlice(-1), _endSlice(-1), _lowThreshold(0), _highThreshold(0), _minimalDifference(0), _polarCurve(0) {
+PieChartDiagrams::PieChartDiagrams() :  _billon(0), _marrow(0), _pieChart(0), _slicesInterval(0), _lowThreshold(0), _highThreshold(0), _minimalDifference(0), _polarCurve(0) {
 }
 
 PieChartDiagrams::~PieChartDiagrams() {
@@ -44,6 +45,10 @@ void PieChartDiagrams::setModel( const Marrow * const marrow ) {
 	_marrow = marrow;
 }
 
+void PieChartDiagrams::setModel( const SlicesInterval * const interval ) {
+	_slicesInterval = interval;
+}
+
 void PieChartDiagrams::attach( const QList<QwtPlot *> & plots ) {
 	const int nbPlots = plots.size();
 	const int nbHistograms = _histograms.size();
@@ -75,19 +80,13 @@ void PieChartDiagrams::setHighThreshold( const int &threshold ) {
 	_highThreshold = threshold;
 }
 
-void PieChartDiagrams::setBillonInterval( const int &beginSlice, const int &endSlice ) {
-	const bool ok = beginSlice>=0 && beginSlice<=endSlice;
-	_beginSlice = ok?beginSlice:-1;
-	_endSlice = ok?endSlice:-1;
-}
-
 void PieChartDiagrams::setMinimalDifference( const int &minimalDifference ) {
 	_minimalDifference = minimalDifference;
 }
 
 void PieChartDiagrams::compute() {
 	clearAll();
-	if ( _billon != 0 && _pieChart != 0 && intervalIsValid()  ) {
+	if ( _billon != 0 && _pieChart != 0 && _slicesInterval != 0 && _slicesInterval->isValid()  ) {
 
 		const int nbSectors = _pieChart->nbSectors();
 		const int nbValues = _highThreshold-_lowThreshold+1;
@@ -102,17 +101,19 @@ void PieChartDiagrams::compute() {
 			}
 		}
 
-		// Calcul des diagrammes en parcourant les tranches _beginSlice à _endSlice du billon
+		// Calcul des diagrammes en parcourant les tranches du billon comprises dans l'intervalle
 		const int sliceWidth = _billon->n_cols;
 		const int sliceMiddleX = sliceWidth/2;
 		const int sliceHeight = _billon->n_rows;
 		const int sliceMiddleY = sliceHeight/2;
+		const int minOfInterval = _slicesInterval->min();
+		const int maxOfInterval = _slicesInterval->max();
 		const bool existMarrow = _marrow != 0;
-		int previousSlice = _beginSlice==0?1:_beginSlice-1;
+		int previousSlice = minOfInterval==0?1:minOfInterval-1;
 		int centerX, centerY;
 		int diffMax = 0;
 
-		for ( int k=_beginSlice ; k<=_endSlice ; ++k ) {
+		for ( int k=minOfInterval ; k<=maxOfInterval ; ++k ) {
 			centerX = existMarrow?_marrow->at(k).x:sliceMiddleX;
 			centerY = existMarrow?_marrow->at(k).y:sliceMiddleY;
 			for ( int j=0 ; j<sliceHeight ; ++j ) {
@@ -152,11 +153,6 @@ void PieChartDiagrams::compute() {
 /*******************************
  * Private functions
  *******************************/
-
-bool PieChartDiagrams::intervalIsValid() const {
-	bool ok = (_beginSlice > -1) && (_billon != 0) && (_endSlice < static_cast<int>(_billon->n_slices)) && (_beginSlice <= _endSlice);
-	return ok;
-}
 
 void PieChartDiagrams::clearAll() {
 	while ( !_histograms.isEmpty() ) {

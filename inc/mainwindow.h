@@ -6,6 +6,7 @@
 
 #include "sliceview_def.h"
 #include "slicezoomer.h"
+#include "slicesinterval.h"
 #include <qwt_plot_curve.h>
 
 namespace Ui {
@@ -41,10 +42,8 @@ private slots:
 	void updateMarrow();
 	void updateSectorsHistograms();
 	void selectSectorHistogram( const int &sectorIdx );
-	void setMinimumSectorsIntervalToCurrentSlice();
-	void setMaximumSectorsIntervalToCurrentSlice();
-	void updateMinimumSectorsIntervalExtremum( const int &value );
-	void updateMaximumSectorsIntervalExtremum( const int &value );
+	void setMinimumOfSlicesIntervalToCurrentSlice();
+	void setMaximumOfSlicesIntervalToCurrentSlice();
 	void setMinimalDifferenceForSectors( const int &minimalDifference );
 	void previousMaximumInSliceHistogram();
 	void nextMaximumInSliceHistogram();
@@ -55,6 +54,7 @@ private slots:
 	void enableMovementWithBackground( const bool &enable );
 	void useNextSliceInsteadOfCurrentSlice( const bool &enable );
 	void flowApplied();
+	void exportInDat();
 
 private:
 	void openNewBillon(const QString &folderName = "");
@@ -78,7 +78,9 @@ private:
 	QList<QwtPlot *> _pieChartPlots;
 
 	SliceZoomer _sliceZoomer;
+	SlicesInterval _sliceInterval;
 
+	int _currentSlice;
 	int _currentMaximum;
 };
 

@@ -6,6 +6,7 @@
 #include "billon_def.h"
 class Marrow;
 class PieChart;
+class SlicesInterval;
 class QwtPlot;
 class QwtPlotHistogram;
 class QwtPolarPlot;
@@ -23,6 +24,7 @@ public:
 	void setModel( const Billon * const billon );
 	void setModel( const PieChart * const pieChart );
 	void setModel( const Marrow * const marrow );
+	void setModel( const SlicesInterval * const interval );
 
 	void attach( const QList<QwtPlot *> & plots );
 	void attach( QwtPolarPlot * const polarPlot );
@@ -36,16 +38,14 @@ public:
 	void compute();
 
 private:
-	bool intervalIsValid() const;
 	void clearAll();
 
 private:
 	const Billon *_billon;
 	const Marrow *_marrow;
 	const PieChart *_pieChart;
+	const SlicesInterval * _slicesInterval;
 
-	int _beginSlice;
-	int _endSlice;
 	int _lowThreshold;
 	int _highThreshold;
 	int _minimalDifference;
