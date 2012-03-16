@@ -77,7 +77,6 @@ namespace DicomReader {
 			}
 			const uint depth = reader->GetFileNames().size();
 
-
 			// Création d'une matrice aux dimensions de l'image
 			Billon * const billon = new Billon( height, width, depth );
 
@@ -101,6 +100,9 @@ namespace DicomReader {
 
 			billon->setMaxValue(max);
 			billon->setMinValue(min);
+
+			const ImageType::SpacingType &spacing = image->GetSpacing();
+			billon->setVoxelSize(spacing[0],spacing[1],spacing[2]);
 
 			return billon;
 		}

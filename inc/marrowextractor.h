@@ -107,7 +107,7 @@ private:
 	 * \param	nbContourPoints Nombre de points de contour
 	 * \return	les coordonnées de la moelle pour la coupe traitée
 	 */
-	Coord2D transHough( const imat &slice, int width, int height, int *x, int *y, int *sliceMaxValue, int *nbContourPoints );
+	iCoord2D transHough( const imat &slice, int width, int height, int *x, int *y, int *sliceMaxValue, int *nbContourPoints );
 
 	/**
 	 * \fn		fmat * contour(const imat &slice, fmat **orientation);
@@ -154,13 +154,13 @@ private:
 	 * \fn		void minSlice(const imat &slice, int *minValue, int *maxValue, Coord *coordMax);
 	 * \brief	Calcul les valeurs minimum et maximum d'une coupe ainsi que la liste des coordonnées ou apparrait la valeur maximum
 	 */
-	void minSlice( const imat &slice, int *minValue, int *maxValue, Coord2D *coordMax );
+	void minSlice( const imat &slice, int *minValue, int *maxValue, iCoord2D *coordMax );
 
 	/**
 	 * \fn		void corrigeMoelle(QList<Coord> *moelle, float *listMax, float seuilHough);
 	 * \brief	Corrige les valeur erronées de la moelle
 	 */
-	void correctMarrow( QList<Coord2D> &marrow, float *listMax, float seuilHough );
+	void correctMarrow( QList<iCoord2D> &marrow, float *listMax, float seuilHough );
 
 private:
 

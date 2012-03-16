@@ -6,6 +6,7 @@
 
 #include "billon_def.h"
 class Marrow;
+class IntensityInterval;
 class QPainter;
 
 class SliceView
@@ -16,9 +17,6 @@ public:
 
 	void setModel( const Billon * billon );
 	void setModel( const Marrow * marrow );
-
-	void setLowThreshold( const int &threshold );
-	void setHighThreshold( const int &threshold );
 
 	void setTypeOfView( const SliceType::SliceType &type );
 
@@ -34,21 +32,18 @@ public:
 	void setFlowEpsilon( const qreal &epsilon );
 	void setFlowMaximumIterations( const int &maxIter );
 
-	void drawSlice( QPainter &painter, const int &sliceNumber );
+	void drawSlice( QPainter &painter, const int &sliceNumber, const IntensityInterval &intensityInterval );
 
 private :
-	void drawCurrentSlice( QPainter &painter, const int &sliceNumber );
-	void drawAverageSlice( QPainter &painter );
-	void drawMedianSlice( QPainter &painter );
-	void drawMovementSlice( QPainter &painter, const int &sliceNumber );
+	void drawCurrentSlice( QPainter &painter, const int &sliceNumber, const IntensityInterval &intensityInterval );
+	void drawAverageSlice( QPainter &painter, const IntensityInterval &intensityInterval );
+	void drawMedianSlice( QPainter &painter, const IntensityInterval &intensityInterval );
+	void drawMovementSlice( QPainter &painter, const int &sliceNumber, const IntensityInterval &intensityInterval );
 	void drawFlowSlice( QPainter &painter, const int &sliceNumber );
 
 private:
 	const Billon * _billon;
 	const Marrow * _marrow;
-
-	int _lowThreshold;
-	int _highThreshold;
 
 	SliceType::SliceType _typeOfView;
 

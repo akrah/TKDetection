@@ -12,6 +12,7 @@
 #include "inc/piechart.h"
 #include "inc/piechartdiagrams.h"
 #include "inc/datexport.h"
+#include "inc/ofsexport.h"
 
 #include <QFileDialog>
 #include <QMouseEvent>
@@ -20,10 +21,13 @@
 
 MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::MainWindow), _billon(0), _marrow(0), _sliceView(new SliceView()), _sliceHistogram(new SliceHistogram()), _pieChart(new PieChart(0,1)), _pieChartDiagrams(new PieChartDiagrams()), _currentSlice(0), _currentMaximum(0) {
 	_ui->setupUi(this);
+	setCorner(Qt::TopLeftCorner,Qt::LeftDockWidgetArea);
+	setCorner(Qt::TopRightCorner,Qt::RightDockWidgetArea);
+	setCorner(Qt::BottomLeftCorner,Qt::LeftDockWidgetArea);
+	setCorner(Qt::BottomRightCorner,Qt::RightDockWidgetArea);
 
 	// Initialisation des vues
 	_pieChartDiagrams->setModel(_pieChart);
-	_pieChartDiagrams->setModel(&_sliceInterval);
 
 	// Paramétrisation des composant graphiques
 	_ui->_labelSliceView->installEventFilter(this);
@@ -83,11 +87,12 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 	QObject::connect(&_sliceZoomer, SIGNAL(isMovedFrom(QPoint)), this, SLOT(dragInSliceView(QPoint)));
 
 	// Évènements déclenchés par les boutons relatifs aux intervalles de coupes
-	QObject::connect(_ui->_spinMinSlice, SIGNAL(valueChanged(int)), &_sliceInterval, SLOT(setMin(int)));
+	QObject::connect(_ui->_spinMinSlice, SIGNAL(valueChanged(int)), &_slicesInterval, SLOT(setMin(int)));
 	QObject::connect(_ui->_buttonMinSlice, SIGNAL(clicked()), this, SLOT(setMinimumOfSlicesIntervalToCurrentSlice()));
-	QObject::connect(_ui->_spinMaxSlice, SIGNAL(valueChanged(int)), &_sliceInterval, SLOT(setMax(int)));
+	QObject::connect(_ui->_spinMaxSlice, SIGNAL(valueChanged(int)), &_slicesInterval, SLOT(setMax(int)));
 	QObject::connect(_ui->_buttonMaxSlice, SIGNAL(clicked()), this, SLOT(setMaximumOfSlicesIntervalToCurrentSlice()));
-	QObject::connect(_ui->_buttonDatExport, SIGNAL(clicked()), this, SLOT(exportInDat()));
+	QObject::connect(_ui->_buttonDatExport, SIGNAL(clicked()), this, SLOT(exportToDat()));
+	QObject::connect(_ui->_buttonOfsExport, SIGNAL(clicked()), this, SLOT(exportToOfs()));
 
 	// Raccourcis des actions du menu
 	_ui->_actionOpenDicom->setShortcut(Qt::CTRL + Qt::Key_O);
@@ -171,7 +176,7 @@ void MainWindow::drawSlice( const int &sliceNumber ) {
 		QPainter painter(&_pix);
 		if ( _sliceView != 0 ) {
 			painter.save();
-			_sliceView->drawSlice(painter,sliceNumber);
+			_sliceView->drawSlice(painter,sliceNumber,_intensityInterval);
 			painter.restore();
 		}
 		if ( _sliceHistogram != 0 ) highlightSliceHistogram(sliceNumber);
@@ -180,8 +185,8 @@ void MainWindow::drawSlice( const int &sliceNumber ) {
 			_marrow->draw(painter,sliceNumber);
 			painter.restore();
 		}
-		if ( _pieChart != 0 && !_pieChartPlots.isEmpty() && sliceNumber >= _sliceInterval.min() && sliceNumber <= _sliceInterval.max()) {
-			Coord2D center(_pix.width()/2,_pix.height()/2);
+		if ( _pieChart != 0 && !_pieChartPlots.isEmpty() && sliceNumber >= _slicesInterval.min() && sliceNumber <= _slicesInterval.max()) {
+			iCoord2D center(_pix.width()/2,_pix.height()/2);
 			if ( _marrow != 0 && sliceNumber >= _marrow->beginSlice() && sliceNumber <= _marrow->endSlice()) {
 				center = _marrow->at(sliceNumber-_marrow->beginSlice());
 			}
@@ -217,9 +222,7 @@ void MainWindow::setTypeOfView( const int &type ) {
 }
 
 void MainWindow::setLowThreshold( const int &threshold ) {
-	if ( _sliceView != 0 ) _sliceView->setLowThreshold(threshold);
-	if ( _sliceHistogram ) _sliceHistogram->setLowThreshold(threshold);
-	if ( _pieChartDiagrams != 0 ) _pieChartDiagrams->setLowThreshold(threshold);
+	_intensityInterval.setMin(threshold);
 
 	_ui->_spansliderSliceThreshold->blockSignals(true);
 		_ui->_spansliderSliceThreshold->setLowerValue(threshold);
@@ -234,9 +237,7 @@ void MainWindow::setLowThreshold( const int &threshold ) {
 }
 
 void MainWindow::setHighThreshold( const int &threshold ) {
-	if ( _sliceView != 0 ) _sliceView->setHighThreshold(threshold);
-	if ( _sliceHistogram ) _sliceHistogram->setHighThreshold(threshold);
-	if ( _pieChartDiagrams != 0 ) _pieChartDiagrams->setHighThreshold(threshold);
+	_intensityInterval.setMax(threshold);
 
 	_ui->_spansliderSliceThreshold->blockSignals(true);
 		_ui->_spansliderSliceThreshold->setUpperValue(threshold);
@@ -253,7 +254,7 @@ void MainWindow::setHighThreshold( const int &threshold ) {
 void MainWindow::updateSliceHistogram() {
 	if ( _sliceHistogram != 0 ) {
 		_sliceHistogram->detach();
-		_sliceHistogram->constructHistogram();
+		_sliceHistogram->constructHistogram(_intensityInterval);
 		_histogramCursor.detach();
 		_sliceHistogram->attach(_ui->_plotSliceHistogram);
 		_histogramCursor.attach(_ui->_plotSliceHistogram);
@@ -282,6 +283,7 @@ void MainWindow::updateMarrow() {
 	}
 	_pieChartDiagrams->setModel(_marrow);
 	_sliceView->setModel(_marrow);
+	_sliceHistogram->setModel(_marrow);
 	drawSlice();
 }
 
@@ -302,7 +304,7 @@ void MainWindow::updateSectorsHistograms() {
 	_ui->_polarSectorSum->replot();
 
 	if ( _pieChartDiagrams != 0 ) {
-		_pieChartDiagrams->compute();
+		_pieChartDiagrams->compute( _slicesInterval, _intensityInterval );
 
 		const int nbHistograms = _pieChartDiagrams->count();
 		if ( nbHistograms != 0 ) {
@@ -364,7 +366,7 @@ void MainWindow::previousMaximumInSliceHistogram() {
 		_currentMaximum = nbMaximums <= 0 ? -1 : _currentMaximum < 0 ? 0 : _currentMaximum == 0 ? nbMaximums-1 : ( _currentMaximum - 1 ) % nbMaximums;
 		int sliceIndex = _sliceHistogram->sliceOfIemeMaximum(_currentMaximum);
 		if ( sliceIndex > -1 ) {
-			drawSlice(sliceIndex);
+			_ui->_sliderSelectSlice->setValue(sliceIndex);
 		}
 	}
 }
@@ -375,7 +377,7 @@ void MainWindow::nextMaximumInSliceHistogram() {
 		_currentMaximum = nbMaximums>0 ? ( _currentMaximum + 1 ) % nbMaximums : -1;
 		int sliceIndex = _sliceHistogram->sliceOfIemeMaximum(_currentMaximum);
 		if ( sliceIndex > -1 ) {
-			drawSlice(sliceIndex);
+			_ui->_sliderSelectSlice->setValue(sliceIndex);
 		}
 	}
 }
@@ -467,9 +469,21 @@ void MainWindow::flowApplied() {
 	}
 }
 
-void MainWindow::exportInDat() {
+void MainWindow::exportToDat() {
 	if ( _billon != 0 ) {
-		DatExport::process( *_billon, _sliceInterval, "output3.dat" );
+		QString fileName = QFileDialog::getSaveFileName(this, tr("Exporter en .dat"), "output.dat", tr("Fichiers de données (*.dat);;Tous les fichiers (*.*)"));
+		if ( !fileName.isEmpty() ) {
+			DatExport::process( *_billon, _slicesInterval, fileName );
+		}
+	}
+}
+
+void MainWindow::exportToOfs() {
+	if ( _billon != 0 && _marrow != 0 ) {
+		QString fileName = QFileDialog::getSaveFileName(this, tr("Exporter en .ofs"), "output.ofs", tr("Fichiers de données (*.ofs);;Tous les fichiers (*.*)"));
+		if ( !fileName.isEmpty() ) {
+			OfsExport::process( *_billon, *_marrow, _slicesInterval, fileName );
+		}
 	}
 }
 
@@ -481,15 +495,21 @@ void MainWindow::openNewBillon( const QString &folderName ) {
 	if ( _billon != 0 ) {
 		delete _billon;
 		_billon = 0;
-		_pix = QImage(0,0,QImage::Format_ARGB32);
 	}
 	if ( !folderName.isEmpty() ) {
 		_billon = DicomReader::read(folderName);
-		_pix = QImage(_billon->n_cols,_billon->n_rows,QImage::Format_ARGB32);
 	}
 	if ( _sliceView != 0 ) _sliceView->setModel(_billon);
 	if ( _sliceHistogram != 0 ) _sliceHistogram->setModel(_billon);
 	if ( _pieChartDiagrams != 0 ) _pieChartDiagrams->setModel(_billon);
+	if ( _billon != 0 ) {
+		_pix = QImage(_billon->n_cols, _billon->n_rows,QImage::Format_ARGB32);
+		_intensityInterval.setBounds(_billon->minValue(),_billon->maxValue());
+	}
+	else {
+		_pix = QImage(0,0,QImage::Format_ARGB32);
+		_intensityInterval.setBounds(1,0);
+	}
 }
 
 void MainWindow::drawSlice() {
@@ -539,7 +559,6 @@ void MainWindow::updateComponentsValues() {
 	_ui->_sliderSelectSlice->setRange(0,nbSlices-1);
 
 	_ui->_spinMinimumIntensityForSum->setRange(0,maxValue-minValue);
-
 
 	enabledComponents();
 }

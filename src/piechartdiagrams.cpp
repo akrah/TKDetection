@@ -6,11 +6,12 @@
 #include "inc/piechart.h"
 #include "inc/piepart.h"
 #include "inc/slicesinterval.h"
+#include "inc/intensityinterval.h"
 #include "inc/pointpolarseriesdata.h"
 #include <qwt_plot_histogram.h>
 #include <qwt_polar_curve.h>
 
-PieChartDiagrams::PieChartDiagrams() :  _billon(0), _marrow(0), _pieChart(0), _slicesInterval(0), _lowThreshold(0), _highThreshold(0), _minimalDifference(0), _polarCurve(0) {
+PieChartDiagrams::PieChartDiagrams() :  _billon(0), _marrow(0), _pieChart(0), _minimalDifference(0), _polarCurve(0) {
 }
 
 PieChartDiagrams::~PieChartDiagrams() {
@@ -45,10 +46,6 @@ void PieChartDiagrams::setModel( const Marrow * const marrow ) {
 	_marrow = marrow;
 }
 
-void PieChartDiagrams::setModel( const SlicesInterval * const interval ) {
-	_slicesInterval = interval;
-}
-
 void PieChartDiagrams::attach( const QList<QwtPlot *> & plots ) {
 	const int nbPlots = plots.size();
 	const int nbHistograms = _histograms.size();
@@ -72,24 +69,18 @@ void PieChartDiagrams::detach() {
 	}
 }
 
-void PieChartDiagrams::setLowThreshold( const int &threshold ) {
-	_lowThreshold = threshold;
-}
-
-void PieChartDiagrams::setHighThreshold( const int &threshold ) {
-	_highThreshold = threshold;
-}
-
 void PieChartDiagrams::setMinimalDifference( const int &minimalDifference ) {
 	_minimalDifference = minimalDifference;
 }
 
-void PieChartDiagrams::compute() {
+void PieChartDiagrams::compute( const SlicesInterval &slicesInterval, const IntensityInterval &intensityInterval ) {
 	clearAll();
-	if ( _billon != 0 && _pieChart != 0 && _slicesInterval != 0 && _slicesInterval->isValid()  ) {
+	if ( _billon != 0 && _pieChart != 0 && slicesInterval.isValid() && intensityInterval.isValid() ) {
 
 		const int nbSectors = _pieChart->nbSectors();
-		const int nbValues = _highThreshold-_lowThreshold+1;
+		const int minValue = intensityInterval.min();
+		const int maxValue = intensityInterval.max();
+		const int nbValues = intensityInterval.count();
 
 		// Création des données des diagrammes
 		QVector<int> sectorsSum(nbSectors,0);
@@ -106,8 +97,8 @@ void PieChartDiagrams::compute() {
 		const int sliceMiddleX = sliceWidth/2;
 		const int sliceHeight = _billon->n_rows;
 		const int sliceMiddleY = sliceHeight/2;
-		const int minOfInterval = _slicesInterval->min();
-		const int maxOfInterval = _slicesInterval->max();
+		const int minOfInterval = slicesInterval.min();
+		const int maxOfInterval = slicesInterval.max();
 		const bool existMarrow = _marrow != 0;
 		int previousSlice = minOfInterval==0?1:minOfInterval-1;
 		int centerX, centerY;
@@ -119,7 +110,7 @@ void PieChartDiagrams::compute() {
 			for ( int j=0 ; j<sliceHeight ; ++j ) {
 				for ( int i=0 ; i<sliceWidth ; ++i ) {
 					const int sectorIdx = _pieChart->partOfAngle( TWO_PI-ANGLE(centerX,centerY,i,j) );
-					const int diffVal = qAbs(RESTRICT_TO_INTERVAL(_billon->at(j,i,k),_lowThreshold,_highThreshold)-RESTRICT_TO_INTERVAL(_billon->at(j,i,previousSlice),_lowThreshold,_highThreshold));
+					const int diffVal = qAbs(RESTRICT_TO_INTERVAL(_billon->at(j,i,k),minValue,maxValue)-RESTRICT_TO_INTERVAL(_billon->at(j,i,previousSlice),minValue,maxValue));
 					if ( diffVal > _minimalDifference ) {
 						histogramsData[sectorIdx][diffVal].value += 1.;
 						sectorsSum[sectorIdx] += diffVal;

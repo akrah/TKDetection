@@ -7,7 +7,7 @@
 class SlicesInterval;
 
 namespace DatExport {
-	void process( const Billon &billon, const SlicesInterval &interval, const QString &fileName = "output2.dat" );
+	void process( const Billon &billon, const SlicesInterval &interval, const QString &fileName = "output.dat" );
 }
 
 #endif // DATEXPORT_H

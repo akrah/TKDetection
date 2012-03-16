@@ -24,7 +24,7 @@ Marrow* MarrowExtractor::process( const icube &image, int sliceMin, int sliceMax
 	sliceMin = RESTRICT_TO_INTERVAL(sliceMin,0,depth-1);
 	sliceMax = RESTRICT_TO_INTERVAL(sliceMax,sliceMin,depth-1);
 
-	Coord2D coordPrec,coordCurrent;
+	iCoord2D coordPrec,coordCurrent;
 	float maxStandList[depth];
 	float *maxStandList2 = 0;
 	float shift,houghStandThreshold;
@@ -123,12 +123,12 @@ Marrow* MarrowExtractor::process( const icube &image, int sliceMin, int sliceMax
 /******************************************************************
  * Fonctions secondaires appelées lors de l'extraction de la moelle
  ******************************************************************/
-Coord2D MarrowExtractor::transHough(const imat &slice, int width, int height, int *x, int *y, int *sliceMaxValue, int *nbContourPoints) {
+iCoord2D MarrowExtractor::transHough(const imat &slice, int width, int height, int *x, int *y, int *sliceMaxValue, int *nbContourPoints) {
 	int x_accu, y_accu, longueur, min;
 	int *droite;
 	imat *tabaccu;
 	fmat *orientation, *cont;
-	Coord2D coordmax;
+	iCoord2D coordmax;
 	orientation = 0;
 	{ // bloc de limitation de vie de la variable voisinage
 		// attention x represente les colonne et y les lignes
@@ -168,7 +168,7 @@ Coord2D MarrowExtractor::transHough(const imat &slice, int width, int height, in
 	*x += coordmax.x;
 	*y += coordmax.y;
 
-	return Coord2D(*x, *y);
+	return iCoord2D(*x, *y);
 }
 
 fmat * MarrowExtractor::contour(const imat &slice, fmat **orientation) {
@@ -465,7 +465,7 @@ int MarrowExtractor::floatCompare(const void *first, const void *second)
 	and positive if a > b */
 }
 
-void MarrowExtractor::minSlice(const imat &slice, int *minValue, int *maxValue, Coord2D *coordmax) {
+void MarrowExtractor::minSlice(const imat &slice, int *minValue, int *maxValue, iCoord2D *coordmax) {
 	const uint height = slice.n_rows-1;
 	const uint width = slice.n_cols-1;
 
@@ -477,13 +477,13 @@ void MarrowExtractor::minSlice(const imat &slice, int *minValue, int *maxValue, 
 			}
 			else if ( value > *maxValue ) {
 				*maxValue = value;
-				*coordmax = Coord2D(j,i);
+				*coordmax = iCoord2D(j,i);
 			}
 		}
 	}
 }
 
-void MarrowExtractor::correctMarrow( QList<Coord2D> &moelle, float *listMax, float seuilHough ) {
+void MarrowExtractor::correctMarrow( QList<iCoord2D> &moelle, float *listMax, float seuilHough ) {
 	const int marrowSize = moelle.size();
 	int startSlice, endSlice, i=0, x1, y1, x2, y2, newx, newy;
 	float ax, ay;
@@ -538,7 +538,7 @@ void MarrowExtractor::correctMarrow( QList<Coord2D> &moelle, float *listMax, flo
 				}else{
 					newy = y1;
 				}
-				moelle.replace(j, Coord2D(newx, newy));
+				moelle.replace(j, iCoord2D(newx, newy));
 			}
 		}
 		i++;

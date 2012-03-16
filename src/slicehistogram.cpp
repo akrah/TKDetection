@@ -1,10 +1,12 @@
 #include "inc/slicehistogram.h"
 
 #include "inc/billon.h"
+#include "inc/marrow.h"
+#include "inc/intensityinterval.h"
 #include "inc/global.h"
 #include <qwt_plot_histogram.h>
 
-SliceHistogram::SliceHistogram() : _billon(0), _histogram(new QwtPlotHistogram()), _histogramMaximums(new QwtPlotHistogram()), _lowThreshold(0), _highThreshold(0) {
+SliceHistogram::SliceHistogram() : _billon(0), _marrow(0), _histogram(new QwtPlotHistogram()), _histogramMaximums(new QwtPlotHistogram()) {
 	_histogramMaximums->setBrush(Qt::green);
 	_histogramMaximums->setPen(QPen(Qt::green));
 }
@@ -27,13 +29,7 @@ qreal SliceHistogram::value( const int &index ) const {
 }
 
 int SliceHistogram::nbMaximums() const {
-	int nbMaximums;
-	if ( _histogramMaximums == 0  ) {
-		nbMaximums = 0;
-	}
-	else {
-		nbMaximums = _histogramMaximums->dataSize();
-	}
+	int nbMaximums = _histogramMaximums == 0 ? 0 : _histogramMaximums->dataSize();
 	return nbMaximums;
 }
 
@@ -51,13 +47,10 @@ int SliceHistogram::sliceOfIemeMaximum( const int &maximumIndex ) const {
 
 void SliceHistogram::setModel( const Billon *billon ) {
 	_billon = billon;
-	if ( _billon != 0 ) {
-		_lowThreshold = _billon->minValue();
-		_highThreshold = _billon->maxValue();
-	}
-	else {
-		_lowThreshold = _highThreshold = 0;
-	}
+}
+
+void SliceHistogram::setModel( const Marrow *marrow ) {
+	_marrow = marrow;
 }
 
 void SliceHistogram::attach( QwtPlot * const plot ) {
@@ -80,15 +73,7 @@ void SliceHistogram::detach() {
 	}
 }
 
-void SliceHistogram::setLowThreshold( const int &threshold ) {
-	_lowThreshold = threshold;
-}
-
-void SliceHistogram::setHighThreshold( const int &threshold ) {
-	_highThreshold = threshold;
-}
-
-void SliceHistogram::constructHistogram() {
+void SliceHistogram::constructHistogram( const IntensityInterval &intensityInterval ) {
 	_datasHistogram.clear();
 	_datasMaximums.clear();
 	if ( _billon != 0 ) {
@@ -97,53 +82,94 @@ void SliceHistogram::constructHistogram() {
 		const uint height = billon.n_rows;
 		const uint depth = billon.n_slices;
 		const uint nbPixels = height*width;
-		const int minValue = _lowThreshold;
-		const int maxValue = _highThreshold;
+		const int minValue = intensityInterval.min();
+		const int maxValue = intensityInterval.max();
 
 		_datasHistogram.reserve(depth-1);
 
 		qreal cumul;
-		for ( uint k=1 ; k<depth ; ++k ) {
-			const arma::imat &slice = billon.slice(k);
-			const arma::imat &prevSlice = billon.slice(k-1);
-			cumul = 0;
-			for ( uint j=0 ; j<height ; ++j ) {
-				for ( uint i=0 ; i<width ; ++i ) {
-					cumul += qAbs(RESTRICT_TO_INTERVAL(slice.at(j,i),minValue,maxValue) - RESTRICT_TO_INTERVAL(prevSlice.at(j,i),minValue,maxValue));
+		if ( _marrow == 0 ) {
+			for ( uint k=1 ; k<depth ; ++k ) {
+				const arma::imat &slice = billon.slice(k);
+				const arma::imat &prevSlice = billon.slice(k-1);
+				cumul = 0;
+				for ( uint j=0 ; j<height ; ++j ) {
+					for ( uint i=0 ; i<width ; ++i ) {
+						cumul += qAbs(RESTRICT_TO_INTERVAL(slice.at(j,i),minValue,maxValue) - RESTRICT_TO_INTERVAL(prevSlice.at(j,i),minValue,maxValue));
+					}
 				}
+				_datasHistogram.append(QwtIntervalSample(cumul/nbPixels,k-1,k));
 			}
-			_datasHistogram.append(QwtIntervalSample(cumul/nbPixels,k-1,k));
+		}
+		else {
+			uint marrowX, marrowY;
+			int iRadius;
+			int diameter = 10;
+			diameter /= _billon->voxelWidth();
+			const int radius = diameter/2;
+			const int radiusMax = radius+1;
+			QList<int> circleLines;
+			int nbPixels2;
+			for ( int j=-radius ; j<radiusMax ; ++j ) {
+				circleLines.append(qSqrt(qAbs(qPow(radius,2)-qPow(j,2))));
+				nbPixels2 += 2*circleLines.last()+1;
+			}
+			for ( uint k=1 ; k<depth ; ++k ) {
+				const arma::imat &slice = billon.slice(k);
+				const arma::imat &prevSlice = billon.slice(k-1);
+				marrowX = _marrow->at(k).x+radiusMax;
+				marrowY = _marrow->at(k).y+radiusMax;
+				cumul = 0;
+				for ( int j=-radius ; j<radiusMax ; ++j ) {
+					iRadius = circleLines[j+radius];
+					for ( int i=-iRadius ; i<iRadius+1 ; ++i ) {
+						cumul += qAbs(RESTRICT_TO_INTERVAL(slice.at(marrowY+j,marrowX+i),minValue,maxValue) - RESTRICT_TO_INTERVAL(prevSlice.at(marrowY+j,marrowX+i),minValue,maxValue));
+					}
+				}
+				_datasHistogram.append(QwtIntervalSample(cumul/nbPixels2,k-1,k));
+			}
 		}
 
 		QList<int> pics;
 		qDebug() << "Pics primaires :";
-		for ( int i=1 ; i<_datasHistogram.size()-1 ; ++i ) {
-			if ( (_datasHistogram.at(i).value > _datasHistogram.at(i-1).value) && (_datasHistogram.at(i).value > _datasHistogram.at(i+1).value ) ) {
+		for ( int i=10 ; i<_datasHistogram.size()-10 ; ++i ) {
+			double value = _datasHistogram.at(i).value;
+			if ( (value > _datasHistogram.at(i-1).value) && (value > _datasHistogram.at(i+1).value) &&
+				 (value > _datasHistogram.at(i-2).value) && (value > _datasHistogram.at(i+2).value) &&
+				 (value > _datasHistogram.at(i-3).value) && (value > _datasHistogram.at(i+3).value) &&
+				 (value > _datasHistogram.at(i-4).value) && (value > _datasHistogram.at(i+4).value) &&
+				 (value > _datasHistogram.at(i-5).value) && (value > _datasHistogram.at(i+5).value) &&
+				 (value > _datasHistogram.at(i-6).value) && (value > _datasHistogram.at(i+6).value) &&
+				 (value > _datasHistogram.at(i-7).value) && (value > _datasHistogram.at(i+7).value) &&
+				 (value > _datasHistogram.at(i-8).value) && (value > _datasHistogram.at(i+8).value) &&
+				 (value > _datasHistogram.at(i-9).value) && (value > _datasHistogram.at(i+9).value) &&
+				 (value > _datasHistogram.at(i-10).value) && (value > _datasHistogram.at(i+10).value)) {
 				pics.append(i);
-				//_datasMaximums.append(_datasHistogram.at(i));
+				_datasMaximums.append(_datasHistogram.at(i));
 				qDebug() << i;
 			}
 		}
 
-		qDebug() << "Pics significatifs :";
-		QList<int> pics2;
-		pics2.append(pics.first());
-		for ( int i=1 ; i<pics.size()-1 ; ++i ) {
-			if ( (_datasHistogram.at(pics.at(i)).value > _datasHistogram.at(pics.at(i-1)).value) && (_datasHistogram.at(pics.at(i)).value > _datasHistogram.at(pics.at(i+1)).value ) ) {
-				pics2.append(pics.at(i));
-				//_datasMaximums.append(_datasHistogram.at(pics.at(i)));
-				qDebug() << pics.at(i);
-			}
-		}
-		pics2.append(pics.last());
+//		qDebug() << "Pics significatifs :";
+//		QList<int> pics2;
+//		pics2.append(pics.first());
+//		for ( int i=1 ; i<pics.size()-1 ; ++i ) {
+//			double value = _datasHistogram.at(pics.at(i)).value;
+//			if ( (value > _datasHistogram.at(pics.at(i-1)).value) && (value > _datasHistogram.at(pics.at(i+1)).value ) && (value > _datasHistogram.at(pics.at(i-2)).value) && (value > _datasHistogram.at(pics.at(i+2)).value ) ) {
+//				pics2.append(pics.at(i));
+//				//_datasMaximums.append(_datasHistogram.at(pics.at(i)));
+//				qDebug() << pics.at(i);
+//			}
+//		}
+//		pics2.append(pics.last());
 
-		qDebug() << "Pics 3èmé niveau :";
-		for ( int i=1 ; i<pics2.size()-1 ; ++i ) {
-			if ( (_datasHistogram.at(pics2.at(i)).value > _datasHistogram.at(pics2.at(i-1)).value) && (_datasHistogram.at(pics2.at(i)).value > _datasHistogram.at(pics2.at(i+1)).value ) ) {
-				_datasMaximums.append(_datasHistogram.at(pics2.at(i)));
-				qDebug() << pics2.at(i);
-			}
-		}
+//		qDebug() << "Pics 3èmé niveau :";
+//		for ( int i=1 ; i<pics2.size()-1 ; ++i ) {
+//			if ( (_datasHistogram.at(pics2.at(i)).value > _datasHistogram.at(pics2.at(i-1)).value) && (_datasHistogram.at(pics2.at(i)).value > _datasHistogram.at(pics2.at(i+1)).value ) ) {
+//				_datasMaximums.append(_datasHistogram.at(pics2.at(i)));
+//				qDebug() << pics2.at(i);
+//			}
+//		}
 	}
 	_histogram->setSamples(_datasHistogram);
 	_histogramMaximums->setSamples(_datasMaximums);

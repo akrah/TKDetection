@@ -23,12 +23,15 @@ TARGET		=	TreeSnake
 DEPENDPATH	*=	./src/ ./inc/ ./ui/
 
 SOURCES		=	main.cpp \
+				datexport.cpp \
 				dicomreader.cpp \
+				intensityinterval.cpp \
+				interval.cpp \
 				mainwindow.cpp \
 				marrow.cpp \
-				marrow_def.cpp \
 				marrowextractor.cpp \
 				marrowextractor_def.cpp \
+				ofsexport.cpp \
 				opticalflow.cpp \
 				piechart.cpp \
 				piechartdiagrams.cpp \
@@ -37,17 +40,21 @@ SOURCES		=	main.cpp \
 				slicehistogram.cpp \
 				sliceview.cpp \
 				slicezoomer.cpp \
-    src/slicesinterval.cpp \
-    src/datexport.cpp
+				slicesinterval.cpp \
 
 HEADERS		=	billon.h \
+				billon_def.h \
+				datexport.h \
 				dicomreader.h \
 				global.h \
+				intensityinterval.h \
+				interval.h \
 				mainwindow.h \
 				marrow.h \
 				marrow_def.h \
 				marrowextractor.h \
 				marrowextractor_def.h \
+				ofsexport.h \
 				opticalflow.h \
 				opticalflow_def.h \
 				piepart.h \
@@ -55,12 +62,10 @@ HEADERS		=	billon.h \
 				piechart.h \
 				pointpolarseriesdata.h \
 				slicehistogram.h \
+				slicesinterval.h \
 				sliceview.h \
 				sliceview_def.h \
 				slicezoomer.h \
-    inc/billon_def.h \
-    inc/slicesinterval.h \
-    inc/datexport.h
 
 FORMS		=	mainwindow.ui
 

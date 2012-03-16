@@ -6,7 +6,7 @@
 
 class QPainter;
 
-class Marrow : public QList<Coord2D>
+class Marrow : public QList<iCoord2D>
 {
 public:
 	Marrow();

@@ -4,9 +4,10 @@
 #include "inc/global.h"
 #include "inc/marrow.h"
 #include "inc/opticalflow.h"
+#include "inc/intensityinterval.h"
 #include <QPainter>
 
-SliceView::SliceView() : _billon(0), _marrow(0), _lowThreshold(0), _highThreshold(0), _typeOfView(SliceType::CURRENT),
+SliceView::SliceView() : _billon(0), _marrow(0), _typeOfView(SliceType::CURRENT),
 	_motionThreshold(0), _motionGroupMinimumRadius(1), _motionWithBackground(false), _useNextSliceInsteadOfCurrentSlice(false),
 	_flowAlpha(FLOW_ALPHA_DEFAULT), _flowEpsilon(FLOW_EPSILON_DEFAULT), _flowMaximumIterations(FLOW_MAXIMUM_ITERATIONS) {
 }
@@ -21,14 +22,6 @@ void SliceView::setModel( const Billon *billon ) {
 
 void SliceView::setModel( const Marrow *marrow ) {
 	_marrow = marrow;
-}
-
-void SliceView::setLowThreshold(const int &threshold) {
-	_lowThreshold = threshold;
-}
-
-void SliceView::setHighThreshold(const int &threshold) {
-	_highThreshold = threshold;
 }
 
 void SliceView::setTypeOfView( const SliceType::SliceType &type ) {
@@ -77,20 +70,20 @@ void SliceView::setFlowMaximumIterations( const int &maxIter ) {
 	_flowMaximumIterations = maxIter;
 }
 
-void SliceView::drawSlice( QPainter &painter, const int &sliceNumber ) {
+void SliceView::drawSlice( QPainter &painter, const int &sliceNumber, const IntensityInterval &intensityInterval ) {
 	if ( _billon != 0 && sliceNumber > -1 && sliceNumber < static_cast<int>(_billon->n_slices) ) {
 		switch (_typeOfView) {
 			// Affichage de la coupe moyenne
 			case SliceType::AVERAGE :
-				drawAverageSlice( painter );
+				drawAverageSlice( painter, intensityInterval );
 				break;
 			// Affichage de la coupe médiane
 			case SliceType::MEDIAN :
-				drawMedianSlice( painter );
+				drawMedianSlice( painter, intensityInterval );
 				break;
 			// Affichage de la coupe de mouvements
 			case SliceType::MOVEMENT :
-				drawMovementSlice( painter, sliceNumber );
+				drawMovementSlice( painter, sliceNumber, intensityInterval );
 				break;
 			case SliceType::FLOW :
 				drawFlowSlice( painter, sliceNumber );
@@ -98,7 +91,7 @@ void SliceView::drawSlice( QPainter &painter, const int &sliceNumber ) {
 			case SliceType::CURRENT:
 			default :
 				// Affichage de la coupe courante
-				drawCurrentSlice( painter, sliceNumber );
+				drawCurrentSlice( painter, sliceNumber, intensityInterval );
 				break;
 		}
 	}
@@ -109,13 +102,13 @@ void SliceView::drawSlice( QPainter &painter, const int &sliceNumber ) {
  * Private functions
  *******************************/
 
-void SliceView::drawCurrentSlice( QPainter &painter, const int &sliceNumber ) {
+void SliceView::drawCurrentSlice( QPainter &painter, const int &sliceNumber, const IntensityInterval &intensityInterval ) {
 	const imat &slice = _billon->slice(sliceNumber);
 	const uint width = slice.n_cols;
 	const uint height = slice.n_rows;
-	const int minValue = _lowThreshold;
-	const int maxValue = _highThreshold;
-	const qreal fact = 255.0/(maxValue-minValue);
+	const int minValue = intensityInterval.min();
+	const int maxValue = intensityInterval.max();
+	const qreal fact = 255.0/intensityInterval.size();
 
 	QImage image(width,height,QImage::Format_ARGB32);
 	QRgb * line = (QRgb *) image.bits();
@@ -128,32 +121,17 @@ void SliceView::drawCurrentSlice( QPainter &painter, const int &sliceNumber ) {
 		}
 	}
 
-//	// Affichage des coupes avec la moelle au centre de l'image
-//	const Coord2D marrowShift = _marrow->at(sliceNumber).shiftTo(Coord2D(width/2,height/2));
-//	const int &xShift = marrowShift.x;
-//	const int &yShift = marrowShift.y;
-//	if ( yShift > 0 ) line += yShift*width;
-//	image.fill(0xff000000);
-//	for (int j=(yShift<0?-yShift:0) ; j<(yShift<0?height:height-yShift) ; j++) {
-//		if ( xShift > 0 ) line += xShift;
-//		for (int i=(xShift<0?-xShift:0) ; i<(xShift<0?width:width-xShift) ; i++) {
-//			color = (RESTRICT_TO_INTERVAL(slice.at(j,i),minValue,maxValue)-minValue)*fact;
-//			*(line++) = qRgb(color,color,color);
-//		}
-//		if ( xShift < 0 ) line += -xShift;
-//	}
-
 	painter.drawImage(0,0,image);
 }
 
-void SliceView::drawAverageSlice( QPainter &painter ) {
+void SliceView::drawAverageSlice( QPainter &painter, const IntensityInterval &intensityInterval ) {
 	const Billon &billon = *_billon;
 	const uint width = billon.n_cols;
 	const uint height = billon.n_rows;
 	const uint depth = billon.n_slices;
-	const int minValue = _lowThreshold;
-	const int maxValue = _highThreshold;
-	const double fact = 255.0/(depth*(maxValue-minValue));
+	const int minValue = intensityInterval.min();
+	const int maxValue = intensityInterval.max();
+	const double fact = 255.0/(depth*intensityInterval.size());
 
 	QImage image(width,height,QImage::Format_ARGB32);
 	QRgb * line = (QRgb *) image.bits();
@@ -173,14 +151,14 @@ void SliceView::drawAverageSlice( QPainter &painter ) {
 	painter.drawImage(0,0,image);
 }
 
-void SliceView::drawMedianSlice( QPainter &painter ) {
+void SliceView::drawMedianSlice( QPainter &painter, const IntensityInterval &intensityInterval ) {
 	const Billon &billon = *_billon;
 	const uint width = billon.n_cols;
 	const uint height = billon.n_rows;
 	const uint depth = billon.n_slices;
-	const int minValue = _lowThreshold;
-	const int maxValue = _highThreshold;
-	const double fact = 255.0/(maxValue-minValue);
+	const int minValue = intensityInterval.min();
+	const int maxValue = intensityInterval.max();
+	const double fact = 255.0/intensityInterval.size();
 
 	QImage image(width,height,QImage::Format_ARGB32);
 	QRgb * line =(QRgb *) image.bits();
@@ -200,14 +178,16 @@ void SliceView::drawMedianSlice( QPainter &painter ) {
 	painter.drawImage(0,0,image);
 }
 
-void SliceView::drawMovementSlice( QPainter &painter, const int &sliceNumber ) {
+void SliceView::drawMovementSlice( QPainter &painter, const int &sliceNumber, const IntensityInterval &intensityInterval ) {
 
 	const imat &previousSlice = _billon->slice(sliceNumber > 0 ? sliceNumber-1 : sliceNumber+1);
 	const imat &toCompareSlice = _billon->slice(_useNextSliceInsteadOfCurrentSlice && sliceNumber < static_cast<int>(_billon->n_slices)-1 ? sliceNumber+1 : sliceNumber );
 
 	const int width = previousSlice.n_cols;
 	const int height = previousSlice.n_rows;
-	const qreal fact = 255.0/(_highThreshold-_lowThreshold);
+	const int minValue = intensityInterval.min();
+	const int maxValue = intensityInterval.max();
+	const qreal fact = 255.0/intensityInterval.size();
 
 	QImage image(width,height,QImage::Format_ARGB32);
 	const QRgb background = qRgb(0,0,0);
@@ -220,10 +200,10 @@ void SliceView::drawMovementSlice( QPainter &painter, const int &sliceNumber ) {
 	if ( _motionWithBackground ) {
 		for ( j=0 ; j<height ; j++) {
 			for ( i=0 ; i<width ; i++) {
-				pixelAbsDiff = qAbs(((RESTRICT_TO_INTERVAL(previousSlice.at(j,i),_lowThreshold,_highThreshold)-_lowThreshold)*fact) - ((RESTRICT_TO_INTERVAL(toCompareSlice.at(j,i),_lowThreshold,_highThreshold)-_lowThreshold)*fact));
+				pixelAbsDiff = qAbs(((RESTRICT_TO_INTERVAL(previousSlice.at(j,i),minValue,maxValue)-minValue)*fact) - ((RESTRICT_TO_INTERVAL(toCompareSlice.at(j,i),minValue,maxValue)-minValue)*fact));
 				if ( pixelAbsDiff > _motionThreshold ) *line = foreground;
 				else {
-					color = (RESTRICT_TO_INTERVAL(previousSlice.at(j,i),_lowThreshold,_highThreshold)-_lowThreshold)*fact;
+					color = (RESTRICT_TO_INTERVAL(previousSlice.at(j,i),minValue,maxValue)-minValue)*fact;
 					*line = qRgb(color,color,color);
 					//*line = background;
 				}
@@ -234,7 +214,7 @@ void SliceView::drawMovementSlice( QPainter &painter, const int &sliceNumber ) {
 	else {
 		for ( j=0 ; j<height ; j++) {
 			for ( i=0 ; i<width ; i++) {
-				pixelAbsDiff = qAbs(((RESTRICT_TO_INTERVAL(previousSlice.at(j,i),_lowThreshold,_highThreshold)-_lowThreshold)*fact) - ((RESTRICT_TO_INTERVAL(toCompareSlice.at(j,i),_lowThreshold,_highThreshold)-_lowThreshold)*fact));
+				pixelAbsDiff = qAbs(((RESTRICT_TO_INTERVAL(previousSlice.at(j,i),minValue,maxValue)-minValue)*fact) - ((RESTRICT_TO_INTERVAL(toCompareSlice.at(j,i),minValue,maxValue)-minValue)*fact));
 				if ( pixelAbsDiff > _motionThreshold ) *line = foreground;
 				else *line = background;
 				line++;
@@ -292,7 +272,7 @@ void SliceView::drawMovementSlice( QPainter &painter, const int &sliceNumber ) {
 						pointer = indexToChange;
 						while ( pointer != supChange ) {
 							const int &pointerValue = *pointer;
-							color = (RESTRICT_TO_INTERVAL(previousSlice.at( j+pointerValue/width, i+(pointerValue/width)%width ),_lowThreshold,_highThreshold)-_lowThreshold)*fact;
+							color = (RESTRICT_TO_INTERVAL(previousSlice.at( j+pointerValue/width, i+(pointerValue/width)%width ),minValue,maxValue)-minValue)*fact;
 							*(line+pointerValue) = qRgb(color,color,color);
 							//*(line+pointerValue) = background;
 							pointer++;

@@ -7,6 +7,7 @@
 #include "sliceview_def.h"
 #include "slicezoomer.h"
 #include "slicesinterval.h"
+#include "intensityinterval.h"
 #include <qwt_plot_curve.h>
 
 namespace Ui {
@@ -54,7 +55,8 @@ private slots:
 	void enableMovementWithBackground( const bool &enable );
 	void useNextSliceInsteadOfCurrentSlice( const bool &enable );
 	void flowApplied();
-	void exportInDat();
+	void exportToDat();
+	void exportToOfs();
 
 private:
 	void openNewBillon(const QString &folderName = "");
@@ -78,7 +80,8 @@ private:
 	QList<QwtPlot *> _pieChartPlots;
 
 	SliceZoomer _sliceZoomer;
-	SlicesInterval _sliceInterval;
+	SlicesInterval _slicesInterval;
+	IntensityInterval _intensityInterval;
 
 	int _currentSlice;
 	int _currentMaximum;

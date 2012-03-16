@@ -1,27 +1,14 @@
 #ifndef SLICESINTERVAL_H
 #define SLICESINTERVAL_H
 
-#include <QObject>
+#include "interval.h"
 
-class SlicesInterval : public QObject
+class SlicesInterval : public Interval
 {
-	Q_OBJECT
-
 public:
 	SlicesInterval();
-	SlicesInterval( int min, int max );
-
-	int min() const;
-	int max() const;
+	SlicesInterval( const int &min, const int &max );
 	bool isValid() const;
-
-public slots:
-	void setMin( const int &min );
-	void setMax( const int &max );
-
-protected:
-	int _min;
-	int _max;
 };
 
 #endif // SLICESINTERVAL_H

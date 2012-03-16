@@ -20,7 +20,7 @@ public:
 	void setOrientation( const qreal &orientation );
 	void setSectorsNumber( const int &nbSectors );
 
-	void draw( QPainter &painter, const int &sectorIdx, const Coord2D &center ) const;
+	void draw( QPainter &painter, const int &sectorIdx, const iCoord2D &center ) const;
 
 private:
 	void updateSectors();

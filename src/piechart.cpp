@@ -49,7 +49,7 @@ void PieChart::setSectorsNumber( const int &nbSectors ) {
 	updateSectors();
 }
 
-void PieChart::draw( QPainter &painter, const int &sectorIdx, const Coord2D &center ) const {
+void PieChart::draw( QPainter &painter, const int &sectorIdx, const iCoord2D &center ) const {
 	const int width = painter.window().width();
 	const int height = painter.window().height();
 	const int centerX = center.x;
