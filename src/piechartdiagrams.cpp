@@ -11,7 +11,7 @@
 #include <qwt_plot_histogram.h>
 #include <qwt_polar_curve.h>
 
-PieChartDiagrams::PieChartDiagrams() :  _billon(0), _marrow(0), _pieChart(0), _minimalDifference(0), _polarCurve(0) {
+PieChartDiagrams::PieChartDiagrams() : _polarCurve(0), _minimalDifference(0) {
 }
 
 PieChartDiagrams::~PieChartDiagrams() {
@@ -33,18 +33,6 @@ int PieChartDiagrams::minimalDifference() const {
 /*******************************
  * Public setters
  *******************************/
-
-void PieChartDiagrams::setModel( const Billon * const billon ) {
-	_billon = billon;
-}
-
-void PieChartDiagrams::setModel( const PieChart * const pieChart ) {
-	_pieChart = pieChart;
-}
-
-void PieChartDiagrams::setModel( const Marrow * const marrow ) {
-	_marrow = marrow;
-}
 
 void PieChartDiagrams::attach( const QList<QwtPlot *> & plots ) {
 	const int nbPlots = plots.size();
@@ -73,44 +61,36 @@ void PieChartDiagrams::setMinimalDifference( const int &minimalDifference ) {
 	_minimalDifference = minimalDifference;
 }
 
-void PieChartDiagrams::compute( const SlicesInterval &slicesInterval, const IntensityInterval &intensityInterval ) {
+void PieChartDiagrams::compute( const Billon &billon, const PieChart &pieChart, const SlicesInterval &slicesInterval, const IntensityInterval &intensityInterval ) {
 	clearAll();
-	if ( _billon != 0 && _pieChart != 0 && slicesInterval.isValid() && intensityInterval.isValid() ) {
-
-		const int nbSectors = _pieChart->nbSectors();
+	if ( slicesInterval.isValid() && intensityInterval.isValid() ) {
+		const int nbSectors = pieChart.nbSectors();
+		const int nbValues = intensityInterval.count();
 		const int minValue = intensityInterval.min();
 		const int maxValue = intensityInterval.max();
-		const int nbValues = intensityInterval.count();
-
-		// Création des données des diagrammes
-		QVector<int> sectorsSum(nbSectors,0);
-		QVector< QVector<QwtIntervalSample> > histogramsData(nbSectors,QVector<QwtIntervalSample>(nbValues,QwtIntervalSample(0.,0.,0.)));
-
-		for ( int i=0 ; i<nbSectors ; ++i ) {
-			for ( int j=0 ; j<nbValues ; ++j ) {
-				histogramsData[i][j].interval.setInterval(j,j+1);
-			}
-		}
-
-		// Calcul des diagrammes en parcourant les tranches du billon comprises dans l'intervalle
-		const int sliceWidth = _billon->n_cols;
+		const int sliceWidth = billon.n_cols;
 		const int sliceMiddleX = sliceWidth/2;
-		const int sliceHeight = _billon->n_rows;
+		const int sliceHeight = billon.n_rows;
 		const int sliceMiddleY = sliceHeight/2;
 		const int minOfInterval = slicesInterval.min();
 		const int maxOfInterval = slicesInterval.max();
-		const bool existMarrow = _marrow != 0;
 		int previousSlice = minOfInterval==0?1:minOfInterval-1;
-		int centerX, centerY;
-		int diffMax = 0;
+		int i, j, k, centerX, centerY, sectorIdx, diffVal, diffMax;
 
-		for ( int k=minOfInterval ; k<=maxOfInterval ; ++k ) {
-			centerX = existMarrow?_marrow->at(k).x:sliceMiddleX;
-			centerY = existMarrow?_marrow->at(k).y:sliceMiddleY;
-			for ( int j=0 ; j<sliceHeight ; ++j ) {
-				for ( int i=0 ; i<sliceWidth ; ++i ) {
-					const int sectorIdx = _pieChart->partOfAngle( TWO_PI-ANGLE(centerX,centerY,i,j) );
-					const int diffVal = qAbs(RESTRICT_TO_INTERVAL(_billon->at(j,i,k),minValue,maxValue)-RESTRICT_TO_INTERVAL(_billon->at(j,i,previousSlice),minValue,maxValue));
+		// Création des données des diagrammes
+		QVector< QVector<QwtIntervalSample> > histogramsData(nbSectors,QVector<QwtIntervalSample>(nbValues,QwtIntervalSample(0.,0.,0.)));
+		initializeDiagramsData( histogramsData, nbSectors, nbValues );
+
+		// Calcul des diagrammes en parcourant les tranches du billon comprises dans l'intervalle
+		QVector<int> sectorsSum(nbSectors,0);
+		centerX = sliceMiddleX;
+		centerY = sliceMiddleY;
+		diffMax = 0;
+		for ( k=minOfInterval ; k<=maxOfInterval ; ++k ) {
+			for ( j=0 ; j<sliceHeight ; ++j ) {
+				for ( i=0 ; i<sliceWidth ; ++i ) {
+					sectorIdx = pieChart.partOfAngle( TWO_PI-ANGLE(centerX,centerY,i,j) );
+					diffVal = qAbs(RESTRICT_TO_INTERVAL(billon(j,i,k),minValue,maxValue)-RESTRICT_TO_INTERVAL(billon(j,i,previousSlice),minValue,maxValue));
 					if ( diffVal > _minimalDifference ) {
 						histogramsData[sectorIdx][diffVal].value += 1.;
 						sectorsSum[sectorIdx] += diffVal;
@@ -121,23 +101,49 @@ void PieChartDiagrams::compute( const SlicesInterval &slicesInterval, const Inte
 			previousSlice = k;
 		}
 
-		// Création des objets histogrammes et affectation de leurs données correspondantes
-		_histograms.reserve(nbSectors);
-		for ( int i=0 ; i<nbSectors ; ++i ) {
-			histogramsData[i].remove(diffMax,nbValues-diffMax);
-			_histograms.append(new QwtPlotHistogram());
-			static_cast<QwtIntervalSeriesData *>(_histograms.last()->data())->setSamples(histogramsData[i]);
+		createDiagrams( histogramsData, sectorsSum, nbSectors, nbValues, diffMax );
+	}
+}
+
+void PieChartDiagrams::compute( const Billon &billon, const PieChart &pieChart, const Marrow &marrow, const SlicesInterval &slicesInterval, const IntensityInterval &intensityInterval ) {
+	clearAll();
+	if ( slicesInterval.isValid() && intensityInterval.isValid() ) {
+		const int nbSectors = pieChart.nbSectors();
+		const int minValue = intensityInterval.min();
+		const int maxValue = intensityInterval.max();
+		const int nbValues = intensityInterval.count();
+		const int sliceWidth = billon.n_cols;
+		const int sliceHeight = billon.n_rows;
+		const int minOfInterval = slicesInterval.min();
+		const int maxOfInterval = slicesInterval.max();
+		int previousSlice = minOfInterval==0?1:minOfInterval-1;
+		int i, j, k, centerX, centerY, sectorIdx, diffVal, diffMax;
+
+		// Création des données des diagrammes
+		QVector< QVector<QwtIntervalSample> > histogramsData(nbSectors,QVector<QwtIntervalSample>(nbValues,QwtIntervalSample(0.,0.,0.)));
+		initializeDiagramsData( histogramsData, nbSectors, nbValues );
+
+		// Calcul des diagrammes en parcourant les tranches du billon comprises dans l'intervalle
+		QVector<int> sectorsSum(nbSectors,0);
+		diffMax = 0;
+		for ( k=minOfInterval ; k<=maxOfInterval ; ++k ) {
+			centerX = marrow[k].x;
+			centerY = marrow[k].y;
+			for ( j=0 ; j<sliceHeight ; ++j ) {
+				for ( i=0 ; i<sliceWidth ; ++i ) {
+					sectorIdx = pieChart.partOfAngle( TWO_PI-ANGLE(centerX,centerY,i,j) );
+					diffVal = qAbs(RESTRICT_TO_INTERVAL(billon(j,i,k),minValue,maxValue)-RESTRICT_TO_INTERVAL(billon(j,i,previousSlice),minValue,maxValue));
+					if ( diffVal > _minimalDifference ) {
+						histogramsData[sectorIdx][diffVal].value += 1.;
+						sectorsSum[sectorIdx] += diffVal;
+						diffMax = qMax(diffMax,diffVal);
+					}
+				}
+			}
+			previousSlice = k;
 		}
 
-		// Création du diagramme circulaire
-		_polarCurve = new QwtPolarCurve();
-		PointPolarSeriesData *pointsDatas = new PointPolarSeriesData();
-		const qreal coeff = 360./nbSectors;
-		for ( int i=0 ; i<nbSectors ; ++i ) {
-			pointsDatas->append(QwtPointPolar(i*coeff,sectorsSum[i]));
-		}
-		pointsDatas->append(QwtPointPolar(0,sectorsSum[0]));
-		_polarCurve->setData(pointsDatas);
+		createDiagrams( histogramsData, sectorsSum, nbSectors, nbValues, diffMax );
 	}
 }
 
@@ -153,4 +159,33 @@ void PieChartDiagrams::clearAll() {
 		delete _polarCurve;
 		_polarCurve = 0;
 	}
+}
+
+void PieChartDiagrams::initializeDiagramsData( QVector< QVector<QwtIntervalSample> > &histogramsData, const int &nbSectors, const int &nbValues ) {
+	for ( int i=0 ; i<nbSectors ; ++i ) {
+		for ( int j=0 ; j<nbValues ; ++j ) {
+			histogramsData[i][j].interval.setInterval(j,j+1);
+		}
+	}
+}
+
+void PieChartDiagrams::createDiagrams( QVector< QVector<QwtIntervalSample> > &histogramsData, const QVector<int> &sectorsSum, const int &nbSectors, const int &nbValues, const int &diffMax ) {
+	int i;
+	// Création des objets histogrammes et affectation de leurs données correspondantes
+	_histograms.reserve(nbSectors);
+	for ( i=0 ; i<nbSectors ; ++i ) {
+		histogramsData[i].remove(diffMax,nbValues-diffMax);
+		_histograms.append(new QwtPlotHistogram());
+		static_cast<QwtIntervalSeriesData *>(_histograms.last()->data())->setSamples(histogramsData[i]);
+	}
+
+	// Création du diagramme circulaire
+	_polarCurve = new QwtPolarCurve();
+	PointPolarSeriesData *pointsDatas = new PointPolarSeriesData();
+	const qreal coeff = 360./nbSectors;
+	for ( i=0 ; i<nbSectors ; ++i ) {
+		pointsDatas->append(QwtPointPolar(i*coeff,sectorsSum[i]));
+	}
+	pointsDatas->append(QwtPointPolar(0,sectorsSum[0]));
+	_polarCurve->setData(pointsDatas);
 }

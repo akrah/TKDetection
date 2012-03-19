@@ -12,6 +12,7 @@ class QwtPlot;
 class QwtPlotHistogram;
 class QwtPolarPlot;
 class QwtPolarCurve;
+class QwtIntervalSample;
 
 class PieChartDiagrams
 {
@@ -22,31 +23,25 @@ public:
 	int count() const;
 	int minimalDifference() const;
 
-	void setModel( const Billon * const billon );
-	void setModel( const PieChart * const pieChart );
-	void setModel( const Marrow * const marrow );
-
 	void attach( const QList<QwtPlot *> & plots );
 	void attach( QwtPolarPlot * const polarPlot );
 	void detach();
 
-	void setBillonInterval( const int &sliceMin, const int &sliceMax );
 	void setMinimalDifference( const int &minimalDifference );
 
-	void compute( const SlicesInterval &slicesInterval, const IntensityInterval &intensityInterval );
+	void compute( const Billon &billon, const PieChart &pieChart, const SlicesInterval &slicesInterval, const IntensityInterval &intensityInterval );
+	void compute( const Billon &billon, const PieChart &pieChart, const Marrow &marrow, const SlicesInterval &slicesInterval, const IntensityInterval &intensityInterval );
 
 private:
 	void clearAll();
+	void initializeDiagramsData( QVector< QVector<QwtIntervalSample> > &histogramsData, const int &nbSectors, const int &nbValues );
+	void createDiagrams( QVector< QVector<QwtIntervalSample> > &histogramsData, const QVector<int> &sectorsSum, const int &nbSectors, const int &nbValues, const int &diffMax );
 
 private:
-	const Billon *_billon;
-	const Marrow *_marrow;
-	const PieChart *_pieChart;
-
-	int _minimalDifference;
-
 	QList<QwtPlotHistogram *> _histograms;
 	QwtPolarCurve *_polarCurve;
+
+	int _minimalDifference;
 };
 
 #endif // PIECHARTDIAGRAMS_H

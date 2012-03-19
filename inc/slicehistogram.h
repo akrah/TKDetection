@@ -21,18 +21,17 @@ public:
 	int nbMaximums() const;
 	int sliceOfIemeMaximum( const int &maximumIndex ) const;
 
-	void setModel( const Billon *billon );
-	void setModel( const Marrow *marrow );
-
 	void attach( QwtPlot * const plot );
 	void detach();
+	void clear();
 
-	void constructHistogram( const IntensityInterval &intensityInterval );
+	void constructHistogram( const Billon &billon, const IntensityInterval &intensityInterval );
+	void constructHistogram( const Billon &billon, const Marrow &marrow, const IntensityInterval &intensityInterval );
 
 private:
-	const Billon *_billon;
-	const Marrow *_marrow;
+	void updateMaximums();
 
+private:
 	QwtPlotHistogram *_histogram;
 	QVector<QwtIntervalSample> _datasHistogram;
 

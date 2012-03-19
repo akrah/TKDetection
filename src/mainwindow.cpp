@@ -26,9 +26,6 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 	setCorner(Qt::BottomLeftCorner,Qt::LeftDockWidgetArea);
 	setCorner(Qt::BottomRightCorner,Qt::RightDockWidgetArea);
 
-	// Initialisation des vues
-	_pieChartDiagrams->setModel(_pieChart);
-
 	// Paramétrisation des composant graphiques
 	_ui->_labelSliceView->installEventFilter(this);
 	_ui->_labelSliceView->installEventFilter(&_sliceZoomer);
@@ -91,8 +88,8 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 	QObject::connect(_ui->_buttonMinSlice, SIGNAL(clicked()), this, SLOT(setMinimumOfSlicesIntervalToCurrentSlice()));
 	QObject::connect(_ui->_spinMaxSlice, SIGNAL(valueChanged(int)), &_slicesInterval, SLOT(setMax(int)));
 	QObject::connect(_ui->_buttonMaxSlice, SIGNAL(clicked()), this, SLOT(setMaximumOfSlicesIntervalToCurrentSlice()));
-	QObject::connect(_ui->_buttonDatExport, SIGNAL(clicked()), this, SLOT(exportToDat()));
-	QObject::connect(_ui->_buttonOfsExport, SIGNAL(clicked()), this, SLOT(exportToOfs()));
+	QObject::connect(_ui->_buttonExportDat, SIGNAL(clicked()), this, SLOT(exportToDat()));
+	QObject::connect(_ui->_buttonExportOfs, SIGNAL(clicked()), this, SLOT(exportToOfs()));
 
 	// Raccourcis des actions du menu
 	_ui->_actionOpenDicom->setShortcut(Qt::CTRL + Qt::Key_O);
@@ -254,7 +251,11 @@ void MainWindow::setHighThreshold( const int &threshold ) {
 void MainWindow::updateSliceHistogram() {
 	if ( _sliceHistogram != 0 ) {
 		_sliceHistogram->detach();
-		_sliceHistogram->constructHistogram(_intensityInterval);
+		_sliceHistogram->clear();
+		if ( _billon != 0 ) {
+			if ( _marrow != 0 )	_sliceHistogram->constructHistogram(*_billon, *_marrow, _intensityInterval);
+			else _sliceHistogram->constructHistogram(*_billon, _intensityInterval);
+		}
 		_histogramCursor.detach();
 		_sliceHistogram->attach(_ui->_plotSliceHistogram);
 		_histogramCursor.attach(_ui->_plotSliceHistogram);
@@ -281,9 +282,7 @@ void MainWindow::updateMarrow() {
 		MarrowExtractor extractor;
 		_marrow = extractor.process(*_billon,0,_billon->n_slices-1);
 	}
-	_pieChartDiagrams->setModel(_marrow);
 	_sliceView->setModel(_marrow);
-	_sliceHistogram->setModel(_marrow);
 	drawSlice();
 }
 
@@ -304,7 +303,8 @@ void MainWindow::updateSectorsHistograms() {
 	_ui->_polarSectorSum->replot();
 
 	if ( _pieChartDiagrams != 0 ) {
-		_pieChartDiagrams->compute( _slicesInterval, _intensityInterval );
+		if ( _marrow != 0 )	_pieChartDiagrams->compute( *_billon, *_pieChart, *_marrow, _slicesInterval, _intensityInterval );
+		else _pieChartDiagrams->compute( *_billon, *_pieChart, _slicesInterval, _intensityInterval );
 
 		const int nbHistograms = _pieChartDiagrams->count();
 		if ( nbHistograms != 0 ) {
@@ -473,7 +473,7 @@ void MainWindow::exportToDat() {
 	if ( _billon != 0 ) {
 		QString fileName = QFileDialog::getSaveFileName(this, tr("Exporter en .dat"), "output.dat", tr("Fichiers de données (*.dat);;Tous les fichiers (*.*)"));
 		if ( !fileName.isEmpty() ) {
-			DatExport::process( *_billon, _slicesInterval, fileName );
+			DatExport::process( *_billon, _slicesInterval, fileName, _ui->_spinExportResolution->value() );
 		}
 	}
 }
@@ -482,7 +482,7 @@ void MainWindow::exportToOfs() {
 	if ( _billon != 0 && _marrow != 0 ) {
 		QString fileName = QFileDialog::getSaveFileName(this, tr("Exporter en .ofs"), "output.ofs", tr("Fichiers de données (*.ofs);;Tous les fichiers (*.*)"));
 		if ( !fileName.isEmpty() ) {
-			OfsExport::process( *_billon, *_marrow, _slicesInterval, fileName );
+			OfsExport::process( *_billon, *_marrow, _slicesInterval, fileName, _ui->_spinExportNbEdges->value(), _ui->_spinExportRadius->value() );
 		}
 	}
 }
@@ -500,8 +500,6 @@ void MainWindow::openNewBillon( const QString &folderName ) {
 		_billon = DicomReader::read(folderName);
 	}
 	if ( _sliceView != 0 ) _sliceView->setModel(_billon);
-	if ( _sliceHistogram != 0 ) _sliceHistogram->setModel(_billon);
-	if ( _pieChartDiagrams != 0 ) _pieChartDiagrams->setModel(_billon);
 	if ( _billon != 0 ) {
 		_pix = QImage(_billon->n_cols, _billon->n_rows,QImage::Format_ARGB32);
 		_intensityInterval.setBounds(_billon->minValue(),_billon->maxValue());

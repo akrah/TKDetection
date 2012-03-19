@@ -198,7 +198,7 @@
      <item>
       <widget class="QTabWidget" name="_tabs">
        <property name="currentIndex">
-        <number>0</number>
+        <number>2</number>
        </property>
        <widget class="QWidget" name="_tabGeneral">
         <attribute name="title">
@@ -233,8 +233,8 @@
                 <rect>
                  <x>0</x>
                  <y>0</y>
-                 <width>382</width>
-                 <height>198</height>
+                 <width>273</width>
+                 <height>146</height>
                 </rect>
                </property>
                <attribute name="label">
@@ -392,8 +392,8 @@
                 <rect>
                  <x>0</x>
                  <y>0</y>
-                 <width>382</width>
-                 <height>177</height>
+                 <width>322</width>
+                 <height>144</height>
                 </rect>
                </property>
                <attribute name="label">
@@ -720,6 +720,84 @@
          </item>
         </layout>
        </widget>
+       <widget class="QWidget" name="tab">
+        <attribute name="title">
+         <string>Export</string>
+        </attribute>
+        <layout class="QFormLayout" name="formLayout_6">
+         <item row="0" column="0">
+          <widget class="QLabel" name="label_16">
+           <property name="text">
+            <string>Résolution</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="1">
+          <widget class="QSpinBox" name="_spinExportResolution">
+           <property name="minimum">
+            <number>1</number>
+           </property>
+           <property name="maximum">
+            <number>8</number>
+           </property>
+          </widget>
+         </item>
+         <item row="3" column="0">
+          <widget class="QLabel" name="label_18">
+           <property name="text">
+            <string>Nombre de sommets du cercle</string>
+           </property>
+          </widget>
+         </item>
+         <item row="3" column="1">
+          <widget class="QSpinBox" name="_spinExportNbEdges">
+           <property name="minimum">
+            <number>3</number>
+           </property>
+           <property name="maximum">
+            <number>100</number>
+           </property>
+           <property name="value">
+            <number>4</number>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="1">
+          <widget class="QPushButton" name="_buttonExportDat">
+           <property name="text">
+            <string>Exporter en .dat</string>
+           </property>
+          </widget>
+         </item>
+         <item row="5" column="1">
+          <widget class="QPushButton" name="_buttonExportOfs">
+           <property name="text">
+            <string>Exporter en .ofs</string>
+           </property>
+          </widget>
+         </item>
+         <item row="4" column="1">
+          <widget class="QSpinBox" name="_spinExportRadius">
+           <property name="minimum">
+            <number>1</number>
+           </property>
+           <property name="maximum">
+            <number>30</number>
+           </property>
+           <property name="value">
+            <number>10</number>
+           </property>
+          </widget>
+         </item>
+         <item row="4" column="0">
+          <widget class="QLabel" name="label_17">
+           <property name="text">
+            <string>Rayon autour de la moelle</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
       </widget>
      </item>
      <item>
@@ -818,20 +896,6 @@
            </widget>
           </item>
          </layout>
-        </item>
-        <item row="3" column="1">
-         <widget class="QPushButton" name="_buttonDatExport">
-          <property name="text">
-           <string>Exporter en .dat</string>
-          </property>
-         </widget>
-        </item>
-        <item row="3" column="0">
-         <widget class="QPushButton" name="_buttonOfsExport">
-          <property name="text">
-           <string>Exporter en .ofs</string>
-          </property>
-         </widget>
         </item>
        </layout>
       </widget>
