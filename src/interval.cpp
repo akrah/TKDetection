@@ -22,6 +22,22 @@ int Interval::count() const {
 	return size() + 1;
 }
 
+bool Interval::containsOpen( const int &value ) const {
+	return (value > min()) && (value < max());
+}
+
+bool Interval::containsOpen( const Interval &interval ) const {
+	return (min() < interval.min()) && (max() > interval.max());
+}
+
+bool Interval::containsClosed( const int &value ) const {
+	return (value >= min()) && (value <= max());
+}
+
+bool Interval::containsClosed( const Interval &interval ) const {
+	return (min() <= interval.min()) && (max() >= interval.max());
+}
+
 void Interval::setMin( const int &min ) {
 	_min = min;
 }

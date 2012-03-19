@@ -20,9 +20,9 @@ public:
 
 	void setTypeOfView( const SliceType::SliceType &type );
 
-	void setMotionThreshold( const int &threshold );
-	void setMotionGroupMinimumRadius( const int &radius );
-	void enableMotionWithBackground( const bool &enable );
+	void setMovementThreshold( const int &threshold );
+	void setMovementGroupMinimumRadius( const int &radius );
+	void enableMovementWithBackground( const bool &enable );
 	void useNextSliceInsteadOfCurrentSlice( const bool &enable );
 
 	qreal flowAlpha() const;
@@ -47,9 +47,9 @@ private:
 
 	SliceType::SliceType _typeOfView;
 
-	int _motionThreshold;
-	int _motionGroupMinimumRadius;
-	bool _motionWithBackground;
+	int _movementThreshold;
+	int _movementGroupMinimumRadius;
+	bool _movementWithBackground;
 	bool _useNextSliceInsteadOfCurrentSlice;
 
 	qreal _flowAlpha;

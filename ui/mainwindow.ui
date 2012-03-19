@@ -198,7 +198,7 @@
      <item>
       <widget class="QTabWidget" name="_tabs">
        <property name="currentIndex">
-        <number>2</number>
+        <number>0</number>
        </property>
        <widget class="QWidget" name="_tabGeneral">
         <attribute name="title">
@@ -228,13 +228,13 @@
               <property name="frameShape">
                <enum>QFrame::StyledPanel</enum>
               </property>
-              <widget class="QWidget" name="_pageMotionParameters">
+              <widget class="QWidget" name="_pageMovementParameters">
                <property name="geometry">
                 <rect>
                  <x>0</x>
                  <y>0</y>
-                 <width>273</width>
-                 <height>146</height>
+                 <width>382</width>
+                 <height>225</height>
                 </rect>
                </property>
                <attribute name="label">
@@ -244,7 +244,7 @@
                 <item row="0" column="1">
                  <layout class="QHBoxLayout" name="horizontalLayout_9">
                   <item>
-                   <widget class="QSlider" name="_sliderMotionThreshold">
+                   <widget class="QSlider" name="_sliderMovementThreshold">
                     <property name="font">
                      <font>
                       <weight>50</weight>
@@ -260,7 +260,7 @@
                    </widget>
                   </item>
                   <item>
-                   <widget class="QSpinBox" name="_spinMotionThreshold">
+                   <widget class="QSpinBox" name="_spinMovementThreshold">
                     <property name="font">
                      <font>
                       <weight>50</weight>
@@ -314,7 +314,7 @@
                  </widget>
                 </item>
                 <item row="3" column="1">
-                 <widget class="QCheckBox" name="_checkDrawMotionWithBackground">
+                 <widget class="QCheckBox" name="_checkDrawMovementWithBackground">
                   <property name="font">
                    <font>
                     <weight>50</weight>

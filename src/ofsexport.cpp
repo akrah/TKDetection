@@ -20,7 +20,7 @@ namespace OfsExport {
 	}
 
 	void process( const Billon &billon, const Marrow &marrow, const SlicesInterval &interval, const QString &fileName, const int &nbEdgesPerSlice, const int &radiusOfTubes ) {
-		if ( interval.min() >= marrow.beginSlice() || interval.max() <= marrow.endSlice() ) {
+		if ( interval.containsClosed(marrow.interval()) ) {
 			QFile file(fileName);
 			if ( file.open(QIODevice::WriteOnly) ) {
 				QTextStream stream(&file);
@@ -39,7 +39,7 @@ namespace OfsExport {
 			const int width = billon.n_cols;
 			const int height = billon.n_rows;
 			const int nbSlices = interval.size();
-			const int firstMarrow = interval.min() - marrow.beginSlice();
+			const int firstMarrow = interval.min() - marrow.interval().min();
 			const int lastMarrow = qMin(firstMarrow + nbSlices,marrow.size());
 			qreal depth = -0.5;
 			const qreal depthShift = 1./(qreal)nbSlices;

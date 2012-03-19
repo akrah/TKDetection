@@ -15,6 +15,10 @@ public:
 	int max() const;
 	int size() const;
 	int count() const;
+	bool containsOpen( const int &value ) const;
+	bool containsOpen( const Interval &interval ) const;
+	bool containsClosed( const int &value ) const;
+	bool containsClosed( const Interval &interval ) const;
 
 	virtual bool isValid() const = 0;
 

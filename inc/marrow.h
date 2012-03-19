@@ -3,6 +3,7 @@
 
 #include <QList>
 #include "marrow_def.h"
+#include "slicesinterval.h"
 
 class QPainter;
 
@@ -12,14 +13,12 @@ public:
 	Marrow();
 	Marrow( const int &begin, const int &end );
 
-	int beginSlice() const;
-	int endSlice() const;
+	const SlicesInterval &interval() const;
 
 	void draw( QPainter &painter, const int &sliceIdx ) const;
 
 private:
-	int _begin;
-	int _end;
+	SlicesInterval _interval;
 };
 
 #endif // MARROW_H

@@ -8,7 +8,7 @@
 #include <QPainter>
 
 SliceView::SliceView() : _billon(0), _marrow(0), _typeOfView(SliceType::CURRENT),
-	_motionThreshold(0), _motionGroupMinimumRadius(1), _motionWithBackground(false), _useNextSliceInsteadOfCurrentSlice(false),
+	_movementThreshold(0), _movementGroupMinimumRadius(1), _movementWithBackground(false), _useNextSliceInsteadOfCurrentSlice(false),
 	_flowAlpha(FLOW_ALPHA_DEFAULT), _flowEpsilon(FLOW_EPSILON_DEFAULT), _flowMaximumIterations(FLOW_MAXIMUM_ITERATIONS) {
 }
 
@@ -30,16 +30,16 @@ void SliceView::setTypeOfView( const SliceType::SliceType &type ) {
 	}
 }
 
-void SliceView::setMotionThreshold( const int &threshold ) {
-	_motionThreshold = threshold;
+void SliceView::setMovementThreshold( const int &threshold ) {
+	_movementThreshold = threshold;
 }
 
-void SliceView::setMotionGroupMinimumRadius( const int &radius ) {
-	_motionGroupMinimumRadius = qMax(radius,0);
+void SliceView::setMovementGroupMinimumRadius( const int &radius ) {
+	_movementGroupMinimumRadius = qMax(radius,0);
 }
 
-void SliceView::enableMotionWithBackground( const bool &enable ) {
-	_motionWithBackground = enable;
+void SliceView::enableMovementWithBackground( const bool &enable ) {
+	_movementWithBackground = enable;
 }
 
 void SliceView::useNextSliceInsteadOfCurrentSlice( const bool &enable ) {
@@ -197,11 +197,11 @@ void SliceView::drawMovementSlice( QPainter &painter, const int &sliceNumber, co
 	int i, j, color, pixelAbsDiff;
 
 	line = (QRgb *) image.bits();
-	if ( _motionWithBackground ) {
+	if ( _movementWithBackground ) {
 		for ( j=0 ; j<height ; j++) {
 			for ( i=0 ; i<width ; i++) {
 				pixelAbsDiff = qAbs(((RESTRICT_TO_INTERVAL(previousSlice.at(j,i),minValue,maxValue)-minValue)*fact) - ((RESTRICT_TO_INTERVAL(toCompareSlice.at(j,i),minValue,maxValue)-minValue)*fact));
-				if ( pixelAbsDiff > _motionThreshold ) *line = foreground;
+				if ( pixelAbsDiff > _movementThreshold ) *line = foreground;
 				else {
 					color = (RESTRICT_TO_INTERVAL(previousSlice.at(j,i),minValue,maxValue)-minValue)*fact;
 					*line = qRgb(color,color,color);
@@ -215,7 +215,7 @@ void SliceView::drawMovementSlice( QPainter &painter, const int &sliceNumber, co
 		for ( j=0 ; j<height ; j++) {
 			for ( i=0 ; i<width ; i++) {
 				pixelAbsDiff = qAbs(((RESTRICT_TO_INTERVAL(previousSlice.at(j,i),minValue,maxValue)-minValue)*fact) - ((RESTRICT_TO_INTERVAL(toCompareSlice.at(j,i),minValue,maxValue)-minValue)*fact));
-				if ( pixelAbsDiff > _motionThreshold ) *line = foreground;
+				if ( pixelAbsDiff > _movementThreshold ) *line = foreground;
 				else *line = background;
 				line++;
 			}
@@ -223,12 +223,12 @@ void SliceView::drawMovementSlice( QPainter &painter, const int &sliceNumber, co
 	}
 
 	// Suppressionndes points isolés
-	if ( _motionGroupMinimumRadius > 0 ) {
-		const int productRadiusWidth = _motionGroupMinimumRadius*width;
-		const int diffHeightRadius = height-_motionGroupMinimumRadius;
-		const int diffWidthRadius = width-_motionGroupMinimumRadius;
-		const int nbCompare = _motionGroupMinimumRadius*8;
-		const int nbChange = qPow(2*_motionGroupMinimumRadius-1,2);
+	if ( _movementGroupMinimumRadius > 0 ) {
+		const int productRadiusWidth = _movementGroupMinimumRadius*width;
+		const int diffHeightRadius = height-_movementGroupMinimumRadius;
+		const int diffWidthRadius = width-_movementGroupMinimumRadius;
+		const int nbCompare = _movementGroupMinimumRadius*8;
+		const int nbChange = qPow(2*_movementGroupMinimumRadius-1,2);
 
 		int indexToCompare[nbCompare];
 		int indexToChange[nbChange];
@@ -240,28 +240,28 @@ void SliceView::drawMovementSlice( QPainter &painter, const int &sliceNumber, co
 		int counter;
 
 		counter = 0;
-		indexToCompare[counter++] = -productRadiusWidth-_motionGroupMinimumRadius;
-		indexToCompare[counter++] = -productRadiusWidth+_motionGroupMinimumRadius;
-		indexToCompare[counter++] = productRadiusWidth-_motionGroupMinimumRadius;
-		indexToCompare[counter++] = productRadiusWidth+_motionGroupMinimumRadius;
-		for ( i=-_motionGroupMinimumRadius+1 ; i<_motionGroupMinimumRadius ; i++ ) {
+		indexToCompare[counter++] = -productRadiusWidth-_movementGroupMinimumRadius;
+		indexToCompare[counter++] = -productRadiusWidth+_movementGroupMinimumRadius;
+		indexToCompare[counter++] = productRadiusWidth-_movementGroupMinimumRadius;
+		indexToCompare[counter++] = productRadiusWidth+_movementGroupMinimumRadius;
+		for ( i=-_movementGroupMinimumRadius+1 ; i<_movementGroupMinimumRadius ; i++ ) {
 			indexToCompare[counter++] = -productRadiusWidth+i;
 			indexToCompare[counter++] = productRadiusWidth+i;
-			indexToCompare[counter++] = i*width-_motionGroupMinimumRadius;
-			indexToCompare[counter++] = i*width+_motionGroupMinimumRadius;
+			indexToCompare[counter++] = i*width-_movementGroupMinimumRadius;
+			indexToCompare[counter++] = i*width+_movementGroupMinimumRadius;
 		}
 
 		counter = 0;
-		for ( j=-_motionGroupMinimumRadius+1 ; j<_motionGroupMinimumRadius ; j++ ) {
-			for ( i=-_motionGroupMinimumRadius+1 ; i<_motionGroupMinimumRadius ; i++ ) {
+		for ( j=-_movementGroupMinimumRadius+1 ; j<_movementGroupMinimumRadius ; j++ ) {
+			for ( i=-_movementGroupMinimumRadius+1 ; i<_movementGroupMinimumRadius ; i++ ) {
 				indexToChange[counter++] = j*width+i;
 			}
 		}
 
-		line = ((QRgb *) image.bits()) + productRadiusWidth + _motionGroupMinimumRadius;
-		if ( _motionWithBackground ) {
-			for ( j=_motionGroupMinimumRadius ; j<diffHeightRadius ; j++) {
-				for ( i=_motionGroupMinimumRadius ; i<diffWidthRadius ; i++) {
+		line = ((QRgb *) image.bits()) + productRadiusWidth + _movementGroupMinimumRadius;
+		if ( _movementWithBackground ) {
+			for ( j=_movementGroupMinimumRadius ; j<diffHeightRadius ; j++) {
+				for ( i=_movementGroupMinimumRadius ; i<diffWidthRadius ; i++) {
 					isBackground = true;
 					pointer = indexToCompare;
 					while ( pointer != supCompare ) {
@@ -280,12 +280,12 @@ void SliceView::drawMovementSlice( QPainter &painter, const int &sliceNumber, co
 					}
 					line++;
 				}
-				line+=(2*_motionGroupMinimumRadius);
+				line+=(2*_movementGroupMinimumRadius);
 			}
 		}
 		else {
-			for ( j=_motionGroupMinimumRadius ; j<diffHeightRadius ; j++) {
-				for ( i=_motionGroupMinimumRadius ; i<diffWidthRadius ; i++) {
+			for ( j=_movementGroupMinimumRadius ; j<diffHeightRadius ; j++) {
+				for ( i=_movementGroupMinimumRadius ; i<diffWidthRadius ; i++) {
 					isBackground = true;
 					pointer = indexToCompare;
 					while ( pointer != supCompare ) {
@@ -299,7 +299,7 @@ void SliceView::drawMovementSlice( QPainter &painter, const int &sliceNumber, co
 					}
 					line++;
 				}
-				line+=_motionGroupMinimumRadius*2;
+				line+=_movementGroupMinimumRadius*2;
 			}
 		}
 	}

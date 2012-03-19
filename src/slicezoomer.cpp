@@ -23,10 +23,10 @@ bool SliceZoomer::eventFilter(QObject *, QEvent *event) {
 			{
 				if ( _isDraging ) {
 					const QMouseEvent *mouseEvent = static_cast<const QMouseEvent*>(event);
-					const QPoint motionVector = mouseEvent->pos() - _pointStartDrag;
-					if ( motionVector.manhattanLength() > 0 ) {
+					const QPoint movementVector = mouseEvent->pos() - _pointStartDrag;
+					if ( movementVector.manhattanLength() > 0 ) {
 						_pointStartDrag = mouseEvent->pos();
-						emit isMovedFrom(motionVector);
+						emit isMovedFrom(movementVector);
 					}
 					isFiltered = true;
 				}

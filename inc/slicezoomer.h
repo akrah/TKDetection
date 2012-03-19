@@ -17,7 +17,7 @@ protected:
 	bool eventFilter(QObject *, QEvent *event);
 
 signals:
-	void isMovedFrom( const QPoint &motionVector );
+	void isMovedFrom( const QPoint &movementVector );
 	void zoomFactorChanged( const qreal &newZoomFactor, const QPoint &focalPoint );
 
 private:

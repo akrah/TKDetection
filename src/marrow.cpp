@@ -1,23 +1,19 @@
 #include "inc/marrow.h"
 
 #include <QPainter>
+#include "inc/slicesinterval.h"
 
-Marrow::Marrow() : QList<iCoord2D>(), _begin(0), _end(0) {
+Marrow::Marrow() : QList<iCoord2D>(), _interval(0,0) {
 }
 
-Marrow::Marrow( const int &begin, const int &end ) : QList<iCoord2D>(), _begin(begin), _end(end) {
+Marrow::Marrow( const int &begin, const int &end ) : QList<iCoord2D>(), _interval(begin,end) {
 }
 
 /*******************************
  * Public getters
  *******************************/
-
-int Marrow::beginSlice() const {
-	return _begin;
-}
-
-int Marrow::endSlice() const {
-	return _end;
+const SlicesInterval &Marrow::interval() const {
+	return _interval;
 }
 
 
@@ -25,8 +21,8 @@ int Marrow::endSlice() const {
  * Public setters
  *******************************/
 void Marrow::draw( QPainter &painter, const int &sliceIdx ) const {
-	if ( (sliceIdx>=_begin) && (sliceIdx<=_end) ) {
-		const iCoord2D &coordToDraw = at(sliceIdx-_begin);
+	if ( _interval.containsClosed(sliceIdx) ) {
+		const iCoord2D &coordToDraw = at(sliceIdx-_interval.min());
 
 		QPainterPath ellipsePath;
 		ellipsePath.addEllipse(coordToDraw.x-5,coordToDraw.y-5,10,10);
