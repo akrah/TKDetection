@@ -15,14 +15,14 @@ public:
 	MarrowExtractor();
 
 	/**
-	 * \fn		QList<Coord>* process( const icube &image, int sliceMin, int sliceMax )
+	 * \fn		QList<Coord>* process( const icube &image, const int &sliceMin, const int &sliceMax )
 	 * \brief	Extrait la moelle d'une matrice sous forme d'une liste des coordonnées des voxels qui la compose
 	 * \param	image Image 2D
 	 * \param	sliceMin Première coupe à traiter
 	 * \param	sliceMax Dernière coupe à traiter
 	 * \return	la liste des coordonnées de la moelle
 	 */
-	Marrow* process( const icube &image, int sliceMin, int sliceMax );
+	Marrow* process( const icube &image, const int &sliceMin, const int &sliceMax );
 
 	/********************************************************
 	 * Get functions

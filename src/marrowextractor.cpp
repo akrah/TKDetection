@@ -17,12 +17,10 @@ MarrowExtractor::MarrowExtractor() :
  * Fonction principale d'extraction de la moelle
  ********************************************************/
 
-Marrow* MarrowExtractor::process( const icube &image, int sliceMin, int sliceMax ) {
+Marrow* MarrowExtractor::process( const icube &image, const int &sliceMin, const int &sliceMax ) {
 	const int width = image.n_cols;
 	const int height = image.n_rows;
 	const int depth = image.n_slices;
-	sliceMin = RESTRICT_TO_INTERVAL(sliceMin,0,depth-1);
-	sliceMax = RESTRICT_TO_INTERVAL(sliceMax,sliceMin,depth-1);
 
 	iCoord2D coordPrec,coordCurrent;
 	float maxStandList[depth];

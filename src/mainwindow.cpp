@@ -54,8 +54,6 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 	QObject::connect(_ui->_comboSliceType, SIGNAL(activated(int)), this, SLOT(setTypeOfView(int)));
 	QObject::connect(_ui->_sliderMovementThreshold, SIGNAL(valueChanged(int)), this, SLOT(setMovementThreshold(int)));
 	QObject::connect(_ui->_spinMovementThreshold, SIGNAL(valueChanged(int)), this, SLOT(setMovementThreshold(int)));
-	QObject::connect(_ui->_sliderMovementMinimumRadius, SIGNAL(valueChanged(int)), this, SLOT(setMovementGroupMinimumRadius(int)));
-	QObject::connect(_ui->_spinMovementMinimumRadius, SIGNAL(valueChanged(int)), this, SLOT(setMovementGroupMinimumRadius(int)));
 	QObject::connect(_ui->_checkDrawMovementWithBackground, SIGNAL(toggled(bool)), this, SLOT(enableMovementWithBackground(bool)));
 	QObject::connect(_ui->_checkUseNextSlice, SIGNAL(toggled(bool)), this, SLOT(useNextSliceInsteadOfCurrentSlice(bool)));
 	QObject::connect(_ui->_buttonFlowApplied, SIGNAL(clicked()), this, SLOT(flowApplied()));
@@ -173,7 +171,7 @@ void MainWindow::drawSlice( const int &sliceNumber ) {
 		_pix.fill(0xff000000);
 		QPainter painter(&_pix);
 		painter.save();
-			_sliceView->drawSlice(painter,sliceNumber,_intensityInterval);
+			_sliceView->drawSlice(painter,*_billon,sliceNumber,_intensityInterval);
 		painter.restore();
 		highlightSliceHistogram(sliceNumber);
 		if ( _marrow != 0 ) {
@@ -277,7 +275,6 @@ void MainWindow::updateMarrow() {
 		MarrowExtractor extractor;
 		_marrow = extractor.process(*_billon,0,_billon->n_slices-1);
 	}
-	_sliceView->setModel(_marrow);
 	drawSlice();
 }
 
@@ -394,20 +391,6 @@ void MainWindow::setMovementThreshold( const int &threshold ) {
 	drawSlice();
 }
 
-void MainWindow::setMovementGroupMinimumRadius( const int &radius ) {
-	_sliceView->setMovementGroupMinimumRadius(radius);
-
-	_ui->_spinMovementMinimumRadius->blockSignals(true);
-		_ui->_spinMovementMinimumRadius->setValue(radius);
-	_ui->_spinMovementMinimumRadius->blockSignals(false);
-
-	_ui->_sliderMovementMinimumRadius->blockSignals(true);
-		_ui->_sliderMovementMinimumRadius->setValue(radius);
-	_ui->_sliderMovementMinimumRadius->blockSignals(false);
-
-	drawSlice();
-}
-
 void MainWindow::enableMovementWithBackground( const bool &enable ) {
 	_sliceView->enableMovementWithBackground(enable);
 	drawSlice();
@@ -474,7 +457,6 @@ void MainWindow::openNewBillon( const QString &folderName ) {
 	if ( !folderName.isEmpty() ) {
 		_billon = DicomReader::read(folderName);
 	}
-	_sliceView->setModel(_billon);
 	if ( _billon != 0 ) {
 		_pix = QImage(_billon->n_cols, _billon->n_rows,QImage::Format_ARGB32);
 		_intensityInterval.setBounds(_billon->minValue(),_billon->maxValue());

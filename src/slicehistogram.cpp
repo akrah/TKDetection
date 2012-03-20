@@ -107,30 +107,30 @@ void SliceHistogram::constructHistogram( const Billon &billon, const Marrow &mar
 	const uint depth = billon.n_slices;
 	const int minValue = intensityInterval.min();
 	const int maxValue = intensityInterval.max();
-	int diameter = 10;
+	int diameter = 20;
 	diameter /= billon.voxelWidth();
 	const int radius = diameter/2;
 	const int radiusMax = radius+1;
-	int iRadius, nbPixels;
-	uint marrowX, marrowY;
+	int i, j, iRadius, nbPixels;
+	uint k, marrowX, marrowY;
 	qreal cumul;
 
 	_datasHistogram.reserve(depth-1);
 
 	QList<int> circleLines;
-	for ( int j=-radius ; j<radiusMax ; ++j ) {
+	for ( j=-radius ; j<radiusMax ; ++j ) {
 		circleLines.append(qSqrt(qAbs(qPow(radius,2)-qPow(j,2))));
 		nbPixels += 2*circleLines.last()+1;
 	}
-	for ( uint k=1 ; k<depth ; ++k ) {
+	for ( k=1 ; k<depth ; ++k ) {
 		const arma::imat &slice = billon.slice(k);
 		const arma::imat &prevSlice = billon.slice(k-1);
 		marrowX = marrow[k].x+radiusMax;
 		marrowY = marrow[k].y+radiusMax;
 		cumul = 0;
-		for ( int j=-radius ; j<radiusMax ; ++j ) {
+		for ( j=-radius ; j<radiusMax ; ++j ) {
 			iRadius = circleLines[j+radius];
-			for ( int i=-iRadius ; i<iRadius+1 ; ++i ) {
+			for ( i=-iRadius ; i<iRadius+1 ; ++i ) {
 				cumul += qAbs(RESTRICT_TO_INTERVAL(slice.at(marrowY+j,marrowX+i),minValue,maxValue) - RESTRICT_TO_INTERVAL(prevSlice.at(marrowY+j,marrowX+i),minValue,maxValue));
 			}
 		}
@@ -139,7 +139,6 @@ void SliceHistogram::constructHistogram( const Billon &billon, const Marrow &mar
 
 	_histogram->setSamples(_datasHistogram);
 	updateMaximums();
-
 }
 
 void SliceHistogram::updateMaximums() {
@@ -147,9 +146,12 @@ void SliceHistogram::updateMaximums() {
 
 	if ( _datasHistogram.size() > 0 ) {
 		QList<int> pics;
+		const int filterRadius = 15;
+		const int max = _datasHistogram.size()-filterRadius;
+		double value;
 		qDebug() << "Pics primaires :";
-		for ( int i=10 ; i<_datasHistogram.size()-10 ; ++i ) {
-			double value = _datasHistogram.at(i).value;
+		for ( int i=filterRadius ; i<max ; ++i ) {
+			value = _datasHistogram.at(i).value;
 			if ( (value > _datasHistogram.at(i-1).value) && (value > _datasHistogram.at(i+1).value) &&
 				 (value > _datasHistogram.at(i-2).value) && (value > _datasHistogram.at(i+2).value) &&
 				 (value > _datasHistogram.at(i-3).value) && (value > _datasHistogram.at(i+3).value) &&
@@ -159,9 +161,15 @@ void SliceHistogram::updateMaximums() {
 				 (value > _datasHistogram.at(i-7).value) && (value > _datasHistogram.at(i+7).value) &&
 				 (value > _datasHistogram.at(i-8).value) && (value > _datasHistogram.at(i+8).value) &&
 				 (value > _datasHistogram.at(i-9).value) && (value > _datasHistogram.at(i+9).value) &&
-				 (value > _datasHistogram.at(i-10).value) && (value > _datasHistogram.at(i+10).value)) {
+				 (value > _datasHistogram.at(i-10).value) && (value > _datasHistogram.at(i+10).value) &&
+				 (value > _datasHistogram.at(i-11).value) && (value > _datasHistogram.at(i+11).value) &&
+				 (value > _datasHistogram.at(i-12).value) && (value > _datasHistogram.at(i+12).value) &&
+				 (value > _datasHistogram.at(i-13).value) && (value > _datasHistogram.at(i+13).value) &&
+				 (value > _datasHistogram.at(i-14).value) && (value > _datasHistogram.at(i+14).value) &&
+				 (value > _datasHistogram.at(i-15).value) && (value > _datasHistogram.at(i+15).value) ) {
 				pics.append(i);
 				_datasMaximums.append(_datasHistogram.at(i));
+				i+=filterRadius-1;
 				qDebug() << i;
 			}
 		}

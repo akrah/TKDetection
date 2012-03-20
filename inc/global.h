@@ -30,7 +30,7 @@ namespace {
 
 	template<class T>
 	inline T RESTRICT_TO_INTERVAL(const T &x, const T &min, const T &max) {
-		return qMax(min,qMin(max,x));
+		return (x<min||x>max)?min:x;
 	}
 }
 

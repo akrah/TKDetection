@@ -78,12 +78,6 @@
       </property>
       <item>
        <widget class="QScrollArea" name="_scrollSliceView">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
         <property name="frameShape">
          <enum>QFrame::NoFrame</enum>
         </property>
@@ -110,8 +104,8 @@
           <rect>
            <x>0</x>
            <y>0</y>
-           <width>76</width>
-           <height>76</height>
+           <width>565</width>
+           <height>443</height>
           </rect>
          </property>
          <layout class="QHBoxLayout" name="horizontalLayout_8">
@@ -198,7 +192,7 @@
      <item>
       <widget class="QTabWidget" name="_tabs">
        <property name="currentIndex">
-        <number>0</number>
+        <number>2</number>
        </property>
        <widget class="QWidget" name="_tabGeneral">
         <attribute name="title">
@@ -241,6 +235,22 @@
                 <string>Paramètres du mouvement</string>
                </attribute>
                <layout class="QFormLayout" name="formLayout_7">
+                <property name="fieldGrowthPolicy">
+                 <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
+                </property>
+                <item row="0" column="0">
+                 <widget class="QLabel" name="label_9">
+                  <property name="font">
+                   <font>
+                    <weight>50</weight>
+                    <bold>false</bold>
+                   </font>
+                  </property>
+                  <property name="text">
+                   <string>Seuil minimum</string>
+                  </property>
+                 </widget>
+                </item>
                 <item row="0" column="1">
                  <layout class="QHBoxLayout" name="horizontalLayout_9">
                   <item>
@@ -274,33 +284,7 @@
                   </item>
                  </layout>
                 </item>
-                <item row="0" column="0">
-                 <widget class="QLabel" name="label_9">
-                  <property name="font">
-                   <font>
-                    <weight>50</weight>
-                    <bold>false</bold>
-                   </font>
-                  </property>
-                  <property name="text">
-                   <string>Seuil minimum</string>
-                  </property>
-                 </widget>
-                </item>
                 <item row="2" column="0">
-                 <widget class="QLabel" name="label_11">
-                  <property name="font">
-                   <font>
-                    <weight>50</weight>
-                    <bold>false</bold>
-                   </font>
-                  </property>
-                  <property name="text">
-                   <string>Rayon minimal</string>
-                  </property>
-                 </widget>
-                </item>
-                <item row="3" column="0">
                  <widget class="QLabel" name="label_10">
                   <property name="font">
                    <font>
@@ -313,7 +297,7 @@
                   </property>
                  </widget>
                 </item>
-                <item row="3" column="1">
+                <item row="2" column="1">
                  <widget class="QCheckBox" name="_checkDrawMovementWithBackground">
                   <property name="font">
                    <font>
@@ -326,7 +310,7 @@
                   </property>
                  </widget>
                 </item>
-                <item row="4" column="0">
+                <item row="3" column="0">
                  <widget class="QLabel" name="label_12">
                   <property name="font">
                    <font>
@@ -339,7 +323,7 @@
                   </property>
                  </widget>
                 </item>
-                <item row="4" column="1">
+                <item row="3" column="1">
                  <widget class="QCheckBox" name="_checkUseNextSlice">
                   <property name="font">
                    <font>
@@ -352,39 +336,6 @@
                   </property>
                  </widget>
                 </item>
-                <item row="2" column="1">
-                 <layout class="QHBoxLayout" name="horizontalLayout_10">
-                  <property name="bottomMargin">
-                   <number>0</number>
-                  </property>
-                  <item>
-                   <widget class="QSlider" name="_sliderMovementMinimumRadius">
-                    <property name="maximum">
-                     <number>10</number>
-                    </property>
-                    <property name="pageStep">
-                     <number>5</number>
-                    </property>
-                    <property name="orientation">
-                     <enum>Qt::Horizontal</enum>
-                    </property>
-                   </widget>
-                  </item>
-                  <item>
-                   <widget class="QSpinBox" name="_spinMovementMinimumRadius">
-                    <property name="font">
-                     <font>
-                      <weight>50</weight>
-                      <bold>false</bold>
-                     </font>
-                    </property>
-                    <property name="maximum">
-                     <number>10</number>
-                    </property>
-                   </widget>
-                  </item>
-                 </layout>
-                </item>
                </layout>
               </widget>
               <widget class="QWidget" name="_pageFlowParameters">
@@ -392,8 +343,8 @@
                 <rect>
                  <x>0</x>
                  <y>0</y>
-                 <width>322</width>
-                 <height>144</height>
+                 <width>382</width>
+                 <height>225</height>
                 </rect>
                </property>
                <attribute name="label">
@@ -501,12 +452,6 @@
                 </item>
                 <item row="3" column="1">
                  <widget class="QPushButton" name="_buttonFlowApplied">
-                  <property name="sizePolicy">
-                   <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-                    <horstretch>0</horstretch>
-                    <verstretch>0</verstretch>
-                   </sizepolicy>
-                  </property>
                   <property name="font">
                    <font>
                     <weight>50</weight>
@@ -955,12 +900,6 @@
        </item>
        <item>
         <widget class="QPushButton" name="_buttonUpdateSliceHistogram">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
          <property name="text">
           <string>Mettre à jour l'histogramme</string>
          </property>
