@@ -148,7 +148,7 @@
      <x>0</x>
      <y>0</y>
      <width>1036</width>
-     <height>25</height>
+     <height>22</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFichier">
@@ -198,7 +198,7 @@
      <item>
       <widget class="QTabWidget" name="_tabs">
        <property name="currentIndex">
-        <number>0</number>
+        <number>2</number>
        </property>
        <widget class="QWidget" name="_tabGeneral">
         <attribute name="title">
@@ -233,8 +233,8 @@
                 <rect>
                  <x>0</x>
                  <y>0</y>
-                 <width>382</width>
-                 <height>225</height>
+                 <width>348</width>
+                 <height>185</height>
                 </rect>
                </property>
                <attribute name="label">
@@ -392,8 +392,8 @@
                 <rect>
                  <x>0</x>
                  <y>0</y>
-                 <width>322</width>
-                 <height>144</height>
+                 <width>315</width>
+                 <height>149</height>
                 </rect>
                </property>
                <attribute name="label">
@@ -703,7 +703,7 @@
             <layout class="QVBoxLayout" name="verticalLayout_8">
              <item>
               <widget class="QwtPolarPlot" name="_polarSectorSum">
-               <property name="plotBackground">
+               <property name="plotBackground" stdset="0">
                 <brush brushstyle="SolidPattern">
                  <color alpha="255">
                   <red>200</red>
@@ -782,7 +782,7 @@
             <number>1</number>
            </property>
            <property name="maximum">
-            <number>30</number>
+            <number>200</number>
            </property>
            <property name="value">
             <number>10</number>
@@ -1010,19 +1010,21 @@
  <layoutdefault spacing="6" margin="11"/>
  <customwidgets>
   <customwidget>
+   <class>QxtSpanSlider</class>
+   <extends>QSlider</extends>
+   <header>QxtSpanSlider</header>
+  </customwidget>
+  <customwidget>
    <class>QwtPlot</class>
    <extends>QFrame</extends>
    <header>qwt_plot.h</header>
+   <container>1</container>
   </customwidget>
   <customwidget>
    <class>QwtPolarPlot</class>
    <extends>QFrame</extends>
    <header>qwt_polar_plot.h</header>
-  </customwidget>
-  <customwidget>
-   <class>QxtSpanSlider</class>
-   <extends>QSlider</extends>
-   <header>QxtSpanSlider</header>
+   <container>1</container>
   </customwidget>
  </customwidgets>
  <resources/>

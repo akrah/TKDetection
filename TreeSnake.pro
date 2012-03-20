@@ -107,27 +107,27 @@ itk3 {
 					-litkvnl
 } else:itk4 {
 # SI ITK_VERSION = itk4
-	ITK_PATH	 =	/usr/local/include/ITK-4.0/
+	ITK_PATH	 =	/usr/local/include/ITK-4.1/
 	INCLUDEPATH	*=	$${ITK_PATH}/
-
+	QMAKE_LIBDIR *=	/usr/local/lib/
 	LIBS		*=	\
-				-lITKIOGDCM-4.0 \
-					-litkgdcmDICT-4.0 \
-					-litkgdcmMSFF-4.0 \
-						-litkgdcmIOD-4.0 \
-						-litkgdcmDSED-4.0 \
-							-litkzlib-4.0 \
-						-litkgdcmCommon-4.0 \
-						-litkgdcmuuid-4.0 \
-						-litkopenjpeg-4.0 \
-						-litkgdcmjpeg12-4.0 \
-						-litkgdcmjpeg16-4.0 \
-						-litkgdcmjpeg8-4.0 \
-					-lITKIOImageBase-4.0 \
-						-lITKCommon-4.0 \
-							-litksys-4.0 \
-							-litkvnl_algo-4.0 \
-							-litkv3p_netlib-4.0 \
-							-litkvnl-4.0
+				-lITKIOGDCM-4.1 \
+					-litkgdcmDICT-4.1 \
+					-litkgdcmMSFF-4.1 \
+						-litkgdcmIOD-4.1 \
+						-litkgdcmDSED-4.1 \
+							-litkzlib-4.1 \
+						-litkgdcmCommon-4.1 \
+						-litkgdcmuuid-4.1 \
+						-litkopenjpeg-4.1 \
+						-litkgdcmjpeg12-4.1 \
+						-litkgdcmjpeg16-4.1 \
+						-litkgdcmjpeg8-4.1 \
+					-lITKIOImageBase-4.1 \
+						-lITKCommon-4.1 \
+							-litksys-4.1 \
+							-litkvnl_algo-4.1 \
+							-litkv3p_netlib-4.1 \
+							-litkvnl-4.1
 
 }
