@@ -19,18 +19,20 @@ namespace OfsExport {
 		void computeEgesLinks( const int &nbEdges, const int &nbSlices, QTextStream &stream );
 	}
 
-	void process( const Billon &billon, const Marrow &marrow, const SlicesInterval &interval, const QString &fileName, const int &nbEdgesPerSlice, const int &radiusOfTubes ) {
-		if ( interval.containsClosed(marrow.interval()) ) {
-			QFile file(fileName);
-			if ( file.open(QIODevice::WriteOnly) ) {
-				QTextStream stream(&file);
-				stream << "OFS MHD" << endl;
-				computeAllEdges( billon, marrow, interval, nbEdgesPerSlice, radiusOfTubes, stream );
-				computeEgesLinks( nbEdgesPerSlice, interval.count(), stream );
-
-				file.close();
-			}
-		}
+  void process( const Billon &billon, const Marrow &marrow, const SlicesInterval &interval, const QString &fileName, const int &nbEdgesPerSlice, const int &radiusOfTubes ) {
+	  if ( interval.containsClosed(marrow.interval()) ) {
+	    QFile file(fileName);
+	    if ( file.open(QIODevice::WriteOnly) ) {
+	      QTextStream stream(&file);
+	      stream << "OFS MHD" << endl;
+	      computeAllEdges( billon, marrow, interval, nbEdgesPerSlice, radiusOfTubes, stream );
+	      computeEgesLinks( nbEdgesPerSlice, interval.count(), stream );
+	      
+	      file.close();
+	    }
+	  }else{
+	    std::cerr << "Saving not possible since the mesh is outside the SlicesInterval" << endl;
+	  }
 	}
 
 	namespace {
