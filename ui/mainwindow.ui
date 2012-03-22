@@ -105,7 +105,7 @@
            <x>0</x>
            <y>0</y>
            <width>565</width>
-           <height>443</height>
+           <height>643</height>
           </rect>
          </property>
          <layout class="QHBoxLayout" name="horizontalLayout_8">
@@ -142,7 +142,7 @@
      <x>0</x>
      <y>0</y>
      <width>1036</width>
-     <height>22</height>
+     <height>25</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFichier">
@@ -227,8 +227,8 @@
                 <rect>
                  <x>0</x>
                  <y>0</y>
-                 <width>348</width>
-                 <height>185</height>
+                 <width>273</width>
+                 <height>109</height>
                 </rect>
                </property>
                <attribute name="label">
@@ -262,7 +262,7 @@
                      </font>
                     </property>
                     <property name="maximum">
-                     <number>50</number>
+                     <number>400</number>
                     </property>
                     <property name="orientation">
                      <enum>Qt::Horizontal</enum>
@@ -278,7 +278,7 @@
                      </font>
                     </property>
                     <property name="maximum">
-                     <number>50</number>
+                     <number>400</number>
                     </property>
                    </widget>
                   </item>
@@ -343,8 +343,8 @@
                 <rect>
                  <x>0</x>
                  <y>0</y>
-                 <width>315</width>
-                 <height>149</height>
+                 <width>322</width>
+                 <height>144</height>
                 </rect>
                </property>
                <attribute name="label">
@@ -648,7 +648,7 @@
             <layout class="QVBoxLayout" name="verticalLayout_8">
              <item>
               <widget class="QwtPolarPlot" name="_polarSectorSum">
-               <property name="plotBackground" stdset="0">
+               <property name="plotBackground">
                 <brush brushstyle="SolidPattern">
                  <color alpha="255">
                   <red>200</red>
@@ -670,6 +670,9 @@
          <string>Export</string>
         </attribute>
         <layout class="QFormLayout" name="formLayout_6">
+         <property name="fieldGrowthPolicy">
+          <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
+         </property>
          <item row="0" column="0">
           <widget class="QLabel" name="label_16">
            <property name="text">
@@ -684,6 +687,13 @@
            </property>
            <property name="maximum">
             <number>8</number>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="1">
+          <widget class="QPushButton" name="_buttonExportDat">
+           <property name="text">
+            <string>Exporter en .dat</string>
            </property>
           </widget>
          </item>
@@ -707,17 +717,10 @@
            </property>
           </widget>
          </item>
-         <item row="1" column="1">
-          <widget class="QPushButton" name="_buttonExportDat">
+         <item row="4" column="0">
+          <widget class="QLabel" name="label_17">
            <property name="text">
-            <string>Exporter en .dat</string>
-           </property>
-          </widget>
-         </item>
-         <item row="5" column="1">
-          <widget class="QPushButton" name="_buttonExportOfs">
-           <property name="text">
-            <string>Exporter en .ofs</string>
+            <string>Rayon autour de la moelle</string>
            </property>
           </widget>
          </item>
@@ -734,10 +737,51 @@
            </property>
           </widget>
          </item>
-         <item row="4" column="0">
-          <widget class="QLabel" name="label_17">
+         <item row="5" column="1">
+          <widget class="QPushButton" name="_buttonExportOfs">
            <property name="text">
-            <string>Rayon autour de la moelle</string>
+            <string>Exporter en .ofs</string>
+           </property>
+          </widget>
+         </item>
+         <item row="6" column="0">
+          <widget class="QLabel" name="label_11">
+           <property name="text">
+            <string>Seuil de binarisation</string>
+           </property>
+          </widget>
+         </item>
+         <item row="7" column="1">
+          <widget class="QPushButton" name="_buttonExportV3D">
+           <property name="text">
+            <string>Export en .v3d</string>
+           </property>
+          </widget>
+         </item>
+         <item row="6" column="1">
+          <widget class="QSpinBox" name="_spinExportThreshold">
+           <property name="minimum">
+            <number>-700</number>
+           </property>
+           <property name="maximum">
+            <number>500</number>
+           </property>
+           <property name="value">
+            <number>-20</number>
+           </property>
+          </widget>
+         </item>
+         <item row="8" column="1">
+          <widget class="QPushButton" name="_buttonExportFlowV3D">
+           <property name="text">
+            <string>Export flot en .v3d</string>
+           </property>
+          </widget>
+         </item>
+         <item row="9" column="1">
+          <widget class="QPushButton" name="_buttonExportDiagramV3D">
+           <property name="text">
+            <string>Export diagram en .v3d</string>
            </property>
           </widget>
          </item>
@@ -949,11 +993,6 @@
  <layoutdefault spacing="6" margin="11"/>
  <customwidgets>
   <customwidget>
-   <class>QxtSpanSlider</class>
-   <extends>QSlider</extends>
-   <header>QxtSpanSlider</header>
-  </customwidget>
-  <customwidget>
    <class>QwtPlot</class>
    <extends>QFrame</extends>
    <header>qwt_plot.h</header>
@@ -964,6 +1003,11 @@
    <extends>QFrame</extends>
    <header>qwt_polar_plot.h</header>
    <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>QxtSpanSlider</class>
+   <extends>QSlider</extends>
+   <header>QxtSpanSlider</header>
   </customwidget>
  </customwidgets>
  <resources/>

@@ -20,10 +20,11 @@ const SlicesInterval &Marrow::interval() const {
 /*******************************
  * Public setters
  *******************************/
-void Marrow::draw( QPainter &painter, const int &sliceIdx ) const {
+void Marrow::draw( QImage &image, const int &sliceIdx ) const {
 	if ( _interval.containsClosed(sliceIdx) ) {
 		const iCoord2D &coordToDraw = at(sliceIdx-_interval.min());
 
+		QPainter painter(&image);
 		QPainterPath ellipsePath;
 		ellipsePath.addEllipse(coordToDraw.x-5,coordToDraw.y-5,10,10);
 		QColor color(100,200,100);

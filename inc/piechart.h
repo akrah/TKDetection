@@ -5,7 +5,7 @@
 #include "inc/marrow_def.h"
 
 class PiePart;
-class QPainter;
+class QImage;
 
 class PieChart
 {
@@ -20,7 +20,7 @@ public:
 	void setOrientation( const qreal &orientation );
 	void setSectorsNumber( const int &nbSectors );
 
-	void draw( QPainter &painter, const int &sectorIdx, const iCoord2D &center ) const;
+	void draw( QImage &painter, const int &sectorIdx, const iCoord2D &center ) const;
 
 private:
 	void updateSectors();

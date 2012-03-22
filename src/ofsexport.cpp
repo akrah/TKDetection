@@ -10,6 +10,8 @@
 #include <QVector>
 #include <qmath.h>
 
+#include <QDebug>
+
 namespace OfsExport {
 
 	namespace {
@@ -32,7 +34,7 @@ namespace OfsExport {
 			}
 		}
 		else {
-			std::cerr << "Saving not possible since the mesh is outside the SlicesInterval" << std::endl;
+			qDebug() << QObject::tr("Saving not possible since the mesh is outside the SlicesInterval");
 		}
 	}
 

@@ -13,6 +13,8 @@
 #include "inc/piechartdiagrams.h"
 #include "inc/datexport.h"
 #include "inc/ofsexport.h"
+#include "inc/v3dexport.h"
+#include "inc/opticalflow.h"
 
 #include <QFileDialog>
 #include <QMouseEvent>
@@ -88,6 +90,9 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 	QObject::connect(_ui->_buttonMaxSlice, SIGNAL(clicked()), this, SLOT(setMaximumOfSlicesIntervalToCurrentSlice()));
 	QObject::connect(_ui->_buttonExportDat, SIGNAL(clicked()), this, SLOT(exportToDat()));
 	QObject::connect(_ui->_buttonExportOfs, SIGNAL(clicked()), this, SLOT(exportToOfs()));
+	QObject::connect(_ui->_buttonExportV3D, SIGNAL(clicked()), this, SLOT(exportToV3D()));
+	QObject::connect(_ui->_buttonExportFlowV3D, SIGNAL(clicked()), this, SLOT(exportFlowToV3D()));
+	QObject::connect(_ui->_buttonExportDiagramV3D, SIGNAL(clicked()), this, SLOT(exportDiagramToV3D()));
 
 	// Raccourcis des actions du menu
 	_ui->_actionOpenDicom->setShortcut(Qt::CTRL + Qt::Key_O);
@@ -169,26 +174,16 @@ void MainWindow::drawSlice( const int &sliceNumber ) {
 	if ( _billon != 0 ) {
 		_ui->_labelSliceNumber->setNum(sliceNumber);
 		_pix.fill(0xff000000);
-		QPainter painter(&_pix);
-		painter.save();
-			_sliceView->drawSlice(painter,*_billon,sliceNumber,_intensityInterval);
-		painter.restore();
+		_sliceView->drawSlice(_pix,*_billon,sliceNumber,_intensityInterval);
 		highlightSliceHistogram(sliceNumber);
-		if ( _marrow != 0 ) {
-			painter.save();
-			_marrow->draw(painter,sliceNumber);
-			painter.restore();
-		}
+		if ( _marrow != 0 ) _marrow->draw(_pix,sliceNumber);
 		if ( !_pieChartPlots.isEmpty() && _slicesInterval.containsClosed(sliceNumber)) {
 			iCoord2D center(_pix.width()/2,_pix.height()/2);
 			if ( _marrow != 0 &&  _marrow->interval().containsClosed(sliceNumber) ) {
 				center = _marrow->at(sliceNumber-_marrow->interval().min());
 			}
-			painter.save();
-			_pieChart->draw(painter,_ui->_comboSelectSector->currentIndex(), center);
-			painter.restore();
+			_pieChart->draw(_pix,_ui->_comboSelectSector->currentIndex(), center);
 		};
-		painter.end();
 	}
 	else {
 		_ui->_labelSliceNumber->setText(tr("Aucune"));
@@ -441,6 +436,83 @@ void MainWindow::exportToOfs() {
 		QString fileName = QFileDialog::getSaveFileName(this, tr("Exporter en .ofs"), "output.ofs", tr("Fichiers de données (*.ofs);;Tous les fichiers (*.*)"));
 		if ( !fileName.isEmpty() ) {
 			OfsExport::process( *_billon, *_marrow, _slicesInterval, fileName, _ui->_spinExportNbEdges->value(), _ui->_spinExportRadius->value() );
+		}
+	}
+}
+
+void MainWindow::exportToV3D() {
+	if ( _billon != 0 ) {
+		QString fileName = QFileDialog::getSaveFileName(this, tr("Exporter en .v3d"), "output.v3d", tr("Fichiers de données (*.v3d);;Tous les fichiers (*.*)"));
+		if ( !fileName.isEmpty() ) {
+			if ( _marrow != 0 )	V3DExport::process( *_billon, *_marrow, fileName, _slicesInterval, _ui->_spinExportThreshold->value() );
+			else 	V3DExport::process( *_billon, fileName, _slicesInterval, _ui->_spinExportThreshold->value() );
+		}
+	}
+}
+
+void MainWindow::exportFlowToV3D() {
+	if ( _billon != 0 ) {
+		QString fileName = QFileDialog::getSaveFileName(this, tr("Exporter en .v3d"), "output_flow.v3d", tr("Fichiers de données (*.v3d);;Tous les fichiers (*.*)"));
+		if ( !fileName.isEmpty() ) {
+			const int width = _billon->n_cols;
+			const int height = _billon->n_rows;
+			const int depth = _slicesInterval.count();
+			Billon billonFlow( width, height, _slicesInterval.count() );
+			billonFlow.setMinValue(_billon->minValue());
+			billonFlow.setMaxValue(_billon->maxValue());
+			billonFlow.setVoxelSize(_billon->voxelWidth(),_billon->voxelHeight(),_billon->voxelDepth());
+			VectorsField *field = 0;
+			int i,j,k;
+
+			for ( k=0 ; k<depth ; ++k ) {
+				field = OpticalFlow::compute(*_billon,k+_slicesInterval.min(),_ui->_spinFlowAlpha->value(),_ui->_spinFlowEpsilon->value(),_ui->_spinFlowMaximumIterations->value());
+				if ( field != 0 ) {
+					arma::Mat<__billon_type__> &slice = billonFlow.slice(k);
+					for ( j=0 ; j<height ; ++j ) {
+						for ( i=0 ; i<width ; ++i ) {
+							slice.at(j,i) = qSqrt( qPow((*field)[j][i].x(),2) + qPow((*field)[j][i].y(),2) )*20.;
+						}
+					}
+					delete field;
+					field = 0;
+				}
+			}
+
+			if ( _marrow != 0 )	V3DExport::process( billonFlow, *_marrow, fileName, SlicesInterval(0,depth-1), _ui->_spinExportThreshold->value() );
+			else 	V3DExport::process( billonFlow, fileName, SlicesInterval(0,depth-1), _ui->_spinExportThreshold->value() );
+		}
+	}
+}
+
+void MainWindow::exportDiagramToV3D() {
+	if ( _billon != 0 ) {
+		QString fileName = QFileDialog::getSaveFileName(this, tr("Exporter en .v3d"), "output_diag.v3d", tr("Fichiers de données (*.v3d);;Tous les fichiers (*.*)"));
+		if ( !fileName.isEmpty() ) {
+			const int width = _billon->n_cols;
+			const int height = _billon->n_rows;
+			const int depth = _slicesInterval.count();
+			const int minValue = _intensityInterval.min();
+			const int maxValue = _intensityInterval.max();
+
+			Billon billonDiag( width, height, _slicesInterval.count() );
+			billonDiag.setMinValue(_billon->minValue());
+			billonDiag.setMaxValue(_billon->maxValue());
+			billonDiag.setVoxelSize(_billon->voxelWidth(),_billon->voxelHeight(),_billon->voxelDepth());
+			int i,j,k;
+
+			for ( k=_slicesInterval.min()+1 ; k<_slicesInterval.max() ; ++k ) {
+				const arma::Mat<__billon_type__> &currentSlice = _billon->slice(k);
+				const arma::Mat<__billon_type__> &previousSlice = _billon->slice(k-1);
+				arma::Mat<__billon_type__> &sliceDiag = billonDiag.slice(k-_slicesInterval.min()-1);
+				for ( j=0 ; j<height ; ++j ) {
+					for ( i=0 ; i<width ; ++i ) {
+						sliceDiag.at(j,i) = qAbs(((RESTRICT_TO_INTERVAL(currentSlice.at(j,i),minValue,maxValue)-minValue)) - ((RESTRICT_TO_INTERVAL(previousSlice.at(j,i),minValue,maxValue)-minValue)));
+					}
+				}
+			}
+
+			if ( _marrow != 0 )	V3DExport::process( billonDiag, *_marrow, fileName, SlicesInterval(0,depth-2), _ui->_spinExportThreshold->value() );
+			else 	V3DExport::process( billonDiag, fileName, SlicesInterval(0,depth-2), _ui->_spinExportThreshold->value() );
 		}
 	}
 }

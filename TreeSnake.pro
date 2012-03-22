@@ -9,11 +9,12 @@
 #-----------------------------------------------------
 
 # Version d'ITK installée : itk3 | itk4
-ITK_VERSION =   itk4
+ITK_VERSION = itk4
+ITK_NUMBER =  4.0
 
 #------------ NE PAS MODIFIER EN DESSOUS ------------#
 
-QT			*=	core gui
+QT			*=	core gui xml
 CONFIG		*=	qwt qxt qwtpolar
 QXT			=	core gui
 
@@ -41,6 +42,7 @@ SOURCES		=	main.cpp \
 				sliceview.cpp \
 				slicezoomer.cpp \
 				slicesinterval.cpp \
+				v3dexport.cpp
 
 HEADERS		=	billon.h \
 				billon_def.h \
@@ -66,6 +68,7 @@ HEADERS		=	billon.h \
 				sliceview.h \
 				sliceview_def.h \
 				slicezoomer.h \
+				v3dexport.h
 
 FORMS		=	mainwindow.ui
 
@@ -82,7 +85,7 @@ itk3 {
 					$${ITK_PATH}/gdcm/src/ \
 					$${ITK_PATH}/Utilities/ \
 					$${ITK_PATH}/Utilities/vxl/vcl/ \
-					$${ITK_PATH}/Utilities/vxl/core/ \
+					$${ITK_PATH}/Utilities/vxl/core/
 
 	QMAKE_LIBDIR *=	/usr/local/lib/
 
@@ -107,27 +110,27 @@ itk3 {
 					-litkvnl
 } else:itk4 {
 # SI ITK_VERSION = itk4
-	ITK_PATH	 =	/usr/local/include/ITK-4.0/
+	ITK_PATH	 =	/usr/local/include/ITK-$${ITK_NUMBER}/
 	INCLUDEPATH	*=	$${ITK_PATH}/
 
 	LIBS		*=	\
-				-lITKIOGDCM-4.0 \
-					-litkgdcmDICT-4.0 \
-					-litkgdcmMSFF-4.0 \
-						-litkgdcmIOD-4.0 \
-						-litkgdcmDSED-4.0 \
-							-litkzlib-4.0 \
-						-litkgdcmCommon-4.0 \
-						-litkgdcmuuid-4.0 \
-						-litkopenjpeg-4.0 \
-						-litkgdcmjpeg12-4.0 \
-						-litkgdcmjpeg16-4.0 \
-						-litkgdcmjpeg8-4.0 \
-					-lITKIOImageBase-4.0 \
-						-lITKCommon-4.0 \
-							-litksys-4.0 \
-							-litkvnl_algo-4.0 \
-							-litkv3p_netlib-4.0 \
-							-litkvnl-4.0
+				-lITKIOGDCM-$${ITK_NUMBER} \
+					-litkgdcmDICT-$${ITK_NUMBER} \
+					-litkgdcmMSFF-$${ITK_NUMBER} \
+						-litkgdcmIOD-$${ITK_NUMBER} \
+						-litkgdcmDSED-$${ITK_NUMBER} \
+							-litkzlib-$${ITK_NUMBER} \
+						-litkgdcmCommon-$${ITK_NUMBER} \
+						-litkgdcmuuid-$${ITK_NUMBER} \
+						-litkopenjpeg-$${ITK_NUMBER} \
+						-litkgdcmjpeg12-$${ITK_NUMBER} \
+						-litkgdcmjpeg16-$${ITK_NUMBER} \
+						-litkgdcmjpeg8-$${ITK_NUMBER} \
+					-lITKIOImageBase-$${ITK_NUMBER} \
+						-lITKCommon-$${ITK_NUMBER} \
+							-litksys-$${ITK_NUMBER} \
+							-litkvnl_algo-$${ITK_NUMBER} \
+							-litkv3p_netlib-$${ITK_NUMBER} \
+							-litkvnl-$${ITK_NUMBER}
 
 }

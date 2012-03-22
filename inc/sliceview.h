@@ -6,7 +6,7 @@
 
 #include "billon_def.h"
 class IntensityInterval;
-class QPainter;
+class QImage;
 
 class SliceView
 {
@@ -27,14 +27,14 @@ public:
 	void setFlowEpsilon( const qreal &epsilon );
 	void setFlowMaximumIterations( const int &maxIter );
 
-	void drawSlice( QPainter &painter, const Billon &billon, const int &sliceNumber, const IntensityInterval &intensityInterval );
+	void drawSlice( QImage &image, const Billon &billon, const int &sliceNumber, const IntensityInterval &intensityInterval );
 
 private :
-	void drawCurrentSlice( QPainter &painter, const Billon &billon, const int &sliceNumber, const IntensityInterval &intensityInterval );
-	void drawAverageSlice( QPainter &painter, const Billon &billon, const IntensityInterval &intensityInterval );
-	void drawMedianSlice( QPainter &painter, const Billon &billon, const IntensityInterval &intensityInterval );
-	void drawMovementSlice( QPainter &painter, const Billon &billon, const int &sliceNumber, const IntensityInterval &intensityInterval );
-	void drawFlowSlice( QPainter &painter, const Billon &billon, const int &sliceNumber );
+	void drawCurrentSlice( QImage &image, const Billon &billon, const int &sliceNumber, const IntensityInterval &intensityInterval );
+	void drawAverageSlice( QImage &image, const Billon &billon, const IntensityInterval &intensityInterval );
+	void drawMedianSlice( QImage &image, const Billon &billon, const IntensityInterval &intensityInterval );
+	void drawMovementSlice( QImage &image, const Billon &billon, const int &sliceNumber, const IntensityInterval &intensityInterval );
+	void drawFlowSlice( QImage &image, const Billon &billon, const int &sliceNumber );
 
 private:
 	SliceType::SliceType _typeOfView;

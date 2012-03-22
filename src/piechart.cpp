@@ -49,9 +49,9 @@ void PieChart::setSectorsNumber( const int &nbSectors ) {
 	updateSectors();
 }
 
-void PieChart::draw( QPainter &painter, const int &sectorIdx, const iCoord2D &center ) const {
-	const int width = painter.window().width();
-	const int height = painter.window().height();
+void PieChart::draw( QImage &image, const int &sectorIdx, const iCoord2D &center ) const {
+	const int width = image.width();
+	const int height = image.height();
 	const int centerX = center.x;
 	const int centerY = center.y;
 
@@ -61,6 +61,7 @@ void PieChart::draw( QPainter &painter, const int &sectorIdx, const iCoord2D &ce
 	twoSides.append( TWO_PI-_sectors.at(sectorIdx).rightAngle() );
 	twoSides.append( TWO_PI-_sectors.at(sectorIdx).leftAngle() );
 
+	QPainter painter(&image);
 	painter.setPen(QColor(0,255,0));
 
 	// Dessin des deux côtés du secteur

@@ -5,7 +5,7 @@
 #include "marrow_def.h"
 #include "slicesinterval.h"
 
-class QPainter;
+class QImage;
 
 class Marrow : public QList<iCoord2D>
 {
@@ -15,7 +15,7 @@ public:
 
 	const SlicesInterval &interval() const;
 
-	void draw( QPainter &painter, const int &sliceIdx ) const;
+	void draw( QImage &image, const int &sliceIdx ) const;
 
 private:
 	SlicesInterval _interval;

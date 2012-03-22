@@ -56,6 +56,9 @@ private slots:
 	void flowApplied();
 	void exportToDat();
 	void exportToOfs();
+	void exportToV3D();
+	void exportFlowToV3D();
+	void exportDiagramToV3D();
 
 private:
 	void openNewBillon(const QString &folderName = "");
