@@ -25,6 +25,10 @@ int PieChart::nbSectors() const {
 	return (TWO_PI/_angle);
 }
 
+const QList<PiePart> &PieChart::sectors() const {
+	return _sectors;
+}
+
 int PieChart::partOfAngle( const qreal &angle ) const {
 	int sectorId;
 	bool ok = false;

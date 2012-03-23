@@ -5,6 +5,8 @@
 #include "inc/marrow.h"
 #include "inc/opticalflow.h"
 #include "inc/intensityinterval.h"
+#include "inc/piechart.h"
+#include "inc/piepart.h"
 
 #include <QPainter>
 
@@ -77,6 +79,10 @@ void SliceView::drawSlice( QImage &image, const Billon &billon, const int &slice
 			case SliceType::FLOW :
 				drawFlowSlice( image, billon, sliceNumber );
 				break;
+			case SliceType::RESTRICTED_AREA :
+				drawCurrentSlice( image, billon, sliceNumber, intensityInterval );
+				drawRestrictedArea( image, billon, sliceNumber, intensityInterval );
+				break;
 			case SliceType::CURRENT:
 			default :
 				// Affichage de la coupe courante
@@ -92,7 +98,7 @@ void SliceView::drawSlice( QImage &image, const Billon &billon, const int &slice
  *******************************/
 
 void SliceView::drawCurrentSlice( QImage &image, const Billon &billon, const int &sliceNumber, const IntensityInterval &intensityInterval ) {
-	const imat &slice = billon.slice(sliceNumber);
+	const arma::Mat<__billon_type__> &slice = billon.slice(sliceNumber);
 	const uint width = slice.n_cols;
 	const uint height = slice.n_rows;
 	const int minValue = intensityInterval.min();
@@ -159,9 +165,9 @@ void SliceView::drawMedianSlice( QImage &image, const Billon &billon, const Inte
 
 void SliceView::drawMovementSlice( QImage &image, const Billon &billon, const int &sliceNumber, const IntensityInterval &intensityInterval ) {
 
-	const imat &previousSlice = billon.slice(sliceNumber > 0 ? sliceNumber-1 : sliceNumber+1);
-	const imat &currentSlice = billon.slice(sliceNumber);
-	const imat &toCompareSlice = billon.slice(_useNextSliceInsteadOfCurrentSlice && sliceNumber < static_cast<int>(billon.n_slices)-1 ? sliceNumber+1 : sliceNumber );
+	const arma::Mat<__billon_type__> &previousSlice = billon.slice(sliceNumber > 0 ? sliceNumber-1 : sliceNumber+1);
+	const arma::Mat<__billon_type__> &currentSlice = billon.slice(sliceNumber);
+	const arma::Mat<__billon_type__> &toCompareSlice = billon.slice(_useNextSliceInsteadOfCurrentSlice && sliceNumber < static_cast<int>(billon.n_slices)-1 ? sliceNumber+1 : sliceNumber );
 
 	const int width = previousSlice.n_cols;
 	const int height = previousSlice.n_rows;
@@ -204,7 +210,7 @@ void SliceView::drawMovementSlice( QImage &image, const Billon &billon, const in
 
 void SliceView::drawFlowSlice( QImage &image, const Billon &billon, const int &sliceNumber ) {
 
-	const imat &currentSlice = billon.slice(sliceNumber);
+	const arma::Mat<__billon_type__> &currentSlice = billon.slice(sliceNumber);
 
 	const int width = currentSlice.n_cols;
 	const int height = currentSlice.n_rows;
@@ -236,4 +242,47 @@ void SliceView::drawFlowSlice( QImage &image, const Billon &billon, const int &s
 //	}
 
 	delete field;
+}
+
+#include <QDebug>
+
+void SliceView::drawRestrictedArea( QImage &image, const Billon &billon, const int &sliceNumber, const IntensityInterval &intensityInterval ) {
+	const int nbPoints = 500;
+	PieChart pie(0,nbPoints);
+	const QList<PiePart> &sectors = pie.sectors();
+	const arma::Mat<__billon_type__> &currentSlice = billon.slice(sliceNumber);
+
+	QPainter painter(&image);
+	painter.setPen(Qt::green);
+
+	const int xCenter = image.width()/2;
+	const int yCenter = image.height()/2;
+	qreal xEdge, yEdge, xOldEdge, yOldEdge, distX, distY, xBary, yBary, radiusLength, cosAngle, sinAngle, lissageFact;
+	xBary = yBary = radiusLength = 0.;
+	lissageFact = 20./21.;
+	for ( int i=0 ; i<sectors.size() ; ++i ) {
+		xEdge = xCenter;
+		yEdge = yCenter;
+		cosAngle = qCos(sectors[i].orientation());
+		sinAngle = -qSin(sectors[i].orientation());
+		while ( currentSlice.at(yEdge,xEdge) > -900 ) {
+			xEdge += cosAngle;
+			yEdge += sinAngle;
+		}
+		if ( i != 0 ) {
+			distX = xOldEdge-xEdge;
+			distY = yOldEdge-yEdge;
+			qDebug() << "distX, distY : " << distX << ", " << distY;
+			if ( qAbs(distX) > 1. ) xEdge += distX*lissageFact;
+			if ( qAbs(distY) > 1. ) yEdge += distY*lissageFact;
+		}
+		xBary += xEdge;
+		yBary += yEdge;
+		xOldEdge = xEdge;
+		yOldEdge = yEdge;
+		radiusLength += qSqrt( qPow(xEdge-xCenter,2) + qPow(yEdge-yCenter,2) );
+		painter.drawEllipse(xEdge-1,yEdge-1,2,2);
+	}
+	painter.drawEllipse(QPointF(xBary/(qreal)nbPoints,yBary/(qreal)nbPoints),3,3);
+	painter.drawEllipse(QPointF(xBary/(qreal)nbPoints,yBary/(qreal)nbPoints),radiusLength/(qreal)nbPoints,radiusLength/(qreal)nbPoints);
 }

@@ -10,6 +10,7 @@ namespace SliceType {
 		MEDIAN,
 		MOVEMENT,
 		FLOW,
+		RESTRICTED_AREA,
 		_SLICE_TYPE_MAX_
 	};
 }

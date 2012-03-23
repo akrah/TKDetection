@@ -86,8 +86,8 @@ void SliceHistogram::constructHistogram( const Billon &billon, const IntensityIn
 
 	qreal cumul;
 	for ( uint k=1 ; k<depth ; ++k ) {
-		const arma::imat &slice = billon.slice(k);
-		const arma::imat &prevSlice = billon.slice(k-1);
+		const arma::Mat<__billon_type__> &slice = billon.slice(k);
+		const arma::Mat<__billon_type__> &prevSlice = billon.slice(k-1);
 		cumul = 0;
 		for ( uint j=0 ; j<height ; ++j ) {
 			for ( uint i=0 ; i<width ; ++i ) {
@@ -123,8 +123,8 @@ void SliceHistogram::constructHistogram( const Billon &billon, const Marrow &mar
 		nbPixels += 2*circleLines.last()+1;
 	}
 	for ( k=1 ; k<depth ; ++k ) {
-		const arma::imat &slice = billon.slice(k);
-		const arma::imat &prevSlice = billon.slice(k-1);
+		const arma::Mat<__billon_type__> &slice = billon.slice(k);
+		const arma::Mat<__billon_type__> &prevSlice = billon.slice(k-1);
 		marrowX = marrow[k].x+radiusMax;
 		marrowY = marrow[k].y+radiusMax;
 		cumul = 0;
@@ -173,27 +173,6 @@ void SliceHistogram::updateMaximums() {
 				qDebug() << i;
 			}
 		}
-
-	//	qDebug() << "Pics significatifs :";
-	//	QList<int> pics2;
-	//	pics2.append(pics.first());
-	//	for ( int i=1 ; i<pics.size()-1 ; ++i ) {
-	//		double value = _datasHistogram.at(pics.at(i)).value;
-	//		if ( (value > _datasHistogram.at(pics.at(i-1)).value) && (value > _datasHistogram.at(pics.at(i+1)).value ) && (value > _datasHistogram.at(pics.at(i-2)).value) && (value > _datasHistogram.at(pics.at(i+2)).value ) ) {
-	//			pics2.append(pics.at(i));
-	//			//_datasMaximums.append(_datasHistogram.at(pics.at(i)));
-	//			qDebug() << pics.at(i);
-	//		}
-	//	}
-	//	pics2.append(pics.last());
-
-	//	qDebug() << "Pics 3èmé niveau :";
-	//	for ( int i=1 ; i<pics2.size()-1 ; ++i ) {
-	//		if ( (_datasHistogram.at(pics2.at(i)).value > _datasHistogram.at(pics2.at(i-1)).value) && (_datasHistogram.at(pics2.at(i)).value > _datasHistogram.at(pics2.at(i+1)).value ) ) {
-	//			_datasMaximums.append(_datasHistogram.at(pics2.at(i)));
-	//			qDebug() << pics2.at(i);
-	//		}
-	//	}
 	}
 
 	_histogramMaximums->setSamples(_datasMaximums);

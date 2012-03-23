@@ -42,6 +42,7 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 	_ui->_comboSliceType->insertItem(SliceType::MEDIAN,tr("Coupe médiane"));
 	_ui->_comboSliceType->insertItem(SliceType::MOVEMENT,tr("Coupe de mouvements"));
 	_ui->_comboSliceType->insertItem(SliceType::FLOW,tr("Coupe de flots optiques"));
+	_ui->_comboSliceType->insertItem(SliceType::RESTRICTED_AREA,tr("Coupe de zone réduite"));
 
 	_ui->_spinFlowAlpha->setValue(_sliceView->flowAlpha());
 	_ui->_spinFlowEpsilon->setValue(_sliceView->flowEpsilon());
@@ -592,7 +593,7 @@ void MainWindow::updateComponentsValues() {
 
 void MainWindow::enabledComponents() {
 	const int sliceType = _ui->_comboSliceType->currentIndex();
-	const bool enable = (_billon != 0) && ( sliceType == SliceType::CURRENT || sliceType == SliceType::MOVEMENT || sliceType == SliceType::FLOW );
+	const bool enable = (_billon != 0) && ( sliceType == SliceType::CURRENT || sliceType == SliceType::MOVEMENT || sliceType == SliceType::FLOW || sliceType == SliceType::RESTRICTED_AREA );
 	_ui->_sliderSelectSlice->setEnabled(enable);
 	_ui->_spansliderSliceThreshold->setEnabled(enable);
 	_ui->_buttonComputeMarrow->setEnabled(enable);

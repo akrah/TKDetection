@@ -35,6 +35,7 @@ private :
 	void drawMedianSlice( QImage &image, const Billon &billon, const IntensityInterval &intensityInterval );
 	void drawMovementSlice( QImage &image, const Billon &billon, const int &sliceNumber, const IntensityInterval &intensityInterval );
 	void drawFlowSlice( QImage &image, const Billon &billon, const int &sliceNumber );
+	void drawRestrictedArea( QImage &image, const Billon &billon, const int &sliceNumber, const IntensityInterval &intensityInterval );
 
 private:
 	SliceType::SliceType _typeOfView;

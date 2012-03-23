@@ -15,6 +15,7 @@ public:
 	qreal orientation() const;
 	qreal angle() const;
 	int nbSectors() const;
+	const QList<PiePart> &sectors() const;
 	int partOfAngle( const qreal &angle ) const;
 
 	void setOrientation( const qreal &orientation );
