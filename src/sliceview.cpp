@@ -12,7 +12,9 @@
 
 SliceView::SliceView() : _typeOfView(SliceType::CURRENT),
 	_movementThreshold(0), _movementWithBackground(false), _useNextSliceInsteadOfCurrentSlice(false),
-	_flowAlpha(FLOW_ALPHA_DEFAULT), _flowEpsilon(FLOW_EPSILON_DEFAULT), _flowMaximumIterations(FLOW_MAXIMUM_ITERATIONS) {
+	_flowAlpha(FLOW_ALPHA_DEFAULT), _flowEpsilon(FLOW_EPSILON_DEFAULT), _flowMaximumIterations(FLOW_MAXIMUM_ITERATIONS),
+	_restrictedAreaResolution(100), _restrictedAreaSmooth(0.5), _restrictedAreaThreshold(-900), _restrictedAreaDrawCircle(true)
+{
 }
 
 /*******************************
@@ -59,6 +61,22 @@ void SliceView::setFlowEpsilon( const qreal &epsilon ) {
 
 void SliceView::setFlowMaximumIterations( const int &maxIter ) {
 	_flowMaximumIterations = maxIter;
+}
+
+void SliceView::setRestrictedAreaResolution( const int &resolution ) {
+	_restrictedAreaResolution = resolution;
+}
+
+void SliceView::setRestrictedAreaSmooth( const qreal &smooth ) {
+	_restrictedAreaSmooth = smooth;
+}
+
+void SliceView::setRestrictedAreaThreshold( const int &threshold )  {
+	_restrictedAreaThreshold = threshold;
+}
+
+void SliceView::enableRestrictedAreaCircle( const bool &enable )  {
+	_restrictedAreaDrawCircle = enable;
 }
 
 void SliceView::drawSlice( QImage &image, const Billon &billon, const int &sliceNumber, const IntensityInterval &intensityInterval ) {
@@ -244,10 +262,11 @@ void SliceView::drawFlowSlice( QImage &image, const Billon &billon, const int &s
 	delete field;
 }
 
-#include <QDebug>
-
 void SliceView::drawRestrictedArea( QImage &image, const Billon &billon, const int &sliceNumber, const IntensityInterval &intensityInterval ) {
-	const int nbPoints = 500;
+	const int nbPoints = _restrictedAreaResolution;
+	const qreal lissageFact = _restrictedAreaSmooth;
+	const int threshold = _restrictedAreaThreshold;
+
 	PieChart pie(0,nbPoints);
 	const QList<PiePart> &sectors = pie.sectors();
 	const arma::Mat<__billon_type__> &currentSlice = billon.slice(sliceNumber);
@@ -257,32 +276,80 @@ void SliceView::drawRestrictedArea( QImage &image, const Billon &billon, const i
 
 	const int xCenter = image.width()/2;
 	const int yCenter = image.height()/2;
-	qreal xEdge, yEdge, xOldEdge, yOldEdge, distX, distY, xBary, yBary, radiusLength, cosAngle, sinAngle, lissageFact;
+
+	qreal xEdge, yEdge, xOldEdge, yOldEdge, xOrigin, yOrigin, distX, distY, xBary, yBary, orientation, radiusLength, cosAngle, sinAngle;
 	xBary = yBary = radiusLength = 0.;
-	lissageFact = 20./21.;
+
 	for ( int i=0 ; i<sectors.size() ; ++i ) {
-		xEdge = xCenter;
-		yEdge = yCenter;
-		cosAngle = qCos(sectors[i].orientation());
-		sinAngle = -qSin(sectors[i].orientation());
-		while ( currentSlice.at(yEdge,xEdge) > -900 ) {
+		orientation = sectors[i].orientation();
+		cosAngle = qCos(orientation);
+		sinAngle = -qSin(orientation);
+//		xEdge = xCenter + 50*cosAngle;
+//		yEdge = yCenter + 50*sinAngle;
+		while ( currentSlice.at(yEdge,xEdge) > threshold ) {
 			xEdge += cosAngle;
 			yEdge += sinAngle;
 		}
 		if ( i != 0 ) {
 			distX = xOldEdge-xEdge;
 			distY = yOldEdge-yEdge;
-			qDebug() << "distX, distY : " << distX << ", " << distY;
-			if ( qAbs(distX) > 1. ) xEdge += distX*lissageFact;
-			if ( qAbs(distY) > 1. ) yEdge += distY*lissageFact;
+			if ( qAbs(distX) > 10. ) xEdge += distX*lissageFact;
+			if ( qAbs(distY) > 10. ) yEdge += distY*lissageFact;
+			painter.drawLine(xOldEdge,yOldEdge,xEdge,yEdge);
+		}
+		else {
+			xOrigin = xEdge;
+			yOrigin = yEdge;
 		}
 		xBary += xEdge;
 		yBary += yEdge;
 		xOldEdge = xEdge;
 		yOldEdge = yEdge;
 		radiusLength += qSqrt( qPow(xEdge-xCenter,2) + qPow(yEdge-yCenter,2) );
-		painter.drawEllipse(xEdge-1,yEdge-1,2,2);
+		//painter.drawEllipse((int)xEdge-1,(int)yEdge-1,2,2);
+		//painter.drawPoint((int)xEdge,(int)yEdge);
 	}
-	painter.drawEllipse(QPointF(xBary/(qreal)nbPoints,yBary/(qreal)nbPoints),3,3);
-	painter.drawEllipse(QPointF(xBary/(qreal)nbPoints,yBary/(qreal)nbPoints),radiusLength/(qreal)nbPoints,radiusLength/(qreal)nbPoints);
+	painter.drawLine(xOldEdge,yOldEdge,xOrigin,yOrigin);
+	xBary /= (qreal)nbPoints;
+	yBary /= (qreal)nbPoints;
+	const QPointF center(xBary,yBary);
+	radiusLength += qSqrt( qPow(xBary-xCenter,2) + qPow(yBary-yCenter,2) )*(qreal)nbPoints;
+	radiusLength /= (qreal)nbPoints;
+
+	if ( _restrictedAreaDrawCircle ) {
+		painter.drawEllipse(center,3,3);
+		painter.drawEllipse(center,radiusLength,radiusLength);
+	}
 }
+
+
+//void SliceView::drawRestrictedArea( QImage &image, const Billon &billon, const int &sliceNumber, const IntensityInterval &intensityInterval ) {
+//	const int threshold = _restrictedAreaThreshold;
+
+//	const arma::Mat<__billon_type__> &currentSlice = billon.slice(sliceNumber);
+
+//	QPainter painter(&image);
+//	painter.setPen(Qt::green);
+
+//	const int width = billon.n_cols-1;
+//	const int height = billon.n_rows-1;
+//	int iForward, iBackward, j;
+//	bool find;
+
+//	for ( j=1 ; j<height ; ++j ) {
+//		find = false;
+//		for ( iForward=1 ; iForward<width && !find ; ++iForward ) {
+//			find = (currentSlice.at(j,iForward) > threshold);
+//		}
+//		if ( find ) {
+//			painter.drawEllipse(iForward-1,j-1,2,2);
+//			find = false;
+//			for ( iBackward=width-1 ; iBackward>0 && !find ; --iBackward ) {
+//				find = (currentSlice.at(j,iBackward) > threshold);
+//			}
+//			if ( find && iBackward > iForward ) {
+//				painter.drawEllipse(iBackward-1,j-1,2,2);
+//			}
+//		}
+//	}
+//}

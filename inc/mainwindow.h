@@ -54,6 +54,10 @@ private slots:
 	void enableMovementWithBackground( const bool &enable );
 	void useNextSliceInsteadOfCurrentSlice( const bool &enable );
 	void flowApplied();
+	void setRestrictedAreaResolution( const int &resolution );
+	void setRestrictedAreaSmooth( const double &smooth );
+	void setRestrictedAreaThreshold( const int &threshold );
+	void enableRestrictedAreaCircle( const bool &enable ) ;
 	void exportToDat();
 	void exportToOfs();
 	void exportToV3D();

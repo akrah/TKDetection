@@ -60,6 +60,10 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 	QObject::connect(_ui->_checkDrawMovementWithBackground, SIGNAL(toggled(bool)), this, SLOT(enableMovementWithBackground(bool)));
 	QObject::connect(_ui->_checkUseNextSlice, SIGNAL(toggled(bool)), this, SLOT(useNextSliceInsteadOfCurrentSlice(bool)));
 	QObject::connect(_ui->_buttonFlowApplied, SIGNAL(clicked()), this, SLOT(flowApplied()));
+	QObject::connect(_ui->_spinRestrictedAreaResolution, SIGNAL(valueChanged(int)), this, SLOT(setRestrictedAreaResolution(int)));
+	QObject::connect(_ui->_spinRestrictedAreaSmooth, SIGNAL(valueChanged(double)), this, SLOT(setRestrictedAreaSmooth(double)));
+	QObject::connect(_ui->_spinRestrictedAreaThreshold, SIGNAL(valueChanged(int)), this, SLOT(setRestrictedAreaThreshold(int)));
+	QObject::connect(_ui->_checkRestrictedAreaEnableCircle, SIGNAL(toggled(bool)), this, SLOT(enableRestrictedAreaCircle(bool)));
 
 	// Évènements déclenchés par le slider de seuillage
 	QObject::connect(_ui->_spansliderSliceThreshold, SIGNAL(lowerValueChanged(int)), this, SLOT(setLowThreshold(int)));
@@ -202,6 +206,9 @@ void MainWindow::setTypeOfView( const int &type ) {
 			break;
 		case SliceType::FLOW:
 			_ui->_toolboxSliceParameters->setCurrentWidget(_ui->_pageFlowParameters);
+			break;
+		case SliceType::RESTRICTED_AREA:
+			_ui->_toolboxSliceParameters->setCurrentWidget(_ui->_pageRestrictedAreaParameters);
 			break;
 		default:
 			break;
@@ -421,6 +428,26 @@ void MainWindow::flowApplied() {
 	}
 
 	if ( hasModification ) drawSlice();
+}
+
+void MainWindow::setRestrictedAreaResolution( const int &resolution ) {
+	_sliceView->setRestrictedAreaResolution(resolution);
+	drawSlice();
+}
+
+void MainWindow::setRestrictedAreaSmooth( const double &smooth ) {
+	_sliceView->setRestrictedAreaSmooth(smooth);
+	drawSlice();
+}
+
+void MainWindow::setRestrictedAreaThreshold( const int &threshold ) {
+	_sliceView->setRestrictedAreaThreshold(threshold);
+	drawSlice();
+}
+
+void MainWindow::enableRestrictedAreaCircle( const bool &enable )  {
+	_sliceView->enableRestrictedAreaCircle(enable);
+	drawSlice();
 }
 
 void MainWindow::exportToDat() {

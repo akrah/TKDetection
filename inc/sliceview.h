@@ -27,6 +27,11 @@ public:
 	void setFlowEpsilon( const qreal &epsilon );
 	void setFlowMaximumIterations( const int &maxIter );
 
+	void setRestrictedAreaResolution( const int &resolution );
+	void setRestrictedAreaSmooth( const qreal &smooth );
+	void setRestrictedAreaThreshold( const int &threshold );
+	void enableRestrictedAreaCircle( const bool &enable );
+
 	void drawSlice( QImage &image, const Billon &billon, const int &sliceNumber, const IntensityInterval &intensityInterval );
 
 private :
@@ -47,6 +52,11 @@ private:
 	qreal _flowAlpha;
 	qreal _flowEpsilon;
 	int _flowMaximumIterations;
+
+	int _restrictedAreaResolution;
+	qreal _restrictedAreaSmooth;
+	int _restrictedAreaThreshold;
+	bool _restrictedAreaDrawCircle;
 };
 
 #endif // SLICEVIEW_H
