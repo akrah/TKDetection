@@ -104,7 +104,7 @@
           <rect>
            <x>0</x>
            <y>0</y>
-           <width>565</width>
+           <width>515</width>
            <height>660</height>
           </rect>
          </property>
@@ -171,7 +171,7 @@
   <widget class="QDockWidget" name="dockWidget_2">
    <property name="minimumSize">
     <size>
-     <width>450</width>
+     <width>500</width>
      <height>708</height>
     </size>
    </property>
@@ -227,7 +227,7 @@
                 <rect>
                  <x>0</x>
                  <y>0</y>
-                 <width>382</width>
+                 <width>432</width>
                  <height>194</height>
                 </rect>
                </property>
@@ -470,7 +470,7 @@
                 <rect>
                  <x>0</x>
                  <y>0</y>
-                 <width>382</width>
+                 <width>432</width>
                  <height>194</height>
                 </rect>
                </property>
@@ -571,6 +571,19 @@
                   </property>
                   <property name="checked">
                    <bool>true</bool>
+                  </property>
+                 </widget>
+                </item>
+                <item row="3" column="1">
+                 <widget class="QPushButton" name="_buttonWorkOnRestrictedBillon">
+                  <property name="font">
+                   <font>
+                    <weight>50</weight>
+                    <bold>false</bold>
+                   </font>
+                  </property>
+                  <property name="text">
+                   <string>Travailler définitivement sur ce billon</string>
                   </property>
                  </widget>
                 </item>

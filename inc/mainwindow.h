@@ -57,6 +57,7 @@ private slots:
 	void setRestrictedAreaResolution( const int &resolution );
 	void setRestrictedAreaThreshold( const int &threshold );
 	void enableRestrictedAreaCircle( const bool &enable ) ;
+	void workOnRestrictedBillon();
 	void exportToDat();
 	void exportToOfs();
 	void exportToV3D();

@@ -1,8 +1,12 @@
 #ifndef BILLON_H
 #define BILLON_H
 
+#include "global.h"
+
 #include <qglobal.h>
 #include <armadillo>
+
+#include <QPolygon>
 
 template< typename T >
 class BillonTpl : public arma::Cube<T>
@@ -10,6 +14,7 @@ class BillonTpl : public arma::Cube<T>
 public:
 	BillonTpl();
 	BillonTpl( const int &width, const int &height, const int &depth );
+	BillonTpl( const BillonTpl &billon );
 
 	T minValue() const;
 	T maxValue() const;
@@ -20,6 +25,8 @@ public:
 	void setMinValue( const T &value );
 	void setMaxValue( const T &value );
 	void setVoxelSize( const qreal &width, const qreal &height, const qreal &depth );
+
+	BillonTpl * restrictToArea( const int &nbPolygonsPoints, const int &threshold );
 
 protected:
 	T _minValue;
@@ -34,6 +41,9 @@ BillonTpl<T>::BillonTpl() : arma::Cube<T>(), _minValue((T)0), _maxValue((T)0), _
 
 template< typename T >
 BillonTpl<T>::BillonTpl( const int &width, const int &height, const int &depth ) : arma::Cube<T>(height,width,depth), _minValue((T)0), _maxValue((T)0), _voxelWidth(0.), _voxelHeight(0.), _voxelDepth(0.) {}
+
+template< typename T >
+BillonTpl<T>::BillonTpl( const BillonTpl &billon ) : arma::Cube<T>(billon), _minValue(billon._minValue), _maxValue(billon._maxValue), _voxelWidth(billon._voxelWidth), _voxelHeight(billon._voxelHeight), _voxelDepth(billon._voxelDepth) {}
 
 template< typename T >
 T BillonTpl<T>::minValue() const {
@@ -75,6 +85,74 @@ void BillonTpl<T>::setVoxelSize(const qreal &width, const qreal &height, const q
 	_voxelWidth = width;
 	_voxelHeight = height;
 	_voxelDepth = depth;
+}
+
+template< typename T >
+BillonTpl<T> * BillonTpl<T>::restrictToArea( const int &nbPolygonPoints, const int &threshold ) {
+	BillonTpl *restrictedBillon = new BillonTpl(*this);
+	const int nbSlices = restrictedBillon->n_slices;
+
+	for ( int indexSlice = 0 ; indexSlice<nbSlices ; ++indexSlice ) {
+		arma::Mat<T> &currentSlice = restrictedBillon->slice(indexSlice);
+
+		const int sliceWidth = currentSlice.n_cols;
+		const int sliceHeight = currentSlice.n_rows;
+		const int xCenter = sliceWidth/2;
+		const int yCenter = sliceHeight/2;
+		const int thresholdRestrict = RESTRICT_TO_INTERVAL(threshold,_minValue,_maxValue);
+
+		QPolygon polygon(nbPolygonPoints);
+		int polygonPoints[2*nbPolygonPoints+2];
+
+		qreal xEdge, yEdge, orientation, cosAngle, sinAngle;
+		int i,j,k;
+		orientation = 0.;
+		k = 0;
+
+		for ( i=0 ; i<nbPolygonPoints ; ++i ) {
+			orientation += (TWO_PI/(qreal)nbPolygonPoints);
+			cosAngle = qCos(orientation);
+			sinAngle = -qSin(orientation);
+			xEdge = xCenter; // + 50*cosAngle;
+			yEdge = yCenter; // + 50*sinAngle;
+			while ( currentSlice.at(yEdge,xEdge) > thresholdRestrict && xEdge>0. && yEdge>0. && xEdge<sliceWidth && yEdge<sliceHeight ) {
+				xEdge += cosAngle;
+				yEdge += sinAngle;
+			}
+			polygonPoints[k++] = xEdge;
+			polygonPoints[k++] = yEdge;
+		}
+		polygonPoints[k++] = polygonPoints[0];
+		polygonPoints[k] = polygonPoints[1];
+
+		polygon.setPoints(nbPolygonPoints+1,polygonPoints);
+
+		QRect boudingRect = polygon.boundingRect();
+		const int xLeft = qMax(0,boudingRect.left());
+		const int xRight = qMin(sliceWidth-1,boudingRect.right());
+		const int yTop = qMax(0,boudingRect.top());
+		const int yBottom = qMin(sliceHeight-1,boudingRect.bottom()+1);
+
+		currentSlice.submat(0,0,yTop,sliceWidth-1).fill(_minValue);
+		currentSlice.submat(yTop,0,yBottom,xLeft).fill(_minValue);
+		currentSlice.submat(yTop,xRight,yBottom,sliceWidth-1).fill(_minValue);
+		currentSlice.submat(yBottom,0,sliceHeight-1,sliceWidth-1).fill(_minValue);
+
+		polygon.translate(-xLeft,-yTop);
+		arma::Mat<T> boudingSlice = currentSlice.submat( arma::span(yTop,yBottom), arma::span(xLeft,xRight) );
+		const int boudingWidth = boudingSlice.n_cols;
+		const int boudinHeight = boudingSlice.n_rows;
+		for ( j=0 ; j<boudinHeight ; ++j ) {
+			for ( i=0 ; i<boudingWidth ; ++i ) {
+				if ( !polygon.containsPoint(QPoint(i,j),Qt::WindingFill) ) {
+					boudingSlice.at(j,i) = _minValue;
+				}
+			}
+		}
+		currentSlice( arma::span(yTop,yBottom), arma::span(xLeft,xRight) ) = boudingSlice;
+	}
+
+	return restrictedBillon;
 }
 
 #endif // BILLON_H

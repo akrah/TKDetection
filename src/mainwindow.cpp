@@ -20,6 +20,7 @@
 #include <QMouseEvent>
 #include <QPainter>
 #include <QScrollBar>
+#include <QMessageBox>
 
 MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::MainWindow), _billon(0), _marrow(0), _sliceView(new SliceView()), _sliceHistogram(new SliceHistogram()), _pieChart(new PieChart(0,1)), _pieChartDiagrams(new PieChartDiagrams()), _currentSlice(0), _currentMaximum(0) {
 	_ui->setupUi(this);
@@ -63,6 +64,7 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 	QObject::connect(_ui->_spinRestrictedAreaResolution, SIGNAL(valueChanged(int)), this, SLOT(setRestrictedAreaResolution(int)));
 	QObject::connect(_ui->_spinRestrictedAreaThreshold, SIGNAL(valueChanged(int)), this, SLOT(setRestrictedAreaThreshold(int)));
 	QObject::connect(_ui->_checkRestrictedAreaEnableCircle, SIGNAL(toggled(bool)), this, SLOT(enableRestrictedAreaCircle(bool)));
+	QObject::connect(_ui->_buttonWorkOnRestrictedBillon, SIGNAL(clicked()), this, SLOT(workOnRestrictedBillon()));
 
 	// Évènements déclenchés par le slider de seuillage
 	QObject::connect(_ui->_spansliderSliceThreshold, SIGNAL(lowerValueChanged(int)), this, SLOT(setLowThreshold(int)));
@@ -443,6 +445,19 @@ void MainWindow::enableRestrictedAreaCircle( const bool &enable )  {
 	_sliceView->enableRestrictedAreaCircle(enable);
 	drawSlice();
 }
+
+void MainWindow::workOnRestrictedBillon() {
+	if ( _billon != 0 ) {
+		QMessageBox::StandardButton choiceButton = QMessageBox::warning(this,tr("Opération destructrice"),tr("Attention, vous ne pourrez plus revenir au billon initial.\nÉtes-vous sûr de vouloir continuer ?"));
+		if ( choiceButton == QMessageBox::Ok ) {
+			Billon * newBillon = _billon->restrictToArea( _ui->_spinRestrictedAreaResolution->value(), _ui->_spinRestrictedAreaThreshold->value() );
+			delete _billon;
+			_billon = newBillon;
+			drawSlice();
+		}
+	}
+}
+
 
 void MainWindow::exportToDat() {
 	if ( _billon != 0 ) {
