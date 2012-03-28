@@ -6,6 +6,9 @@ Interval::Interval() : QObject(), _min(0), _max(0) {
 Interval::Interval( const int &min, const int &max ) : QObject(), _min(min), _max(max) {
 }
 
+Interval::Interval( const Interval &interval ) : QObject(), _min(interval._min), _max(interval._max) {
+}
+
 int Interval::min() const {
 	return _min;
 }

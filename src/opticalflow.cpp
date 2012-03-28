@@ -60,8 +60,8 @@ namespace OpticalFlow {
 		// Donne les dérivées partielles de la tranche K saur pour la dernière ligne et la dernière colonne
 		inline
 		void computePartialDerivatives( const icube &cube, const int &k, PartialDerivatives &E ) {
-			const Mat<__billon_type__> &sliceK = cube.slice(k);
-			const Mat<__billon_type__> &sliceK1 = cube.slice(k+1);
+			const Slice &sliceK = cube.slice(k);
+			const Slice &sliceK1 = cube.slice(k+1);
 			const int width = sliceK.n_cols-1;
 			const int height = sliceK.n_rows-1;
 			qreal Eijk, Eijk1, Eij1k, Eij1k1, Ei1jk, Ei1jk1, Ei1j1k, Ei1j1k1;

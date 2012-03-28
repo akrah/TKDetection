@@ -86,8 +86,8 @@ void SliceHistogram::constructHistogram( const Billon &billon, const IntensityIn
 
 	qreal cumul;
 	for ( uint k=1 ; k<depth ; ++k ) {
-		const arma::Mat<__billon_type__> &slice = billon.slice(k);
-		const arma::Mat<__billon_type__> &prevSlice = billon.slice(k-1);
+		const arma::Slice &slice = billon.slice(k);
+		const arma::Slice &prevSlice = billon.slice(k-1);
 		cumul = 0;
 		for ( uint j=0 ; j<height ; ++j ) {
 			for ( uint i=0 ; i<width ; ++i ) {
@@ -123,8 +123,8 @@ void SliceHistogram::constructHistogram( const Billon &billon, const Marrow &mar
 		nbPixels += 2*circleLines.last()+1;
 	}
 	for ( k=1 ; k<depth ; ++k ) {
-		const arma::Mat<__billon_type__> &slice = billon.slice(k);
-		const arma::Mat<__billon_type__> &prevSlice = billon.slice(k-1);
+		const arma::Slice &slice = billon.slice(k);
+		const arma::Slice &prevSlice = billon.slice(k-1);
 		marrowX = marrow[k].x+radiusMax;
 		marrowY = marrow[k].y+radiusMax;
 		cumul = 0;

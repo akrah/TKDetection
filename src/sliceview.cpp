@@ -13,7 +13,7 @@
 SliceView::SliceView() : _typeOfView(SliceType::CURRENT),
 	_movementThreshold(0), _movementWithBackground(false), _useNextSliceInsteadOfCurrentSlice(false),
 	_flowAlpha(FLOW_ALPHA_DEFAULT), _flowEpsilon(FLOW_EPSILON_DEFAULT), _flowMaximumIterations(FLOW_MAXIMUM_ITERATIONS),
-	_restrictedAreaResolution(100), _restrictedAreaSmooth(0.5), _restrictedAreaThreshold(-900), _restrictedAreaDrawCircle(true)
+	_restrictedAreaResolution(100), _restrictedAreaThreshold(-900), _restrictedAreaDrawCircle(true)
 {
 }
 
@@ -67,10 +67,6 @@ void SliceView::setRestrictedAreaResolution( const int &resolution ) {
 	_restrictedAreaResolution = resolution;
 }
 
-void SliceView::setRestrictedAreaSmooth( const qreal &smooth ) {
-	_restrictedAreaSmooth = smooth;
-}
-
 void SliceView::setRestrictedAreaThreshold( const int &threshold )  {
 	_restrictedAreaThreshold = threshold;
 }
@@ -116,7 +112,7 @@ void SliceView::drawSlice( QImage &image, const Billon &billon, const int &slice
  *******************************/
 
 void SliceView::drawCurrentSlice( QImage &image, const Billon &billon, const int &sliceNumber, const IntensityInterval &intensityInterval ) {
-	const arma::Mat<__billon_type__> &slice = billon.slice(sliceNumber);
+	const Slice &slice = billon.slice(sliceNumber);
 	const uint width = slice.n_cols;
 	const uint height = slice.n_rows;
 	const int minValue = intensityInterval.min();
@@ -183,9 +179,9 @@ void SliceView::drawMedianSlice( QImage &image, const Billon &billon, const Inte
 
 void SliceView::drawMovementSlice( QImage &image, const Billon &billon, const int &sliceNumber, const IntensityInterval &intensityInterval ) {
 
-	const arma::Mat<__billon_type__> &previousSlice = billon.slice(sliceNumber > 0 ? sliceNumber-1 : sliceNumber+1);
-	const arma::Mat<__billon_type__> &currentSlice = billon.slice(sliceNumber);
-	const arma::Mat<__billon_type__> &toCompareSlice = billon.slice(_useNextSliceInsteadOfCurrentSlice && sliceNumber < static_cast<int>(billon.n_slices)-1 ? sliceNumber+1 : sliceNumber );
+	const Slice &previousSlice = billon.slice(sliceNumber > 0 ? sliceNumber-1 : sliceNumber+1);
+	const Slice &currentSlice = billon.slice(sliceNumber);
+	const Slice &toCompareSlice = billon.slice(_useNextSliceInsteadOfCurrentSlice && sliceNumber < static_cast<int>(billon.n_slices)-1 ? sliceNumber+1 : sliceNumber );
 
 	const int width = previousSlice.n_cols;
 	const int height = previousSlice.n_rows;
@@ -228,7 +224,7 @@ void SliceView::drawMovementSlice( QImage &image, const Billon &billon, const in
 
 void SliceView::drawFlowSlice( QImage &image, const Billon &billon, const int &sliceNumber ) {
 
-	const arma::Mat<__billon_type__> &currentSlice = billon.slice(sliceNumber);
+	const Slice &currentSlice = billon.slice(sliceNumber);
 
 	const int width = currentSlice.n_cols;
 	const int height = currentSlice.n_rows;
@@ -264,92 +260,147 @@ void SliceView::drawFlowSlice( QImage &image, const Billon &billon, const int &s
 
 void SliceView::drawRestrictedArea( QImage &image, const Billon &billon, const int &sliceNumber, const IntensityInterval &intensityInterval ) {
 	const int nbPoints = _restrictedAreaResolution;
-	const qreal lissageFact = _restrictedAreaSmooth;
-	const int threshold = _restrictedAreaThreshold;
 
-	PieChart pie(0,nbPoints);
-	const QList<PiePart> &sectors = pie.sectors();
-	const arma::Mat<__billon_type__> &currentSlice = billon.slice(sliceNumber);
+	const int max = intensityInterval.max();
+	const int min = intensityInterval.min();
+	const int threshold = RESTRICT_TO_INTERVAL(_restrictedAreaThreshold,min,max);
+
+	const Slice &currentSlice = billon.slice(sliceNumber);
+
+	const int imageWidth = currentSlice.n_cols;
+	const int imageHeight = currentSlice.n_rows;
+	const int xCenter = image.width()/2;
+	const int yCenter = image.height()/2;
+
+	QPolygon polygon(nbPoints);
+	int polygonPoints[2*nbPoints+2];
+
+	qreal xEdge, yEdge, orientation, cosAngle, sinAngle;
+	int i,j,k;
+	orientation = 0.;
+	k = 0;
 
 	QPainter painter(&image);
 	painter.setPen(Qt::green);
 
-	const int xCenter = image.width()/2;
-	const int yCenter = image.height()/2;
-
-	qreal xEdge, yEdge, xOldEdge, yOldEdge, xOrigin, yOrigin, distX, distY, xBary, yBary, orientation, radiusLength, cosAngle, sinAngle;
-	xBary = yBary = radiusLength = 0.;
-
-	for ( int i=0 ; i<sectors.size() ; ++i ) {
-		orientation = sectors[i].orientation();
+	for ( i=0 ; i<nbPoints ; ++i ) {
+		orientation += (TWO_PI/(qreal)nbPoints);
 		cosAngle = qCos(orientation);
 		sinAngle = -qSin(orientation);
-//		xEdge = xCenter + 50*cosAngle;
-//		yEdge = yCenter + 50*sinAngle;
-		while ( currentSlice.at(yEdge,xEdge) > threshold ) {
+		xEdge = xCenter; // + 50*cosAngle;
+		yEdge = yCenter; // + 50*sinAngle;
+		while ( RESTRICT_TO_INTERVAL(currentSlice.at(yEdge,xEdge),min,max) > threshold && xEdge>0 && yEdge>0 && xEdge<imageWidth && yEdge<imageHeight ) {
 			xEdge += cosAngle;
 			yEdge += sinAngle;
 		}
-		if ( i != 0 ) {
-			distX = xOldEdge-xEdge;
-			distY = yOldEdge-yEdge;
-			if ( qAbs(distX) > 10. ) xEdge += distX*lissageFact;
-			if ( qAbs(distY) > 10. ) yEdge += distY*lissageFact;
-			painter.drawLine(xOldEdge,yOldEdge,xEdge,yEdge);
-		}
-		else {
-			xOrigin = xEdge;
-			yOrigin = yEdge;
-		}
-		xBary += xEdge;
-		yBary += yEdge;
-		xOldEdge = xEdge;
-		yOldEdge = yEdge;
-		radiusLength += qSqrt( qPow(xEdge-xCenter,2) + qPow(yEdge-yCenter,2) );
-		//painter.drawEllipse((int)xEdge-1,(int)yEdge-1,2,2);
-		//painter.drawPoint((int)xEdge,(int)yEdge);
+		polygonPoints[k++] = xEdge;
+		polygonPoints[k++] = yEdge;
+		painter.drawPoint(xEdge,yEdge);
 	}
-	painter.drawLine(xOldEdge,yOldEdge,xOrigin,yOrigin);
-	xBary /= (qreal)nbPoints;
-	yBary /= (qreal)nbPoints;
-	const QPointF center(xBary,yBary);
-	radiusLength += qSqrt( qPow(xBary-xCenter,2) + qPow(yBary-yCenter,2) )*(qreal)nbPoints;
-	radiusLength /= (qreal)nbPoints;
+	polygonPoints[k++] = polygonPoints[0];
+	polygonPoints[k] = polygonPoints[1];
+
+	polygon.setPoints(nbPoints+1,polygonPoints);
 
 	if ( _restrictedAreaDrawCircle ) {
-		painter.drawEllipse(center,3,3);
-		painter.drawEllipse(center,radiusLength,radiusLength);
+		QRect boudingRect = polygon.boundingRect();
+		const int xLeft = boudingRect.left();
+		const int xRight = boudingRect.right();
+		const int yTop = boudingRect.top();
+		const int yBottom = boudingRect.bottom()+1;
+		const int endLineWidth = imageWidth-xRight;
+
+		const QRgb bg = qRgb(0,0,0);
+
+		painter.fillRect(0,0,imageWidth,yTop,bg);
+		painter.fillRect(0,yTop,xLeft,yBottom,bg);
+		painter.fillRect(xRight,yTop,imageWidth,yBottom,bg);
+		painter.fillRect(0,yBottom,imageWidth,imageHeight,bg);
+		painter.end();
+
+		QRgb * line =(QRgb *) image.bits();
+		line += imageWidth*yTop;
+		for ( j=yTop ; j<yBottom ; ++j ) {
+			line += xLeft;
+			for ( i=xLeft ; i<xRight ; ++i ) {
+				if ( !polygon.containsPoint(QPoint(i,j),Qt::WindingFill) ) {
+					 *line = bg;
+				}
+				line++;
+			}
+			line += endLineWidth;
+		}
 	}
 }
 
-
 //void SliceView::drawRestrictedArea( QImage &image, const Billon &billon, const int &sliceNumber, const IntensityInterval &intensityInterval ) {
-//	const int threshold = _restrictedAreaThreshold;
+//	const int nbPoints = _restrictedAreaResolution;
 
-//	const arma::Mat<__billon_type__> &currentSlice = billon.slice(sliceNumber);
+//	const int max = intensityInterval.max();
+//	const int min = intensityInterval.min();
+//	const int threshold = RESTRICT_TO_INTERVAL(_restrictedAreaThreshold,min,max);
+
+//	const Slice &currentSlice = billon.slice(sliceNumber);
 
 //	QPainter painter(&image);
 //	painter.setPen(Qt::green);
 
-//	const int width = billon.n_cols-1;
-//	const int height = billon.n_rows-1;
-//	int iForward, iBackward, j;
-//	bool find;
+//	const int xCenter = image.width()/2;
+//	const int yCenter = image.height()/2;
 
-//	for ( j=1 ; j<height ; ++j ) {
-//		find = false;
-//		for ( iForward=1 ; iForward<width && !find ; ++iForward ) {
-//			find = (currentSlice.at(j,iForward) > threshold);
+//	qreal xEdge, yEdge, xOldEdge, yOldEdge, xOrigin, yOrigin, xBary, yBary, orientation, radiusMax, radiusMean, cosAngle, sinAngle;
+//	orientation = xBary = yBary = radiusMax = radiusMean = 0.;
+
+//	for ( int i=0 ; i<nbPoints ; ++i ) {
+//		orientation += (TWO_PI/(qreal)nbPoints);
+//		cosAngle = qCos(orientation);
+//		sinAngle = -qSin(orientation);
+//		xEdge = xCenter + 50*cosAngle;
+//		yEdge = yCenter + 50*sinAngle;
+//		while ( RESTRICT_TO_INTERVAL(currentSlice.at(yEdge,xEdge),min,max) > threshold ) {
+//			xEdge += cosAngle;
+//			yEdge += sinAngle;
 //		}
-//		if ( find ) {
-//			painter.drawEllipse(iForward-1,j-1,2,2);
-//			find = false;
-//			for ( iBackward=width-1 ; iBackward>0 && !find ; --iBackward ) {
-//				find = (currentSlice.at(j,iBackward) > threshold);
-//			}
-//			if ( find && iBackward > iForward ) {
-//				painter.drawEllipse(iBackward-1,j-1,2,2);
-//			}
+//		if ( i == 0 ) {
+//			xOrigin = xEdge;
+//			yOrigin = yEdge;
 //		}
+//		else {
+//			painter.drawLine(static_cast<int>(xOldEdge),static_cast<int>(yOldEdge),static_cast<int>(xEdge),static_cast<int>(yEdge));
+//		}
+//		xBary += xEdge;
+//		yBary += yEdge;
+//		xOldEdge = xEdge;
+//		yOldEdge = yEdge;
+//		radiusMean += qSqrt( qPow(xEdge-xCenter,2) + qPow(yEdge-yCenter,2) );
+//		radiusMax = qMax(radiusMax, qSqrt(qPow(xEdge-xCenter,2) + qPow(yEdge-yCenter,2)) );
+//	}
+//	painter.drawLine(xOldEdge,yOldEdge,xOrigin,yOrigin);
+
+//	if ( _restrictedAreaDrawCircle ) {
+//		xBary /= (qreal)nbPoints;
+//		yBary /= (qreal)nbPoints;
+//		radiusMean /= (qreal)nbPoints;
+//		const QPointF center(xBary,yBary);
+//		painter.drawEllipse(center,3,3);
+//		painter.drawEllipse(center,radiusMax,radiusMax);
+//		painter.setPen(Qt::red);
+////		painter.drawEllipse(center,radiusMean,radiusMean);
+//		painter.setPen(QColor(255,127,0));
+//		painter.drawEllipse(center,(radiusMean+radiusMax)/2.,(radiusMean+radiusMax)/2.);
+
+////		QRgb * line =(QRgb *) image.bits();
+////		QRgb bg = qRgb(0,0,0);
+////		const int width = currentSlice.n_cols;
+////		const int height = currentSlice.n_rows;
+////		for ( int j=0 ; j<height ; ++j ) {
+////			for ( int i=0 ; i<width ; ++i ) {
+////				if ( qSqrt( qPow(i-xBary,2) + qPow(j-yBary,2) ) > radiusLength ) {
+////					 *line = bg;
+////				}
+////				line++;
+////			}
+////		}
+
 //	}
 //}

@@ -55,7 +55,6 @@ private slots:
 	void useNextSliceInsteadOfCurrentSlice( const bool &enable );
 	void flowApplied();
 	void setRestrictedAreaResolution( const int &resolution );
-	void setRestrictedAreaSmooth( const double &smooth );
 	void setRestrictedAreaThreshold( const int &threshold );
 	void enableRestrictedAreaCircle( const bool &enable ) ;
 	void exportToDat();

@@ -61,7 +61,6 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 	QObject::connect(_ui->_checkUseNextSlice, SIGNAL(toggled(bool)), this, SLOT(useNextSliceInsteadOfCurrentSlice(bool)));
 	QObject::connect(_ui->_buttonFlowApplied, SIGNAL(clicked()), this, SLOT(flowApplied()));
 	QObject::connect(_ui->_spinRestrictedAreaResolution, SIGNAL(valueChanged(int)), this, SLOT(setRestrictedAreaResolution(int)));
-	QObject::connect(_ui->_spinRestrictedAreaSmooth, SIGNAL(valueChanged(double)), this, SLOT(setRestrictedAreaSmooth(double)));
 	QObject::connect(_ui->_spinRestrictedAreaThreshold, SIGNAL(valueChanged(int)), this, SLOT(setRestrictedAreaThreshold(int)));
 	QObject::connect(_ui->_checkRestrictedAreaEnableCircle, SIGNAL(toggled(bool)), this, SLOT(enableRestrictedAreaCircle(bool)));
 
@@ -435,11 +434,6 @@ void MainWindow::setRestrictedAreaResolution( const int &resolution ) {
 	drawSlice();
 }
 
-void MainWindow::setRestrictedAreaSmooth( const double &smooth ) {
-	_sliceView->setRestrictedAreaSmooth(smooth);
-	drawSlice();
-}
-
 void MainWindow::setRestrictedAreaThreshold( const int &threshold ) {
 	_sliceView->setRestrictedAreaThreshold(threshold);
 	drawSlice();
@@ -495,7 +489,7 @@ void MainWindow::exportFlowToV3D() {
 			for ( k=0 ; k<depth ; ++k ) {
 				field = OpticalFlow::compute(*_billon,k+_slicesInterval.min(),_ui->_spinFlowAlpha->value(),_ui->_spinFlowEpsilon->value(),_ui->_spinFlowMaximumIterations->value());
 				if ( field != 0 ) {
-					arma::Mat<__billon_type__> &slice = billonFlow.slice(k);
+					Slice &slice = billonFlow.slice(k);
 					for ( j=0 ; j<height ; ++j ) {
 						for ( i=0 ; i<width ; ++i ) {
 							slice.at(j,i) = qSqrt( qPow((*field)[j][i].x(),2) + qPow((*field)[j][i].y(),2) )*20.;
@@ -529,9 +523,9 @@ void MainWindow::exportDiagramToV3D() {
 			int i,j,k;
 
 			for ( k=_slicesInterval.min()+1 ; k<_slicesInterval.max() ; ++k ) {
-				const arma::Mat<__billon_type__> &currentSlice = _billon->slice(k);
-				const arma::Mat<__billon_type__> &previousSlice = _billon->slice(k-1);
-				arma::Mat<__billon_type__> &sliceDiag = billonDiag.slice(k-_slicesInterval.min()-1);
+				const Slice &currentSlice = _billon->slice(k);
+				const Slice &previousSlice = _billon->slice(k-1);
+				Slice &sliceDiag = billonDiag.slice(k-_slicesInterval.min()-1);
 				for ( j=0 ; j<height ; ++j ) {
 					for ( i=0 ; i<width ; ++i ) {
 						sliceDiag.at(j,i) = qAbs(((RESTRICT_TO_INTERVAL(currentSlice.at(j,i),minValue,maxValue)-minValue)) - ((RESTRICT_TO_INTERVAL(previousSlice.at(j,i),minValue,maxValue)-minValue)));

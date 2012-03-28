@@ -28,7 +28,6 @@ public:
 	void setFlowMaximumIterations( const int &maxIter );
 
 	void setRestrictedAreaResolution( const int &resolution );
-	void setRestrictedAreaSmooth( const qreal &smooth );
 	void setRestrictedAreaThreshold( const int &threshold );
 	void enableRestrictedAreaCircle( const bool &enable );
 
@@ -54,7 +53,6 @@ private:
 	int _flowMaximumIterations;
 
 	int _restrictedAreaResolution;
-	qreal _restrictedAreaSmooth;
 	int _restrictedAreaThreshold;
 	bool _restrictedAreaDrawCircle;
 };

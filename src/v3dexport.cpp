@@ -128,7 +128,7 @@ namespace V3DExport {
 						data.clear();
 						data.reserve(width*height*depth*2);
 						for ( int k=interval.min(); k<=interval.max(); k++ ) {
-							const arma::Mat<__billon_type__> slice = billon.slice(k);
+							const arma::Slice slice = billon.slice(k);
 							for ( int j=0; j<height; j++ ) {
 								for ( int i=0; i<width; i++ ) {
 									voxelValue.clear();

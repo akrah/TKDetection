@@ -10,6 +10,7 @@ class Interval : public QObject
 public:
 	Interval();
 	Interval( const int &min, const int &max );
+	Interval( const Interval &interval );
 
 	int min() const;
 	int max() const;
