@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1036</width>
-    <height>914</height>
+    <height>928</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -104,8 +104,8 @@
           <rect>
            <x>0</x>
            <y>0</y>
-           <width>590</width>
-           <height>660</height>
+           <width>562</width>
+           <height>676</height>
           </rect>
          </property>
          <layout class="QHBoxLayout" name="horizontalLayout_8">
@@ -142,7 +142,7 @@
      <x>0</x>
      <y>0</y>
      <width>1036</width>
-     <height>25</height>
+     <height>22</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFichier">
@@ -171,8 +171,8 @@
   <widget class="QDockWidget" name="dockWidget_2">
    <property name="minimumSize">
     <size>
-     <width>425</width>
-     <height>708</height>
+     <width>447</width>
+     <height>735</height>
     </size>
    </property>
    <property name="floating">
@@ -192,7 +192,7 @@
      <item>
       <widget class="QTabWidget" name="_tabs">
        <property name="currentIndex">
-        <number>0</number>
+        <number>2</number>
        </property>
        <widget class="QWidget" name="_tabGeneral">
         <attribute name="title">
@@ -227,8 +227,8 @@
                 <rect>
                  <x>0</x>
                  <y>0</y>
-                 <width>357</width>
-                 <height>154</height>
+                 <width>345</width>
+                 <height>115</height>
                 </rect>
                </property>
                <attribute name="label">
@@ -343,8 +343,8 @@
                 <rect>
                  <x>0</x>
                  <y>0</y>
-                 <width>322</width>
-                 <height>144</height>
+                 <width>315</width>
+                 <height>153</height>
                 </rect>
                </property>
                <attribute name="label">
@@ -470,8 +470,8 @@
                 <rect>
                  <x>0</x>
                  <y>0</y>
-                 <width>316</width>
-                 <height>138</height>
+                 <width>321</width>
+                 <height>144</height>
                 </rect>
                </property>
                <attribute name="label">
@@ -772,7 +772,7 @@
             <layout class="QVBoxLayout" name="verticalLayout_8">
              <item>
               <widget class="QwtPolarPlot" name="_polarSectorSum">
-               <property name="plotBackground">
+               <property name="plotBackground" stdset="0">
                 <brush brushstyle="SolidPattern">
                  <color alpha="255">
                   <red>200</red>
@@ -906,6 +906,13 @@
           <widget class="QPushButton" name="_buttonExportDiagramV3D">
            <property name="text">
             <string>Export diagram en .v3d</string>
+           </property>
+          </widget>
+         </item>
+         <item row="10" column="1">
+          <widget class="QPushButton" name="_buttonExportHisto">
+           <property name="text">
+            <string>Export histo</string>
            </property>
           </widget>
          </item>
@@ -1146,6 +1153,11 @@
  <layoutdefault spacing="6" margin="11"/>
  <customwidgets>
   <customwidget>
+   <class>QxtSpanSlider</class>
+   <extends>QSlider</extends>
+   <header>QxtSpanSlider</header>
+  </customwidget>
+  <customwidget>
    <class>QwtPlot</class>
    <extends>QFrame</extends>
    <header>qwt_plot.h</header>
@@ -1156,11 +1168,6 @@
    <extends>QFrame</extends>
    <header>qwt_polar_plot.h</header>
    <container>1</container>
-  </customwidget>
-  <customwidget>
-   <class>QxtSpanSlider</class>
-   <extends>QSlider</extends>
-   <header>QxtSpanSlider</header>
   </customwidget>
  </customwidgets>
  <resources/>
