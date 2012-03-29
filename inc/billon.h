@@ -37,10 +37,10 @@ protected:
 };
 
 template< typename T >
-BillonTpl<T>::BillonTpl() : arma::Cube<T>(), _minValue((T)0), _maxValue((T)0), _voxelWidth(0.), _voxelHeight(0.), _voxelDepth(0.) {}
+BillonTpl<T>::BillonTpl() : arma::Cube<T>(), _minValue(static_cast<T>(0)), _maxValue(static_cast<T>(0)), _voxelWidth(0.), _voxelHeight(0.), _voxelDepth(0.) {}
 
 template< typename T >
-BillonTpl<T>::BillonTpl( const int &width, const int &height, const int &depth ) : arma::Cube<T>(height,width,depth), _minValue((T)0), _maxValue((T)0), _voxelWidth(0.), _voxelHeight(0.), _voxelDepth(0.) {}
+BillonTpl<T>::BillonTpl( const int &width, const int &height, const int &depth ) : arma::Cube<T>(height,width,depth), _minValue(static_cast<T>(0)), _maxValue(static_cast<T>(0)), _voxelWidth(0.), _voxelHeight(0.), _voxelDepth(0.) {}
 
 template< typename T >
 BillonTpl<T>::BillonTpl( const BillonTpl &billon ) : arma::Cube<T>(billon), _minValue(billon._minValue), _maxValue(billon._maxValue), _voxelWidth(billon._voxelWidth), _voxelHeight(billon._voxelHeight), _voxelDepth(billon._voxelDepth) {}
@@ -110,7 +110,7 @@ BillonTpl<T> * BillonTpl<T>::restrictToArea( const int &nbPolygonPoints, const i
 		k = 0;
 
 		for ( i=0 ; i<nbPolygonPoints ; ++i ) {
-			orientation += (TWO_PI/(qreal)nbPolygonPoints);
+			orientation += (TWO_PI/static_cast<qreal>(nbPolygonPoints));
 			cosAngle = qCos(orientation);
 			sinAngle = -qSin(orientation);
 			xEdge = xCenter; // + 50*cosAngle;

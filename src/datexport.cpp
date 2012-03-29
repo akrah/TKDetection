@@ -28,7 +28,7 @@ namespace DatExport {
 				const arma::Slice &slice = billon.slice(k);
 				for ( int j=0 ; j<height-shift ; j+=resolution ) {
 					for ( int i=0 ; i<width-shift ; i+=resolution ) {
-						dStream << (qint8) ((arma::mean(arma::mean(slice.submat(j,i,j+shift,i+shift)))-minValue)*fact);
+						dStream << static_cast<qint8>((arma::mean(arma::mean(slice.submat(j,i,j+shift,i+shift)))-minValue)*fact);
 					}
 				}
 			}

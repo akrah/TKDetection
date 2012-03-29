@@ -104,7 +104,7 @@
           <rect>
            <x>0</x>
            <y>0</y>
-           <width>515</width>
+           <width>590</width>
            <height>660</height>
           </rect>
          </property>
@@ -171,7 +171,7 @@
   <widget class="QDockWidget" name="dockWidget_2">
    <property name="minimumSize">
     <size>
-     <width>500</width>
+     <width>425</width>
      <height>708</height>
     </size>
    </property>
@@ -227,8 +227,8 @@
                 <rect>
                  <x>0</x>
                  <y>0</y>
-                 <width>432</width>
-                 <height>194</height>
+                 <width>357</width>
+                 <height>154</height>
                 </rect>
                </property>
                <attribute name="label">
@@ -470,8 +470,8 @@
                 <rect>
                  <x>0</x>
                  <y>0</y>
-                 <width>432</width>
-                 <height>194</height>
+                 <width>316</width>
+                 <height>138</height>
                 </rect>
                </property>
                <attribute name="label">
@@ -575,7 +575,7 @@
                  </widget>
                 </item>
                 <item row="3" column="1">
-                 <widget class="QPushButton" name="_buttonWorkOnRestrictedBillon">
+                 <widget class="QPushButton" name="_buttonComputeRestrictedBillon">
                   <property name="font">
                    <font>
                     <weight>50</weight>
@@ -583,7 +583,7 @@
                    </font>
                   </property>
                   <property name="text">
-                   <string>Travailler définitivement sur ce billon</string>
+                   <string>Créer le billon réduit</string>
                   </property>
                  </widget>
                 </item>
@@ -1009,6 +1009,35 @@
            </widget>
           </item>
          </layout>
+        </item>
+       </layout>
+      </widget>
+     </item>
+     <item>
+      <widget class="QGroupBox" name="groupBox_4">
+       <property name="title">
+        <string>Choix du billon</string>
+       </property>
+       <layout class="QFormLayout" name="formLayout_9">
+        <item row="0" column="1">
+         <widget class="QLabel" name="_labelBillonUsed">
+          <property name="autoFillBackground">
+           <bool>true</bool>
+          </property>
+          <property name="text">
+           <string>Actuellement : Billon original</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="0">
+         <widget class="QPushButton" name="_buttonChangeBillonUsed">
+          <property name="text">
+           <string>Changer de billon</string>
+          </property>
+         </widget>
         </item>
        </layout>
       </widget>

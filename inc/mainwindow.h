@@ -57,7 +57,8 @@ private slots:
 	void setRestrictedAreaResolution( const int &resolution );
 	void setRestrictedAreaThreshold( const int &threshold );
 	void enableRestrictedAreaCircle( const bool &enable ) ;
-	void workOnRestrictedBillon();
+	void computeRestrictedBillon();
+	void changeBillonUsed();
 	void exportToDat();
 	void exportToOfs();
 	void exportToV3D();
@@ -76,6 +77,7 @@ private:
 	QButtonGroup _groupSliceView;
 
 	Billon *_billon;
+	Billon *_unusedBillon;
 	Marrow *_marrow;
 	SliceView *_sliceView;
 	SliceHistogram *_sliceHistogram;
@@ -91,6 +93,7 @@ private:
 
 	int _currentSlice;
 	int _currentMaximum;
+	bool _isUsedOriginalBillon;
 };
 
 #endif // MAINWINDOW_H

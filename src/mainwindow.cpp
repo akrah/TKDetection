@@ -22,7 +22,7 @@
 #include <QScrollBar>
 #include <QMessageBox>
 
-MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::MainWindow), _billon(0), _marrow(0), _sliceView(new SliceView()), _sliceHistogram(new SliceHistogram()), _pieChart(new PieChart(0,1)), _pieChartDiagrams(new PieChartDiagrams()), _currentSlice(0), _currentMaximum(0) {
+MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::MainWindow), _billon(0), _unusedBillon(0), _marrow(0), _sliceView(new SliceView()), _sliceHistogram(new SliceHistogram()), _pieChart(new PieChart(0,1)), _pieChartDiagrams(new PieChartDiagrams()), _currentSlice(0), _currentMaximum(0), _isUsedOriginalBillon(true) {
 	_ui->setupUi(this);
 	setCorner(Qt::TopLeftCorner,Qt::LeftDockWidgetArea);
 	setCorner(Qt::TopRightCorner,Qt::RightDockWidgetArea);
@@ -64,7 +64,8 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 	QObject::connect(_ui->_spinRestrictedAreaResolution, SIGNAL(valueChanged(int)), this, SLOT(setRestrictedAreaResolution(int)));
 	QObject::connect(_ui->_spinRestrictedAreaThreshold, SIGNAL(valueChanged(int)), this, SLOT(setRestrictedAreaThreshold(int)));
 	QObject::connect(_ui->_checkRestrictedAreaEnableCircle, SIGNAL(toggled(bool)), this, SLOT(enableRestrictedAreaCircle(bool)));
-	QObject::connect(_ui->_buttonWorkOnRestrictedBillon, SIGNAL(clicked()), this, SLOT(workOnRestrictedBillon()));
+	QObject::connect(_ui->_buttonComputeRestrictedBillon, SIGNAL(clicked()), this, SLOT(computeRestrictedBillon()));
+	QObject::connect(_ui->_buttonChangeBillonUsed, SIGNAL(clicked()), this, SLOT(changeBillonUsed()));
 
 	// Évènements déclenchés par le slider de seuillage
 	QObject::connect(_ui->_spansliderSliceThreshold, SIGNAL(lowerValueChanged(int)), this, SLOT(setLowThreshold(int)));
@@ -108,22 +109,20 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 	_ui->_actionQuit->setShortcut(Qt::CTRL + Qt::Key_Q);
 	QObject::connect(_ui->_actionQuit, SIGNAL(triggered()), this, SLOT(close()));
 
-	//_ui->_comboSliceType->setCurrentIndex(SliceType::CURRENT);
 	closeImage();
 }
 
 MainWindow::~MainWindow() {
-	while ( !_pieChartPlots.isEmpty() ) {
-		_pieChartPlots.removeLast();
-	}
+	qDeleteAll(_pieChartPlots.begin(),_pieChartPlots.end());
 	delete _pieChartDiagrams;
 	delete _pieChart;
 	delete _sliceHistogram;
 	delete _sliceView;
 	if ( _marrow != 0 ) delete _marrow;
 	if ( _billon != 0 ) delete _billon;
-	delete _ui;
+	if ( _unusedBillon != 0 ) delete _unusedBillon;
 }
+
 
 /*******************************
  * Public fonctions
@@ -446,18 +445,58 @@ void MainWindow::enableRestrictedAreaCircle( const bool &enable )  {
 	drawSlice();
 }
 
-void MainWindow::workOnRestrictedBillon() {
+void MainWindow::computeRestrictedBillon() {
 	if ( _billon != 0 ) {
-		QMessageBox::StandardButton choiceButton = QMessageBox::warning(this,tr("Opération destructrice"),tr("Attention, vous ne pourrez plus revenir au billon initial.\nÉtes-vous sûr de vouloir continuer ?"));
-		if ( choiceButton == QMessageBox::Ok ) {
-			Billon * newBillon = _billon->restrictToArea( _ui->_spinRestrictedAreaResolution->value(), _ui->_spinRestrictedAreaThreshold->value() );
-			delete _billon;
-			_billon = newBillon;
+		Billon *originalBillon = 0;
+		Billon *restrictedBillon = 0;
+		if ( _unusedBillon != 0 ) {
+			if ( _isUsedOriginalBillon ) {
+				restrictedBillon = _unusedBillon;
+				originalBillon = _billon;
+			}
+			else {
+				restrictedBillon = _billon;
+				originalBillon = _unusedBillon;
+			}
+		}
+		else {
+			originalBillon = _billon;
+		}
+		Billon * newBillon = originalBillon->restrictToArea( _ui->_spinRestrictedAreaResolution->value(), _ui->_spinRestrictedAreaThreshold->value() );
+		if ( newBillon != 0 ) {
+			if ( restrictedBillon != 0 ) delete restrictedBillon;
+			restrictedBillon = 0;
+			if ( _isUsedOriginalBillon ) {
+				_unusedBillon = newBillon;
+			}
+			else {
+				_billon = newBillon;
+			}
 			drawSlice();
 		}
 	}
 }
 
+void MainWindow::changeBillonUsed() {
+	if ( _billon != 0 && _unusedBillon != 0 ) {
+		_isUsedOriginalBillon = !_isUsedOriginalBillon;
+		Billon *temporaryBillon = _billon;
+		_billon = _unusedBillon;
+		_unusedBillon = temporaryBillon;
+		QPalette palette;
+		if ( _isUsedOriginalBillon ) {
+			palette.setBrush(QPalette::Active,QPalette::Window,QBrush(QColor(170,255,100)));
+			_ui->_labelBillonUsed->setPalette(palette);
+			_ui->_labelBillonUsed->setText(tr("Actuellement : Billon original"));
+		}
+		else {
+			palette.setBrush(QPalette::Active,QPalette::Window,QBrush(QColor(255,170,100)));
+			_ui->_labelBillonUsed->setPalette(palette);
+			_ui->_labelBillonUsed->setText(tr("Actuellement : Billon restreint"));
+		}
+		drawSlice();
+	}
+}
 
 void MainWindow::exportToDat() {
 	if ( _billon != 0 ) {
@@ -563,6 +602,10 @@ void MainWindow::openNewBillon( const QString &folderName ) {
 		delete _billon;
 		_billon = 0;
 	}
+	if ( _unusedBillon != 0 ) {
+		delete _unusedBillon;
+		_unusedBillon = 0;
+	}
 	if ( !folderName.isEmpty() ) {
 		_billon = DicomReader::read(folderName);
 	}
@@ -574,6 +617,11 @@ void MainWindow::openNewBillon( const QString &folderName ) {
 		_pix = QImage(0,0,QImage::Format_ARGB32);
 		_intensityInterval.setBounds(1,0);
 	}
+	_isUsedOriginalBillon = true;
+	QPalette palette;
+	palette.setBrush(QPalette::Active,QPalette::Window,QBrush(QColor(170,255,100)));
+	_ui->_labelBillonUsed->setPalette(palette);
+	_ui->_labelBillonUsed->setText(tr("Actuellement : Billon original"));
 }
 
 void MainWindow::drawSlice() {

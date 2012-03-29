@@ -152,9 +152,7 @@ void PieChartDiagrams::compute( const Billon &billon, const PieChart &pieChart, 
  *******************************/
 
 void PieChartDiagrams::clearAll() {
-	while ( !_histograms.isEmpty() ) {
-		_histograms.removeLast();
-	}
+	qDeleteAll(_histograms.begin(),_histograms.end());
 	if ( _polarCurve != 0 ) {
 		delete _polarCurve;
 		_polarCurve = 0;

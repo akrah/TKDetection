@@ -15,17 +15,17 @@
 #define DOUBLE_ERR_NEG (-DOUBLE_ERR_POS)
 
 namespace {
-	inline qreal ANGLE( const qreal &xo, const qreal &yo, const qreal &x2, const qreal &y2 ) {
-		const qreal x_diff = x2-xo;
-		const qreal sqrt = qSqrt(qPow(x_diff,2)+pow(y2-yo,2));
-		qreal arcos = sqrt!=0?qAcos(x_diff / sqrt):0;
-		if ( yo > y2 ) arcos = -arcos+TWO_PI;
-		return arcos;
-	}
-
 	inline bool IS_EQUAL( const qreal & v1, const qreal &v2 ) {
 		const qreal diff = v1 - v2;
 		return (diff < DOUBLE_ERR_POS) && (diff > DOUBLE_ERR_NEG);
+	}
+
+	inline qreal ANGLE( const qreal &xo, const qreal &yo, const qreal &x2, const qreal &y2 ) {
+		const qreal x_diff = x2-xo;
+		const qreal sqrt = qSqrt(qPow(x_diff,2)+pow(y2-yo,2));
+		qreal arcos = !IS_EQUAL(sqrt,0.)?qAcos(x_diff / sqrt):0;
+		if ( yo > y2 ) arcos = -arcos+TWO_PI;
+		return arcos;
 	}
 
 	template<class T>

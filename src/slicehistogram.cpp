@@ -116,6 +116,7 @@ void SliceHistogram::constructHistogram( const Billon &billon, const Marrow &mar
 	qreal cumul;
 
 	_datasHistogram.reserve(depth-1);
+	nbPixels = 0;
 
 	QList<int> circleLines;
 	for ( j=-radius ; j<radiusMax ; ++j ) {
