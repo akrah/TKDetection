@@ -14,6 +14,7 @@
 #include "inc/datexport.h"
 #include "inc/ofsexport.h"
 #include "inc/v3dexport.h"
+#include "inc/histoexport.h"
 #include "inc/opticalflow.h"
 
 #include <QFileDialog>
@@ -522,10 +523,11 @@ void MainWindow::exportHisto() {
         if ( _billon != 0 && _marrow != 0 ) {
             QString fileName = QFileDialog::getSaveFileName(this, tr("Exporter l'histo' .sep"), "output.sep", tr("Fichiers séquences de point euclidiens (*.sep);;Tous les fichiers (*.*)"));
                 if ( !fileName.isEmpty() ) {
-                        OfsExport::process( *_billon, *_marrow, _slicesInterval, fileName, _ui->_spinExportNbEdges->value(), _ui->_spinExportRadius->value() );
+                        HistoExport::process( *_billon,  *_sliceHistogram, _slicesInterval,fileName );
                 }
         }
 }
+
 
 
 void MainWindow::exportToV3D() {
