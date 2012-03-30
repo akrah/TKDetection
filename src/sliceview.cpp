@@ -280,8 +280,6 @@ void SliceView::drawRestrictedArea( QImage &image, const Billon &billon, const i
 	orientation = 0.;
 	k = 0;
 
-	QPainter painter(&image);
-	painter.setPen(Qt::green);
 
 	for ( i=0 ; i<nbPoints ; ++i ) {
 		orientation += (TWO_PI/(qreal)nbPoints);
@@ -295,12 +293,13 @@ void SliceView::drawRestrictedArea( QImage &image, const Billon &billon, const i
 		}
 		polygonPoints[k++] = xEdge;
 		polygonPoints[k++] = yEdge;
-		painter.drawPoint(xEdge,yEdge);
 	}
 	polygonPoints[k++] = polygonPoints[0];
 	polygonPoints[k] = polygonPoints[1];
 
 	polygon.setPoints(nbPoints+1,polygonPoints);
+
+	QPainter painter;
 
 	if ( _restrictedAreaDrawCircle ) {
 		QRect boudingRect = polygon.boundingRect();
@@ -312,10 +311,11 @@ void SliceView::drawRestrictedArea( QImage &image, const Billon &billon, const i
 
 		const QRgb bg = qRgb(0,0,0);
 
-		painter.fillRect(0,0,imageWidth,yTop,bg);
-		painter.fillRect(0,yTop,xLeft,yBottom,bg);
-		painter.fillRect(xRight,yTop,imageWidth,yBottom,bg);
-		painter.fillRect(0,yBottom,imageWidth,imageHeight,bg);
+		painter.begin(&image);
+			painter.fillRect(0,0,imageWidth,yTop,bg);
+			painter.fillRect(0,yTop,xLeft,yBottom,bg);
+			painter.fillRect(xRight,yTop,imageWidth,yBottom,bg);
+			painter.fillRect(0,yBottom,imageWidth,imageHeight,bg);
 		painter.end();
 
 		QRgb * line =(QRgb *) image.bits();
@@ -331,6 +331,10 @@ void SliceView::drawRestrictedArea( QImage &image, const Billon &billon, const i
 			line += endLineWidth;
 		}
 	}
+
+	painter.begin(&image);
+	painter.setPen(Qt::green);
+	painter.drawPolygon(polygon);
 }
 
 //void SliceView::drawRestrictedArea( QImage &image, const Billon &billon, const int &sliceNumber, const IntensityInterval &intensityInterval ) {

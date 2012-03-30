@@ -113,8 +113,12 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 }
 
 MainWindow::~MainWindow() {
-	qDeleteAll(_pieChartPlots.begin(),_pieChartPlots.end());
+	// Ordre de suppression de _pieChartDiagrams et _pieChartPlots à respecter :
+	//    Qwt entraine la suppression des éléments de _pieChartDiagrams quand on supprime les _pieChartPlot associès
+	// (quand on a utilisé la fonction attach())
 	delete _pieChartDiagrams;
+	qDeleteAll(_pieChartPlots);
+	_pieChartPlots.clear();
 	delete _pieChart;
 	delete _sliceHistogram;
 	delete _sliceView;

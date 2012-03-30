@@ -78,20 +78,26 @@ void SliceHistogram::constructHistogram( const Billon &billon, const IntensityIn
 	const uint width = billon.n_cols;
 	const uint height = billon.n_rows;
 	const uint depth = billon.n_slices;
-	const uint nbPixels = height*width;
 	const int minValue = intensityInterval.min();
 	const int maxValue = intensityInterval.max();
 
 	_datasHistogram.reserve(depth-1);
 
 	qreal cumul;
+	int currentSliceValue, previousSliceValue, nbPixels;
 	for ( uint k=1 ; k<depth ; ++k ) {
 		const arma::Slice &slice = billon.slice(k);
 		const arma::Slice &prevSlice = billon.slice(k-1);
 		cumul = 0;
+		nbPixels = 0;
 		for ( uint j=0 ; j<height ; ++j ) {
 			for ( uint i=0 ; i<width ; ++i ) {
-				cumul += qAbs(RESTRICT_TO_INTERVAL(slice.at(j,i),minValue,maxValue) - RESTRICT_TO_INTERVAL(prevSlice.at(j,i),minValue,maxValue));
+				currentSliceValue = RESTRICT_TO_INTERVAL(slice.at(j,i),minValue,maxValue);
+				previousSliceValue = RESTRICT_TO_INTERVAL(prevSlice.at(j,i),minValue,maxValue);
+				if ( currentSliceValue > minValue && previousSliceValue > minValue ) {
+					cumul += qAbs(currentSliceValue - previousSliceValue);
+					nbPixels++;
+				}
 			}
 		}
 		_datasHistogram.append(QwtIntervalSample(cumul/nbPixels,k-1,k));
@@ -111,28 +117,36 @@ void SliceHistogram::constructHistogram( const Billon &billon, const Marrow &mar
 	diameter /= billon.voxelWidth();
 	const int radius = diameter/2;
 	const int radiusMax = radius+1;
-	int i, j, iRadius, nbPixels;
+	int i, j, iRadius;
 	uint k, marrowX, marrowY;
 	qreal cumul;
 
 	_datasHistogram.reserve(depth-1);
-	nbPixels = 0;
+	//nbPixels = 0;
 
 	QList<int> circleLines;
 	for ( j=-radius ; j<radiusMax ; ++j ) {
 		circleLines.append(qSqrt(qAbs(qPow(radius,2)-qPow(j,2))));
-		nbPixels += 2*circleLines.last()+1;
+		//nbPixels += 2*circleLines.last()+1;
 	}
+
+	int currentSliceValue, previousSliceValue, nbPixels;
 	for ( k=1 ; k<depth ; ++k ) {
 		const arma::Slice &slice = billon.slice(k);
 		const arma::Slice &prevSlice = billon.slice(k-1);
 		marrowX = marrow[k].x+radiusMax;
 		marrowY = marrow[k].y+radiusMax;
 		cumul = 0;
+		nbPixels = 0;
 		for ( j=-radius ; j<radiusMax ; ++j ) {
 			iRadius = circleLines[j+radius];
 			for ( i=-iRadius ; i<iRadius+1 ; ++i ) {
-				cumul += qAbs(RESTRICT_TO_INTERVAL(slice.at(marrowY+j,marrowX+i),minValue,maxValue) - RESTRICT_TO_INTERVAL(prevSlice.at(marrowY+j,marrowX+i),minValue,maxValue));
+				currentSliceValue = RESTRICT_TO_INTERVAL(slice.at(marrowY+j,marrowX+i),minValue,maxValue);
+				previousSliceValue = RESTRICT_TO_INTERVAL(prevSlice.at(marrowY+j,marrowX+i),minValue,maxValue);
+				if ( currentSliceValue > minValue && previousSliceValue > minValue ) {
+					cumul += qAbs(currentSliceValue - previousSliceValue);
+					nbPixels++;
+				}
 			}
 		}
 		_datasHistogram.append(QwtIntervalSample(cumul/nbPixels,k-1,k));

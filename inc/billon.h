@@ -90,6 +90,7 @@ void BillonTpl<T>::setVoxelSize(const qreal &width, const qreal &height, const q
 template< typename T >
 BillonTpl<T> * BillonTpl<T>::restrictToArea( const int &nbPolygonPoints, const int &threshold ) {
 	BillonTpl *restrictedBillon = new BillonTpl(*this);
+	restrictedBillon->setMinValue(threshold);
 	const int nbSlices = restrictedBillon->n_slices;
 
 	for ( int indexSlice = 0 ; indexSlice<nbSlices ; ++indexSlice ) {

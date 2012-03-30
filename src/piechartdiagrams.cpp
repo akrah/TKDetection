@@ -35,9 +35,8 @@ int PieChartDiagrams::minimalDifference() const {
  *******************************/
 
 void PieChartDiagrams::attach( const QList<QwtPlot *> & plots ) {
-	const int nbPlots = plots.size();
-	const int nbHistograms = _histograms.size();
-	for ( int i=0 ; i<nbPlots && i<nbHistograms ; ++i ) {
+	const int nbMaxIter = qMin(plots.size(),_histograms.size());
+	for ( int i=0 ; i<nbMaxIter ; ++i ) {
 		if ( _histograms[i] != 0 && plots[i] != 0 ) {
 			_histograms[i]->attach(plots[i]);
 		}
@@ -66,8 +65,8 @@ void PieChartDiagrams::compute( const Billon &billon, const PieChart &pieChart, 
 	if ( slicesInterval.isValid() && intensityInterval.isValid() ) {
 		const int nbSectors = pieChart.nbSectors();
 		const int nbValues = intensityInterval.count();
-		const int minValue = intensityInterval.min();
-		const int maxValue = intensityInterval.max();
+		const int minValue = billon.minValue(); // intensityInterval.min();
+		const int maxValue = billon.maxValue(); // intensityInterval.max();
 		const int sliceWidth = billon.n_cols;
 		const int sliceMiddleX = sliceWidth/2;
 		const int sliceHeight = billon.n_rows;
@@ -86,15 +85,21 @@ void PieChartDiagrams::compute( const Billon &billon, const PieChart &pieChart, 
 		centerX = sliceMiddleX;
 		centerY = sliceMiddleY;
 		diffMax = 0;
+
+		int currentSliceValue, previousSliceValue;
 		for ( k=minOfInterval ; k<=maxOfInterval ; ++k ) {
 			for ( j=0 ; j<sliceHeight ; ++j ) {
 				for ( i=0 ; i<sliceWidth ; ++i ) {
 					sectorIdx = pieChart.partOfAngle( TWO_PI-ANGLE(centerX,centerY,i,j) );
-					diffVal = qAbs(RESTRICT_TO_INTERVAL(billon(j,i,k),minValue,maxValue)-RESTRICT_TO_INTERVAL(billon(j,i,previousSlice),minValue,maxValue));
-					if ( diffVal > _minimalDifference ) {
-						histogramsData[sectorIdx][diffVal].value += 1.;
-						sectorsSum[sectorIdx] += diffVal;
-						diffMax = qMax(diffMax,diffVal);
+					currentSliceValue = RESTRICT_TO_INTERVAL(billon(j,i,k),minValue,maxValue);
+					previousSliceValue = RESTRICT_TO_INTERVAL(billon(j,i,previousSlice),minValue,maxValue);
+					if ( currentSliceValue>minValue && previousSliceValue>minValue ) {
+						diffVal = qAbs(currentSliceValue-previousSliceValue);
+						if ( diffVal > _minimalDifference ) {
+							histogramsData[sectorIdx][diffVal].value += 1.;
+							sectorsSum[sectorIdx] += diffVal;
+							diffMax = qMax(diffMax,diffVal);
+						}
 					}
 				}
 			}
@@ -109,8 +114,8 @@ void PieChartDiagrams::compute( const Billon &billon, const PieChart &pieChart, 
 	clearAll();
 	if ( slicesInterval.isValid() && intensityInterval.isValid() ) {
 		const int nbSectors = pieChart.nbSectors();
-		const int minValue = intensityInterval.min();
-		const int maxValue = intensityInterval.max();
+		const int minValue = billon.minValue(); // intensityInterval.min();
+		const int maxValue = billon.maxValue(); // intensityInterval.max();
 		const int nbValues = intensityInterval.count();
 		const int sliceWidth = billon.n_cols;
 		const int sliceHeight = billon.n_rows;
@@ -126,17 +131,23 @@ void PieChartDiagrams::compute( const Billon &billon, const PieChart &pieChart, 
 		// Calcul des diagrammes en parcourant les tranches du billon comprises dans l'intervalle
 		QVector<int> sectorsSum(nbSectors,0);
 		diffMax = 0;
+
+		int currentSliceValue, previousSliceValue;
 		for ( k=minOfInterval ; k<=maxOfInterval ; ++k ) {
 			centerX = marrow[k].x;
 			centerY = marrow[k].y;
 			for ( j=0 ; j<sliceHeight ; ++j ) {
 				for ( i=0 ; i<sliceWidth ; ++i ) {
 					sectorIdx = pieChart.partOfAngle( TWO_PI-ANGLE(centerX,centerY,i,j) );
-					diffVal = qAbs(RESTRICT_TO_INTERVAL(billon(j,i,k),minValue,maxValue)-RESTRICT_TO_INTERVAL(billon(j,i,previousSlice),minValue,maxValue));
-					if ( diffVal > _minimalDifference ) {
-						histogramsData[sectorIdx][diffVal].value += 1.;
-						sectorsSum[sectorIdx] += diffVal;
-						diffMax = qMax(diffMax,diffVal);
+					currentSliceValue = RESTRICT_TO_INTERVAL(billon(j,i,k),minValue,maxValue);
+					previousSliceValue = RESTRICT_TO_INTERVAL(billon(j,i,previousSlice),minValue,maxValue);
+					if ( currentSliceValue>minValue && previousSliceValue>minValue ) {
+						diffVal = qAbs(currentSliceValue-previousSliceValue);
+						if ( diffVal > _minimalDifference ) {
+							histogramsData[sectorIdx][diffVal].value += 1.;
+							sectorsSum[sectorIdx] += diffVal;
+							diffMax = qMax(diffMax,diffVal);
+						}
 					}
 				}
 			}
@@ -152,7 +163,8 @@ void PieChartDiagrams::compute( const Billon &billon, const PieChart &pieChart, 
  *******************************/
 
 void PieChartDiagrams::clearAll() {
-	qDeleteAll(_histograms.begin(),_histograms.end());
+	qDeleteAll(_histograms);
+	_histograms.clear();
 	if ( _polarCurve != 0 ) {
 		delete _polarCurve;
 		_polarCurve = 0;
