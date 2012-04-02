@@ -14,6 +14,7 @@
 #include "inc/datexport.h"
 #include "inc/ofsexport.h"
 #include "inc/v3dexport.h"
+#include "inc/histoexport.h"
 #include "inc/opticalflow.h"
 
 #include <QFileDialog>
@@ -97,7 +98,8 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 	QObject::connect(_ui->_buttonMaxSlice, SIGNAL(clicked()), this, SLOT(setMaximumOfSlicesIntervalToCurrentSlice()));
 	QObject::connect(_ui->_buttonExportDat, SIGNAL(clicked()), this, SLOT(exportToDat()));
 	QObject::connect(_ui->_buttonExportOfs, SIGNAL(clicked()), this, SLOT(exportToOfs()));
-	QObject::connect(_ui->_buttonExportV3D, SIGNAL(clicked()), this, SLOT(exportToV3D()));
+        QObject::connect(_ui->_buttonExportHisto, SIGNAL(clicked()), this, SLOT(exportHisto()));
+        QObject::connect(_ui->_buttonExportV3D, SIGNAL(clicked()), this, SLOT(exportToV3D()));
 	QObject::connect(_ui->_buttonExportFlowV3D, SIGNAL(clicked()), this, SLOT(exportFlowToV3D()));
 	QObject::connect(_ui->_buttonExportDiagramV3D, SIGNAL(clicked()), this, SLOT(exportDiagramToV3D()));
 
@@ -519,6 +521,18 @@ void MainWindow::exportToOfs() {
 		}
 	}
 }
+
+
+void MainWindow::exportHisto() {
+        if ( _billon != 0 && _marrow != 0 ) {
+            QString fileName = QFileDialog::getSaveFileName(this, tr("Exporter l'histo' .sep"), "output.sep", tr("Fichiers séquences de point euclidiens (*.sep);;Tous les fichiers (*.*)"));
+                if ( !fileName.isEmpty() ) {
+                        HistoExport::process( *_billon,  *_sliceHistogram, _slicesInterval,fileName );
+                }
+        }
+}
+
+
 
 void MainWindow::exportToV3D() {
 	if ( _billon != 0 ) {

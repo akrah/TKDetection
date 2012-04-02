@@ -33,6 +33,7 @@ SOURCES		=	main.cpp \
 				marrowextractor.cpp \
 				marrowextractor_def.cpp \
 				ofsexport.cpp \
+                                histoexport.cpp \
 				opticalflow.cpp \
 				piechart.cpp \
 				piechartdiagrams.cpp \
@@ -57,6 +58,7 @@ HEADERS		=	billon.h \
 				marrowextractor.h \
 				marrowextractor_def.h \
 				ofsexport.h \
+                                histoexport.h \
 				opticalflow.h \
 				opticalflow_def.h \
 				piepart.h \
