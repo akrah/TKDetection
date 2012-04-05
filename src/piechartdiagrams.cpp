@@ -1,7 +1,6 @@
 #include "inc/piechartdiagrams.h"
 
 #include "inc/billon.h"
-#include "inc/global.h"
 #include "inc/marrow.h"
 #include "inc/piechart.h"
 #include "inc/piepart.h"
@@ -91,8 +90,8 @@ void PieChartDiagrams::compute( const Billon &billon, const PieChart &pieChart, 
 			for ( j=0 ; j<sliceHeight ; ++j ) {
 				for ( i=0 ; i<sliceWidth ; ++i ) {
 					sectorIdx = pieChart.partOfAngle( TWO_PI-ANGLE(centerX,centerY,i,j) );
-					currentSliceValue = RESTRICT_TO_INTERVAL(billon(j,i,k),minValue,maxValue);
-					previousSliceValue = RESTRICT_TO_INTERVAL(billon(j,i,previousSlice),minValue,maxValue);
+					currentSliceValue = qBound(minValue,billon(j,i,k),maxValue);
+					previousSliceValue = qBound(minValue,billon(j,i,previousSlice),maxValue);
 					if ( currentSliceValue>minValue && previousSliceValue>minValue ) {
 						diffVal = qAbs(currentSliceValue-previousSliceValue);
 						if ( diffVal > _minimalDifference ) {
@@ -139,8 +138,8 @@ void PieChartDiagrams::compute( const Billon &billon, const PieChart &pieChart, 
 			for ( j=0 ; j<sliceHeight ; ++j ) {
 				for ( i=0 ; i<sliceWidth ; ++i ) {
 					sectorIdx = pieChart.partOfAngle( TWO_PI-ANGLE(centerX,centerY,i,j) );
-					currentSliceValue = RESTRICT_TO_INTERVAL(billon(j,i,k),minValue,maxValue);
-					previousSliceValue = RESTRICT_TO_INTERVAL(billon(j,i,previousSlice),minValue,maxValue);
+					currentSliceValue = qBound(minValue,billon(j,i,k),maxValue);
+					previousSliceValue = qBound(minValue,billon(j,i,previousSlice),maxValue);
 					if ( currentSliceValue>minValue && previousSliceValue>minValue ) {
 						diffVal = qAbs(currentSliceValue-previousSliceValue);
 						if ( diffVal > _minimalDifference ) {

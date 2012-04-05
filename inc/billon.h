@@ -2,6 +2,7 @@
 #define BILLON_H
 
 #include "global.h"
+#include "marrow.h"
 
 #include <qglobal.h>
 #include <armadillo>
@@ -26,7 +27,7 @@ public:
 	void setMaxValue( const T &value );
 	void setVoxelSize( const qreal &width, const qreal &height, const qreal &depth );
 
-	BillonTpl * restrictToArea( const int &nbPolygonsPoints, const int &threshold );
+	BillonTpl * restrictToArea( const int &nbPolygonsPoints, const int &threshold, const Marrow *marrow = 0 );
 
 protected:
 	T _minValue;
@@ -88,19 +89,19 @@ void BillonTpl<T>::setVoxelSize(const qreal &width, const qreal &height, const q
 }
 
 template< typename T >
-BillonTpl<T> * BillonTpl<T>::restrictToArea( const int &nbPolygonPoints, const int &threshold ) {
+BillonTpl<T> * BillonTpl<T>::restrictToArea( const int &nbPolygonPoints, const int &threshold, const Marrow *marrow ) {
 	BillonTpl *restrictedBillon = new BillonTpl(*this);
 	restrictedBillon->setMinValue(threshold);
 	const int nbSlices = restrictedBillon->n_slices;
+	const int thresholdRestrict = threshold-1;
 
 	for ( int indexSlice = 0 ; indexSlice<nbSlices ; ++indexSlice ) {
 		arma::Mat<T> &currentSlice = restrictedBillon->slice(indexSlice);
 
 		const int sliceWidth = currentSlice.n_cols;
 		const int sliceHeight = currentSlice.n_rows;
-		const int xCenter = sliceWidth/2;
-		const int yCenter = sliceHeight/2;
-		const int thresholdRestrict = RESTRICT_TO_INTERVAL(threshold,_minValue,_maxValue);
+		const int xCenter = (marrow != 0 && marrow->interval().containsClosed(indexSlice))?marrow->at(indexSlice).x:sliceWidth/2;
+		const int yCenter = (marrow != 0 && marrow->interval().containsClosed(indexSlice))?marrow->at(indexSlice).y:sliceHeight/2;
 
 		QPolygon polygon(nbPolygonPoints);
 		int polygonPoints[2*nbPolygonPoints+2];
@@ -114,9 +115,9 @@ BillonTpl<T> * BillonTpl<T>::restrictToArea( const int &nbPolygonPoints, const i
 			orientation += (TWO_PI/static_cast<qreal>(nbPolygonPoints));
 			cosAngle = qCos(orientation);
 			sinAngle = -qSin(orientation);
-			xEdge = xCenter; // + 50*cosAngle;
-			yEdge = yCenter; // + 50*sinAngle;
-			while ( currentSlice.at(yEdge,xEdge) > thresholdRestrict && xEdge>0. && yEdge>0. && xEdge<sliceWidth && yEdge<sliceHeight ) {
+			xEdge = xCenter + 5*cosAngle;
+			yEdge = yCenter + 5*sinAngle;
+			while ( xEdge>0. && yEdge>0. && xEdge<sliceWidth && yEdge<sliceHeight && currentSlice.at(yEdge,xEdge) > thresholdRestrict ) {
 				xEdge += cosAngle;
 				yEdge += sinAngle;
 			}
@@ -134,10 +135,10 @@ BillonTpl<T> * BillonTpl<T>::restrictToArea( const int &nbPolygonPoints, const i
 		const int yTop = qMax(0,boudingRect.top());
 		const int yBottom = qMin(sliceHeight-1,boudingRect.bottom()+1);
 
-		currentSlice.submat(0,0,yTop,sliceWidth-1).fill(_minValue);
-		currentSlice.submat(yTop,0,yBottom,xLeft).fill(_minValue);
-		currentSlice.submat(yTop,xRight,yBottom,sliceWidth-1).fill(_minValue);
-		currentSlice.submat(yBottom,0,sliceHeight-1,sliceWidth-1).fill(_minValue);
+		currentSlice.submat(0,0,yTop,sliceWidth-1).fill(threshold);
+		currentSlice.submat(yTop,0,yBottom,xLeft).fill(threshold);
+		currentSlice.submat(yTop,xRight,yBottom,sliceWidth-1).fill(threshold);
+		currentSlice.submat(yBottom,0,sliceHeight-1,sliceWidth-1).fill(threshold);
 
 		polygon.translate(-xLeft,-yTop);
 		arma::Mat<T> boudingSlice = currentSlice.submat( arma::span(yTop,yBottom), arma::span(xLeft,xRight) );
@@ -146,7 +147,7 @@ BillonTpl<T> * BillonTpl<T>::restrictToArea( const int &nbPolygonPoints, const i
 		for ( j=0 ; j<boudinHeight ; ++j ) {
 			for ( i=0 ; i<boudingWidth ; ++i ) {
 				if ( !polygon.containsPoint(QPoint(i,j),Qt::WindingFill) ) {
-					boudingSlice.at(j,i) = _minValue;
+					boudingSlice.at(j,i) = threshold;
 				}
 			}
 		}

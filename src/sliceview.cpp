@@ -1,7 +1,6 @@
 #include "inc/sliceview.h"
 
 #include "inc/billon.h"
-#include "inc/global.h"
 #include "inc/marrow.h"
 #include "inc/opticalflow.h"
 #include "inc/intensityinterval.h"
@@ -125,7 +124,7 @@ void SliceView::drawCurrentSlice( QImage &image, const Billon &billon, const int
 
 	for ( j=0 ; j<height ; j++) {
 		for ( i=0 ; i<width ; i++) {
-			color = (RESTRICT_TO_INTERVAL(slice.at(j,i),minValue,maxValue)-minValue)*fact;
+			color = (qBound(minValue,slice.at(j,i),maxValue)-minValue)*fact;
 			*(line++) = qRgb(color,color,color);
 		}
 	}
@@ -146,7 +145,7 @@ void SliceView::drawAverageSlice( QImage &image, const Billon &billon, const Int
 		for (uint i=0 ; i<width ; i++) {
 			color = depth*(-minValue);
 			for (uint k=0 ; k<depth ; k++) {
-				color += RESTRICT_TO_INTERVAL(billon.at(j,i,k),minValue,maxValue);
+				color += qBound(minValue,billon.at(j,i,k),maxValue);
 			}
 			color *= fact;
 			*(line++) = qRgb(color,color,color);
@@ -169,7 +168,7 @@ void SliceView::drawMedianSlice( QImage &image, const Billon &billon, const Inte
 		for (uint i=0 ; i<width ; i++) {
 			ivec tab(depth);
 			for (uint k=0 ; k<depth ; k++) {
-				tab(k) = RESTRICT_TO_INTERVAL(billon.at(j,i,k),minValue,maxValue);
+				tab(k) = qBound(minValue,billon.at(j,i,k),maxValue);
 			}
 			color = (median(tab)-minValue)*fact;
 			*(line++) = qRgb(color,color,color);
@@ -199,10 +198,10 @@ void SliceView::drawMovementSlice( QImage &image, const Billon &billon, const in
 	if ( _movementWithBackground ) {
 		for ( j=0 ; j<height ; j++) {
 			for ( i=0 ; i<width ; i++) {
-				pixelAbsDiff = qAbs(((RESTRICT_TO_INTERVAL(previousSlice.at(j,i),minValue,maxValue)-minValue)) - ((RESTRICT_TO_INTERVAL(toCompareSlice.at(j,i),minValue,maxValue)-minValue)));
+				pixelAbsDiff = qAbs(((qBound(minValue,previousSlice.at(j,i),maxValue)-minValue)) - ((qBound(minValue,toCompareSlice.at(j,i),maxValue)-minValue)));
 				if ( pixelAbsDiff > _movementThreshold ) *line = foreground;
 				else {
-					color = (RESTRICT_TO_INTERVAL(currentSlice.at(j,i),minValue,maxValue)-minValue)*fact;
+					color = (qBound(minValue,currentSlice.at(j,i),maxValue)-minValue)*fact;
 					*line = qRgb(color,color,color);
 					//*line = background;
 				}
@@ -213,7 +212,7 @@ void SliceView::drawMovementSlice( QImage &image, const Billon &billon, const in
 	else {
 		for ( j=0 ; j<height ; j++) {
 			for ( i=0 ; i<width ; i++) {
-				pixelAbsDiff = qAbs(((RESTRICT_TO_INTERVAL(previousSlice.at(j,i),minValue,maxValue)-minValue)) - ((RESTRICT_TO_INTERVAL(toCompareSlice.at(j,i),minValue,maxValue)-minValue)));
+				pixelAbsDiff = qAbs(((qBound(minValue,previousSlice.at(j,i),maxValue)-minValue)) - ((qBound(minValue,toCompareSlice.at(j,i),maxValue)-minValue)));
 				if ( pixelAbsDiff > _movementThreshold ) *line = foreground;
 				else *line = background;
 				line++;
@@ -263,7 +262,7 @@ void SliceView::drawRestrictedArea( QImage &image, const Billon &billon, const i
 
 	const int max = intensityInterval.max();
 	const int min = intensityInterval.min();
-	const int threshold = RESTRICT_TO_INTERVAL(_restrictedAreaThreshold,min,max);
+	const int threshold = qBound(min,_restrictedAreaThreshold,max);
 
 	const Slice &currentSlice = billon.slice(sliceNumber);
 
@@ -287,7 +286,7 @@ void SliceView::drawRestrictedArea( QImage &image, const Billon &billon, const i
 		sinAngle = -qSin(orientation);
 		xEdge = xCenter; // + 50*cosAngle;
 		yEdge = yCenter; // + 50*sinAngle;
-		while ( RESTRICT_TO_INTERVAL(currentSlice.at(yEdge,xEdge),min,max) > threshold && xEdge>0 && yEdge>0 && xEdge<imageWidth && yEdge<imageHeight ) {
+		while ( qBound(min,currentSlice.at(yEdge,xEdge),max) > threshold && xEdge>0 && yEdge>0 && xEdge<imageWidth && yEdge<imageHeight ) {
 			xEdge += cosAngle;
 			yEdge += sinAngle;
 		}
@@ -342,7 +341,7 @@ void SliceView::drawRestrictedArea( QImage &image, const Billon &billon, const i
 
 //	const int max = intensityInterval.max();
 //	const int min = intensityInterval.min();
-//	const int threshold = RESTRICT_TO_INTERVAL(_restrictedAreaThreshold,min,max);
+//	const int threshold = qBound(min,_restrictedAreaThreshold,max);
 
 //	const Slice &currentSlice = billon.slice(sliceNumber);
 
@@ -361,7 +360,7 @@ void SliceView::drawRestrictedArea( QImage &image, const Billon &billon, const i
 //		sinAngle = -qSin(orientation);
 //		xEdge = xCenter + 50*cosAngle;
 //		yEdge = yCenter + 50*sinAngle;
-//		while ( RESTRICT_TO_INTERVAL(currentSlice.at(yEdge,xEdge),min,max) > threshold ) {
+//		while ( qBound(min,currentSlice.at(yEdge,xEdge),max) > threshold ) {
 //			xEdge += cosAngle;
 //			yEdge += sinAngle;
 //		}

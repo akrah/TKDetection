@@ -34,11 +34,15 @@ public:
 private slots:
 	void openDicom();
 	void closeImage();
+	void drawSlice();
 	void drawSlice( const int &sliceNumber );
 	void setTypeOfView( const int &type );
 	void setLowThreshold( const int &threshold );
 	void setHighThreshold( const int &threshold );
 	void updateSliceHistogram();
+	void setMarrowAroundDiameter( const int &diameter );
+	void setHistogramIntervalType( const int &type );
+	void enableHistogramSmoothing( const bool &enable );
 	void highlightSliceHistogram( const int &slicePosition );
 	void updateMarrow();
 	void updateSectorsHistograms();
@@ -62,15 +66,14 @@ private slots:
 	void exportToDat();
 	void exportToOfs();
 	void exportToV3D();
-        void exportFlowToV3D();
-        void exportHisto();
-        void exportDiagramToV3D();
+	void exportFlowToV3D();
+	void exportHisto();
+	void exportDiagramToV3D();
 
 
 
 private:
 	void openNewBillon(const QString &folderName = "");
-	void drawSlice();
 	void updateComponentsValues();
 	void enabledComponents();
 

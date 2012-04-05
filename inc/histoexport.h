@@ -8,7 +8,7 @@ class SlicesInterval;
 class Marrow;
 
 namespace HistoExport {
-  void process( const Billon &billon, const SliceHistogram &sliceHisto, const SlicesInterval &interval, const QString &fileName);
+  void process( const SliceHistogram &sliceHisto, const SlicesInterval &interval, const QString &fileName);
 }
 
 

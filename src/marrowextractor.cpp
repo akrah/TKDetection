@@ -2,7 +2,6 @@
 
 #include "inc/marrow.h"
 #include "inc/marrowextractor_def.h"
-#include "inc/global.h"
 
 MarrowExtractor::MarrowExtractor() :
 	_falseCutPercent(MarrowExtractorDefaultsParameters::FALSE_CUT_PERCENT),

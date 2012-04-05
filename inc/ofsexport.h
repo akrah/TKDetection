@@ -8,7 +8,7 @@ class SlicesInterval;
 class Marrow;
 
 namespace OfsExport {
-  void process( const Billon &billon, const Marrow &marrow, const SlicesInterval &interval, const QString &fileName, const int &nbEdgesPerSlice = 4, const int &radiusOfTubes = 10 );
+	void process( const Billon &billon, const Marrow &marrow, const SlicesInterval &interval, const QString &fileName, const int &nbEdgesPerSlice = 4, const int &radiusOfTubes = 10 );
 }
 
 

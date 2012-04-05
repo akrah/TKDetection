@@ -4,7 +4,7 @@
 #
 # Project created by QtCreator 2011-12-08T16:51:12
 #
-#                Adrien Krähenbühl
+#		Adrien Krähenbühl
 #
 #-----------------------------------------------------
 
@@ -26,6 +26,7 @@ DEPENDPATH	*=	./src/ ./inc/ ./ui/
 SOURCES		=	main.cpp \
 				datexport.cpp \
 				dicomreader.cpp \
+				histoexport.cpp \
 				intensityinterval.cpp \
 				interval.cpp \
 				mainwindow.cpp \
@@ -33,7 +34,6 @@ SOURCES		=	main.cpp \
 				marrowextractor.cpp \
 				marrowextractor_def.cpp \
 				ofsexport.cpp \
-                                histoexport.cpp \
 				opticalflow.cpp \
 				piechart.cpp \
 				piechartdiagrams.cpp \
@@ -50,6 +50,7 @@ HEADERS		=	billon.h \
 				datexport.h \
 				dicomreader.h \
 				global.h \
+				histoexport.h \
 				intensityinterval.h \
 				interval.h \
 				mainwindow.h \
@@ -58,7 +59,6 @@ HEADERS		=	billon.h \
 				marrowextractor.h \
 				marrowextractor_def.h \
 				ofsexport.h \
-                                histoexport.h \
 				opticalflow.h \
 				opticalflow_def.h \
 				piepart.h \
@@ -70,7 +70,8 @@ HEADERS		=	billon.h \
 				sliceview.h \
 				sliceview_def.h \
 				slicezoomer.h \
-				v3dexport.h
+				v3dexport.h \
+    slicehistogram_def.h
 
 FORMS		=	mainwindow.ui
 

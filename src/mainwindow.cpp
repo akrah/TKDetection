@@ -78,6 +78,11 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 	QObject::connect(_ui->_buttonUpdateSliceHistogram, SIGNAL(clicked()), this, SLOT(updateSliceHistogram()));
 	QObject::connect(_ui->_buttonPreviousMaximum, SIGNAL(clicked()), this, SLOT(previousMaximumInSliceHistogram()));
 	QObject::connect(_ui->_buttonNextMaximum, SIGNAL(clicked()), this, SLOT(nextMaximumInSliceHistogram()));
+	QObject::connect(_ui->_sliderMarrowAroundDiameter, SIGNAL(valueChanged(int)), this, SLOT(setMarrowAroundDiameter(int)));
+	QObject::connect(_ui->_spinMarrowAroundDiameter, SIGNAL(valueChanged(int)), this, SLOT(setMarrowAroundDiameter(int)));
+	QObject::connect(_ui->_checkMarrowAroundDiameter, SIGNAL(clicked()), this, SLOT(drawSlice()));
+	QObject::connect(_ui->_comboHistogramInterval, SIGNAL(activated(int)), this, SLOT(setHistogramIntervalType(int)));
+	QObject::connect(_ui->_checkHistogramSmoothing, SIGNAL(toggled(bool)), this, SLOT(enableHistogramSmoothing(bool)));
 
 	// Évènements déclenchés par les bouton associès à la moelle
 	QObject::connect(_ui->_buttonComputeMarrow, SIGNAL(clicked()), this, SLOT(updateMarrow()));
@@ -98,8 +103,8 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 	QObject::connect(_ui->_buttonMaxSlice, SIGNAL(clicked()), this, SLOT(setMaximumOfSlicesIntervalToCurrentSlice()));
 	QObject::connect(_ui->_buttonExportDat, SIGNAL(clicked()), this, SLOT(exportToDat()));
 	QObject::connect(_ui->_buttonExportOfs, SIGNAL(clicked()), this, SLOT(exportToOfs()));
-        QObject::connect(_ui->_buttonExportHisto, SIGNAL(clicked()), this, SLOT(exportHisto()));
-        QObject::connect(_ui->_buttonExportV3D, SIGNAL(clicked()), this, SLOT(exportToV3D()));
+	QObject::connect(_ui->_buttonExportHisto, SIGNAL(clicked()), this, SLOT(exportHisto()));
+	QObject::connect(_ui->_buttonExportV3D, SIGNAL(clicked()), this, SLOT(exportToV3D()));
 	QObject::connect(_ui->_buttonExportFlowV3D, SIGNAL(clicked()), this, SLOT(exportFlowToV3D()));
 	QObject::connect(_ui->_buttonExportDiagramV3D, SIGNAL(clicked()), this, SLOT(exportDiagramToV3D()));
 
@@ -187,7 +192,14 @@ void MainWindow::drawSlice( const int &sliceNumber ) {
 		_pix.fill(0xff000000);
 		_sliceView->drawSlice(_pix,*_billon,sliceNumber,_intensityInterval);
 		highlightSliceHistogram(sliceNumber);
-		if ( _marrow != 0 ) _marrow->draw(_pix,sliceNumber);
+		if ( _marrow != 0 ) {
+			_marrow->draw(_pix,sliceNumber);
+			if ( _ui->_checkMarrowAroundDiameter->isChecked() && _sliceHistogram->marrowAroundDiameter() > 0 ) {
+				QPainter painter(&_pix);
+				iCoord2D center = _marrow->at(sliceNumber-_marrow->interval().min());
+				painter.drawEllipse(QPointF(center.x,center.y),_sliceHistogram->marrowAroundDiameter()/(2.*_billon->voxelWidth()),_sliceHistogram->marrowAroundDiameter()/(2.*_billon->voxelHeight()));
+			}
+		}
 		if ( !_pieChartPlots.isEmpty() && _slicesInterval.containsClosed(sliceNumber)) {
 			iCoord2D center(_pix.width()/2,_pix.height()/2);
 			if ( _marrow != 0 &&  _marrow->interval().containsClosed(sliceNumber) ) {
@@ -256,8 +268,8 @@ void MainWindow::updateSliceHistogram() {
 	_sliceHistogram->detach();
 	_sliceHistogram->clear();
 	if ( _billon != 0 ) {
-		if ( _marrow != 0 )	_sliceHistogram->constructHistogram(*_billon, *_marrow, _intensityInterval);
-		else _sliceHistogram->constructHistogram(*_billon, _intensityInterval);
+		if ( _marrow != 0 )	_sliceHistogram->constructHistogram(*_billon, *_marrow);
+		else _sliceHistogram->constructHistogram(*_billon);
 	}
 	_histogramCursor.detach();
 	_sliceHistogram->attach(_ui->_plotSliceHistogram);
@@ -266,6 +278,28 @@ void MainWindow::updateSliceHistogram() {
 	highlightSliceHistogram(_currentSlice);
 }
 
+void MainWindow::setMarrowAroundDiameter( const int &diameter ) {
+	_sliceHistogram->setMarrowAroundDiameter(diameter);
+
+	_ui->_spinMarrowAroundDiameter->blockSignals(true);
+		_ui->_spinMarrowAroundDiameter->setValue(diameter);
+	_ui->_spinMarrowAroundDiameter->blockSignals(false);
+
+	_ui->_sliderMarrowAroundDiameter->blockSignals(true);
+		_ui->_sliderMarrowAroundDiameter->setValue(diameter);
+	_ui->_sliderMarrowAroundDiameter->blockSignals(false);
+
+	drawSlice();
+}
+
+void MainWindow::setHistogramIntervalType( const int &type ) {
+	_sliceHistogram->setIntervalType( static_cast<const HistogramIntervalType::HistogramIntervalType>(type) );
+	drawSlice();
+}
+
+void MainWindow::enableHistogramSmoothing( const bool &enable ) {
+	_sliceHistogram->enableSmoothing(enable);
+}
 
 void MainWindow::highlightSliceHistogram( const int &slicePosition ) {
 	qreal height = _sliceHistogram->value(slicePosition);
@@ -388,6 +422,7 @@ void MainWindow::dragInSliceView( const QPoint &movementVector ) {
 
 void MainWindow::setMovementThreshold( const int &threshold ) {
 	_sliceView->setMovementThreshold(threshold);
+	_sliceHistogram->setMovementThreshold(threshold);
 
 	_ui->_spinMovementThreshold->blockSignals(true);
 		_ui->_spinMovementThreshold->setValue(threshold);
@@ -468,7 +503,7 @@ void MainWindow::computeRestrictedBillon() {
 		else {
 			originalBillon = _billon;
 		}
-		Billon * newBillon = originalBillon->restrictToArea( _ui->_spinRestrictedAreaResolution->value(), _ui->_spinRestrictedAreaThreshold->value() );
+		Billon * newBillon = originalBillon->restrictToArea( _ui->_spinRestrictedAreaResolution->value(), _ui->_spinRestrictedAreaThreshold->value(), _marrow );
 		if ( newBillon != 0 ) {
 			if ( restrictedBillon != 0 ) delete restrictedBillon;
 			restrictedBillon = 0;
@@ -524,12 +559,12 @@ void MainWindow::exportToOfs() {
 
 
 void MainWindow::exportHisto() {
-        if ( _billon != 0 && _marrow != 0 ) {
-            QString fileName = QFileDialog::getSaveFileName(this, tr("Exporter l'histo' .sep"), "output.sep", tr("Fichiers séquences de point euclidiens (*.sep);;Tous les fichiers (*.*)"));
-                if ( !fileName.isEmpty() ) {
-                        HistoExport::process( *_billon,  *_sliceHistogram, _slicesInterval,fileName );
-                }
-        }
+	if ( _sliceHistogram != 0 ) {
+		QString fileName = QFileDialog::getSaveFileName(this, tr("Exporter l'histo' .sep"), "output.sep", tr("Fichiers séquences de point euclidiens (*.sep);;Tous les fichiers (*.*)"));
+		if ( !fileName.isEmpty() ) {
+			HistoExport::process( *_sliceHistogram, _slicesInterval, fileName );
+		}
+	}
 }
 
 
@@ -600,7 +635,7 @@ void MainWindow::exportDiagramToV3D() {
 				Slice &sliceDiag = billonDiag.slice(k-_slicesInterval.min()-1);
 				for ( j=0 ; j<height ; ++j ) {
 					for ( i=0 ; i<width ; ++i ) {
-						sliceDiag.at(j,i) = qAbs(((RESTRICT_TO_INTERVAL(currentSlice.at(j,i),minValue,maxValue)-minValue)) - ((RESTRICT_TO_INTERVAL(previousSlice.at(j,i),minValue,maxValue)-minValue)));
+						sliceDiag.at(j,i) = qAbs(((qBound(minValue,currentSlice.at(j,i),maxValue)-minValue)) - ((qBound(minValue,previousSlice.at(j,i),maxValue)-minValue)));
 					}
 				}
 			}

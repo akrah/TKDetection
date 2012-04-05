@@ -75,8 +75,8 @@ void PieChart::draw( QImage &image, const int &sectorIdx, const iCoord2D &center
 		angle = twoSides.takeLast();
 		x1 = x2 = centerX;
 		y1 = y2 = centerY;
-		if ( IS_EQUAL(angle,PI_ON_TWO) ) y2 = height;
-		else if ( IS_EQUAL(angle,THREE_PI_ON_TWO) ) y1 = 0;
+		if ( qFuzzyCompare(angle,PI_ON_TWO) ) y2 = height;
+		else if ( qFuzzyCompare(angle,THREE_PI_ON_TWO) ) y1 = 0;
 		else {
 			const qreal a = tan(angle);
 			const qreal b = centerY - (a*centerX);
