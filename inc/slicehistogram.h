@@ -26,8 +26,10 @@ public:
 
 	void setMarrowAroundDiameter( const int &diameter );
 	void setIntervalType( const HistogramIntervalType::HistogramIntervalType &type );
-	void setMovementThreshold( const int &threshold );
+	void setMovementThresholdMin( const int &threshold );
+	void setMovementThresholdMax( const int &threshold );
 	void enableSmoothing( const bool &enable );
+	void useNextSlice( const bool &enable );
 	void attach( QwtPlot * const plot );
 	void detach();
 	void clear();
@@ -64,8 +66,10 @@ private:
 
 	int _marrowAroundDiameter;
 	HistogramIntervalType::HistogramIntervalType _intervalType;
-	int _movementThreshold;
+	int _movementThresholdMin;
+	int _movementThresholdMax;
 	bool _smoothing;
+	bool _useNextSlice;
 };
 
 #endif // SLICEHISTOGRAM_H

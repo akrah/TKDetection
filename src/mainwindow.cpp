@@ -57,8 +57,10 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 
 	// Évènements déclenchés par les boutons de sélection de la vue
 	QObject::connect(_ui->_comboSliceType, SIGNAL(activated(int)), this, SLOT(setTypeOfView(int)));
-	QObject::connect(_ui->_sliderMovementThreshold, SIGNAL(valueChanged(int)), this, SLOT(setMovementThreshold(int)));
-	QObject::connect(_ui->_spinMovementThreshold, SIGNAL(valueChanged(int)), this, SLOT(setMovementThreshold(int)));
+	QObject::connect(_ui->_sliderMovementThresholdMin, SIGNAL(valueChanged(int)), this, SLOT(setMovementThresholdMin(int)));
+	QObject::connect(_ui->_spinMovementThresholdMin, SIGNAL(valueChanged(int)), this, SLOT(setMovementThresholdMin(int)));
+	QObject::connect(_ui->_sliderMovementThresholdMax, SIGNAL(valueChanged(int)), this, SLOT(setMovementThresholdMax(int)));
+	QObject::connect(_ui->_spinMovementThresholdMax, SIGNAL(valueChanged(int)), this, SLOT(setMovementThresholdMax(int)));
 	QObject::connect(_ui->_checkDrawMovementWithBackground, SIGNAL(toggled(bool)), this, SLOT(enableMovementWithBackground(bool)));
 	QObject::connect(_ui->_checkUseNextSlice, SIGNAL(toggled(bool)), this, SLOT(useNextSliceInsteadOfCurrentSlice(bool)));
 	QObject::connect(_ui->_buttonFlowApplied, SIGNAL(clicked()), this, SLOT(flowApplied()));
@@ -422,17 +424,32 @@ void MainWindow::dragInSliceView( const QPoint &movementVector ) {
 	if ( movementVector.y() != 0 ) scrollArea.verticalScrollBar()->setValue(scrollArea.verticalScrollBar()->value()-movementVector.y());
 }
 
-void MainWindow::setMovementThreshold( const int &threshold ) {
-	_sliceView->setMovementThreshold(threshold);
-	_sliceHistogram->setMovementThreshold(threshold);
+void MainWindow::setMovementThresholdMin( const int &threshold ) {
+	_sliceView->setMovementThresholdMin(threshold);
+	_sliceHistogram->setMovementThresholdMin(threshold);
 
-	_ui->_spinMovementThreshold->blockSignals(true);
-		_ui->_spinMovementThreshold->setValue(threshold);
-	_ui->_spinMovementThreshold->blockSignals(false);
+	_ui->_spinMovementThresholdMin->blockSignals(true);
+		_ui->_spinMovementThresholdMin->setValue(threshold);
+	_ui->_spinMovementThresholdMin->blockSignals(false);
 
-	_ui->_sliderMovementThreshold->blockSignals(true);
-		_ui->_sliderMovementThreshold->setValue(threshold);
-	_ui->_sliderMovementThreshold->blockSignals(false);
+	_ui->_sliderMovementThresholdMin->blockSignals(true);
+		_ui->_sliderMovementThresholdMin->setValue(threshold);
+	_ui->_sliderMovementThresholdMin->blockSignals(false);
+
+	drawSlice();
+}
+
+void MainWindow::setMovementThresholdMax( const int &threshold ) {
+	_sliceView->setMovementThresholdMax(threshold);
+	_sliceHistogram->setMovementThresholdMax(threshold);
+
+	_ui->_spinMovementThresholdMax->blockSignals(true);
+		_ui->_spinMovementThresholdMax->setValue(threshold);
+	_ui->_spinMovementThresholdMax->blockSignals(false);
+
+	_ui->_sliderMovementThresholdMax->blockSignals(true);
+		_ui->_sliderMovementThresholdMax->setValue(threshold);
+	_ui->_sliderMovementThresholdMax->blockSignals(false);
 
 	drawSlice();
 }
@@ -444,6 +461,7 @@ void MainWindow::enableMovementWithBackground( const bool &enable ) {
 
 void MainWindow::useNextSliceInsteadOfCurrentSlice( const bool &enable ) {
 	_sliceView->useNextSliceInsteadOfCurrentSlice(enable);
+	_sliceHistogram->useNextSlice(enable);
 	drawSlice();
 }
 

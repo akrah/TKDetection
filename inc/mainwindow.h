@@ -54,7 +54,8 @@ private slots:
 	void nextMaximumInSliceHistogram();
 	void zoomInSliceView( const qreal &zoomFactor, const QPoint &focalPoint );
 	void dragInSliceView( const QPoint &movementVector );
-	void setMovementThreshold( const int &threshold );
+	void setMovementThresholdMin( const int &threshold );
+	void setMovementThresholdMax( const int &threshold );
 	void enableMovementWithBackground( const bool &enable );
 	void useNextSliceInsteadOfCurrentSlice( const bool &enable );
 	void flowApplied();

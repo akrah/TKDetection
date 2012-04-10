@@ -10,7 +10,7 @@
 #include <QPainter>
 
 SliceView::SliceView() : _typeOfView(SliceType::CURRENT),
-	_movementThreshold(0), _movementWithBackground(false), _useNextSliceInsteadOfCurrentSlice(false),
+	_movementThresholdMin(0), _movementThresholdMax(1000), _movementWithBackground(false), _useNextSliceInsteadOfCurrentSlice(false),
 	_flowAlpha(FLOW_ALPHA_DEFAULT), _flowEpsilon(FLOW_EPSILON_DEFAULT), _flowMaximumIterations(FLOW_MAXIMUM_ITERATIONS),
 	_restrictedAreaResolution(100), _restrictedAreaThreshold(-900), _restrictedAreaDrawCircle(true), _restrictedAreaBeginRadius(0)
 {
@@ -26,8 +26,12 @@ void SliceView::setTypeOfView( const SliceType::SliceType &type ) {
 	}
 }
 
-void SliceView::setMovementThreshold( const int &threshold ) {
-	_movementThreshold = threshold;
+void SliceView::setMovementThresholdMin( const int &threshold ) {
+	_movementThresholdMin = threshold;
+}
+
+void SliceView::setMovementThresholdMax( const int &threshold ) {
+	_movementThresholdMax = threshold;
 }
 
 void SliceView::enableMovementWithBackground( const bool &enable ) {
@@ -203,7 +207,7 @@ void SliceView::drawMovementSlice( QImage &image, const Billon &billon, const in
 		for ( j=0 ; j<height ; j++) {
 			for ( i=0 ; i<width ; i++) {
 				pixelAbsDiff = qAbs(((qBound(minValue,previousSlice.at(j,i),maxValue)-minValue)) - ((qBound(minValue,toCompareSlice.at(j,i),maxValue)-minValue)));
-				if ( pixelAbsDiff > _movementThreshold ) *line = foreground;
+				if ( pixelAbsDiff > _movementThresholdMin && pixelAbsDiff < _movementThresholdMax ) *line = foreground;
 				else {
 					color = (qBound(minValue,currentSlice.at(j,i),maxValue)-minValue)*fact;
 					*line = qRgb(color,color,color);
@@ -217,7 +221,7 @@ void SliceView::drawMovementSlice( QImage &image, const Billon &billon, const in
 		for ( j=0 ; j<height ; j++) {
 			for ( i=0 ; i<width ; i++) {
 				pixelAbsDiff = qAbs(((qBound(minValue,previousSlice.at(j,i),maxValue)-minValue)) - ((qBound(minValue,toCompareSlice.at(j,i),maxValue)-minValue)));
-				if ( pixelAbsDiff > _movementThreshold ) *line = foreground;
+				if ( pixelAbsDiff > _movementThresholdMin && pixelAbsDiff < _movementThresholdMax ) *line = foreground;
 				else *line = background;
 				line++;
 			}

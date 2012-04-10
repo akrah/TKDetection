@@ -17,7 +17,8 @@ public:
 
 	void setTypeOfView( const SliceType::SliceType &type );
 
-	void setMovementThreshold( const int &threshold );
+	void setMovementThresholdMin( const int &threshold );
+	void setMovementThresholdMax( const int &threshold );
 	void enableMovementWithBackground( const bool &enable );
 	void useNextSliceInsteadOfCurrentSlice( const bool &enable );
 
@@ -46,7 +47,8 @@ private :
 private:
 	SliceType::SliceType _typeOfView;
 
-	int _movementThreshold;
+	int _movementThresholdMin;
+	int _movementThresholdMax;
 	bool _movementWithBackground;
 	bool _useNextSliceInsteadOfCurrentSlice;
 
