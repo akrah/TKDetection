@@ -10,7 +10,7 @@
 
 # Version d'ITK installée : itk3 | itk4
 ITK_VERSION = itk4
-ITK_NUMBER =  4.1
+ITK_NUMBER =  4.0
 
 #------------ NE PAS MODIFIER EN DESSOUS ------------#
 
@@ -71,7 +71,7 @@ HEADERS		=	billon.h \
 				sliceview_def.h \
 				slicezoomer.h \
 				v3dexport.h \
-    slicehistogram_def.h
+	slicehistogram_def.h
 
 FORMS		=	mainwindow.ui
 

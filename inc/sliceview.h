@@ -7,6 +7,7 @@
 #include "billon_def.h"
 class IntensityInterval;
 class QImage;
+class Marrow;
 
 class SliceView
 {
@@ -30,8 +31,9 @@ public:
 	void setRestrictedAreaResolution( const int &resolution );
 	void setRestrictedAreaThreshold( const int &threshold );
 	void enableRestrictedAreaCircle( const bool &enable );
+	void setRestrictedAreaBeginRadius( const int &radius );
 
-	void drawSlice( QImage &image, const Billon &billon, const int &sliceNumber, const IntensityInterval &intensityInterval );
+	void drawSlice( QImage &image, const Billon &billon, const Marrow *marrow, const int &sliceNumber, const IntensityInterval &intensityInterval );
 
 private :
 	void drawCurrentSlice( QImage &image, const Billon &billon, const int &sliceNumber, const IntensityInterval &intensityInterval );
@@ -39,7 +41,7 @@ private :
 	void drawMedianSlice( QImage &image, const Billon &billon, const IntensityInterval &intensityInterval );
 	void drawMovementSlice( QImage &image, const Billon &billon, const int &sliceNumber, const IntensityInterval &intensityInterval );
 	void drawFlowSlice( QImage &image, const Billon &billon, const int &sliceNumber );
-	void drawRestrictedArea( QImage &image, const Billon &billon, const int &sliceNumber, const IntensityInterval &intensityInterval );
+	void drawRestrictedArea( QImage &image, const Billon &billon, const Marrow *marrow, const int &sliceNumber, const IntensityInterval &intensityInterval );
 
 private:
 	SliceType::SliceType _typeOfView;
@@ -55,6 +57,7 @@ private:
 	int _restrictedAreaResolution;
 	int _restrictedAreaThreshold;
 	bool _restrictedAreaDrawCircle;
+	int _restrictedAreaBeginRadius;
 };
 
 #endif // SLICEVIEW_H

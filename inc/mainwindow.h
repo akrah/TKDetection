@@ -61,6 +61,7 @@ private slots:
 	void setRestrictedAreaResolution( const int &resolution );
 	void setRestrictedAreaThreshold( const int &threshold );
 	void enableRestrictedAreaCircle( const bool &enable ) ;
+	void setRestrictedAreaBeginRadius( const int &radius );
 	void computeRestrictedBillon();
 	void changeBillonUsed();
 	void exportToDat();

@@ -12,7 +12,7 @@
 SliceView::SliceView() : _typeOfView(SliceType::CURRENT),
 	_movementThreshold(0), _movementWithBackground(false), _useNextSliceInsteadOfCurrentSlice(false),
 	_flowAlpha(FLOW_ALPHA_DEFAULT), _flowEpsilon(FLOW_EPSILON_DEFAULT), _flowMaximumIterations(FLOW_MAXIMUM_ITERATIONS),
-	_restrictedAreaResolution(100), _restrictedAreaThreshold(-900), _restrictedAreaDrawCircle(true)
+	_restrictedAreaResolution(100), _restrictedAreaThreshold(-900), _restrictedAreaDrawCircle(true), _restrictedAreaBeginRadius(0)
 {
 }
 
@@ -74,7 +74,11 @@ void SliceView::enableRestrictedAreaCircle( const bool &enable )  {
 	_restrictedAreaDrawCircle = enable;
 }
 
-void SliceView::drawSlice( QImage &image, const Billon &billon, const int &sliceNumber, const IntensityInterval &intensityInterval ) {
+void SliceView::setRestrictedAreaBeginRadius( const int &radius ) {
+	_restrictedAreaBeginRadius = radius;
+}
+
+void SliceView::drawSlice( QImage &image, const Billon &billon, const Marrow *marrow, const int &sliceNumber, const IntensityInterval &intensityInterval ) {
 	if ( sliceNumber > -1 && sliceNumber < static_cast<int>(billon.n_slices) ) {
 		switch (_typeOfView) {
 			// Affichage de la coupe moyenne
@@ -94,7 +98,7 @@ void SliceView::drawSlice( QImage &image, const Billon &billon, const int &slice
 				break;
 			case SliceType::RESTRICTED_AREA :
 				drawCurrentSlice( image, billon, sliceNumber, intensityInterval );
-				drawRestrictedArea( image, billon, sliceNumber, intensityInterval );
+				drawRestrictedArea( image, billon, marrow, sliceNumber, intensityInterval );
 				break;
 			case SliceType::CURRENT:
 			default :
@@ -257,7 +261,7 @@ void SliceView::drawFlowSlice( QImage &image, const Billon &billon, const int &s
 	delete field;
 }
 
-void SliceView::drawRestrictedArea( QImage &image, const Billon &billon, const int &sliceNumber, const IntensityInterval &intensityInterval ) {
+void SliceView::drawRestrictedArea( QImage &image, const Billon &billon, const Marrow *marrow, const int &sliceNumber, const IntensityInterval &intensityInterval ) {
 	const int nbPoints = _restrictedAreaResolution;
 
 	const int max = intensityInterval.max();
@@ -268,8 +272,8 @@ void SliceView::drawRestrictedArea( QImage &image, const Billon &billon, const i
 
 	const int imageWidth = currentSlice.n_cols;
 	const int imageHeight = currentSlice.n_rows;
-	const int xCenter = image.width()/2;
-	const int yCenter = image.height()/2;
+	const int xCenter = (marrow != 0 && marrow->interval().containsClosed(sliceNumber))?marrow->at(sliceNumber-marrow->interval().min()).x:imageWidth/2;
+	const int yCenter = (marrow != 0 && marrow->interval().containsClosed(sliceNumber))?marrow->at(sliceNumber-marrow->interval().min()).y:imageHeight/2;
 
 	QPolygon polygon(nbPoints);
 	int polygonPoints[2*nbPoints+2];
@@ -279,13 +283,12 @@ void SliceView::drawRestrictedArea( QImage &image, const Billon &billon, const i
 	orientation = 0.;
 	k = 0;
 
-
 	for ( i=0 ; i<nbPoints ; ++i ) {
-		orientation += (TWO_PI/(qreal)nbPoints);
+		orientation += (TWO_PI/static_cast<qreal>(nbPoints));
 		cosAngle = qCos(orientation);
 		sinAngle = -qSin(orientation);
-		xEdge = xCenter; // + 50*cosAngle;
-		yEdge = yCenter; // + 50*sinAngle;
+		xEdge = xCenter + _restrictedAreaBeginRadius*cosAngle;
+		yEdge = yCenter + _restrictedAreaBeginRadius*sinAngle;
 		while ( qBound(min,currentSlice.at(yEdge,xEdge),max) > threshold && xEdge>0 && yEdge>0 && xEdge<imageWidth && yEdge<imageHeight ) {
 			xEdge += cosAngle;
 			yEdge += sinAngle;

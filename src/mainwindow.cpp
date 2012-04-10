@@ -65,6 +65,8 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 	QObject::connect(_ui->_spinRestrictedAreaResolution, SIGNAL(valueChanged(int)), this, SLOT(setRestrictedAreaResolution(int)));
 	QObject::connect(_ui->_spinRestrictedAreaThreshold, SIGNAL(valueChanged(int)), this, SLOT(setRestrictedAreaThreshold(int)));
 	QObject::connect(_ui->_checkRestrictedAreaEnableCircle, SIGNAL(toggled(bool)), this, SLOT(enableRestrictedAreaCircle(bool)));
+	QObject::connect(_ui->_sliderRestrictedAreaBeginRadius, SIGNAL(valueChanged(int)), this, SLOT(setRestrictedAreaBeginRadius(int)));
+	QObject::connect(_ui->_spinRestrictedAreaBeginRadius, SIGNAL(valueChanged(int)), this, SLOT(setRestrictedAreaBeginRadius(int)));
 	QObject::connect(_ui->_buttonComputeRestrictedBillon, SIGNAL(clicked()), this, SLOT(computeRestrictedBillon()));
 	QObject::connect(_ui->_buttonChangeBillonUsed, SIGNAL(clicked()), this, SLOT(changeBillonUsed()));
 
@@ -190,7 +192,7 @@ void MainWindow::drawSlice( const int &sliceNumber ) {
 	if ( _billon != 0 ) {
 		_ui->_labelSliceNumber->setNum(sliceNumber);
 		_pix.fill(0xff000000);
-		_sliceView->drawSlice(_pix,*_billon,sliceNumber,_intensityInterval);
+		_sliceView->drawSlice(_pix,*_billon,_marrow,sliceNumber,_intensityInterval);
 		highlightSliceHistogram(sliceNumber);
 		if ( _marrow != 0 ) {
 			_marrow->draw(_pix,sliceNumber);
@@ -483,6 +485,20 @@ void MainWindow::setRestrictedAreaThreshold( const int &threshold ) {
 
 void MainWindow::enableRestrictedAreaCircle( const bool &enable )  {
 	_sliceView->enableRestrictedAreaCircle(enable);
+	drawSlice();
+}
+
+void MainWindow::setRestrictedAreaBeginRadius( const int &radius ) {
+	_sliceView->setRestrictedAreaBeginRadius( radius );
+
+	_ui->_sliderRestrictedAreaBeginRadius->blockSignals(true);
+		_ui->_sliderRestrictedAreaBeginRadius->setValue(radius);
+	_ui->_sliderRestrictedAreaBeginRadius->blockSignals(false);
+
+	_ui->_spinRestrictedAreaBeginRadius->blockSignals(true);
+		_ui->_spinRestrictedAreaBeginRadius->setValue(radius);
+	_ui->_spinRestrictedAreaBeginRadius->blockSignals(false);
+
 	drawSlice();
 }
 
