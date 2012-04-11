@@ -87,6 +87,8 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 	QObject::connect(_ui->_checkMarrowAroundDiameter, SIGNAL(clicked()), this, SLOT(drawSlice()));
 	QObject::connect(_ui->_comboHistogramInterval, SIGNAL(activated(int)), this, SLOT(setHistogramIntervalType(int)));
 	QObject::connect(_ui->_checkHistogramSmoothing, SIGNAL(toggled(bool)), this, SLOT(enableHistogramSmoothing(bool)));
+	QObject::connect(_ui->_sliderHistogramIntervalMinimumWidth, SIGNAL(valueChanged(int)), this, SLOT(setHistogramIntervalMinimumWidth(int)));
+	QObject::connect(_ui->_spinHistogramIntervalMinimumWidth, SIGNAL(valueChanged(int)), this, SLOT(setHistogramIntervalMinimumWidth(int)));
 
 	// Évènements déclenchés par les bouton associès à la moelle
 	QObject::connect(_ui->_buttonComputeMarrow, SIGNAL(clicked()), this, SLOT(updateMarrow()));
@@ -94,7 +96,6 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 	// Évènements déclenchés par les bouton associès aux histogrammes de secteurs
 	QObject::connect(_ui->_buttonUpdateSectors, SIGNAL(clicked()), this, SLOT(updateSectorsHistograms()));
 	QObject::connect(_ui->_comboSelectSector, SIGNAL(currentIndexChanged(int)), this, SLOT(selectSectorHistogram(int)));
-	QObject::connect(_ui->_spinMinimumIntensityForSum, SIGNAL(valueChanged(int)), this, SLOT(setMinimalDifferenceForSectors(int)));
 
 	// Évènements déclenchés par la souris sur le visualiseur de coupes
 	QObject::connect(&_sliceZoomer, SIGNAL(zoomFactorChanged(qreal,QPoint)), this, SLOT(zoomInSliceView(qreal,QPoint)));
@@ -105,12 +106,12 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 	QObject::connect(_ui->_buttonMinSlice, SIGNAL(clicked()), this, SLOT(setMinimumOfSlicesIntervalToCurrentSlice()));
 	QObject::connect(_ui->_spinMaxSlice, SIGNAL(valueChanged(int)), &_slicesInterval, SLOT(setMax(int)));
 	QObject::connect(_ui->_buttonMaxSlice, SIGNAL(clicked()), this, SLOT(setMaximumOfSlicesIntervalToCurrentSlice()));
-	QObject::connect(_ui->_buttonExportDat, SIGNAL(clicked()), this, SLOT(exportToDat()));
-	QObject::connect(_ui->_buttonExportOfs, SIGNAL(clicked()), this, SLOT(exportToOfs()));
-	QObject::connect(_ui->_buttonExportHisto, SIGNAL(clicked()), this, SLOT(exportHisto()));
-	QObject::connect(_ui->_buttonExportV3D, SIGNAL(clicked()), this, SLOT(exportToV3D()));
-	QObject::connect(_ui->_buttonExportFlowV3D, SIGNAL(clicked()), this, SLOT(exportFlowToV3D()));
-	QObject::connect(_ui->_buttonExportDiagramV3D, SIGNAL(clicked()), this, SLOT(exportDiagramToV3D()));
+	QObject::connect(_ui->_buttonExportToDat, SIGNAL(clicked()), this, SLOT(exportToDat()));
+	QObject::connect(_ui->_buttonExportToOfs, SIGNAL(clicked()), this, SLOT(exportToOfs()));
+	QObject::connect(_ui->_buttonExportHistogramToSep, SIGNAL(clicked()), this, SLOT(exportHistogramToV3D()));
+	QObject::connect(_ui->_buttonExportToV3D, SIGNAL(clicked()), this, SLOT(exportToV3D()));
+	QObject::connect(_ui->_buttonExportFlowToV3D, SIGNAL(clicked()), this, SLOT(exportFlowToV3D()));
+	QObject::connect(_ui->_buttonExportMovementsToV3D, SIGNAL(clicked()), this, SLOT(exportMovementsToV3D()));
 
 	// Raccourcis des actions du menu
 	_ui->_actionOpenDicom->setShortcut(Qt::CTRL + Qt::Key_O);
@@ -298,7 +299,18 @@ void MainWindow::setMarrowAroundDiameter( const int &diameter ) {
 
 void MainWindow::setHistogramIntervalType( const int &type ) {
 	_sliceHistogram->setIntervalType( static_cast<const HistogramIntervalType::HistogramIntervalType>(type) );
-	drawSlice();
+}
+
+void MainWindow::setHistogramIntervalMinimumWidth( const int &width ) {
+	_sliceHistogram->setMinimumIntervalWidth(width);
+
+	_ui->_spinHistogramIntervalMinimumWidth->blockSignals(true);
+		_ui->_spinHistogramIntervalMinimumWidth->setValue(width);
+	_ui->_spinHistogramIntervalMinimumWidth->blockSignals(false);
+
+	_ui->_sliderHistogramIntervalMinimumWidth->blockSignals(true);
+		_ui->_sliderHistogramIntervalMinimumWidth->setValue(width);
+	_ui->_sliderHistogramIntervalMinimumWidth->blockSignals(false);
 }
 
 void MainWindow::enableHistogramSmoothing( const bool &enable ) {
@@ -339,8 +351,7 @@ void MainWindow::updateSectorsHistograms() {
 	_ui->_comboSelectSector->clear();
 	_ui->_polarSectorSum->replot();
 
-	if ( _marrow != 0 )	_pieChartDiagrams->compute( *_billon, *_pieChart, *_marrow, _slicesInterval, _intensityInterval );
-	else _pieChartDiagrams->compute( *_billon, *_pieChart, _slicesInterval, _intensityInterval );
+	if ( _billon != 0 ) _pieChartDiagrams->compute( *_billon, _marrow, *_pieChart, _slicesInterval );
 
 	const int nbHistograms = _pieChartDiagrams->count();
 	if ( nbHistograms != 0 ) {
@@ -389,10 +400,6 @@ void MainWindow::setMaximumOfSlicesIntervalToCurrentSlice() {
 	_ui->_spinMaxSlice->setValue(_currentSlice);
 }
 
-void MainWindow::setMinimalDifferenceForSectors( const int &minimalDifference ) {
-	_pieChartDiagrams->setMinimalDifference(minimalDifference);
-}
-
 void MainWindow::previousMaximumInSliceHistogram() {
 	const int nbMaximums = _sliceHistogram->nbMaximums();
 	_currentMaximum = nbMaximums <= 0 ? -1 : _currentMaximum < 0 ? 0 : _currentMaximum == 0 ? nbMaximums-1 : ( _currentMaximum - 1 ) % nbMaximums;
@@ -427,6 +434,7 @@ void MainWindow::dragInSliceView( const QPoint &movementVector ) {
 void MainWindow::setMovementThresholdMin( const int &threshold ) {
 	_sliceView->setMovementThresholdMin(threshold);
 	_sliceHistogram->setMovementThresholdMin(threshold);
+	_pieChartDiagrams->setMinimalDifference(threshold);
 
 	_ui->_spinMovementThresholdMin->blockSignals(true);
 		_ui->_spinMovementThresholdMin->setValue(threshold);
@@ -591,8 +599,7 @@ void MainWindow::exportToOfs() {
 	}
 }
 
-
-void MainWindow::exportHisto() {
+void MainWindow::exportHistogramToV3D() {
 	if ( _sliceHistogram != 0 ) {
 		QString fileName = QFileDialog::getSaveFileName(this, tr("Exporter l'histo' .sep"), "output.sep", tr("Fichiers séquences de point euclidiens (*.sep);;Tous les fichiers (*.*)"));
 		if ( !fileName.isEmpty() ) {
@@ -601,14 +608,11 @@ void MainWindow::exportHisto() {
 	}
 }
 
-
-
 void MainWindow::exportToV3D() {
 	if ( _billon != 0 ) {
 		QString fileName = QFileDialog::getSaveFileName(this, tr("Exporter en .v3d"), "output.v3d", tr("Fichiers de données (*.v3d);;Tous les fichiers (*.*)"));
 		if ( !fileName.isEmpty() ) {
-			if ( _marrow != 0 )	V3DExport::process( *_billon, *_marrow, fileName, _slicesInterval, _ui->_spinExportThreshold->value() );
-			else 	V3DExport::process( *_billon, fileName, _slicesInterval, _ui->_spinExportThreshold->value() );
+			V3DExport::process( *_billon, _marrow, fileName, _slicesInterval, _ui->_spinExportThreshold->value() );
 		}
 	}
 }
@@ -641,13 +645,12 @@ void MainWindow::exportFlowToV3D() {
 				}
 			}
 
-			if ( _marrow != 0 )	V3DExport::process( billonFlow, *_marrow, fileName, SlicesInterval(0,depth-1), _ui->_spinExportThreshold->value() );
-			else 	V3DExport::process( billonFlow, fileName, SlicesInterval(0,depth-1), _ui->_spinExportThreshold->value() );
+			V3DExport::process( billonFlow, _marrow, fileName, SlicesInterval(0,depth-1), _ui->_spinExportThreshold->value() );
 		}
 	}
 }
 
-void MainWindow::exportDiagramToV3D() {
+void MainWindow::exportMovementsToV3D() {
 	if ( _billon != 0 ) {
 		QString fileName = QFileDialog::getSaveFileName(this, tr("Exporter en .v3d"), "output_diag.v3d", tr("Fichiers de données (*.v3d);;Tous les fichiers (*.*)"));
 		if ( !fileName.isEmpty() ) {
@@ -656,26 +659,25 @@ void MainWindow::exportDiagramToV3D() {
 			const int depth = _slicesInterval.count();
 			const int minValue = _intensityInterval.min();
 			const int maxValue = _intensityInterval.max();
+			const int thresholdMin = _ui->_sliderMovementThresholdMin->value();
+			const int thresholdMax = _ui->_sliderMovementThresholdMax->value();
 
-			Billon billonDiag( width, height, _slicesInterval.count() );
-			billonDiag.setMinValue(_billon->minValue());
-			billonDiag.setMaxValue(_billon->maxValue());
-			billonDiag.setVoxelSize(_billon->voxelWidth(),_billon->voxelHeight(),_billon->voxelDepth());
-			int i,j,k;
+			Billon billonDiag( *_billon );
+			int i,j,k, pixAbsDiff;
 
 			for ( k=_slicesInterval.min()+1 ; k<_slicesInterval.max() ; ++k ) {
-				const Slice &currentSlice = _billon->slice(k);
 				const Slice &previousSlice = _billon->slice(k-1);
+				const Slice &toCompareSlice = _billon->slice(_ui->_checkUseNextSlice && k < _slicesInterval.max()-1 ? k+1 : k );
 				Slice &sliceDiag = billonDiag.slice(k-_slicesInterval.min()-1);
 				for ( j=0 ; j<height ; ++j ) {
 					for ( i=0 ; i<width ; ++i ) {
-						sliceDiag.at(j,i) = qAbs(((qBound(minValue,currentSlice.at(j,i),maxValue)-minValue)) - ((qBound(minValue,previousSlice.at(j,i),maxValue)-minValue)));
+						pixAbsDiff = qAbs(((qBound(minValue,previousSlice.at(j,i),maxValue)-minValue)) - ((qBound(minValue,toCompareSlice.at(j,i),maxValue)-minValue)));
+						if ( (pixAbsDiff <= thresholdMin) && (pixAbsDiff >= thresholdMax) ) sliceDiag.at(j,i) = minValue;
 					}
 				}
 			}
 
-			if ( _marrow != 0 )	V3DExport::process( billonDiag, *_marrow, fileName, SlicesInterval(0,depth-2), _ui->_spinExportThreshold->value() );
-			else 	V3DExport::process( billonDiag, fileName, SlicesInterval(0,depth-2), _ui->_spinExportThreshold->value() );
+			V3DExport::process( billonDiag, _marrow, fileName, SlicesInterval(0,depth-2), _ui->_spinExportThreshold->value() );
 		}
 	}
 }
@@ -757,8 +759,6 @@ void MainWindow::updateComponentsValues() {
 	_ui->_sliderSelectSlice->setValue(0);
 	_ui->_sliderSelectSlice->setRange(0,nbSlices-1);
 
-	_ui->_spinMinimumIntensityForSum->setRange(0,maxValue-minValue);
-
 	enabledComponents();
 }
 
@@ -773,8 +773,8 @@ void MainWindow::enabledComponents() {
 	_ui->_buttonMinSlice->setEnabled(enable);
 	_ui->_buttonUpdateSectors->setEnabled(enable);
 	_ui->_comboSelectSector->setEnabled(enable);
-	_ui->_buttonExportDat->setEnabled(enable);
-	_ui->_buttonExportOfs->setEnabled(enable);
+	_ui->_buttonExportToDat->setEnabled(enable);
+	_ui->_buttonExportToOfs->setEnabled(enable);
 	_ui->_buttonNextMaximum->setEnabled(enable);
 	_ui->_buttonPreviousMaximum->setEnabled(enable);
 }

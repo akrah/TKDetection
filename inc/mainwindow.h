@@ -42,6 +42,7 @@ private slots:
 	void updateSliceHistogram();
 	void setMarrowAroundDiameter( const int &diameter );
 	void setHistogramIntervalType( const int &type );
+	void setHistogramIntervalMinimumWidth( const int &width );
 	void enableHistogramSmoothing( const bool &enable );
 	void highlightSliceHistogram( const int &slicePosition );
 	void updateMarrow();
@@ -49,7 +50,6 @@ private slots:
 	void selectSectorHistogram( const int &sectorIdx );
 	void setMinimumOfSlicesIntervalToCurrentSlice();
 	void setMaximumOfSlicesIntervalToCurrentSlice();
-	void setMinimalDifferenceForSectors( const int &minimalDifference );
 	void previousMaximumInSliceHistogram();
 	void nextMaximumInSliceHistogram();
 	void zoomInSliceView( const qreal &zoomFactor, const QPoint &focalPoint );
@@ -69,8 +69,8 @@ private slots:
 	void exportToOfs();
 	void exportToV3D();
 	void exportFlowToV3D();
-	void exportHisto();
-	void exportDiagramToV3D();
+	void exportHistogramToV3D();
+	void exportMovementsToV3D();
 
 
 

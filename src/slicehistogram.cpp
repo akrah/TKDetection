@@ -8,7 +8,7 @@
 
 SliceHistogram::SliceHistogram() : _histogram(new QwtPlotHistogram()), _histogramMaximums(new QwtPlotHistogram()), _histogramMinimums(new QwtPlotHistogram()), _histogramBranchesArea(new QwtPlotHistogram()),
 	_curveMeans(new QwtPlotCurve()), _dataMeans(0.), _curveMedian(new QwtPlotCurve()), _dataMedian(0.), _marrowAroundDiameter(20), _intervalType(HistogramIntervalType::FROM_EDGE),
-	_movementThresholdMin(0), _movementThresholdMax(1000), _smoothing(true), _useNextSlice(false)
+	_minimumIntervalWidth(0), _movementThresholdMin(0), _movementThresholdMax(1000), _smoothing(true), _useNextSlice(false)
 {
 	_histogramMaximums->setBrush(Qt::green);
 	_histogramMaximums->setPen(QPen(Qt::green));
@@ -57,9 +57,12 @@ int SliceHistogram::sliceOfIemeMaximum( const int &maximumIndex ) const {
 	return sliceIndex;
 }
 
-
 int SliceHistogram::marrowAroundDiameter() const {
 	return _marrowAroundDiameter;
+}
+
+const QVector<QwtIntervalSample> & SliceHistogram::branchesAreas() const {
+	return _datasBranchesRealAreas;
 }
 
 /*******************************
@@ -73,6 +76,10 @@ void SliceHistogram::setIntervalType( const HistogramIntervalType::HistogramInte
 	if ( type > HistogramIntervalType::_HIST_INTERVAL_TYPE_MIN_ && type < HistogramIntervalType::_HIST_INTERVAL_TYPE_MAX__ ) {
 		_intervalType = type;
 	}
+}
+
+void SliceHistogram::setMinimumIntervalWidth( const int &width ) {
+	_minimumIntervalWidth = width;
 }
 
 void SliceHistogram::setMovementThresholdMin( const int &threshold ) {
@@ -143,8 +150,8 @@ void SliceHistogram::clear() {
 	_histogramMaximums->setSamples(_datasMaximums);
 	_datasMinimums.clear();
 	_histogramMinimums->setSamples(_datasMinimums);
-	_datasBranchesArea.clear();
-	_histogramBranchesArea->setSamples(_datasBranchesArea);
+	_datasBranchesAreaToDrawing.clear();
+	_histogramBranchesArea->setSamples(_datasBranchesAreaToDrawing);
 	_dataMeans = 0.;
 	_curveMeans->setSamples(QVector<QPointF>());
 	_dataMedian = 0.;
@@ -225,8 +232,8 @@ void SliceHistogram::constructHistogram( const Billon &billon, const Marrow &mar
 	for ( k=1 ; k<depth ; ++k ) {
 		const arma::Slice &slice = _useNextSlice?billon.slice(k+1):billon.slice(k);
 		const arma::Slice &prevSlice = billon.slice(k-1);
-		marrowX = marrow[k].x+radiusMax;
-		marrowY = marrow[k].y+radiusMax;
+		marrowX = marrow[k].x;
+		marrowY = marrow[k].y;
 		cumul = 0.;
 		nbPixels = 0;
 		for ( j=-radius ; j<radiusMax ; ++j ) {
@@ -258,6 +265,8 @@ void SliceHistogram::constructHistogram( const Billon &billon, const Marrow &mar
 //	updateMinimums();
 	computeMeansAndMedian();
 	computeIntervals();
+
+	_histogramMaximums->setSamples(_datasMaximums);
 }
 
 void SliceHistogram::updateMaximums() {
@@ -278,14 +287,7 @@ void SliceHistogram::updateMaximums() {
 				 (value > _datasHistogram.at(i-5).value) && (value > _datasHistogram.at(i+5).value) &&
 				 (value > _datasHistogram.at(i-6).value) && (value > _datasHistogram.at(i+6).value) &&
 				 (value > _datasHistogram.at(i-7).value) && (value > _datasHistogram.at(i+7).value) &&
-				 (value > _datasHistogram.at(i-8).value) && (value > _datasHistogram.at(i+8).value) &&
-				 (value > _datasHistogram.at(i-9).value) && (value > _datasHistogram.at(i+9).value) &&
-				 (value > _datasHistogram.at(i-10).value) && (value > _datasHistogram.at(i+10).value) &&
-				 (value > _datasHistogram.at(i-11).value) && (value > _datasHistogram.at(i+11).value) &&
-				 (value > _datasHistogram.at(i-12).value) && (value > _datasHistogram.at(i+12).value) &&
-				 (value > _datasHistogram.at(i-13).value) && (value > _datasHistogram.at(i+13).value) &&
-				 (value > _datasHistogram.at(i-14).value) && (value > _datasHistogram.at(i+14).value) &&
-				 (value > _datasHistogram.at(i-15).value) && (value > _datasHistogram.at(i+15).value) ) {
+				 (value > _datasHistogram.at(i-8).value) && (value > _datasHistogram.at(i+8).value) ) {
 				pics.append(i);
 				_datasMaximums.append(_datasHistogram.at(i));
 				i+=filterRadius-1;
@@ -344,53 +346,76 @@ void SliceHistogram::smoothHistogram( QVector< QwtIntervalSample > &histogramDat
 }
 
 void SliceHistogram::computeIntervals() {
-	_datasBranchesArea.clear();
-	const int nbMaximums = this->nbMaximums();
+	_datasBranchesAreaToDrawing.clear();
+	_datasBranchesRealAreas.clear();
+	int nbMaximums = this->nbMaximums();
 	if ( nbMaximums > 0 ) {
 		const int sizeOfHistogram = _datasHistogram.size();
-		int indexMax;
+		int cursorMax, cursorMin;
 		qreal derivated;
 		if ( _intervalType != HistogramIntervalType::FROM_EDGE ) {
 			qreal limit = _intervalType==HistogramIntervalType::FROM_MEANS?_dataMeans:_dataMedian;
 			for ( int i=0 ; i<nbMaximums ; ++i ) {
-				indexMax = sliceOfIemeMaximum(i);
-				derivated = firstdDerivated(_datasHistogram,indexMax);
-				while ( indexMax > 0 && (_datasHistogram.at(indexMax).value > limit || derivated > 0.) ) {
-					_datasBranchesArea.append(_datasHistogram.at(indexMax));
-					indexMax--;
-					if ( indexMax > 0 ) derivated = firstdDerivated(_datasHistogram,indexMax);
+				cursorMin = sliceOfIemeMaximum(i);
+				derivated = firstdDerivated(_datasHistogram,cursorMin);
+				while ( cursorMin > 0 && (_datasHistogram.at(cursorMin).value > limit || derivated > 0.) ) {
+					_datasBranchesAreaToDrawing.append(_datasHistogram.at(cursorMin));
+					cursorMin--;
+					if ( cursorMin > 0 ) derivated = firstdDerivated(_datasHistogram,cursorMin);
 				}
+				cursorMin++;
 
-				indexMax = sliceOfIemeMaximum(i)+1;
-				derivated = firstdDerivated(_datasHistogram,indexMax);
-				while ( indexMax < sizeOfHistogram && (_datasHistogram.at(indexMax).value > limit || derivated < 0.) ) {
-					_datasBranchesArea.append(_datasHistogram.at(indexMax));
-					indexMax++;
-					if ( indexMax < sizeOfHistogram ) derivated = firstdDerivated(_datasHistogram,indexMax);
+				cursorMax = sliceOfIemeMaximum(i)+1;
+				derivated = firstdDerivated(_datasHistogram,cursorMax);
+				while ( cursorMax < sizeOfHistogram && (_datasHistogram.at(cursorMax).value > limit || derivated < 0.) ) {
+					_datasBranchesAreaToDrawing.append(_datasHistogram.at(cursorMax));
+					cursorMax++;
+					if ( cursorMax < sizeOfHistogram ) derivated = firstdDerivated(_datasHistogram,cursorMax);
+				}
+				cursorMax--;
+
+				if ( (cursorMax-cursorMin) > _minimumIntervalWidth ) {
+					_datasBranchesRealAreas.append(QwtIntervalSample(1.,cursorMin,cursorMax));
+				}
+				else {
+					_datasMaximums.remove(i);
+					nbMaximums--;
+					i--;
 				}
 			}
 		}
 		else {
 			for ( int i=0 ; i<nbMaximums ; ++i ) {
-				indexMax = sliceOfIemeMaximum(i);
-				derivated = firstdDerivated(_datasHistogram,indexMax);
-				while ( indexMax > 0 && derivated > 0. ) {
-					_datasBranchesArea.append(_datasHistogram.at(indexMax));
-					indexMax--;
-					if ( indexMax > 0 ) derivated = firstdDerivated(_datasHistogram,indexMax);
+				cursorMin = sliceOfIemeMaximum(i);
+				derivated = firstdDerivated(_datasHistogram,cursorMin);
+				while ( cursorMin > 0 && derivated > 0. ) {
+					_datasBranchesAreaToDrawing.append(_datasHistogram.at(cursorMin));
+					cursorMin--;
+					if ( cursorMin > 0 ) derivated = firstdDerivated(_datasHistogram,cursorMin);
 				}
+				cursorMin++;
 
-				indexMax = sliceOfIemeMaximum(i)+1;
-				derivated = firstdDerivated(_datasHistogram,indexMax);
-				while ( indexMax < sizeOfHistogram && derivated < 0. ) {
-					_datasBranchesArea.append(_datasHistogram.at(indexMax));
-					indexMax++;
-					if ( indexMax < sizeOfHistogram ) derivated = firstdDerivated(_datasHistogram,indexMax);
+				cursorMax = sliceOfIemeMaximum(i)+1;
+				derivated = firstdDerivated(_datasHistogram,cursorMax);
+				while ( cursorMax < sizeOfHistogram && derivated < 0. ) {
+					_datasBranchesAreaToDrawing.append(_datasHistogram.at(cursorMax));
+					cursorMax++;
+					if ( cursorMax < sizeOfHistogram ) derivated = firstdDerivated(_datasHistogram,cursorMax);
+				}
+				cursorMax--;
+
+				if ( (cursorMax-cursorMin) > _minimumIntervalWidth ) {
+					_datasBranchesRealAreas.append(QwtIntervalSample(1.,cursorMin,cursorMax));
+				}
+				else {
+					_datasMaximums.remove(i);
+					nbMaximums--;
+					i--;
 				}
 			}
 		}
 	}
-	_histogramBranchesArea->setSamples(_datasBranchesArea);
+	_histogramBranchesArea->setSamples(_datasBranchesAreaToDrawing);
 }
 
 

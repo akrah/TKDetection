@@ -19,7 +19,7 @@ namespace V3DExport {
 		void writeTag( QXmlStreamWriter &stream, const QString &name, const QString &value );
 	}
 
-	void process( const Billon &billon, const QString &fileName, const SlicesInterval &interval, const int &threshold ) {
+	void process( const Billon &billon, const Marrow *marrow, const QString &fileName, const SlicesInterval &interval, const int &threshold ) {
 		QFile file(fileName);
 
 		if( !file.open(QIODevice::WriteOnly) ) {
@@ -34,28 +34,7 @@ namespace V3DExport {
 
 			stream.writeStartElement("image");
 				appendBillon( billon, interval, threshold, stream );
-			stream.writeEndElement();
-
-		stream.writeEndDocument();
-
-		file.close();
-	}
-
-	void process( const Billon &billon, const Marrow &marrow, const QString &fileName, const SlicesInterval &interval, const int &threshold ) {
-		QFile file(fileName);
-
-		if( !file.open(QIODevice::WriteOnly) ) {
-			qDebug() << QObject::tr("ERREUR : Impossible de créer le ficher XML ") << fileName << ".";
-			return;
-		}
-
-		QXmlStreamWriter stream( &file );
-		stream.setAutoFormatting(true);
-		stream.writeStartDocument("1.0");
-
-			stream.writeStartElement("image");
-				appendBillon( billon, interval, threshold, stream );
-				appendMarrow( marrow, stream );
+				if ( marrow != 0 ) appendMarrow( *marrow, stream );
 			stream.writeEndElement();
 
 		stream.writeEndDocument();

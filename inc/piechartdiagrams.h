@@ -7,7 +7,6 @@
 class Marrow;
 class PieChart;
 class SlicesInterval;
-class IntensityInterval;
 class QwtPlot;
 class QwtPlotHistogram;
 class QwtPolarPlot;
@@ -29,8 +28,7 @@ public:
 
 	void setMinimalDifference( const int &minimalDifference );
 
-	void compute( const Billon &billon, const PieChart &pieChart, const SlicesInterval &slicesInterval, const IntensityInterval &intensityInterval );
-	void compute( const Billon &billon, const PieChart &pieChart, const Marrow &marrow, const SlicesInterval &slicesInterval, const IntensityInterval &intensityInterval );
+	void compute( const Billon &billon, const Marrow *marrow, const PieChart &pieChart, const SlicesInterval &slicesInterval );
 
 private:
 	void clearAll();

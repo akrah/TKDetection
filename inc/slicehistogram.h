@@ -23,9 +23,11 @@ public:
 	int nbMaximums() const;
 	int sliceOfIemeMaximum( const int &maximumIndex ) const;
 	int marrowAroundDiameter() const;
+	const QVector<QwtIntervalSample> & branchesAreas() const;
 
 	void setMarrowAroundDiameter( const int &diameter );
 	void setIntervalType( const HistogramIntervalType::HistogramIntervalType &type );
+	void setMinimumIntervalWidth( const int &width );
 	void setMovementThresholdMin( const int &threshold );
 	void setMovementThresholdMax( const int &threshold );
 	void enableSmoothing( const bool &enable );
@@ -56,7 +58,8 @@ private:
 	QVector<QwtIntervalSample> _datasMinimums;
 
 	QwtPlotHistogram *_histogramBranchesArea;
-	QVector<QwtIntervalSample> _datasBranchesArea;
+	QVector<QwtIntervalSample> _datasBranchesAreaToDrawing;
+	QVector<QwtIntervalSample> _datasBranchesRealAreas;
 
 	QwtPlotCurve *_curveMeans;
 	qreal _dataMeans;
@@ -66,6 +69,7 @@ private:
 
 	int _marrowAroundDiameter;
 	HistogramIntervalType::HistogramIntervalType _intervalType;
+	int _minimumIntervalWidth;
 	int _movementThresholdMin;
 	int _movementThresholdMax;
 	bool _smoothing;

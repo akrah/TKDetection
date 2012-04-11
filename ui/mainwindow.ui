@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>793</width>
-    <height>954</height>
+    <width>969</width>
+    <height>951</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -104,8 +104,8 @@
           <rect>
            <x>0</x>
            <y>0</y>
-           <width>322</width>
-           <height>700</height>
+           <width>482</width>
+           <height>697</height>
           </rect>
          </property>
          <layout class="QHBoxLayout" name="horizontalLayout_8">
@@ -141,7 +141,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>793</width>
+     <width>969</width>
      <height>25</height>
     </rect>
    </property>
@@ -171,8 +171,8 @@
   <widget class="QDockWidget" name="dockWidget_2">
    <property name="minimumSize">
     <size>
-     <width>450</width>
-     <height>740</height>
+     <width>466</width>
+     <height>745</height>
     </size>
    </property>
    <property name="floating">
@@ -192,7 +192,7 @@
      <item>
       <widget class="QTabWidget" name="_tabs">
        <property name="currentIndex">
-        <number>0</number>
+        <number>1</number>
        </property>
        <widget class="QWidget" name="_tabGeneral">
         <attribute name="title">
@@ -227,8 +227,8 @@
                 <rect>
                  <x>0</x>
                  <y>0</y>
-                 <width>382</width>
-                 <height>176</height>
+                 <width>398</width>
+                 <height>173</height>
                 </rect>
                </property>
                <attribute name="label">
@@ -382,6 +382,19 @@
                   </item>
                  </layout>
                 </item>
+                <item row="4" column="1">
+                 <widget class="QPushButton" name="_buttonExportMovementsToV3D">
+                  <property name="font">
+                   <font>
+                    <weight>50</weight>
+                    <bold>false</bold>
+                   </font>
+                  </property>
+                  <property name="text">
+                   <string>Export en .v3d</string>
+                  </property>
+                 </widget>
+                </item>
                </layout>
               </widget>
               <widget class="QWidget" name="_pageFlowParameters">
@@ -389,8 +402,8 @@
                 <rect>
                  <x>0</x>
                  <y>0</y>
-                 <width>322</width>
-                 <height>144</height>
+                 <width>374</width>
+                 <height>177</height>
                 </rect>
                </property>
                <attribute name="label">
@@ -506,6 +519,26 @@
                   </property>
                   <property name="text">
                    <string>Apply</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="4" column="1">
+                 <widget class="QPushButton" name="_buttonExportFlowToV3D">
+                  <property name="font">
+                   <font>
+                    <weight>50</weight>
+                    <bold>false</bold>
+                   </font>
+                  </property>
+                  <property name="text">
+                   <string>Export flot en .v3d</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="3" column="0">
+                 <widget class="Line" name="line">
+                  <property name="orientation">
+                   <enum>Qt::Horizontal</enum>
                   </property>
                  </widget>
                 </item>
@@ -775,6 +808,41 @@ autour de la moelle</string>
            </property>
           </widget>
          </item>
+         <item row="5" column="1">
+          <widget class="QPushButton" name="_buttonExportHistogramToSep">
+           <property name="text">
+            <string>Export en .sep</string>
+           </property>
+          </widget>
+         </item>
+         <item row="4" column="1">
+          <layout class="QHBoxLayout" name="horizontalLayout_13">
+           <item>
+            <widget class="QSlider" name="_sliderHistogramIntervalMinimumWidth">
+             <property name="maximum">
+              <number>50</number>
+             </property>
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QSpinBox" name="_spinHistogramIntervalMinimumWidth">
+             <property name="maximum">
+              <number>50</number>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+         <item row="4" column="0">
+          <widget class="QLabel" name="label_5">
+           <property name="text">
+            <string>Largeur minimale des intervalles</string>
+           </property>
+          </widget>
+         </item>
         </layout>
        </widget>
        <widget class="QWidget" name="_tabSectors">
@@ -783,73 +851,45 @@ autour de la moelle</string>
         </attribute>
         <layout class="QVBoxLayout" name="verticalLayout_7">
          <item>
-          <widget class="QGroupBox" name="groupBox_6">
-           <property name="title">
-            <string>Forme des secteurs</string>
+          <layout class="QFormLayout" name="formLayout_4">
+           <property name="bottomMargin">
+            <number>0</number>
            </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
-           </property>
-           <layout class="QFormLayout" name="formLayout">
-            <item row="0" column="0">
-             <widget class="QLabel" name="label_2">
-              <property name="text">
-               <string>Orientation (en degrés)</string>
-              </property>
-             </widget>
-            </item>
-            <item row="0" column="1">
-             <widget class="QSpinBox" name="_spinSectorsOrientation">
-              <property name="buttonSymbols">
-               <enum>QAbstractSpinBox::UpDownArrows</enum>
-              </property>
-              <property name="maximum">
-               <number>360</number>
-              </property>
-             </widget>
-            </item>
-            <item row="1" column="0">
-             <widget class="QLabel" name="label_3">
-              <property name="text">
-               <string>Nombre de secteurs</string>
-              </property>
-             </widget>
-            </item>
-            <item row="1" column="1">
-             <widget class="QSpinBox" name="_spinSectorsNumber">
-              <property name="maximum">
-               <number>360</number>
-              </property>
-              <property name="value">
-               <number>30</number>
-              </property>
-             </widget>
-            </item>
-           </layout>
-          </widget>
-         </item>
-         <item>
-          <widget class="QGroupBox" name="groupBox_5">
-           <property name="title">
-            <string>Somme des intensités</string>
-           </property>
-           <layout class="QFormLayout" name="formLayout_4">
-            <item row="0" column="0">
-             <widget class="QLabel" name="label_5">
-              <property name="text">
-               <string>Différence minimale prise en compte</string>
-              </property>
-             </widget>
-            </item>
-            <item row="0" column="1">
-             <widget class="QSpinBox" name="_spinMinimumIntensityForSum">
-              <property name="maximum">
-               <number>0</number>
-              </property>
-             </widget>
-            </item>
-           </layout>
-          </widget>
+           <item row="0" column="0">
+            <widget class="QLabel" name="label_2">
+             <property name="text">
+              <string>Orientation (en degrés)</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="1">
+            <widget class="QSpinBox" name="_spinSectorsOrientation">
+             <property name="buttonSymbols">
+              <enum>QAbstractSpinBox::UpDownArrows</enum>
+             </property>
+             <property name="maximum">
+              <number>360</number>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="0">
+            <widget class="QLabel" name="label_3">
+             <property name="text">
+              <string>Nombre de secteurs</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="1">
+            <widget class="QSpinBox" name="_spinSectorsNumber">
+             <property name="maximum">
+              <number>360</number>
+             </property>
+             <property name="value">
+              <number>30</number>
+             </property>
+            </widget>
+           </item>
+          </layout>
          </item>
          <item>
           <widget class="QPushButton" name="_buttonUpdateSectors">
@@ -971,7 +1011,7 @@ autour de la moelle</string>
           </widget>
          </item>
          <item row="1" column="1">
-          <widget class="QPushButton" name="_buttonExportDat">
+          <widget class="QPushButton" name="_buttonExportToDat">
            <property name="text">
             <string>Exporter en .dat</string>
            </property>
@@ -1018,7 +1058,7 @@ autour de la moelle</string>
           </widget>
          </item>
          <item row="5" column="1">
-          <widget class="QPushButton" name="_buttonExportOfs">
+          <widget class="QPushButton" name="_buttonExportToOfs">
            <property name="text">
             <string>Exporter en .ofs</string>
            </property>
@@ -1028,13 +1068,6 @@ autour de la moelle</string>
           <widget class="QLabel" name="label_11">
            <property name="text">
             <string>Seuil de binarisation</string>
-           </property>
-          </widget>
-         </item>
-         <item row="7" column="1">
-          <widget class="QPushButton" name="_buttonExportV3D">
-           <property name="text">
-            <string>Export en .v3d</string>
            </property>
           </widget>
          </item>
@@ -1051,24 +1084,10 @@ autour de la moelle</string>
            </property>
           </widget>
          </item>
-         <item row="8" column="1">
-          <widget class="QPushButton" name="_buttonExportFlowV3D">
+         <item row="7" column="1">
+          <widget class="QPushButton" name="_buttonExportToV3D">
            <property name="text">
-            <string>Export flot en .v3d</string>
-           </property>
-          </widget>
-         </item>
-         <item row="9" column="1">
-          <widget class="QPushButton" name="_buttonExportDiagramV3D">
-           <property name="text">
-            <string>Export diagram en .v3d</string>
-           </property>
-          </widget>
-         </item>
-         <item row="10" column="1">
-          <widget class="QPushButton" name="_buttonExportHisto">
-           <property name="text">
-            <string>Export histo en .sep</string>
+            <string>Export en .v3d</string>
            </property>
           </widget>
          </item>
@@ -1079,7 +1098,7 @@ autour de la moelle</string>
      <item>
       <widget class="QGroupBox" name="groupBox_3">
        <property name="title">
-        <string>Marrow</string>
+        <string>Moelle</string>
        </property>
        <layout class="QHBoxLayout" name="horizontalLayout_10">
         <item>
