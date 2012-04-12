@@ -10,6 +10,7 @@ class QwtPlot;
 class QwtPlotHistogram;
 class QwtPlotCurve;
 class QwtIntervalSample;
+class QwtInterval;
 class IntensityInterval;
 
 class SliceHistogram
@@ -23,7 +24,7 @@ public:
 	int nbMaximums() const;
 	int sliceOfIemeMaximum( const int &maximumIndex ) const;
 	int marrowAroundDiameter() const;
-	const QVector<QwtIntervalSample> & branchesAreas() const;
+	const QVector<QwtInterval> & branchesAreas() const;
 
 	void setMarrowAroundDiameter( const int &diameter );
 	void setIntervalType( const HistogramIntervalType::HistogramIntervalType &type );
@@ -31,13 +32,13 @@ public:
 	void setMovementThresholdMin( const int &threshold );
 	void setMovementThresholdMax( const int &threshold );
 	void enableSmoothing( const bool &enable );
-	void useNextSlice( const bool &enable );
+	void useNextSliceInsteadOfCurrentSlice( const bool &enable );
+	void setMaximumsNeighborhood( const int &neighborhood );
 	void attach( QwtPlot * const plot );
 	void detach();
 	void clear();
 
-	void constructHistogram( const Billon &billon );
-	void constructHistogram( const Billon &billon, const Marrow &marrow );
+	void constructHistogram( const Billon &billon, const Marrow *marrow );
 
 private:
 	void updateMaximums();
@@ -59,13 +60,16 @@ private:
 
 	QwtPlotHistogram *_histogramBranchesArea;
 	QVector<QwtIntervalSample> _datasBranchesAreaToDrawing;
-	QVector<QwtIntervalSample> _datasBranchesRealAreas;
+	QVector<QwtInterval> _datasBranchesRealAreas;
 
 	QwtPlotCurve *_curveMeans;
 	qreal _dataMeans;
 
 	QwtPlotCurve *_curveMedian;
 	qreal _dataMedian;
+
+	QwtPlotCurve *_curveMeansMedian;
+	qreal _dataMeansMedian;
 
 	int _marrowAroundDiameter;
 	HistogramIntervalType::HistogramIntervalType _intervalType;
@@ -74,6 +78,7 @@ private:
 	int _movementThresholdMax;
 	bool _smoothing;
 	bool _useNextSlice;
+	int _maximumsNeighborhood;
 };
 
 #endif // SLICEHISTOGRAM_H

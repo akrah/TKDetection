@@ -44,6 +44,7 @@ private slots:
 	void setHistogramIntervalType( const int &type );
 	void setHistogramIntervalMinimumWidth( const int &width );
 	void enableHistogramSmoothing( const bool &enable );
+	void setHistogramMaximumsNeighborhood( const int &neighborhood );
 	void highlightSliceHistogram( const int &slicePosition );
 	void updateMarrow();
 	void updateSectorsHistograms();

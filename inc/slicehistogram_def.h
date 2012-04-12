@@ -8,6 +8,7 @@ namespace HistogramIntervalType {
 		FROM_EDGE,
 		FROM_MEANS,
 		FROM_MEDIAN,
+		FROM_MIDDLE_OF_MEANS_AND_MEDIAN,
 		_HIST_INTERVAL_TYPE_MAX__
 	};
 }

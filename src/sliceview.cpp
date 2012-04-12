@@ -10,7 +10,7 @@
 #include <QPainter>
 
 SliceView::SliceView() : _typeOfView(SliceType::CURRENT),
-	_movementThresholdMin(0), _movementThresholdMax(1000), _movementWithBackground(false), _useNextSliceInsteadOfCurrentSlice(false),
+	_movementThresholdMin(100), _movementThresholdMax(200), _movementWithBackground(false), _useNextSliceInsteadOfCurrentSlice(false),
 	_flowAlpha(FLOW_ALPHA_DEFAULT), _flowEpsilon(FLOW_EPSILON_DEFAULT), _flowMaximumIterations(FLOW_MAXIMUM_ITERATIONS),
 	_restrictedAreaResolution(100), _restrictedAreaThreshold(-900), _restrictedAreaDrawCircle(true), _restrictedAreaBeginRadius(0)
 {

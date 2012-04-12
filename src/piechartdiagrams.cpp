@@ -9,7 +9,7 @@
 #include <qwt_plot_histogram.h>
 #include <qwt_polar_curve.h>
 
-PieChartDiagrams::PieChartDiagrams() : _polarCurve(0), _minimalDifference(0) {
+PieChartDiagrams::PieChartDiagrams() : _polarCurve(0), _movementsThresholdMin(100), _movementsThresholdMax(200), _marrowAroundDiameter(40) {
 }
 
 PieChartDiagrams::~PieChartDiagrams() {
@@ -22,10 +22,6 @@ PieChartDiagrams::~PieChartDiagrams() {
 
 int PieChartDiagrams::count() const {
 	return _histograms.size();
-}
-
-int PieChartDiagrams::minimalDifference() const {
-	return _minimalDifference;
 }
 
 /*******************************
@@ -54,21 +50,35 @@ void PieChartDiagrams::detach() {
 	}
 }
 
-void PieChartDiagrams::setMinimalDifference( const int &minimalDifference ) {
-	_minimalDifference = minimalDifference;
+void PieChartDiagrams::setMovementsThresholdMin( const int &threshold ) {
+	_movementsThresholdMin = threshold;
+}
+
+void PieChartDiagrams::setMovementsThresholdMax( const int &threshold ) {
+	_movementsThresholdMax = threshold;
+}
+
+void PieChartDiagrams::useNextSliceInsteadOfCurrentSlice( const bool &enable ) {
+	_useNextSlice = enable;
+}
+
+void PieChartDiagrams::setMarrowArroundDiameter( const int &diameter ) {
+	_marrowAroundDiameter = diameter;
 }
 
 void PieChartDiagrams::compute( const Billon &billon, const Marrow *marrow, const PieChart &pieChart, const SlicesInterval &slicesInterval ) {
-	clearAll();
 	if ( slicesInterval.isValid() ) {
-		const int nbSectors = pieChart.nbSectors();
+		const uint width = billon.n_cols;
+		const uint height = billon.n_rows;
 		const int minValue = billon.minValue();
-		const int nbValues = billon.maxValue()-minValue;
-		const int sliceWidth = billon.n_cols;
-		const int sliceHeight = billon.n_rows;
-		const int minOfInterval = slicesInterval.min();
-		const int maxOfInterval = slicesInterval.max();
-		int i, j, k, centerX, centerY, sectorIdx, diffVal, diffMax, currentSliceValue, previousSliceValue;
+		const int nbValues = _movementsThresholdMax-_movementsThresholdMin;
+		const int nbSectors = pieChart.nbSectors();
+		const uint minOfInterval = slicesInterval.min();
+		const uint maxOfInterval = slicesInterval.max()+1;
+		const int diameter = _marrowAroundDiameter;
+		const int radius = diameter/(2.*billon.voxelWidth());
+		const int radiusMax = radius+1;
+		const qreal squareRadius = qPow(radius,2);
 
 		// Création des données des diagrammes
 		QVector< QVector<QwtIntervalSample> > histogramsData(nbSectors,QVector<QwtIntervalSample>(nbValues,QwtIntervalSample(0.,0.,0.)));
@@ -76,35 +86,68 @@ void PieChartDiagrams::compute( const Billon &billon, const Marrow *marrow, cons
 
 		// Calcul des diagrammes en parcourant les tranches du billon comprises dans l'intervalle
 		QVector<int> sectorsSum(nbSectors,0);
-		centerX = sliceWidth/2;
-		centerY = sliceHeight/2;
-		diffMax = 0;
 
-		for ( k=minOfInterval ; k<=maxOfInterval ; ++k ) {
-			const arma::Slice &slice = billon.slice(k);
+		QList<int> circleLines;
+		if ( marrow != 0 ) {
+			circleLines.reserve(2*radius+1);
+			for ( int lineIndex=-radius ; lineIndex<radiusMax ; ++lineIndex ) {
+				circleLines.append(qSqrt(squareRadius-qPow(lineIndex,2)));
+			}
+		}
+
+		int i, j, iRadius, iRadiusMax, currentSliceValue, previousSliceValue, sectorIdx;
+		uint k, marrowX, marrowY, xPos, yPos;
+		qreal diff;
+		marrowX = width/2;
+		marrowY = height/2;
+		for ( k=minOfInterval==0?1:minOfInterval ; k<maxOfInterval ; ++k ) {
+			const arma::Slice &slice = _useNextSlice?billon.slice(k+1):billon.slice(k);
 			const arma::Slice &prevSlice = billon.slice(k-1);
 			if ( marrow != 0 ) {
-				centerX = marrow->at(k).x;
-				centerY = marrow->at(k).y;
+				marrowX = marrow->at(k).x;
+				marrowY = marrow->at(k).y;
+				for ( j=-radius ; j<radiusMax ; ++j ) {
+					iRadius = circleLines[j+radius];
+					iRadiusMax = iRadius+1;
+					for ( i=-iRadius ; i<iRadiusMax ; ++i ) {
+						xPos = marrowX+i;
+						yPos = marrowY+j;
+						if ( xPos < width && yPos < height ) {
+							sectorIdx = pieChart.partOfAngle( TWO_PI-ANGLE(marrowX,marrowY,xPos,yPos) );
+							currentSliceValue = slice.at(yPos,xPos);
+							previousSliceValue = prevSlice.at(yPos,xPos);
+							if ( (currentSliceValue > minValue) && (previousSliceValue > minValue) ) {
+								diff = qAbs(currentSliceValue - previousSliceValue);
+								if ( (diff > _movementsThresholdMin) && (diff < _movementsThresholdMax) ) {
+									diff -= _movementsThresholdMin;
+									histogramsData[sectorIdx][diff-1].value += 1.;
+									sectorsSum[sectorIdx] += diff;
+								}
+							}
+						}
+					}
+				}
 			}
-			for ( j=0 ; j<sliceHeight ; ++j ) {
-				for ( i=0 ; i<sliceWidth ; ++i ) {
-					sectorIdx = pieChart.partOfAngle( TWO_PI-ANGLE(centerX,centerY,i,j) );
-					currentSliceValue = slice.at(j,i);
-					previousSliceValue = prevSlice.at(j,i);
-					if ( (currentSliceValue > minValue) && (previousSliceValue > minValue) ) {
-						diffVal = qAbs(currentSliceValue-previousSliceValue);
-						if ( diffVal > _minimalDifference ) {
-							histogramsData[sectorIdx][diffVal].value += 1.;
-							sectorsSum[sectorIdx] += diffVal;
-							diffMax = qMax(diffMax,diffVal);
+			else {
+				for ( j=0 ; j<static_cast<int>(height) ; ++j ) {
+					for ( i=0 ; i<static_cast<int>(width) ; ++i ) {
+						sectorIdx = pieChart.partOfAngle( TWO_PI-ANGLE(marrowX,marrowY,i,j) );
+						currentSliceValue = slice.at(j,i);
+						previousSliceValue = prevSlice.at(j,i);
+						if ( (currentSliceValue > minValue) && (previousSliceValue > minValue) ) {
+							diff = qAbs(currentSliceValue - previousSliceValue);
+							if ( diff > _movementsThresholdMin && diff < _movementsThresholdMax ) {
+								diff -= _movementsThresholdMin;
+								histogramsData[sectorIdx][diff-1].value += 1.;
+								sectorsSum[sectorIdx] += diff;
+							}
 						}
 					}
 				}
 			}
 		}
 
-		createDiagrams( histogramsData, sectorsSum, nbSectors, nbValues, diffMax );
+		createDiagrams( histogramsData, sectorsSum, nbSectors );
 	}
 }
 
@@ -129,12 +172,13 @@ void PieChartDiagrams::initializeDiagramsData( QVector< QVector<QwtIntervalSampl
 	}
 }
 
-void PieChartDiagrams::createDiagrams( QVector< QVector<QwtIntervalSample> > &histogramsData, const QVector<int> &sectorsSum, const int &nbSectors, const int &nbValues, const int &diffMax ) {
+void PieChartDiagrams::createDiagrams( QVector< QVector<QwtIntervalSample> > &histogramsData, const QVector<int> &sectorsSum, const int &nbSectors ) {
+	clearAll();
+
 	int i;
 	// Création des objets histogrammes et affectation de leurs données correspondantes
 	_histograms.reserve(nbSectors);
 	for ( i=0 ; i<nbSectors ; ++i ) {
-		histogramsData[i].remove(diffMax,nbValues-diffMax);
 		_histograms.append(new QwtPlotHistogram());
 		static_cast<QwtIntervalSeriesData *>(_histograms.last()->data())->setSamples(histogramsData[i]);
 	}

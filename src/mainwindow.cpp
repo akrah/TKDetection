@@ -87,6 +87,8 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 	QObject::connect(_ui->_checkMarrowAroundDiameter, SIGNAL(clicked()), this, SLOT(drawSlice()));
 	QObject::connect(_ui->_comboHistogramInterval, SIGNAL(activated(int)), this, SLOT(setHistogramIntervalType(int)));
 	QObject::connect(_ui->_checkHistogramSmoothing, SIGNAL(toggled(bool)), this, SLOT(enableHistogramSmoothing(bool)));
+	QObject::connect(_ui->_sliderMaximumsNeighborhood, SIGNAL(valueChanged(int)), this, SLOT(setHistogramMaximumsNeighborhood(int)));
+	QObject::connect(_ui->_spinMaximumsNeighborhood, SIGNAL(valueChanged(int)), this, SLOT(setHistogramMaximumsNeighborhood(int)));
 	QObject::connect(_ui->_sliderHistogramIntervalMinimumWidth, SIGNAL(valueChanged(int)), this, SLOT(setHistogramIntervalMinimumWidth(int)));
 	QObject::connect(_ui->_spinHistogramIntervalMinimumWidth, SIGNAL(valueChanged(int)), this, SLOT(setHistogramIntervalMinimumWidth(int)));
 
@@ -273,8 +275,7 @@ void MainWindow::updateSliceHistogram() {
 	_sliceHistogram->detach();
 	_sliceHistogram->clear();
 	if ( _billon != 0 ) {
-		if ( _marrow != 0 )	_sliceHistogram->constructHistogram(*_billon, *_marrow);
-		else _sliceHistogram->constructHistogram(*_billon);
+		_sliceHistogram->constructHistogram(*_billon, _marrow);
 	}
 	_histogramCursor.detach();
 	_sliceHistogram->attach(_ui->_plotSliceHistogram);
@@ -285,6 +286,7 @@ void MainWindow::updateSliceHistogram() {
 
 void MainWindow::setMarrowAroundDiameter( const int &diameter ) {
 	_sliceHistogram->setMarrowAroundDiameter(diameter);
+	_pieChartDiagrams->setMarrowArroundDiameter(diameter);
 
 	_ui->_spinMarrowAroundDiameter->blockSignals(true);
 		_ui->_spinMarrowAroundDiameter->setValue(diameter);
@@ -315,6 +317,18 @@ void MainWindow::setHistogramIntervalMinimumWidth( const int &width ) {
 
 void MainWindow::enableHistogramSmoothing( const bool &enable ) {
 	_sliceHistogram->enableSmoothing(enable);
+}
+
+void MainWindow::setHistogramMaximumsNeighborhood( const int &neighborhood ) {
+	_sliceHistogram->setMaximumsNeighborhood(neighborhood);
+
+	_ui->_spinMaximumsNeighborhood->blockSignals(true);
+		_ui->_spinMaximumsNeighborhood->setValue(neighborhood);
+	_ui->_spinMaximumsNeighborhood->blockSignals(false);
+
+	_ui->_sliderMaximumsNeighborhood->blockSignals(true);
+		_ui->_sliderMaximumsNeighborhood->setValue(neighborhood);
+	_ui->_sliderMaximumsNeighborhood->blockSignals(false);
 }
 
 void MainWindow::highlightSliceHistogram( const int &slicePosition ) {
@@ -434,7 +448,7 @@ void MainWindow::dragInSliceView( const QPoint &movementVector ) {
 void MainWindow::setMovementThresholdMin( const int &threshold ) {
 	_sliceView->setMovementThresholdMin(threshold);
 	_sliceHistogram->setMovementThresholdMin(threshold);
-	_pieChartDiagrams->setMinimalDifference(threshold);
+	_pieChartDiagrams->setMovementsThresholdMin(threshold);
 
 	_ui->_spinMovementThresholdMin->blockSignals(true);
 		_ui->_spinMovementThresholdMin->setValue(threshold);
@@ -450,6 +464,7 @@ void MainWindow::setMovementThresholdMin( const int &threshold ) {
 void MainWindow::setMovementThresholdMax( const int &threshold ) {
 	_sliceView->setMovementThresholdMax(threshold);
 	_sliceHistogram->setMovementThresholdMax(threshold);
+	_pieChartDiagrams->setMovementsThresholdMax(threshold);
 
 	_ui->_spinMovementThresholdMax->blockSignals(true);
 		_ui->_spinMovementThresholdMax->setValue(threshold);
@@ -469,7 +484,8 @@ void MainWindow::enableMovementWithBackground( const bool &enable ) {
 
 void MainWindow::useNextSliceInsteadOfCurrentSlice( const bool &enable ) {
 	_sliceView->useNextSliceInsteadOfCurrentSlice(enable);
-	_sliceHistogram->useNextSlice(enable);
+	_sliceHistogram->useNextSliceInsteadOfCurrentSlice(enable);
+	_pieChartDiagrams->useNextSliceInsteadOfCurrentSlice(enable);
 	drawSlice();
 }
 

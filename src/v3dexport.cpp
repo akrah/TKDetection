@@ -13,7 +13,8 @@
 namespace V3DExport {
 
 	namespace {
-		void appendBillon( const Billon &billon, const SlicesInterval &interval, const int &threshold, QXmlStreamWriter &stream );
+		void appendTags( const Billon &billon, QXmlStreamWriter &stream );
+		void appendComponent( const Billon &billon, const SlicesInterval &interval, const int &index, const int &threshold, QXmlStreamWriter &stream );
 		void appendMarrow( const Marrow &marrow, QXmlStreamWriter &stream );
 		void writeXmlElementWithAttribute( QXmlStreamWriter &stream, const QString &elementName, const QString &attributeName, const QString &attributeValue, const QString &elementValue );
 		void writeTag( QXmlStreamWriter &stream, const QString &name, const QString &value );
@@ -33,7 +34,8 @@ namespace V3DExport {
 		stream.writeDTD("<!DOCTYPE IMAGE>");
 
 			stream.writeStartElement("image");
-				appendBillon( billon, interval, threshold, stream );
+				appendTags( billon, stream );
+				appendComponent( billon, interval, 1, threshold, stream );
 				if ( marrow != 0 ) appendMarrow( *marrow, stream );
 			stream.writeEndElement();
 
@@ -43,24 +45,24 @@ namespace V3DExport {
 	}
 
 	namespace {
-		void appendBillon( const Billon &billon, const SlicesInterval &interval, const int &threshold, QXmlStreamWriter &stream ) {
-			int width = billon.n_cols;
-			int height = billon.n_rows;
-			int depth = interval.size();
-
+		void appendTags( const Billon &billon, QXmlStreamWriter &stream ) {
 			stream.writeStartElement("tags");
-
-				writeTag(stream,"width",QString::number(width));
-				writeTag(stream,"height",QString::number(height));
-				writeTag(stream,"depth",QString::number(depth));
+				writeTag(stream,"width",QString::number(billon.n_cols));
+				writeTag(stream,"height",QString::number(billon.n_rows));
+				writeTag(stream,"depth",QString::number(billon.n_slices));
 				writeTag(stream,"xspacing",QString::number(billon.voxelWidth()));
 				writeTag(stream,"yspacing",QString::number(billon.voxelHeight()));
 				writeTag(stream,"zspacing",QString::number(billon.voxelDepth()));
 				writeTag(stream,"voxelwidth",QString::number(billon.voxelWidth()));
 				writeTag(stream,"voxelheight",QString::number(billon.voxelHeight()));
 				writeTag(stream,"voxeldepth",QString::number(billon.voxelDepth()));
-
 			stream.writeEndElement();
+		}
+
+		void appendComponent( const Billon &billon, const SlicesInterval &interval, const int &index, const int &threshold, QXmlStreamWriter &stream ) {
+			int width = billon.n_cols;
+			int height = billon.n_rows;
+			int depth = interval.size();
 
 			// components
 			QByteArray data;
@@ -69,8 +71,9 @@ namespace V3DExport {
 
 			stream.writeStartElement("components");
 				stream.writeStartElement("component");
-					stream.writeAttribute("id","1");
+					stream.writeAttribute("id",QString::number(index));
 					stream.writeAttribute("valmax",QString::number(billon.maxValue()));
+					stream.writeAttribute("valmin",QString::number(billon.minValue()));
 
 					//coord minimum
 					stream.writeStartElement("coord");
@@ -82,7 +85,7 @@ namespace V3DExport {
 							stream.writeCharacters("0");
 						stream.writeEndElement();
 						stream.writeStartElement("z");
-							stream.writeCharacters("0");
+							stream.writeCharacters(QString::number(interval.min()));
 						stream.writeEndElement();
 					stream.writeEndElement();
 
@@ -96,7 +99,7 @@ namespace V3DExport {
 							stream.writeCharacters(QString::number(height-1));
 						stream.writeEndElement();
 						stream.writeStartElement("z");
-							stream.writeCharacters(QString::number(depth-1));
+							stream.writeCharacters(QString::number(interval.max()));
 						stream.writeEndElement();
 					stream.writeEndElement();
 

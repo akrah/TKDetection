@@ -43,7 +43,8 @@ SOURCES		=	main.cpp \
 				sliceview.cpp \
 				slicezoomer.cpp \
 				slicesinterval.cpp \
-				v3dexport.cpp
+				v3dexport.cpp \
+    src/v3dreader.cpp
 
 HEADERS		=	billon.h \
 				billon_def.h \
@@ -66,12 +67,13 @@ HEADERS		=	billon.h \
 				piechart.h \
 				pointpolarseriesdata.h \
 				slicehistogram.h \
+				slicehistogram_def.h \
 				slicesinterval.h \
 				sliceview.h \
 				sliceview_def.h \
 				slicezoomer.h \
 				v3dexport.h \
-	slicehistogram_def.h
+    inc/v3dreader.h
 
 FORMS		=	mainwindow.ui
 

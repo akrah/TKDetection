@@ -104,7 +104,7 @@
           <rect>
            <x>0</x>
            <y>0</y>
-           <width>482</width>
+           <width>454</width>
            <height>697</height>
           </rect>
          </property>
@@ -171,7 +171,7 @@
   <widget class="QDockWidget" name="dockWidget_2">
    <property name="minimumSize">
     <size>
-     <width>466</width>
+     <width>494</width>
      <height>745</height>
     </size>
    </property>
@@ -227,7 +227,7 @@
                 <rect>
                  <x>0</x>
                  <y>0</y>
-                 <width>398</width>
+                 <width>306</width>
                  <height>173</height>
                 </rect>
                </property>
@@ -264,6 +264,9 @@
                     <property name="maximum">
                      <number>1000</number>
                     </property>
+                    <property name="value">
+                     <number>100</number>
+                    </property>
                     <property name="orientation">
                      <enum>Qt::Horizontal</enum>
                     </property>
@@ -279,6 +282,9 @@
                     </property>
                     <property name="maximum">
                      <number>1000</number>
+                    </property>
+                    <property name="value">
+                     <number>100</number>
                     </property>
                    </widget>
                   </item>
@@ -357,7 +363,7 @@
                      <number>2000</number>
                     </property>
                     <property name="value">
-                     <number>1000</number>
+                     <number>200</number>
                     </property>
                     <property name="orientation">
                      <enum>Qt::Horizontal</enum>
@@ -376,7 +382,7 @@
                      <number>2000</number>
                     </property>
                     <property name="value">
-                     <number>1000</number>
+                     <number>200</number>
                     </property>
                    </widget>
                   </item>
@@ -739,7 +745,7 @@ autour de la moelle</string>
               <number>500</number>
              </property>
              <property name="value">
-              <number>20</number>
+              <number>40</number>
              </property>
              <property name="orientation">
               <enum>Qt::Horizontal</enum>
@@ -752,7 +758,7 @@ autour de la moelle</string>
               <number>500</number>
              </property>
              <property name="value">
-              <number>20</number>
+              <number>40</number>
              </property>
             </widget>
            </item>
@@ -765,15 +771,18 @@ autour de la moelle</string>
            </item>
           </layout>
          </item>
-         <item row="3" column="0">
+         <item row="4" column="0">
           <widget class="QLabel" name="label_23">
            <property name="text">
             <string>Calcul des intervalles</string>
            </property>
           </widget>
          </item>
-         <item row="3" column="1">
+         <item row="4" column="1">
           <widget class="QComboBox" name="_comboHistogramInterval">
+           <property name="currentIndex">
+            <number>3</number>
+           </property>
            <item>
             <property name="text">
              <string>Dès le sommet</string>
@@ -787,6 +796,11 @@ autour de la moelle</string>
            <item>
             <property name="text">
              <string>En dessous de la médiane</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>En dessous du mileu moy/méd</string>
             </property>
            </item>
           </widget>
@@ -808,14 +822,14 @@ autour de la moelle</string>
            </property>
           </widget>
          </item>
-         <item row="5" column="1">
+         <item row="6" column="1">
           <widget class="QPushButton" name="_buttonExportHistogramToSep">
            <property name="text">
             <string>Export en .sep</string>
            </property>
           </widget>
          </item>
-         <item row="4" column="1">
+         <item row="5" column="1">
           <layout class="QHBoxLayout" name="horizontalLayout_13">
            <item>
             <widget class="QSlider" name="_sliderHistogramIntervalMinimumWidth">
@@ -836,12 +850,46 @@ autour de la moelle</string>
            </item>
           </layout>
          </item>
-         <item row="4" column="0">
+         <item row="5" column="0">
           <widget class="QLabel" name="label_5">
            <property name="text">
             <string>Largeur minimale des intervalles</string>
            </property>
           </widget>
+         </item>
+         <item row="3" column="0">
+          <widget class="QLabel" name="label_27">
+           <property name="text">
+            <string>Voisinage des maximums</string>
+           </property>
+          </widget>
+         </item>
+         <item row="3" column="1">
+          <layout class="QHBoxLayout" name="horizontalLayout_14">
+           <item>
+            <widget class="QSlider" name="_sliderMaximumsNeighborhood">
+             <property name="maximum">
+              <number>30</number>
+             </property>
+             <property name="value">
+              <number>15</number>
+             </property>
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QSpinBox" name="_spinMaximumsNeighborhood">
+             <property name="maximum">
+              <number>30</number>
+             </property>
+             <property name="value">
+              <number>15</number>
+             </property>
+            </widget>
+           </item>
+          </layout>
          </item>
         </layout>
        </widget>

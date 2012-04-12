@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!ELEMENT image (tags,components,moelle) !>
+	<!ELEMENT tags (tag+) !>
+		<!ELEMENT tag #PCDATA !>
+	<!ELEMENT components (component+) !>
+		<!ELEMENT component (coord+,skeleton?,binarydata) !>
+			<!ELEMENT coord (x,y,z) !>
+				<!ELEMENT x #PCDATA !>
+				<!ELEMENT y #PCDATA !>
+				<!ELEMENT z #PCDATA !>
+			<!ELEMENT skeleton (coord+) !>
+			<!ELEMENT binarydata #PCDATA !>
+	<!ELEMENT moelle (coord+,binarydata) !>
+
+<!ATTLIST component id NMTOKEN #REQUIRED !>
+<!ATTLIST component valmax NMTOKEN #REQUIRED !>
+<!ATTLIST component valmin NMTOKEN #REQUIRED !>
+<!ATTLIST coord name (minimum|maximum) #IMPLIED !>
+<!ATTLIST binarydata encoding (8|16|32|64) #REQUIRED !>
+<!ATTLIST tag name (name|id|institution|date|hour|physician|serie|operator|mode|protocol|kv|ma|filter|serialnumber|thickness|width|height|depth|xspacing|yspacing|zspacing|voxelwidht|voxelheight|voxeldepth|componentsnumber) #REQUIRED !>
+<!ATTLIST skeleton encoding (8|16|32|64) #REQUIRED !>
+
