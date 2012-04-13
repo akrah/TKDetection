@@ -6,11 +6,11 @@ namespace SliceType {
 	enum SliceType {
 		_SLICE_TYPE_MIN_ = -1,
 		CURRENT,
-		AVERAGE,
-		MEDIAN,
 		MOVEMENT,
 		FLOW,
 		RESTRICTED_AREA,
+		AVERAGE,
+		MEDIAN,
 		_SLICE_TYPE_MAX_
 	};
 }

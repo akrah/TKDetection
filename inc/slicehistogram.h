@@ -23,6 +23,7 @@ public:
 	qreal value( const int &index ) const;
 	int nbMaximums() const;
 	int sliceOfIemeMaximum( const int &maximumIndex ) const;
+	int sliceOfIemeInterval( const int &intervalIndex ) const;
 	int marrowAroundDiameter() const;
 	const QVector<QwtInterval> & branchesAreas() const;
 
@@ -38,7 +39,7 @@ public:
 	void detach();
 	void clear();
 
-	void constructHistogram( const Billon &billon, const Marrow *marrow );
+	void constructHistogram( const Billon &billon, const Marrow *marrow, const IntensityInterval &intensity );
 
 private:
 	void updateMaximums();

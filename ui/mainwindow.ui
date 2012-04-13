@@ -105,7 +105,7 @@
            <x>0</x>
            <y>0</y>
            <width>454</width>
-           <height>697</height>
+           <height>698</height>
           </rect>
          </property>
          <layout class="QHBoxLayout" name="horizontalLayout_8">
@@ -172,7 +172,7 @@
    <property name="minimumSize">
     <size>
      <width>494</width>
-     <height>745</height>
+     <height>749</height>
     </size>
    </property>
    <property name="floating">
@@ -192,7 +192,7 @@
      <item>
       <widget class="QTabWidget" name="_tabs">
        <property name="currentIndex">
-        <number>1</number>
+        <number>2</number>
        </property>
        <widget class="QWidget" name="_tabGeneral">
         <attribute name="title">
@@ -227,8 +227,8 @@
                 <rect>
                  <x>0</x>
                  <y>0</y>
-                 <width>306</width>
-                 <height>173</height>
+                 <width>426</width>
+                 <height>174</height>
                 </rect>
                </property>
                <attribute name="label">
@@ -339,6 +339,9 @@
                   </property>
                   <property name="text">
                    <string/>
+                  </property>
+                  <property name="checked">
+                   <bool>true</bool>
                   </property>
                  </widget>
                 </item>
@@ -745,7 +748,7 @@ autour de la moelle</string>
               <number>500</number>
              </property>
              <property name="value">
-              <number>40</number>
+              <number>50</number>
              </property>
              <property name="orientation">
               <enum>Qt::Horizontal</enum>
@@ -758,7 +761,7 @@ autour de la moelle</string>
               <number>500</number>
              </property>
              <property name="value">
-              <number>40</number>
+              <number>50</number>
              </property>
             </widget>
            </item>
@@ -836,6 +839,9 @@ autour de la moelle</string>
              <property name="maximum">
               <number>50</number>
              </property>
+             <property name="value">
+              <number>10</number>
+             </property>
              <property name="orientation">
               <enum>Qt::Horizontal</enum>
              </property>
@@ -845,6 +851,9 @@ autour de la moelle</string>
             <widget class="QSpinBox" name="_spinHistogramIntervalMinimumWidth">
              <property name="maximum">
               <number>50</number>
+             </property>
+             <property name="value">
+              <number>10</number>
              </property>
             </widget>
            </item>
@@ -868,11 +877,14 @@ autour de la moelle</string>
           <layout class="QHBoxLayout" name="horizontalLayout_14">
            <item>
             <widget class="QSlider" name="_sliderMaximumsNeighborhood">
+             <property name="minimum">
+              <number>1</number>
+             </property>
              <property name="maximum">
               <number>30</number>
              </property>
              <property name="value">
-              <number>15</number>
+              <number>10</number>
              </property>
              <property name="orientation">
               <enum>Qt::Horizontal</enum>
@@ -881,11 +893,14 @@ autour de la moelle</string>
            </item>
            <item>
             <widget class="QSpinBox" name="_spinMaximumsNeighborhood">
+             <property name="minimum">
+              <number>1</number>
+             </property>
              <property name="maximum">
               <number>30</number>
              </property>
              <property name="value">
-              <number>15</number>
+              <number>10</number>
              </property>
             </widget>
            </item>
@@ -938,13 +953,6 @@ autour de la moelle</string>
             </widget>
            </item>
           </layout>
-         </item>
-         <item>
-          <widget class="QPushButton" name="_buttonUpdateSectors">
-           <property name="text">
-            <string>Calcul des histogrammes</string>
-           </property>
-          </widget>
          </item>
          <item>
           <widget class="QTabWidget" name="tabWidget">
@@ -1030,6 +1038,51 @@ autour de la moelle</string>
             </layout>
            </widget>
           </widget>
+         </item>
+         <item>
+          <layout class="QHBoxLayout" name="horizontalLayout_15">
+           <property name="rightMargin">
+            <number>0</number>
+           </property>
+           <property name="bottomMargin">
+            <number>0</number>
+           </property>
+           <item>
+            <widget class="QLabel" name="label_28">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="text">
+              <string>Intervalle</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QComboBox" name="_comboSelectInterval">
+             <item>
+              <property name="text">
+               <string>Personnalisé</string>
+              </property>
+             </item>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="_buttonSelectIntervalUpdate">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="text">
+              <string>Recalculer</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
          </item>
         </layout>
        </widget>

@@ -5,11 +5,12 @@
 #include "inc/piechart.h"
 #include "inc/piepart.h"
 #include "inc/slicesinterval.h"
+#include "inc/intensityinterval.h"
 #include "inc/pointpolarseriesdata.h"
 #include <qwt_plot_histogram.h>
-#include <qwt_polar_curve.h>
 
-PieChartDiagrams::PieChartDiagrams() : _polarCurve(0), _movementsThresholdMin(100), _movementsThresholdMax(200), _marrowAroundDiameter(40) {
+PieChartDiagrams::PieChartDiagrams() : _polarCurve(0), _movementsThresholdMin(100), _movementsThresholdMax(200), _marrowAroundDiameter(50) {
+	_highlightCurve.setPen(QPen(Qt::green));
 }
 
 PieChartDiagrams::~PieChartDiagrams() {
@@ -40,10 +41,12 @@ void PieChartDiagrams::attach( const QList<QwtPlot *> & plots ) {
 void PieChartDiagrams::attach( QwtPolarPlot * const polarPlot ) {
 	if ( _polarCurve != 0 && polarPlot != 0 ) {
 		_polarCurve->attach(polarPlot);
+		_highlightCurve.attach(polarPlot);
 	}
 }
 
 void PieChartDiagrams::detach() {
+	_highlightCurve.detach();
 	if ( _polarCurve != 0 ) _polarCurve->detach();
 	for ( int i=0 ; i<_histograms.size() ; ++i ) {
 		if ( _histograms[i] != 0 ) _histograms[i]->detach();
@@ -66,15 +69,16 @@ void PieChartDiagrams::setMarrowArroundDiameter( const int &diameter ) {
 	_marrowAroundDiameter = diameter;
 }
 
-void PieChartDiagrams::compute( const Billon &billon, const Marrow *marrow, const PieChart &pieChart, const SlicesInterval &slicesInterval ) {
+void PieChartDiagrams::compute( const Billon &billon, const Marrow *marrow, const PieChart &pieChart, const SlicesInterval &slicesInterval, const IntensityInterval &intensity ) {
 	if ( slicesInterval.isValid() ) {
 		const uint width = billon.n_cols;
 		const uint height = billon.n_rows;
-		const int minValue = billon.minValue();
+		const int minValue = intensity.min();
+		const int maxValue = intensity.max();
 		const int nbValues = _movementsThresholdMax-_movementsThresholdMin;
 		const int nbSectors = pieChart.nbSectors();
 		const uint minOfInterval = slicesInterval.min();
-		const uint maxOfInterval = slicesInterval.max()+1;
+		const uint maxOfInterval = slicesInterval.max();
 		const int diameter = _marrowAroundDiameter;
 		const int radius = diameter/(2.*billon.voxelWidth());
 		const int radiusMax = radius+1;
@@ -117,7 +121,7 @@ void PieChartDiagrams::compute( const Billon &billon, const Marrow *marrow, cons
 							currentSliceValue = slice.at(yPos,xPos);
 							previousSliceValue = prevSlice.at(yPos,xPos);
 							if ( (currentSliceValue > minValue) && (previousSliceValue > minValue) ) {
-								diff = qAbs(currentSliceValue - previousSliceValue);
+								diff = qAbs(qBound(minValue,currentSliceValue,maxValue) - qBound(minValue,previousSliceValue,maxValue));
 								if ( (diff > _movementsThresholdMin) && (diff < _movementsThresholdMax) ) {
 									diff -= _movementsThresholdMin;
 									histogramsData[sectorIdx][diff-1].value += 1.;
@@ -135,7 +139,7 @@ void PieChartDiagrams::compute( const Billon &billon, const Marrow *marrow, cons
 						currentSliceValue = slice.at(j,i);
 						previousSliceValue = prevSlice.at(j,i);
 						if ( (currentSliceValue > minValue) && (previousSliceValue > minValue) ) {
-							diff = qAbs(currentSliceValue - previousSliceValue);
+							diff = qAbs(qBound(minValue,currentSliceValue,maxValue) - qBound(minValue,previousSliceValue,maxValue));
 							if ( diff > _movementsThresholdMin && diff < _movementsThresholdMax ) {
 								diff -= _movementsThresholdMin;
 								histogramsData[sectorIdx][diff-1].value += 1.;
@@ -151,6 +155,23 @@ void PieChartDiagrams::compute( const Billon &billon, const Marrow *marrow, cons
 	}
 }
 
+void PieChartDiagrams::highlightCurve( const int &index ) {
+	if ( !_histograms.isEmpty() && index > -1 && index < _histograms.size() ) {
+		const qreal coeff = 360./_histograms.size();
+		const qreal demiCoeff = coeff/2.;
+		const qreal valueOfCurve = _polarCurve->sample(index*2).radius();
+
+		PointPolarSeriesData *pointsDatas = new PointPolarSeriesData();
+		pointsDatas->append(QwtPointPolar(index*coeff-demiCoeff,0));
+		pointsDatas->append(QwtPointPolar(index*coeff-demiCoeff,valueOfCurve));
+		pointsDatas->append(QwtPointPolar(index*coeff+demiCoeff,valueOfCurve));
+		pointsDatas->append(QwtPointPolar(index*coeff+demiCoeff,0));
+		pointsDatas->append(QwtPointPolar(index*coeff-demiCoeff,0));
+
+		_highlightCurve.setData(pointsDatas);
+	}
+}
+
 /*******************************
  * Private functions
  *******************************/
@@ -162,6 +183,7 @@ void PieChartDiagrams::clearAll() {
 		delete _polarCurve;
 		_polarCurve = 0;
 	}
+	_highlightCurve.setData(new PointPolarSeriesData());
 }
 
 void PieChartDiagrams::initializeDiagramsData( QVector< QVector<QwtIntervalSample> > &histogramsData, const int &nbSectors, const int &nbValues ) {
@@ -187,9 +209,13 @@ void PieChartDiagrams::createDiagrams( QVector< QVector<QwtIntervalSample> > &hi
 	_polarCurve = new QwtPolarCurve();
 	PointPolarSeriesData *pointsDatas = new PointPolarSeriesData();
 	const qreal coeff = 360./nbSectors;
+	const qreal demiCoeff = coeff/2.;
+	qreal currentCoeff = -demiCoeff;
 	for ( i=0 ; i<nbSectors ; ++i ) {
-		pointsDatas->append(QwtPointPolar(i*coeff,sectorsSum[i]));
+		pointsDatas->append(QwtPointPolar(currentCoeff,sectorsSum[i]));
+		currentCoeff+=coeff;
+		pointsDatas->append(QwtPointPolar(currentCoeff,sectorsSum[i]));
 	}
-	pointsDatas->append(QwtPointPolar(0,sectorsSum[0]));
+	pointsDatas->append(QwtPointPolar(-demiCoeff,sectorsSum[0]));
 	_polarCurve->setData(pointsDatas);
 }

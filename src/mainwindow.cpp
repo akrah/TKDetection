@@ -40,11 +40,11 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 	_histogramCursor.setBrush(Qt::red);
 
 	_ui->_comboSliceType->insertItem(SliceType::CURRENT,tr("Coupe originale"));
-	_ui->_comboSliceType->insertItem(SliceType::AVERAGE,tr("Coupe moyenne"));
-	_ui->_comboSliceType->insertItem(SliceType::MEDIAN,tr("Coupe médiane"));
 	_ui->_comboSliceType->insertItem(SliceType::MOVEMENT,tr("Coupe de mouvements"));
 	_ui->_comboSliceType->insertItem(SliceType::FLOW,tr("Coupe de flots optiques"));
 	_ui->_comboSliceType->insertItem(SliceType::RESTRICTED_AREA,tr("Coupe de zone réduite"));
+	//_ui->_comboSliceType->insertItem(SliceType::AVERAGE,tr("Coupe moyenne"));
+	//_ui->_comboSliceType->insertItem(SliceType::MEDIAN,tr("Coupe médiane"));
 
 	_ui->_spinFlowAlpha->setValue(_sliceView->flowAlpha());
 	_ui->_spinFlowEpsilon->setValue(_sliceView->flowEpsilon());
@@ -96,8 +96,9 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 	QObject::connect(_ui->_buttonComputeMarrow, SIGNAL(clicked()), this, SLOT(updateMarrow()));
 
 	// Évènements déclenchés par les bouton associès aux histogrammes de secteurs
-	QObject::connect(_ui->_buttonUpdateSectors, SIGNAL(clicked()), this, SLOT(updateSectorsHistograms()));
 	QObject::connect(_ui->_comboSelectSector, SIGNAL(currentIndexChanged(int)), this, SLOT(selectSectorHistogram(int)));
+	QObject::connect(_ui->_comboSelectInterval, SIGNAL(activated(int)), this, SLOT(selectInterval(int)));
+	QObject::connect(_ui->_buttonSelectIntervalUpdate, SIGNAL(clicked()), this, SLOT(selectCurrentInterval()));
 
 	// Évènements déclenchés par la souris sur le visualiseur de coupes
 	QObject::connect(&_sliceZoomer, SIGNAL(zoomFactorChanged(qreal,QPoint)), this, SLOT(zoomInSliceView(qreal,QPoint)));
@@ -161,6 +162,9 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *event) {
 				if ( sector > -1 && sector < _ui->_comboSelectSector->count()) {
 					_ui->_comboSelectSector->setCurrentIndex(sector);
 				}
+
+				_pieChartDiagrams->highlightCurve(sector);
+				_ui->_polarSectorSum->replot();
 			}
 		}
 	}
@@ -187,7 +191,7 @@ void MainWindow::closeImage() {
 	openNewBillon();
 	updateMarrow();
 	updateSliceHistogram();
-	updateSectorsHistograms();
+	updateSectorsHistogramsForCurrentInterval();
 	updateComponentsValues();
 	drawSlice();
 }
@@ -207,12 +211,15 @@ void MainWindow::drawSlice( const int &sliceNumber ) {
 				painter.drawEllipse(QPointF(center.x,center.y),_sliceHistogram->marrowAroundDiameter()/(2.*_billon->voxelWidth()),_sliceHistogram->marrowAroundDiameter()/(2.*_billon->voxelHeight()));
 			}
 		}
-		if ( !_pieChartPlots.isEmpty() && _slicesInterval.containsClosed(sliceNumber)) {
-			iCoord2D center(_pix.width()/2,_pix.height()/2);
-			if ( _marrow != 0 &&  _marrow->interval().containsClosed(sliceNumber) ) {
-				center = _marrow->at(sliceNumber-_marrow->interval().min());
+		if ( !_pieChartPlots.isEmpty() ) {
+			const bool drawing = _ui->_comboSelectInterval->currentIndex() == 0 ? _slicesInterval.containsClosed(sliceNumber) : _sliceHistogram->branchesAreas().at(_ui->_comboSelectInterval->currentIndex()-1).contains(sliceNumber);
+			if ( drawing ) {
+				iCoord2D center(_pix.width()/2,_pix.height()/2);
+				if ( _marrow != 0 &&  _marrow->interval().containsClosed(sliceNumber) ) {
+					center = _marrow->at(sliceNumber-_marrow->interval().min());
+				}
+				_pieChart->draw(_pix,_ui->_comboSelectSector->currentIndex(), center);
 			}
-			_pieChart->draw(_pix,_ui->_comboSelectSector->currentIndex(), center);
 		};
 	}
 	else {
@@ -275,13 +282,25 @@ void MainWindow::updateSliceHistogram() {
 	_sliceHistogram->detach();
 	_sliceHistogram->clear();
 	if ( _billon != 0 ) {
-		_sliceHistogram->constructHistogram(*_billon, _marrow);
+		_sliceHistogram->constructHistogram(*_billon, _marrow, _intensityInterval);
 	}
 	_histogramCursor.detach();
 	_sliceHistogram->attach(_ui->_plotSliceHistogram);
 	_histogramCursor.attach(_ui->_plotSliceHistogram);
 	_ui->_plotSliceHistogram->setAxisScale(QwtPlot::xBottom,0,(_billon != 0)?_billon->n_slices:0);
 	highlightSliceHistogram(_currentSlice);
+
+	const int oldIntervalIndex = _ui->_comboSelectInterval->currentIndex();
+	_ui->_comboSelectInterval->clear();
+	_ui->_comboSelectInterval->addItem(tr("Personnalisé"));
+	const QVector<QwtInterval> &intervals = _sliceHistogram->branchesAreas();
+	if ( !intervals.isEmpty() ) {
+		for ( int i=0 ; i<intervals.size() ; ++i ) {
+			const QwtInterval interval = intervals.at(i);
+			_ui->_comboSelectInterval->addItem(tr("Interval %1 : [ %2, %3 ] (%4 coupes)").arg(i).arg(interval.minValue()).arg(interval.maxValue()).arg(interval.width()));
+		}
+	}
+	_ui->_comboSelectInterval->setCurrentIndex(oldIntervalIndex<=intervals.size()?oldIntervalIndex:0);
 }
 
 void MainWindow::setMarrowAroundDiameter( const int &diameter ) {
@@ -351,50 +370,8 @@ void MainWindow::updateMarrow() {
 	drawSlice();
 }
 
-void MainWindow::updateSectorsHistograms() {
-	_pieChartDiagrams->detach();
-
-	_pieChart->setOrientation(_ui->_spinSectorsOrientation->value()*DEG_TO_RAD_FACT);
-	_pieChart->setSectorsNumber(_ui->_spinSectorsNumber->value());
-
-	while ( !_pieChartPlots.isEmpty() ) {
-		_ui->_stackedSectorsHistograms->removeWidget(_pieChartPlots.last());
-		_pieChartPlots.removeLast();
-	}
-
-	_ui->_comboSelectSector->clear();
-	_ui->_polarSectorSum->replot();
-
-	if ( _billon != 0 ) _pieChartDiagrams->compute( *_billon, _marrow, *_pieChart, _slicesInterval );
-
-	const int nbHistograms = _pieChartDiagrams->count();
-	if ( nbHistograms != 0 ) {
-
-		_pieChartPlots.reserve(nbHistograms);
-		for ( int i=0 ; i<nbHistograms ; ++i ) {
-			QwtPlot * plot = new QwtPlot();
-			_pieChartPlots.append(plot);
-			_ui->_stackedSectorsHistograms->addWidget(plot);
-			_ui->_comboSelectSector->addItem(tr("Secteur %1").arg(i));
-		}
-
-		_pieChartDiagrams->attach(_pieChartPlots);
-		_pieChartDiagrams->attach(_ui->_polarSectorSum);
-
-		for ( int i=0 ; i<nbHistograms ; ++i ) {
-			_pieChartPlots[i]->replot();
-		}
-		_ui->_polarSectorSum->replot();
-
-		_ui->_labelSectorsOrientation->setNum(_ui->_spinSectorsOrientation->value());
-		_ui->_labelSectorsNumber->setNum(_ui->_spinSectorsNumber->value());
-	}
-	else {
-		_ui->_labelSectorsOrientation->setText(tr("Aucune"));
-		_ui->_labelSectorsNumber->setText(tr("Aucun"));
-	}
-
-	selectSectorHistogram(0);
+void MainWindow::updateSectorsHistogramsForCurrentInterval() {
+	computeSectorsHistogramForInterval(_slicesInterval);
 }
 
 void MainWindow::selectSectorHistogram( const int &sectorIdx ) {
@@ -570,6 +547,8 @@ void MainWindow::computeRestrictedBillon() {
 			}
 			else {
 				_billon = newBillon;
+				_ui->_spansliderSliceThreshold->setMinimum(newBillon->minValue());
+				_ui->_spansliderSliceThreshold->setMaximum(newBillon->maxValue());
 			}
 			drawSlice();
 		}
@@ -593,6 +572,8 @@ void MainWindow::changeBillonUsed() {
 			_ui->_labelBillonUsed->setPalette(palette);
 			_ui->_labelBillonUsed->setText(tr("Actuellement : Billon restreint"));
 		}
+		_ui->_spansliderSliceThreshold->setMinimum(_billon->minValue());
+		_ui->_spansliderSliceThreshold->setMaximum(_billon->maxValue());
 		drawSlice();
 	}
 }
@@ -687,7 +668,7 @@ void MainWindow::exportMovementsToV3D() {
 				Slice &sliceDiag = billonDiag.slice(k-_slicesInterval.min()-1);
 				for ( j=0 ; j<height ; ++j ) {
 					for ( i=0 ; i<width ; ++i ) {
-						pixAbsDiff = qAbs(((qBound(minValue,previousSlice.at(j,i),maxValue)-minValue)) - ((qBound(minValue,toCompareSlice.at(j,i),maxValue)-minValue)));
+						pixAbsDiff = qAbs(qBound(minValue,previousSlice.at(j,i),maxValue) - qBound(minValue,toCompareSlice.at(j,i),maxValue));
 						if ( (pixAbsDiff <= thresholdMin) && (pixAbsDiff >= thresholdMax) ) sliceDiag.at(j,i) = minValue;
 					}
 				}
@@ -696,6 +677,22 @@ void MainWindow::exportMovementsToV3D() {
 			V3DExport::process( billonDiag, _marrow, fileName, SlicesInterval(0,depth-2), _ui->_spinExportThreshold->value() );
 		}
 	}
+}
+
+void MainWindow::selectInterval( const int &index ) {
+	if ( index > 0 && index <= _sliceHistogram->branchesAreas().size() ) {
+		const QwtInterval &interval = _sliceHistogram->branchesAreas().at(index-1);
+		computeSectorsHistogramForInterval(SlicesInterval(interval.minValue(),interval.maxValue()));
+		_ui->_sliderSelectSlice->setValue(_sliceHistogram->sliceOfIemeInterval(index-1));
+	}
+	else {
+		computeSectorsHistogramForInterval(_slicesInterval);
+		_ui->_sliderSelectSlice->setValue((_slicesInterval.min()+_slicesInterval.max())/2);
+	}
+}
+
+void MainWindow::selectCurrentInterval() {
+	selectInterval(_ui->_comboSelectInterval->currentIndex());
 }
 
 /*******************************
@@ -787,10 +784,56 @@ void MainWindow::enabledComponents() {
 	_ui->_buttonUpdateSliceHistogram->setEnabled(enable);
 	_ui->_buttonMaxSlice->setEnabled(enable);
 	_ui->_buttonMinSlice->setEnabled(enable);
-	_ui->_buttonUpdateSectors->setEnabled(enable);
 	_ui->_comboSelectSector->setEnabled(enable);
 	_ui->_buttonExportToDat->setEnabled(enable);
 	_ui->_buttonExportToOfs->setEnabled(enable);
 	_ui->_buttonNextMaximum->setEnabled(enable);
 	_ui->_buttonPreviousMaximum->setEnabled(enable);
+}
+
+
+void MainWindow::computeSectorsHistogramForInterval( const SlicesInterval &interval ) {
+	_pieChartDiagrams->detach();
+
+	_pieChart->setOrientation(_ui->_spinSectorsOrientation->value()*DEG_TO_RAD_FACT);
+	_pieChart->setSectorsNumber(_ui->_spinSectorsNumber->value());
+
+	while ( !_pieChartPlots.isEmpty() ) {
+		_ui->_stackedSectorsHistograms->removeWidget(_pieChartPlots.last());
+		_pieChartPlots.removeLast();
+	}
+
+	_ui->_comboSelectSector->clear();
+	_ui->_polarSectorSum->replot();
+
+	if ( _billon != 0 ) _pieChartDiagrams->compute( *_billon, _marrow, *_pieChart, interval, _intensityInterval );
+
+	const int nbHistograms = _pieChartDiagrams->count();
+	if ( nbHistograms != 0 ) {
+
+		_pieChartPlots.reserve(nbHistograms);
+		for ( int i=0 ; i<nbHistograms ; ++i ) {
+			QwtPlot * plot = new QwtPlot();
+			_pieChartPlots.append(plot);
+			_ui->_stackedSectorsHistograms->addWidget(plot);
+			_ui->_comboSelectSector->addItem(tr("Secteur %1").arg(i));
+		}
+
+		_pieChartDiagrams->attach(_pieChartPlots);
+		_pieChartDiagrams->attach(_ui->_polarSectorSum);
+
+		for ( int i=0 ; i<nbHistograms ; ++i ) {
+			_pieChartPlots[i]->replot();
+		}
+		_ui->_polarSectorSum->replot();
+
+		_ui->_labelSectorsOrientation->setNum(_ui->_spinSectorsOrientation->value());
+		_ui->_labelSectorsNumber->setNum(_ui->_spinSectorsNumber->value());
+	}
+	else {
+		_ui->_labelSectorsOrientation->setText(tr("Aucune"));
+		_ui->_labelSectorsNumber->setText(tr("Aucun"));
+	}
+
+	selectSectorHistogram(0);
 }

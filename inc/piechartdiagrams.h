@@ -1,12 +1,15 @@
 #ifndef PIECHARTDIAGRAMS_H
 #define PIECHARTDIAGRAMS_H
 
-#include <QList>
-
 #include "billon_def.h"
+
+#include <QList>
+#include <qwt_polar_curve.h>
+
 class Marrow;
 class PieChart;
 class SlicesInterval;
+class IntensityInterval;
 class QwtPlot;
 class QwtPlotHistogram;
 class QwtPolarPlot;
@@ -30,7 +33,8 @@ public:
 	void useNextSliceInsteadOfCurrentSlice( const bool &enable );
 	void setMarrowArroundDiameter( const int &diameter );
 
-	void compute( const Billon &billon, const Marrow *marrow, const PieChart &pieChart, const SlicesInterval &slicesInterval );
+	void compute( const Billon &billon, const Marrow *marrow, const PieChart &pieChart, const SlicesInterval &slicesInterval, const IntensityInterval &intensity );
+	void highlightCurve( const int &index );
 
 private:
 	void clearAll();
@@ -40,6 +44,7 @@ private:
 private:
 	QList<QwtPlotHistogram *> _histograms;
 	QwtPolarCurve *_polarCurve;
+	QwtPolarCurve _highlightCurve;
 
 	int _movementsThresholdMin;
 	int _movementsThresholdMax;

@@ -12,7 +12,7 @@
 SliceView::SliceView() : _typeOfView(SliceType::CURRENT),
 	_movementThresholdMin(100), _movementThresholdMax(200), _movementWithBackground(false), _useNextSliceInsteadOfCurrentSlice(false),
 	_flowAlpha(FLOW_ALPHA_DEFAULT), _flowEpsilon(FLOW_EPSILON_DEFAULT), _flowMaximumIterations(FLOW_MAXIMUM_ITERATIONS),
-	_restrictedAreaResolution(100), _restrictedAreaThreshold(-900), _restrictedAreaDrawCircle(true), _restrictedAreaBeginRadius(0)
+	_restrictedAreaResolution(100), _restrictedAreaThreshold(-900), _restrictedAreaDrawCircle(true), _restrictedAreaBeginRadius(5)
 {
 }
 
@@ -206,7 +206,7 @@ void SliceView::drawMovementSlice( QImage &image, const Billon &billon, const in
 	if ( _movementWithBackground ) {
 		for ( j=0 ; j<height ; j++) {
 			for ( i=0 ; i<width ; i++) {
-				pixelAbsDiff = qAbs(((qBound(minValue,previousSlice.at(j,i),maxValue)-minValue)) - ((qBound(minValue,toCompareSlice.at(j,i),maxValue)-minValue)));
+				pixelAbsDiff = qAbs(qBound(minValue,previousSlice.at(j,i),maxValue) - qBound(minValue,toCompareSlice.at(j,i),maxValue));
 				if ( pixelAbsDiff > _movementThresholdMin && pixelAbsDiff < _movementThresholdMax ) *line = foreground;
 				else {
 					color = (qBound(minValue,currentSlice.at(j,i),maxValue)-minValue)*fact;
