@@ -2,8 +2,10 @@
 #define PIECHARTDIAGRAMS_H
 
 #include "billon_def.h"
+#include "inc/pointpolarseriesdata.h"
 
 #include <QList>
+#include <qwt_plot_histogram.h>
 #include <qwt_polar_curve.h>
 
 class Marrow;
@@ -11,9 +13,7 @@ class PieChart;
 class SlicesInterval;
 class IntensityInterval;
 class QwtPlot;
-class QwtPlotHistogram;
 class QwtPolarPlot;
-class QwtPolarCurve;
 class QwtIntervalSample;
 
 class PieChartDiagrams
@@ -24,9 +24,10 @@ public:
 
 	int count() const;
 
-	void attach( const QList<QwtPlot *> & plots );
 	void attach( QwtPolarPlot * const polarPlot );
+	void attach( QwtPlot * const plot );
 	void detach();
+	void clearAll();
 
 	void setMovementsThresholdMin( const int &threshold );
 	void setMovementsThresholdMax( const int &threshold );
@@ -37,14 +38,20 @@ public:
 	void highlightCurve( const int &index );
 
 private:
-	void clearAll();
-	void initializeDiagramsData( QVector< QVector<QwtIntervalSample> > &histogramsData, const int &nbSectors, const int &nbValues );
-	void createDiagrams( QVector< QVector<QwtIntervalSample> > &histogramsData, const QVector<int> &sectorsSum, const int &nbSectors );
+	void createDiagrams( const QVector<int> &sectorsSum, const int &nbSectors );
+	void updateMaximums();
 
 private:
-	QList<QwtPlotHistogram *> _histograms;
-	QwtPolarCurve *_polarCurve;
-	QwtPolarCurve _highlightCurve;
+	QwtPolarCurve *_curve;
+	QwtPolarCurve *_curveMaximums;
+
+	QwtPolarCurve *_highlightCurve;
+
+	QwtPlotHistogram *_curveHistogram;
+	QVector<QwtIntervalSample> _curveHistogramDatas;
+
+	QwtPlotHistogram *_curveHistogramMaximums;
+	QVector<QwtIntervalSample> _curveHistogramMaximumsDatas;
 
 	int _movementsThresholdMin;
 	int _movementsThresholdMax;

@@ -43,7 +43,6 @@ public:
 
 private:
 	void updateMaximums();
-	void updateMinimums();
 	void computeIntervals();
 	void computeMeansAndMedian();
 
@@ -55,9 +54,6 @@ private:
 
 	QwtPlotHistogram *_histogramMaximums;
 	QVector<QwtIntervalSample> _datasMaximums;
-
-	QwtPlotHistogram *_histogramMinimums;
-	QVector<QwtIntervalSample> _datasMinimums;
 
 	QwtPlotHistogram *_histogramBranchesArea;
 	QVector<QwtIntervalSample> _datasBranchesAreaToDrawing;

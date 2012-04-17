@@ -9,12 +9,16 @@
 #include "inc/pointpolarseriesdata.h"
 #include <qwt_plot_histogram.h>
 
-PieChartDiagrams::PieChartDiagrams() : _polarCurve(0), _movementsThresholdMin(100), _movementsThresholdMax(200), _marrowAroundDiameter(50) {
-	_highlightCurve.setPen(QPen(Qt::green));
+PieChartDiagrams::PieChartDiagrams() :  _curve(new QwtPolarCurve()), _curveMaximums(new QwtPolarCurve()), _highlightCurve(new QwtPolarCurve()), _curveHistogram(new QwtPlotHistogram()), _curveHistogramMaximums(new QwtPlotHistogram()), _movementsThresholdMin(100), _movementsThresholdMax(200), _marrowAroundDiameter(50) {
+	_highlightCurve->setPen(QPen(Qt::green));
+	_curveHistogramMaximums->setBrush(Qt::green);
+	_curveHistogramMaximums->setPen(QPen(Qt::green));
 }
 
 PieChartDiagrams::~PieChartDiagrams() {
 	clearAll();
+	if ( _curve != 0 ) delete _curve;
+	if ( _curveMaximums != 0 ) delete _curveMaximums;
 }
 
 /*******************************
@@ -22,35 +26,52 @@ PieChartDiagrams::~PieChartDiagrams() {
  *******************************/
 
 int PieChartDiagrams::count() const {
-	return _histograms.size();
+	return _curveHistogramDatas.size();
 }
 
 /*******************************
  * Public setters
  *******************************/
 
-void PieChartDiagrams::attach( const QList<QwtPlot *> & plots ) {
-	const int nbMaxIter = qMin(plots.size(),_histograms.size());
-	for ( int i=0 ; i<nbMaxIter ; ++i ) {
-		if ( _histograms[i] != 0 && plots[i] != 0 ) {
-			_histograms[i]->attach(plots[i]);
-		}
+void PieChartDiagrams::attach( QwtPolarPlot * const polarPlot ) {
+	if ( polarPlot != 0 ) {
+		_curve->attach(polarPlot);
+		_curveMaximums->attach(polarPlot);
+		_highlightCurve->attach(polarPlot);
 	}
 }
 
-void PieChartDiagrams::attach( QwtPolarPlot * const polarPlot ) {
-	if ( _polarCurve != 0 && polarPlot != 0 ) {
-		_polarCurve->attach(polarPlot);
-		_highlightCurve.attach(polarPlot);
+void PieChartDiagrams::attach( QwtPlot * const plot ) {
+	if ( plot != 0 ) {
+		_curveHistogram->attach(plot);
+		_curveHistogramMaximums->attach(plot);
 	}
 }
 
 void PieChartDiagrams::detach() {
-	_highlightCurve.detach();
-	if ( _polarCurve != 0 ) _polarCurve->detach();
-	for ( int i=0 ; i<_histograms.size() ; ++i ) {
-		if ( _histograms[i] != 0 ) _histograms[i]->detach();
+	_highlightCurve->detach();
+	_curve->detach();
+	_curveMaximums->detach();
+	_curveHistogram->detach();
+	_curveHistogramMaximums->detach();
+}
+
+void PieChartDiagrams::clearAll() {
+	if ( _curve != 0 ) {
+		delete _curve;
+		_curve = new QwtPolarCurve();
 	}
+
+	if ( _curveMaximums != 0 ) {
+		delete _curveMaximums;
+		_curveMaximums = new QwtPolarCurve();
+	}
+
+	_curveHistogramDatas.clear();
+	_curveHistogram->setSamples(_curveHistogramDatas);
+
+	_curveHistogramMaximumsDatas.clear();
+	_curveHistogramMaximums->setSamples(_curveHistogramMaximumsDatas);
 }
 
 void PieChartDiagrams::setMovementsThresholdMin( const int &threshold ) {
@@ -70,12 +91,12 @@ void PieChartDiagrams::setMarrowArroundDiameter( const int &diameter ) {
 }
 
 void PieChartDiagrams::compute( const Billon &billon, const Marrow *marrow, const PieChart &pieChart, const SlicesInterval &slicesInterval, const IntensityInterval &intensity ) {
+	clearAll();
 	if ( slicesInterval.isValid() ) {
 		const uint width = billon.n_cols;
 		const uint height = billon.n_rows;
 		const int minValue = intensity.min();
 		const int maxValue = intensity.max();
-		const int nbValues = _movementsThresholdMax-_movementsThresholdMin;
 		const int nbSectors = pieChart.nbSectors();
 		const uint minOfInterval = slicesInterval.min();
 		const uint maxOfInterval = slicesInterval.max();
@@ -83,10 +104,6 @@ void PieChartDiagrams::compute( const Billon &billon, const Marrow *marrow, cons
 		const int radius = diameter/(2.*billon.voxelWidth());
 		const int radiusMax = radius+1;
 		const qreal squareRadius = qPow(radius,2);
-
-		// Création des données des diagrammes
-		QVector< QVector<QwtIntervalSample> > histogramsData(nbSectors,QVector<QwtIntervalSample>(nbValues,QwtIntervalSample(0.,0.,0.)));
-		initializeDiagramsData( histogramsData, nbSectors, nbValues );
 
 		// Calcul des diagrammes en parcourant les tranches du billon comprises dans l'intervalle
 		QVector<int> sectorsSum(nbSectors,0);
@@ -124,7 +141,6 @@ void PieChartDiagrams::compute( const Billon &billon, const Marrow *marrow, cons
 								diff = qAbs(qBound(minValue,currentSliceValue,maxValue) - qBound(minValue,previousSliceValue,maxValue));
 								if ( (diff > _movementsThresholdMin) && (diff < _movementsThresholdMax) ) {
 									diff -= _movementsThresholdMin;
-									histogramsData[sectorIdx][diff-1].value += 1.;
 									sectorsSum[sectorIdx] += diff;
 								}
 							}
@@ -142,7 +158,6 @@ void PieChartDiagrams::compute( const Billon &billon, const Marrow *marrow, cons
 							diff = qAbs(qBound(minValue,currentSliceValue,maxValue) - qBound(minValue,previousSliceValue,maxValue));
 							if ( diff > _movementsThresholdMin && diff < _movementsThresholdMax ) {
 								diff -= _movementsThresholdMin;
-								histogramsData[sectorIdx][diff-1].value += 1.;
 								sectorsSum[sectorIdx] += diff;
 							}
 						}
@@ -151,15 +166,16 @@ void PieChartDiagrams::compute( const Billon &billon, const Marrow *marrow, cons
 			}
 		}
 
-		createDiagrams( histogramsData, sectorsSum, nbSectors );
+		createDiagrams( sectorsSum, nbSectors );
+		updateMaximums();
 	}
 }
 
 void PieChartDiagrams::highlightCurve( const int &index ) {
-	if ( !_histograms.isEmpty() && index > -1 && index < _histograms.size() ) {
-		const qreal coeff = 360./_histograms.size();
+	if ( index > -1 && index < count() ) {
+		const qreal coeff = 360./count();
 		const qreal demiCoeff = coeff/2.;
-		const qreal valueOfCurve = _polarCurve->sample(index*2).radius();
+		const qreal valueOfCurve = _curve->sample(index*2).radius();
 
 		PointPolarSeriesData *pointsDatas = new PointPolarSeriesData();
 		pointsDatas->append(QwtPointPolar(index*coeff-demiCoeff,0));
@@ -168,7 +184,7 @@ void PieChartDiagrams::highlightCurve( const int &index ) {
 		pointsDatas->append(QwtPointPolar(index*coeff+demiCoeff,0));
 		pointsDatas->append(QwtPointPolar(index*coeff-demiCoeff,0));
 
-		_highlightCurve.setData(pointsDatas);
+		_highlightCurve->setData(pointsDatas);
 	}
 }
 
@@ -176,46 +192,60 @@ void PieChartDiagrams::highlightCurve( const int &index ) {
  * Private functions
  *******************************/
 
-void PieChartDiagrams::clearAll() {
-	qDeleteAll(_histograms);
-	_histograms.clear();
-	if ( _polarCurve != 0 ) {
-		delete _polarCurve;
-		_polarCurve = 0;
-	}
-	_highlightCurve.setData(new PointPolarSeriesData());
-}
-
-void PieChartDiagrams::initializeDiagramsData( QVector< QVector<QwtIntervalSample> > &histogramsData, const int &nbSectors, const int &nbValues ) {
-	for ( int i=0 ; i<nbSectors ; ++i ) {
-		for ( int j=0 ; j<nbValues ; ++j ) {
-			histogramsData[i][j].interval.setInterval(j,j+1);
-		}
-	}
-}
-
-void PieChartDiagrams::createDiagrams( QVector< QVector<QwtIntervalSample> > &histogramsData, const QVector<int> &sectorsSum, const int &nbSectors ) {
-	clearAll();
-
-	int i;
-	// Création des objets histogrammes et affectation de leurs données correspondantes
-	_histograms.reserve(nbSectors);
-	for ( i=0 ; i<nbSectors ; ++i ) {
-		_histograms.append(new QwtPlotHistogram());
-		static_cast<QwtIntervalSeriesData *>(_histograms.last()->data())->setSamples(histogramsData[i]);
-	}
-
-	// Création du diagramme circulaire
-	_polarCurve = new QwtPolarCurve();
-	PointPolarSeriesData *pointsDatas = new PointPolarSeriesData();
+void PieChartDiagrams::createDiagrams( const QVector<int> &sectorsSum, const int &nbSectors ) {
 	const qreal coeff = 360./nbSectors;
 	const qreal demiCoeff = coeff/2.;
 	qreal currentCoeff = -demiCoeff;
+	int i, value;
+	PointPolarSeriesData *curveDatas = new PointPolarSeriesData();
+	_curveHistogramDatas.fill(QwtIntervalSample(),nbSectors);
 	for ( i=0 ; i<nbSectors ; ++i ) {
-		pointsDatas->append(QwtPointPolar(currentCoeff,sectorsSum[i]));
+		value = sectorsSum[i];
+		QwtIntervalSample &interval = _curveHistogramDatas[i];
+
+		curveDatas->append(QwtPointPolar(currentCoeff,value));
+		interval.interval.setMinValue(currentCoeff);
+
 		currentCoeff+=coeff;
-		pointsDatas->append(QwtPointPolar(currentCoeff,sectorsSum[i]));
+
+		curveDatas->append(QwtPointPolar(currentCoeff,value));
+		interval.interval.setMaxValue(currentCoeff);
+		interval.value = sectorsSum[i];
 	}
-	pointsDatas->append(QwtPointPolar(-demiCoeff,sectorsSum[0]));
-	_polarCurve->setData(pointsDatas);
+	curveDatas->append(QwtPointPolar(-demiCoeff,sectorsSum[0]));
+	_curve->setData(curveDatas);
+	_curveHistogram->setSamples(_curveHistogramDatas);
+}
+
+void PieChartDiagrams::updateMaximums() {
+	const int max = count();
+	PointPolarSeriesData *_curveMaximumsDatas = new PointPolarSeriesData();
+
+	if ( max > 0 ) {
+		double value;
+		int cursor;
+		bool isMax;
+
+		qDebug() << "Pics angulaires :";
+		for ( int i=0 ; i<max ; ++i ) {
+			value = _curveHistogramDatas[i].value;
+			if ( value > 0 ) {
+				cursor = 1;
+				do {
+					isMax = ( (value > _curveHistogramDatas[i-cursor>=0?i-cursor:max+i-cursor].value) && (value > _curveHistogramDatas[i+cursor<max?i+cursor:i+cursor-max].value) );
+					cursor++;
+				}
+				while ( isMax && cursor<3 );
+				if ( isMax ) {
+					_curveMaximumsDatas->append(_curve->sample(i));
+					_curveHistogramMaximumsDatas.append(_curveHistogramDatas[i]);
+					i+=cursor-1;
+					qDebug() << i;
+				}
+			}
+		}
+	}
+
+	_curveMaximums->setData(_curveMaximumsDatas);
+	_curveHistogramMaximums->setSamples(_curveHistogramMaximumsDatas);
 }

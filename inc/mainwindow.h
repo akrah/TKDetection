@@ -96,7 +96,6 @@ private:
 
 	PieChart *_pieChart;
 	PieChartDiagrams *_pieChartDiagrams;
-	QList<QwtPlot *> _pieChartPlots;
 
 	SliceZoomer _sliceZoomer;
 	SlicesInterval _slicesInterval;
@@ -105,6 +104,7 @@ private:
 	int _currentSlice;
 	int _currentMaximum;
 	bool _isUsedOriginalBillon;
+	int _currentSector;
 };
 
 #endif // MAINWINDOW_H

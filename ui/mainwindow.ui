@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>969</width>
-    <height>951</height>
+    <height>973</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -105,7 +105,7 @@
            <x>0</x>
            <y>0</y>
            <width>454</width>
-           <height>698</height>
+           <height>719</height>
           </rect>
          </property>
          <layout class="QHBoxLayout" name="horizontalLayout_8">
@@ -172,7 +172,7 @@
    <property name="minimumSize">
     <size>
      <width>494</width>
-     <height>749</height>
+     <height>767</height>
     </size>
    </property>
    <property name="floating">
@@ -962,61 +962,6 @@ autour de la moelle</string>
            <property name="currentIndex">
             <number>1</number>
            </property>
-           <widget class="QWidget" name="tab_1">
-            <attribute name="title">
-             <string>Histogrammes</string>
-            </attribute>
-            <layout class="QVBoxLayout" name="verticalLayout_2">
-             <item>
-              <layout class="QFormLayout" name="formLayout_2">
-               <property name="topMargin">
-                <number>0</number>
-               </property>
-               <item row="0" column="0">
-                <widget class="QLabel" name="label_4">
-                 <property name="text">
-                  <string>Orientation utilisée</string>
-                 </property>
-                </widget>
-               </item>
-               <item row="0" column="1">
-                <widget class="QLabel" name="_labelSectorsOrientation">
-                 <property name="text">
-                  <string>Aucune</string>
-                 </property>
-                </widget>
-               </item>
-               <item row="1" column="0">
-                <widget class="QLabel" name="label_6">
-                 <property name="text">
-                  <string>Nombre de secteurs</string>
-                 </property>
-                </widget>
-               </item>
-               <item row="1" column="1">
-                <widget class="QLabel" name="_labelSectorsNumber">
-                 <property name="text">
-                  <string>Aucun</string>
-                 </property>
-                </widget>
-               </item>
-              </layout>
-             </item>
-             <item>
-              <widget class="QComboBox" name="_comboSelectSector"/>
-             </item>
-             <item>
-              <widget class="QStackedWidget" name="_stackedSectorsHistograms">
-               <property name="frameShape">
-                <enum>QFrame::NoFrame</enum>
-               </property>
-               <property name="currentIndex">
-                <number>-1</number>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </widget>
            <widget class="QWidget" name="tab_2">
             <attribute name="title">
              <string>Diagramme circulaire</string>
@@ -1034,6 +979,16 @@ autour de la moelle</string>
                 </brush>
                </property>
               </widget>
+             </item>
+            </layout>
+           </widget>
+           <widget class="QWidget" name="tab_4">
+            <attribute name="title">
+             <string>Histogramme angulaire</string>
+            </attribute>
+            <layout class="QGridLayout" name="gridLayout">
+             <item row="0" column="0">
+              <widget class="QwtPlot" name="_plotAngularHistogram"/>
              </item>
             </layout>
            </widget>

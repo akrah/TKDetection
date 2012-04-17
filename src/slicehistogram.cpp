@@ -6,7 +6,7 @@
 #include <qwt_plot_histogram.h>
 #include <qwt_plot_curve.h>
 
-SliceHistogram::SliceHistogram() : _histogram(new QwtPlotHistogram()), _histogramMaximums(new QwtPlotHistogram()), _histogramMinimums(new QwtPlotHistogram()), _histogramBranchesArea(new QwtPlotHistogram()),
+SliceHistogram::SliceHistogram() : _histogram(new QwtPlotHistogram()), _histogramMaximums(new QwtPlotHistogram()), _histogramBranchesArea(new QwtPlotHistogram()),
 	_curveMeans(new QwtPlotCurve()), _dataMeans(0.), _curveMedian(new QwtPlotCurve()), _dataMedian(0.), _curveMeansMedian(new QwtPlotCurve()), _dataMeansMedian(0.), _marrowAroundDiameter(50), _intervalType(HistogramIntervalType::FROM_MIDDLE_OF_MEANS_AND_MEDIAN),
 	_minimumIntervalWidth(10), _movementThresholdMin(100), _movementThresholdMax(200), _smoothing(true), _useNextSlice(true), _maximumsNeighborhood(10)
 {
@@ -16,9 +16,6 @@ SliceHistogram::SliceHistogram() : _histogram(new QwtPlotHistogram()), _histogra
 	_histogramBranchesArea->setBrush(Qt::blue);
 	_histogramBranchesArea->setPen(QPen(Qt::blue));
 
-	_histogramMinimums->setBrush(Qt::yellow);
-	_histogramMinimums->setPen(QPen(Qt::yellow));
-
 	_curveMeans->setPen(QPen(Qt::red));
 	_curveMedian->setPen(QPen(Qt::red));
 	_curveMeansMedian->setPen(QPen(Qt::red));
@@ -27,7 +24,6 @@ SliceHistogram::SliceHistogram() : _histogram(new QwtPlotHistogram()), _histogra
 SliceHistogram::~SliceHistogram() {
 	if ( _histogram != 0 ) delete _histogram;
 	if ( _histogramMaximums != 0 ) delete _histogramMaximums;
-	if ( _histogramMinimums != 0 ) delete _histogramMinimums;
 	if ( _histogramBranchesArea != 0 ) delete _histogramBranchesArea;
 	if ( _curveMeans != 0 ) delete _curveMeans;
 	if ( _curveMedian != 0 ) delete _curveMedian;
@@ -123,9 +119,6 @@ void SliceHistogram::attach( QwtPlot * const plot ) {
 		if ( _histogramMaximums != 0 ) {
 			_histogramMaximums->attach(plot);
 		}
-		if ( _histogramMinimums != 0 ) {
-			_histogramMinimums->attach(plot);
-		}
 		if ( _intervalType == HistogramIntervalType::FROM_MEANS && _curveMeans != 0 ) {
 			_curveMeans->attach(plot);
 		}
@@ -148,9 +141,6 @@ void SliceHistogram::detach() {
 	if ( _histogramMaximums != 0 ) {
 		_histogramMaximums->detach();
 	}
-	if ( _histogramMinimums != 0 ) {
-		_histogramMinimums->detach();
-	}
 	if ( _curveMeans != 0 ) {
 		_curveMeans->detach();
 	}
@@ -167,8 +157,6 @@ void SliceHistogram::clear() {
 	_histogram->setSamples(_datasHistogram);
 	_datasMaximums.clear();
 	_histogramMaximums->setSamples(_datasMaximums);
-	_datasMinimums.clear();
-	_histogramMinimums->setSamples(_datasMinimums);
 	_datasBranchesAreaToDrawing.clear();
 	_datasBranchesRealAreas.clear();
 	_histogramBranchesArea->setSamples(_datasBranchesAreaToDrawing);
@@ -205,14 +193,13 @@ void SliceHistogram::constructHistogram( const Billon &billon, const Marrow *mar
 		}
 	}
 
-	int i, j, iRadius, iRadiusMax, currentSliceValue, previousSliceValue, nbPixels;
+	int i, j, iRadius, iRadiusMax, currentSliceValue, previousSliceValue;
 	uint k, marrowX, marrowY, xPos, yPos;
 	qreal cumul, diff;
 	for ( k=1 ; k<depth ; ++k ) {
 		const arma::Slice &slice = _useNextSlice?billon.slice(k+1):billon.slice(k);
 		const arma::Slice &prevSlice = billon.slice(k-1);
 		cumul = 0.;
-		nbPixels = 0;
 		if ( marrow != 0 ) {
 			marrowX = marrow->at(k).x;
 			marrowY = marrow->at(k).y;
@@ -230,7 +217,6 @@ void SliceHistogram::constructHistogram( const Billon &billon, const Marrow *mar
 							if ( (diff > _movementThresholdMin) && (diff < _movementThresholdMax) ) {
 								cumul += diff;
 							}
-							nbPixels++;
 						}
 					}
 				}
@@ -246,19 +232,16 @@ void SliceHistogram::constructHistogram( const Billon &billon, const Marrow *mar
 						if ( (diff > _movementThresholdMin) && (diff < _movementThresholdMax) ) {
 							cumul += diff;
 						}
-						nbPixels++;
 					}
 				}
 			}
 		}
-		if ( nbPixels > 0 ) _datasHistogram.append(QwtIntervalSample(cumul,k-1,k));
-		else _datasHistogram.append(QwtIntervalSample(0.,k-1,k));
+		_datasHistogram.append(QwtIntervalSample(cumul,k-1,k));
 	}
 
 	if (_smoothing) smoothHistogram( _datasHistogram );
 	_histogram->setSamples(_datasHistogram);
 	updateMaximums();
-//	updateMinimums();
 	computeMeansAndMedian();
 	computeIntervals();
 }
@@ -267,7 +250,6 @@ void SliceHistogram::updateMaximums() {
 	_datasMaximums.clear();
 
 	if ( _datasHistogram.size() > 0 ) {
-		QList<int> pics;
 		const int max = _datasHistogram.size()-_maximumsNeighborhood;
 		double value;
 		int cursor;
@@ -275,15 +257,14 @@ void SliceHistogram::updateMaximums() {
 		qDebug() << "Pics :";
 		for ( int i=_maximumsNeighborhood ; i<max ; ++i ) {
 			value = _datasHistogram.at(i).value;
-			if ( value != 0 ) {
+			if ( value > 0 ) {
 				cursor = 1;
 				do {
-					isMax = ( (value > _datasHistogram.at(i-cursor).value) && (value >= _datasHistogram.at(i+cursor).value) );
+					isMax = ( (value > _datasHistogram.at(i-cursor).value) && (value > _datasHistogram.at(i+cursor).value) );
 					cursor++;
 				}
 				while ( isMax && cursor<=_maximumsNeighborhood );
 				if ( isMax ) {
-					pics.append(i);
 					_datasMaximums.append(_datasHistogram.at(i));
 					i+=_maximumsNeighborhood-1;
 					qDebug() << i;
@@ -295,33 +276,6 @@ void SliceHistogram::updateMaximums() {
 	_histogramMaximums->setSamples(_datasMaximums);
 }
 
-void SliceHistogram::updateMinimums() {
-	_datasMinimums.clear();
-
-	if ( _datasHistogram.size() > 0 ) {
-		QList<int> pics;
-		const int filterRadius = 5;
-		const int max = _datasHistogram.size()-filterRadius;
-		double value;
-		qDebug() << "Pics primaires :";
-		for ( int i=filterRadius ; i<max ; ++i ) {
-			value = _datasHistogram.at(i).value;
-			if ( (value < _datasHistogram.at(i-1).value) && (value < _datasHistogram.at(i+1).value) &&
-				 (value < _datasHistogram.at(i-2).value) && (value < _datasHistogram.at(i+2).value) &&
-				 (value < _datasHistogram.at(i-3).value) && (value < _datasHistogram.at(i+3).value) &&
-				 (value < _datasHistogram.at(i-4).value) && (value < _datasHistogram.at(i+4).value) &&
-				 (value < _datasHistogram.at(i-5).value) && (value < _datasHistogram.at(i+5).value) ) {
-				pics.append(i);
-				_datasMinimums.append(_datasHistogram.at(i));
-				i+=filterRadius-1;
-				qDebug() << i;
-			}
-		}
-	}
-
-	_histogramMinimums->setSamples(_datasMinimums);
-}
-
 namespace {
 	inline qreal firstdDerivated( const QVector< QwtIntervalSample > &histogramDatas, const int &index ) {
 		return histogramDatas.at(index).value - histogramDatas.at(qAbs(index-1)).value;
@@ -331,13 +285,13 @@ namespace {
 void SliceHistogram::smoothHistogram( QVector< QwtIntervalSample > &histogramDatas ) {
 	qreal veryOldValue = histogramDatas.at(0).value;
 	qreal oldValue = histogramDatas.at(1).value;
-	qreal temporaryOldValue;
-	for ( int i=2 ; i<histogramDatas.size()-2 ; ++i ) {
-		temporaryOldValue = histogramDatas.at(i).value;
-		histogramDatas[i].value = (veryOldValue + oldValue + temporaryOldValue + histogramDatas.at(i+1).value + histogramDatas.at(i+2).value)/5.;
-		//histogramDatas[i].value = (histogramDatas.at(i-2).value, histogramDatas.at(i-1).value + histogramDatas.at(i).value + histogramDatas.at(i+1).value + histogramDatas.at(i+2).value)/5.;
+	qreal currentValue;
+	int nbDatas = histogramDatas.size()-2;
+	for ( int i=2 ; i<nbDatas ; ++i ) {
+		currentValue = histogramDatas.at(i).value;
+		histogramDatas[i].value = (veryOldValue + oldValue + currentValue + histogramDatas.at(i+1).value + histogramDatas.at(i+2).value)/5.;
 		veryOldValue = oldValue;
-		oldValue = temporaryOldValue;
+		oldValue = currentValue;
 	}
 }
 
@@ -443,18 +397,22 @@ void SliceHistogram::computeMeansAndMedian() {
 	qreal yMedian[2] = { 0., 0. };
 	qreal xMeansMedian[2] = { 0., nbDatas };
 	qreal yMeansMedian[2] = { 0., 0. };
+	qreal currentValue;
 	_dataMeans = 0.;
 	_dataMedian = 0.;
 	_dataMeansMedian = 0.;
 	if ( nbDatas > 0 ) {
-		QVector<qreal> listToSort;
+		QVector<qreal> listToSort(nbDatas);
 		for ( int i=0 ; i<nbDatas ; ++i ) {
-			_dataMeans += _datasHistogram.at(i).value;
-			listToSort.append(_datasHistogram.at(i).value);
+			currentValue = _datasHistogram.at(i).value;
+			_dataMeans += currentValue;
+			listToSort[i] = currentValue;
 		}
 		_dataMeans /= nbDatas;
 		qSort(listToSort);
-		_dataMedian = listToSort.at(listToSort.size()/2);
+		_dataMedian = listToSort.at(nbDatas/2+1);
+		if ( nbDatas % 2 == 0 ) _dataMedian = (_dataMedian+listToSort.at(nbDatas/2))/2;
+
 		_dataMeansMedian = (_dataMeans+_dataMedian)/2.;
 		yMeans[0] = yMeans[1] = _dataMeans;
 		yMedian[0] = yMedian[1] = _dataMedian;
