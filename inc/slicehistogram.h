@@ -5,6 +5,7 @@
 
 #include "slicehistogram_def.h"
 #include "billon_def.h"
+
 class Marrow;
 class QwtPlot;
 class QwtPlotHistogram;
@@ -42,7 +43,7 @@ public:
 	void constructHistogram( const Billon &billon, const Marrow *marrow, const IntensityInterval &intensity );
 
 private:
-	void updateMaximums();
+	void computeMaximums();
 	void computeIntervals();
 	void computeMeansAndMedian();
 

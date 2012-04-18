@@ -960,7 +960,7 @@ autour de la moelle</string>
             <enum>QTabWidget::West</enum>
            </property>
            <property name="currentIndex">
-            <number>1</number>
+            <number>0</number>
            </property>
            <widget class="QWidget" name="tab_2">
             <attribute name="title">
@@ -971,10 +971,10 @@ autour de la moelle</string>
               <widget class="QwtPolarPlot" name="_polarSectorSum">
                <property name="plotBackground">
                 <brush brushstyle="SolidPattern">
-                 <color alpha="255">
-                  <red>200</red>
-                  <green>200</green>
-                  <blue>200</blue>
+                 <color alpha="0">
+                  <red>255</red>
+                  <green>255</green>
+                  <blue>255</blue>
                  </color>
                 </brush>
                </property>

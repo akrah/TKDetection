@@ -50,6 +50,9 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 	_ui->_spinFlowEpsilon->setValue(_sliceView->flowEpsilon());
 	_ui->_spinFlowMaximumIterations->setValue(_sliceView->flowMaximumIterations());
 
+	_pieChartDiagrams->attach(_ui->_polarSectorSum);
+	_pieChartDiagrams->attach(_ui->_plotAngularHistogram);
+
 	/**** Mise en place de la communication MVC ****/
 
 	// Évènements déclenchés par le slider de n° de coupe
@@ -157,6 +160,7 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *event) {
 
 				_pieChartDiagrams->highlightCurve(sector);
 				_ui->_polarSectorSum->replot();
+				_ui->_plotAngularHistogram->replot();
 			}
 		}
 	}
@@ -209,6 +213,7 @@ void MainWindow::drawSlice( const int &sliceNumber ) {
 			if ( _marrow != 0 &&  _marrow->interval().containsClosed(sliceNumber) ) {
 				center = _marrow->at(sliceNumber-_marrow->interval().min());
 			}
+			_pieChartDiagrams->draw(_pix,center);
 			_pieChart->draw(_pix,_currentSector, center);
 		}
 	}
@@ -310,6 +315,7 @@ void MainWindow::setMarrowAroundDiameter( const int &diameter ) {
 
 void MainWindow::setHistogramIntervalType( const int &type ) {
 	_sliceHistogram->setIntervalType( static_cast<const HistogramIntervalType::HistogramIntervalType>(type) );
+	_pieChartDiagrams->setIntervalType( static_cast<const HistogramIntervalType::HistogramIntervalType>(type) );
 }
 
 void MainWindow::setHistogramIntervalMinimumWidth( const int &width ) {
@@ -782,25 +788,12 @@ void MainWindow::enabledComponents() {
 
 
 void MainWindow::computeSectorsHistogramForInterval( const SlicesInterval &interval ) {
-	_pieChartDiagrams->detach();
-	_pieChartDiagrams->clearAll();
-
 	_pieChart->setOrientation(_ui->_spinSectorsOrientation->value()*DEG_TO_RAD_FACT);
 	_pieChart->setSectorsNumber(_ui->_spinSectorsNumber->value());
 
-	_ui->_polarSectorSum->replot();
-	_ui->_plotAngularHistogram->replot();
-
 	if ( _billon != 0 ) _pieChartDiagrams->compute( *_billon, _marrow, *_pieChart, interval, _intensityInterval );
 
-	const int nbHistograms = _pieChartDiagrams->count();
-	if ( nbHistograms != 0 ) {
-		_pieChartDiagrams->attach(_ui->_polarSectorSum);
-		_pieChartDiagrams->attach(_ui->_plotAngularHistogram);
-
-		_ui->_plotAngularHistogram->replot();
-		_ui->_polarSectorSum->replot();
-	}
-
+	_ui->_plotAngularHistogram->replot();
+	_ui->_polarSectorSum->replot();
 	selectSectorHistogram(0);
 }

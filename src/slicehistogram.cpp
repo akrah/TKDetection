@@ -241,12 +241,12 @@ void SliceHistogram::constructHistogram( const Billon &billon, const Marrow *mar
 
 	if (_smoothing) smoothHistogram( _datasHistogram );
 	_histogram->setSamples(_datasHistogram);
-	updateMaximums();
+	computeMaximums();
 	computeMeansAndMedian();
 	computeIntervals();
 }
 
-void SliceHistogram::updateMaximums() {
+void SliceHistogram::computeMaximums() {
 	_datasMaximums.clear();
 
 	if ( _datasHistogram.size() > 0 ) {
@@ -408,12 +408,12 @@ void SliceHistogram::computeMeansAndMedian() {
 			_dataMeans += currentValue;
 			listToSort[i] = currentValue;
 		}
-		_dataMeans /= nbDatas;
+		_dataMeans /= static_cast<qreal>(nbDatas);
 		qSort(listToSort);
-		_dataMedian = listToSort.at(nbDatas/2+1);
-		if ( nbDatas % 2 == 0 ) _dataMedian = (_dataMedian+listToSort.at(nbDatas/2))/2;
-
+		if ( nbDatas % 2 == 0 ) _dataMedian = (listToSort.at((nbDatas/2)-1)+listToSort.at(nbDatas/2))/2.;
+		else _dataMedian = listToSort.at((nbDatas+1)/2-1);
 		_dataMeansMedian = (_dataMeans+_dataMedian)/2.;
+
 		yMeans[0] = yMeans[1] = _dataMeans;
 		yMedian[0] = yMedian[1] = _dataMedian;
 		yMeansMedian[0] = yMeansMedian[1] = _dataMeansMedian;

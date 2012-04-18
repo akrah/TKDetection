@@ -10,6 +10,7 @@ public:
 
 	virtual QRectF boundingRect() const;
 
+	void setSamples( const QVector<QwtPointPolar> &samples );
 	void append( QwtPointPolar point );
 	void clear();
 };
