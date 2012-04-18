@@ -27,7 +27,7 @@ void Marrow::draw( QImage &image, const int &sliceIdx ) const {
 		QPainter painter(&image);
 		QPainterPath ellipsePath;
 		ellipsePath.addEllipse(coordToDraw.x-5,coordToDraw.y-5,10,10);
-		QColor color(100,200,100);
+		QColor color(Qt::red);
 
 		painter.setBrush(color);
 		painter.setPen(color);

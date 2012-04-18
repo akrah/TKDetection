@@ -40,18 +40,26 @@ public:
 private:
 	void createDiagrams( const QVector<int> &sectorsSum, const int &nbSectors );
 	void updateMaximums();
+	int sliceOfIemeMaximum( const int &maximumIndex ) const;
+	void computeIntervals();
 
 private:
-	QwtPolarCurve *_curve;
-	QwtPolarCurve *_curveMaximums;
+	QwtPolarCurve _curve;
+	PointPolarSeriesData *_curveDatas;
+	QwtPolarCurve _curveMaximums;
+	PointPolarSeriesData *_curveMaximumsDatas;
+	QwtPolarCurve _highlightCurve;
+	PointPolarSeriesData *_highlightCurveDatas;
 
-	QwtPolarCurve *_highlightCurve;
-
-	QwtPlotHistogram *_curveHistogram;
+	QwtPlotHistogram _curveHistogram;
 	QVector<QwtIntervalSample> _curveHistogramDatas;
 
-	QwtPlotHistogram *_curveHistogramMaximums;
+	QwtPlotHistogram _curveHistogramMaximums;
 	QVector<QwtIntervalSample> _curveHistogramMaximumsDatas;
+
+	QwtPlotHistogram _curveHistogramIntervals;
+	QVector<QwtIntervalSample> _curveHistogramIntervalsDatas;
+	QVector<QwtInterval> _curveHistogramIntervalsRealDatas;
 
 	int _movementsThresholdMin;
 	int _movementsThresholdMax;

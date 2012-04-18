@@ -66,7 +66,7 @@ void PieChart::draw( QImage &image, const int &sectorIdx, const iCoord2D &center
 	twoSides.append( TWO_PI-_sectors.at(sectorIdx).leftAngle() );
 
 	QPainter painter(&image);
-	painter.setPen(QColor(0,255,0));
+	painter.setPen(Qt::red);
 
 	// Dessin des deux côtés du secteur
 	qreal angle, x1,y1,x2,y2;

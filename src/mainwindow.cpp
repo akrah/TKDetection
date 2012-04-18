@@ -203,7 +203,7 @@ void MainWindow::drawSlice( const int &sliceNumber ) {
 				painter.drawEllipse(QPointF(center.x,center.y),_sliceHistogram->marrowAroundDiameter()/(2.*_billon->voxelWidth()),_sliceHistogram->marrowAroundDiameter()/(2.*_billon->voxelHeight()));
 			}
 		}
-		const bool drawing = _ui->_comboSelectInterval->currentIndex() == 0 ? _slicesInterval.containsClosed(sliceNumber) : _sliceHistogram->branchesAreas().at(_ui->_comboSelectInterval->currentIndex()-1).contains(sliceNumber);
+		const bool drawing = (_pieChartDiagrams->count() != 0) && (_ui->_comboSelectInterval->currentIndex() == 0 ? _slicesInterval.containsClosed(sliceNumber) : _sliceHistogram->branchesAreas().at(_ui->_comboSelectInterval->currentIndex()-1).contains(sliceNumber));
 		if ( drawing ) {
 			iCoord2D center(_pix.width()/2,_pix.height()/2);
 			if ( _marrow != 0 &&  _marrow->interval().containsClosed(sliceNumber) ) {
