@@ -188,6 +188,9 @@ void MainWindow::closeImage() {
 	updateMarrow();
 	updateSliceHistogram();
 	updateSectorsHistogramsForCurrentInterval();
+	_pieChartDiagrams->clearAll();
+	_ui->_plotAngularHistogram->replot();
+	_ui->_polarSectorSum->replot();
 	updateComponentsValues();
 	drawSlice();
 }
@@ -332,6 +335,7 @@ void MainWindow::setHistogramIntervalMinimumWidth( const int &width ) {
 
 void MainWindow::enableHistogramSmoothing( const bool &enable ) {
 	_sliceHistogram->enableSmoothing(enable);
+	_pieChartDiagrams->enableSmoothing(enable);
 }
 
 void MainWindow::setHistogramMaximumsNeighborhood( const int &neighborhood ) {
@@ -745,17 +749,17 @@ void MainWindow::updateComponentsValues() {
 	}
 
 	_ui->_spansliderSliceThreshold->setMinimum(minValue);
-	_ui->_spansliderSliceThreshold->setLowerValue(minValue);
+	_ui->_spansliderSliceThreshold->setLowerValue(-700);
 	_ui->_spansliderSliceThreshold->setMaximum(maxValue);
-	_ui->_spansliderSliceThreshold->setUpperValue(maxValue);
+	_ui->_spansliderSliceThreshold->setUpperValue(500);
 
 	_ui->_spinMinThreshold->setMinimum(minValue);
 	_ui->_spinMinThreshold->setMaximum(maxValue);
-	_ui->_spinMinThreshold->setValue(minValue);
+	_ui->_spinMinThreshold->setValue(-700);
 
 	_ui->_spinMaxThreshold->setMinimum(minValue);
 	_ui->_spinMaxThreshold->setMaximum(maxValue);
-	_ui->_spinMaxThreshold->setValue(maxValue);
+	_ui->_spinMaxThreshold->setValue(500);
 
 	_ui->_spinMinSlice->setMinimum(0);
 	_ui->_spinMinSlice->setMaximum(nbSlices-1);

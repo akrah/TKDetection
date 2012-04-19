@@ -44,7 +44,7 @@ SOURCES		=	main.cpp \
 				slicezoomer.cpp \
 				slicesinterval.cpp \
 				v3dexport.cpp \
-	src/v3dreader.cpp
+				v3dreader.cpp
 
 HEADERS		=	billon.h \
 				billon_def.h \
@@ -73,7 +73,7 @@ HEADERS		=	billon.h \
 				sliceview_def.h \
 				slicezoomer.h \
 				v3dexport.h \
-	inc/v3dreader.h
+				v3dreader.h
 
 FORMS		=	mainwindow.ui
 

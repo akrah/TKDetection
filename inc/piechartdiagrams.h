@@ -30,12 +30,14 @@ public:
 
 	void attach( QwtPolarPlot * const polarPlot );
 	void attach( QwtPlot * const plot );
+	void clearAll();
 
 	void setMovementsThresholdMin( const int &threshold );
 	void setMovementsThresholdMax( const int &threshold );
 	void useNextSliceInsteadOfCurrentSlice( const bool &enable );
 	void setMarrowArroundDiameter( const int &diameter );
 	void setIntervalType( const HistogramIntervalType::HistogramIntervalType &type );
+	void enableSmoothing( const bool &enable );
 
 	void compute( const Billon &billon, const Marrow *marrow, const PieChart &pieChart, const SlicesInterval &slicesInterval, const IntensityInterval &intensity );
 	void highlightCurve( const int &index );
@@ -44,7 +46,8 @@ public:
 
 private:
 	int sliceOfIemeMaximum( const int &maximumIndex ) const;
-	void createDiagrams( const QVector<int> &sectorsSum );
+	void smoothHistogram( QVector<qreal> &sectorsSum );
+	void createDiagrams( const QVector<qreal> &sectorsSum );
 	void computeMeansAndMedian();
 	void computeMaximums();
 	void computeIntervals();
@@ -61,16 +64,23 @@ private:
 	QVector<QwtIntervalSample> _curveHistogramMaximumsDatas;
 	QVector<int> _maximumsIndex;
 
-	QwtPolarCurve _highlightCurve;
-	PointPolarSeriesData *_highlightCurveDatas;
-	QwtPlotHistogram _highlightCurveHistogram;
-	QVector<QwtIntervalSample> _highlightCurveHistogramDatas;
-
 	QwtPolarCurve _curveIntervals;
 	PointPolarSeriesData *_curveIntervalsDatas;
 	QwtPlotHistogram _curveHistogramIntervals;
 	QVector<QwtIntervalSample> _curveHistogramIntervalsDatas;
 	QVector<QwtInterval> _curveHistogramIntervalsRealDatas;
+
+	QwtPolarCurve _highlightCurve;
+	PointPolarSeriesData *_highlightCurveDatas;
+	QwtPlotHistogram _highlightCurveHistogram;
+	QVector<QwtIntervalSample> _highlightCurveHistogramDatas;
+
+	qreal _dataMeans;
+	QwtPlotCurve _curveMeans;
+	qreal _dataMedian;
+	QwtPlotCurve _curveMedian;
+	qreal _dataMeansMedian;
+	QwtPlotCurve _curveMeansMedian;
 
 	PieChart _pieChart;
 
@@ -79,13 +89,8 @@ private:
 	bool _useNextSlice;
 	int _marrowAroundDiameter;
 	HistogramIntervalType::HistogramIntervalType _intervalType;
+	bool _smoothing;
 
-	qreal _dataMeans;
-	QwtPlotCurve _curveMeans;
-	qreal _dataMedian;
-	QwtPlotCurve _curveMedian;
-	qreal _dataMeansMedian;
-	QwtPlotCurve _curveMeansMedian;
 };
 
 #endif // PIECHARTDIAGRAMS_H

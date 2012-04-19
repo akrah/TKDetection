@@ -265,7 +265,7 @@
                      <number>1000</number>
                     </property>
                     <property name="value">
-                     <number>100</number>
+                     <number>200</number>
                     </property>
                     <property name="orientation">
                      <enum>Qt::Horizontal</enum>
@@ -284,7 +284,7 @@
                      <number>1000</number>
                     </property>
                     <property name="value">
-                     <number>100</number>
+                     <number>200</number>
                     </property>
                    </widget>
                   </item>
@@ -366,7 +366,7 @@
                      <number>2000</number>
                     </property>
                     <property name="value">
-                     <number>200</number>
+                     <number>500</number>
                     </property>
                     <property name="orientation">
                      <enum>Qt::Horizontal</enum>
@@ -385,7 +385,7 @@
                      <number>2000</number>
                     </property>
                     <property name="value">
-                     <number>200</number>
+                     <number>500</number>
                     </property>
                    </widget>
                   </item>
@@ -411,7 +411,7 @@
                 <rect>
                  <x>0</x>
                  <y>0</y>
-                 <width>374</width>
+                 <width>413</width>
                  <height>177</height>
                 </rect>
                </property>
@@ -558,7 +558,7 @@
                 <rect>
                  <x>0</x>
                  <y>0</y>
-                 <width>316</width>
+                 <width>413</width>
                  <height>178</height>
                 </rect>
                </property>
@@ -748,7 +748,7 @@ autour de la moelle</string>
               <number>500</number>
              </property>
              <property name="value">
-              <number>50</number>
+              <number>100</number>
              </property>
              <property name="orientation">
               <enum>Qt::Horizontal</enum>
@@ -761,7 +761,7 @@ autour de la moelle</string>
               <number>500</number>
              </property>
              <property name="value">
-              <number>50</number>
+              <number>100</number>
              </property>
             </widget>
            </item>
@@ -948,7 +948,7 @@ autour de la moelle</string>
               <number>360</number>
              </property>
              <property name="value">
-              <number>30</number>
+              <number>100</number>
              </property>
             </widget>
            </item>
@@ -960,7 +960,7 @@ autour de la moelle</string>
             <enum>QTabWidget::West</enum>
            </property>
            <property name="currentIndex">
-            <number>0</number>
+            <number>1</number>
            </property>
            <widget class="QWidget" name="tab_2">
             <attribute name="title">
@@ -1423,6 +1423,64 @@ autour de la moelle</string>
    <header>QxtSpanSlider</header>
   </customwidget>
  </customwidgets>
+ <tabstops>
+  <tabstop>_scrollSliceView</tabstop>
+  <tabstop>_tabs</tabstop>
+  <tabstop>_comboSliceType</tabstop>
+  <tabstop>_sliderMovementThresholdMin</tabstop>
+  <tabstop>_spinMovementThresholdMin</tabstop>
+  <tabstop>_sliderMovementThresholdMax</tabstop>
+  <tabstop>_spinMovementThresholdMax</tabstop>
+  <tabstop>_checkDrawMovementWithBackground</tabstop>
+  <tabstop>_checkUseNextSlice</tabstop>
+  <tabstop>_buttonExportMovementsToV3D</tabstop>
+  <tabstop>_buttonComputeMarrow</tabstop>
+  <tabstop>_spinMinThreshold</tabstop>
+  <tabstop>_spansliderSliceThreshold</tabstop>
+  <tabstop>_spinMaxThreshold</tabstop>
+  <tabstop>_spinMinSlice</tabstop>
+  <tabstop>_buttonMinSlice</tabstop>
+  <tabstop>_spinMaxSlice</tabstop>
+  <tabstop>_buttonMaxSlice</tabstop>
+  <tabstop>_buttonChangeBillonUsed</tabstop>
+  <tabstop>_sliderSelectSlice</tabstop>
+  <tabstop>_buttonPreviousMaximum</tabstop>
+  <tabstop>_buttonUpdateSliceHistogram</tabstop>
+  <tabstop>_buttonNextMaximum</tabstop>
+  <tabstop>_spinFlowAlpha</tabstop>
+  <tabstop>_spinFlowEpsilon</tabstop>
+  <tabstop>_spinFlowMaximumIterations</tabstop>
+  <tabstop>_buttonFlowApplied</tabstop>
+  <tabstop>_buttonExportFlowToV3D</tabstop>
+  <tabstop>_spinRestrictedAreaResolution</tabstop>
+  <tabstop>_spinRestrictedAreaThreshold</tabstop>
+  <tabstop>_sliderRestrictedAreaBeginRadius</tabstop>
+  <tabstop>_spinRestrictedAreaBeginRadius</tabstop>
+  <tabstop>_checkRestrictedAreaEnableCircle</tabstop>
+  <tabstop>_buttonComputeRestrictedBillon</tabstop>
+  <tabstop>_sliderMarrowAroundDiameter</tabstop>
+  <tabstop>_spinMarrowAroundDiameter</tabstop>
+  <tabstop>_checkMarrowAroundDiameter</tabstop>
+  <tabstop>_checkHistogramSmoothing</tabstop>
+  <tabstop>_sliderMaximumsNeighborhood</tabstop>
+  <tabstop>_spinMaximumsNeighborhood</tabstop>
+  <tabstop>_comboHistogramInterval</tabstop>
+  <tabstop>_sliderHistogramIntervalMinimumWidth</tabstop>
+  <tabstop>_spinHistogramIntervalMinimumWidth</tabstop>
+  <tabstop>_buttonExportHistogramToSep</tabstop>
+  <tabstop>_spinSectorsOrientation</tabstop>
+  <tabstop>_spinSectorsNumber</tabstop>
+  <tabstop>tabWidget</tabstop>
+  <tabstop>_comboSelectInterval</tabstop>
+  <tabstop>_buttonSelectIntervalUpdate</tabstop>
+  <tabstop>_spinExportResolution</tabstop>
+  <tabstop>_buttonExportToDat</tabstop>
+  <tabstop>_spinExportNbEdges</tabstop>
+  <tabstop>_spinExportRadius</tabstop>
+  <tabstop>_buttonExportToOfs</tabstop>
+  <tabstop>_spinExportThreshold</tabstop>
+  <tabstop>_buttonExportToV3D</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>
