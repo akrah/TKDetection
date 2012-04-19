@@ -10,6 +10,9 @@ PiePart::PiePart( const qreal &orientation, const qreal &angle ) : _orientation(
 	setAngle(angle);
 }
 
+PiePart::PiePart( const PiePart &piePart ) : _orientation(piePart._orientation), _angle(piePart._angle), _leftAngle(piePart._leftAngle), _rightAngle(piePart._rightAngle) {
+}
+
 /*******************************
  * Public getters
  *******************************/

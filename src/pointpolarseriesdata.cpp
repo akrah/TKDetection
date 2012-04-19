@@ -26,6 +26,14 @@ void PointPolarSeriesData::append( QwtPointPolar point ) {
 	d_samples.append(point);
 }
 
+void PointPolarSeriesData::remove( const int &i ) {
+	d_samples.remove(i);
+}
+
+void PointPolarSeriesData::remove( const int &i, const int &count ) {
+	d_samples.remove(i,count);
+}
+
 void PointPolarSeriesData::clear() {
 	d_boundingRect = QRectF( 0.0, 0.0, -1.0, -1.0 );
 	d_samples.clear();

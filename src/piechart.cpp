@@ -9,6 +9,11 @@ PieChart::PieChart( const qreal &orientation, const int &nbSectors ) : _orientat
 	updateSectors();
 }
 
+
+PieChart::PieChart( const PieChart &pieChart ) : _orientation(pieChart._orientation), _angle(pieChart._angle), _sectors(pieChart._sectors) {
+
+}
+
 /*******************************
  * Public getters
  *******************************/
@@ -22,11 +27,15 @@ qreal PieChart::angle() const {
 }
 
 int PieChart::nbSectors() const {
-	return (TWO_PI/_angle);
+	return qRound(TWO_PI/_angle);
 }
 
 const QList<PiePart> &PieChart::sectors() const {
 	return _sectors;
+}
+
+const PiePart &PieChart::sector( const int &index ) const {
+	return _sectors[index];
 }
 
 int PieChart::partOfAngle( const qreal &angle ) const {
@@ -101,7 +110,7 @@ void PieChart::draw( QImage &image, const int &sectorIdx, const iCoord2D &center
 
 void PieChart::updateSectors() {
 	_sectors.clear();
-	const int nbSectors = TWO_PI/_angle;
+	const int nbSectors = qRound(TWO_PI/_angle);
 	qreal currentOrientation = _orientation;
 	for ( int i=0 ; i<nbSectors ; ++i ) {
 		_sectors.append(PiePart( fmod( currentOrientation, TWO_PI ), _angle ));

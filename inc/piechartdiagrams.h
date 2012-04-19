@@ -4,6 +4,7 @@
 #include "billon_def.h"
 #include "slicehistogram_def.h"
 #include "marrow_def.h"
+#include "piechart.h"
 
 #include <QList>
 #include <qwt_plot_histogram.h>
@@ -43,32 +44,35 @@ public:
 
 private:
 	int sliceOfIemeMaximum( const int &maximumIndex ) const;
-	void createDiagrams( const QVector<int> &sectorsSum, const int &nbSectors );
-	void computeMaximums();
+	void createDiagrams( const QVector<int> &sectorsSum );
 	void computeMeansAndMedian();
+	void computeMaximums();
 	void computeIntervals();
 
 private:
 	QwtPolarCurve _curve;
 	PointPolarSeriesData *_curveDatas;
-	QwtPolarCurve _curveMaximums;
-	PointPolarSeriesData *_curveMaximumsDatas;
-	QwtPolarCurve _highlightCurve;
-	PointPolarSeriesData *_highlightCurveDatas;
-
-	QwtPolarCurve _curveIntervals;
-	PointPolarSeriesData *_curveIntervalsDatas;
-
 	QwtPlotHistogram _curveHistogram;
 	QVector<QwtIntervalSample> _curveHistogramDatas;
+
+	QwtPolarCurve _curveMaximums;
+	PointPolarSeriesData *_curveMaximumsDatas;
 	QwtPlotHistogram _curveHistogramMaximums;
 	QVector<QwtIntervalSample> _curveHistogramMaximumsDatas;
+	QVector<int> _maximumsIndex;
+
+	QwtPolarCurve _highlightCurve;
+	PointPolarSeriesData *_highlightCurveDatas;
 	QwtPlotHistogram _highlightCurveHistogram;
 	QVector<QwtIntervalSample> _highlightCurveHistogramDatas;
 
+	QwtPolarCurve _curveIntervals;
+	PointPolarSeriesData *_curveIntervalsDatas;
 	QwtPlotHistogram _curveHistogramIntervals;
 	QVector<QwtIntervalSample> _curveHistogramIntervalsDatas;
 	QVector<QwtInterval> _curveHistogramIntervalsRealDatas;
+
+	PieChart _pieChart;
 
 	int _movementsThresholdMin;
 	int _movementsThresholdMax;

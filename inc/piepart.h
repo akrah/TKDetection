@@ -8,6 +8,7 @@ class PiePart
 public:
 	PiePart();
 	PiePart( const qreal &orientation, const qreal &angle );
+	PiePart( const PiePart &piePart );
 
 	qreal angle() const;
 	qreal orientation() const;
@@ -20,10 +21,12 @@ public:
 	void setOrientation( const qreal &orientation );
 
 private:
+	// <En radians>
 	qreal _orientation;
 	qreal _angle;
 	qreal _leftAngle;
 	qreal _rightAngle;
+	// </En radians>
 };
 
 #endif // PIEPART_H

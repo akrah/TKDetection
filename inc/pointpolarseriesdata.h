@@ -12,6 +12,9 @@ public:
 
 	void setSamples( const QVector<QwtPointPolar> &samples );
 	void append( QwtPointPolar point );
+
+	void remove( const int &i );
+	void remove( const int &i, const int &count );
 	void clear();
 };
 

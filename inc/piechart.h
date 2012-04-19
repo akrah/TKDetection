@@ -11,11 +11,13 @@ class PieChart
 {
 public:
 	PieChart( const qreal &orientation, const int &nbSectors );
+	PieChart( const PieChart &pieChart );
 
 	qreal orientation() const;
 	qreal angle() const;
 	int nbSectors() const;
 	const QList<PiePart> &sectors() const;
+	const PiePart &sector( const int &index ) const;
 	int partOfAngle( const qreal &angle ) const;
 
 	void setOrientation( const qreal &orientation );
@@ -28,7 +30,7 @@ private:
 
 private:
 	qreal _orientation;
-	qreal _angle;
+	qreal _angle; // En radians
 
 	QList<PiePart> _sectors;
 };

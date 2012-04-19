@@ -50,8 +50,10 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 	_ui->_spinFlowEpsilon->setValue(_sliceView->flowEpsilon());
 	_ui->_spinFlowMaximumIterations->setValue(_sliceView->flowMaximumIterations());
 
+	_ui->_polarSectorSum->setScale( QwtPolar::Azimuth, 0.0, TWO_PI );
 	_pieChartDiagrams->attach(_ui->_polarSectorSum);
 	_pieChartDiagrams->attach(_ui->_plotAngularHistogram);
+
 
 	/**** Mise en place de la communication MVC ****/
 
@@ -159,8 +161,6 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *event) {
 				selectSectorHistogram(sector);
 
 				_pieChartDiagrams->highlightCurve(sector);
-				_ui->_polarSectorSum->replot();
-				_ui->_plotAngularHistogram->replot();
 			}
 		}
 	}
