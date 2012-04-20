@@ -47,8 +47,8 @@ private slots:
 	void setHistogramMaximumsNeighborhood( const int &neighborhood );
 	void highlightSliceHistogram( const int &slicePosition );
 	void updateMarrow();
-	void updateSectorsHistogramsForCurrentInterval();
-	void selectSectorHistogram( const int &sectorIdx );
+	void computeSectorsHistogramsForCurrentSliceIntervall();
+	void highlightSectorHistogram( const int &sectorIdx );
 	void setMinimumOfSlicesIntervalToCurrentSlice();
 	void setMaximumOfSlicesIntervalToCurrentSlice();
 	void previousMaximumInSliceHistogram();
@@ -72,9 +72,10 @@ private slots:
 	void exportFlowToV3D();
 	void exportHistogramToV3D();
 	void exportMovementsToV3D();
-	void selectInterval( const int &index );
-	void selectCurrentInterval();
-
+	void selectSliceInterval( const int &index );
+	void selectCurrentSliceInterval();
+	void selectSectorInterval( const int &index );
+	void selectCurrentSectorInterval();
 
 private:
 	void openNewBillon(const QString &folderName = "");
@@ -89,6 +90,7 @@ private:
 
 	Billon *_billon;
 	Billon *_unusedBillon;
+	Billon *_sectorBillon;
 	Marrow *_marrow;
 	SliceView *_sliceView;
 	SliceHistogram *_sliceHistogram;

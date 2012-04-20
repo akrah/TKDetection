@@ -6,7 +6,7 @@
 #include <QPainter>
 
 PieChart::PieChart( const qreal &orientation, const int &nbSectors ) : _orientation(orientation), _angle(TWO_PI/static_cast<qreal>(nbSectors)) {
-	updateSectors();
+	updateSectors(nbSectors);
 }
 
 
@@ -30,10 +30,6 @@ int PieChart::nbSectors() const {
 	return qRound(TWO_PI/_angle);
 }
 
-const QList<PiePart> &PieChart::sectors() const {
-	return _sectors;
-}
-
 const PiePart &PieChart::sector( const int &index ) const {
 	return _sectors[index];
 }
@@ -42,10 +38,10 @@ int PieChart::partOfAngle( const qreal &angle ) const {
 	int sectorId;
 	bool ok = false;
 	const int nbSectors = _sectors.size();
-	for ( sectorId = 0 ; !ok && (sectorId < nbSectors) ; sectorId += !ok ) {
-		ok = _sectors.at(sectorId).contains(angle);
+	for ( sectorId = 0 ; !ok && (sectorId < nbSectors) ; sectorId++ ) {
+		ok = _sectors[sectorId].contains(angle);
 	}
-	return (sectorId<nbSectors)?sectorId:0;
+	return sectorId-1;
 }
 
 /*******************************
@@ -54,12 +50,12 @@ int PieChart::partOfAngle( const qreal &angle ) const {
 
 void PieChart::setOrientation( const qreal &orientation ) {
 	_orientation = orientation;
-	updateSectors();
+	updateSectors(_sectors.size());
 }
 
 void PieChart::setSectorsNumber( const int &nbSectors ) {
 	_angle = TWO_PI/static_cast<qreal>(nbSectors);
-	updateSectors();
+	updateSectors(nbSectors);
 }
 
 void PieChart::draw( QImage &image, const int &sectorIdx, const iCoord2D &center ) const {
@@ -108,9 +104,8 @@ void PieChart::draw( QImage &image, const int &sectorIdx, const iCoord2D &center
  * Private setters
  *******************************/
 
-void PieChart::updateSectors() {
+void PieChart::updateSectors( const int &nbSectors ) {
 	_sectors.clear();
-	const int nbSectors = qRound(TWO_PI/_angle);
 	qreal currentOrientation = _orientation;
 	for ( int i=0 ; i<nbSectors ; ++i ) {
 		_sectors.append(PiePart( fmod( currentOrientation, TWO_PI ), _angle ));

@@ -23,7 +23,7 @@
 #include <QScrollBar>
 #include <QMessageBox>
 
-MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::MainWindow), _billon(0), _unusedBillon(0), _marrow(0), _sliceView(new SliceView()), _sliceHistogram(new SliceHistogram()), _pieChart(new PieChart(0,1)), _pieChartDiagrams(new PieChartDiagrams()), _currentSlice(0), _currentMaximum(0), _isUsedOriginalBillon(true) {
+MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::MainWindow), _billon(0), _unusedBillon(0), _sectorBillon(0), _marrow(0), _sliceView(new SliceView()), _sliceHistogram(new SliceHistogram()), _pieChart(new PieChart(0,1)), _pieChartDiagrams(new PieChartDiagrams()), _currentSlice(0), _currentMaximum(0), _isUsedOriginalBillon(true) {
 	_ui->setupUi(this);
 	setCorner(Qt::TopLeftCorner,Qt::LeftDockWidgetArea);
 	setCorner(Qt::TopRightCorner,Qt::RightDockWidgetArea);
@@ -101,8 +101,12 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 	QObject::connect(_ui->_buttonComputeMarrow, SIGNAL(clicked()), this, SLOT(updateMarrow()));
 
 	// Évènements déclenchés par les bouton associès aux histogrammes de secteurs
-	QObject::connect(_ui->_comboSelectInterval, SIGNAL(activated(int)), this, SLOT(selectInterval(int)));
-	QObject::connect(_ui->_buttonSelectIntervalUpdate, SIGNAL(clicked()), this, SLOT(selectCurrentInterval()));
+	QObject::connect(_ui->_comboSelectSliceInterval, SIGNAL(activated(int)), this, SLOT(selectSliceInterval(int)));
+	QObject::connect(_ui->_buttonSelectSliceIntervalUpdate, SIGNAL(clicked()), this, SLOT(selectCurrentSliceInterval()));
+	QObject::connect(_ui->_comboSelectSectorInterval, SIGNAL(activated(int)), this, SLOT(selectSectorInterval(int)));
+	QObject::connect(_ui->_buttonSelectSectorIntervalThresholding, SIGNAL(clicked()), this, SLOT(selectCurrentSectorInterval()));
+	QObject::connect(_ui->_sliderSectorThresholding, SIGNAL(valueChanged(int)), _ui->_spinSectorThresholding, SLOT(setValue(int)));
+	QObject::connect(_ui->_spinSectorThresholding, SIGNAL(valueChanged(int)), _ui->_sliderSectorThresholding, SLOT(setValue(int)));
 
 	// Évènements déclenchés par la souris sur le visualiseur de coupes
 	QObject::connect(&_sliceZoomer, SIGNAL(zoomFactorChanged(qreal,QPoint)), this, SLOT(zoomInSliceView(qreal,QPoint)));
@@ -158,7 +162,7 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *event) {
 
 				const int sector = _pieChart->partOfAngle( TWO_PI-ANGLE(centerX,centerY,x,y) );
 
-				selectSectorHistogram(sector);
+				highlightSectorHistogram(sector);
 
 				_pieChartDiagrams->highlightCurve(sector);
 			}
@@ -187,10 +191,11 @@ void MainWindow::closeImage() {
 	openNewBillon();
 	updateMarrow();
 	updateSliceHistogram();
-	updateSectorsHistogramsForCurrentInterval();
+	computeSectorsHistogramsForCurrentSliceIntervall();
 	_pieChartDiagrams->clearAll();
 	_ui->_plotAngularHistogram->replot();
 	_ui->_polarSectorSum->replot();
+	selectSectorInterval(0);
 	updateComponentsValues();
 	drawSlice();
 }
@@ -210,14 +215,51 @@ void MainWindow::drawSlice( const int &sliceNumber ) {
 				painter.drawEllipse(QPointF(center.x,center.y),_sliceHistogram->marrowAroundDiameter()/(2.*_billon->voxelWidth()),_sliceHistogram->marrowAroundDiameter()/(2.*_billon->voxelHeight()));
 			}
 		}
-		const bool drawing = (_pieChartDiagrams->count() != 0) && (_ui->_comboSelectInterval->currentIndex() == 0 ? _slicesInterval.containsClosed(sliceNumber) : _sliceHistogram->branchesAreas().at(_ui->_comboSelectInterval->currentIndex()-1).contains(sliceNumber));
-		if ( drawing ) {
+		const bool inDrawingArea = (_ui->_comboSelectSliceInterval->currentIndex() == 0 ? _slicesInterval.containsClosed(sliceNumber) : _sliceHistogram->branchesAreas().at(_ui->_comboSelectSliceInterval->currentIndex()-1).contains(sliceNumber));
+		if ( (_pieChartDiagrams->count() != 0) && inDrawingArea ) {
 			iCoord2D center(_pix.width()/2,_pix.height()/2);
 			if ( _marrow != 0 &&  _marrow->interval().containsClosed(sliceNumber) ) {
 				center = _marrow->at(sliceNumber-_marrow->interval().min());
 			}
 			_pieChartDiagrams->draw(_pix,center);
 			_pieChart->draw(_pix,_currentSector, center);
+		}
+		if ( _sectorBillon != 0 && inDrawingArea ) {
+			const int width = _sectorBillon->n_cols;
+			const int height = _sectorBillon->n_rows;
+			const int depth = _sectorBillon->n_slices;
+
+			QPainter painter(&_pix);
+			QColor color(255,0,0,127);
+			painter.setPen(color);
+
+			const QwtInterval &sliceInterval = _sliceHistogram->branchesAreas()[_ui->_comboSelectSliceInterval->currentIndex()-1];
+			const int firstSlice = sliceInterval.minValue();
+			const QwtInterval &sectorInterval = _pieChartDiagrams->branchesSectors()[_ui->_comboSelectSectorInterval->currentIndex()-1];
+
+			const Slice &sectorSlice = _sectorBillon->slice(sliceNumber-firstSlice);
+			const int marrowX = _marrow->at(sliceNumber).x;
+			const int marrowY = _marrow->at(sliceNumber).y;
+			int i, j;
+			if ( sectorInterval.isValid() ) {
+				for ( j=0 ; j<height ; ++j ) {
+					for ( i=0 ; i<width ; ++i ) {
+						if ( sectorSlice.at(j,i) && sectorInterval.contains( _pieChart->partOfAngle( TWO_PI-ANGLE( marrowX, marrowY, i, j ) ) ) ) {
+							painter.drawPoint(i,j);
+						}
+					}
+				}
+			}
+			else {
+				const QwtInterval sectorIntervalInverted = sectorInterval.inverted();
+				for ( j=0 ; j<height ; ++j ) {
+					for ( i=0 ; i<width ; ++i ) {
+						if ( sectorSlice(j,i) && !sectorIntervalInverted.contains( _pieChart->partOfAngle( TWO_PI-ANGLE( marrowX, marrowY, i, j ) ) ) ) {
+							painter.drawPoint(i,j);
+						}
+					}
+				}
+			}
 		}
 	}
 	else {
@@ -288,22 +330,22 @@ void MainWindow::updateSliceHistogram() {
 	_ui->_plotSliceHistogram->setAxisScale(QwtPlot::xBottom,0,(_billon != 0)?_billon->n_slices:0);
 	highlightSliceHistogram(_currentSlice);
 
-	const int oldIntervalIndex = _ui->_comboSelectInterval->currentIndex();
-	_ui->_comboSelectInterval->clear();
-	_ui->_comboSelectInterval->addItem(tr("Personnalisé"));
+	const int oldIntervalIndex = _ui->_comboSelectSliceInterval->currentIndex();
+	_ui->_comboSelectSliceInterval->clear();
+	_ui->_comboSelectSliceInterval->addItem(tr("Personnalisé"));
 	const QVector<QwtInterval> &intervals = _sliceHistogram->branchesAreas();
 	if ( !intervals.isEmpty() ) {
 		for ( int i=0 ; i<intervals.size() ; ++i ) {
 			const QwtInterval interval = intervals.at(i);
-			_ui->_comboSelectInterval->addItem(tr("Interval %1 : [ %2, %3 ] (%4 coupes)").arg(i).arg(interval.minValue()).arg(interval.maxValue()).arg(interval.width()));
+			_ui->_comboSelectSliceInterval->addItem(tr("Interval %1 : [ %2, %3 ] (%4 coupes)").arg(i).arg(interval.minValue()).arg(interval.maxValue()).arg(interval.width()));
 		}
 	}
-	_ui->_comboSelectInterval->setCurrentIndex(oldIntervalIndex<=intervals.size()?oldIntervalIndex:0);
+	_ui->_comboSelectSliceInterval->setCurrentIndex(oldIntervalIndex<=intervals.size()?oldIntervalIndex:0);
 }
 
 void MainWindow::setMarrowAroundDiameter( const int &diameter ) {
 	_sliceHistogram->setMarrowAroundDiameter(diameter);
-	_pieChartDiagrams->setMarrowArroundDiameter(diameter);
+	_pieChartDiagrams->setMarrowAroundDiameter(diameter);
 
 	_ui->_spinMarrowAroundDiameter->blockSignals(true);
 		_ui->_spinMarrowAroundDiameter->setValue(diameter);
@@ -370,11 +412,11 @@ void MainWindow::updateMarrow() {
 	drawSlice();
 }
 
-void MainWindow::updateSectorsHistogramsForCurrentInterval() {
+void MainWindow::computeSectorsHistogramsForCurrentSliceIntervall() {
 	computeSectorsHistogramForInterval(_slicesInterval);
 }
 
-void MainWindow::selectSectorHistogram( const int &sectorIdx ) {
+void MainWindow::highlightSectorHistogram( const int &sectorIdx ) {
 	_currentSector = sectorIdx;
 	drawSlice();
 }
@@ -679,9 +721,11 @@ void MainWindow::exportMovementsToV3D() {
 	}
 }
 
-void MainWindow::selectInterval( const int &index ) {
+void MainWindow::selectSliceInterval( const int &index ) {
+	selectSectorInterval(0);
+
 	if ( index > 0 && index <= _sliceHistogram->branchesAreas().size() ) {
-		const QwtInterval &interval = _sliceHistogram->branchesAreas().at(index-1);
+		const QwtInterval &interval = _sliceHistogram->branchesAreas()[index-1];
 		computeSectorsHistogramForInterval(SlicesInterval(interval.minValue(),interval.maxValue()));
 		_ui->_sliderSelectSlice->setValue(_sliceHistogram->sliceOfIemeInterval(index-1));
 	}
@@ -689,10 +733,62 @@ void MainWindow::selectInterval( const int &index ) {
 		computeSectorsHistogramForInterval(_slicesInterval);
 		_ui->_sliderSelectSlice->setValue((_slicesInterval.min()+_slicesInterval.max())/2);
 	}
+
+	_ui->_comboSelectSectorInterval->clear();
+	_ui->_comboSelectSectorInterval->addItem(tr("Aucun"));
+	const QVector<QwtInterval> &intervals = _pieChartDiagrams->branchesSectors();
+	if ( !intervals.isEmpty() ) {
+		qreal rightAngle, leftAngle;
+		for ( int i=0 ; i<intervals.size() ; ++i ) {
+			const QwtInterval interval = intervals.at(i);
+			rightAngle = _pieChart->sector(interval.minValue()).rightAngle()*RAD_TO_DEG_FACT;
+			leftAngle = _pieChart->sector(interval.maxValue()).leftAngle()*RAD_TO_DEG_FACT;
+			_ui->_comboSelectSectorInterval->addItem(tr("Secteur %1 : [ %2, %3 ] (%4 degres)").arg(i).arg(rightAngle).arg(leftAngle).arg(interval.isValid()?leftAngle-rightAngle:leftAngle-rightAngle+360.));
+		}
+	}
 }
 
-void MainWindow::selectCurrentInterval() {
-	selectInterval(_ui->_comboSelectInterval->currentIndex());
+void MainWindow::selectCurrentSliceInterval() {
+	selectSliceInterval(_ui->_comboSelectSliceInterval->currentIndex());
+}
+
+void MainWindow::selectSectorInterval( const int &index ) {
+	if ( _sectorBillon != 0 ) {
+		delete _sectorBillon;
+		_sectorBillon = 0;
+	}
+	if ( index > 0 && index <= _pieChartDiagrams->branchesSectors().size() ) {
+		const QwtInterval &sliceInterval = _sliceHistogram->branchesAreas()[_ui->_comboSelectSliceInterval->currentIndex()-1];
+		const int firstSlice = sliceInterval.minValue();
+		const int lastSlice = sliceInterval.maxValue()+1;
+
+		_sectorBillon = new Billon(_billon->n_cols,_billon->n_rows,sliceInterval.width()+1);
+		_sectorBillon->setMinValue(0);
+		_sectorBillon->setMaxValue(1);
+		_sectorBillon->setVoxelSize(_billon->voxelWidth(),_billon->voxelHeight(),_billon->voxelDepth());
+		_sectorBillon->fill(0);
+
+
+		const int width = _billon->n_cols;
+		const int height = _billon->n_rows;
+		const int threshold = _ui->_sliderSectorThresholding->value();
+
+		int i, j, k;
+		for ( k=firstSlice ; k<lastSlice ; ++k ) {
+			const Slice &originalSlice = _billon->slice(k);
+			Slice &sectorSlice = _sectorBillon->slice(k-firstSlice);
+			for ( j=0 ; j<height ; ++j ) {
+				for ( i=0 ; i<width ; ++i ) {
+					sectorSlice.at(j,i) = ( originalSlice.at(j,i) > threshold && originalSlice.at(j,i) < 500 );
+				}
+			}
+		}
+	}
+	drawSlice();
+}
+
+void MainWindow::selectCurrentSectorInterval() {
+	selectSectorInterval(_ui->_comboSelectSectorInterval->currentIndex());
 }
 
 /*******************************
@@ -799,5 +895,5 @@ void MainWindow::computeSectorsHistogramForInterval( const SlicesInterval &inter
 
 	_ui->_plotAngularHistogram->replot();
 	_ui->_polarSectorSum->replot();
-	selectSectorHistogram(0);
+	highlightSectorHistogram(0);
 }

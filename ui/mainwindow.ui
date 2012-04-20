@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>969</width>
-    <height>973</height>
+    <height>1052</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -105,7 +105,7 @@
            <x>0</x>
            <y>0</y>
            <width>454</width>
-           <height>719</height>
+           <height>798</height>
           </rect>
          </property>
          <layout class="QHBoxLayout" name="horizontalLayout_8">
@@ -172,7 +172,7 @@
    <property name="minimumSize">
     <size>
      <width>494</width>
-     <height>767</height>
+     <height>846</height>
     </size>
    </property>
    <property name="floating">
@@ -228,7 +228,7 @@
                  <x>0</x>
                  <y>0</y>
                  <width>426</width>
-                 <height>174</height>
+                 <height>218</height>
                 </rect>
                </property>
                <attribute name="label">
@@ -411,7 +411,7 @@
                 <rect>
                  <x>0</x>
                  <y>0</y>
-                 <width>413</width>
+                 <width>374</width>
                  <height>177</height>
                 </rect>
                </property>
@@ -558,7 +558,7 @@
                 <rect>
                  <x>0</x>
                  <y>0</y>
-                 <width>413</width>
+                 <width>316</width>
                  <height>178</height>
                 </rect>
                </property>
@@ -995,14 +995,11 @@ autour de la moelle</string>
           </widget>
          </item>
          <item>
-          <layout class="QHBoxLayout" name="horizontalLayout_15">
-           <property name="rightMargin">
-            <number>0</number>
-           </property>
+          <layout class="QGridLayout" name="gridLayout_2">
            <property name="bottomMargin">
             <number>0</number>
            </property>
-           <item>
+           <item row="0" column="0">
             <widget class="QLabel" name="label_28">
              <property name="sizePolicy">
               <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
@@ -1015,27 +1012,119 @@ autour de la moelle</string>
              </property>
             </widget>
            </item>
-           <item>
-            <widget class="QComboBox" name="_comboSelectInterval">
+           <item row="0" column="1">
+            <layout class="QHBoxLayout" name="horizontalLayout_15">
+             <property name="rightMargin">
+              <number>0</number>
+             </property>
+             <property name="bottomMargin">
+              <number>0</number>
+             </property>
              <item>
-              <property name="text">
-               <string>Personnalisé</string>
-              </property>
+              <widget class="QComboBox" name="_comboSelectSliceInterval">
+               <item>
+                <property name="text">
+                 <string>Personnalisé</string>
+                </property>
+               </item>
+              </widget>
              </item>
-            </widget>
+             <item>
+              <widget class="QPushButton" name="_buttonSelectSliceIntervalUpdate">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="text">
+                <string>Mettre à jour</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
            </item>
-           <item>
-            <widget class="QPushButton" name="_buttonSelectIntervalUpdate">
+           <item row="1" column="0">
+            <widget class="QLabel" name="label_4">
              <property name="sizePolicy">
-              <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+              <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
                <horstretch>0</horstretch>
                <verstretch>0</verstretch>
               </sizepolicy>
              </property>
              <property name="text">
-              <string>Recalculer</string>
+              <string>Secteur</string>
              </property>
             </widget>
+           </item>
+           <item row="1" column="1">
+            <layout class="QHBoxLayout" name="horizontalLayout_16">
+             <property name="bottomMargin">
+              <number>0</number>
+             </property>
+             <item>
+              <widget class="QComboBox" name="_comboSelectSectorInterval">
+               <item>
+                <property name="text">
+                 <string>Aucun</string>
+                </property>
+               </item>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="_buttonSelectSectorIntervalThresholding">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="text">
+                <string>Seuiller</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item row="2" column="0">
+            <widget class="QLabel" name="label_6">
+             <property name="text">
+              <string>Seuillage</string>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="1">
+            <layout class="QHBoxLayout" name="horizontalLayout_17">
+             <item>
+              <widget class="QSlider" name="_sliderSectorThresholding">
+               <property name="minimum">
+                <number>-700</number>
+               </property>
+               <property name="maximum">
+                <number>500</number>
+               </property>
+               <property name="value">
+                <number>-70</number>
+               </property>
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QSpinBox" name="_spinSectorThresholding">
+               <property name="minimum">
+                <number>-700</number>
+               </property>
+               <property name="maximum">
+                <number>500</number>
+               </property>
+               <property name="value">
+                <number>-70</number>
+               </property>
+              </widget>
+             </item>
+            </layout>
            </item>
           </layout>
          </item>
@@ -1214,9 +1303,6 @@ autour de la moelle</string>
         <set>Qt::AlignCenter</set>
        </property>
        <layout class="QFormLayout" name="formLayout_3">
-        <property name="fieldGrowthPolicy">
-         <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
-        </property>
         <item row="0" column="0">
          <widget class="QLabel" name="label_7">
           <property name="text">
@@ -1471,8 +1557,8 @@ autour de la moelle</string>
   <tabstop>_spinSectorsOrientation</tabstop>
   <tabstop>_spinSectorsNumber</tabstop>
   <tabstop>tabWidget</tabstop>
-  <tabstop>_comboSelectInterval</tabstop>
-  <tabstop>_buttonSelectIntervalUpdate</tabstop>
+  <tabstop>_comboSelectSliceInterval</tabstop>
+  <tabstop>_buttonSelectSliceIntervalUpdate</tabstop>
   <tabstop>_spinExportResolution</tabstop>
   <tabstop>_buttonExportToDat</tabstop>
   <tabstop>_spinExportNbEdges</tabstop>

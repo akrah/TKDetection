@@ -27,6 +27,7 @@ public:
 	~PieChartDiagrams();
 
 	int count() const;
+	const QVector<QwtInterval> &branchesSectors() const;
 
 	void attach( QwtPolarPlot * const polarPlot );
 	void attach( QwtPlot * const plot );
@@ -35,7 +36,7 @@ public:
 	void setMovementsThresholdMin( const int &threshold );
 	void setMovementsThresholdMax( const int &threshold );
 	void useNextSliceInsteadOfCurrentSlice( const bool &enable );
-	void setMarrowArroundDiameter( const int &diameter );
+	void setMarrowAroundDiameter( const int &diameter );
 	void setIntervalType( const HistogramIntervalType::HistogramIntervalType &type );
 	void enableSmoothing( const bool &enable );
 
@@ -45,12 +46,11 @@ public:
 	void draw( QImage &image, const iCoord2D &center ) const;
 
 private:
-	int sliceOfIemeMaximum( const int &maximumIndex ) const;
 	void smoothHistogram( QVector<qreal> &sectorsSum );
 	void createDiagrams( const QVector<qreal> &sectorsSum );
-	void computeMeansAndMedian();
-	void computeMaximums();
-	void computeIntervals();
+	void computeMeansAndMedian( const QVector<qreal> &sectorsSum );
+	void computeMaximums( const QVector<qreal> &sectorsSum );
+	void computeIntervals( const QVector<qreal> &sectorsSum );
 
 private:
 	QwtPolarCurve _curve;

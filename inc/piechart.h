@@ -1,7 +1,7 @@
 #ifndef PIECHART_H
 #define PIECHART_H
 
-#include <QList>
+#include <QVector>
 #include "inc/marrow_def.h"
 
 class PiePart;
@@ -16,7 +16,6 @@ public:
 	qreal orientation() const;
 	qreal angle() const;
 	int nbSectors() const;
-	const QList<PiePart> &sectors() const;
 	const PiePart &sector( const int &index ) const;
 	int partOfAngle( const qreal &angle ) const;
 
@@ -26,13 +25,13 @@ public:
 	void draw( QImage &painter, const int &sectorIdx, const iCoord2D &center ) const;
 
 private:
-	void updateSectors();
+	void updateSectors( const int &nbSectors );
 
 private:
 	qreal _orientation;
 	qreal _angle; // En radians
 
-	QList<PiePart> _sectors;
+	QVector<PiePart> _sectors;
 };
 
 #endif // PIECHART_H

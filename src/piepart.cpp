@@ -2,7 +2,7 @@
 
 #include "inc/global.h"
 
-PiePart::PiePart() : _orientation(0.), _angle(TWO_PI) {
+PiePart::PiePart() : _orientation(0.), _angle(0.) {
 	setAngle(_angle);
 }
 
@@ -34,7 +34,7 @@ qreal PiePart::leftAngle() const {
 }
 
 bool PiePart::contains( const qreal &angle ) const {
-	bool contains = ( (_rightAngle > _leftAngle) && ( angle<_leftAngle || angle>=_rightAngle ) ) || ( (_rightAngle < _leftAngle) && ( angle<_leftAngle && angle>=_rightAngle ) );
+	bool contains = _rightAngle < _leftAngle ? angle<_leftAngle && angle>=_rightAngle : angle<_leftAngle || angle>=_rightAngle;
 	return contains;
 }
 
@@ -44,12 +44,12 @@ bool PiePart::contains( const qreal &angle ) const {
 
 void PiePart::setAngle( const qreal &angle ) {
 	_angle = angle;
-	_leftAngle = fmod(fmod(_orientation,TWO_PI)+0.5*fmod(_angle,TWO_PI)+TWO_PI,TWO_PI);
 	_rightAngle = fmod(fmod(_orientation,TWO_PI)-0.5*fmod(_angle,TWO_PI)+TWO_PI,TWO_PI);
+	_leftAngle = fmod(_rightAngle+angle,TWO_PI);
 }
 
 void PiePart::setOrientation( const qreal &orientation ) {
 	_orientation = orientation;
-	_leftAngle = fmod(fmod(_orientation,TWO_PI)+0.5*fmod(_angle,TWO_PI)+TWO_PI,TWO_PI);
 	_rightAngle = fmod(fmod(_orientation,TWO_PI)-0.5*fmod(_angle,TWO_PI)+TWO_PI,TWO_PI);
+	_leftAngle = fmod(_rightAngle+angle(),TWO_PI);
 }

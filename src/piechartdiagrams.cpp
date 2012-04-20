@@ -50,6 +50,10 @@ int PieChartDiagrams::count() const {
 	return _curveHistogramDatas.size();
 }
 
+const QVector<QwtInterval> &PieChartDiagrams::branchesSectors() const {
+	return _curveHistogramIntervalsRealDatas;
+}
+
 /*******************************
  * Public setters
  *******************************/
@@ -120,7 +124,7 @@ void PieChartDiagrams::useNextSliceInsteadOfCurrentSlice( const bool &enable ) {
 	_useNextSlice = enable;
 }
 
-void PieChartDiagrams::setMarrowArroundDiameter( const int &diameter ) {
+void PieChartDiagrams::setMarrowAroundDiameter( const int &diameter ) {
 	_marrowAroundDiameter = diameter;
 }
 
@@ -225,9 +229,9 @@ void PieChartDiagrams::compute( const Billon &billon, const Marrow *marrow, cons
 
 		if ( _smoothing ) smoothHistogram( sectorsSum );
 		createDiagrams( sectorsSum );
-		computeMeansAndMedian();
-		computeMaximums();
-		computeIntervals();
+		computeMeansAndMedian( sectorsSum );
+		computeMaximums( sectorsSum );
+		computeIntervals( sectorsSum );
 	}
 }
 
@@ -254,10 +258,6 @@ void PieChartDiagrams::highlightCurve( const int &index ) {
 /*******************************
  * Private functions
  *******************************/
-int PieChartDiagrams::sliceOfIemeMaximum( const int &maximumIndex ) const {
-	return _maximumsIndex[maximumIndex];
-}
-
 void PieChartDiagrams::createDiagrams( const QVector<qreal> &sectorsSum ) {
 	const int nbSectors = sectorsSum.size();
 	_curveDatas->clear();
@@ -281,12 +281,12 @@ void PieChartDiagrams::createDiagrams( const QVector<qreal> &sectorsSum ) {
 void PieChartDiagrams::smoothHistogram( QVector<qreal> &sectorsSum ) {
 	int i = 0;
 	qreal veryOldValue, oldValue, currentValue, firstValue, secondValue;
-	const int nbDatas = sectorsSum.size()-2;
-	veryOldValue = sectorsSum[nbDatas];
-	oldValue = sectorsSum[nbDatas+1];
+	const int nbSectors = sectorsSum.size()-2;
+	veryOldValue = sectorsSum[nbSectors];
+	oldValue = sectorsSum[nbSectors+1];
 	firstValue = sectorsSum[0];
 	secondValue = sectorsSum[1];
-	for ( i=0 ; i<nbDatas ; ++i ) {
+	for ( i=0 ; i<nbSectors ; ++i ) {
 		currentValue = sectorsSum[i];
 		sectorsSum[i] = (veryOldValue + oldValue + currentValue + sectorsSum[i+1] + sectorsSum[i+2])/5.;
 		veryOldValue = oldValue;
@@ -301,29 +301,29 @@ void PieChartDiagrams::smoothHistogram( QVector<qreal> &sectorsSum ) {
 	sectorsSum[i] = (veryOldValue + oldValue + currentValue + firstValue + secondValue)/5.;
 }
 
-void PieChartDiagrams::computeMeansAndMedian() {
-	const int nbDatas = count();
+void PieChartDiagrams::computeMeansAndMedian( const QVector<qreal> &sectorsSum ) {
+	const int nbSectors = sectorsSum.size();
 	qreal xMeans[2] = { 0., TWO_PI };
 	qreal yMeans[2] = { 0., 0. };
 	qreal xMedian[2] = { 0., TWO_PI };
 	qreal yMedian[2] = { 0., 0. };
 	qreal xMeansMedian[2] = { 0., TWO_PI };
 	qreal yMeansMedian[2] = { 0., 0. };
-	qreal currentValue;
 	_dataMeans = 0.;
 	_dataMedian = 0.;
 	_dataMeansMedian = 0.;
-	if ( nbDatas > 0 ) {
-		QVector<qreal> listToSort(nbDatas);
-		for ( int i=0 ; i<nbDatas ; ++i ) {
-			currentValue = _curveHistogramDatas[i].value;
-			_dataMeans += currentValue;
-			listToSort[i] = currentValue;
+	if ( nbSectors > 0 ) {
+		// Moyenne
+		for ( int i=0 ; i<nbSectors ; ++i ) {
+			_dataMeans += sectorsSum[i];
 		}
-		_dataMeans /= static_cast<qreal>(nbDatas);
-		qSort(listToSort);
-		if ( nbDatas % 2 == 0 ) _dataMedian = (listToSort[(nbDatas/2)-1]+listToSort[nbDatas/2])/2.;
-		else _dataMedian = listToSort[(nbDatas+1)/2-1];
+		_dataMeans /= static_cast<qreal>(nbSectors);
+		// Mediane
+		QVector<qreal> sortedList(sectorsSum);
+		qSort(sortedList);
+		if ( nbSectors % 2 == 0 ) _dataMedian = (sortedList[(nbSectors/2)-1]+sortedList[nbSectors/2])/2.;
+		else _dataMedian = sortedList[(nbSectors+1)/2-1];
+		// Milieu Moyenne-Mediane
 		_dataMeansMedian = (_dataMeans+_dataMedian)/2.;
 
 		yMeans[0] = yMeans[1] = _dataMeans;
@@ -335,22 +335,25 @@ void PieChartDiagrams::computeMeansAndMedian() {
 	_curveMeansMedian.setSamples(xMeansMedian,yMeansMedian,2);
 }
 
-void PieChartDiagrams::computeMaximums() {
-	const int nbDatas = count();
+void PieChartDiagrams::computeMaximums( const QVector<qreal> &sectorsSum ) {
+	const int nbSectors = sectorsSum.size();
 	_curveMaximumsDatas->clear();
 	_curveHistogramMaximumsDatas.clear();
 	_maximumsIndex.clear();
-	if ( nbDatas > 0 ) {
+	if ( nbSectors > 0 ) {
 		double value;
 		int i, cursor;
 		bool isMax;
+		qreal limit;
+		if ( _intervalType == HistogramIntervalType::FROM_EDGE ) limit = 0;
+		else limit = _intervalType==HistogramIntervalType::FROM_MEANS?_dataMeans:_intervalType==HistogramIntervalType::FROM_MEDIAN?_dataMedian:_dataMeansMedian;
 		qDebug() << "Pics angulaires :";
-		for ( i=0 ; i<nbDatas ; ++i ) {
-			value = _curveHistogramDatas[i].value;
-			if ( value > _dataMeans ) {
+		for ( i=0 ; i<nbSectors ; ++i ) {
+			value = sectorsSum[i];
+			if ( value > limit ) {
 				cursor = 1;
 				do {
-					isMax = ( (value > _curveHistogramDatas[i-cursor>=0?i-cursor:nbDatas+i-cursor].value) && (value > _curveHistogramDatas[i+cursor<nbDatas?i+cursor:i+cursor-nbDatas].value) );
+					isMax = ( (value > sectorsSum[i-cursor>=0?i-cursor:nbSectors+i-cursor]) && (value > sectorsSum[i+cursor<nbSectors?i+cursor:i+cursor-nbSectors]) );
 					cursor++;
 				}
 				while ( isMax && cursor<1 );
@@ -372,53 +375,54 @@ void PieChartDiagrams::computeMaximums() {
 }
 
 namespace {
-	inline qreal firstdDerivated( const QVector< QwtIntervalSample > &histogramDatas, const int &index ) {
-		return histogramDatas[index].value - histogramDatas[index>0?index-1:histogramDatas.size()-1].value;
+	inline qreal firstdDerivated( const QVector<qreal> &sectorsSum, const int &index ) {
+		return sectorsSum[index] - sectorsSum[index>0?index-1:sectorsSum.size()-1];
 	}
 }
 
-void PieChartDiagrams::computeIntervals() {
+void PieChartDiagrams::computeIntervals( const QVector<qreal> &sectorsSum ) {
 	_curveIntervalsDatas->clear();
 	_curveHistogramIntervalsDatas.clear();
 	_curveHistogramIntervalsRealDatas.clear();
 	if ( !_maximumsIndex.isEmpty() ) {
+		const int nbSectors = sectorsSum.size();
 		int nbMaximums = _maximumsIndex.size();
-		const int sizeOfHistogram = count();
 		int cursorMax, cursorMin;
 		qreal derivated;
 		bool isSupToLimit;
 		QVector<QwtIntervalSample> setOfIntervals;
+		setOfIntervals.reserve(nbSectors);
 		if ( _intervalType != HistogramIntervalType::FROM_EDGE ) {
 			qreal limit = _intervalType==HistogramIntervalType::FROM_MEANS?_dataMeans:_intervalType==HistogramIntervalType::FROM_MEDIAN?_dataMedian:_dataMeansMedian;
 			for ( int i=0 ; i<nbMaximums ; ++i ) {
 				setOfIntervals.clear();
-				cursorMin = sliceOfIemeMaximum(i);
+				cursorMin = _maximumsIndex[i];
 				// Si c'est le premier intervalle ou que le maximum courant n'est pas compris dans l'intervalle précédent.
 				if ( _curveHistogramIntervalsRealDatas.isEmpty() || _curveHistogramIntervalsRealDatas.last().maxValue() < cursorMin ) {
 					// On recherche les bornes min et max des potentielles de l'intervalle contenant le ième maximum
-					derivated = firstdDerivated(_curveHistogramDatas,cursorMin);
-					isSupToLimit = _curveHistogramDatas[cursorMin].value > limit;
+					derivated = firstdDerivated(sectorsSum,cursorMin);
+					isSupToLimit = sectorsSum[cursorMin] > limit;
 					while ( isSupToLimit || derivated > 0. ) {
 						setOfIntervals.append(_curveHistogramDatas[cursorMin]);
 						cursorMin--;
-						if ( cursorMin < 0 ) cursorMin = sizeOfHistogram-1;
-						derivated = firstdDerivated(_curveHistogramDatas,cursorMin);
-						isSupToLimit &= _curveHistogramDatas[cursorMin].value > limit;
+						if ( cursorMin < 0 ) cursorMin = nbSectors-1;
+						derivated = firstdDerivated(sectorsSum,cursorMin);
+						isSupToLimit &= sectorsSum[cursorMin] > limit;
 					}
 
-					cursorMax = sliceOfIemeMaximum(i)+1;
-					if ( cursorMax == sizeOfHistogram ) cursorMax = 0;
-					derivated = firstdDerivated(_curveHistogramDatas,cursorMax);
-					isSupToLimit = _curveHistogramDatas[cursorMax].value > limit;
+					cursorMax = _maximumsIndex[i]+1;
+					if ( cursorMax == nbSectors ) cursorMax = 0;
+					derivated = firstdDerivated(sectorsSum,cursorMax);
+					isSupToLimit = sectorsSum[cursorMax] > limit;
 					while ( isSupToLimit || derivated < 0. ) {
 						setOfIntervals.append(_curveHistogramDatas[cursorMax]);
 						cursorMax++;
-						if ( cursorMax == sizeOfHistogram ) cursorMax = 0;
-						derivated = firstdDerivated(_curveHistogramDatas,cursorMax);
-						isSupToLimit &= _curveHistogramDatas[cursorMax].value > limit;
+						if ( cursorMax == nbSectors ) cursorMax = 0;
+						derivated = firstdDerivated(sectorsSum,cursorMax);
+						isSupToLimit &= sectorsSum[cursorMax] > limit;
 					}
 					cursorMax--;
-					if ( cursorMax<0 ) cursorMax = sizeOfHistogram-1;
+					if ( cursorMax<0 ) cursorMax = nbSectors-1;
 
 					// Si c'est le premier intervalle ou que le maximum courant n'est pas compris dans l'intervalle précédent.
 					if ( _curveHistogramIntervalsRealDatas.isEmpty() || _curveHistogramIntervalsRealDatas.first().maxValue() != cursorMax ) {
@@ -426,23 +430,23 @@ void PieChartDiagrams::computeIntervals() {
 						if ( cursorMax>cursorMin && qAbs(cursorMax-cursorMin) > 1 /*_minimumIntervalWidth*/ ) {
 							_curveIntervalsDatas->append(QwtPointPolar( _pieChart.sector(cursorMin).rightAngle(), 0. ));
 							for ( int j=cursorMin ; j<cursorMax ; ++j ) {
-								_curveIntervalsDatas->append(QwtPointPolar(_pieChart.sector(j).rightAngle(),_curveHistogramDatas[j].value));
-								_curveIntervalsDatas->append(QwtPointPolar(_pieChart.sector(j).leftAngle(),_curveHistogramDatas[j].value));
+								_curveIntervalsDatas->append(QwtPointPolar(_pieChart.sector(j).rightAngle(),sectorsSum[j]));
+								_curveIntervalsDatas->append(QwtPointPolar(_pieChart.sector(j).leftAngle(),sectorsSum[j]));
 							}
 							_curveIntervalsDatas->append(QwtPointPolar( _pieChart.sector(cursorMax).leftAngle(), 0. ));
 						}
 						// Si les bornes définissent bien un intervalle... mais qu'il contient 0.
-						else if ( cursorMax<cursorMin && qAbs(cursorMax-(cursorMin-sizeOfHistogram)) > 1 /*_minimumIntervalWidth*/ ) {
+						else if ( cursorMax<cursorMin && qAbs(cursorMax-(cursorMin-nbSectors)) > 1 /*_minimumIntervalWidth*/ ) {
 							_curveIntervalsDatas->append(QwtPointPolar( _pieChart.sector(cursorMin).rightAngle(), 0. ));
-							for ( int j=cursorMin ; j<sizeOfHistogram ; ++j ) {
-								_curveIntervalsDatas->append(QwtPointPolar(_pieChart.sector(j).rightAngle(),_curveHistogramDatas[j].value));
-								_curveIntervalsDatas->append(QwtPointPolar(_pieChart.sector(j).leftAngle(),_curveHistogramDatas[j].value));
+							for ( int j=cursorMin ; j<nbSectors ; ++j ) {
+								_curveIntervalsDatas->append(QwtPointPolar(_pieChart.sector(j).rightAngle(),sectorsSum[j]));
+								_curveIntervalsDatas->append(QwtPointPolar(_pieChart.sector(j).leftAngle(),sectorsSum[j]));
 							}
 							for ( int j=0 ; j<cursorMax ; ++j ) {
-								_curveIntervalsDatas->append(QwtPointPolar(_pieChart.sector(j).rightAngle(),_curveHistogramDatas[j].value));
-								_curveIntervalsDatas->append(QwtPointPolar(_pieChart.sector(j).leftAngle(),_curveHistogramDatas[j].value));
+								_curveIntervalsDatas->append(QwtPointPolar(_pieChart.sector(j).rightAngle(),sectorsSum[j]));
+								_curveIntervalsDatas->append(QwtPointPolar(_pieChart.sector(j).leftAngle(),sectorsSum[j]));
 							}
-							_curveIntervalsDatas->append(QwtPointPolar( _pieChart.sector(cursorMax>=0?cursorMax:sizeOfHistogram-1).leftAngle(), 0. ));
+							_curveIntervalsDatas->append(QwtPointPolar( _pieChart.sector(cursorMax>=0?cursorMax:nbSectors-1).leftAngle(), 0. ));
 						}
 						_curveHistogramIntervalsDatas << setOfIntervals;
 						_curveHistogramIntervalsRealDatas.append(QwtInterval(cursorMin,cursorMax));
@@ -457,32 +461,32 @@ void PieChartDiagrams::computeIntervals() {
 			for ( int i=0 ; i<nbMaximums ; ++i ) {
 				setOfIntervals.clear();
 				// On recherche les bornes min et max des potentielles de l'intervalle contenant le ième maximum
-				cursorMin = sliceOfIemeMaximum(i);
-				derivated = firstdDerivated(_curveHistogramDatas,cursorMin);
+				cursorMin = _maximumsIndex[i];
+				derivated = firstdDerivated(sectorsSum,cursorMin);
 				while ( derivated > 0. ) {
 					setOfIntervals.append(_curveHistogramDatas[cursorMin]);
 					cursorMin--;
-					if ( cursorMin < 0 ) cursorMin = sizeOfHistogram-1;
-					derivated = firstdDerivated(_curveHistogramDatas,cursorMin);
+					if ( cursorMin < 0 ) cursorMin = nbSectors-1;
+					derivated = firstdDerivated(sectorsSum,cursorMin);
 				}
-				cursorMax = sliceOfIemeMaximum(i)+1;
-				if ( cursorMax == sizeOfHistogram ) cursorMax = 0;
-				derivated = firstdDerivated(_curveHistogramDatas,cursorMax);
+				cursorMax = _maximumsIndex[i]+1;
+				if ( cursorMax == nbSectors ) cursorMax = 0;
+				derivated = firstdDerivated(sectorsSum,cursorMax);
 				while ( derivated < 0. ) {
 					setOfIntervals.append(_curveHistogramDatas[cursorMax]);
 					cursorMax++;
-					if ( cursorMax == sizeOfHistogram ) cursorMax = 0;
-					derivated = firstdDerivated(_curveHistogramDatas,cursorMax);
+					if ( cursorMax == nbSectors ) cursorMax = 0;
+					derivated = firstdDerivated(sectorsSum,cursorMax);
 				}
 				cursorMax--;
-				if ( cursorMax<0 ) cursorMax = sizeOfHistogram-1;
+				if ( cursorMax<0 ) cursorMax = nbSectors-1;
 
 				// Si les bornes définissent bien un intervalle qui ne contient pas 0.
 				if ( cursorMax>cursorMin && qAbs(cursorMax-cursorMin) > 1 /*_minimumIntervalWidth*/ ) {
 					_curveIntervalsDatas->append(QwtPointPolar( _pieChart.sector(cursorMin).rightAngle(), 0. ));
 					for ( int j=cursorMin ; j<cursorMax ; ++j ) {
-						_curveIntervalsDatas->append(QwtPointPolar(_pieChart.sector(j).rightAngle(),_curveHistogramDatas[j].value));
-						_curveIntervalsDatas->append(QwtPointPolar(_pieChart.sector(j).leftAngle(),_curveHistogramDatas[j].value));
+						_curveIntervalsDatas->append(QwtPointPolar(_pieChart.sector(j).rightAngle(),sectorsSum[j]));
+						_curveIntervalsDatas->append(QwtPointPolar(_pieChart.sector(j).leftAngle(),sectorsSum[j]));
 					}
 					_curveIntervalsDatas->append(QwtPointPolar( _pieChart.sector(cursorMax).leftAngle(), 0. ));
 
@@ -490,17 +494,17 @@ void PieChartDiagrams::computeIntervals() {
 					_curveHistogramIntervalsRealDatas.append(QwtInterval(cursorMin,cursorMax));
 				}
 				// Si les bornes définissent bien un intervalle... mais qu'il contient 0.
-				else if ( cursorMax<cursorMin && qAbs(cursorMax-(cursorMin-sizeOfHistogram)) > 1 /*_minimumIntervalWidth*/ ) {
+				else if ( cursorMax<cursorMin && qAbs(cursorMax-(cursorMin-nbSectors)) > 1 /*_minimumIntervalWidth*/ ) {
 					_curveIntervalsDatas->append(QwtPointPolar( _pieChart.sector(cursorMin).rightAngle(), 0. ));
-					for ( int j=cursorMin ; j<sizeOfHistogram ; ++j ) {
-						_curveIntervalsDatas->append(QwtPointPolar(_pieChart.sector(j).rightAngle(),_curveHistogramDatas[j].value));
-						_curveIntervalsDatas->append(QwtPointPolar(_pieChart.sector(j).leftAngle(),_curveHistogramDatas[j].value));
+					for ( int j=cursorMin ; j<nbSectors ; ++j ) {
+						_curveIntervalsDatas->append(QwtPointPolar(_pieChart.sector(j).rightAngle(),sectorsSum[j]));
+						_curveIntervalsDatas->append(QwtPointPolar(_pieChart.sector(j).leftAngle(),sectorsSum[j]));
 					}
 					for ( int j=0 ; j<cursorMax ; ++j ) {
-						_curveIntervalsDatas->append(QwtPointPolar(_pieChart.sector(j).rightAngle(),_curveHistogramDatas[j].value));
-						_curveIntervalsDatas->append(QwtPointPolar(_pieChart.sector(j).leftAngle(),_curveHistogramDatas[j].value));
+						_curveIntervalsDatas->append(QwtPointPolar(_pieChart.sector(j).rightAngle(),sectorsSum[j]));
+						_curveIntervalsDatas->append(QwtPointPolar(_pieChart.sector(j).leftAngle(),sectorsSum[j]));
 					}
-					_curveIntervalsDatas->append(QwtPointPolar( _pieChart.sector(cursorMax>=0?cursorMax:sizeOfHistogram-1).leftAngle(), 0. ));
+					_curveIntervalsDatas->append(QwtPointPolar( _pieChart.sector(cursorMax>=0?cursorMax:nbSectors-1).leftAngle(), 0. ));
 
 					_curveHistogramIntervalsDatas << setOfIntervals;
 					_curveHistogramIntervalsRealDatas.append(QwtInterval(cursorMin,cursorMax));
@@ -524,8 +528,11 @@ void PieChartDiagrams::draw( QImage &image, const iCoord2D &center ) const {
 		const int height = image.height();
 		const int centerX = center.x;
 		const int centerY = center.y;
-		const QColor colors[] = { Qt::blue, Qt::cyan, Qt::magenta };
-		qreal angle, x1,y1,x2,y2;
+		QColor colors[] = { Qt::blue, Qt::cyan, Qt::magenta };
+//		colors[0].setAlpha(20);
+//		colors[1].setAlpha(20);
+//		colors[2].setAlpha(20);
+		qreal angle, x1,y1,x2,y2; //,oldx,oldy;
 		int i, nbBoucle;
 
 		// Liste qui va contenir les angles des deux côté du secteur à dessiner
@@ -542,6 +549,7 @@ void PieChartDiagrams::draw( QImage &image, const iCoord2D &center ) const {
 		i = twoSides.size()-1;
 		while ( i > 0 ) {
 			painter.setPen(colors[i%3]);
+			painter.setBrush(colors[i%3]);
 			nbBoucle = 2;
 			while ( nbBoucle-- > 0 ) {
 				// Calcul des coordonnées du segment à tracer
@@ -549,7 +557,7 @@ void PieChartDiagrams::draw( QImage &image, const iCoord2D &center ) const {
 				x1 = x2 = centerX;
 				y1 = y2 = centerY;
 				if ( qFuzzyCompare(angle,PI_ON_TWO) ) y2 = height;
-				else if ( qFuzzyCompare(angle,THREE_PI_ON_TWO) ) y1 = 0;
+				else if ( qFuzzyCompare(angle,THREE_PI_ON_TWO) ) y2 = 0;
 				else {
 					const qreal a = tan(angle);
 					const qreal b = centerY - (a*centerX);
@@ -558,12 +566,23 @@ void PieChartDiagrams::draw( QImage &image, const iCoord2D &center ) const {
 						y2 = a*width+b;
 					}
 					else {
-						x1 = 0;
-						y1 = b;
+						x2 = 0;
+						y2 = b;
 					}
 				}
 				// Tracé du segment droit
 				painter.drawLine(x1,y1,x2,y2);
+//				if ( nbBoucle == 0 ) {
+//					QPolygon polygon;
+//					polygon.append(QPoint(x1,y1));
+//					polygon.append(QPoint(x2,y2));
+//					polygon.append(QPoint(oldx,oldy));
+//					painter.drawPolygon(polygon);
+//				}
+//				else {
+//					oldx = x2;
+//					oldy = y2;
+//				}
 			}
 		}
 	}
