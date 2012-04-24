@@ -214,7 +214,7 @@ void SliceHistogram::constructHistogram( const Billon &billon, const Marrow *mar
 						previousSliceValue = prevSlice.at(yPos,xPos);
 						if ( (currentSliceValue > minValue) && (previousSliceValue > minValue) ) {
 							diff = qAbs(qBound(minValue,currentSliceValue,maxValue) - qBound(minValue,previousSliceValue,maxValue));
-							if ( (diff > _movementThresholdMin) && (diff < _movementThresholdMax) ) {
+							if ( (diff >= _movementThresholdMin) && (diff <= _movementThresholdMax) ) {
 								cumul += diff;
 							}
 						}
@@ -229,7 +229,7 @@ void SliceHistogram::constructHistogram( const Billon &billon, const Marrow *mar
 					previousSliceValue = prevSlice.at(j,i);
 					if ( (currentSliceValue > minValue) && (previousSliceValue > minValue) ) {
 						diff = qAbs(qBound(minValue,currentSliceValue,maxValue) - qBound(minValue,previousSliceValue,maxValue));
-						if ( (diff > _movementThresholdMin) && (diff < _movementThresholdMax) ) {
+						if ( (diff >= _movementThresholdMin) && (diff <= _movementThresholdMax) ) {
 							cumul += diff;
 						}
 					}
@@ -244,6 +244,19 @@ void SliceHistogram::constructHistogram( const Billon &billon, const Marrow *mar
 	computeMaximums();
 	computeMeansAndMedian();
 	computeIntervals();
+}
+
+void SliceHistogram::smoothHistogram( QVector< QwtIntervalSample > &histogramDatas ) {
+	qreal veryOldValue = histogramDatas.at(0).value;
+	qreal oldValue = histogramDatas.at(1).value;
+	qreal currentValue;
+	int nbDatas = histogramDatas.size()-2;
+	for ( int i=2 ; i<nbDatas ; ++i ) {
+		currentValue = histogramDatas.at(i).value;
+		histogramDatas[i].value = (veryOldValue + oldValue + currentValue + histogramDatas.at(i+1).value + histogramDatas.at(i+2).value)/5.;
+		veryOldValue = oldValue;
+		oldValue = currentValue;
+	}
 }
 
 void SliceHistogram::computeMaximums() {
@@ -282,18 +295,6 @@ namespace {
 	}
 }
 
-void SliceHistogram::smoothHistogram( QVector< QwtIntervalSample > &histogramDatas ) {
-	qreal veryOldValue = histogramDatas.at(0).value;
-	qreal oldValue = histogramDatas.at(1).value;
-	qreal currentValue;
-	int nbDatas = histogramDatas.size()-2;
-	for ( int i=2 ; i<nbDatas ; ++i ) {
-		currentValue = histogramDatas.at(i).value;
-		histogramDatas[i].value = (veryOldValue + oldValue + currentValue + histogramDatas.at(i+1).value + histogramDatas.at(i+2).value)/5.;
-		veryOldValue = oldValue;
-		oldValue = currentValue;
-	}
-}
 
 void SliceHistogram::computeIntervals() {
 	_datasBranchesAreaToDrawing.clear();

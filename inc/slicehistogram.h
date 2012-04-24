@@ -43,11 +43,11 @@ public:
 	void constructHistogram( const Billon &billon, const Marrow *marrow, const IntensityInterval &intensity );
 
 private:
-	void computeMaximums();
-	void computeIntervals();
-	void computeMeansAndMedian();
-
 	void smoothHistogram( QVector< QwtIntervalSample > &histogramDatas );
+	void computeMaximums();
+	void computeMeansAndMedian();
+	void computeIntervals();
+
 
 private:
 	QwtPlotHistogram *_histogram;

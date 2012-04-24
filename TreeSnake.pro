@@ -24,6 +24,7 @@ TARGET		=	TreeSnake
 DEPENDPATH	*=	./src/ ./inc/ ./ui/
 
 SOURCES		=	main.cpp \
+				connexcomponentextractor.cpp \
 				datexport.cpp \
 				dicomreader.cpp \
 				histoexport.cpp \
@@ -48,6 +49,7 @@ SOURCES		=	main.cpp \
 
 HEADERS		=	billon.h \
 				billon_def.h \
+				connexcomponentextractor.h \
 				datexport.h \
 				dicomreader.h \
 				global.h \

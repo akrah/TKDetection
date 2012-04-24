@@ -227,7 +227,6 @@ void MainWindow::drawSlice( const int &sliceNumber ) {
 		if ( _sectorBillon != 0 && inDrawingArea ) {
 			const int width = _sectorBillon->n_cols;
 			const int height = _sectorBillon->n_rows;
-			const int depth = _sectorBillon->n_slices;
 
 			QPainter painter(&_pix);
 			QColor color(255,0,0,127);
@@ -240,11 +239,14 @@ void MainWindow::drawSlice( const int &sliceNumber ) {
 			const Slice &sectorSlice = _sectorBillon->slice(sliceNumber-firstSlice);
 			const int marrowX = _marrow->at(sliceNumber).x;
 			const int marrowY = _marrow->at(sliceNumber).y;
+
+			const int threshold = _ui->_sliderSectorThresholding->value();
+
 			int i, j;
 			if ( sectorInterval.isValid() ) {
 				for ( j=0 ; j<height ; ++j ) {
 					for ( i=0 ; i<width ; ++i ) {
-						if ( sectorSlice.at(j,i) && sectorInterval.contains( _pieChart->partOfAngle( TWO_PI-ANGLE( marrowX, marrowY, i, j ) ) ) ) {
+						if ( sectorSlice.at(j,i) > threshold && sectorInterval.contains( _pieChart->partOfAngle( TWO_PI-ANGLE( marrowX, marrowY, i, j ) ) ) ) {
 							painter.drawPoint(i,j);
 						}
 					}
@@ -254,7 +256,7 @@ void MainWindow::drawSlice( const int &sliceNumber ) {
 				const QwtInterval sectorIntervalInverted = sectorInterval.inverted();
 				for ( j=0 ; j<height ; ++j ) {
 					for ( i=0 ; i<width ; ++i ) {
-						if ( sectorSlice(j,i) && !sectorIntervalInverted.contains( _pieChart->partOfAngle( TWO_PI-ANGLE( marrowX, marrowY, i, j ) ) ) ) {
+						if ( sectorSlice(j,i) > threshold && !sectorIntervalInverted.contains( _pieChart->partOfAngle( TWO_PI-ANGLE( marrowX, marrowY, i, j ) ) ) ) {
 							painter.drawPoint(i,j);
 						}
 					}
@@ -779,7 +781,7 @@ void MainWindow::selectSectorInterval( const int &index ) {
 			Slice &sectorSlice = _sectorBillon->slice(k-firstSlice);
 			for ( j=0 ; j<height ; ++j ) {
 				for ( i=0 ; i<width ; ++i ) {
-					sectorSlice.at(j,i) = ( originalSlice.at(j,i) > threshold && originalSlice.at(j,i) < 500 );
+					sectorSlice.at(j,i) = ( originalSlice.at(j,i) > threshold && originalSlice.at(j,i) < 500 ) ? originalSlice.at(j,i) : threshold;
 				}
 			}
 		}

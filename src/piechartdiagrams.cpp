@@ -200,9 +200,8 @@ void PieChartDiagrams::compute( const Billon &billon, const Marrow *marrow, cons
 							previousSliceValue = prevSlice.at(yPos,xPos);
 							if ( (currentSliceValue > minValue) && (previousSliceValue > minValue) ) {
 								diff = qAbs(qBound(minValue,currentSliceValue,maxValue) - qBound(minValue,previousSliceValue,maxValue));
-								if ( (diff > _movementsThresholdMin) && (diff < _movementsThresholdMax) ) {
-									diff -= _movementsThresholdMin;
-									sectorsSum[sectorIdx] += diff;
+								if ( (diff >= _movementsThresholdMin) && (diff <= _movementsThresholdMax) ) {
+									sectorsSum[sectorIdx] += (diff-_movementsThresholdMin);
 								}
 							}
 						}
@@ -217,9 +216,8 @@ void PieChartDiagrams::compute( const Billon &billon, const Marrow *marrow, cons
 						previousSliceValue = prevSlice.at(j,i);
 						if ( (currentSliceValue > minValue) && (previousSliceValue > minValue) ) {
 							diff = qAbs(qBound(minValue,currentSliceValue,maxValue) - qBound(minValue,previousSliceValue,maxValue));
-							if ( diff > _movementsThresholdMin && diff < _movementsThresholdMax ) {
-								diff -= _movementsThresholdMin;
-								sectorsSum[sectorIdx] += diff;
+							if ( diff >= _movementsThresholdMin && diff <= _movementsThresholdMax ) {
+								sectorsSum[sectorIdx] += (diff-_movementsThresholdMin);
 							}
 						}
 					}
@@ -342,8 +340,8 @@ void PieChartDiagrams::computeMaximums( const QVector<qreal> &sectorsSum ) {
 	_maximumsIndex.clear();
 	if ( nbSectors > 0 ) {
 		double value;
-		int i, cursor;
-		bool isMax;
+		int i; // cursor;
+		//bool isMax;
 		qreal limit;
 		if ( _intervalType == HistogramIntervalType::FROM_EDGE ) limit = 0;
 		else limit = _intervalType==HistogramIntervalType::FROM_MEANS?_dataMeans:_intervalType==HistogramIntervalType::FROM_MEDIAN?_dataMedian:_dataMeansMedian;
@@ -351,13 +349,14 @@ void PieChartDiagrams::computeMaximums( const QVector<qreal> &sectorsSum ) {
 		for ( i=0 ; i<nbSectors ; ++i ) {
 			value = sectorsSum[i];
 			if ( value > limit ) {
-				cursor = 1;
-				do {
-					isMax = ( (value > sectorsSum[i-cursor>=0?i-cursor:nbSectors+i-cursor]) && (value > sectorsSum[i+cursor<nbSectors?i+cursor:i+cursor-nbSectors]) );
-					cursor++;
-				}
-				while ( isMax && cursor<1 );
-				if ( isMax ) {
+				//cursor = 1;
+				//do {
+				//	isMax = ( (value > sectorsSum[i-cursor>=0?i-cursor:nbSectors+i-cursor]) && (value > sectorsSum[i+cursor<nbSectors?i+cursor:i+cursor-nbSectors]) );
+				//	cursor++;
+				//}
+				//while ( isMax && cursor<1 ); TOUJOURS VRAI SI CURSOR COMMENCE A 1
+				//if ( isMax ) {
+				if ( (value > sectorsSum[i>=1?i-1:nbSectors+i-1]) && (value > sectorsSum[i+1<nbSectors?i+1:i+1-nbSectors]) ) {
 					const PiePart &part = _pieChart.sector(i);
 					_curveMaximumsDatas->append(QwtPointPolar(part.rightAngle(),0.));
 					_curveMaximumsDatas->append(QwtPointPolar(part.rightAngle(),value));
@@ -365,7 +364,7 @@ void PieChartDiagrams::computeMaximums( const QVector<qreal> &sectorsSum ) {
 					_curveMaximumsDatas->append(QwtPointPolar(part.leftAngle(),0.));
 					_curveHistogramMaximumsDatas.append(_curveHistogramDatas[i]);
 					_maximumsIndex.append(i);
-					i+=cursor-1;
+				//	i+=cursor-1;
 					qDebug() << i;
 				}
 			}
