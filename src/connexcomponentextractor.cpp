@@ -8,6 +8,8 @@
 #include <QList>
 #include <QPair>
 
+#include <QDebug>
+
 namespace ConnexComponentExtractor {
 
 	namespace {
@@ -22,12 +24,10 @@ namespace ConnexComponentExtractor {
 		 * \param	nbLabel Nombre de labels déjà attribués
 		 * \return	le dernier label attribué
 		 */
-		static
 		int twoPassAlgorithm( arma::imat &oldSlice, arma::Slice &currentSlice, arma::imat &labels, QMap<int, QList<iCoord3D> > &connexComponentList, int k, int nbLabel, const __billon_type__ &threshold );
 	}
 
-	void extractConnexComponent( Billon &billon, QMap< int, Billon* > &components, const int &minimumSize, const __billon_type__ &threshold ) {
-		components.clear();
+	Billon * extractConnexComponent( Billon &billon, const int &minimumSize, const __billon_type__ &threshold ) {
 
 		const uint width = billon.n_cols;
 		const uint height = billon.n_rows;
@@ -41,7 +41,7 @@ namespace ConnexComponentExtractor {
 		arma::imat* tmp;
 
 		//On parcours les tranches 1 par 1
-		for ( unsigned int k=0 ; k<billon.n_slices ; k++ ) {
+		for ( unsigned int k=0 ; k<depth ; k++ ) {
 			nbLabel = twoPassAlgorithm((*oldSlice),billon.slice(k),(*labels),connexComponentList,k,nbLabel,threshold);
 			tmp = oldSlice;
 			oldSlice = labels;
@@ -100,29 +100,29 @@ namespace ConnexComponentExtractor {
 //			components.insert(counter++,con);
 //		}
 
+		Billon* components = new Billon(width,height,depth);
+		components->setVoxelSize(billon.voxelWidth(),billon.voxelHeight(),billon.voxelDepth());
+		components->fill(0);
+
 		QMapIterator<int, QList<iCoord3D> > iter(connexComponentList);
 		iCoord3D currentCoord;
 		int counter = 1;
 		while (iter.hasNext()) {
 			iter.next();
-			Billon* con = new Billon(width,height,depth);
-			con->setMinValue(billon.minValue());
-			con->setMaxValue(billon.maxValue());
-			con->setVoxelSize(billon.voxelWidth(),billon.voxelHeight(),billon.voxelDepth());
 			if ( iter.value().size() > minimumSize ) {
 				QListIterator<iCoord3D> coords(iter.value());
 				while (coords.hasNext()) {
 					currentCoord = coords.next();
-					con->at(currentCoord.y,currentCoord.x,currentCoord.z) = 1;
+					components->at(currentCoord.y,currentCoord.x,currentCoord.z) = counter;
 				}
-				if ( components.contains(counter) ) {
-					delete components[counter];
-					components.remove(counter);
-				}
-				components.insert(counter++,con);
+				counter++;
 			}
 		}
-		std::cerr << "Nombre de composantes = " << (counter - 1) << '\n';
+		qDebug() << QObject::tr("Nombre de composantes = %1").arg(counter-1);
+		components->setMinValue(0);
+		components->setMaxValue(counter-1);
+
+		return components;
 	}
 
 	namespace {
@@ -166,7 +166,6 @@ namespace ConnexComponentExtractor {
 						}
 						//Si ses voisins ont une étiquette
 						else {
-							// TODO : remplacer mini par la valeur du premier voisin
 							QListIterator<int> iterVoisin(voisinage);
 							mini = iterVoisin.next();
 							while(iterVoisin.hasNext()) {
@@ -182,7 +181,7 @@ namespace ConnexComponentExtractor {
 									tableEquiv[voisinage[ind]] = mini;
 									if (isOld && connexComponentList.contains(voisinage[ind])) {
 										connexComponentList[mini].append(connexComponentList.take(voisinage[ind]));
-										tableEquiv[voisinage[ind]] = mini;
+										//tableEquiv[voisinage[ind]] = mini; EST DEJA FAIT AU DESSUS DU IF
 									}
 								}
 							}

@@ -91,6 +91,7 @@ private:
 	Billon *_billon;
 	Billon *_unusedBillon;
 	Billon *_sectorBillon;
+	Billon *_componentBillon;
 	Marrow *_marrow;
 	SliceView *_sliceView;
 	SliceHistogram *_sliceHistogram;

@@ -104,8 +104,8 @@
           <rect>
            <x>0</x>
            <y>0</y>
-           <width>454</width>
-           <height>798</height>
+           <width>403</width>
+           <height>799</height>
           </rect>
          </property>
          <layout class="QHBoxLayout" name="horizontalLayout_8">
@@ -171,8 +171,8 @@
   <widget class="QDockWidget" name="dockWidget_2">
    <property name="minimumSize">
     <size>
-     <width>494</width>
-     <height>846</height>
+     <width>545</width>
+     <height>948</height>
     </size>
    </property>
    <property name="floating">
@@ -227,8 +227,8 @@
                 <rect>
                  <x>0</x>
                  <y>0</y>
-                 <width>426</width>
-                 <height>218</height>
+                 <width>477</width>
+                 <height>349</height>
                 </rect>
                </property>
                <attribute name="label">
@@ -1022,6 +1022,9 @@ autour de la moelle</string>
              </property>
              <item>
               <widget class="QComboBox" name="_comboSelectSliceInterval">
+               <property name="maxCount">
+                <number>2147483647</number>
+               </property>
                <item>
                 <property name="text">
                  <string>Personnalisé</string>
@@ -1072,7 +1075,7 @@ autour de la moelle</string>
               </widget>
              </item>
              <item>
-              <widget class="QPushButton" name="_buttonSelectSectorIntervalThresholding">
+              <widget class="QPushButton" name="_buttonSelectSectorIntervalUpdate">
                <property name="sizePolicy">
                 <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
                  <horstretch>0</horstretch>
@@ -1080,7 +1083,7 @@ autour de la moelle</string>
                 </sizepolicy>
                </property>
                <property name="text">
-                <string>Seuiller</string>
+                <string>Mettre à jour</string>
                </property>
               </widget>
              </item>
@@ -1122,6 +1125,72 @@ autour de la moelle</string>
                <property name="value">
                 <number>-70</number>
                </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item row="3" column="0">
+            <widget class="QLabel" name="label_29">
+             <property name="text">
+              <string>Afficher les
+composantes connexes</string>
+             </property>
+            </widget>
+           </item>
+           <item row="4" column="0">
+            <widget class="QLabel" name="label_30">
+             <property name="text">
+              <string>Taille minimale
+d'une composante</string>
+             </property>
+            </widget>
+           </item>
+           <item row="4" column="1">
+            <layout class="QHBoxLayout" name="horizontalLayout_18">
+             <item>
+              <widget class="QSlider" name="_sliderMinimalSizeOfConnexComponents">
+               <property name="maximum">
+                <number>500</number>
+               </property>
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QSpinBox" name="_spinMinimalSizeOfConnexComponents">
+               <property name="maximum">
+                <number>500</number>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item row="3" column="1">
+            <layout class="QHBoxLayout" name="horizontalLayout_19">
+             <item>
+              <widget class="QCheckBox" name="_checkEnableConnexComponents">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="text">
+                <string/>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QComboBox" name="_comboConnexComponents">
+               <property name="maxCount">
+                <number>2147483647</number>
+               </property>
+               <item>
+                <property name="text">
+                 <string>Toutes</string>
+                </property>
+               </item>
               </widget>
              </item>
             </layout>

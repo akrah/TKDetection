@@ -12,7 +12,7 @@ namespace ConnexComponentExtractor {
 	 * \param	cube Matrice cubique contenant l'ensemble des points
 	 * \param	image Image à laquelle il faut ajouter les composantes connexes du cube
 	 */
-	void extractConnexComponent( Billon &billon, QMap< int, Billon* > &components, const int &minimumSize, const __billon_type__ &threshold );
+	Billon * extractConnexComponent( Billon &billon, const int &minimumSize, const __billon_type__ &threshold );
 }
 
 #endif // CONNEX_COMPONENT_EXTRACTOR_H

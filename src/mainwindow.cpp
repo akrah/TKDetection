@@ -16,6 +16,7 @@
 #include "inc/v3dexport.h"
 #include "inc/histoexport.h"
 #include "inc/opticalflow.h"
+#include "inc/connexcomponentextractor.h"
 
 #include <QFileDialog>
 #include <QMouseEvent>
@@ -23,7 +24,7 @@
 #include <QScrollBar>
 #include <QMessageBox>
 
-MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::MainWindow), _billon(0), _unusedBillon(0), _sectorBillon(0), _marrow(0), _sliceView(new SliceView()), _sliceHistogram(new SliceHistogram()), _pieChart(new PieChart(0,1)), _pieChartDiagrams(new PieChartDiagrams()), _currentSlice(0), _currentMaximum(0), _isUsedOriginalBillon(true) {
+MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::MainWindow), _billon(0), _unusedBillon(0), _sectorBillon(0), _componentBillon(0), _marrow(0), _sliceView(new SliceView()), _sliceHistogram(new SliceHistogram()), _pieChart(new PieChart(0,1)), _pieChartDiagrams(new PieChartDiagrams()), _currentSlice(0), _currentMaximum(0), _isUsedOriginalBillon(true) {
 	_ui->setupUi(this);
 	setCorner(Qt::TopLeftCorner,Qt::LeftDockWidgetArea);
 	setCorner(Qt::TopRightCorner,Qt::RightDockWidgetArea);
@@ -104,9 +105,12 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 	QObject::connect(_ui->_comboSelectSliceInterval, SIGNAL(activated(int)), this, SLOT(selectSliceInterval(int)));
 	QObject::connect(_ui->_buttonSelectSliceIntervalUpdate, SIGNAL(clicked()), this, SLOT(selectCurrentSliceInterval()));
 	QObject::connect(_ui->_comboSelectSectorInterval, SIGNAL(activated(int)), this, SLOT(selectSectorInterval(int)));
-	QObject::connect(_ui->_buttonSelectSectorIntervalThresholding, SIGNAL(clicked()), this, SLOT(selectCurrentSectorInterval()));
+	QObject::connect(_ui->_buttonSelectSectorIntervalUpdate, SIGNAL(clicked()), this, SLOT(selectCurrentSectorInterval()));
 	QObject::connect(_ui->_sliderSectorThresholding, SIGNAL(valueChanged(int)), _ui->_spinSectorThresholding, SLOT(setValue(int)));
 	QObject::connect(_ui->_spinSectorThresholding, SIGNAL(valueChanged(int)), _ui->_sliderSectorThresholding, SLOT(setValue(int)));
+	QObject::connect(_ui->_sliderMinimalSizeOfConnexComponents, SIGNAL(valueChanged(int)), _ui->_spinMinimalSizeOfConnexComponents, SLOT(setValue(int)));
+	QObject::connect(_ui->_spinMinimalSizeOfConnexComponents, SIGNAL(valueChanged(int)), _ui->_sliderMinimalSizeOfConnexComponents, SLOT(setValue(int)));
+	QObject::connect(_ui->_comboConnexComponents, SIGNAL(activated(int)), this, SLOT(drawSlice()));
 
 	// Évènements déclenchés par la souris sur le visualiseur de coupes
 	QObject::connect(&_sliceZoomer, SIGNAL(zoomFactorChanged(qreal,QPoint)), this, SLOT(zoomInSliceView(qreal,QPoint)));
@@ -225,39 +229,60 @@ void MainWindow::drawSlice( const int &sliceNumber ) {
 			_pieChart->draw(_pix,_currentSector, center);
 		}
 		if ( _sectorBillon != 0 && inDrawingArea ) {
-			const int width = _sectorBillon->n_cols;
-			const int height = _sectorBillon->n_rows;
 
-			QPainter painter(&_pix);
-			QColor color(255,0,0,127);
-			painter.setPen(color);
+			if ( !_ui->_checkEnableConnexComponents->isChecked() || _componentBillon == 0 ) {
+				const int width = _sectorBillon->n_cols;
+				const int height = _sectorBillon->n_rows;
+				const int threshold = _ui->_sliderSectorThresholding->value();
 
-			const QwtInterval &sliceInterval = _sliceHistogram->branchesAreas()[_ui->_comboSelectSliceInterval->currentIndex()-1];
-			const int firstSlice = sliceInterval.minValue();
-			const QwtInterval &sectorInterval = _pieChartDiagrams->branchesSectors()[_ui->_comboSelectSectorInterval->currentIndex()-1];
+				const QwtInterval &sliceInterval = _sliceHistogram->branchesAreas()[_ui->_comboSelectSliceInterval->currentIndex()-1];
+				const Slice &sectorSlice = _sectorBillon->slice(sliceNumber-sliceInterval.minValue());
 
-			const Slice &sectorSlice = _sectorBillon->slice(sliceNumber-firstSlice);
-			const int marrowX = _marrow->at(sliceNumber).x;
-			const int marrowY = _marrow->at(sliceNumber).y;
+				QPainter painter(&_pix);
+				QColor color(255,0,0,127);
+				painter.setPen(color);
 
-			const int threshold = _ui->_sliderSectorThresholding->value();
-
-			int i, j;
-			if ( sectorInterval.isValid() ) {
+				int i, j;
 				for ( j=0 ; j<height ; ++j ) {
 					for ( i=0 ; i<width ; ++i ) {
-						if ( sectorSlice.at(j,i) > threshold && sectorInterval.contains( _pieChart->partOfAngle( TWO_PI-ANGLE( marrowX, marrowY, i, j ) ) ) ) {
+						if ( sectorSlice.at(j,i) > threshold ) {
 							painter.drawPoint(i,j);
 						}
 					}
 				}
 			}
 			else {
-				const QwtInterval sectorIntervalInverted = sectorInterval.inverted();
-				for ( j=0 ; j<height ; ++j ) {
-					for ( i=0 ; i<width ; ++i ) {
-						if ( sectorSlice(j,i) > threshold && !sectorIntervalInverted.contains( _pieChart->partOfAngle( TWO_PI-ANGLE( marrowX, marrowY, i, j ) ) ) ) {
-							painter.drawPoint(i,j);
+				const int width = _componentBillon->n_cols;
+				const int height = _componentBillon->n_rows;
+
+				const QColor colors[] = { QColor(0,0,255,127), QColor(0,255,255,127), QColor(255,0,255,127), QColor(255,0,0,127), QColor(255,255,0,127), QColor(0,255,0,127) };
+				const int nbColors = sizeof(colors)/sizeof(QColor);
+
+				const QwtInterval &sliceInterval = _sliceHistogram->branchesAreas()[_ui->_comboSelectSliceInterval->currentIndex()-1];
+				const Slice &sectorSlice = _componentBillon->slice(sliceNumber-sliceInterval.minValue());
+				const int selectedComponents = _ui->_comboConnexComponents->currentIndex();
+
+				QPainter painter(&_pix);
+				int i, j, color;
+				if ( selectedComponents ) {
+					for ( j=0 ; j<height ; ++j ) {
+						for ( i=0 ; i<width ; ++i ) {
+							color = sectorSlice.at(j,i);
+							if ( color == selectedComponents ) {
+								painter.setPen(colors[color%nbColors]);
+								painter.drawPoint(i,j);
+							}
+						}
+					}
+				}
+				else {
+					for ( j=0 ; j<height ; ++j ) {
+						for ( i=0 ; i<width ; ++i ) {
+							color = sectorSlice.at(j,i);
+							if ( color ) {
+								painter.setPen(colors[color%nbColors]);
+								painter.drawPoint(i,j);
+							}
 						}
 					}
 				}
@@ -759,30 +784,65 @@ void MainWindow::selectSectorInterval( const int &index ) {
 		delete _sectorBillon;
 		_sectorBillon = 0;
 	}
+	if ( _componentBillon != 0 ) {
+		delete _componentBillon;
+		_componentBillon = 0;
+	}
+	_ui->_comboConnexComponents->clear();
+	_ui->_comboConnexComponents->addItem(tr("Toutes"));
 	if ( index > 0 && index <= _pieChartDiagrams->branchesSectors().size() ) {
+		const QwtInterval &sectorInterval = _pieChartDiagrams->branchesSectors()[_ui->_comboSelectSectorInterval->currentIndex()-1];
 		const QwtInterval &sliceInterval = _sliceHistogram->branchesAreas()[_ui->_comboSelectSliceInterval->currentIndex()-1];
 		const int firstSlice = sliceInterval.minValue();
 		const int lastSlice = sliceInterval.maxValue()+1;
-
-		_sectorBillon = new Billon(_billon->n_cols,_billon->n_rows,sliceInterval.width()+1);
-		_sectorBillon->setMinValue(0);
-		_sectorBillon->setMaxValue(1);
-		_sectorBillon->setVoxelSize(_billon->voxelWidth(),_billon->voxelHeight(),_billon->voxelDepth());
-		_sectorBillon->fill(0);
-
-
 		const int width = _billon->n_cols;
 		const int height = _billon->n_rows;
 		const int threshold = _ui->_sliderSectorThresholding->value();
 
+		_sectorBillon = new Billon(_billon->n_cols,_billon->n_rows,sliceInterval.width()+1);
+		_sectorBillon->setMinValue(threshold);
+		_sectorBillon->setMaxValue(500);
+		_sectorBillon->setVoxelSize(_billon->voxelWidth(),_billon->voxelHeight(),_billon->voxelDepth());
+		_sectorBillon->fill(threshold);
+
 		int i, j, k;
-		for ( k=firstSlice ; k<lastSlice ; ++k ) {
-			const Slice &originalSlice = _billon->slice(k);
-			Slice &sectorSlice = _sectorBillon->slice(k-firstSlice);
-			for ( j=0 ; j<height ; ++j ) {
-				for ( i=0 ; i<width ; ++i ) {
-					sectorSlice.at(j,i) = ( originalSlice.at(j,i) > threshold && originalSlice.at(j,i) < 500 ) ? originalSlice.at(j,i) : threshold;
+		if ( sectorInterval.isValid() ) {
+			for ( k=firstSlice ; k<lastSlice ; ++k ) {
+				const Slice &originalSlice = _billon->slice(k);
+				Slice &sectorSlice = _sectorBillon->slice(k-firstSlice);
+				const int marrowX = _marrow->at(k).x;
+				const int marrowY = _marrow->at(k).y;
+				for ( j=0 ; j<height ; ++j ) {
+					for ( i=0 ; i<width ; ++i ) {
+						if ( originalSlice.at(j,i) > threshold && originalSlice.at(j,i) < 500 && sectorInterval.contains(_pieChart->partOfAngle(TWO_PI-ANGLE(marrowX, marrowY, i, j))) ) {
+							sectorSlice.at(j,i) = originalSlice.at(j,i);
+						}
+					}
 				}
+			}
+		}
+		else {
+			const QwtInterval sectorIntervalInverted = sectorInterval.inverted();
+			for ( k=firstSlice ; k<lastSlice ; ++k ) {
+				const Slice &originalSlice = _billon->slice(k);
+				Slice &sectorSlice = _sectorBillon->slice(k-firstSlice);
+				const int marrowX = _marrow->at(k).x;
+				const int marrowY = _marrow->at(k).y;
+				for ( j=0 ; j<height ; ++j ) {
+					for ( i=0 ; i<width ; ++i ) {
+						if ( originalSlice.at(j,i) > threshold && originalSlice.at(j,i) < 500 && !sectorIntervalInverted.contains(_pieChart->partOfAngle(TWO_PI-ANGLE(marrowX, marrowY, i, j))) ) {
+							sectorSlice.at(j,i) = originalSlice.at(j,i);
+						}
+					}
+				}
+			}
+		}
+
+		if ( _ui->_checkEnableConnexComponents->isChecked() ) {
+			_componentBillon = ConnexComponentExtractor::extractConnexComponent(*_sectorBillon,_ui->_sliderMinimalSizeOfConnexComponents->value(),threshold);
+			const int nbComponents = _componentBillon->maxValue()+1;
+			for ( i=1 ; i<nbComponents ; ++i ) {
+				_ui->_comboConnexComponents->addItem(tr("Composante %1").arg(i));
 			}
 		}
 	}
