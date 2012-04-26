@@ -10,7 +10,7 @@
 
 # Version d'ITK installée : itk3 | itk4
 ITK_VERSION = itk4
-ITK_NUMBER =  4.1
+ITK_NUMBER =  4.0
 
 #------------ NE PAS MODIFIER EN DESSOUS ------------#
 
@@ -45,7 +45,8 @@ SOURCES		=	main.cpp \
 				slicezoomer.cpp \
 				slicesinterval.cpp \
 				v3dexport.cpp \
-				v3dreader.cpp
+				v3dreader.cpp \
+    src/pgm3dexport.cpp
 
 HEADERS		=	billon.h \
 				billon_def.h \
@@ -75,7 +76,8 @@ HEADERS		=	billon.h \
 				sliceview_def.h \
 				slicezoomer.h \
 				v3dexport.h \
-				v3dreader.h
+				v3dreader.h \
+    inc/pgm3dexport.h
 
 FORMS		=	mainwindow.ui
 

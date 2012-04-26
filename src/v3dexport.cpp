@@ -24,7 +24,7 @@ namespace V3DExport {
 		QFile file(fileName);
 
 		if( !file.open(QIODevice::WriteOnly) ) {
-			qDebug() << QObject::tr("ERREUR : Impossible de créer le ficher XML ") << fileName << ".";
+			qDebug() << QObject::tr("ERREUR : Impossible de créer le ficher XML %1.").arg(fileName);
 			return;
 		}
 
