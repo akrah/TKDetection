@@ -10,7 +10,7 @@
 
 # Version d'ITK installée : itk3 | itk4
 ITK_VERSION = itk4
-ITK_NUMBER =  4.0
+ITK_NUMBER =  4.1
 
 #------------ NE PAS MODIFIER EN DESSOUS ------------#
 
@@ -36,6 +36,7 @@ SOURCES		=	main.cpp \
 				marrowextractor_def.cpp \
 				ofsexport.cpp \
 				opticalflow.cpp \
+				pgm3dexport.cpp \
 				piechart.cpp \
 				piechartdiagrams.cpp \
 				piepart.cpp \
@@ -46,7 +47,6 @@ SOURCES		=	main.cpp \
 				slicesinterval.cpp \
 				v3dexport.cpp \
 				v3dreader.cpp \
-    src/pgm3dexport.cpp
 
 HEADERS		=	billon.h \
 				billon_def.h \
@@ -65,6 +65,7 @@ HEADERS		=	billon.h \
 				ofsexport.h \
 				opticalflow.h \
 				opticalflow_def.h \
+				pgm3dexport.h \
 				piepart.h \
 				piechartdiagrams.h \
 				piechart.h \
@@ -77,7 +78,6 @@ HEADERS		=	billon.h \
 				slicezoomer.h \
 				v3dexport.h \
 				v3dreader.h \
-    inc/pgm3dexport.h
 
 FORMS		=	mainwindow.ui
 

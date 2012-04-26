@@ -17,6 +17,7 @@
 #include "inc/histoexport.h"
 #include "inc/opticalflow.h"
 #include "inc/connexcomponentextractor.h"
+#include "inc/pgm3dexport.h"
 
 #include <QFileDialog>
 #include <QMouseEvent>
@@ -111,6 +112,8 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 	QObject::connect(_ui->_sliderMinimalSizeOfConnexComponents, SIGNAL(valueChanged(int)), _ui->_spinMinimalSizeOfConnexComponents, SLOT(setValue(int)));
 	QObject::connect(_ui->_spinMinimalSizeOfConnexComponents, SIGNAL(valueChanged(int)), _ui->_sliderMinimalSizeOfConnexComponents, SLOT(setValue(int)));
 	QObject::connect(_ui->_comboConnexComponents, SIGNAL(activated(int)), this, SLOT(drawSlice()));
+	QObject::connect(_ui->_buttonExportSectorToPgm3D, SIGNAL(clicked()), this, SLOT(exportSectorToPgm3D()));
+	QObject::connect(_ui->_buttonExportConnexComponentToPgm3D, SIGNAL(clicked()), this, SLOT(exportConnexComponentToPgm3D()));
 
 	// Évènements déclenchés par la souris sur le visualiseur de coupes
 	QObject::connect(&_sliceZoomer, SIGNAL(zoomFactorChanged(qreal,QPoint)), this, SLOT(zoomInSliceView(qreal,QPoint)));
@@ -255,7 +258,7 @@ void MainWindow::drawSlice( const int &sliceNumber ) {
 				const int width = _componentBillon->n_cols;
 				const int height = _componentBillon->n_rows;
 
-				const QColor colors[] = { QColor(0,0,255,127), QColor(0,255,255,127), QColor(255,0,255,127), QColor(255,0,0,127), QColor(255,255,0,127), QColor(0,255,0,127) };
+				const QColor colors[] = { QColor(0,0,255,127), QColor(255,0,255,127), QColor(255,0,0,127), QColor(255,255,0,127), QColor(0,255,0,127) };
 				const int nbColors = sizeof(colors)/sizeof(QColor);
 
 				const QwtInterval &sliceInterval = _sliceHistogram->branchesAreas()[_ui->_comboSelectSliceInterval->currentIndex()-1];
@@ -851,6 +854,24 @@ void MainWindow::selectSectorInterval( const int &index ) {
 
 void MainWindow::selectCurrentSectorInterval() {
 	selectSectorInterval(_ui->_comboSelectSectorInterval->currentIndex());
+}
+
+void MainWindow::exportSectorToPgm3D() {
+	if ( _sectorBillon != 0 ) {
+		QString fileName = QFileDialog::getSaveFileName(this, tr("Exporter le secteur en .pgm3d"), "output.pgm3d", tr("Fichiers de données (*.pgm3d);;Tous les fichiers (*.*)"));
+		if ( !fileName.isEmpty() ) {
+			Pgm3dExport::process( *_sectorBillon, fileName );
+		}
+	}
+}
+
+void MainWindow::exportConnexComponentToPgm3D() {
+	if ( _componentBillon != 0 ) {
+		QString fileName = QFileDialog::getSaveFileName(this, tr("Exporter la composante connexe en .pgm3d"), "output.pgm3d", tr("Fichiers de données (*.pgm3d);;Tous les fichiers (*.*)"));
+		if ( !fileName.isEmpty() ) {
+			Pgm3dExport::process( *_componentBillon, fileName );
+		}
+	}
 }
 
 /*******************************

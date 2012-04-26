@@ -227,8 +227,8 @@
                 <rect>
                  <x>0</x>
                  <y>0</y>
-                 <width>477</width>
-                 <height>293</height>
+                 <width>306</width>
+                 <height>173</height>
                 </rect>
                </property>
                <attribute name="label">
@@ -1087,6 +1087,19 @@ autour de la moelle</string>
                </property>
               </widget>
              </item>
+             <item>
+              <widget class="QPushButton" name="_buttonExportSectorToPgm3D">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="text">
+                <string>PGM3D</string>
+               </property>
+              </widget>
+             </item>
             </layout>
            </item>
            <item row="3" column="0">
@@ -1193,7 +1206,7 @@ d'une composante</string>
               </widget>
              </item>
              <item>
-              <widget class="QPushButton" name="_buttonConnexComponentExportPgm3D">
+              <widget class="QPushButton" name="_buttonExportConnexComponentToPgm3D">
                <property name="sizePolicy">
                 <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
                  <horstretch>0</horstretch>
@@ -1201,7 +1214,7 @@ d'une composante</string>
                 </sizepolicy>
                </property>
                <property name="text">
-                <string>Export PGM3D</string>
+                <string>PGM3D</string>
                </property>
               </widget>
              </item>

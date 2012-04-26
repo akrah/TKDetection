@@ -76,6 +76,8 @@ private slots:
 	void selectCurrentSliceInterval();
 	void selectSectorInterval( const int &index );
 	void selectCurrentSectorInterval();
+	void exportSectorToPgm3D();
+	void exportConnexComponentToPgm3D();
 
 private:
 	void openNewBillon(const QString &folderName = "");

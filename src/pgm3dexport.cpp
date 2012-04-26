@@ -22,7 +22,8 @@ namespace Pgm3dExport {
 		const int minValue = billon.minValue();
 
 		QTextStream stream(&file);
-		stream << "P3d" << endl;
+
+		stream << "P3D" << endl;
 		stream << width << " " << height << " " << depth << endl;
 		stream << billon.maxValue()-minValue << endl;
 
@@ -31,7 +32,7 @@ namespace Pgm3dExport {
 			const arma::Slice &slice = billon.slice(k);
 			for ( j=0 ; j<height ; ++j ) {
 				for ( i=0 ; i<width ; ++i ) {
-					stream << slice.at(j,i) << " ";
+					stream << (char)(slice.at(j,i)-minValue);
 				}
 			}
 		}
