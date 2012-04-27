@@ -222,7 +222,7 @@ namespace ConnexComponentExtractor {
 							label = labels.at(i,j);
 						}
 						if (!connexComponentList.contains(label)) connexComponentList[label] = QList<iCoord3D>();
-						connexComponentList[label].append((iCoord3D){j,i,k});
+						connexComponentList[label].append(iCoord3D(i,j,k));
 					}
 				}
 			}
