@@ -132,37 +132,37 @@ namespace ConnexComponentExtractor {
 
 			QMap<int, int> tableEquiv;
 			QList<int> voisinage;
-			uint i, j;
+			uint j, i;
 			int mini, oldStart, sup, inf, label;
 			bool isOld;
 			labels.fill(0);
-			//On parcour une première fois la tranche
-			for ( j=1 ; j<width-1 ; j++) {
-				for ( i=1 ; i<height-1 ; i++) {
+			//On parcourt une première fois la tranche
+			for ( j=1 ; j<height-1 ; j++) {
+				for ( i=1 ; i<width-1 ; i++) {
 					//Si on a un voxel
-					if ( currentSlice.at(i,j) > threshold ) {
+					if ( currentSlice.at(j,i) > threshold ) {
 						//On sauvegarde la valeur des voisins non nuls
 						voisinage.clear();
 						//Voisinage de la face courante
-						if (labels.at(i-1,j)) voisinage.append(labels.at(i-1,j));
-						if (labels.at(i-1,j-1))voisinage.append(labels.at(i-1,j-1));
-						if (labels.at(i,j-1)) voisinage.append(labels.at(i,j-1));
-						if (labels.at(i+1,j-1)) voisinage.append(labels.at(i+1,j-1));
+						if (labels.at(j,i-1)) voisinage.append(labels.at(j,i-1));
+						if (labels.at(j-1,i-1))voisinage.append(labels.at(j-1,i-1));
+						if (labels.at(j-1,i)) voisinage.append(labels.at(j-1,i));
+						if (labels.at(j-1,i+1)) voisinage.append(labels.at(j-1,i+1));
 						oldStart = voisinage.size();
 						//Voisinage de la face arrière
-						if (oldSlice.at(i-1,j-1)) voisinage.append(oldSlice.at(i-1,j-1));
-						if (oldSlice.at(i-1,j)) voisinage.append(oldSlice.at(i-1,j));
-						if (oldSlice.at(i-1,j+1)) voisinage.append(oldSlice.at(i-1,j+1));
-						if (oldSlice.at(i,j-1)) voisinage.append(oldSlice.at(i,j-1));
-						if (oldSlice.at(i,j)) voisinage.append(oldSlice.at(i,j));
-						if (oldSlice.at(i,j+1)) voisinage.append(oldSlice.at(i,j+1));
-						if (oldSlice.at(i+1,j-1)) voisinage.append(oldSlice.at(i+1,j-1));
-						if (oldSlice.at(i+1,j)) voisinage.append(oldSlice.at(i+1,j));
-						if (oldSlice.at(i+1,j+1)) voisinage.append(oldSlice.at(i+1,j+1));
+						if (oldSlice.at(j-1,i-1)) voisinage.append(oldSlice.at(j-1,i-1));
+						if (oldSlice.at(j-1,i)) voisinage.append(oldSlice.at(j-1,i));
+						if (oldSlice.at(j-1,i+1)) voisinage.append(oldSlice.at(j-1,i+1));
+						if (oldSlice.at(j,i-1)) voisinage.append(oldSlice.at(j,i-1));
+						if (oldSlice.at(j,i)) voisinage.append(oldSlice.at(j,i));
+						if (oldSlice.at(j,i+1)) voisinage.append(oldSlice.at(j,i+1));
+						if (oldSlice.at(j+1,i-1)) voisinage.append(oldSlice.at(j+1,i-1));
+						if (oldSlice.at(j+1,i)) voisinage.append(oldSlice.at(j+1,i));
+						if (oldSlice.at(j+1,i+1)) voisinage.append(oldSlice.at(j+1,i+1));
 						//Si ses voisins n'ont pas d'étiquette
 						if ( voisinage.isEmpty() ) {
 							nbLabel++;
-							labels.at(i,j) = nbLabel;
+							labels.at(j,i) = nbLabel;
 						}
 						//Si ses voisins ont une étiquette
 						else {
@@ -172,11 +172,11 @@ namespace ConnexComponentExtractor {
 								mini = qMin(mini,iterVoisin.next());
 							}
 							//Attribution de la valeur minimale au voxel courant
-							labels.at(i,j) = mini;
+							labels.at(j,i) = mini;
 							isOld = connexComponentList.contains(mini);
 							//Mise à jour de la table d'équivalence pour la face courante
 							//et fusion des liste de sommets si un voxel fusionne des composantes connexes antérieures
-							for (int ind=0 ; ind<oldStart ; ind++ ) {
+							for ( int ind=0 ; ind<oldStart ; ind++ ) {
 								if ( voisinage[ind] > mini ) {
 									tableEquiv[voisinage[ind]] = mini;
 									if (isOld && connexComponentList.contains(voisinage[ind])) {
@@ -185,10 +185,10 @@ namespace ConnexComponentExtractor {
 									}
 								}
 							}
-							if (isOld) {
-								for (int ind=oldStart ; ind<voisinage.size() ; ind++) {
-									if (voisinage[ind] != mini) {
-										if (mini>voisinage[ind]) {
+							if ( isOld ) {
+								for ( int ind=oldStart ; ind<voisinage.size() ; ind++ ) {
+									if ( voisinage[ind] != mini ) {
+										if ( mini>voisinage[ind] ) {
 											sup = mini;
 											inf = voisinage[ind];
 										} else {
@@ -212,14 +212,14 @@ namespace ConnexComponentExtractor {
 					tableEquiv[iter.key()] = tableEquiv[iter.value()];
 				}
 			}
-			for ( i=0 ; i<width ; i++ ) {
-				for ( j=0 ; j<height ; j++ ) {
-					label = labels.at(i,j);
+			for ( j=0 ; j<height ; j++ ) {
+				for ( i=0 ; i<width ; i++ ) {
+					label = labels.at(j,i);
 					//Si on a un voxel
 					if (label) {
 						if (tableEquiv.contains(label)) {
-							labels.at(i,j) = tableEquiv[label];
-							label = labels.at(i,j);
+							labels.at(j,i) = tableEquiv[label];
+							label = labels.at(j,i);
 						}
 						if (!connexComponentList.contains(label)) connexComponentList[label] = QList<iCoord3D>();
 						connexComponentList[label].append(iCoord3D(i,j,k));

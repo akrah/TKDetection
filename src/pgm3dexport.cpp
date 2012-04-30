@@ -27,12 +27,13 @@ namespace Pgm3dExport {
 		stream << width << " " << height << " " << depth << endl;
 		stream << billon.maxValue()-minValue << endl;
 
+		QDataStream dstream(&file);
 		uint i, j, k;
 		for ( k=0 ; k<depth ; ++k ) {
 			const arma::Slice &slice = billon.slice(k);
 			for ( j=0 ; j<height ; ++j ) {
 				for ( i=0 ; i<width ; ++i ) {
-					stream << (char)(slice.at(j,i)-minValue);
+					dstream << (qint16)(slice.at(j,i)-minValue);
 				}
 			}
 		}

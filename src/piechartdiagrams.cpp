@@ -345,9 +345,9 @@ void PieChartDiagrams::computeMaximums( const QVector<qreal> &sectorsSum ) {
 		qreal limit;
 //		TODO : Ce seuil ne doit pas être identique à celui de l'histogramme de coupes car on perd trop de branches.
 //				Il y a donc un seuil à 100 en attendant.
-//		if ( _intervalType == HistogramIntervalType::FROM_EDGE ) limit = 0;
-//		else limit = _intervalType==HistogramIntervalType::FROM_MEANS?_dataMeans:_intervalType==HistogramIntervalType::FROM_MEDIAN?_dataMedian:_dataMeansMedian;
-		limit = 100;
+//		limit = 100;
+		if ( _intervalType == HistogramIntervalType::FROM_EDGE ) limit = 0;
+		else limit = _intervalType==HistogramIntervalType::FROM_MEANS?_dataMeans:_intervalType==HistogramIntervalType::FROM_MEDIAN?_dataMedian:_dataMeansMedian;
 		qDebug() << "Pics angulaires :";
 		for ( i=0 ; i<nbSectors ; ++i ) {
 			value = sectorsSum[i];
