@@ -7,7 +7,7 @@
 #include <qwt_plot_curve.h>
 
 SliceHistogram::SliceHistogram() : _histogram(new QwtPlotHistogram()), _histogramMaximums(new QwtPlotHistogram()), _histogramBranchesArea(new QwtPlotHistogram()),
-	_curveMeans(new QwtPlotCurve()), _dataMeans(0.), _curveMedian(new QwtPlotCurve()), _dataMedian(0.), _curveMeansMedian(new QwtPlotCurve()), _dataMeansMedian(0.), _marrowAroundDiameter(100), _intervalType(HistogramIntervalType::FROM_MIDDLE_OF_MEANS_AND_MEDIAN),
+	_curveMax(new QwtPlotCurve()), _curveMeans(new QwtPlotCurve()), _dataMeans(0.), _curveMedian(new QwtPlotCurve()), _dataMedian(0.), _curveMeansMedian(new QwtPlotCurve()), _dataMeansMedian(0.), _marrowAroundDiameter(100), _intervalType(HistogramIntervalType::FROM_MIDDLE_OF_MEANS_AND_MEDIAN),
 	_minimumIntervalWidth(10), _movementThresholdMin(200), _movementThresholdMax(500), _smoothing(true), _useNextSlice(true), _maximumsNeighborhood(10)
 {
 	_histogramMaximums->setBrush(Qt::green);
@@ -16,6 +16,7 @@ SliceHistogram::SliceHistogram() : _histogram(new QwtPlotHistogram()), _histogra
 	_histogramBranchesArea->setBrush(Qt::blue);
 	_histogramBranchesArea->setPen(QPen(Qt::blue));
 
+	_curveMax->setPen(QPen(Qt::red));
 	_curveMeans->setPen(QPen(Qt::red));
 	_curveMedian->setPen(QPen(Qt::red));
 	_curveMeansMedian->setPen(QPen(Qt::red));
@@ -25,8 +26,10 @@ SliceHistogram::~SliceHistogram() {
 	if ( _histogram != 0 ) delete _histogram;
 	if ( _histogramMaximums != 0 ) delete _histogramMaximums;
 	if ( _histogramBranchesArea != 0 ) delete _histogramBranchesArea;
+	if ( _curveMax != 0 ) delete _curveMax;
 	if ( _curveMeans != 0 ) delete _curveMeans;
 	if ( _curveMedian != 0 ) delete _curveMedian;
+	if ( _curveMeansMedian != 0 ) delete _curveMeansMedian;
 }
 
 /*******************************
@@ -119,7 +122,10 @@ void SliceHistogram::attach( QwtPlot * const plot ) {
 		if ( _histogramMaximums != 0 ) {
 			_histogramMaximums->attach(plot);
 		}
-		if ( _intervalType == HistogramIntervalType::FROM_MEANS && _curveMeans != 0 ) {
+		if ( _intervalType == HistogramIntervalType::FROM_MAX && _curveMax != 0 ) {
+			_curveMax->attach(plot);
+		}
+		else if ( _intervalType == HistogramIntervalType::FROM_MEANS && _curveMeans != 0 ) {
 			_curveMeans->attach(plot);
 		}
 		else if ( _intervalType == HistogramIntervalType::FROM_MEDIAN && _curveMedian != 0 ) {
@@ -141,6 +147,9 @@ void SliceHistogram::detach() {
 	if ( _histogramMaximums != 0 ) {
 		_histogramMaximums->detach();
 	}
+	if ( _curveMax != 0 ) {
+		_curveMax->detach();
+	}
 	if ( _curveMeans != 0 ) {
 		_curveMeans->detach();
 	}
@@ -160,6 +169,8 @@ void SliceHistogram::clear() {
 	_datasBranchesAreaToDrawing.clear();
 	_datasBranchesRealAreas.clear();
 	_histogramBranchesArea->setSamples(_datasBranchesAreaToDrawing);
+	_dataMax = 0.;
+	_curveMax->setSamples(QVector<QPointF>());
 	_dataMeans = 0.;
 	_curveMeans->setSamples(QVector<QPointF>());
 	_dataMedian = 0.;
@@ -306,7 +317,7 @@ void SliceHistogram::computeIntervals() {
 		qreal derivated;
 		QVector<QwtIntervalSample> setOfIntervals;
 		if ( _intervalType != HistogramIntervalType::FROM_EDGE ) {
-			qreal limit = _intervalType==HistogramIntervalType::FROM_MEANS?_dataMeans:_intervalType==HistogramIntervalType::FROM_MEDIAN?_dataMedian:_dataMeansMedian;
+			qreal limit = _intervalType==HistogramIntervalType::FROM_MEANS?_dataMeans:_intervalType==HistogramIntervalType::FROM_MEDIAN?_dataMedian:_intervalType==HistogramIntervalType::FROM_MAX?_dataMax:_dataMeansMedian;
 			for ( int i=0 ; i<nbMaximums ; ++i ) {
 				cursorMin = sliceOfIemeMaximum(i);
 				if (_datasBranchesRealAreas.size() == 0 || _datasBranchesRealAreas.last().maxValue() < cursorMin ) {
@@ -392,6 +403,8 @@ void SliceHistogram::computeIntervals() {
 
 void SliceHistogram::computeMeansAndMedian() {
 	const int nbDatas = _datasHistogram.size();
+	qreal xMax[2] = { 0., nbDatas };
+	qreal yMax[2] = { 0., 0. };
 	qreal xMeans[2] = { 0., nbDatas };
 	qreal yMeans[2] = { 0., 0. };
 	qreal xMedian[2] = { 0., nbDatas };
@@ -399,6 +412,7 @@ void SliceHistogram::computeMeansAndMedian() {
 	qreal xMeansMedian[2] = { 0., nbDatas };
 	qreal yMeansMedian[2] = { 0., 0. };
 	qreal currentValue;
+	_dataMax = 0.;
 	_dataMeans = 0.;
 	_dataMedian = 0.;
 	_dataMeansMedian = 0.;
@@ -406,19 +420,23 @@ void SliceHistogram::computeMeansAndMedian() {
 		QVector<qreal> listToSort(nbDatas);
 		for ( int i=0 ; i<nbDatas ; ++i ) {
 			currentValue = _datasHistogram.at(i).value;
+			_dataMax = qMax(_dataMax,currentValue);
 			_dataMeans += currentValue;
 			listToSort[i] = currentValue;
 		}
+		_dataMax *= 0.02;
 		_dataMeans /= static_cast<qreal>(nbDatas);
 		qSort(listToSort);
 		if ( nbDatas % 2 == 0 ) _dataMedian = (listToSort.at((nbDatas/2)-1)+listToSort.at(nbDatas/2))/2.;
 		else _dataMedian = listToSort.at((nbDatas+1)/2-1);
 		_dataMeansMedian = (_dataMeans+_dataMedian)/2.;
 
+		yMax[0] = yMax[1] = _dataMax;
 		yMeans[0] = yMeans[1] = _dataMeans;
 		yMedian[0] = yMedian[1] = _dataMedian;
 		yMeansMedian[0] = yMeansMedian[1] = _dataMeansMedian;
 	}
+	_curveMax->setSamples(xMax,yMax,2);
 	_curveMeans->setSamples(xMeans,yMeans,2);
 	_curveMedian->setSamples(xMedian,yMedian,2);
 	_curveMeansMedian->setSamples(xMeansMedian,yMeansMedian,2);

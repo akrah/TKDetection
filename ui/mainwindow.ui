@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>969</width>
-    <height>1154</height>
+    <height>1176</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -105,7 +105,7 @@
            <x>0</x>
            <y>0</y>
            <width>403</width>
-           <height>900</height>
+           <height>922</height>
           </rect>
          </property>
          <layout class="QHBoxLayout" name="horizontalLayout_8">
@@ -172,7 +172,7 @@
    <property name="minimumSize">
     <size>
      <width>545</width>
-     <height>948</height>
+     <height>970</height>
     </size>
    </property>
    <property name="floating">
@@ -192,7 +192,7 @@
      <item>
       <widget class="QTabWidget" name="_tabs">
        <property name="currentIndex">
-        <number>2</number>
+        <number>1</number>
        </property>
        <widget class="QWidget" name="_tabGeneral">
         <attribute name="title">
@@ -227,8 +227,8 @@
                 <rect>
                  <x>0</x>
                  <y>0</y>
-                 <width>306</width>
-                 <height>173</height>
+                 <width>477</width>
+                 <height>328</height>
                 </rect>
                </property>
                <attribute name="label">
@@ -784,7 +784,7 @@ autour de la moelle</string>
          <item row="4" column="1">
           <widget class="QComboBox" name="_comboHistogramInterval">
            <property name="currentIndex">
-            <number>3</number>
+            <number>0</number>
            </property>
            <item>
             <property name="text">
@@ -804,6 +804,11 @@ autour de la moelle</string>
            <item>
             <property name="text">
              <string>En dessous du mileu moy/méd</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>En dessous de 2% du maximum</string>
             </property>
            </item>
           </widget>
@@ -993,6 +998,17 @@ autour de la moelle</string>
             </layout>
            </widget>
           </widget>
+         </item>
+         <item>
+          <layout class="QHBoxLayout" name="horizontalLayout_20">
+           <item>
+            <widget class="QPushButton" name="_buttonExportSectorsDiagramAndHistogram">
+             <property name="text">
+              <string>Exporter le diagramme et l'histogramme</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
          </item>
          <item>
           <layout class="QGridLayout" name="gridLayout_2">
@@ -1539,6 +1555,13 @@ d'une composante</string>
         <widget class="QPushButton" name="_buttonUpdateSliceHistogram">
          <property name="text">
           <string>Mettre à jour l'histogramme</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="_buttonExportSliceHistogram">
+         <property name="text">
+          <string>Exporter l'histogramme</string>
          </property>
         </widget>
        </item>

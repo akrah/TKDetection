@@ -78,6 +78,8 @@ private slots:
 	void selectCurrentSectorInterval();
 	void exportSectorToPgm3D();
 	void exportConnexComponentToPgm3D();
+	void exportSliceHistogram();
+	void exportSectorDiagramAndHistogram();
 
 private:
 	void openNewBillon(const QString &folderName = "");
