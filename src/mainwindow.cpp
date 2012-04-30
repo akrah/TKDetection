@@ -24,6 +24,8 @@
 #include <QPainter>
 #include <QScrollBar>
 #include <QMessageBox>
+#include <qwt_plot_renderer.h>
+#include <qwt_polar_renderer.h>
 
 MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::MainWindow), _billon(0), _unusedBillon(0), _sectorBillon(0), _componentBillon(0), _marrow(0), _sliceView(new SliceView()), _sliceHistogram(new SliceHistogram()), _pieChart(new PieChart(0,1)), _pieChartDiagrams(new PieChartDiagrams()), _currentSlice(0), _currentMaximum(0), _isUsedOriginalBillon(true) {
 	_ui->setupUi(this);
@@ -98,6 +100,7 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 	QObject::connect(_ui->_spinMaximumsNeighborhood, SIGNAL(valueChanged(int)), this, SLOT(setHistogramMaximumsNeighborhood(int)));
 	QObject::connect(_ui->_sliderHistogramIntervalMinimumWidth, SIGNAL(valueChanged(int)), this, SLOT(setHistogramIntervalMinimumWidth(int)));
 	QObject::connect(_ui->_spinHistogramIntervalMinimumWidth, SIGNAL(valueChanged(int)), this, SLOT(setHistogramIntervalMinimumWidth(int)));
+	QObject::connect(_ui->_buttonExportSliceHistogram, SIGNAL(clicked()), this, SLOT(exportSliceHistogram()));
 
 	// Évènements déclenchés par les bouton associès à la moelle
 	QObject::connect(_ui->_buttonComputeMarrow, SIGNAL(clicked()), this, SLOT(updateMarrow()));
@@ -130,6 +133,7 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 	QObject::connect(_ui->_buttonExportToV3D, SIGNAL(clicked()), this, SLOT(exportToV3D()));
 	QObject::connect(_ui->_buttonExportFlowToV3D, SIGNAL(clicked()), this, SLOT(exportFlowToV3D()));
 	QObject::connect(_ui->_buttonExportMovementsToV3D, SIGNAL(clicked()), this, SLOT(exportMovementsToV3D()));
+	QObject::connect(_ui->_buttonExportSectorsDiagramAndHistogram, SIGNAL(clicked()), this, SLOT(exportSectorDiagramAndHistogram()));
 
 	// Raccourcis des actions du menu
 	_ui->_actionOpenDicom->setShortcut(Qt::CTRL + Qt::Key_O);
@@ -871,6 +875,28 @@ void MainWindow::exportConnexComponentToPgm3D() {
 		if ( !fileName.isEmpty() ) {
 			Pgm3dExport::process( *_componentBillon, fileName );
 		}
+	}
+}
+
+void MainWindow::exportSliceHistogram() {
+	QString fileName = QFileDialog::getSaveFileName(this, tr("Exporter l'histogramme de coupes"), "output.pdf", tr("Fichiers PDF (*.pdf);;Fichiers PS (*.ps);;Fichiers PNG (*.png);;Fichiers SVG (*.svg);;Tous les fichiers (*.*)"));
+	if ( !fileName.isEmpty() ) {
+		QwtPlotRenderer histoRenderer;
+		histoRenderer.renderDocument(_ui->_plotSliceHistogram,fileName,QSize(297,210),100);
+	}
+}
+
+void MainWindow::exportSectorDiagramAndHistogram() {
+	QString fileName = QFileDialog::getSaveFileName(this, tr("Exporter le diagramme et l'histogramme."), "output.pdf", tr("Fichiers PDF (*.pdf);;Fichiers PS (*.ps);;Fichiers PNG (*.png);;Fichiers SVG (*.svg);;Tous les fichiers (*.*)"));
+	if ( !fileName.isEmpty() ) {
+
+		QString chemin = fileName.section(QDir::separator(),0,-2)+QDir::separator();
+		QString name = fileName.section(QDir::separator(),-1);
+
+		QwtPlotRenderer histoRenderer;
+		histoRenderer.renderDocument(_ui->_plotAngularHistogram, chemin+"histo_"+name, QSize(297,210), 100);
+		QwtPolarRenderer diagramRenderer;
+		diagramRenderer.renderDocument(_ui->_polarSectorSum, chemin+"diag_"+name, QSize(297,210), 100);
 	}
 }
 
