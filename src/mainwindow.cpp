@@ -26,6 +26,8 @@
 #include <QMessageBox>
 #include <qwt_plot_renderer.h>
 #include <qwt_polar_renderer.h>
+#include <qwt_polar_grid.h>
+#include <qwt_round_scale_draw.h>
 
 MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::MainWindow), _billon(0), _unusedBillon(0), _sectorBillon(0), _componentBillon(0), _marrow(0), _sliceView(new SliceView()), _sliceHistogram(new SliceHistogram()), _pieChart(new PieChart(0,1)), _pieChartDiagrams(new PieChartDiagrams()), _currentSlice(0), _currentMaximum(0), _isUsedOriginalBillon(true) {
 	_ui->setupUi(this);
@@ -54,10 +56,17 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 	_ui->_spinFlowEpsilon->setValue(_sliceView->flowEpsilon());
 	_ui->_spinFlowMaximumIterations->setValue(_sliceView->flowMaximumIterations());
 
+	_ui->_plotAngularHistogram->enableAxis(QwtPlot::yLeft,false);
+
 	_ui->_polarSectorSum->setScale( QwtPolar::Azimuth, 0.0, TWO_PI );
 	_pieChartDiagrams->attach(_ui->_polarSectorSum);
 	_pieChartDiagrams->attach(_ui->_plotAngularHistogram);
 
+	QwtPolarGrid *grid = new QwtPolarGrid();
+	grid->showAxis(QwtPolar::AxisRight,false);
+	grid->showAxis(QwtPolar::AxisBottom,false);
+	grid->setMajorGridPen(QPen(Qt::lightGray));
+	grid->attach(_ui->_polarSectorSum);
 
 	/**** Mise en place de la communication MVC ****/
 
@@ -878,26 +887,116 @@ void MainWindow::exportConnexComponentToPgm3D() {
 	}
 }
 
+#include <QInputDialog>
+#include <qwt_legend.h>
+
+
 void MainWindow::exportSliceHistogram() {
-	QString fileName = QFileDialog::getSaveFileName(this, tr("Exporter l'histogramme de coupes"), "output.pdf", tr("Fichiers PDF (*.pdf);;Fichiers PS (*.ps);;Fichiers PNG (*.png);;Fichiers SVG (*.svg);;Tous les fichiers (*.*)"));
-	if ( !fileName.isEmpty() ) {
-		QwtPlotRenderer histoRenderer;
-		histoRenderer.renderDocument(_ui->_plotSliceHistogram,fileName,QSize(297,210),100);
+	QwtPlotRenderer histoRenderer;
+	QLabel label;
+	QString fileName;
+	QMessageBox::StandardButton button;
+	int sizeFact;
+	bool sizeOk;
+	sizeOk = false;
+
+	_ui->_plotSliceHistogram->setAxisTitle(QwtPlot::xBottom,tr("Indice de la coupe"));
+	_ui->_plotSliceHistogram->enableAxis(QwtPlot::yLeft);
+	_ui->_plotSliceHistogram->setAxisTitle(QwtPlot::yLeft,tr("Cumul du z-mouvement"));
+
+	while (!sizeOk) {
+		sizeFact = QInputDialog::getInt(this,tr("Taille de l'image"), tr("Pourcentage"), 100, 10, 100, 1, &sizeOk);
+		if ( sizeOk ) {
+			QPixmap image( 1240*sizeFact/100 , 874*sizeFact/100 );
+			image.fill();
+			histoRenderer.renderTo(_ui->_plotSliceHistogram,image);
+			image = image.scaledToHeight(600,Qt::SmoothTransformation);
+			label.setPixmap(image);
+			label.show();
+			button = QMessageBox::question(&label,tr("Taille correcte"),tr("La taille de l'image est-elle correcte ?"),QMessageBox::Abort|QMessageBox::Yes|QMessageBox::No,QMessageBox::Yes);
+			switch (button) {
+				case QMessageBox::Yes:
+					fileName = QFileDialog::getSaveFileName(&label, tr("Exporter l'histogramme de coupes"), "output.pdf", tr("Fichiers PDF (*.pdf);;Fichiers PS (*.ps);;Fichiers PNG (*.png);;Fichiers SVG (*.svg);;Tous les fichiers (*.*)"));
+					if ( !fileName.isEmpty() ) {
+						histoRenderer.renderDocument(_ui->_plotSliceHistogram,fileName,QSize(297*sizeFact/100,210*sizeFact/100),100);
+					}
+					sizeOk = true;
+					break;
+				case QMessageBox::Abort:
+					sizeOk = true;
+					break;
+				default :
+					sizeOk = false;
+					break;
+			}
+		}
+		else {
+			sizeOk = true;
+		}
 	}
+
+	_ui->_plotSliceHistogram->setAxisTitle(QwtPlot::xBottom,"");
+	_ui->_plotSliceHistogram->setAxisTitle(QwtPlot::yLeft,"");
+	_ui->_plotSliceHistogram->enableAxis(QwtPlot::yLeft,false);
 }
 
 void MainWindow::exportSectorDiagramAndHistogram() {
-	QString fileName = QFileDialog::getSaveFileName(this, tr("Exporter le diagramme et l'histogramme."), "output.pdf", tr("Fichiers PDF (*.pdf);;Fichiers PS (*.ps);;Fichiers PNG (*.png);;Fichiers SVG (*.svg);;Tous les fichiers (*.*)"));
-	if ( !fileName.isEmpty() ) {
+	QString fileName;
+	QwtPlotRenderer histoRenderer;
+	QwtPolarRenderer diagramRenderer;
+	QLabel label1, label2;
+	QMessageBox::StandardButton button;
+	int sizeFact;
+	bool sizeOk, abort;
+	sizeOk = abort = false;
 
-		QString chemin = fileName.section(QDir::separator(),0,-2)+QDir::separator();
-		QString name = fileName.section(QDir::separator(),-1);
+	_ui->_plotAngularHistogram->setAxisTitle(QwtPlot::xBottom,tr("Secteur angulaire en radians"));
+	_ui->_plotAngularHistogram->enableAxis(QwtPlot::yLeft);
+	_ui->_plotAngularHistogram->setAxisTitle(QwtPlot::yLeft,tr("Cumul du z-mouvement"));
 
-		QwtPlotRenderer histoRenderer;
-		histoRenderer.renderDocument(_ui->_plotAngularHistogram, chemin+"histo_"+name, QSize(297,210), 100);
-		QwtPolarRenderer diagramRenderer;
-		diagramRenderer.renderDocument(_ui->_polarSectorSum, chemin+"diag_"+name, QSize(297,210), 100);
+	while (!sizeOk && !abort) {
+		sizeFact = QInputDialog::getInt(this,tr("Taille de l'image"), tr("Pourcentage"), 100, 10, 100, 1, &sizeOk);
+		if ( sizeOk ) {
+			QPixmap image1( 1240*sizeFact/100 , 874*sizeFact/100 );
+			QPixmap image2( 1240*sizeFact/100 , 874*sizeFact/100 );
+			image1.fill();
+			image2.fill();
+			histoRenderer.renderTo(_ui->_plotAngularHistogram,image1);
+			diagramRenderer.renderTo(_ui->_polarSectorSum,image2);
+			image1 = image1.scaledToHeight(600,Qt::SmoothTransformation);
+			image2 = image2.scaledToHeight(600,Qt::SmoothTransformation);
+			label1.setPixmap(image1);
+			label2.setPixmap(image2);
+			label1.show();
+			label2.show();
+			button = QMessageBox::question(&label1,tr("Taille correcte"),tr("La taille de l'image est-elle correcte ?"),QMessageBox::Abort|QMessageBox::Yes|QMessageBox::No,QMessageBox::Yes);
+			switch (button) {
+				case QMessageBox::Yes:
+					fileName = QFileDialog::getSaveFileName(&label1, tr("Exporter le diagramme et l'histogramme."), "output.pdf", tr("Fichiers PDF (*.pdf);;Fichiers PS (*.ps);;Fichiers PNG (*.png);;Fichiers SVG (*.svg);;Tous les fichiers (*.*)"));
+					if ( !fileName.isEmpty() ) {
+						QString chemin = fileName.section(QDir::separator(),0,-2)+QDir::separator();
+						QString name = fileName.section(QDir::separator(),-1);
+						histoRenderer.renderDocument(_ui->_plotAngularHistogram, chemin+"histo_"+name, QSize(297*sizeFact/100,210*sizeFact/100), 100);
+						diagramRenderer.renderDocument(_ui->_polarSectorSum, chemin+"diag_"+name, QSize(297*sizeFact/100,210*sizeFact/100), 100);
+					}
+					sizeOk = true;
+					break;
+				case QMessageBox::Abort:
+					abort = true;
+					break;
+				default :
+					sizeOk = false;
+					break;
+			}
+		}
+		else {
+			sizeOk = true;
+		}
 	}
+
+	_ui->_plotAngularHistogram->setAxisTitle(QwtPlot::xBottom,"");
+	_ui->_plotAngularHistogram->setAxisTitle(QwtPlot::yLeft,"");
+	_ui->_plotAngularHistogram->enableAxis(QwtPlot::yLeft,false);
 }
 
 /*******************************
