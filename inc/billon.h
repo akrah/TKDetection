@@ -99,7 +99,6 @@ template< typename T >
      restrictedBillon->setMinValue(threshold);
      const int nbSlices = restrictedBillon->n_slices;
      const int thresholdRestrict = threshold-1;
-
      for ( int indexSlice = 0 ; indexSlice<nbSlices ; ++indexSlice ) {
              arma::Mat<T> &currentSlice = restrictedBillon->slice(indexSlice);
 
@@ -159,6 +158,7 @@ template< typename T >
              }
              currentSlice( arma::span(yTop,yBottom), arma::span(xLeft,xRight) ) = boudingSlice;
      }
+     delete restrictedBillon;
 
    return vectAllVertex;
 
@@ -232,7 +232,6 @@ BillonTpl<T> * BillonTpl<T>::restrictToArea( const int &nbPolygonPoints, const i
 		}
 		currentSlice( arma::span(yTop,yBottom), arma::span(xLeft,xRight) ) = boudingSlice;
 	}
-
 	return restrictedBillon;
 }
 

@@ -19,7 +19,7 @@ namespace OfsExport {
 		void computeAllEdges( const Billon &billon, const Marrow &marrow, const SlicesInterval &interval, const int &nbEdges, const int &radius, QTextStream &stream );
 
                 //Rajout BK: Affiche les coordonnées des sommets pour l'export OFS (utile iuniquement pour le maillage de la zone réduite)
-                void displayExportedVertex( const Billon &billon, QVector<rCoord2D> vectVertex,const int &nbSlices, QTextStream &stream );
+                void displayExportedVertex( const Billon &billon, QVector<rCoord2D> vectVertex,const int &nbSlices, const int &resolutionCercle, QTextStream &stream );
 
                 // Calcul les faces du maillages de la moelle
 		void computeEgesLinks( const int &nbEdges, const int &nbSlices, QTextStream &stream );
@@ -43,12 +43,13 @@ namespace OfsExport {
 	}
 
         void processRestrictedMesh( Billon &billon, const Marrow &marrow, const QString &fileName, const int &resolutionCercle, const int &seuilContour ) {
-              QVector<rCoord2D> vectVertex = billon.getRestrictedAreaVertex(resolutionCercle,seuilContour, &marrow);
+              QVector<rCoord2D> vectVertex = billon.getRestrictedAreaVertex( resolutionCercle,seuilContour, &marrow);
+
               QFile file(fileName);
               if ( file.open(QIODevice::WriteOnly) ) {
                     QTextStream stream(&file);
                     stream << "OFS MHD" << endl;
-                    displayExportedVertex(billon, vectVertex, billon.n_slices, stream);
+                    displayExportedVertex(billon, vectVertex, billon.n_slices, resolutionCercle, stream);
                     computeEgesLinks( resolutionCercle, billon.n_slices, stream );
 
 
@@ -98,7 +99,7 @@ namespace OfsExport {
 		}
 
 
-               void displayExportedVertex( const Billon &billon, QVector<rCoord2D> vectVertex, const int &nbSlices, QTextStream &stream ){
+               void displayExportedVertex( const Billon &billon, QVector<rCoord2D> vectVertex, const int &nbSlices,const int &resolutionCercle, QTextStream &stream ){
                    const int width = billon.n_cols;
                    const int height = billon.n_rows;
                    qreal depth = -0.5;
@@ -107,8 +108,16 @@ namespace OfsExport {
                    stream <<vectVertex.size()<< endl;
                    rCoord2D *offsetsIterator = 0;
                    for (int k=0; k<vectVertex.size(); ++k ) {
-                       stream << (vectVertex.at(k).x /(qreal)width)<< ' ' << (vectVertex.at(k).y/(qreal)height)<< ' ' << depth << endl;
-                       depth += depthShift;
+                       if(k==0)
+                           stream << 0 << ' ' << 0 << ' ' << -0.5 << endl;
+                       else if(k== resolutionCercle*(nbSlices-1))
+                           stream << 0 << ' ' << 0 << ' ' << depth << endl;
+                       else {
+                           stream << ((vectVertex.at(k).x /(qreal)width) -0.5)<< ' ' << ((vectVertex.at(k).y/(qreal)height) -0.5)<< ' ' << depth << endl;
+                        }
+                           if(k%resolutionCercle==0){
+                             depth += depthShift;
+                       }
                    }
                }
 
@@ -144,8 +153,8 @@ namespace OfsExport {
 				}
 			}
 			// La face de derrière
-			const int lasBase = nbPoints;
-			for ( int i=lasBase+1 ; i<nbSlices*nbEdges-1 ; ++i ) {
+                        const int lasBase = nbPoints;
+                        for ( int i=lasBase+1 ; i<nbSlices*nbEdges-1 ; ++i ) {
 				stream << lasBase << ' ' << i+1 << ' ' << i << endl;
 			}
 		}
