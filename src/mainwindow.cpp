@@ -39,6 +39,7 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 	_ui->_labelSliceView->installEventFilter(&_sliceZoomer);
 
 	_ui->_plotSliceHistogram->enableAxis(QwtPlot::yLeft,false);
+	_ui->_plotAngularHistogram->enableAxis(QwtPlot::yLeft,false);
 
 	_histogramCursor.attach(_ui->_plotSliceHistogram);
 	_histogramCursor.setBrush(Qt::red);

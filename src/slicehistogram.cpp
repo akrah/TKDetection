@@ -411,20 +411,22 @@ void SliceHistogram::computeMeansAndMedian() {
 	qreal yMedian[2] = { 0., 0. };
 	qreal xMeansMedian[2] = { 0., nbDatas };
 	qreal yMeansMedian[2] = { 0., 0. };
-	qreal currentValue;
+	qreal currentValue, minValue;
 	_dataMax = 0.;
 	_dataMeans = 0.;
 	_dataMedian = 0.;
 	_dataMeansMedian = 0.;
 	if ( nbDatas > 0 ) {
+		minValue = _datasHistogram.at(0).value;
 		QVector<qreal> listToSort(nbDatas);
 		for ( int i=0 ; i<nbDatas ; ++i ) {
 			currentValue = _datasHistogram.at(i).value;
 			_dataMax = qMax(_dataMax,currentValue);
+			minValue = qMin(minValue,currentValue);
 			_dataMeans += currentValue;
 			listToSort[i] = currentValue;
 		}
-		_dataMax *= 0.02;
+		_dataMax = 0.02 * (_dataMax-minValue) + minValue;
 		_dataMeans /= static_cast<qreal>(nbDatas);
 		qSort(listToSort);
 		if ( nbDatas % 2 == 0 ) _dataMedian = (listToSort.at((nbDatas/2)-1)+listToSort.at(nbDatas/2))/2.;
