@@ -19,7 +19,7 @@ namespace OfsExport {
 		void computeAllEdges( const Billon &billon, const Marrow &marrow, const SlicesInterval &interval, const int &nbEdges, const int &radius, QTextStream &stream );
 
                 //Rajout BK: Affiche les coordonnées des sommets pour l'export OFS (utile iuniquement pour le maillage de la zone réduite)
-                void displayExportedVertex( QVector<rCoord2D> vectVertex,const int &nbSlices, QTextStream &stream );
+                void displayExportedVertex( const Billon &billon, QVector<rCoord2D> vectVertex,const int &nbSlices, QTextStream &stream );
 
                 // Calcul les faces du maillages de la moelle
 		void computeEgesLinks( const int &nbEdges, const int &nbSlices, QTextStream &stream );
@@ -48,7 +48,7 @@ namespace OfsExport {
               if ( file.open(QIODevice::WriteOnly) ) {
                     QTextStream stream(&file);
                     stream << "OFS MHD" << endl;
-                    displayExportedVertex(vectVertex, billon.n_slices, stream);
+                    displayExportedVertex(billon, vectVertex, billon.n_slices, stream);
                     computeEgesLinks( resolutionCercle, billon.n_slices, stream );
 
 
@@ -66,7 +66,7 @@ namespace OfsExport {
 			const int height = billon.n_rows;
 			const int nbSlices = interval.size();
 			const int firstMarrow = interval.min() - marrow.interval().min();
-			const int lastMarrow = qMin(firstMarrow + nbSlices,marrow.size());
+                        const int lastMarrow = qMin(firstMarrow + nbSlices,marrow.size());
 			qreal depth = -0.5;
 			const qreal depthShift = 1./(qreal)nbSlices;
 			int i,k;
@@ -98,14 +98,16 @@ namespace OfsExport {
 		}
 
 
-               void displayExportedVertex( QVector<rCoord2D> vectVertex, const int &nbSlices, QTextStream &stream ){
+               void displayExportedVertex( const Billon &billon, QVector<rCoord2D> vectVertex, const int &nbSlices, QTextStream &stream ){
+                   const int width = billon.n_cols;
+                   const int height = billon.n_rows;
                    qreal depth = -0.5;
                    const qreal depthShift = 1./(qreal)nbSlices;
                    stream << endl;
                    stream <<vectVertex.size()<< endl;
                    rCoord2D *offsetsIterator = 0;
                    for (int k=0; k<vectVertex.size(); ++k ) {
-                       stream << vectVertex.at(k).x << ' ' << vectVertex.at(k).y << ' ' << depth << endl;
+                       stream << (vectVertex.at(k).x /(qreal)width)<< ' ' << (vectVertex.at(k).y/(qreal)height)<< ' ' << depth << endl;
                        depth += depthShift;
                    }
                }
