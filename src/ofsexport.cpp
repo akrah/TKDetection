@@ -17,7 +17,11 @@ namespace OfsExport {
 	namespace {
 		// Calcul les coordonnées des sommets du maillage de la moelle
 		void computeAllEdges( const Billon &billon, const Marrow &marrow, const SlicesInterval &interval, const int &nbEdges, const int &radius, QTextStream &stream );
-		// Calcul les faces du maillages de la moelle
+
+                //Rajout BK: Affiche les coordonnées des sommets pour l'export OFS (utile iuniquement pour le maillage de la zone réduite)
+                void displayExportedVertex( const Billon &billon, QVector<rCoord2D> vectVertex,const int &nbSlices, QTextStream &stream );
+
+                // Calcul les faces du maillages de la moelle
 		void computeEgesLinks( const int &nbEdges, const int &nbSlices, QTextStream &stream );
 	}
 
@@ -27,25 +31,42 @@ namespace OfsExport {
 			if ( file.open(QIODevice::WriteOnly) ) {
 				QTextStream stream(&file);
 				stream << "OFS MHD" << endl;
-				computeAllEdges( billon, marrow, interval, nbEdgesPerSlice, radiusOfTubes, stream );
-				computeEgesLinks( nbEdgesPerSlice, interval.count(), stream );
+                                computeAllEdges( billon, marrow, interval, nbEdgesPerSlice, radiusOfTubes, stream );
+                                computeEgesLinks( nbEdgesPerSlice, interval.count(), stream );
 
 				file.close();
-			}
+                        }
 		}
 		else {
 			qDebug() << QObject::tr("Saving not possible since the mesh is outside the SlicesInterval");
 		}
 	}
 
+        void processRestrictedMesh( Billon &billon, const Marrow &marrow, const QString &fileName, const int &resolutionCercle, const int &seuilContour ) {
+              QVector<rCoord2D> vectVertex = billon.getRestrictedAreaVertex(resolutionCercle,seuilContour, &marrow);
+              QFile file(fileName);
+              if ( file.open(QIODevice::WriteOnly) ) {
+                    QTextStream stream(&file);
+                    stream << "OFS MHD" << endl;
+                    displayExportedVertex(billon, vectVertex, billon.n_slices, stream);
+                    computeEgesLinks( resolutionCercle, billon.n_slices, stream );
+
+
+                    file.close();
+              }
+
+        }
+
+
 	namespace {
+
 
 		void computeAllEdges( const Billon &billon, const Marrow &marrow, const SlicesInterval &interval, const int &nbEdges, const int &radius, QTextStream &stream ) {
 			const int width = billon.n_cols;
 			const int height = billon.n_rows;
 			const int nbSlices = interval.size();
 			const int firstMarrow = interval.min() - marrow.interval().min();
-			const int lastMarrow = qMin(firstMarrow + nbSlices,marrow.size());
+                        const int lastMarrow = qMin(firstMarrow + nbSlices,marrow.size());
 			qreal depth = -0.5;
 			const qreal depthShift = 1./(qreal)nbSlices;
 			int i,k;
@@ -75,6 +96,23 @@ namespace OfsExport {
 				depth += depthShift;
 			}
 		}
+
+
+               void displayExportedVertex( const Billon &billon, QVector<rCoord2D> vectVertex, const int &nbSlices, QTextStream &stream ){
+                   const int width = billon.n_cols;
+                   const int height = billon.n_rows;
+                   qreal depth = -0.5;
+                   const qreal depthShift = 1./(qreal)nbSlices;
+                   stream << endl;
+                   stream <<vectVertex.size()<< endl;
+                   rCoord2D *offsetsIterator = 0;
+                   for (int k=0; k<vectVertex.size(); ++k ) {
+                       stream << (vectVertex.at(k).x /(qreal)width)<< ' ' << (vectVertex.at(k).y/(qreal)height)<< ' ' << depth << endl;
+                       depth += depthShift;
+                   }
+               }
+
+
 
 		void computeEgesLinks( const int &nbEdges, const int &nbSlices, QTextStream &stream ) {
 			const int nbPoints = nbEdges*(nbSlices-1);

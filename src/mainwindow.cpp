@@ -142,6 +142,8 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 	QObject::connect(_ui->_buttonExportToV3D, SIGNAL(clicked()), this, SLOT(exportToV3D()));
 	QObject::connect(_ui->_buttonExportFlowToV3D, SIGNAL(clicked()), this, SLOT(exportFlowToV3D()));
 	QObject::connect(_ui->_buttonExportMovementsToV3D, SIGNAL(clicked()), this, SLOT(exportMovementsToV3D()));
+        QObject::connect(_ui->_buttonExportToOfsRestricted, SIGNAL(clicked()), this, SLOT(exportToOfsRestricted()));
+
 	QObject::connect(_ui->_buttonExportSectorsDiagramAndHistogram, SIGNAL(clicked()), this, SLOT(exportSectorDiagramAndHistogram()));
 
 	// Raccourcis des actions du menu
@@ -680,6 +682,16 @@ void MainWindow::exportToOfs() {
 		}
 	}
 }
+
+void MainWindow::exportToOfsRestricted() {
+        if ( _billon != 0 && _marrow != 0 ) {
+                QString fileName = QFileDialog::getSaveFileName(this, tr("Exporter en .ofs"), "output.ofs", tr("Fichiers de données (*.ofs);;Tous les fichiers (*.*)"));
+                if ( !fileName.isEmpty() ) {
+                        OfsExport::processRestrictedMesh( *_billon, *_marrow,  fileName);
+                }
+        }
+}
+
 
 void MainWindow::exportHistogramToV3D() {
 	if ( _sliceHistogram != 0 ) {
