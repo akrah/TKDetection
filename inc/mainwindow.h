@@ -68,6 +68,7 @@ private slots:
 	void changeBillonUsed();
 	void exportToDat();
 	void exportToOfs();
+        void exportToOfsRestricted();
 	void exportToV3D();
 	void exportFlowToV3D();
 	void exportHistogramToV3D();
