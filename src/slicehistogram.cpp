@@ -317,7 +317,7 @@ void SliceHistogram::computeIntervals() {
 		qreal derivated;
 		QVector<QwtIntervalSample> setOfIntervals;
 		if ( _intervalType != HistogramIntervalType::FROM_EDGE ) {
-			qreal limit = _intervalType==HistogramIntervalType::FROM_MEANS?_dataMeans:_intervalType==HistogramIntervalType::FROM_MEDIAN?_dataMedian:_intervalType==HistogramIntervalType::FROM_MAX?_dataMax:_dataMeansMedian;
+			const qreal limit = _intervalType==HistogramIntervalType::FROM_MEANS?_dataMeans:_intervalType==HistogramIntervalType::FROM_MEDIAN?_dataMedian:_intervalType==HistogramIntervalType::FROM_MAX?_dataMax:_dataMeansMedian;
 			for ( int i=0 ; i<nbMaximums ; ++i ) {
 				cursorMin = sliceOfIemeMaximum(i);
 				if (_datasBranchesRealAreas.size() == 0 || _datasBranchesRealAreas.last().maxValue() < cursorMin ) {
@@ -419,6 +419,7 @@ void SliceHistogram::computeMeansAndMedian() {
 	if ( nbDatas > 0 ) {
 		minValue = _datasHistogram.at(0).value;
 		QVector<qreal> listToSort(nbDatas);
+		minValue = _datasHistogram.at(0).value;
 		for ( int i=0 ; i<nbDatas ; ++i ) {
 			currentValue = _datasHistogram.at(i).value;
 			_dataMax = qMax(_dataMax,currentValue);
@@ -426,7 +427,7 @@ void SliceHistogram::computeMeansAndMedian() {
 			_dataMeans += currentValue;
 			listToSort[i] = currentValue;
 		}
-		_dataMax = 0.02 * (_dataMax-minValue) + minValue;
+		_dataMax  = (_dataMax-minValue)*0.02 + minValue;
 		_dataMeans /= static_cast<qreal>(nbDatas);
 		qSort(listToSort);
 		if ( nbDatas % 2 == 0 ) _dataMedian = (listToSort.at((nbDatas/2)-1)+listToSort.at(nbDatas/2))/2.;

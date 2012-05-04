@@ -185,6 +185,7 @@
 	<number>2</number>
    </attribute>
    <widget class="QWidget" name="dockWidgetContents_2">
+<<<<<<< HEAD
 	<layout class="QVBoxLayout" name="verticalLayout_4">
 	 <property name="topMargin">
 	  <number>0</number>
@@ -1619,11 +1620,6 @@ d'une composante</string>
  <layoutdefault spacing="6" margin="11"/>
  <customwidgets>
   <customwidget>
-   <class>QxtSpanSlider</class>
-   <extends>QSlider</extends>
-   <header>QxtSpanSlider</header>
-  </customwidget>
-  <customwidget>
    <class>QwtPlot</class>
    <extends>QFrame</extends>
    <header>qwt_plot.h</header>
@@ -1634,6 +1630,11 @@ d'une composante</string>
    <extends>QFrame</extends>
    <header>qwt_polar_plot.h</header>
    <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>QxtSpanSlider</class>
+   <extends>QSlider</extends>
+   <header>QxtSpanSlider</header>
   </customwidget>
  </customwidgets>
  <tabstops>
@@ -1683,7 +1684,7 @@ d'une composante</string>
   <tabstop>_buttonExportHistogramToSep</tabstop>
   <tabstop>_spinSectorsOrientation</tabstop>
   <tabstop>_spinSectorsNumber</tabstop>
-  <tabstop>tabWidget</tabstop>
+  <tabstop>tab_7</tabstop>
   <tabstop>_comboSelectSliceInterval</tabstop>
   <tabstop>_buttonSelectSliceIntervalUpdate</tabstop>
   <tabstop>_spinExportResolution</tabstop>
