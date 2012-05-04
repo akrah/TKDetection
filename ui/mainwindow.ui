@@ -104,8 +104,8 @@
           <rect>
            <x>0</x>
            <y>0</y>
-           <width>263</width>
-           <height>923</height>
+           <width>448</width>
+           <height>922</height>
           </rect>
          </property>
          <layout class="QHBoxLayout" name="horizontalLayout_8">
@@ -142,7 +142,7 @@
      <x>0</x>
      <y>0</y>
      <width>969</width>
-     <height>22</height>
+     <height>25</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFichier">
@@ -169,12 +169,6 @@
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
   <widget class="QDockWidget" name="dockWidget_2">
-   <property name="minimumSize">
-    <size>
-     <width>679</width>
-     <height>970</height>
-    </size>
-   </property>
    <property name="floating">
     <bool>false</bool>
    </property>
@@ -192,7 +186,7 @@
      <item>
       <widget class="QTabWidget" name="_tabs">
        <property name="currentIndex">
-        <number>3</number>
+        <number>2</number>
        </property>
        <widget class="QWidget" name="_tabGeneral">
         <attribute name="title">
@@ -227,8 +221,8 @@
                 <rect>
                  <x>0</x>
                  <y>0</y>
-                 <width>443</width>
-                 <height>349</height>
+                 <width>306</width>
+                 <height>173</height>
                 </rect>
                </property>
                <attribute name="label">
@@ -411,8 +405,8 @@
                 <rect>
                  <x>0</x>
                  <y>0</y>
-                 <width>373</width>
-                 <height>187</height>
+                 <width>374</width>
+                 <height>177</height>
                 </rect>
                </property>
                <attribute name="label">
@@ -558,8 +552,8 @@
                 <rect>
                  <x>0</x>
                  <y>0</y>
-                 <width>577</width>
-                 <height>349</height>
+                 <width>316</width>
+                 <height>178</height>
                 </rect>
                </property>
                <attribute name="label">
@@ -960,12 +954,12 @@ autour de la moelle</string>
           </layout>
          </item>
          <item>
-          <widget class="QTabWidget" name="tabWidget">
+          <widget class="QTabWidget" name="tab_7">
            <property name="tabPosition">
             <enum>QTabWidget::West</enum>
            </property>
            <property name="currentIndex">
-            <number>1</number>
+            <number>3</number>
            </property>
            <widget class="QWidget" name="tab_2">
             <attribute name="title">
@@ -974,7 +968,7 @@ autour de la moelle</string>
             <layout class="QVBoxLayout" name="verticalLayout_8">
              <item>
               <widget class="QwtPolarPlot" name="_polarSectorSum">
-               <property name="plotBackground" stdset="0">
+               <property name="plotBackground">
                 <brush brushstyle="SolidPattern">
                  <color alpha="0">
                   <red>255</red>
@@ -994,6 +988,36 @@ autour de la moelle</string>
             <layout class="QGridLayout" name="gridLayout">
              <item row="0" column="0">
               <widget class="QwtPlot" name="_plotAngularHistogram"/>
+             </item>
+            </layout>
+           </widget>
+           <widget class="QWidget" name="tab_6">
+            <attribute name="title">
+             <string>Diagramme intensite</string>
+            </attribute>
+            <layout class="QVBoxLayout" name="verticalLayout_2">
+             <item>
+              <widget class="QwtPolarPlot" name="_polarSectorSum2">
+               <property name="plotBackground">
+                <brush brushstyle="SolidPattern">
+                 <color alpha="0">
+                  <red>255</red>
+                  <green>255</green>
+                  <blue>255</blue>
+                 </color>
+                </brush>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+           <widget class="QWidget" name="tab_5">
+            <attribute name="title">
+             <string>Histogramme intensite</string>
+            </attribute>
+            <layout class="QVBoxLayout" name="verticalLayout_10">
+             <item>
+              <widget class="QwtPlot" name="_plotAngularHistogram2"/>
              </item>
             </layout>
            </widget>
@@ -1619,11 +1643,6 @@ d'une composante</string>
  <layoutdefault spacing="6" margin="11"/>
  <customwidgets>
   <customwidget>
-   <class>QxtSpanSlider</class>
-   <extends>QSlider</extends>
-   <header>QxtSpanSlider</header>
-  </customwidget>
-  <customwidget>
    <class>QwtPlot</class>
    <extends>QFrame</extends>
    <header>qwt_plot.h</header>
@@ -1634,6 +1653,11 @@ d'une composante</string>
    <extends>QFrame</extends>
    <header>qwt_polar_plot.h</header>
    <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>QxtSpanSlider</class>
+   <extends>QSlider</extends>
+   <header>QxtSpanSlider</header>
   </customwidget>
  </customwidgets>
  <tabstops>
@@ -1683,7 +1707,7 @@ d'une composante</string>
   <tabstop>_buttonExportHistogramToSep</tabstop>
   <tabstop>_spinSectorsOrientation</tabstop>
   <tabstop>_spinSectorsNumber</tabstop>
-  <tabstop>tabWidget</tabstop>
+  <tabstop>tab_7</tabstop>
   <tabstop>_comboSelectSliceInterval</tabstop>
   <tabstop>_buttonSelectSliceIntervalUpdate</tabstop>
   <tabstop>_spinExportResolution</tabstop>

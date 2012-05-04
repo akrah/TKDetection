@@ -57,16 +57,22 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 	_ui->_spinFlowMaximumIterations->setValue(_sliceView->flowMaximumIterations());
 
 	_ui->_plotAngularHistogram->enableAxis(QwtPlot::yLeft,false);
+	_ui->_plotAngularHistogram2->enableAxis(QwtPlot::yLeft,false);
 
 	_ui->_polarSectorSum->setScale( QwtPolar::Azimuth, 0.0, TWO_PI );
 	_pieChartDiagrams->attach(_ui->_polarSectorSum);
 	_pieChartDiagrams->attach(_ui->_plotAngularHistogram);
+
+	_ui->_polarSectorSum2->setScale( QwtPolar::Azimuth, 0.0, TWO_PI );
+	_pieChartDiagrams->attach2(_ui->_polarSectorSum2);
+	_pieChartDiagrams->attach2(_ui->_plotAngularHistogram2);
 
 	QwtPolarGrid *grid = new QwtPolarGrid();
 	grid->showAxis(QwtPolar::AxisRight,false);
 	grid->showAxis(QwtPolar::AxisBottom,false);
 	grid->setMajorGridPen(QPen(Qt::lightGray));
 	grid->attach(_ui->_polarSectorSum);
+	grid->attach(_ui->_polarSectorSum2);
 
 	/**** Mise en place de la communication MVC ****/
 
@@ -142,7 +148,7 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 	QObject::connect(_ui->_buttonExportToV3D, SIGNAL(clicked()), this, SLOT(exportToV3D()));
 	QObject::connect(_ui->_buttonExportFlowToV3D, SIGNAL(clicked()), this, SLOT(exportFlowToV3D()));
 	QObject::connect(_ui->_buttonExportMovementsToV3D, SIGNAL(clicked()), this, SLOT(exportMovementsToV3D()));
-        QObject::connect(_ui->_buttonExportToOfsRestricted, SIGNAL(clicked()), this, SLOT(exportToOfsRestricted()));
+		QObject::connect(_ui->_buttonExportToOfsRestricted, SIGNAL(clicked()), this, SLOT(exportToOfsRestricted()));
 
 	QObject::connect(_ui->_buttonExportSectorsDiagramAndHistogram, SIGNAL(clicked()), this, SLOT(exportSectorDiagramAndHistogram()));
 
@@ -217,6 +223,8 @@ void MainWindow::closeImage() {
 	_pieChartDiagrams->clearAll();
 	_ui->_plotAngularHistogram->replot();
 	_ui->_polarSectorSum->replot();
+	_ui->_plotAngularHistogram2->replot();
+	_ui->_polarSectorSum2->replot();
 	selectSectorInterval(0);
 	updateComponentsValues();
 	drawSlice();
@@ -233,6 +241,7 @@ void MainWindow::drawSlice( const int &sliceNumber ) {
 			_marrow->draw(_pix,sliceNumber);
 			if ( _ui->_checkMarrowAroundDiameter->isChecked() && _sliceHistogram->marrowAroundDiameter() > 0 ) {
 				QPainter painter(&_pix);
+				painter.setPen(Qt::yellow);
 				iCoord2D center = _marrow->at(sliceNumber-_marrow->interval().min());
 				painter.drawEllipse(QPointF(center.x,center.y),_sliceHistogram->marrowAroundDiameter()/(2.*_billon->voxelWidth()),_sliceHistogram->marrowAroundDiameter()/(2.*_billon->voxelHeight()));
 			}
@@ -684,12 +693,12 @@ void MainWindow::exportToOfs() {
 }
 
 void MainWindow::exportToOfsRestricted() {
-        if ( _billon != 0 && _marrow != 0 ) {
-                QString fileName = QFileDialog::getSaveFileName(this, tr("Exporter en .ofs"), "output.ofs", tr("Fichiers de données (*.ofs);;Tous les fichiers (*.*)"));
-                if ( !fileName.isEmpty() ) {
-                        OfsExport::processRestrictedMesh( *_billon, *_marrow,  fileName);
-                }
-        }
+		if ( _billon != 0 && _marrow != 0 ) {
+				QString fileName = QFileDialog::getSaveFileName(this, tr("Exporter en .ofs"), "output.ofs", tr("Fichiers de données (*.ofs);;Tous les fichiers (*.*)"));
+				if ( !fileName.isEmpty() ) {
+						OfsExport::processRestrictedMesh( *_billon, *_marrow,  fileName);
+				}
+		}
 }
 
 
@@ -1115,5 +1124,7 @@ void MainWindow::computeSectorsHistogramForInterval( const SlicesInterval &inter
 
 	_ui->_plotAngularHistogram->replot();
 	_ui->_polarSectorSum->replot();
+	_ui->_plotAngularHistogram2->replot();
+	_ui->_polarSectorSum2->replot();
 	highlightSectorHistogram(0);
 }
