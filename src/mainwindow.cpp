@@ -135,6 +135,7 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 	QObject::connect(_ui->_comboConnexComponents, SIGNAL(activated(int)), this, SLOT(drawSlice()));
 	QObject::connect(_ui->_buttonExportSectorToPgm3D, SIGNAL(clicked()), this, SLOT(exportSectorToPgm3D()));
 	QObject::connect(_ui->_buttonExportConnexComponentToPgm3D, SIGNAL(clicked()), this, SLOT(exportConnexComponentToPgm3D()));
+	QObject::connect(_ui->_buttonExportSectorToOfs, SIGNAL(clicked()), this, SLOT(exportSectorToOfs()));
 
 	// Évènements déclenchés par la souris sur le visualiseur de coupes
 	QObject::connect(&_sliceZoomer, SIGNAL(zoomFactorChanged(qreal,QPoint)), this, SLOT(zoomInSliceView(qreal,QPoint)));
@@ -699,12 +700,25 @@ void MainWindow::exportToOfs() {
 }
 
 void MainWindow::exportToOfsRestricted() {
-		if ( _billon != 0 && _marrow != 0 ) {
-				QString fileName = QFileDialog::getSaveFileName(this, tr("Exporter en .ofs"), "output.ofs", tr("Fichiers de données (*.ofs);;Tous les fichiers (*.*)"));
-				if ( !fileName.isEmpty() ) {
-						OfsExport::processRestrictedMesh( *_billon, *_marrow, _slicesInterval,  fileName);
-				}
+	if ( _billon != 0 && _marrow != 0 ) {
+		QString fileName = QFileDialog::getSaveFileName(this, tr("Exporter en .ofs"), "output.ofs", tr("Fichiers de données (*.ofs);;Tous les fichiers (*.*)"));
+		if ( !fileName.isEmpty() ) {
+			OfsExport::processRestrictedMesh( *_billon, *_marrow, _slicesInterval,  fileName);
 		}
+	}
+}
+
+void MainWindow::exportSectorToOfs() {
+	int index = _ui->_comboSelectSectorInterval->currentIndex();
+	if ( _billon != 0 && _marrow != 0 && index > 0 && index <= _pieChartDiagrams->branchesSectors().size() ) {
+		QString fileName = QFileDialog::getSaveFileName(this, tr("Exporter le secteur %1 en .ofs").arg(index), QString("sector_%1.ofs").arg(index), tr("Fichiers de données (*.ofs);;Tous les fichiers (*.*)"));
+		if ( !fileName.isEmpty() ) {
+			const QwtInterval &sectorInterval = _pieChartDiagrams->branchesSectors()[_ui->_comboSelectSectorInterval->currentIndex()-1];
+			const QwtInterval &qwtSlicesInterval = _sliceHistogram->branchesAreas()[_ui->_comboSelectSliceInterval->currentIndex()-1];
+			const SlicesInterval slicesInterval(qwtSlicesInterval.minValue(),qwtSlicesInterval.maxValue());
+			OfsExport::processOnSector( *_billon, *_marrow, slicesInterval, fileName, _pieChart->sector(sectorInterval.minValue()).rightAngle(), _pieChart->sector(sectorInterval.maxValue()).leftAngle(), _ui->_spinExportNbEdges->value() );
+		}
+	}
 }
 
 
