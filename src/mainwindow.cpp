@@ -683,7 +683,7 @@ void MainWindow::exportToDat() {
 			bool ok;
 			qreal contrastFactor = QInputDialog::getInt(this,tr("Facteur de contraste"), tr("Contraste de l'image (image originale avec contraste à 0)"), 0, -100, 100, 1, &ok);
 			if ( ok ) {
-				DatExport::process( *_billon, _slicesInterval, fileName, _ui->_spinExportResolution->value(), (contrastFactor+100.)/100. );
+				DatExport::process( *_billon, _slicesInterval, _intensityInterval, fileName, _ui->_spinExportResolution->value(), (contrastFactor+100.)/100. );
 			}
 		}
 	}
