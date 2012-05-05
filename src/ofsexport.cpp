@@ -120,7 +120,7 @@ namespace OfsExport {
 			const int firstMarrow = interval.min() - marrow.interval().min();
 			const int lastMarrow = qMin(firstMarrow + nbSlices,marrow.size());
 			const qreal depthShift = 1./(qreal)nbSlices;
-			const qreal angleShift = (rightAngle<leftAngle?leftAngle-rightAngle:leftAngle+(TWO_PI-rightAngle))/(qreal)nbEdges;
+			const qreal angleShift = (rightAngle<leftAngle?leftAngle-rightAngle:leftAngle+(TWO_PI-rightAngle))/(qreal)(nbEdges-1);
 			int i,k;
 
 			stream << endl;
@@ -143,7 +143,8 @@ namespace OfsExport {
 					angle += angleShift;
 				}
 				offsetsIterator = offsets.data();
-				for ( i=0 ; i<nbEdges ; ++i ) {
+				stream << xOfs << ' ' << yOfs << ' ' << depth << endl;
+				for ( i=0 ; i<nbEdges-1 ; ++i ) {
 					stream << xOfs+offsetsIterator->x << ' ' << yOfs+offsetsIterator->y << ' ' << depth << endl;
 					offsetsIterator++;
 				}
