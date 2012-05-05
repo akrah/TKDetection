@@ -635,7 +635,7 @@ void MainWindow::computeRestrictedBillon() {
 		else {
 			originalBillon = _billon;
 		}
-		Billon * newBillon = originalBillon->restrictToArea( _ui->_spinRestrictedAreaResolution->value(), _ui->_spinRestrictedAreaThreshold->value(), _marrow );
+                Billon * newBillon = originalBillon->restrictToArea( _ui->_spinRestrictedAreaResolution->value(), _ui->_spinRestrictedAreaThreshold->value(), _marrow );
 		if ( newBillon != 0 ) {
 			if ( restrictedBillon != 0 ) delete restrictedBillon;
 			restrictedBillon = 0;
@@ -694,12 +694,12 @@ void MainWindow::exportToOfs() {
 }
 
 void MainWindow::exportToOfsRestricted() {
-		if ( _billon != 0 && _marrow != 0 ) {
-				QString fileName = QFileDialog::getSaveFileName(this, tr("Exporter en .ofs"), "output.ofs", tr("Fichiers de données (*.ofs);;Tous les fichiers (*.*)"));
-				if ( !fileName.isEmpty() ) {
-						OfsExport::processRestrictedMesh( *_billon, *_marrow,  fileName);
-				}
-		}
+        if ( _billon != 0 && _marrow != 0 ) {
+                QString fileName = QFileDialog::getSaveFileName(this, tr("Exporter en .ofs"), "output.ofs", tr("Fichiers de données (*.ofs);;Tous les fichiers (*.*)"));
+                if ( !fileName.isEmpty() ) {
+                        OfsExport::processRestrictedMesh( *_billon, *_marrow, _slicesInterval,  fileName);
+                }
+        }
 }
 
 

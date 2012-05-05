@@ -19,7 +19,7 @@ namespace OfsExport {
 		void computeAllEdges( const Billon &billon, const Marrow &marrow, const SlicesInterval &interval, const int &nbEdges, const int &radius, QTextStream &stream );
 
                 //Rajout BK: Affiche les coordonnées des sommets pour l'export OFS (utile iuniquement pour le maillage de la zone réduite)
-                void displayExportedVertex( const Billon &billon, QVector<rCoord2D> vectVertex,const int &nbSlices, const int &resolutionCercle, QTextStream &stream );
+                void displayExportedVertex( const Billon &billon, QVector<rCoord2D> vectVertex, const SlicesInterval &interval,const int &nbSlices, const int &resolutionCercle, QTextStream &stream );
 
                 // Calcul les faces du maillages de la moelle
 		void computeEgesLinks( const int &nbEdges, const int &nbSlices, QTextStream &stream );
@@ -42,14 +42,14 @@ namespace OfsExport {
 		}
 	}
 
-        void processRestrictedMesh( Billon &billon, const Marrow &marrow, const QString &fileName, const int &resolutionCercle, const int &seuilContour ) {
+        void processRestrictedMesh( Billon &billon, const Marrow &marrow, const SlicesInterval &interval, const QString &fileName, const int &resolutionCercle, const int &seuilContour ) {
               QVector<rCoord2D> vectVertex = billon.getRestrictedAreaVertex( resolutionCercle,seuilContour, &marrow);
 
               QFile file(fileName);
               if ( file.open(QIODevice::WriteOnly) ) {
                     QTextStream stream(&file);
                     stream << "OFS MHD" << endl;
-                    displayExportedVertex(billon, vectVertex, billon.n_slices, resolutionCercle, stream);
+                    displayExportedVertex(billon, vectVertex, interval, billon.n_slices, resolutionCercle, stream);
                     computeEgesLinks( resolutionCercle, billon.n_slices, stream );
 
 
@@ -99,7 +99,7 @@ namespace OfsExport {
 		}
 
 
-               void displayExportedVertex( const Billon &billon, QVector<rCoord2D> vectVertex, const int &nbSlices,const int &resolutionCercle, QTextStream &stream ){
+               void displayExportedVertex( const Billon &billon, QVector<rCoord2D> vectVertex, const SlicesInterval &interval, const int &nbSlices,const int &resolutionCercle, QTextStream &stream ){
                    const int width = billon.n_cols;
                    const int height = billon.n_rows;
                    qreal depth = -0.5;
