@@ -8,7 +8,7 @@
 #include <QTextStream>
 
 namespace DatExport {
-	void process( const Billon &billon, const SlicesInterval &interval, const QString &fileName, const int &resolution ) {
+	void process( const Billon &billon, const SlicesInterval &interval, const QString &fileName, const int &resolution, const qreal &contrastFactor ) {
 		QFile file(fileName);
 		if ( file.open(QIODevice::WriteOnly) ) {
 			const int firstSlice = interval.min();
@@ -28,7 +28,7 @@ namespace DatExport {
 				const arma::Slice &slice = billon.slice(k);
 				for ( int j=0 ; j<height-shift ; j+=resolution ) {
 					for ( int i=0 ; i<width-shift ; i+=resolution ) {
-						dStream << static_cast<qint8>((arma::mean(arma::mean(slice.submat(j,i,j+shift,i+shift)))-minValue)*fact);
+						dStream << static_cast<qint8>( qBound(0., ((((arma::mean(arma::mean(slice.submat(j,i,j+shift,i+shift)))-minValue)*fact)-128.)*contrastFactor)+128, 255.) );
 					}
 				}
 			}
