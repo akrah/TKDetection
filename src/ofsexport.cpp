@@ -143,6 +143,7 @@ namespace OfsExport {
 					angle += angleShift;
 				}
 				offsetsIterator = offsets.data();
+				stream << xOfs << ' ' << yOfs << ' ' << depth << endl;
 				for ( i=0 ; i<nbEdges ; ++i ) {
 					stream << xOfs+offsetsIterator->x << ' ' << yOfs+offsetsIterator->y << ' ' << depth << endl;
 					offsetsIterator++;
