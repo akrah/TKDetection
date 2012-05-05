@@ -28,7 +28,7 @@ namespace OfsExport {
 	}
 
 	void process( const Billon &billon, const Marrow &marrow, const SlicesInterval &interval, const QString &fileName, const int &nbEdgesPerSlice, const int &radiusOfTubes ) {
-		if ( interval.containsClosed(marrow.interval()) ) {
+		if ( marrow.interval().containsClosed(interval) ) {
 			QFile file(fileName);
 			if ( file.open(QIODevice::WriteOnly) ) {
 				QTextStream stream(&file);
@@ -44,7 +44,7 @@ namespace OfsExport {
 	}
 
 	void processOnSector( const Billon &billon, const Marrow &marrow, const SlicesInterval &interval, const QString &fileName, const qreal &rightAngle, const qreal &leftAngle, const int &nbEdgesPerSlice ) {
-		if ( interval.containsClosed(marrow.interval()) ) {
+		if ( marrow.interval().containsClosed(interval) ) {
 			QFile file(fileName);
 			if ( file.open(QIODevice::WriteOnly) ) {
 				QTextStream stream(&file);
