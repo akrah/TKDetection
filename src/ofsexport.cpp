@@ -108,8 +108,6 @@ namespace OfsExport {
                    qreal depth = -0.5;
                    stream << endl;
                    stream << resolutionCercle*(lastMarrow-firstMarrow+1) << endl;
-
-//                   stream << (nbSlices*resolutionCercle+1)<< endl;
                    const qreal depthShift = 1./(qreal)nbSlices;
                    int pos=0;
                    for (int k=firstMarrow ; k<=lastMarrow ; ++k ) {
@@ -126,7 +124,6 @@ namespace OfsExport {
                        }
                        depth += depthShift;
                    }
-                   std::cerr<< "pos="<< pos << "##"<< std::endl;
                }
 
 
