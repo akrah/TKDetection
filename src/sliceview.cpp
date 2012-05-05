@@ -186,45 +186,63 @@ void SliceView::drawMedianSlice( QImage &image, const Billon &billon, const Inte
 
 void SliceView::drawMovementSlice( QImage &image, const Billon &billon, const int &sliceNumber, const IntensityInterval &intensityInterval ) {
 
-	const Slice &previousSlice = billon.slice(sliceNumber > 0 ? sliceNumber-1 : sliceNumber+1);
-	const Slice &currentSlice = billon.slice(sliceNumber);
-	const Slice &toCompareSlice = billon.slice(_useNextSliceInsteadOfCurrentSlice && sliceNumber < static_cast<int>(billon.n_slices)-1 ? sliceNumber+1 : sliceNumber );
+//	const Slice &previousSlice = billon.slice(sliceNumber > 0 ? sliceNumber-1 : sliceNumber+1);
+//	const Slice &currentSlice = billon.slice(sliceNumber);
+//	const Slice &toCompareSlice = billon.slice(_useNextSliceInsteadOfCurrentSlice && sliceNumber < static_cast<int>(billon.n_slices)-1 ? sliceNumber+1 : sliceNumber );
 
-	const int width = previousSlice.n_cols;
-	const int height = previousSlice.n_rows;
+//	const int width = previousSlice.n_cols;
+//	const int height = previousSlice.n_rows;
+//	const int minValue = intensityInterval.min();
+//	const int maxValue = intensityInterval.max();
+//	const qreal fact = 255.0/intensityInterval.size();
+
+//	const QRgb background = qRgb(0,0,0);
+//	const QRgb foreground = qRgb(0,200,200);
+//	QRgb *line;
+
+//	int i, j, color, pixelAbsDiff;
+
+//	line = (QRgb *) image.bits();
+//	if ( _movementWithBackground ) {
+//		for ( j=0 ; j<height ; j++) {
+//			for ( i=0 ; i<width ; i++) {
+//				pixelAbsDiff = qAbs(qBound(minValue,previousSlice.at(j,i),maxValue) - qBound(minValue,toCompareSlice.at(j,i),maxValue));
+//				if ( pixelAbsDiff > _movementThresholdMin && pixelAbsDiff < _movementThresholdMax ) *line = foreground;
+//				else {
+//					color = (qBound(minValue,currentSlice.at(j,i),maxValue)-minValue)*fact;
+//					*line = qRgb(color,color,color);
+//					//*line = background;
+//				}
+//				line++;
+//			}
+//		}
+//	}
+//	else {
+//		for ( j=0 ; j<height ; j++) {
+//			for ( i=0 ; i<width ; i++) {
+//				pixelAbsDiff = qAbs(qBound(minValue,previousSlice.at(j,i),maxValue) - qBound(minValue,toCompareSlice.at(j,i),maxValue));
+//				if ( pixelAbsDiff > _movementThresholdMin && pixelAbsDiff < _movementThresholdMax ) *line = foreground;
+//				else *line = background;
+//				line++;
+//			}
+//		}
+//	}
+	const Slice &previousSlice = billon.slice(sliceNumber > 0 ? sliceNumber-1 : sliceNumber+1);
+	const Slice &toCompareSlice = billon.slice(_useNextSliceInsteadOfCurrentSlice && sliceNumber < static_cast<int>(billon.n_slices)-1 ? sliceNumber+1 : sliceNumber );
+	const uint width = previousSlice.n_cols;
+	const uint height = previousSlice.n_rows;
 	const int minValue = intensityInterval.min();
 	const int maxValue = intensityInterval.max();
-	const qreal fact = 255.0/intensityInterval.size();
+	const qreal fact = 255./500;
 
-	const QRgb background = qRgb(0,0,0);
-	const QRgb foreground = qRgb(0,200,200);
-	QRgb *line;
+	QRgb * line = (QRgb *) image.bits();
+	int color;
+	uint i,j;
 
-	int i, j, color, pixelAbsDiff;
-
-	line = (QRgb *) image.bits();
-	if ( _movementWithBackground ) {
-		for ( j=0 ; j<height ; j++) {
-			for ( i=0 ; i<width ; i++) {
-				pixelAbsDiff = qAbs(qBound(minValue,previousSlice.at(j,i),maxValue) - qBound(minValue,toCompareSlice.at(j,i),maxValue));
-				if ( pixelAbsDiff > _movementThresholdMin && pixelAbsDiff < _movementThresholdMax ) *line = foreground;
-				else {
-					color = (qBound(minValue,currentSlice.at(j,i),maxValue)-minValue)*fact;
-					*line = qRgb(color,color,color);
-					//*line = background;
-				}
-				line++;
-			}
-		}
-	}
-	else {
-		for ( j=0 ; j<height ; j++) {
-			for ( i=0 ; i<width ; i++) {
-				pixelAbsDiff = qAbs(((qBound(minValue,previousSlice.at(j,i),maxValue)-minValue)) - ((qBound(minValue,toCompareSlice.at(j,i),maxValue)-minValue)));
-				if ( pixelAbsDiff > _movementThresholdMin && pixelAbsDiff < _movementThresholdMax ) *line = foreground;
-				else *line = background;
-				line++;
-			}
+	for ( j=0 ; j<height ; j++) {
+		for ( i=0 ; i<width ; i++) {
+			color = qMin(qAbs(qBound(minValue,previousSlice.at(j,i),maxValue) - qBound(minValue,toCompareSlice.at(j,i),maxValue)),500) * fact;
+			*(line++) = qRgb(color,color,color);
 		}
 	}
 }
