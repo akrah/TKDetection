@@ -427,8 +427,8 @@ void PieChartDiagrams::computeMaximums( const QVector<qreal> &sectorsSum ) {
 	_maximumsIndex.clear();
 	if ( nbSectors > 0 ) {
 		double value;
-		int i; // cursor;
-		//bool isMax;
+		int i, cursor;
+		bool isMax;
 //		TODO : Ce seuil ne doit pas être identique à celui de l'histogramme de coupes car on perd trop de branches.
 //				Il y a donc un seuil à 100 en attendant.
 //		const qreal limit = 100;
@@ -436,8 +436,7 @@ void PieChartDiagrams::computeMaximums( const QVector<qreal> &sectorsSum ) {
 		qDebug() << "Pics angulaires :";
 		for ( i=0 ; i<nbSectors ; ++i ) {
 			value = sectorsSum[i];
-			//if ( value > limit ) {
-			if ( value > 0 ) {
+			if ( value > limit ) {
 				cursor = 1;
 				do {
 					isMax = ( (value > sectorsSum[i-cursor>=0?i-cursor:nbSectors+i-cursor]) && (value > sectorsSum[i+cursor<nbSectors?i+cursor:i+cursor-nbSectors]) );
