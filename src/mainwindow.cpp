@@ -24,6 +24,7 @@
 #include <QPainter>
 #include <QScrollBar>
 #include <QMessageBox>
+#include <QInputDialog>
 #include <qwt_plot_renderer.h>
 #include <qwt_polar_renderer.h>
 
@@ -635,7 +636,7 @@ void MainWindow::computeRestrictedBillon() {
 		else {
 			originalBillon = _billon;
 		}
-                Billon * newBillon = originalBillon->restrictToArea( _ui->_spinRestrictedAreaResolution->value(), _ui->_spinRestrictedAreaThreshold->value(), _marrow );
+				Billon * newBillon = originalBillon->restrictToArea( _ui->_spinRestrictedAreaResolution->value(), _ui->_spinRestrictedAreaThreshold->value(), _marrow );
 		if ( newBillon != 0 ) {
 			if ( restrictedBillon != 0 ) delete restrictedBillon;
 			restrictedBillon = 0;
@@ -694,12 +695,12 @@ void MainWindow::exportToOfs() {
 }
 
 void MainWindow::exportToOfsRestricted() {
-        if ( _billon != 0 && _marrow != 0 ) {
-                QString fileName = QFileDialog::getSaveFileName(this, tr("Exporter en .ofs"), "output.ofs", tr("Fichiers de données (*.ofs);;Tous les fichiers (*.*)"));
-                if ( !fileName.isEmpty() ) {
-                        OfsExport::processRestrictedMesh( *_billon, *_marrow, _slicesInterval,  fileName);
-                }
-        }
+		if ( _billon != 0 && _marrow != 0 ) {
+				QString fileName = QFileDialog::getSaveFileName(this, tr("Exporter en .ofs"), "output.ofs", tr("Fichiers de données (*.ofs);;Tous les fichiers (*.*)"));
+				if ( !fileName.isEmpty() ) {
+						OfsExport::processRestrictedMesh( *_billon, *_marrow, _slicesInterval,  fileName);
+				}
+		}
 }
 
 
@@ -895,7 +896,11 @@ void MainWindow::exportSectorToPgm3D() {
 	if ( _sectorBillon != 0 ) {
 		QString fileName = QFileDialog::getSaveFileName(this, tr("Exporter le secteur en .pgm3d"), "output.pgm3d", tr("Fichiers de données (*.pgm3d);;Tous les fichiers (*.*)"));
 		if ( !fileName.isEmpty() ) {
-			Pgm3dExport::process( *_sectorBillon, fileName );
+			bool ok;
+			qreal contrastFactor = QInputDialog::getInt(this,tr("Facteur de contraste"), tr("Contraste de l'image (image originale avec contraste à 0)"), 0, -100, 100, 1, &ok);
+			if ( ok ) {
+				Pgm3dExport::process( *_sectorBillon, fileName, (contrastFactor+100.)/100. );
+			}
 		}
 	}
 }
@@ -904,13 +909,14 @@ void MainWindow::exportConnexComponentToPgm3D() {
 	if ( _componentBillon != 0 ) {
 		QString fileName = QFileDialog::getSaveFileName(this, tr("Exporter la composante connexe en .pgm3d"), "output.pgm3d", tr("Fichiers de données (*.pgm3d);;Tous les fichiers (*.*)"));
 		if ( !fileName.isEmpty() ) {
-			Pgm3dExport::process( *_componentBillon, fileName );
+			bool ok;
+			qreal contrastFactor = QInputDialog::getInt(this,tr("Facteur de contraste"), tr("Contraste de l'image (image originale avec contraste à 0)"), 0, -100, 100, 1, &ok);
+			if ( ok ) {
+				Pgm3dExport::process( *_componentBillon, fileName, (contrastFactor+100.)/100. );
+			}
 		}
 	}
 }
-
-#include <QInputDialog>
-#include <qwt_legend.h>
 
 void MainWindow::exportSliceHistogram() {
 	QwtPlotRenderer histoRenderer;
