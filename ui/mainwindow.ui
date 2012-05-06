@@ -1091,6 +1091,13 @@ autour de la moelle</string>
                </property>
               </widget>
              </item>
+             <item>
+              <widget class="QPushButton" name="_buttonExportAllSectorsInAllIntervalsToOfs">
+               <property name="text">
+                <string>Export ALL in OFS</string>
+               </property>
+              </widget>
+             </item>
             </layout>
            </item>
            <item row="1" column="0">
