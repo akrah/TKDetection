@@ -67,7 +67,7 @@ namespace OfsExport {
 				stream << "OFS MHD" << endl;
 				computeAllSectorInAllIntervalsEdges( billon, marrow, intervals, nbEdgesPerSlice, stream );
 
-				QTextStream fullStream;
+				QString fullStream;
 				int sumNbLinks = 0;
 				int currentBase = 0;
 				const int nbPointsFoTube = 4*nbEdgesPerSlice;
@@ -79,7 +79,7 @@ namespace OfsExport {
 
 					// La face de devant
 					for ( int i=1 ; i<nbEdgesPerSlice-1 ; ++i ) {
-						fullStream << currentBase << ' ' << currentBase+i << ' ' << currentBase+i+1 << endl;
+						fullStream.append( QString("%1 %2 %3%4").arg(currentBase).arg(currentBase+i).arg(currentBase+i+1).arg('\n') );
 					}
 					// Les autres faces
 					QList<qint32> tubes;
@@ -96,21 +96,21 @@ namespace OfsExport {
 					tubes.append(currentBase);
 					for ( int base = 0 ; base<nbPoints ; base += nbEdgesPerSlice ) {
 						for ( int i=0 ; i<nbPointsFoTube ; i+=4 ) {
-							fullStream << base+tubes[i] << ' ' << base+tubes[i+1] << ' ' << base+tubes[i+2] << endl;
-							fullStream << base+tubes[i] << ' ' << base+tubes[i+2] << ' ' << base+tubes[i+3] << endl;
+							fullStream.append( QString("%1 %2 %3%4").arg(base+tubes[i]).arg(base+tubes[i+1]).arg(base+tubes[i+2]).arg('\n') );
+							fullStream.append( QString("%1 %2 %3%4").arg(base+tubes[i]).arg(base+tubes[i+2]).arg(base+tubes[i+3]).arg('\n') );
 						}
 					}
 					// La face de derrière
-					const int lasBase = currentBase+nbPoints;
-					for ( int i=lasBase+1 ; i<nbSlices*nbEdgesPerSlice-1 ; ++i ) {
-						fullStream << lasBase << ' ' << i+1 << ' ' << i << endl;
+					const int lastBase = currentBase+nbPoints;
+					for ( int i=lastBase+1 ; i<nbSlices*nbEdgesPerSlice-1 ; ++i ) {
+						fullStream.append( QString("%1 %2 %3%4").arg(lastBase).arg(i+1).arg(i).arg('\n') );
 					}
 
 					currentBase += nbSlices*nbEdgesPerSlice;
 				}
 				stream << endl;
 				stream << sumNbLinks << endl;
-				stream << *(fullStream.string());
+				stream << fullStream;
 
 				file.close();
 			}
@@ -213,7 +213,7 @@ namespace OfsExport {
 			const int width = billon.n_cols;
 			const int height = billon.n_rows;
 
-			QTextStream fullStream;
+			QString fullStream;
 			int sumOfnbEdges = 0;
 			QVector<rCoord2D> offsets;
 			rCoord2D *offsetsIterator;
@@ -247,9 +247,9 @@ namespace OfsExport {
 						angle += angleShift;
 					}
 					offsetsIterator = offsets.data();
-					fullStream << xOfs << ' ' << yOfs << ' ' << depth << endl;
+					fullStream.append( QString("%1 %2 %3%4").arg(xOfs).arg(yOfs).arg(depth).arg('\n') );
 					for ( i=0 ; i<nbEdges-1 ; ++i ) {
-						fullStream << xOfs+offsetsIterator->x << ' ' << yOfs+offsetsIterator->y << ' ' << depth << endl;
+						fullStream.append( QString("%1 %2 %3%4").arg(xOfs+offsetsIterator->x).arg(yOfs+offsetsIterator->y).arg(depth).arg('\n') );
 						offsetsIterator++;
 					}
 					depth += depthShift;
@@ -258,7 +258,7 @@ namespace OfsExport {
 			}
 			stream << endl;
 			stream << sumOfnbEdges << endl;
-			stream << *(fullStream.string());
+			stream << fullStream;
 		}
 
 		void displayExportedVertex( const Billon &billon, const Marrow &marrow, QVector<rCoord2D> vectVertex, const SlicesInterval &interval,const int &resolutionCercle, QTextStream &stream ){
