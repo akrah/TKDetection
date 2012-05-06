@@ -70,6 +70,7 @@ private slots:
 	void exportToOfs();
 	void exportToOfsRestricted();
 	void exportSectorToOfs();
+	void exportAllSectorInAllIntervalsToOfs();
 	void exportToV3D();
 	void exportFlowToV3D();
 	void exportHistogramToV3D();

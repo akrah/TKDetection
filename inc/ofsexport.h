@@ -2,6 +2,7 @@
 #define OFSEXPORT_H
 
 #include <QString>
+#include <QPair>
 
 #include "billon_def.h"
 class SlicesInterval;
@@ -11,6 +12,7 @@ class PiePart;
 namespace OfsExport {
 	void process( const Billon &billon, const Marrow &marrow, const SlicesInterval &interval, const QString &fileName, const int &nbEdgesPerSlice = 4, const int &radiusOfTubes = 10 );
 	void processOnSector( const Billon &billon, const Marrow &marrow, const SlicesInterval &interval, const QString &fileName, const qreal &rightAngle, const qreal &leftAngle, const int &nbEdgesPerSlice = 4 );
+	void processOnAllSectorInAllIntervals( const Billon &billon, const Marrow &marrow, const QVector< QPair< SlicesInterval, QPair<qreal,qreal> > > &intervals, const QString &fileName, const int &nbEdgesPerSlice = 4 );
 	void processRestrictedMesh( const Billon &billon, const Marrow &marrow, const SlicesInterval &interval, const QString &fileName, const int &resolutionCercle = 100, const int &seuilContour = -900 ) ;
 }
 

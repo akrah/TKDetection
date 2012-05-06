@@ -41,6 +41,12 @@ bool Interval::containsClosed( const Interval &interval ) const {
 	return (min() <= interval.min()) && (max() >= interval.max());
 }
 
+//Interval& Interval::operator =(const Interval& other) {
+//	_min = other._min;
+//	_max = other._max;
+//	return *this;
+//}
+
 void Interval::setMin( const int &min ) {
 	_min = min;
 }

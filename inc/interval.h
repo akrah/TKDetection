@@ -23,6 +23,8 @@ public:
 
 	virtual bool isValid() const = 0;
 
+	Interval& operator =(const Interval& other);
+
 public slots:
 	void setMin( const int &min );
 	void setMax( const int &max );

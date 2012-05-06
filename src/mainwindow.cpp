@@ -721,6 +721,24 @@ void MainWindow::exportSectorToOfs() {
 	}
 }
 
+void MainWindow::exportAllSectorInAllIntervalsToOfs() {
+	if ( _billon != 0 && _marrow != 0 && _ui->_comboSelectSectorInterval->count() > 0 ) {
+		QString fileName = QFileDialog::getSaveFileName(this, tr("Exporter tous les secteurs de tous les intervalles en .ofs"), "allSector.ofs", tr("Fichiers de données (*.ofs);;Tous les fichiers (*.*)"));
+		if ( !fileName.isEmpty() ) {
+			QVector< QPair< SlicesInterval, QPair<qreal,qreal> > > intervals;
+			for ( int i=0 ; i<_ui->_comboSelectSliceInterval->count()-1 ; i++ ) {
+				const QwtInterval &qwtSlicesInterval = _sliceHistogram->branchesAreas()[i];
+				const SlicesInterval slicesInterval(qwtSlicesInterval.minValue(),qwtSlicesInterval.maxValue());
+				for ( int j=0 ; j<_ui->_comboSelectSectorInterval->count()-1 ; j++ ) {
+					const QwtInterval &sectorInterval = _pieChartDiagrams->branchesSectors()[j];
+					const QPair<qreal,qreal> angles( _pieChart->sector(sectorInterval.minValue()).rightAngle(), _pieChart->sector(sectorInterval.maxValue()).leftAngle() );
+					intervals.append( QPair< SlicesInterval, QPair<qreal,qreal> >( slicesInterval, angles ) );
+				}
+			}
+			OfsExport::processOnAllSectorInAllIntervals( *_billon, *_marrow, intervals, fileName, _ui->_spinExportNbEdges->value() );
+		}
+	}
+}
 
 void MainWindow::exportHistogramToV3D() {
 	if ( _sliceHistogram != 0 ) {
