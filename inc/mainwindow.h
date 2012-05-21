@@ -86,6 +86,7 @@ private slots:
 
 private:
 	void openNewBillon(const QString &folderName = "");
+	void initComponentsValues();
 	void updateComponentsValues();
 	void enabledComponents();
 	void computeSectorsHistogramForInterval( const SlicesInterval &interval );

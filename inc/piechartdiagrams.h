@@ -30,9 +30,7 @@ public:
 	const QVector<QwtInterval> &branchesSectors() const;
 
 	void attach( QwtPolarPlot * const polarPlot );
-	void attach2( QwtPolarPlot * const polarPlot );
 	void attach( QwtPlot * const plot );
-	void attach2( QwtPlot * const plot );
 	void clearAll();
 
 	void setMovementsThresholdMin( const int &threshold );
@@ -50,7 +48,6 @@ public:
 private:
 	void smoothHistogram( QVector<qreal> &sectorsSum );
 	void createDiagrams( const QVector<qreal> &sectorsSum );
-	void createDiagrams2( const QVector<qreal> &sectorsSum );
 	void computeMeansAndMedian( const QVector<qreal> &sectorsSum );
 	void computeMaximums( const QVector<qreal> &sectorsSum );
 	void computeIntervals( const QVector<qreal> &sectorsSum );
@@ -60,11 +57,6 @@ private:
 	PointPolarSeriesData *_curveDatas;
 	QwtPlotHistogram _curveHistogram;
 	QVector<QwtIntervalSample> _curveHistogramDatas;
-
-	QwtPolarCurve _curve2;
-	PointPolarSeriesData *_curveDatas2;
-	QwtPlotHistogram _curveHistogram2;
-	QVector<QwtIntervalSample> _curveHistogramDatas2;
 
 	QwtPolarCurve _curveMaximums;
 	PointPolarSeriesData *_curveMaximumsDatas;
@@ -83,13 +75,8 @@ private:
 	QwtPlotHistogram _highlightCurveHistogram;
 	QVector<QwtIntervalSample> _highlightCurveHistogramDatas;
 
-	QwtPolarCurve _highlightCurve2;
-	PointPolarSeriesData *_highlightCurveDatas2;
-	QwtPlotHistogram _highlightCurveHistogram2;
-	QVector<QwtIntervalSample> _highlightCurveHistogramDatas2;
-
-	qreal _dataMax;
-	QwtPlotCurve _curveMax;
+	qreal _dataPercentage;
+	QwtPlotCurve _curvePercentage;
 	qreal _dataMeans;
 	QwtPlotCurve _curveMeans;
 	qreal _dataMedian;

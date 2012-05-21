@@ -19,7 +19,7 @@ CONFIG		*=	qwt qxt qwtpolar
 QXT			=	core gui
 
 TEMPLATE	=	app
-TARGET		=	TreeSnake
+TARGET		=	TKDetection
 
 DEPENDPATH	*=	./src/ ./inc/ ./ui/
 

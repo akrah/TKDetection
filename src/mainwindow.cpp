@@ -60,22 +60,16 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 	_ui->_spinFlowMaximumIterations->setValue(_sliceView->flowMaximumIterations());
 
 	_ui->_plotAngularHistogram->enableAxis(QwtPlot::yLeft,false);
-	_ui->_plotAngularHistogram2->enableAxis(QwtPlot::yLeft,false);
 
 	_ui->_polarSectorSum->setScale( QwtPolar::Azimuth, 0.0, TWO_PI );
 	_pieChartDiagrams->attach(_ui->_polarSectorSum);
 	_pieChartDiagrams->attach(_ui->_plotAngularHistogram);
-
-	_ui->_polarSectorSum2->setScale( QwtPolar::Azimuth, 0.0, TWO_PI );
-	_pieChartDiagrams->attach2(_ui->_polarSectorSum2);
-	_pieChartDiagrams->attach2(_ui->_plotAngularHistogram2);
 
 	QwtPolarGrid *grid = new QwtPolarGrid();
 	grid->showAxis(QwtPolar::AxisRight,false);
 	grid->showAxis(QwtPolar::AxisBottom,false);
 	grid->setMajorGridPen(QPen(Qt::lightGray));
 	grid->attach(_ui->_polarSectorSum);
-	grid->attach(_ui->_polarSectorSum2);
 
 	/**** Mise en place de la communication MVC ****/
 
@@ -165,6 +159,7 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 	QObject::connect(_ui->_actionQuit, SIGNAL(triggered()), this, SLOT(close()));
 
 	closeImage();
+	initComponentsValues();
 }
 
 MainWindow::~MainWindow() {
@@ -227,8 +222,6 @@ void MainWindow::closeImage() {
 	_pieChartDiagrams->clearAll();
 	_ui->_plotAngularHistogram->replot();
 	_ui->_polarSectorSum->replot();
-	_ui->_plotAngularHistogram2->replot();
-	_ui->_polarSectorSum2->replot();
 	selectSectorInterval(0);
 	updateComponentsValues();
 	drawSlice();
@@ -877,7 +870,7 @@ void MainWindow::selectSectorInterval( const int &index ) {
 
 		_sectorBillon = new Billon(_billon->n_cols,_billon->n_rows,sliceInterval.width()+1);
 		_sectorBillon->setMinValue(threshold);
-		_sectorBillon->setMaxValue(500);
+		_sectorBillon->setMaxValue(MAXIMUM_INTENSITY);
 		_sectorBillon->setVoxelSize(_billon->voxelWidth(),_billon->voxelHeight(),_billon->voxelDepth());
 		_sectorBillon->fill(threshold);
 
@@ -890,7 +883,7 @@ void MainWindow::selectSectorInterval( const int &index ) {
 				const int marrowY = _marrow->at(k).y;
 				for ( j=0 ; j<height ; ++j ) {
 					for ( i=0 ; i<width ; ++i ) {
-						if ( originalSlice.at(j,i) > threshold && originalSlice.at(j,i) < 500 && sectorInterval.contains(_pieChart->partOfAngle(TWO_PI-ANGLE(marrowX, marrowY, i, j))) ) {
+						if ( originalSlice.at(j,i) > threshold && originalSlice.at(j,i) < MAXIMUM_INTENSITY && sectorInterval.contains(_pieChart->partOfAngle(TWO_PI-ANGLE(marrowX, marrowY, i, j))) ) {
 							sectorSlice.at(j,i) = originalSlice.at(j,i);
 						}
 					}
@@ -906,7 +899,7 @@ void MainWindow::selectSectorInterval( const int &index ) {
 				const int marrowY = _marrow->at(k).y;
 				for ( j=0 ; j<height ; ++j ) {
 					for ( i=0 ; i<width ; ++i ) {
-						if ( originalSlice.at(j,i) > threshold && originalSlice.at(j,i) < 500 && !sectorIntervalInverted.contains(_pieChart->partOfAngle(TWO_PI-ANGLE(marrowX, marrowY, i, j))) ) {
+						if ( originalSlice.at(j,i) > threshold && originalSlice.at(j,i) < MAXIMUM_INTENSITY && !sectorIntervalInverted.contains(_pieChart->partOfAngle(TWO_PI-ANGLE(marrowX, marrowY, i, j))) ) {
 							sectorSlice.at(j,i) = originalSlice.at(j,i);
 						}
 					}
@@ -1098,6 +1091,70 @@ void MainWindow::drawSlice() {
 	drawSlice(_currentSlice);
 }
 
+void MainWindow::initComponentsValues() {
+	_ui->_spansliderSliceThreshold->setMinimum(MINIMUM_INTENSITY);
+	_ui->_spansliderSliceThreshold->setLowerValue(MINIMUM_INTENSITY);
+	_ui->_spansliderSliceThreshold->setMaximum(MAXIMUM_INTENSITY);
+	_ui->_spansliderSliceThreshold->setUpperValue(MAXIMUM_INTENSITY);
+
+	_ui->_spinMinThreshold->setMinimum(MINIMUM_INTENSITY);
+	_ui->_spinMinThreshold->setMaximum(MAXIMUM_INTENSITY);
+	_ui->_spinMinThreshold->setValue(MINIMUM_INTENSITY);
+
+	_ui->_spinMaxThreshold->setMinimum(MINIMUM_INTENSITY);
+	_ui->_spinMaxThreshold->setMaximum(MAXIMUM_INTENSITY);
+	_ui->_spinMaxThreshold->setValue(MAXIMUM_INTENSITY);
+
+	_ui->_spinMinSlice->setMinimum(0);
+	_ui->_spinMinSlice->setMaximum(0);
+	_ui->_spinMinSlice->setValue(0);
+
+	_ui->_spinMaxSlice->setMinimum(0);
+	_ui->_spinMaxSlice->setMaximum(0);
+	_ui->_spinMaxSlice->setValue(0);
+
+	_ui->_sliderSelectSlice->setValue(0);
+	_ui->_sliderSelectSlice->setRange(0,0);
+
+	_ui->_sliderMovementThresholdMin->setMinimum(0);
+	_ui->_sliderMovementThresholdMin->setMaximum(1000);
+	_ui->_sliderMovementThresholdMin->setValue(MINIMUM_Z_MOTION);
+
+	_ui->_sliderMovementThresholdMax->setMinimum(0);
+	_ui->_sliderMovementThresholdMax->setMaximum(2000);
+	_ui->_sliderMovementThresholdMax->setValue(MAXIMUM_Z_MOTION);
+
+	_ui->_checkUseNextSlice->setChecked(false);
+
+	_ui->_checkHistogramSmoothing->setEnabled(true);
+
+	_ui->_sliderMaximumsNeighborhood->setMinimum(0);
+	_ui->_sliderMaximumsNeighborhood->setMaximum(50);
+	_ui->_sliderMaximumsNeighborhood->setValue(MAXIMUMS_NEIGHBORHOOD_RADIUS);
+
+	_ui->_spinMaximumsNeighborhood->setMinimum(0);
+	_ui->_spinMaximumsNeighborhood->setMaximum(50);
+	_ui->_spinMaximumsNeighborhood->setValue(MAXIMUMS_NEIGHBORHOOD_RADIUS);
+
+	_ui->_comboHistogramInterval->setCurrentIndex(_ui->_comboHistogramInterval->count()-1);
+
+	_ui->_sliderHistogramIntervalMinimumWidth->setMinimum(0);
+	_ui->_sliderHistogramIntervalMinimumWidth->setMaximum(50);
+	_ui->_sliderHistogramIntervalMinimumWidth->setValue(MINIMUM_INTERVAL_WIDTH);
+
+	_ui->_spinHistogramIntervalMinimumWidth->setMinimum(0);
+	_ui->_spinHistogramIntervalMinimumWidth->setMaximum(50);
+	_ui->_spinHistogramIntervalMinimumWidth->setValue(MINIMUM_INTERVAL_WIDTH);
+
+	_ui->_spinSectorsOrientation->setMinimum(0);
+	_ui->_spinSectorsOrientation->setMaximum(360);
+	_ui->_spinSectorsOrientation->setValue(0);
+
+	_ui->_spinSectorsNumber->setMinimum(0);
+	_ui->_spinSectorsNumber->setMaximum(500);
+	_ui->_spinSectorsNumber->setValue(360);
+}
+
 void MainWindow::updateComponentsValues() {
 	int minValue, maxValue, nbSlices;
 	const bool existBillon = (_billon != 0);
@@ -1117,17 +1174,17 @@ void MainWindow::updateComponentsValues() {
 	}
 
 	_ui->_spansliderSliceThreshold->setMinimum(minValue);
-	_ui->_spansliderSliceThreshold->setLowerValue(-700);
+	_ui->_spansliderSliceThreshold->setLowerValue(MINIMUM_INTENSITY);
 	_ui->_spansliderSliceThreshold->setMaximum(maxValue);
-	_ui->_spansliderSliceThreshold->setUpperValue(500);
+	_ui->_spansliderSliceThreshold->setUpperValue(MAXIMUM_INTENSITY);
 
 	_ui->_spinMinThreshold->setMinimum(minValue);
 	_ui->_spinMinThreshold->setMaximum(maxValue);
-	_ui->_spinMinThreshold->setValue(-700);
+	_ui->_spinMinThreshold->setValue(MINIMUM_INTENSITY);
 
 	_ui->_spinMaxThreshold->setMinimum(minValue);
 	_ui->_spinMaxThreshold->setMaximum(maxValue);
-	_ui->_spinMaxThreshold->setValue(500);
+	_ui->_spinMaxThreshold->setValue(MAXIMUM_INTENSITY);
 
 	_ui->_spinMinSlice->setMinimum(0);
 	_ui->_spinMinSlice->setMaximum(nbSlices-1);
@@ -1167,7 +1224,5 @@ void MainWindow::computeSectorsHistogramForInterval( const SlicesInterval &inter
 
 	_ui->_plotAngularHistogram->replot();
 	_ui->_polarSectorSum->replot();
-	_ui->_plotAngularHistogram2->replot();
-	_ui->_polarSectorSum2->replot();
 	highlightSectorHistogram(0);
 }

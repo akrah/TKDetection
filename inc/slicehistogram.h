@@ -60,8 +60,8 @@ private:
 	QVector<QwtIntervalSample> _datasBranchesAreaToDrawing;
 	QVector<QwtInterval> _datasBranchesRealAreas;
 
-	QwtPlotCurve *_curveMax;
-	qreal _dataMax;
+	QwtPlotCurve *_curvePercentage;
+	qreal _dataPercentage;
 
 	QwtPlotCurve *_curveMeans;
 	qreal _dataMeans;
