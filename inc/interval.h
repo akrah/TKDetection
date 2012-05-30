@@ -21,7 +21,7 @@ public:
 	bool containsClosed( const int &value ) const;
 	bool containsClosed( const Interval &interval ) const;
 
-	virtual bool isValid() const = 0;
+	virtual bool isValid() const;
 
 	Interval& operator =(const Interval& other);
 

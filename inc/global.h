@@ -11,6 +11,8 @@
 #define DEG_TO_RAD_FACT	(PI/180.)
 #define RAD_TO_DEG_FACT	(180./PI)
 
+#define GAUSSIAN_CONSTANT (1./(qSqrt(TWO_PI)))
+
 #define DOUBLE_ERR_POS 0.0000000001
 #define DOUBLE_ERR_NEG (-DOUBLE_ERR_POS)
 
@@ -21,6 +23,10 @@ namespace {
 		qreal arcos = !qFuzzyCompare(sqrt,0.)?qAcos(x_diff / sqrt):0;
 		if ( yo > y2 ) arcos = -arcos+TWO_PI;
 		return arcos;
+	}
+
+	inline qreal GAUSSIAN( qreal x ) {
+		return GAUSSIAN_CONSTANT*qExp(-0.5*(x*x));
 	}
 }
 

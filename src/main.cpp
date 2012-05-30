@@ -16,6 +16,8 @@ void outputHandler(QtMsgType type, const char *msg)
 	}
 }
 
+#include "tst/test_intervalshistogram.h"
+
 int main(int argc, char *argv[])
 {
 	qInstallMsgHandler(outputHandler);
@@ -24,8 +26,10 @@ int main(int argc, char *argv[])
 	QTextCodec::setCodecForCStrings(QTextCodec::codecForName("UTF-8"));
 
 	QApplication a(argc, argv);
-	MainWindow w;
-	w.show();
+	//MainWindow w;
+	//w.show();
+	//return a.exec();
 
-	return a.exec();
+	Test_IntervalsHistogram::allTests();
+	return 0;
 }

@@ -1,18 +1,18 @@
-#-----------------------------------------------------
+#-------------------------------------------------------
 #
-# Fichier de configuration de compilation de TreeSnake
+# Fichier de configuration de compilation de TKDetection
 #
 # Project created by QtCreator 2011-12-08T16:51:12
 #
 #		Adrien Krähenbühl
 #
-#-----------------------------------------------------
+#-------------------------------------------------------
 
 # Version d'ITK installée : itk3 | itk4
 ITK_VERSION = itk4
 ITK_NUMBER =  4.1
 
-#------------ NE PAS MODIFIER EN DESSOUS ------------#
+#------------- NE PAS MODIFIER EN DESSOUS -------------#
 
 QT			*=	core gui xml
 CONFIG		*=	qwt qxt qwtpolar
@@ -21,7 +21,7 @@ QXT			=	core gui
 TEMPLATE	=	app
 TARGET		=	TKDetection
 
-DEPENDPATH	*=	./src/ ./inc/ ./ui/
+DEPENDPATH	*=	./src/ ./inc/ ./ui/ ./tst/
 
 SOURCES		=	main.cpp \
 				connexcomponentextractor.cpp \
@@ -30,6 +30,7 @@ SOURCES		=	main.cpp \
 				histoexport.cpp \
 				intensityinterval.cpp \
 				interval.cpp \
+				intervalscomputer.cpp \
 				mainwindow.cpp \
 				marrow.cpp \
 				marrowextractor.cpp \
@@ -45,6 +46,7 @@ SOURCES		=	main.cpp \
 				sliceview.cpp \
 				slicezoomer.cpp \
 				slicesinterval.cpp \
+				test_intervalshistogram.cpp \
 				v3dexport.cpp \
 				v3dreader.cpp \
 
@@ -57,6 +59,8 @@ HEADERS		=	billon.h \
 				histoexport.h \
 				intensityinterval.h \
 				interval.h \
+				intervalscomputer.h \
+				intervalscomputerdefaultparameters.h \
 				mainwindow.h \
 				marrow.h \
 				marrow_def.h \
@@ -76,13 +80,15 @@ HEADERS		=	billon.h \
 				sliceview.h \
 				sliceview_def.h \
 				slicezoomer.h \
+				test_intervalshistogram.h \
 				v3dexport.h \
 				v3dreader.h \
 
 FORMS		=	mainwindow.ui
 
 INCLUDEPATH *=  /usr/include/ \
-				/usr/local/include/
+				/usr/local/include/ \
+				/usr/include/qwt/
 
 CONFIG += $${ITK_VERSION}
 itk3 {
