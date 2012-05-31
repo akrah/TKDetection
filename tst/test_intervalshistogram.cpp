@@ -112,13 +112,13 @@ namespace Test_IntervalsHistogram {
 	void routineCommune( QVector<qreal> &hist, bool loop ) {
 		std::cout << "Avant : ";
 		coutHistogram( hist.begin(), hist.end() );
-		const QVector<qreal> smootheddHist = IntervalsComputer::gaussianSmoothing(hist,2,loop);
+		const QVector<qreal> smootheddHist = IntervalsComputer::gaussianSmoothing(hist,DEFAULT_MASK_RADIUS,loop);
 		std::cout << "Après : ";
 		coutHistogram( smootheddHist.begin(), smootheddHist.end() );
-		const QVector<int> maximums = IntervalsComputer::maximumsComputing( smootheddHist, IntervalsComputer::minimumThresholdPercentage(smootheddHist), 5, loop );
+		const QVector<int> maximums = IntervalsComputer::maximumsComputing( smootheddHist, IntervalsComputer::minimumThresholdPercentage(smootheddHist), DEFAULT_MINIMUM_WIDTH_OF_NEIGHBORHOOD, loop );
 		std::cout << "Maximums : ";
 		coutHistogram(maximums.begin(),maximums.end());
-		const QVector<Interval> intervals = IntervalsComputer::intervalsComputing( smootheddHist, maximums, IntervalsComputer::minimumThresholdPercentage(smootheddHist), 1, loop );
+		const QVector<Interval> intervals = IntervalsComputer::intervalsComputing( smootheddHist, maximums, IntervalsComputer::minimumThresholdPercentage(smootheddHist), DEFAULT_MINIMUM_WIDTH_OF_INTERVALS, loop );
 		std::cout << "intervals 1 : ";
 		coutHistogram(intervals.begin(),intervals.end());
 		const QVector<Interval> intervals2 = IntervalsComputer::defaultComputingOfIntervals( hist, loop );
