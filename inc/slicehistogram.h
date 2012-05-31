@@ -2,8 +2,6 @@
 #define SLICEHISTOGRAM_H
 
 #include <QVector>
-
-#include "slicehistogram_def.h"
 #include "billon_def.h"
 
 class Marrow;
@@ -29,7 +27,6 @@ public:
 	const QVector<QwtInterval> & branchesAreas() const;
 
 	void setMarrowAroundDiameter( const int &diameter );
-	void setIntervalType( const HistogramIntervalType::HistogramIntervalType &type );
 	void setMinimumIntervalWidth( const int &width );
 	void setMovementThresholdMin( const int &threshold );
 	void setMovementThresholdMax( const int &threshold );
@@ -45,7 +42,7 @@ public:
 private:
 	void smoothHistogram( QVector< QwtIntervalSample > &histogramDatas );
 	void computeMaximums();
-	void computeMeansAndMedian();
+	void computePercentage();
 	void computeIntervals();
 
 
@@ -63,17 +60,7 @@ private:
 	QwtPlotCurve *_curvePercentage;
 	qreal _dataPercentage;
 
-	QwtPlotCurve *_curveMeans;
-	qreal _dataMeans;
-
-	QwtPlotCurve *_curveMedian;
-	qreal _dataMedian;
-
-	QwtPlotCurve *_curveMeansMedian;
-	qreal _dataMeansMedian;
-
 	int _marrowAroundDiameter;
-	HistogramIntervalType::HistogramIntervalType _intervalType;
 	int _minimumIntervalWidth;
 	int _movementThresholdMin;
 	int _movementThresholdMax;

@@ -41,7 +41,6 @@ private slots:
 	void setHighThreshold( const int &threshold );
 	void updateSliceHistogram();
 	void setMarrowAroundDiameter( const int &diameter );
-	void setHistogramIntervalType( const int &type );
 	void setHistogramIntervalMinimumWidth( const int &width );
 	void enableHistogramSmoothing( const bool &enable );
 	void setHistogramMaximumsNeighborhood( const int &neighborhood );

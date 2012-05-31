@@ -7,7 +7,7 @@
 #include <qwt_plot_curve.h>
 
 SliceHistogram::SliceHistogram() : _histogram(new QwtPlotHistogram()), _histogramMaximums(new QwtPlotHistogram()), _histogramBranchesArea(new QwtPlotHistogram()),
-	_curvePercentage(new QwtPlotCurve()), _curveMeans(new QwtPlotCurve()), _dataMeans(0.), _curveMedian(new QwtPlotCurve()), _dataMedian(0.), _curveMeansMedian(new QwtPlotCurve()), _dataMeansMedian(0.), _marrowAroundDiameter(100), _intervalType(HistogramIntervalType::FROM_PERCENTAGE),	_minimumIntervalWidth(10), _movementThresholdMin(MINIMUM_Z_MOTION), _movementThresholdMax(MAXIMUM_Z_MOTION), _smoothing(true), _useNextSlice(true), _maximumsNeighborhood(10)
+	_curvePercentage(new QwtPlotCurve()), _dataPercentage(0.), _marrowAroundDiameter(100), _minimumIntervalWidth(10), _movementThresholdMin(MINIMUM_Z_MOTION), _movementThresholdMax(MAXIMUM_Z_MOTION), _smoothing(true), _useNextSlice(true), _maximumsNeighborhood(10)
 {
 	_histogramMaximums->setBrush(Qt::green);
 	_histogramMaximums->setPen(QPen(Qt::green));
@@ -16,9 +16,6 @@ SliceHistogram::SliceHistogram() : _histogram(new QwtPlotHistogram()), _histogra
 	_histogramBranchesArea->setPen(QPen(Qt::blue));
 
 	_curvePercentage->setPen(QPen(Qt::red));
-	_curveMeans->setPen(QPen(Qt::red));
-	_curveMedian->setPen(QPen(Qt::red));
-	_curveMeansMedian->setPen(QPen(Qt::red));
 }
 
 SliceHistogram::~SliceHistogram() {
@@ -26,9 +23,6 @@ SliceHistogram::~SliceHistogram() {
 	if ( _histogramMaximums != 0 ) delete _histogramMaximums;
 	if ( _histogramBranchesArea != 0 ) delete _histogramBranchesArea;
 	if ( _curvePercentage != 0 ) delete _curvePercentage;
-	if ( _curveMeans != 0 ) delete _curveMeans;
-	if ( _curveMedian != 0 ) delete _curveMedian;
-	if ( _curveMeansMedian != 0 ) delete _curveMeansMedian;
 }
 
 /*******************************
@@ -80,12 +74,6 @@ void SliceHistogram::setMarrowAroundDiameter( const int &diameter ) {
 	_marrowAroundDiameter = diameter;
 }
 
-void SliceHistogram::setIntervalType( const HistogramIntervalType::HistogramIntervalType &type ) {
-	if ( type > HistogramIntervalType::_HIST_INTERVAL_TYPE_MIN_ && type < HistogramIntervalType::_HIST_INTERVAL_TYPE_MAX__ ) {
-		_intervalType = type;
-	}
-}
-
 void SliceHistogram::setMinimumIntervalWidth( const int &width ) {
 	_minimumIntervalWidth = width;
 }
@@ -121,17 +109,8 @@ void SliceHistogram::attach( QwtPlot * const plot ) {
 		if ( _histogramMaximums != 0 ) {
 			_histogramMaximums->attach(plot);
 		}
-		if ( _intervalType == HistogramIntervalType::FROM_PERCENTAGE && _curvePercentage != 0 ) {
+		if ( _curvePercentage != 0 ) {
 			_curvePercentage->attach(plot);
-		}
-		else if ( _intervalType == HistogramIntervalType::FROM_MEANS && _curveMeans != 0 ) {
-			_curveMeans->attach(plot);
-		}
-		else if ( _intervalType == HistogramIntervalType::FROM_MEDIAN && _curveMedian != 0 ) {
-			_curveMedian->attach(plot);
-		}
-		else if ( _intervalType == HistogramIntervalType::FROM_MIDDLE_OF_MEANS_AND_MEDIAN && _curveMeansMedian != 0 ) {
-			_curveMeansMedian->attach(plot);
 		}
 	}
 }
@@ -149,15 +128,6 @@ void SliceHistogram::detach() {
 	if ( _curvePercentage != 0 ) {
 		_curvePercentage->detach();
 	}
-	if ( _curveMeans != 0 ) {
-		_curveMeans->detach();
-	}
-	if ( _curveMedian != 0 ) {
-		_curveMedian->detach();
-	}
-	if ( _curveMeansMedian != 0 ) {
-		_curveMeansMedian->detach();
-	}
 }
 
 void SliceHistogram::clear() {
@@ -170,12 +140,6 @@ void SliceHistogram::clear() {
 	_histogramBranchesArea->setSamples(_datasBranchesAreaToDrawing);
 	_dataPercentage = 0.;
 	_curvePercentage->setSamples(QVector<QPointF>());
-	_dataMeans = 0.;
-	_curveMeans->setSamples(QVector<QPointF>());
-	_dataMedian = 0.;
-	_curveMedian->setSamples(QVector<QPointF>());
-	_dataMeansMedian = 0.;
-	_curveMeansMedian->setSamples(QVector<QPointF>());
 }
 
 void SliceHistogram::constructHistogram( const Billon &billon, const Marrow *marrow, const IntensityInterval &intensity ) {
@@ -252,7 +216,7 @@ void SliceHistogram::constructHistogram( const Billon &billon, const Marrow *mar
 	if (_smoothing) smoothHistogram( _datasHistogram );
 	_histogram->setSamples(_datasHistogram);
 	computeMaximums();
-	computeMeansAndMedian();
+	computePercentage();
 	computeIntervals();
 }
 
@@ -315,75 +279,36 @@ void SliceHistogram::computeIntervals() {
 		int cursorMax, cursorMin;
 		qreal derivated;
 		QVector<QwtIntervalSample> setOfIntervals;
-		if ( _intervalType != HistogramIntervalType::FROM_EDGE ) {
-			const qreal limit = _intervalType==HistogramIntervalType::FROM_MEANS?_dataMeans:_intervalType==HistogramIntervalType::FROM_MEDIAN?_dataMedian:_intervalType==HistogramIntervalType::FROM_PERCENTAGE?_dataPercentage:_dataMeansMedian;
-			for ( int i=0 ; i<nbMaximums ; ++i ) {
-				cursorMin = sliceOfIemeMaximum(i);
-				if (_datasBranchesRealAreas.size() == 0 || _datasBranchesRealAreas.last().maxValue() < cursorMin ) {
-					setOfIntervals.clear();
-					derivated = firstdDerivated(_datasHistogram,cursorMin);
-					while ( cursorMin > 0 && (_datasHistogram.at(cursorMin).value > limit || derivated > 0.) ) {
-						setOfIntervals.append(_datasHistogram.at(cursorMin));
-						cursorMin--;
-						if ( cursorMin > 0 ) derivated = firstdDerivated(_datasHistogram,cursorMin);
-					}
-					cursorMin++;
-
-					if (_datasBranchesRealAreas.size() == 0 || _datasBranchesRealAreas.last().minValue() != cursorMin ) {
-						cursorMax = sliceOfIemeMaximum(i)+1;
-						derivated = firstdDerivated(_datasHistogram,cursorMax);
-						while ( cursorMax < sizeOfHistogram && (_datasHistogram.at(cursorMax).value > limit || derivated < 0.) ) {
-							setOfIntervals.append(_datasHistogram.at(cursorMax));
-							cursorMax++;
-							if ( cursorMax < sizeOfHistogram ) derivated = firstdDerivated(_datasHistogram,cursorMax);
-						}
-						cursorMax--;
-
-						if ( (cursorMax-cursorMin) > _minimumIntervalWidth ) {
-							_datasBranchesAreaToDrawing << setOfIntervals;
-							_datasBranchesRealAreas.append(QwtInterval(cursorMin,cursorMax));
-						}
-						else {
-							_datasMaximums.remove(i);
-							nbMaximums--;
-							i--;
-						}
-					}
+		for ( int i=0 ; i<nbMaximums ; ++i ) {
+			cursorMin = sliceOfIemeMaximum(i);
+			if (_datasBranchesRealAreas.size() == 0 || _datasBranchesRealAreas.last().maxValue() < cursorMin ) {
+				setOfIntervals.clear();
+				derivated = firstdDerivated(_datasHistogram,cursorMin);
+				while ( cursorMin > 0 && (_datasHistogram.at(cursorMin).value > _dataPercentage || derivated > 0.) ) {
+					setOfIntervals.append(_datasHistogram.at(cursorMin));
+					cursorMin--;
+					if ( cursorMin > 0 ) derivated = firstdDerivated(_datasHistogram,cursorMin);
 				}
-			}
-		}
-		else {
-			for ( int i=0 ; i<nbMaximums ; ++i ) {
-				cursorMin = sliceOfIemeMaximum(i);
-				if (_datasBranchesRealAreas.size() == 0 || _datasBranchesRealAreas.last().maxValue() < cursorMin ) {
-					setOfIntervals.clear();
-					derivated = firstdDerivated(_datasHistogram,cursorMin);
-					while ( cursorMin > 0 && derivated > 0. ) {
-						setOfIntervals.append(_datasHistogram.at(cursorMin));
-						cursorMin--;
-						if ( cursorMin > 0 ) derivated = firstdDerivated(_datasHistogram,cursorMin);
+				cursorMin++;
+
+				if (_datasBranchesRealAreas.size() == 0 || _datasBranchesRealAreas.last().minValue() != cursorMin ) {
+					cursorMax = sliceOfIemeMaximum(i)+1;
+					derivated = firstdDerivated(_datasHistogram,cursorMax);
+					while ( cursorMax < sizeOfHistogram && (_datasHistogram.at(cursorMax).value > _dataPercentage || derivated < 0.) ) {
+						setOfIntervals.append(_datasHistogram.at(cursorMax));
+						cursorMax++;
+						if ( cursorMax < sizeOfHistogram ) derivated = firstdDerivated(_datasHistogram,cursorMax);
 					}
-					cursorMin++;
+					cursorMax--;
 
-					if (_datasBranchesRealAreas.size() == 0 || _datasBranchesRealAreas.last().minValue() != cursorMin ) {
-						cursorMax = sliceOfIemeMaximum(i)+1;
-						derivated = firstdDerivated(_datasHistogram,cursorMax);
-						while ( cursorMax < sizeOfHistogram && derivated < 0. ) {
-							setOfIntervals.append(_datasHistogram.at(cursorMax));
-							cursorMax++;
-							if ( cursorMax < sizeOfHistogram ) derivated = firstdDerivated(_datasHistogram,cursorMax);
-						}
-						cursorMax--;
-
-						if ( (cursorMax-cursorMin) > _minimumIntervalWidth ) {
-							_datasBranchesAreaToDrawing << setOfIntervals;
-							_datasBranchesRealAreas.append(QwtInterval(cursorMin,cursorMax));
-						}
-						else {
-							_datasMaximums.remove(i);
-							nbMaximums--;
-							i--;
-						}
+					if ( (cursorMax-cursorMin) > _minimumIntervalWidth ) {
+						_datasBranchesAreaToDrawing << setOfIntervals;
+						_datasBranchesRealAreas.append(QwtInterval(cursorMin,cursorMax));
+					}
+					else {
+						_datasMaximums.remove(i);
+						nbMaximums--;
+						i--;
 					}
 				}
 			}
@@ -400,46 +325,19 @@ void SliceHistogram::computeIntervals() {
 }
 
 
-void SliceHistogram::computeMeansAndMedian() {
+void SliceHistogram::computePercentage() {
 	const int nbDatas = _datasHistogram.size();
-	qreal xMax[2] = { 0., nbDatas };
-	qreal yMax[2] = { 0., 0. };
-	qreal xMeans[2] = { 0., nbDatas };
-	qreal yMeans[2] = { 0., 0. };
-	qreal xMedian[2] = { 0., nbDatas };
-	qreal yMedian[2] = { 0., 0. };
-	qreal xMeansMedian[2] = { 0., nbDatas };
-	qreal yMeansMedian[2] = { 0., 0. };
-	qreal currentValue, minValue;
+	qreal xPercentage[2] = { 0., nbDatas };
+	qreal yPercentage[2] = { 0., 0. };
+	qreal minValue;
 	_dataPercentage = 0.;
-	_dataMeans = 0.;
-	_dataMedian = 0.;
-	_dataMeansMedian = 0.;
 	if ( nbDatas > 0 ) {
-		minValue = _datasHistogram.at(0).value;
-		QVector<qreal> listToSort(nbDatas);
-		minValue = _datasHistogram.at(0).value;
 		for ( int i=0 ; i<nbDatas ; ++i ) {
-			currentValue = _datasHistogram.at(i).value;
-			_dataPercentage = qMax(_dataPercentage,currentValue);
-			minValue = qMin(minValue,currentValue);
-			_dataMeans += currentValue;
-			listToSort[i] = currentValue;
+			_dataPercentage = qMax(_dataPercentage,_datasHistogram.at(i).value);
 		}
+		minValue = _datasHistogram.at(0).value;
 		_dataPercentage  = (_dataPercentage-minValue)*PERCENTAGE_FOR_MAXIMUM_CANDIDATE + minValue;
-		_dataMeans /= static_cast<qreal>(nbDatas);
-		qSort(listToSort);
-		if ( nbDatas % 2 == 0 ) _dataMedian = (listToSort.at((nbDatas/2)-1)+listToSort.at(nbDatas/2))/2.;
-		else _dataMedian = listToSort.at((nbDatas+1)/2-1);
-		_dataMeansMedian = (_dataMeans+_dataMedian)/2.;
-
-		yMax[0] = yMax[1] = _dataPercentage;
-		yMeans[0] = yMeans[1] = _dataMeans;
-		yMedian[0] = yMedian[1] = _dataMedian;
-		yMeansMedian[0] = yMeansMedian[1] = _dataMeansMedian;
+		yPercentage[0] = yPercentage[1] = _dataPercentage;
 	}
-	_curvePercentage->setSamples(xMax,yMax,2);
-	_curveMeans->setSamples(xMeans,yMeans,2);
-	_curveMedian->setSamples(xMedian,yMedian,2);
-	_curveMeansMedian->setSamples(xMeansMedian,yMeansMedian,2);
+	_curvePercentage->setSamples(xPercentage,yPercentage,2);
 }

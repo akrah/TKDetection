@@ -75,7 +75,6 @@ HEADERS		=	billon.h \
 				piechart.h \
 				pointpolarseriesdata.h \
 				slicehistogram.h \
-				slicehistogram_def.h \
 				slicesinterval.h \
 				sliceview.h \
 				sliceview_def.h \

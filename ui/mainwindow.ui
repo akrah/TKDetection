@@ -192,7 +192,7 @@
      <item>
       <widget class="QTabWidget" name="_tabs">
        <property name="currentIndex">
-        <number>2</number>
+        <number>1</number>
        </property>
        <widget class="QWidget" name="_tabGeneral">
         <attribute name="title">
@@ -411,7 +411,7 @@
                 <rect>
                  <x>0</x>
                  <y>0</y>
-                 <width>374</width>
+                 <width>369</width>
                  <height>177</height>
                 </rect>
                </property>
@@ -558,7 +558,7 @@
                 <rect>
                  <x>0</x>
                  <y>0</y>
-                 <width>316</width>
+                 <width>317</width>
                  <height>178</height>
                 </rect>
                </property>
@@ -774,45 +774,6 @@ autour de la moelle</string>
            </item>
           </layout>
          </item>
-         <item row="4" column="0">
-          <widget class="QLabel" name="label_23">
-           <property name="text">
-            <string>Calcul des intervalles</string>
-           </property>
-          </widget>
-         </item>
-         <item row="4" column="1">
-          <widget class="QComboBox" name="_comboHistogramInterval">
-           <property name="currentIndex">
-            <number>0</number>
-           </property>
-           <item>
-            <property name="text">
-             <string>Dès le sommet</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>En dessous de la moyenne</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>En dessous de la médiane</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>En dessous du mileu moy/méd</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>En dessous de 5% du maximum</string>
-            </property>
-           </item>
-          </widget>
-         </item>
          <item row="2" column="0">
           <widget class="QLabel" name="label_24">
            <property name="text">
@@ -827,47 +788,6 @@ autour de la moelle</string>
            </property>
            <property name="checked">
             <bool>true</bool>
-           </property>
-          </widget>
-         </item>
-         <item row="6" column="1">
-          <widget class="QPushButton" name="_buttonExportHistogramToSep">
-           <property name="text">
-            <string>Export en .sep</string>
-           </property>
-          </widget>
-         </item>
-         <item row="5" column="1">
-          <layout class="QHBoxLayout" name="horizontalLayout_13">
-           <item>
-            <widget class="QSlider" name="_sliderHistogramIntervalMinimumWidth">
-             <property name="maximum">
-              <number>50</number>
-             </property>
-             <property name="value">
-              <number>10</number>
-             </property>
-             <property name="orientation">
-              <enum>Qt::Horizontal</enum>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QSpinBox" name="_spinHistogramIntervalMinimumWidth">
-             <property name="maximum">
-              <number>50</number>
-             </property>
-             <property name="value">
-              <number>10</number>
-             </property>
-            </widget>
-           </item>
-          </layout>
-         </item>
-         <item row="5" column="0">
-          <widget class="QLabel" name="label_5">
-           <property name="text">
-            <string>Largeur minimale des intervalles</string>
            </property>
           </widget>
          </item>
@@ -910,6 +830,47 @@ autour de la moelle</string>
             </widget>
            </item>
           </layout>
+         </item>
+         <item row="4" column="0">
+          <widget class="QLabel" name="label_5">
+           <property name="text">
+            <string>Largeur minimale des intervalles</string>
+           </property>
+          </widget>
+         </item>
+         <item row="4" column="1">
+          <layout class="QHBoxLayout" name="horizontalLayout_13">
+           <item>
+            <widget class="QSlider" name="_sliderHistogramIntervalMinimumWidth">
+             <property name="maximum">
+              <number>50</number>
+             </property>
+             <property name="value">
+              <number>10</number>
+             </property>
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QSpinBox" name="_spinHistogramIntervalMinimumWidth">
+             <property name="maximum">
+              <number>50</number>
+             </property>
+             <property name="value">
+              <number>10</number>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+         <item row="5" column="1">
+          <widget class="QPushButton" name="_buttonExportHistogramToSep">
+           <property name="text">
+            <string>Export en .sep</string>
+           </property>
+          </widget>
          </item>
         </layout>
        </widget>
@@ -974,7 +935,7 @@ autour de la moelle</string>
             <layout class="QVBoxLayout" name="verticalLayout_8">
              <item>
               <widget class="QwtPolarPlot" name="_polarSectorSum">
-               <property name="plotBackground">
+               <property name="plotBackground" stdset="0">
                 <brush brushstyle="SolidPattern">
                  <color alpha="0">
                   <red>255</red>
@@ -1651,15 +1612,15 @@ d'une composante</string>
    <container>1</container>
   </customwidget>
   <customwidget>
+   <class>QxtSpanSlider</class>
+   <extends>QSlider</extends>
+   <header>QxtSpanSlider</header>
+  </customwidget>
+  <customwidget>
    <class>QwtPolarPlot</class>
    <extends>QFrame</extends>
    <header>qwt_polar_plot.h</header>
    <container>1</container>
-  </customwidget>
-  <customwidget>
-   <class>QxtSpanSlider</class>
-   <extends>QSlider</extends>
-   <header>QxtSpanSlider</header>
   </customwidget>
  </customwidgets>
  <tabstops>
@@ -1703,7 +1664,6 @@ d'une composante</string>
   <tabstop>_checkHistogramSmoothing</tabstop>
   <tabstop>_sliderMaximumsNeighborhood</tabstop>
   <tabstop>_spinMaximumsNeighborhood</tabstop>
-  <tabstop>_comboHistogramInterval</tabstop>
   <tabstop>_sliderHistogramIntervalMinimumWidth</tabstop>
   <tabstop>_spinHistogramIntervalMinimumWidth</tabstop>
   <tabstop>_buttonExportHistogramToSep</tabstop>

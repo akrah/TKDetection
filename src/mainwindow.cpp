@@ -106,7 +106,6 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 	QObject::connect(_ui->_sliderMarrowAroundDiameter, SIGNAL(valueChanged(int)), this, SLOT(setMarrowAroundDiameter(int)));
 	QObject::connect(_ui->_spinMarrowAroundDiameter, SIGNAL(valueChanged(int)), this, SLOT(setMarrowAroundDiameter(int)));
 	QObject::connect(_ui->_checkMarrowAroundDiameter, SIGNAL(clicked()), this, SLOT(drawSlice()));
-	QObject::connect(_ui->_comboHistogramInterval, SIGNAL(activated(int)), this, SLOT(setHistogramIntervalType(int)));
 	QObject::connect(_ui->_checkHistogramSmoothing, SIGNAL(toggled(bool)), this, SLOT(enableHistogramSmoothing(bool)));
 	QObject::connect(_ui->_sliderMaximumsNeighborhood, SIGNAL(valueChanged(int)), this, SLOT(setHistogramMaximumsNeighborhood(int)));
 	QObject::connect(_ui->_spinMaximumsNeighborhood, SIGNAL(valueChanged(int)), this, SLOT(setHistogramMaximumsNeighborhood(int)));
@@ -407,11 +406,6 @@ void MainWindow::setMarrowAroundDiameter( const int &diameter ) {
 	_ui->_sliderMarrowAroundDiameter->blockSignals(false);
 
 	drawSlice();
-}
-
-void MainWindow::setHistogramIntervalType( const int &type ) {
-	_sliceHistogram->setIntervalType( static_cast<const HistogramIntervalType::HistogramIntervalType>(type) );
-	_pieChartDiagrams->setIntervalType( static_cast<const HistogramIntervalType::HistogramIntervalType>(type) );
 }
 
 void MainWindow::setHistogramIntervalMinimumWidth( const int &width ) {
@@ -1135,8 +1129,6 @@ void MainWindow::initComponentsValues() {
 	_ui->_spinMaximumsNeighborhood->setMinimum(0);
 	_ui->_spinMaximumsNeighborhood->setMaximum(50);
 	_ui->_spinMaximumsNeighborhood->setValue(MAXIMUMS_NEIGHBORHOOD_RADIUS);
-
-	_ui->_comboHistogramInterval->setCurrentIndex(_ui->_comboHistogramInterval->count()-1);
 
 	_ui->_sliderHistogramIntervalMinimumWidth->setMinimum(0);
 	_ui->_sliderHistogramIntervalMinimumWidth->setMaximum(50);

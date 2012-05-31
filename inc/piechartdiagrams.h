@@ -2,7 +2,6 @@
 #define PIECHARTDIAGRAMS_H
 
 #include "billon_def.h"
-#include "slicehistogram_def.h"
 #include "marrow_def.h"
 #include "piechart.h"
 
@@ -37,7 +36,6 @@ public:
 	void setMovementsThresholdMax( const int &threshold );
 	void useNextSliceInsteadOfCurrentSlice( const bool &enable );
 	void setMarrowAroundDiameter( const int &diameter );
-	void setIntervalType( const HistogramIntervalType::HistogramIntervalType &type );
 	void enableSmoothing( const bool &enable );
 
 	void compute( const Billon &billon, const Marrow *marrow, const PieChart &pieChart, const SlicesInterval &slicesInterval, const IntensityInterval &intensity );
@@ -48,7 +46,7 @@ public:
 private:
 	void smoothHistogram( QVector<qreal> &sectorsSum );
 	void createDiagrams( const QVector<qreal> &sectorsSum );
-	void computeMeansAndMedian( const QVector<qreal> &sectorsSum );
+	void computePercentage( const QVector<qreal> &sectorsSum );
 	void computeMaximums( const QVector<qreal> &sectorsSum );
 	void computeIntervals( const QVector<qreal> &sectorsSum );
 
@@ -77,12 +75,6 @@ private:
 
 	qreal _dataPercentage;
 	QwtPlotCurve _curvePercentage;
-	qreal _dataMeans;
-	QwtPlotCurve _curveMeans;
-	qreal _dataMedian;
-	QwtPlotCurve _curveMedian;
-	qreal _dataMeansMedian;
-	QwtPlotCurve _curveMeansMedian;
 
 	PieChart _pieChart;
 
@@ -90,7 +82,6 @@ private:
 	int _movementsThresholdMax;
 	bool _useNextSlice;
 	int _marrowAroundDiameter;
-	HistogramIntervalType::HistogramIntervalType _intervalType;
 	bool _smoothing;
 
 };

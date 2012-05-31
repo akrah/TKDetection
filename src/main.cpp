@@ -16,8 +16,6 @@ void outputHandler(QtMsgType type, const char *msg)
 	}
 }
 
-#include "tst/test_intervalshistogram.h"
-
 int main(int argc, char *argv[])
 {
 	qInstallMsgHandler(outputHandler);
