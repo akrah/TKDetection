@@ -4,11 +4,11 @@
 #include <QString>
 #include "slicehistogram.h"
 #include "billon_def.h"
-class SlicesInterval;
+class Interval;
 class Marrow;
 
 namespace HistoExport {
-  void process( const SliceHistogram &sliceHisto, const SlicesInterval &interval, const QString &fileName);
+  void process( const SliceHistogram &sliceHisto, const Interval &interval, const QString &fileName);
 }
 
 

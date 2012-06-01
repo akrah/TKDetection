@@ -6,8 +6,7 @@
 
 #include "sliceview_def.h"
 #include "slicezoomer.h"
-#include "slicesinterval.h"
-#include "intensityinterval.h"
+#include "interval.h"
 #include <qwt_plot_curve.h>
 
 namespace Ui {
@@ -41,7 +40,6 @@ private slots:
 	void setHighThreshold( const int &threshold );
 	void updateSliceHistogram();
 	void setMarrowAroundDiameter( const int &diameter );
-	void setHistogramIntervalType( const int &type );
 	void setHistogramIntervalMinimumWidth( const int &width );
 	void enableHistogramSmoothing( const bool &enable );
 	void setHistogramMaximumsNeighborhood( const int &neighborhood );
@@ -89,7 +87,7 @@ private:
 	void initComponentsValues();
 	void updateComponentsValues();
 	void enabledComponents();
-	void computeSectorsHistogramForInterval( const SlicesInterval &interval );
+	void computeSectorsHistogramForInterval( const Interval &interval );
 
 private:
 	Ui::MainWindow *_ui;
@@ -109,8 +107,8 @@ private:
 	PieChartDiagrams *_pieChartDiagrams;
 
 	SliceZoomer _sliceZoomer;
-	SlicesInterval _slicesInterval;
-	IntensityInterval _intensityInterval;
+	Interval _slicesInterval;
+	Interval _intensityInterval;
 
 	int _currentSlice;
 	int _currentMaximum;

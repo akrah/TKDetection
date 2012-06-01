@@ -11,7 +11,7 @@ namespace IntervalsComputer
 	QVector<qreal> gaussianSmoothing( const QVector<qreal> &hist, int maskRadius = DEFAULT_MASK_RADIUS , bool loop = false );
 	QVector<int> maximumsComputing( const QVector<qreal> &hist, qreal minimumThreshold, int minimumWidthOfNeighborhood = DEFAULT_MINIMUM_WIDTH_OF_NEIGHBORHOOD, bool loop = false );
 	QVector<Interval> intervalsComputing( const QVector<qreal> &hist, const QVector<int> &maximums, qreal derivativeThreshold, int minimumWidthOfIntervals = DEFAULT_MINIMUM_WIDTH_OF_INTERVALS, bool loop = false );
-	QVector<Interval> defaultComputingOfIntervals( const QVector<qreal> hist, bool loop = false );
+	void defaultComputingOfIntervals( const QVector<qreal> hist, QVector<qreal> &smoothedHist, QVector<int> &maximums, QVector<Interval> &intervals, bool loop = false );
 
 	qreal minimumThresholdPercentage( const QVector<qreal> &hist );
 	qreal minValue( QVector<qreal>::ConstIterator begin, QVector<qreal>::ConstIterator end );

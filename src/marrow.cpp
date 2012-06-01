@@ -1,7 +1,7 @@
 #include "inc/marrow.h"
 
 #include <QPainter>
-#include "inc/slicesinterval.h"
+#include "inc/interval.h"
 
 Marrow::Marrow() : QList<iCoord2D>(), _interval(0,0) {
 }
@@ -12,7 +12,7 @@ Marrow::Marrow( const int &begin, const int &end ) : QList<iCoord2D>(), _interva
 /*******************************
  * Public getters
  *******************************/
-const SlicesInterval &Marrow::interval() const {
+const Interval &Marrow::interval() const {
 	return _interval;
 }
 
@@ -22,7 +22,7 @@ const SlicesInterval &Marrow::interval() const {
  *******************************/
 void Marrow::draw( QImage &image, const int &sliceIdx ) const {
 	if ( _interval.containsClosed(sliceIdx) ) {
-		const iCoord2D &coordToDraw = at(sliceIdx-_interval.min());
+		const iCoord2D &coordToDraw = at(sliceIdx-_interval.minValue());
 
 		QPainter painter(&image);
 		QPainterPath ellipsePath;

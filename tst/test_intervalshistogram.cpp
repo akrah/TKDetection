@@ -18,7 +18,7 @@ namespace {
 	}
 	void coutHistogram( QVector<Interval>::const_iterator begin, QVector<Interval>::const_iterator end ) {
 		while ( begin != end ) {
-			std::cout << '[' << (*begin).min() <<  ", " << (*begin).max() << "] ";
+			std::cout << '[' << (*begin).minValue() <<  ", " << (*begin).maxValue() << "] ";
 			begin++;
 		}
 		std::cout << std::endl;
@@ -118,12 +118,14 @@ namespace Test_IntervalsHistogram {
 		const QVector<int> maximums = IntervalsComputer::maximumsComputing( smootheddHist, IntervalsComputer::minimumThresholdPercentage(smootheddHist), DEFAULT_MINIMUM_WIDTH_OF_NEIGHBORHOOD, loop );
 		std::cout << "Maximums : ";
 		coutHistogram(maximums.begin(),maximums.end());
+<<<<<<< HEAD
 		const QVector<Interval> intervals = IntervalsComputer::intervalsComputing( smootheddHist, maximums, IntervalsComputer::minimumThresholdPercentage(smootheddHist), DEFAULT_MINIMUM_WIDTH_OF_INTERVALS, loop );
 		std::cout << "intervals 1 : ";
+=======
+		const QVector<Interval> intervals = IntervalsComputer::intervalsComputing( smootheddHist, maximums, IntervalsComputer::minimumThresholdPercentage(smootheddHist), 1, loop );
+		std::cout << "intervals : ";
+>>>>>>> NewHistogramComputing
 		coutHistogram(intervals.begin(),intervals.end());
-		const QVector<Interval> intervals2 = IntervalsComputer::defaultComputingOfIntervals( hist, loop );
-		std::cout << "intervals 2 : ";
-		coutHistogram(intervals2.begin(),intervals2.end());
 	}
 
 }
