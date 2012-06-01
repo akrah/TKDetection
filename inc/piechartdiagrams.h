@@ -4,6 +4,7 @@
 #include "billon_def.h"
 #include "marrow_def.h"
 #include "piechart.h"
+#include "pointpolarseriesdata.h"
 
 #include <QList>
 #include <qwt_plot_histogram.h>
@@ -12,12 +13,10 @@
 
 class Marrow;
 class PieChart;
-class SlicesInterval;
-class IntensityInterval;
 class QwtPlot;
 class QwtPolarPlot;
 class QwtIntervalSample;
-class PointPolarSeriesData;
+class Interval;
 
 class PieChartDiagrams
 {
@@ -26,7 +25,7 @@ public:
 	~PieChartDiagrams();
 
 	int count() const;
-	const QVector<QwtInterval> &branchesSectors() const;
+	const QVector<Interval> &branchesSectors() const;
 
 	void attach( QwtPolarPlot * const polarPlot );
 	void attach( QwtPlot * const plot );
@@ -38,43 +37,39 @@ public:
 	void setMarrowAroundDiameter( const int &diameter );
 	void enableSmoothing( const bool &enable );
 
-	void compute( const Billon &billon, const Marrow *marrow, const PieChart &pieChart, const SlicesInterval &slicesInterval, const IntensityInterval &intensity );
+	void compute( const Billon &billon, const Marrow *marrow, const PieChart &pieChart, const Interval &slicesInterval, const Interval &intensity );
 	void highlightCurve( const int &index );
 
 	void draw( QImage &image, const iCoord2D &center ) const;
 
 private:
-	void smoothHistogram( QVector<qreal> &sectorsSum );
-	void createDiagrams( const QVector<qreal> &sectorsSum );
-	void computePercentage( const QVector<qreal> &sectorsSum );
-	void computeMaximums( const QVector<qreal> &sectorsSum );
-	void computeIntervals( const QVector<qreal> &sectorsSum );
+	void computeValues();
+	void computeMaximums();
+	void computeIntervals();
 
 private:
+	QVector<qreal> _datas;
+	QVector<int> _maximums;
+	QVector<Interval> _intervals;
+
 	QwtPolarCurve _curve;
-	PointPolarSeriesData *_curveDatas;
-	QwtPlotHistogram _curveHistogram;
-	QVector<QwtIntervalSample> _curveHistogramDatas;
+	PointPolarSeriesData *_datasCurve;
+	QwtPlotHistogram _histogram;
 
 	QwtPolarCurve _curveMaximums;
-	PointPolarSeriesData *_curveMaximumsDatas;
-	QwtPlotHistogram _curveHistogramMaximums;
-	QVector<QwtIntervalSample> _curveHistogramMaximumsDatas;
-	QVector<int> _maximumsIndex;
+	PointPolarSeriesData *_datasCurveMaximums;
+	QwtPlotHistogram _histogramMaximums;
 
 	QwtPolarCurve _curveIntervals;
-	PointPolarSeriesData *_curveIntervalsDatas;
-	QwtPlotHistogram _curveHistogramIntervals;
-	QVector<QwtIntervalSample> _curveHistogramIntervalsDatas;
-	QVector<QwtInterval> _curveHistogramIntervalsRealDatas;
+	PointPolarSeriesData *_datasCurveIntervals;
+	QwtPlotHistogram _histogramIntervals;
 
 	QwtPolarCurve _highlightCurve;
 	PointPolarSeriesData *_highlightCurveDatas;
 	QwtPlotHistogram _highlightCurveHistogram;
-	QVector<QwtIntervalSample> _highlightCurveHistogramDatas;
 
-	qreal _dataPercentage;
 	QwtPlotCurve _curvePercentage;
+	qreal _dataPercentage;
 
 	PieChart _pieChart;
 

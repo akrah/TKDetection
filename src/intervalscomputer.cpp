@@ -1,6 +1,5 @@
 #include "inc/intervalscomputer.h"
 
-#include <QQueue>
 #include "inc/global.h"
 
 namespace IntervalsComputer {
@@ -82,7 +81,7 @@ namespace IntervalsComputer {
 			for ( int i=0 ; i<nbMaximums ; ++i ) {
 				cursorMin = maximums[i];
 				// Si c'est le premier intervalle ou que le maximum courant n'est pas compris dans l'intervalle précédent.
-				if ( intervals.isEmpty() || intervals.last().min() < cursorMin ) {
+				if ( intervals.isEmpty() || intervals.last().minValue() < cursorMin ) {
 					// On recherche les bornes min et max des potentielles de l'intervalle contenant le ième maximum
 					isSupToThreshold = hist[cursorMin] > derivativeThreshold;
 					while ( isSupToThreshold ) {
@@ -111,7 +110,7 @@ namespace IntervalsComputer {
 					if ( cursorMax<0 ) cursorMax = nbSectors-1;
 
 					// Si c'est le premier intervalle ou que le maximum courant n'est pas compris dans l'intervalle précédent.
-					if ( intervals.isEmpty() || intervals.first().max() != cursorMax ) {
+					if ( intervals.isEmpty() || intervals.first().maxValue() != cursorMax ) {
 						// Si l'intervalle est plus large que minimumWidthOfIntervals
 						if ( cursorMax>cursorMin && qAbs(cursorMax-cursorMin) >= minimumWidthOfIntervals ) {
 							intervals.append(Interval(cursorMin,cursorMax));
@@ -135,10 +134,11 @@ namespace IntervalsComputer {
 		return intervals;
 	}
 
-	QVector<Interval> defaultComputingOfIntervals( const QVector<qreal> hist, bool loop ) {
-		const QVector<qreal> smoothedHist = gaussianSmoothing( hist, 2, loop );
+	void defaultComputingOfIntervals( const QVector<qreal> hist, QVector<qreal> &smoothedHist, QVector<int> &maximums, QVector<Interval> &intervals, bool loop ) {
+		smoothedHist = gaussianSmoothing( hist, 2, loop );
 		const qreal threshold = minimumThresholdPercentage( hist );
-		return intervalsComputing( smoothedHist, maximumsComputing( smoothedHist, threshold, 5, loop ), threshold, 1, loop );
+		maximums = maximumsComputing( smoothedHist, threshold, 5, loop );
+		intervals = intervalsComputing( smoothedHist, maximums, threshold, 1, loop );
 	}
 
 	qreal minimumThresholdPercentage( const QVector<qreal> &hist ) {

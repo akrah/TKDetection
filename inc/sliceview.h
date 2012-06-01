@@ -5,9 +5,9 @@
 #include "sliceview_def.h"
 
 #include "billon_def.h"
-class IntensityInterval;
 class QImage;
 class Marrow;
+class Interval;
 
 class SliceView
 {
@@ -34,15 +34,15 @@ public:
 	void enableRestrictedAreaCircle( const bool &enable );
 	void setRestrictedAreaBeginRadius( const int &radius );
 
-	void drawSlice( QImage &image, const Billon &billon, const Marrow *marrow, const int &sliceNumber, const IntensityInterval &intensityInterval );
+	void drawSlice( QImage &image, const Billon &billon, const Marrow *marrow, const int &sliceNumber, const Interval &intensityInterval );
 
 private :
-	void drawCurrentSlice( QImage &image, const Billon &billon, const int &sliceNumber, const IntensityInterval &intensityInterval );
-	void drawAverageSlice( QImage &image, const Billon &billon, const IntensityInterval &intensityInterval );
-	void drawMedianSlice( QImage &image, const Billon &billon, const IntensityInterval &intensityInterval );
-	void drawMovementSlice( QImage &image, const Billon &billon, const int &sliceNumber, const IntensityInterval &intensityInterval );
+	void drawCurrentSlice( QImage &image, const Billon &billon, const int &sliceNumber, const Interval &intensityInterval );
+	void drawAverageSlice( QImage &image, const Billon &billon, const Interval &intensityInterval );
+	void drawMedianSlice( QImage &image, const Billon &billon, const Interval &intensityInterval );
+	void drawMovementSlice( QImage &image, const Billon &billon, const int &sliceNumber, const Interval &intensityInterval );
 	void drawFlowSlice( QImage &image, const Billon &billon, const int &sliceNumber );
-	void drawRestrictedArea( QImage &image, const Billon &billon, const Marrow *marrow, const int &sliceNumber, const IntensityInterval &intensityInterval );
+	void drawRestrictedArea( QImage &image, const Billon &billon, const Marrow *marrow, const int &sliceNumber, const Interval &intensityInterval );
 
 private:
 	SliceType::SliceType _typeOfView;

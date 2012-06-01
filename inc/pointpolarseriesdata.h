@@ -6,16 +6,20 @@
 class PointPolarSeriesData: public QwtArraySeriesData<QwtPointPolar>
 {
 public:
-	PointPolarSeriesData();
+	PointPolarSeriesData( int size = 0 );
 
 	virtual QRectF boundingRect() const;
 
-	void setSamples( const QVector<QwtPointPolar> &samples );
 	void append( QwtPointPolar point );
 
 	void remove( const int &i );
 	void remove( const int &i, const int &count );
+	void resize( const int &size );
 	void clear();
+
+	QVector<QwtPointPolar>::Iterator begin();
+
+	QwtPointPolar &at( int i );
 };
 
 #endif // POINTPOLARSERIESDATA_H

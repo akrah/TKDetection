@@ -9,26 +9,30 @@ class Interval : public QObject
 
 public:
 	Interval();
-	Interval( const int &min, const int &max );
+	Interval( const int &minValue, const int &maxValue );
 	Interval( const Interval &interval );
 
-	int min() const;
-	int max() const;
-	int size() const;
+	int minValue() const;
+	int maxValue() const;
 	int count() const;
+	int size() const;
+	int width() const;
+	bool contains( const int &value ) const;
+	bool contains( const Interval &interval ) const;
 	bool containsOpen( const int &value ) const;
 	bool containsOpen( const Interval &interval ) const;
 	bool containsClosed( const int &value ) const;
 	bool containsClosed( const Interval &interval ) const;
 
-	virtual bool isValid() const;
+	bool isValid() const;
 
+	Interval inverted() const;
 	Interval& operator =(const Interval& other);
 
 public slots:
-	void setMin( const int &min );
-	void setMax( const int &max );
-	void setBounds( const int &min, const int &max );
+	void setMin( const int &minValue );
+	void setMax( const int &maxValue );
+	void setBounds( const int &minValue, const int &maxValue );
 
 protected:
 	int _min;

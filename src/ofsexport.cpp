@@ -2,7 +2,7 @@
 
 #include "inc/billon.h"
 #include "inc/marrow.h"
-#include "inc/slicesinterval.h"
+#include "inc/interval.h"
 #include "inc/global.h"
 #include "inc/piepart.h"
 
@@ -17,18 +17,18 @@ namespace OfsExport {
 
 	namespace {
 		// Calcul les coordonnées des sommets du maillage de la moelle
-		void computeAllEdges( const Billon &billon, const Marrow &marrow, const SlicesInterval &interval, const int &nbEdges, const int &radius, QTextStream &stream );
-		void computeSectorEdges( const Billon &billon, const Marrow &marrow, const SlicesInterval &interval, const int &nbEdges, const qreal &rightAngle, const qreal &leftAngle, QTextStream &stream );
-		void computeAllSectorInAllIntervalsEdges( const Billon &billon, const Marrow &marrow, const QVector< QPair< SlicesInterval, QPair<qreal,qreal> > > &intervals, const int &nbEdges, QTextStream &stream );
+		void computeAllEdges( const Billon &billon, const Marrow &marrow, const Interval &interval, const int &nbEdges, const int &radius, QTextStream &stream );
+		void computeSectorEdges( const Billon &billon, const Marrow &marrow, const Interval &interval, const int &nbEdges, const qreal &rightAngle, const qreal &leftAngle, QTextStream &stream );
+		void computeAllSectorInAllIntervalsEdges( const Billon &billon, const Marrow &marrow, const QVector<QPair<Interval, QPair<qreal, qreal> > > &intervals, const int &nbEdges, QTextStream &stream );
 
 		//Rajout BK: Affiche les coordonnées des sommets pour l'export OFS (utile iuniquement pour le maillage de la zone réduite)
-		void displayExportedVertex( const Billon &billon, const Marrow &marrow, QVector<rCoord2D> vectVertex, const SlicesInterval &interval, const int &resolutionCercle, QTextStream &stream );
+		void displayExportedVertex( const Billon &billon, const Marrow &marrow, QVector<rCoord2D> vectVertex, const Interval &interval, const int &resolutionCercle, QTextStream &stream );
 
 		// Calcul les faces du maillages de la moelle
 		void computeEgesLinks( const int &nbEdges, const int &nbSlices, QTextStream &stream );
 	}
 
-	void process( const Billon &billon, const Marrow &marrow, const SlicesInterval &interval, const QString &fileName, const int &nbEdgesPerSlice, const int &radiusOfTubes ) {
+	void process( const Billon &billon, const Marrow &marrow, const Interval &interval, const QString &fileName, const int &nbEdgesPerSlice, const int &radiusOfTubes ) {
 		if ( marrow.interval().containsClosed(interval) ) {
 			QFile file(fileName);
 			if ( file.open(QIODevice::WriteOnly) ) {
@@ -44,7 +44,7 @@ namespace OfsExport {
 		}
 	}
 
-	void processOnSector( const Billon &billon, const Marrow &marrow, const SlicesInterval &interval, const QString &fileName, const qreal &rightAngle, const qreal &leftAngle, const int &nbEdgesPerSlice ) {
+	void processOnSector( const Billon &billon, const Marrow &marrow, const Interval &interval, const QString &fileName, const qreal &rightAngle, const qreal &leftAngle, const int &nbEdgesPerSlice ) {
 		if ( marrow.interval().containsClosed(interval) ) {
 			QFile file(fileName);
 			if ( file.open(QIODevice::WriteOnly) ) {
@@ -60,7 +60,7 @@ namespace OfsExport {
 		}
 	}
 
-	void processOnAllSectorInAllIntervals( const Billon &billon, const Marrow &marrow, const QVector< QPair< SlicesInterval, QPair<qreal,qreal> > > &intervals, const QString &fileName, const int &nbEdgesPerSlice ) {
+	void processOnAllSectorInAllIntervals( const Billon &billon, const Marrow &marrow, const QVector< QPair< Interval, QPair<qreal,qreal> > > &intervals, const QString &fileName, const int &nbEdgesPerSlice ) {
 		QFile file(fileName);
 		if ( file.open(QIODevice::WriteOnly) ) {
 				QTextStream stream(&file);
@@ -116,7 +116,7 @@ namespace OfsExport {
 			}
 	}
 
-	void processRestrictedMesh( const Billon &billon, const Marrow &marrow, const SlicesInterval &interval, const QString &fileName, const int &resolutionCercle, const int &seuilContour ) {
+	void processRestrictedMesh( const Billon &billon, const Marrow &marrow, const Interval &interval, const QString &fileName, const int &resolutionCercle, const int &seuilContour ) {
 		  QVector<rCoord2D> vectVertex = billon.getRestrictedAreaVertex( resolutionCercle,seuilContour, &marrow );
 
 		  QFile file(fileName);
@@ -134,11 +134,11 @@ namespace OfsExport {
 	namespace {
 
 
-		void computeAllEdges( const Billon &billon, const Marrow &marrow, const SlicesInterval &interval, const int &nbEdges, const int &radius, QTextStream &stream ) {
+		void computeAllEdges( const Billon &billon, const Marrow &marrow, const Interval &interval, const int &nbEdges, const int &radius, QTextStream &stream ) {
 			const int width = billon.n_cols;
 			const int height = billon.n_rows;
 			const int nbSlices = interval.size();
-			const int firstMarrow = interval.min() - marrow.interval().min();
+			const int firstMarrow = interval.minValue() - marrow.interval().minValue();
 			const int lastMarrow = qMin(firstMarrow + nbSlices,marrow.size());
 			qreal depth = -0.5;
 			const qreal depthShift = 1./(qreal)nbSlices;
@@ -170,11 +170,11 @@ namespace OfsExport {
 			}
 		}
 
-		void computeSectorEdges( const Billon &billon, const Marrow &marrow, const SlicesInterval &interval, const int &nbEdges, const qreal &rightAngle, const qreal &leftAngle, QTextStream &stream ) {
+		void computeSectorEdges( const Billon &billon, const Marrow &marrow, const Interval &interval, const int &nbEdges, const qreal &rightAngle, const qreal &leftAngle, QTextStream &stream ) {
 			const int width = billon.n_cols;
 			const int height = billon.n_rows;
 			const int nbSlices = interval.size();
-			const int firstMarrow = interval.min() - marrow.interval().min();
+			const int firstMarrow = interval.minValue() - marrow.interval().minValue();
 			const int lastMarrow = qMin(firstMarrow + nbSlices,marrow.size());
 			const qreal depthShift = 1./(qreal)nbSlices;
 			const qreal angleShift = (rightAngle<leftAngle?leftAngle-rightAngle:leftAngle+(TWO_PI-rightAngle))/(qreal)(nbEdges-1);
@@ -209,7 +209,7 @@ namespace OfsExport {
 			}
 		}
 
-		void computeAllSectorInAllIntervalsEdges( const Billon &billon, const Marrow &marrow, const QVector< QPair< SlicesInterval, QPair<qreal,qreal> > > &intervals, const int &nbEdges, QTextStream &stream ) {
+		void computeAllSectorInAllIntervalsEdges( const Billon &billon, const Marrow &marrow, const QVector< QPair< Interval, QPair<qreal,qreal> > > &intervals, const int &nbEdges, QTextStream &stream ) {
 			const int width = billon.n_cols;
 			const int height = billon.n_rows;
 
@@ -220,12 +220,12 @@ namespace OfsExport {
 			qreal depth, angle;
 			for ( int k = 0; k<intervals.size() ; ++k ) {
 
-				const SlicesInterval interval = intervals[k].first;
+				const Interval interval = intervals[k].first;
 				const int nbSlices = interval.size();
 				const qreal rightAngle = intervals[k].second.first;
 				const qreal leftAngle = intervals[k].second.second;
 
-				const int firstMarrow = interval.min() - marrow.interval().min();
+				const int firstMarrow = interval.minValue() - marrow.interval().minValue();
 				const int lastMarrow = qMin(firstMarrow + nbSlices,marrow.size());
 				const qreal depthShift = 1./(qreal)nbSlices;
 				const qreal angleShift = (rightAngle<leftAngle?leftAngle-rightAngle:leftAngle+(TWO_PI-rightAngle))/(qreal)(nbEdges-1);
@@ -261,10 +261,10 @@ namespace OfsExport {
 			stream << fullStream;
 		}
 
-		void displayExportedVertex( const Billon &billon, const Marrow &marrow, QVector<rCoord2D> vectVertex, const SlicesInterval &interval,const int &resolutionCercle, QTextStream &stream ){
+		void displayExportedVertex( const Billon &billon, const Marrow &marrow, QVector<rCoord2D> vectVertex, const Interval &interval,const int &resolutionCercle, QTextStream &stream ){
 			const int width = billon.n_cols;
 			const int height = billon.n_rows;
-			const int firstMarrow = interval.min() - marrow.interval().min();
+			const int firstMarrow = interval.minValue() - marrow.interval().minValue();
 			const int nbSlices=interval.size();
 			const int lastMarrow = qMin(firstMarrow + nbSlices,marrow.size());
 			qreal depth = -0.5;

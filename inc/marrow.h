@@ -3,7 +3,7 @@
 
 #include <QList>
 #include "marrow_def.h"
-#include "slicesinterval.h"
+#include "interval.h"
 
 class QImage;
 
@@ -13,12 +13,12 @@ public:
 	Marrow();
 	Marrow( const int &begin, const int &end );
 
-	const SlicesInterval &interval() const;
+	const Interval &interval() const;
 
 	void draw( QImage &image, const int &sliceIdx ) const;
 
 private:
-	SlicesInterval _interval;
+	Interval _interval;
 };
 
 #endif // MARROW_H

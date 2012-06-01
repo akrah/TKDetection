@@ -4,13 +4,14 @@
 #include <QVector>
 #include "billon_def.h"
 
+#include <qwt_plot_histogram.h>
+#include <qwt_plot_curve.h>
+
 class Marrow;
 class QwtPlot;
-class QwtPlotHistogram;
-class QwtPlotCurve;
 class QwtIntervalSample;
 class QwtInterval;
-class IntensityInterval;
+class Interval;
 
 class SliceHistogram
 {
@@ -24,7 +25,7 @@ public:
 	int sliceOfIemeMaximum( const int &maximumIndex ) const;
 	int sliceOfIemeInterval( const int &intervalIndex ) const;
 	int marrowAroundDiameter() const;
-	const QVector<QwtInterval> & branchesAreas() const;
+	const QVector<Interval> &branchesAreas() const;
 
 	void setMarrowAroundDiameter( const int &diameter );
 	void setMinimumIntervalWidth( const int &width );
@@ -37,27 +38,23 @@ public:
 	void detach();
 	void clear();
 
-	void constructHistogram( const Billon &billon, const Marrow *marrow, const IntensityInterval &intensity );
+	void constructHistogram( const Billon &billon, const Marrow *marrow, const Interval &intensity );
 
 private:
-	void smoothHistogram( QVector< QwtIntervalSample > &histogramDatas );
+	void computeValues();
 	void computeMaximums();
-	void computePercentage();
 	void computeIntervals();
 
-
 private:
-	QwtPlotHistogram *_histogram;
-	QVector<QwtIntervalSample> _datasHistogram;
+	QVector<qreal> _datas;
+	QVector<int> _maximums;
+	QVector<Interval> _intervals;
 
-	QwtPlotHistogram *_histogramMaximums;
-	QVector<QwtIntervalSample> _datasMaximums;
+	QwtPlotHistogram _histogramData;
+	QwtPlotHistogram _histogramMaximums;
+	QwtPlotHistogram _histogramIntervals;
 
-	QwtPlotHistogram *_histogramBranchesArea;
-	QVector<QwtIntervalSample> _datasBranchesAreaToDrawing;
-	QVector<QwtInterval> _datasBranchesRealAreas;
-
-	QwtPlotCurve *_curvePercentage;
+	QwtPlotCurve _curvePercentage;
 	qreal _dataPercentage;
 
 	int _marrowAroundDiameter;

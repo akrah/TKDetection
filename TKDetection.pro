@@ -28,7 +28,6 @@ SOURCES		=	main.cpp \
 				datexport.cpp \
 				dicomreader.cpp \
 				histoexport.cpp \
-				intensityinterval.cpp \
 				interval.cpp \
 				intervalscomputer.cpp \
 				mainwindow.cpp \
@@ -45,7 +44,6 @@ SOURCES		=	main.cpp \
 				slicehistogram.cpp \
 				sliceview.cpp \
 				slicezoomer.cpp \
-				slicesinterval.cpp \
 				test_intervalshistogram.cpp \
 				v3dexport.cpp \
 				v3dreader.cpp \
@@ -57,7 +55,6 @@ HEADERS		=	billon.h \
 				dicomreader.h \
 				global.h \
 				histoexport.h \
-				intensityinterval.h \
 				interval.h \
 				intervalscomputer.h \
 				intervalscomputerdefaultparameters.h \
@@ -75,7 +72,6 @@ HEADERS		=	billon.h \
 				piechart.h \
 				pointpolarseriesdata.h \
 				slicehistogram.h \
-				slicesinterval.h \
 				sliceview.h \
 				sliceview_def.h \
 				slicezoomer.h \

@@ -1,6 +1,8 @@
 #include "inc/pointpolarseriesdata.h"
 
-PointPolarSeriesData::PointPolarSeriesData() : QwtArraySeriesData<QwtPointPolar>() {
+PointPolarSeriesData::PointPolarSeriesData( int size ) : QwtArraySeriesData<QwtPointPolar>()
+{
+	d_samples = QVector<QwtPointPolar>(size);
 }
 
 /*******************************
@@ -17,24 +19,38 @@ QRectF PointPolarSeriesData::boundingRect() const
  * Public setters
  *******************************/
 
-void PointPolarSeriesData::setSamples( const QVector<QwtPointPolar> &samples ) {
-	d_boundingRect = QRectF( 0.0, 0.0, -1.0, -1.0 );
-	d_samples = samples;
-}
-
-void PointPolarSeriesData::append( QwtPointPolar point ) {
+void PointPolarSeriesData::append( QwtPointPolar point )
+{
 	d_samples.append(point);
 }
 
-void PointPolarSeriesData::remove( const int &i ) {
+void PointPolarSeriesData::remove( const int &i )
+{
 	d_samples.remove(i);
 }
 
-void PointPolarSeriesData::remove( const int &i, const int &count ) {
+void PointPolarSeriesData::remove( const int &i, const int &count )
+{
 	d_samples.remove(i,count);
 }
 
-void PointPolarSeriesData::clear() {
+void PointPolarSeriesData::resize( const int &size )
+{
+	d_samples.resize(size);
+}
+
+void PointPolarSeriesData::clear()
+{
 	d_boundingRect = QRectF( 0.0, 0.0, -1.0, -1.0 );
 	d_samples.clear();
+}
+
+QVector<QwtPointPolar>::Iterator PointPolarSeriesData::begin()
+{
+	return d_samples.begin();
+}
+
+QwtPointPolar &PointPolarSeriesData::at( int i )
+{
+	return d_samples[i];
 }
