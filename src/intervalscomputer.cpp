@@ -134,18 +134,11 @@ namespace IntervalsComputer {
 		return intervals;
 	}
 
-<<<<<<< HEAD
-	QVector<Interval> defaultComputingOfIntervals( const QVector<qreal> hist, bool loop ) {
-		const QVector<qreal> smoothedHist = gaussianSmoothing( hist, DEFAULT_MASK_RADIUS, loop );
-		const qreal threshold = minimumThresholdPercentage( hist );
-		return intervalsComputing( smoothedHist, maximumsComputing( smoothedHist, threshold, DEFAULT_MINIMUM_WIDTH_OF_NEIGHBORHOOD, loop ), threshold, DEFAULT_MINIMUM_WIDTH_OF_INTERVALS, loop );
-=======
 	void defaultComputingOfIntervals( const QVector<qreal> hist, QVector<qreal> &smoothedHist, QVector<int> &maximums, QVector<Interval> &intervals, bool loop ) {
 		smoothedHist = gaussianSmoothing( hist, 2, loop );
 		const qreal threshold = minimumThresholdPercentage( hist );
 		maximums = maximumsComputing( smoothedHist, threshold, 5, loop );
 		intervals = intervalsComputing( smoothedHist, maximums, threshold, 1, loop );
->>>>>>> NewHistogramComputing
 	}
 
 	qreal minimumThresholdPercentage( const QVector<qreal> &hist ) {
