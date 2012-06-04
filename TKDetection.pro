@@ -47,6 +47,7 @@ SOURCES		=	main.cpp \
 				test_intervalshistogram.cpp \
 				v3dexport.cpp \
 				v3dreader.cpp \
+    src/histogram.cpp
 
 HEADERS		=	billon.h \
 				billon_def.h \
@@ -78,6 +79,7 @@ HEADERS		=	billon.h \
 				test_intervalshistogram.h \
 				v3dexport.h \
 				v3dreader.h \
+    inc/histogram.h
 
 FORMS		=	mainwindow.ui
 

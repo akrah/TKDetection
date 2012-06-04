@@ -27,8 +27,8 @@ public:
 	void setMaxValue( const T &value );
 	void setVoxelSize( const qreal &width, const qreal &height, const qreal &depth );
 
-	BillonTpl * restrictToArea( const int &nbPolygonsPoints, const int &threshold, const Marrow *marrow = 0 ) const;
-	QVector<rCoord2D> getRestrictedAreaVertex( const int &nbPolygonsPoints, const int &threshold, const Marrow *marrow = 0 ) const;
+	QVector<rCoord2D> getAllRestrictedAreaVertex( const int &nbPolygonsPoints, const int &threshold, const Marrow *marrow = 0 ) const;
+	qreal getRestrictedAreaBoudingBoxRadius( const Marrow *marrow, const int &nbPolygonPoints, int intensityThreshold ) const;
 
 protected:
 	T _minValue;
@@ -89,9 +89,8 @@ void BillonTpl<T>::setVoxelSize(const qreal &width, const qreal &height, const q
 	_voxelDepth = depth;
 }
 
-
 template< typename T >
-QVector<rCoord2D> BillonTpl<T>::getRestrictedAreaVertex( const int &nbPolygonPoints, const int &threshold, const Marrow *marrow ) const {
+QVector<rCoord2D> BillonTpl<T>::getAllRestrictedAreaVertex( const int &nbPolygonPoints, const int &threshold, const Marrow *marrow ) const {
 	 QVector<rCoord2D> vectAllVertex;
 	 const int nbSlices = this->n_slices;
 	 const int thresholdRestrict = threshold-1;
@@ -121,75 +120,52 @@ QVector<rCoord2D> BillonTpl<T>::getRestrictedAreaVertex( const int &nbPolygonPoi
 	return vectAllVertex;
 }
 
-
-
-
 template< typename T >
-BillonTpl<T> * BillonTpl<T>::restrictToArea( const int &nbPolygonPoints, const int &threshold, const Marrow *marrow ) const {
-	BillonTpl *restrictedBillon = new BillonTpl(*this);
-	restrictedBillon->setMinValue(threshold);
-	const int nbSlices = restrictedBillon->n_slices;
-	const int thresholdRestrict = threshold-1;
+qreal BillonTpl<T>::getRestrictedAreaBoudingBoxRadius( const Marrow *marrow, const int &nbPolygonPoints, int intensityThreshold ) const
+{
+	QPolygon polygon(nbPolygonPoints);
+	int polygonPoints[2*nbPolygonPoints+2];
+	qreal xEdge, yEdge, orientation, cosAngle, sinAngle, radius;
+	int i,k,counter;
 
-	for ( int indexSlice = 0 ; indexSlice<nbSlices ; ++indexSlice ) {
-		arma::Mat<T> &currentSlice = restrictedBillon->slice(indexSlice);
+	const int width = this->n_cols;
+	const int height = this->n_rows;
+	const int depth = this->n_slices;
 
-		const int sliceWidth = currentSlice.n_cols;
-		const int sliceHeight = currentSlice.n_rows;
-		const int xCenter = (marrow != 0 && marrow->interval().containsClosed(indexSlice))?marrow->at(indexSlice).x:sliceWidth/2;
-		const int yCenter = (marrow != 0 && marrow->interval().containsClosed(indexSlice))?marrow->at(indexSlice).y:sliceHeight/2;
+	radius = 0.;
+	for ( k=0 ; k<depth ; ++k ) {
+		const arma::Mat<T> &currentSlice = this->slice(k);
+		const int xCenter = (marrow != 0 && marrow->interval().containsClosed(k))?marrow->at(k-marrow->interval().minValue()).x:width/2;
+		const int yCenter = (marrow != 0 && marrow->interval().containsClosed(k))?marrow->at(k-marrow->interval().minValue()).y:height/2;
 
-		QPolygon polygon(nbPolygonPoints);
-		int polygonPoints[2*nbPolygonPoints+2];
-
-		qreal xEdge, yEdge, orientation, cosAngle, sinAngle;
-		int i,j,k;
 		orientation = 0.;
-		k = 0;
-
-		for ( i=0 ; i<nbPolygonPoints ; ++i ) {
+		counter = 0;
+		for ( i=0 ; i<nbPolygonPoints ; ++i )
+		{
 			orientation += (TWO_PI/static_cast<qreal>(nbPolygonPoints));
 			cosAngle = qCos(orientation);
 			sinAngle = -qSin(orientation);
-			xEdge = xCenter + 5*cosAngle;
-			yEdge = yCenter + 5*sinAngle;
-			while ( xEdge>0. && yEdge>0. && xEdge<sliceWidth && yEdge<sliceHeight && currentSlice.at(yEdge,xEdge) > thresholdRestrict ) {
+			xEdge = xCenter + 10*cosAngle;
+			yEdge = yCenter + 10*sinAngle;
+			while ( xEdge>0 && yEdge>0 && xEdge<width && yEdge<height && currentSlice.at(yEdge,xEdge) > intensityThreshold )
+			{
 				xEdge += cosAngle;
 				yEdge += sinAngle;
 			}
-			polygonPoints[k++] = xEdge;
-			polygonPoints[k++] = yEdge;
+			polygonPoints[counter++] = xEdge;
+			polygonPoints[counter++] = yEdge;
 		}
-		polygonPoints[k++] = polygonPoints[0];
-		polygonPoints[k] = polygonPoints[1];
+		polygonPoints[counter++] = polygonPoints[0];
+		polygonPoints[counter] = polygonPoints[1];
 
 		polygon.setPoints(nbPolygonPoints+1,polygonPoints);
 
-		QRect boudingRect = polygon.boundingRect();
-		const int xLeft = qMax(0,boudingRect.left());
-		const int xRight = qMin(sliceWidth-1,boudingRect.right());
-		const int yTop = qMax(0,boudingRect.top());
-		const int yBottom = qMin(sliceHeight-1,boudingRect.bottom()+1);
-
-		currentSlice.submat(0,0,yTop,sliceWidth-1).fill(threshold);
-		currentSlice.submat(yTop,0,yBottom,xLeft).fill(threshold);
-		currentSlice.submat(yTop,xRight,yBottom,sliceWidth-1).fill(threshold);
-		currentSlice.submat(yBottom,0,sliceHeight-1,sliceWidth-1).fill(threshold);
-
-		polygon.translate(-xLeft,-yTop);
-		arma::Mat<T> boudingSlice = currentSlice.submat( arma::span(yTop,yBottom), arma::span(xLeft,xRight) );
-		const int boudingWidth = boudingSlice.n_cols;
-		const int boudinHeight = boudingSlice.n_rows;
-		for ( j=0 ; j<boudinHeight ; ++j ) {
-			for ( i=0 ; i<boudingWidth ; ++i ) {
-				if ( !polygon.containsPoint(QPoint(i,j),Qt::WindingFill) ) {
-					boudingSlice.at(j,i) = threshold;
-				}
-			}
-		}
-		currentSlice( arma::span(yTop,yBottom), arma::span(xLeft,xRight) ) = boudingSlice;
+		radius += 0.5*qSqrt(polygon.boundingRect().width()*polygon.boundingRect().width() + polygon.boundingRect().height()*polygon.boundingRect().height());
 	}
-	return restrictedBillon;
+
+	radius/=depth;
+	std::cout << "Rayon de la boite englobante : " << radius << " (" << radius*_voxelWidth << " mm)" << std::endl;
+	return radius*_voxelWidth;
 }
 
 #endif // BILLON_H

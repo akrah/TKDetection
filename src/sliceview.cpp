@@ -12,7 +12,7 @@
 SliceView::SliceView() : _typeOfView(SliceType::CURRENT),
 	_movementThresholdMin(100), _movementThresholdMax(200), _movementWithBackground(false), _useNextSliceInsteadOfCurrentSlice(false),
 	_flowAlpha(FLOW_ALPHA_DEFAULT), _flowEpsilon(FLOW_EPSILON_DEFAULT), _flowMaximumIterations(FLOW_MAXIMUM_ITERATIONS),
-	_restrictedAreaResolution(100), _restrictedAreaThreshold(-900), _restrictedAreaDrawCircle(true), _restrictedAreaBeginRadius(5)
+	_restrictedAreaResolution(100), _restrictedAreaThreshold(-900), _restrictedAreaBeginRadius(5)
 {
 }
 
@@ -72,10 +72,6 @@ void SliceView::setRestrictedAreaResolution( const int &resolution ) {
 
 void SliceView::setRestrictedAreaThreshold( const int &threshold )  {
 	_restrictedAreaThreshold = threshold;
-}
-
-void SliceView::enableRestrictedAreaCircle( const bool &enable )  {
-	_restrictedAreaDrawCircle = enable;
 }
 
 void SliceView::setRestrictedAreaBeginRadius( const int &radius ) {
@@ -301,7 +297,7 @@ void SliceView::drawRestrictedArea( QImage &image, const Billon &billon, const M
 	int polygonPoints[2*nbPoints+2];
 
 	qreal xEdge, yEdge, orientation, cosAngle, sinAngle;
-	int i,j,k;
+	int i,k;
 	orientation = 0.;
 	k = 0;
 
@@ -323,112 +319,10 @@ void SliceView::drawRestrictedArea( QImage &image, const Billon &billon, const M
 
 	polygon.setPoints(nbPoints+1,polygonPoints);
 
-	QPainter painter;
+	const qreal radius = 0.5*qSqrt(polygon.boundingRect().width()*polygon.boundingRect().width() + polygon.boundingRect().height()*polygon.boundingRect().height());
+	std::cout << "Rayon de la boite englobante : " << radius << " (" << radius*billon.voxelWidth() << " mm)" << std::endl;
 
-	if ( _restrictedAreaDrawCircle ) {
-		QRect boudingRect = polygon.boundingRect();
-		const int xLeft = boudingRect.left();
-		const int xRight = boudingRect.right();
-		const int yTop = boudingRect.top();
-		const int yBottom = boudingRect.bottom()+1;
-		const int endLineWidth = imageWidth-xRight;
-
-		const QRgb bg = qRgb(0,0,0);
-
-		painter.begin(&image);
-			painter.fillRect(0,0,imageWidth,yTop,bg);
-			painter.fillRect(0,yTop,xLeft,yBottom,bg);
-			painter.fillRect(xRight,yTop,imageWidth,yBottom,bg);
-			painter.fillRect(0,yBottom,imageWidth,imageHeight,bg);
-		painter.end();
-
-		QRgb * line =(QRgb *) image.bits();
-		line += imageWidth*yTop;
-		for ( j=yTop ; j<yBottom ; ++j ) {
-			line += xLeft;
-			for ( i=xLeft ; i<xRight ; ++i ) {
-				if ( !polygon.containsPoint(QPoint(i,j),Qt::WindingFill) ) {
-					 *line = bg;
-				}
-				line++;
-			}
-			line += endLineWidth;
-		}
-	}
-
-	painter.begin(&image);
+	QPainter painter(&image);
 	painter.setPen(Qt::green);
 	painter.drawPolygon(polygon);
 }
-
-//void SliceView::drawRestrictedArea( QImage &image, const Billon &billon, const int &sliceNumber, const Interval &intensityInterval ) {
-//	const int nbPoints = _restrictedAreaResolution;
-
-//	const int max = intensityInterval.max();
-//	const int min = intensityInterval.min();
-//	const int threshold = qBound(min,_restrictedAreaThreshold,max);
-
-//	const Slice &currentSlice = billon.slice(sliceNumber);
-
-//	QPainter painter(&image);
-//	painter.setPen(Qt::green);
-
-//	const int xCenter = image.width()/2;
-//	const int yCenter = image.height()/2;
-
-//	qreal xEdge, yEdge, xOldEdge, yOldEdge, xOrigin, yOrigin, xBary, yBary, orientation, radiusMax, radiusMean, cosAngle, sinAngle;
-//	orientation = xBary = yBary = radiusMax = radiusMean = 0.;
-
-//	for ( int i=0 ; i<nbPoints ; ++i ) {
-//		orientation += (TWO_PI/(qreal)nbPoints);
-//		cosAngle = qCos(orientation);
-//		sinAngle = -qSin(orientation);
-//		xEdge = xCenter + 50*cosAngle;
-//		yEdge = yCenter + 50*sinAngle;
-//		while ( qBound(min,currentSlice.at(yEdge,xEdge),max) > threshold ) {
-//			xEdge += cosAngle;
-//			yEdge += sinAngle;
-//		}
-//		if ( i == 0 ) {
-//			xOrigin = xEdge;
-//			yOrigin = yEdge;
-//		}
-//		else {
-//			painter.drawLine(static_cast<int>(xOldEdge),static_cast<int>(yOldEdge),static_cast<int>(xEdge),static_cast<int>(yEdge));
-//		}
-//		xBary += xEdge;
-//		yBary += yEdge;
-//		xOldEdge = xEdge;
-//		yOldEdge = yEdge;
-//		radiusMean += qSqrt( qPow(xEdge-xCenter,2) + qPow(yEdge-yCenter,2) );
-//		radiusMax = qMax(radiusMax, qSqrt(qPow(xEdge-xCenter,2) + qPow(yEdge-yCenter,2)) );
-//	}
-//	painter.drawLine(xOldEdge,yOldEdge,xOrigin,yOrigin);
-
-//	if ( _restrictedAreaDrawCircle ) {
-//		xBary /= (qreal)nbPoints;
-//		yBary /= (qreal)nbPoints;
-//		radiusMean /= (qreal)nbPoints;
-//		const QPointF center(xBary,yBary);
-//		painter.drawEllipse(center,3,3);
-//		painter.drawEllipse(center,radiusMax,radiusMax);
-//		painter.setPen(Qt::red);
-////		painter.drawEllipse(center,radiusMean,radiusMean);
-//		painter.setPen(QColor(255,127,0));
-//		painter.drawEllipse(center,(radiusMean+radiusMax)/2.,(radiusMean+radiusMax)/2.);
-
-////		QRgb * line =(QRgb *) image.bits();
-////		QRgb bg = qRgb(0,0,0);
-////		const int width = currentSlice.n_cols;
-////		const int height = currentSlice.n_rows;
-////		for ( int j=0 ; j<height ; ++j ) {
-////			for ( int i=0 ; i<width ; ++i ) {
-////				if ( qSqrt( qPow(i-xBary,2) + qPow(j-yBary,2) ) > radiusLength ) {
-////					 *line = bg;
-////				}
-////				line++;
-////			}
-////		}
-
-//	}
-//}

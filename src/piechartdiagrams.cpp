@@ -14,8 +14,8 @@
 
 #include <QPainter>
 
-PieChartDiagrams::PieChartDiagrams() : _datasCurve(new PointPolarSeriesData()), _datasCurveMaximums(new PointPolarSeriesData()), _datasCurveIntervals(new PointPolarSeriesData()),  _highlightCurveDatas(new PointPolarSeriesData()),
-	_pieChart(PieChart(0.,100)), _movementsThresholdMin(MINIMUM_Z_MOTION), _movementsThresholdMax(MAXIMUM_Z_MOTION), _marrowAroundDiameter(100), _smoothing(true)
+PieChartDiagrams::PieChartDiagrams() : Histogram(), _datasCurve(new PointPolarSeriesData()), _datasCurveMaximums(new PointPolarSeriesData()),
+	_datasCurveIntervals(new PointPolarSeriesData()),  _highlightCurveDatas(new PointPolarSeriesData()), _pieChart(PieChart(0.,360))
 {
 	_highlightCurve.setPen(QPen(Qt::red));
 	_highlightCurveHistogram.setBrush(Qt::red);
@@ -37,18 +37,16 @@ PieChartDiagrams::PieChartDiagrams() : _datasCurve(new PointPolarSeriesData()), 
 	_curveIntervals.setData(_datasCurveIntervals);
 }
 
-PieChartDiagrams::~PieChartDiagrams() {
+PieChartDiagrams::~PieChartDiagrams()
+{
 }
 
 /*******************************
  * Public getters
  *******************************/
 
-int PieChartDiagrams::count() const {
-	return _datas.size()+1;
-}
-
-const QVector<Interval> &PieChartDiagrams::branchesSectors() const {
+const QVector<Interval> &PieChartDiagrams::branchesSectors() const
+{
 	return _intervals;
 }
 
@@ -56,8 +54,10 @@ const QVector<Interval> &PieChartDiagrams::branchesSectors() const {
  * Public setters
  *******************************/
 
-void PieChartDiagrams::attach( QwtPolarPlot * const polarPlot ) {
-	if ( polarPlot != 0 ) {
+void PieChartDiagrams::attach( QwtPolarPlot * const polarPlot )
+{
+	if ( polarPlot != 0 )
+	{
 		_curve.attach(polarPlot);
 		_curveIntervals.attach(polarPlot);
 		_curveMaximums.attach(polarPlot);
@@ -65,8 +65,10 @@ void PieChartDiagrams::attach( QwtPolarPlot * const polarPlot ) {
 	}
 }
 
-void PieChartDiagrams::attach( QwtPlot * const plot ) {
-	if ( plot != 0 ) {
+void PieChartDiagrams::attach( QwtPlot * const plot )
+{
+	if ( plot != 0 )
+	{
 		_histogram.attach(plot);
 		_histogramIntervals.attach(plot);
 		_histogramMaximums.attach(plot);
@@ -75,7 +77,8 @@ void PieChartDiagrams::attach( QwtPlot * const plot ) {
 	}
 }
 
-void PieChartDiagrams::clearAll() {
+void PieChartDiagrams::clear()
+{
 	QVector<QwtIntervalSample> empty(0);
 
 	_datasCurve->clear();
@@ -91,31 +94,14 @@ void PieChartDiagrams::clearAll() {
 	_highlightCurveDatas->clear();
 	_highlightCurveHistogram.setSamples(empty);
 
-	_curvePercentage.detach();
+	_derivativeThreshold = 0.;
+	_curvePercentage.setSamples(QVector<QPointF>(0));
 }
 
-void PieChartDiagrams::setMovementsThresholdMin( const int &threshold ) {
-	_movementsThresholdMin = threshold;
-}
-
-void PieChartDiagrams::setMovementsThresholdMax( const int &threshold ) {
-	_movementsThresholdMax = threshold;
-}
-
-void PieChartDiagrams::useNextSliceInsteadOfCurrentSlice( const bool &enable ) {
-	_useNextSlice = enable;
-}
-
-void PieChartDiagrams::setMarrowAroundDiameter( const int &diameter ) {
-	_marrowAroundDiameter = diameter;
-}
-
-void PieChartDiagrams::enableSmoothing( const bool &enable ) {
-	_smoothing = enable;
-}
-
-void PieChartDiagrams::compute( const Billon &billon, const Marrow *marrow, const PieChart &pieChart, const Interval &slicesInterval, const Interval &intensity ) {
-	if ( slicesInterval.isValid() && slicesInterval.width() > 0 ) {
+void PieChartDiagrams::compute( const Billon &billon, const Marrow *marrow, const PieChart &pieChart, const Interval &slicesInterval, const Interval &intensity )
+{
+	if ( slicesInterval.isValid() && slicesInterval.width() > 0 )
+	{
 		_pieChart = pieChart;
 
 		const uint width = billon.n_cols;
@@ -134,9 +120,11 @@ void PieChartDiagrams::compute( const Billon &billon, const Marrow *marrow, cons
 		_datas.fill(0.,nbSectors);
 
 		QList<int> circleLines;
-		if ( marrow != 0 ) {
+		if ( marrow != 0 )
+		{
 			circleLines.reserve(2*radius+1);
-			for ( int lineIndex=-radius ; lineIndex<radiusMax ; ++lineIndex ) {
+			for ( int lineIndex=-radius ; lineIndex<radiusMax ; ++lineIndex )
+			{
 				circleLines.append(qSqrt(squareRadius-qPow(lineIndex,2)));
 			}
 		}
@@ -146,26 +134,33 @@ void PieChartDiagrams::compute( const Billon &billon, const Marrow *marrow, cons
 		__billon_type__ currentSliceValue, previousSliceValue, diff;
 		marrowX = width/2;
 		marrowY = height/2;
-		if ( marrow != 0 ) {
-			for ( k=minOfInterval==0?1:minOfInterval ; k<maxOfInterval ; ++k ) {
+		if ( marrow != 0 )
+		{
+			for ( k=minOfInterval==0?1:minOfInterval ; k<maxOfInterval ; ++k )
+			{
 				const arma::Slice &slice = _useNextSlice?billon.slice(k+1):billon.slice(k);
 				const arma::Slice &prevSlice = billon.slice(k-1);
 				marrowX = marrow->at(k).x;
 				marrowY = marrow->at(k).y;
-				for ( j=-radius ; j<radiusMax ; ++j ) {
+				for ( j=-radius ; j<radiusMax ; ++j )
+				{
 					iRadius = circleLines[j+radius];
 					iRadiusMax = iRadius+1;
-					for ( i=-iRadius ; i<iRadiusMax ; ++i ) {
+					for ( i=-iRadius ; i<iRadiusMax ; ++i )
+					{
 						xPos = marrowX+i;
 						yPos = marrowY+j;
-						if ( xPos < width && yPos < height ) {
+						if ( xPos < width && yPos < height )
+						{
 							sectorIdx = _pieChart.partOfAngle( TWO_PI-ANGLE(marrowX,marrowY,xPos,yPos) );
 							currentSliceValue = slice.at(yPos,xPos);
 							previousSliceValue = prevSlice.at(yPos,xPos);
-							if ( (currentSliceValue > minValue) && (previousSliceValue > minValue) ) {
+							if ( (currentSliceValue > minValue) && (previousSliceValue > minValue) )
+							{
 								diff = qAbs(qBound(minValue,currentSliceValue,maxValue) - qBound(minValue,previousSliceValue,maxValue));
-								if ( (diff >= _movementsThresholdMin) && (diff <= _movementsThresholdMax) ) {
-									_datas[sectorIdx] += (diff-_movementsThresholdMin);
+								if ( (diff >= _movementThresholdMin) && (diff <= _movementThresholdMax) )
+								{
+									_datas[sectorIdx] += (diff-_movementThresholdMin);
 								}
 							}
 						}
@@ -173,19 +168,25 @@ void PieChartDiagrams::compute( const Billon &billon, const Marrow *marrow, cons
 				}
 			}
 		}
-		else {
-			for ( k=minOfInterval==0?1:minOfInterval ; k<maxOfInterval ; ++k ) {
+		else
+		{
+			for ( k=minOfInterval==0?1:minOfInterval ; k<maxOfInterval ; ++k )
+			{
 				const arma::Slice &slice = _useNextSlice?billon.slice(k+1):billon.slice(k);
 				const arma::Slice &prevSlice = billon.slice(k-1);
-				for ( j=0 ; j<static_cast<int>(height) ; ++j ) {
-					for ( i=0 ; i<static_cast<int>(width) ; ++i ) {
+				for ( j=0 ; j<static_cast<int>(height) ; ++j )
+				{
+					for ( i=0 ; i<static_cast<int>(width) ; ++i )
+					{
 						sectorIdx = _pieChart.partOfAngle( TWO_PI-ANGLE(marrowX,marrowY,i,j) );
 						currentSliceValue = slice.at(j,i);
 						previousSliceValue = prevSlice.at(j,i);
-						if ( (currentSliceValue > minValue) && (previousSliceValue > minValue) ) {
+						if ( (currentSliceValue > minValue) && (previousSliceValue > minValue) )
+						{
 							diff = qAbs(qBound(minValue,currentSliceValue,maxValue) - qBound(minValue,previousSliceValue,maxValue));
-							if ( diff >= _movementsThresholdMin && diff <= _movementsThresholdMax ) {
-								_datas[sectorIdx] += (diff-_movementsThresholdMin);
+							if ( diff >= _movementThresholdMin && diff <= _movementThresholdMax )
+							{
+								_datas[sectorIdx] += (diff-_movementThresholdMin);
 							}
 						}
 					}
@@ -193,24 +194,27 @@ void PieChartDiagrams::compute( const Billon &billon, const Marrow *marrow, cons
 			}
 		}
 
-		if ( _smoothing ) _datas = IntervalsComputer::gaussianSmoothing( _datas, DEFAULT_MASK_RADIUS, true );
-		_dataPercentage = IntervalsComputer::minimumThresholdPercentage( _datas );
-		_maximums = IntervalsComputer::maximumsComputing( _datas, _dataPercentage, DEFAULT_MINIMUM_WIDTH_OF_NEIGHBORHOOD, true );
-		_intervals = IntervalsComputer::intervalsComputing( _datas, _maximums, _dataPercentage, DEFAULT_MINIMUM_WIDTH_OF_INTERVALS, true );
+		if ( _smoothing == SmoothingType::GAUSSIAN ) _datas = IntervalsComputer::gaussianSmoothing( _datas, DEFAULT_MASK_RADIUS, true );
+		else if ( _smoothing == SmoothingType::MEANS ) _datas = IntervalsComputer::meansSmoothing( _datas, DEFAULT_MASK_RADIUS, true );
+		_derivativeThreshold = IntervalsComputer::minimumThresholdPercentage( _datas, _derivativePercentage );
+		_maximums = IntervalsComputer::maximumsComputing( _datas, _derivativeThreshold, _maximumsNeighborhood, true );
+		_intervals = IntervalsComputer::intervalsComputing( _datas, _maximums, _derivativeThreshold, _minimumIntervalWidth, true );
 
 		computeValues();
 		computeMaximums();
 		computeIntervals();
 
 		const qreal x[] = { 0., TWO_PI };
-		const qreal y[] = { _dataPercentage, _dataPercentage };
+		const qreal y[] = { _derivativeThreshold, _derivativeThreshold };
 		_curvePercentage.setSamples(x,y,2);
 	}
 }
 
-void PieChartDiagrams::highlightCurve( const int &index ) {
+void PieChartDiagrams::highlightCurve( const int &index )
+{
 	QVector<QwtIntervalSample> highlightCurveHistogramDatas(1);
-	if ( index > -1 && index < count() ) {
+	if ( index > -1 && index < count() )
+	{
 		_highlightCurveDatas->resize(4);
 		const qreal rightAngle = _pieChart.sector(index).rightAngle();
 		const qreal leftAngle = _pieChart.sector(index).leftAngle();
@@ -226,7 +230,8 @@ void PieChartDiagrams::highlightCurve( const int &index ) {
 		highlightCurveHistogramDatas[0].value = valueOfCurve;
 		highlightCurveHistogramDatas[0].interval.setInterval(rightAngle,leftAngle);
 	}
-	else {
+	else
+	{
 		_highlightCurveDatas->resize(0);
 	}
 	_highlightCurveHistogram.setSamples(highlightCurveHistogramDatas);
@@ -237,17 +242,20 @@ void PieChartDiagrams::highlightCurve( const int &index ) {
 /*******************************
  * Private functions
  *******************************/
-void PieChartDiagrams::computeValues() {
+void PieChartDiagrams::computeValues()
+{
 	const int nbSectors = _datas.size();
 	QVector<QwtIntervalSample> curveHistogramDatas(0);
-	if ( nbSectors > 0 ) {
+	if ( nbSectors > 0 )
+	{
 		curveHistogramDatas.fill(QwtIntervalSample(),nbSectors);
 		_datasCurve->resize(2*nbSectors+1);
 		QVector<QwtPointPolar>::Iterator beginCurve = _datasCurve->begin();
 		QVector<QwtIntervalSample>::Iterator beginHist = curveHistogramDatas.begin();
 		int i, value;
 		qreal left, right;
-		for ( i=0 ; i<nbSectors ; ++i ) {
+		for ( i=0 ; i<nbSectors ; ++i )
+		{
 			const PiePart &part = _pieChart.sector(i);
 			value = _datas[i];
 			left = part.leftAngle();
@@ -262,13 +270,15 @@ void PieChartDiagrams::computeValues() {
 		(*beginCurve).setAzimuth(_pieChart.sector(0).rightAngle());
 		(*beginCurve).setRadius(_datas[0]);
 	}
-	else {
+	else
+	{
 		_datasCurve->resize(0);
 	}
 	_histogram.setSamples(curveHistogramDatas);
 }
 
-void PieChartDiagrams::computeMaximums() {
+void PieChartDiagrams::computeMaximums()
+{
 	const int nbMaximums = _maximums.size();
 	QVector<QwtIntervalSample> curveHistogramMaximumsDatas(nbMaximums);
 	_datasCurveMaximums->resize(4*nbMaximums);
@@ -300,7 +310,8 @@ void PieChartDiagrams::computeMaximums() {
 	_histogramMaximums.setSamples(curveHistogramMaximumsDatas);
 }
 
-void PieChartDiagrams::computeIntervals() {
+void PieChartDiagrams::computeIntervals()
+{
 	_datasCurveIntervals->clear();
 	QVector<QwtIntervalSample> curveHistogramIntervalsDatas;
 
@@ -333,12 +344,14 @@ void PieChartDiagrams::computeIntervals() {
 			else
 			{
 				_datasCurveIntervals->append(QwtPointPolar( _pieChart.sector(min).rightAngle(), 0. ));
-				for ( i=min ; i<nbSectors ; ++i ) {
+				for ( i=min ; i<nbSectors ; ++i )
+				{
 					_datasCurveIntervals->append(QwtPointPolar(_pieChart.sector(i).rightAngle(),_datas[i]));
 					_datasCurveIntervals->append(QwtPointPolar(_pieChart.sector(i).leftAngle(),_datas[i]));
 					curveHistogramIntervalsDatas.append(QwtIntervalSample(_datas[i],_pieChart.sector(i).rightAngle(),_pieChart.sector(i).leftAngle()));
 				}
-				for ( i=0 ; i<max ; ++i ) {
+				for ( i=0 ; i<max ; ++i )
+				{
 					_datasCurveIntervals->append(QwtPointPolar(_pieChart.sector(i).rightAngle(),_datas[i]));
 					_datasCurveIntervals->append(QwtPointPolar(_pieChart.sector(i).leftAngle(),_datas[i]));
 					curveHistogramIntervalsDatas.append(QwtIntervalSample(_datas[i],_pieChart.sector(i).rightAngle(),_pieChart.sector(i).leftAngle()));
@@ -351,8 +364,10 @@ void PieChartDiagrams::computeIntervals() {
 	_histogramIntervals.setSamples(curveHistogramIntervalsDatas);
 }
 
-void PieChartDiagrams::draw( QImage &image, const iCoord2D &center ) const {
-	if ( !_maximums.isEmpty() ) {
+void PieChartDiagrams::draw( QImage &image, const iCoord2D &center ) const
+{
+	if ( !_maximums.isEmpty() )
+	{
 		const int width = image.width();
 		const int height = image.height();
 		const int centerX = center.x;
@@ -367,7 +382,8 @@ void PieChartDiagrams::draw( QImage &image, const iCoord2D &center ) const {
 		// Liste qui va contenir les angles des deux côté du secteur à dessiner
 		// Permet de factoriser le code de calcul des coordonnées juste en dessous
 		QList<qreal> twoSides;
-		for ( i=0 ; i<_intervals.size() ; ++i ) {
+		for ( i=0 ; i<_intervals.size() ; ++i )
+		{
 			const Interval &interval = _intervals[i];
 			twoSides.append( TWO_PI-_pieChart.sector(interval.minValue()).orientation()-0.01 );
 			twoSides.append( TWO_PI-_pieChart.sector(interval.maxValue()).orientation() );
@@ -376,39 +392,46 @@ void PieChartDiagrams::draw( QImage &image, const iCoord2D &center ) const {
 		// Dessin des deux côtés du secteur
 		QPainter painter(&image);
 		i = twoSides.size()-1;
-		while ( i > 0 ) {
+		while ( i > 0 )
+		{
 			painter.setPen(colors[i%3]);
 			painter.setBrush(colors[i%3]);
 			nbBoucle = 2;
-			while ( nbBoucle-- > 0 ) {
+			while ( nbBoucle-- > 0 )
+			{
 				// Calcul des coordonnées du segment à tracer
 				angle = twoSides[i--];
 				x1 = x2 = centerX;
 				y1 = y2 = centerY;
 				if ( qFuzzyCompare(angle,PI_ON_TWO) ) y2 = height;
 				else if ( qFuzzyCompare(angle,THREE_PI_ON_TWO) ) y2 = 0;
-				else {
+				else
+				{
 					const qreal a = tan(angle);
 					const qreal b = centerY - (a*centerX);
-					if ( angle < PI_ON_TWO || angle > THREE_PI_ON_TWO ) {
+					if ( angle < PI_ON_TWO || angle > THREE_PI_ON_TWO )
+					{
 						x2 = width;
 						y2 = a*width+b;
 					}
-					else {
+					else
+					{
 						x2 = 0;
 						y2 = b;
 					}
 				}
 				// Tracé du segment droit
 				painter.drawLine(x1,y1,x2,y2);
-//				if ( nbBoucle == 0 ) {
+//				if ( nbBoucle == 0 )
+//				{
 //					QPolygon polygon;
 //					polygon.append(QPoint(x1,y1));
 //					polygon.append(QPoint(x2,y2));
 //					polygon.append(QPoint(oldx,oldy));
 //					painter.drawPolygon(polygon);
 //				}
-//				else {
+//				else
+//					{
 //					oldx = x2;
 //					oldy = y2;
 //				}

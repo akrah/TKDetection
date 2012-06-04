@@ -78,16 +78,17 @@ namespace IntervalsComputer {
 			const int nbMaximums = maximums.size();
 			int cursorMax, cursorMin;
 			bool isSupToThreshold;
+			cursorMax = 0;
 			for ( int i=0 ; i<nbMaximums ; ++i ) {
 				cursorMin = maximums[i];
 				// Si c'est le premier intervalle ou que le maximum courant n'est pas compris dans l'intervalle précédent.
-				if ( intervals.isEmpty() || intervals.last().minValue() < cursorMin ) {
+				if ( cursorMax < cursorMin ) {
 					// On recherche les bornes min et max des potentielles de l'intervalle contenant le ième maximum
 					isSupToThreshold = hist[cursorMin] > derivativeThreshold;
 					while ( isSupToThreshold ) {
 						cursorMin--;
 						if ( cursorMin < 0 ) cursorMin = nbSectors-1;
-						isSupToThreshold &= hist[cursorMin] > derivativeThreshold;
+						isSupToThreshold = hist[cursorMin] > derivativeThreshold;
 					}
 					while ( firstdDerivated(hist,cursorMin,loop) > 0. ) {
 						cursorMin--;
@@ -100,7 +101,7 @@ namespace IntervalsComputer {
 					while ( isSupToThreshold ) {
 						cursorMax++;
 						if ( cursorMax >= nbSectors ) cursorMax = 0;
-						isSupToThreshold &= hist[cursorMax] > derivativeThreshold;
+						isSupToThreshold = hist[cursorMax] > derivativeThreshold;
 					}
 					while ( firstdDerivated(hist,cursorMax,loop) < 0. ) {
 						cursorMax++;
@@ -141,10 +142,10 @@ namespace IntervalsComputer {
 		intervals = intervalsComputing( smoothedHist, maximums, threshold, 1, loop );
 	}
 
-	qreal minimumThresholdPercentage( const QVector<qreal> &hist ) {
+	qreal minimumThresholdPercentage( const QVector<qreal> &hist, const qreal &percentage ) {
 		const qreal min = minValue(hist.begin(),hist.end());
 		const qreal max = maxValue(hist.begin(),hist.end());
-		return (max-min)*PERCENTAGE_FOR_MAXIMUM_CANDIDATE+min;
+		return (max-min)*percentage+min;
 	}
 
 	qreal minValue( QVector<qreal>::ConstIterator begin, QVector<qreal>::ConstIterator end ) {

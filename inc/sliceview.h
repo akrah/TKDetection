@@ -31,7 +31,6 @@ public:
 
 	void setRestrictedAreaResolution( const int &resolution );
 	void setRestrictedAreaThreshold( const int &threshold );
-	void enableRestrictedAreaCircle( const bool &enable );
 	void setRestrictedAreaBeginRadius( const int &radius );
 
 	void drawSlice( QImage &image, const Billon &billon, const Marrow *marrow, const int &sliceNumber, const Interval &intensityInterval );
@@ -58,7 +57,6 @@ private:
 
 	int _restrictedAreaResolution;
 	int _restrictedAreaThreshold;
-	bool _restrictedAreaDrawCircle;
 	int _restrictedAreaBeginRadius;
 };
 

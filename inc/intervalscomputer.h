@@ -13,7 +13,7 @@ namespace IntervalsComputer
 	QVector<Interval> intervalsComputing( const QVector<qreal> &hist, const QVector<int> &maximums, qreal derivativeThreshold, int minimumWidthOfIntervals = DEFAULT_MINIMUM_WIDTH_OF_INTERVALS, bool loop = false );
 	void defaultComputingOfIntervals( const QVector<qreal> hist, QVector<qreal> &smoothedHist, QVector<int> &maximums, QVector<Interval> &intervals, bool loop = false );
 
-	qreal minimumThresholdPercentage( const QVector<qreal> &hist );
+	qreal minimumThresholdPercentage( const QVector<qreal> &hist, const qreal &percentage = DEFAULT_PERCENTAGE_FOR_MAXIMUM_CANDIDATE );
 	qreal minValue( QVector<qreal>::ConstIterator begin, QVector<qreal>::ConstIterator end );
 	qreal maxValue( QVector<qreal>::ConstIterator begin, QVector<qreal>::ConstIterator end );
 	qreal firstdDerivated( const QVector<qreal> &hist, const int &index, bool loop );
