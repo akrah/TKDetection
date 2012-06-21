@@ -63,7 +63,6 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 	_ui->_comboHistogramSmoothing->insertItem(SmoothingType::MEANS,tr("Moyen"));
 	_ui->_comboHistogramSmoothing->insertItem(SmoothingType::GAUSSIAN,tr("Gaussien"));
 	_ui->_comboHistogramSmoothing->setCurrentIndex(SmoothingType::GAUSSIAN);
-
 	_ui->_comboEdgeDetectionType->insertItem(EdgeDetectionType::SOBEL,tr("Sobel"));
 	_ui->_comboEdgeDetectionType->insertItem(EdgeDetectionType::LAPLACIAN,tr("Laplacian"));
 
