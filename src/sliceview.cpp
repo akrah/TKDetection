@@ -10,9 +10,9 @@
 #include <QPainter>
 
 SliceView::SliceView() : _typeOfView(SliceType::CURRENT),
-	_movementThresholdMin(100), _movementThresholdMax(200), _movementWithBackground(false), _useNextSliceInsteadOfCurrentSlice(false),
+	_movementThresholdMin(100), _movementThresholdMax(200), _useNextSliceInsteadOfCurrentSlice(false),
 	_flowAlpha(FLOW_ALPHA_DEFAULT), _flowEpsilon(FLOW_EPSILON_DEFAULT), _flowMaximumIterations(FLOW_MAXIMUM_ITERATIONS),
-	_restrictedAreaResolution(100), _restrictedAreaThreshold(-900), _restrictedAreaDrawCircle(true), _restrictedAreaBeginRadius(5)
+	_restrictedAreaResolution(100), _restrictedAreaThreshold(-900), _restrictedAreaBeginRadius(5), _typeOfEdgeDetection(EdgeDetectionType::SOBEL)
 {
 }
 
@@ -20,71 +20,88 @@ SliceView::SliceView() : _typeOfView(SliceType::CURRENT),
  * Public setters
  *******************************/
 
-void SliceView::setTypeOfView( const SliceType::SliceType &type ) {
-	if ( type > SliceType::_SLICE_TYPE_MIN_ && type < SliceType::_SLICE_TYPE_MAX_ ) {
+void SliceView::setTypeOfView( const SliceType::SliceType &type )
+{
+	if ( type > SliceType::_SLICE_TYPE_MIN_ && type < SliceType::_SLICE_TYPE_MAX_ )
+	{
 		_typeOfView = type;
 	}
 }
 
-void SliceView::setMovementThresholdMin( const int &threshold ) {
+void SliceView::setMovementThresholdMin( const int &threshold )
+{
 	_movementThresholdMin = threshold;
 }
 
-void SliceView::setMovementThresholdMax( const int &threshold ) {
+void SliceView::setMovementThresholdMax( const int &threshold )
+{
 	_movementThresholdMax = threshold;
 }
 
-void SliceView::enableMovementWithBackground( const bool &enable ) {
-	_movementWithBackground = enable;
-}
-
-void SliceView::useNextSliceInsteadOfCurrentSlice( const bool &enable ) {
+void SliceView::useNextSliceInsteadOfCurrentSlice( const bool &enable )
+{
 	_useNextSliceInsteadOfCurrentSlice = enable;
 }
 
-qreal SliceView::flowAlpha() const {
+qreal SliceView::flowAlpha() const
+{
 	return _flowAlpha;
 }
 
-qreal SliceView::flowEpsilon() const {
+qreal SliceView::flowEpsilon() const
+{
 	return _flowEpsilon;
 }
 
-int SliceView::flowMaximumIterations() const {
+int SliceView::flowMaximumIterations() const
+{
 	return _flowMaximumIterations;
 }
 
-void SliceView::setFlowAlpha( const qreal &alpha ) {
+void SliceView::setFlowAlpha( const qreal &alpha )
+{
 	_flowAlpha = alpha;
 }
 
-void SliceView::setFlowEpsilon( const qreal &epsilon ) {
+void SliceView::setFlowEpsilon( const qreal &epsilon )
+{
 	_flowEpsilon = epsilon;
 }
 
-void SliceView::setFlowMaximumIterations( const int &maxIter ) {
+void SliceView::setFlowMaximumIterations( const int &maxIter )
+{
 	_flowMaximumIterations = maxIter;
 }
 
-void SliceView::setRestrictedAreaResolution( const int &resolution ) {
+void SliceView::setRestrictedAreaResolution( const int &resolution )
+{
 	_restrictedAreaResolution = resolution;
 }
 
-void SliceView::setRestrictedAreaThreshold( const int &threshold )  {
+void SliceView::setRestrictedAreaThreshold( const int &threshold )
+{
 	_restrictedAreaThreshold = threshold;
 }
 
-void SliceView::enableRestrictedAreaCircle( const bool &enable )  {
-	_restrictedAreaDrawCircle = enable;
-}
-
-void SliceView::setRestrictedAreaBeginRadius( const int &radius ) {
+void SliceView::setRestrictedAreaBeginRadius( const int &radius )
+{
 	_restrictedAreaBeginRadius = radius;
 }
 
-void SliceView::drawSlice( QImage &image, const Billon &billon, const Marrow *marrow, const int &sliceNumber, const Interval &intensityInterval ) {
-	if ( sliceNumber > -1 && sliceNumber < static_cast<int>(billon.n_slices) ) {
-		switch (_typeOfView) {
+void SliceView::setEdgeDetectionType( const EdgeDetectionType::EdgeDetectionType &type )
+{
+	if ( type > EdgeDetectionType::_EDGE_DETECTION_MIN_ && type < EdgeDetectionType::_EDGE_DETECTION_MAX_ )
+	{
+		_typeOfEdgeDetection = type;
+	}
+}
+
+void SliceView::drawSlice( QImage &image, const Billon &billon, const Marrow *marrow, const int &sliceNumber, const Interval &intensityInterval )
+{
+	if ( sliceNumber > -1 && sliceNumber < static_cast<int>(billon.n_slices) )
+	{
+		switch (_typeOfView)
+		{
 			// Affichage de la coupe moyenne
 			case SliceType::AVERAGE :
 				drawAverageSlice( image, billon, intensityInterval );
@@ -97,13 +114,20 @@ void SliceView::drawSlice( QImage &image, const Billon &billon, const Marrow *ma
 			case SliceType::MOVEMENT :
 				drawMovementSlice( image, billon, sliceNumber, intensityInterval );
 				break;
+			// Affichage de la coupe de détection de mouvements
+			case SliceType::EDGE_DETECTION :
+				drawEdgeDetectionSlice( image, billon, sliceNumber, intensityInterval );
+				break;
+			// Affichage de la coupe de flot optique
 			case SliceType::FLOW :
 				drawFlowSlice( image, billon, sliceNumber );
 				break;
+			// Affichage de la zone réduite
 			case SliceType::RESTRICTED_AREA :
 				drawCurrentSlice( image, billon, sliceNumber, intensityInterval );
 				drawRestrictedArea( image, billon, marrow, sliceNumber, intensityInterval );
 				break;
+			// Affichage de la coupe originale
 			case SliceType::CURRENT:
 			default :
 				// Affichage de la coupe courante
@@ -118,7 +142,8 @@ void SliceView::drawSlice( QImage &image, const Billon &billon, const Marrow *ma
  * Private functions
  *******************************/
 
-void SliceView::drawCurrentSlice( QImage &image, const Billon &billon, const int &sliceNumber, const Interval &intensityInterval ) {
+void SliceView::drawCurrentSlice( QImage &image, const Billon &billon, const int &sliceNumber, const Interval &intensityInterval )
+{
 	const Slice &slice = billon.slice(sliceNumber);
 	const uint width = slice.n_cols;
 	const uint height = slice.n_rows;
@@ -130,15 +155,18 @@ void SliceView::drawCurrentSlice( QImage &image, const Billon &billon, const int
 	int color;
 	uint i,j;
 
-	for ( j=0 ; j<height ; j++) {
-		for ( i=0 ; i<width ; i++) {
-			color = (qBound(minValue,slice.at(j,i),maxValue)-minValue)*fact;
+	for ( j=0 ; j<height ; j++)
+	{
+		for ( i=0 ; i<width ; i++)
+		{
+			color = (RESTRICT_TO(minValue,slice.at(j,i),maxValue)-minValue)*fact;
 			*(line++) = qRgb(color,color,color);
 		}
 	}
 }
 
-void SliceView::drawAverageSlice( QImage &image, const Billon &billon, const Interval &intensityInterval ) {
+void SliceView::drawAverageSlice( QImage &image, const Billon &billon, const Interval &intensityInterval )
+{
 	const uint width = billon.n_cols;
 	const uint height = billon.n_rows;
 	const uint depth = billon.n_slices;
@@ -149,11 +177,14 @@ void SliceView::drawAverageSlice( QImage &image, const Billon &billon, const Int
 	QRgb * line = (QRgb *) image.bits();
 	int color;
 
-	for (uint j=0 ; j<height ; j++) {
-		for (uint i=0 ; i<width ; i++) {
+	for (uint j=0 ; j<height ; j++)
+	{
+		for (uint i=0 ; i<width ; i++)
+		{
 			color = depth*(-minValue);
-			for (uint k=0 ; k<depth ; k++) {
-				color += qBound(minValue,billon.at(j,i,k),maxValue);
+			for (uint k=0 ; k<depth ; k++)
+			{
+				color += RESTRICT_TO(minValue,billon.at(j,i,k),maxValue);
 			}
 			color *= fact;
 			*(line++) = qRgb(color,color,color);
@@ -161,7 +192,8 @@ void SliceView::drawAverageSlice( QImage &image, const Billon &billon, const Int
 	}
 }
 
-void SliceView::drawMedianSlice( QImage &image, const Billon &billon, const Interval &intensityInterval ) {
+void SliceView::drawMedianSlice( QImage &image, const Billon &billon, const Interval &intensityInterval )
+{
 	const uint width = billon.n_cols;
 	const uint height = billon.n_rows;
 	const uint depth = billon.n_slices;
@@ -172,11 +204,14 @@ void SliceView::drawMedianSlice( QImage &image, const Billon &billon, const Inte
 	QRgb * line =(QRgb *) image.bits();
 	int color;
 
-	for (uint j=0 ; j<height ; j++) {
-		for (uint i=0 ; i<width ; i++) {
+	for (uint j=0 ; j<height ; j++)
+	{
+		for (uint i=0 ; i<width ; i++)
+		{
 			ivec tab(depth);
-			for (uint k=0 ; k<depth ; k++) {
-				tab(k) = qBound(minValue,billon.at(j,i,k),maxValue);
+			for (uint k=0 ; k<depth ; k++)
+			{
+				tab(k) = RESTRICT_TO(minValue,billon.at(j,i,k),maxValue);
 			}
 			color = (median(tab)-minValue)*fact;
 			*(line++) = qRgb(color,color,color);
@@ -184,70 +219,80 @@ void SliceView::drawMedianSlice( QImage &image, const Billon &billon, const Inte
 	}
 }
 
-void SliceView::drawMovementSlice( QImage &image, const Billon &billon, const int &sliceNumber, const Interval &intensityInterval ) {
-
-//	const Slice &previousSlice = billon.slice(sliceNumber > 0 ? sliceNumber-1 : sliceNumber+1);
-//	const Slice &currentSlice = billon.slice(sliceNumber);
-//	const Slice &toCompareSlice = billon.slice(_useNextSliceInsteadOfCurrentSlice && sliceNumber < static_cast<int>(billon.n_slices)-1 ? sliceNumber+1 : sliceNumber );
-
-//	const int width = previousSlice.n_cols;
-//	const int height = previousSlice.n_rows;
-//	const int minValue = intensityInterval.min();
-//	const int maxValue = intensityInterval.max();
-//	const qreal fact = 255.0/intensityInterval.size();
-
-//	const QRgb background = qRgb(0,0,0);
-//	const QRgb foreground = qRgb(0,200,200);
-//	QRgb *line;
-
-//	int i, j, color, pixelAbsDiff;
-
-//	line = (QRgb *) image.bits();
-//	if ( _movementWithBackground ) {
-//		for ( j=0 ; j<height ; j++) {
-//			for ( i=0 ; i<width ; i++) {
-//				pixelAbsDiff = qAbs(qBound(minValue,previousSlice.at(j,i),maxValue) - qBound(minValue,toCompareSlice.at(j,i),maxValue));
-//				if ( pixelAbsDiff > _movementThresholdMin && pixelAbsDiff < _movementThresholdMax ) *line = foreground;
-//				else {
-//					color = (qBound(minValue,currentSlice.at(j,i),maxValue)-minValue)*fact;
-//					*line = qRgb(color,color,color);
-//					//*line = background;
-//				}
-//				line++;
-//			}
-//		}
-//	}
-//	else {
-//		for ( j=0 ; j<height ; j++) {
-//			for ( i=0 ; i<width ; i++) {
-//				pixelAbsDiff = qAbs(qBound(minValue,previousSlice.at(j,i),maxValue) - qBound(minValue,toCompareSlice.at(j,i),maxValue));
-//				if ( pixelAbsDiff > _movementThresholdMin && pixelAbsDiff < _movementThresholdMax ) *line = foreground;
-//				else *line = background;
-//				line++;
-//			}
-//		}
-//	}
+void SliceView::drawMovementSlice( QImage &image, const Billon &billon, const int &sliceNumber, const Interval &intensityInterval )
+{
 	const Slice &previousSlice = billon.slice(sliceNumber > 0 ? sliceNumber-1 : sliceNumber+1);
 	const Slice &toCompareSlice = billon.slice(_useNextSliceInsteadOfCurrentSlice && sliceNumber < static_cast<int>(billon.n_slices)-1 ? sliceNumber+1 : sliceNumber );
 	const uint width = previousSlice.n_cols;
 	const uint height = previousSlice.n_rows;
 	const int minValue = intensityInterval.minValue();
 	const int maxValue = intensityInterval.maxValue();
-	const qreal fact = 255./500;
+	const qreal fact = 255./intensityInterval.width();
 
 	QRgb * line = (QRgb *) image.bits();
 	int color;
 	uint i,j;
 
-	for ( j=0 ; j<height ; j++) {
-		for ( i=0 ; i<width ; i++) {
-			color = qMin(qAbs(qBound(minValue,previousSlice.at(j,i),maxValue) - qBound(minValue,toCompareSlice.at(j,i),maxValue)),500) * fact;
+	for ( j=0 ; j<height ; j++)
+	{
+		for ( i=0 ; i<width ; i++)
+		{
+			color = qAbs(RESTRICT_TO(minValue,previousSlice.at(j,i),maxValue) - RESTRICT_TO(minValue,toCompareSlice.at(j,i),maxValue)) * fact;
 			*(line++) = qRgb(color,color,color);
 		}
 	}
 }
 
-void SliceView::drawFlowSlice( QImage &image, const Billon &billon, const int &sliceNumber ) {
+void SliceView::drawEdgeDetectionSlice( QImage &image, const Billon &billon, const int &sliceNumber, const Interval &intensityInterval )
+{
+	const Slice &slice = billon.slice(sliceNumber);
+	const uint width = slice.n_cols;
+	const uint height = slice.n_rows;
+	const int minValue = intensityInterval.minValue();
+	const int maxValue = intensityInterval.maxValue();
+	const int nbValues = intensityInterval.size()*4;
+	const qreal fact = 255./nbValues;
+
+	QRgb * line = (QRgb *) image.bits() + width + 1;
+	int color, gx, gy, gNorme, max;
+	uint i,j;
+
+	max = 0;
+	switch (_typeOfEdgeDetection) {
+		case EdgeDetectionType::SOBEL :
+			for ( j=1 ; j<height-1 ; j++)
+			{
+				for ( i=1 ; i<width-1 ; i++)
+				{
+					gx = gy = RESTRICT_TO(minValue,slice.at(j-1,i-1),maxValue) - RESTRICT_TO(minValue,slice.at(j+1,i+1),maxValue);
+					gx += 2.*RESTRICT_TO(minValue,slice.at(j,i-1),maxValue) + RESTRICT_TO(minValue,slice.at(j+1,i-1),maxValue) - RESTRICT_TO(minValue,slice.at(j-1,i+1),maxValue) - 2.*RESTRICT_TO(minValue,slice.at(j,i+1),maxValue);
+					gy += 2.*RESTRICT_TO(minValue,slice.at(j-1,i),maxValue) + RESTRICT_TO(minValue,slice.at(j-1,i+1),maxValue) - RESTRICT_TO(minValue,slice.at(j+1,i-1),maxValue) - 2.*RESTRICT_TO(minValue,slice.at(j+1,i),maxValue);
+					gNorme = qSqrt(gx*gx+gy*gy);
+					max = qMax(max,(int)(gNorme*fact));
+					color = qBound(0.,gNorme*fact,255.);
+					*(line++) = qRgb(color,color,color);
+				}
+				line+=2;
+			}
+			break;
+		case EdgeDetectionType::LAPLACIAN :
+			for ( j=1 ; j<height-1 ; j++)
+			{
+				for ( i=1 ; i<width-1 ; i++)
+				{
+					color = qBound(0,4*RESTRICT_TO(minValue,slice.at(j,i),maxValue) - RESTRICT_TO(minValue,slice.at(j-1,i),maxValue) - RESTRICT_TO(minValue,slice.at(j+1,i),maxValue) - RESTRICT_TO(minValue,slice.at(j,i-1),maxValue) - RESTRICT_TO(minValue,slice.at(j,i+1),maxValue),255);
+					*(line++) = qRgb(color,color,color);
+				}
+				line+=2;
+			}
+			break;
+		default :
+			break;
+	}
+}
+
+void SliceView::drawFlowSlice( QImage &image, const Billon &billon, const int &sliceNumber )
+{
 
 	const Slice &currentSlice = billon.slice(sliceNumber);
 
@@ -261,8 +306,10 @@ void SliceView::drawFlowSlice( QImage &image, const Billon &billon, const int &s
 	qreal angle, norme;
 	QColor color;
 
-	for ( j=0 ; j<height-1 ; j++) {
-		for ( i=0 ; i<width-1 ; i++) {
+	for ( j=0 ; j<height-1 ; j++)
+	{
+		for ( i=0 ; i<width-1 ; i++)
+		{
 			angle = (ANGLE(0,0,(*field)[j][i].x(),(*field)[j][i].y())+PI_ON_FOUR)*RAD_TO_DEG_FACT;
 			if (angle>360.) angle -= 360.;
 			norme = qMin(qSqrt( qPow((*field)[j][i].x(),2) + qPow((*field)[j][i].y(),2) )*20.,255.);
@@ -274,8 +321,10 @@ void SliceView::drawFlowSlice( QImage &image, const Billon &billon, const int &s
 
 //	QPainter painter(&image);
 //	painter.setPen(Qt::white);
-//	for ( j=5 ; j<height-1 ; j+=5 ) {
-//		for ( i=5 ; i<width-1 ; i+=5 ) {
+//	for ( j=5 ; j<height-1 ; j+=5 )
+//	{
+//		for ( i=5 ; i<width-1 ; i+=5 )
+//		{
 //			painter.drawLine(i,j,i+(*field)[j][i].x(),j+(*field)[j][i].y());
 //		}
 //	}
@@ -283,7 +332,8 @@ void SliceView::drawFlowSlice( QImage &image, const Billon &billon, const int &s
 	delete field;
 }
 
-void SliceView::drawRestrictedArea( QImage &image, const Billon &billon, const Marrow *marrow, const int &sliceNumber, const Interval &intensityInterval ) {
+void SliceView::drawRestrictedArea( QImage &image, const Billon &billon, const Marrow *marrow, const int &sliceNumber, const Interval &intensityInterval )
+{
 	const int nbPoints = _restrictedAreaResolution;
 
 	const int max = intensityInterval.maxValue();
@@ -301,17 +351,19 @@ void SliceView::drawRestrictedArea( QImage &image, const Billon &billon, const M
 	int polygonPoints[2*nbPoints+2];
 
 	qreal xEdge, yEdge, orientation, cosAngle, sinAngle;
-	int i,j,k;
+	int i,k;
 	orientation = 0.;
 	k = 0;
 
-	for ( i=0 ; i<nbPoints ; ++i ) {
+	for ( i=0 ; i<nbPoints ; ++i )
+	{
 		orientation += (TWO_PI/static_cast<qreal>(nbPoints));
 		cosAngle = qCos(orientation);
 		sinAngle = -qSin(orientation);
 		xEdge = xCenter + _restrictedAreaBeginRadius*cosAngle;
 		yEdge = yCenter + _restrictedAreaBeginRadius*sinAngle;
-		while ( qBound(min,currentSlice.at(yEdge,xEdge),max) > threshold && xEdge>0 && yEdge>0 && xEdge<imageWidth && yEdge<imageHeight ) {
+		while ( RESTRICT_TO(min,currentSlice.at(yEdge,xEdge),max) > threshold && xEdge>0 && yEdge>0 && xEdge<imageWidth && yEdge<imageHeight )
+		{
 			xEdge += cosAngle;
 			yEdge += sinAngle;
 		}
@@ -323,112 +375,7 @@ void SliceView::drawRestrictedArea( QImage &image, const Billon &billon, const M
 
 	polygon.setPoints(nbPoints+1,polygonPoints);
 
-	QPainter painter;
-
-	if ( _restrictedAreaDrawCircle ) {
-		QRect boudingRect = polygon.boundingRect();
-		const int xLeft = boudingRect.left();
-		const int xRight = boudingRect.right();
-		const int yTop = boudingRect.top();
-		const int yBottom = boudingRect.bottom()+1;
-		const int endLineWidth = imageWidth-xRight;
-
-		const QRgb bg = qRgb(0,0,0);
-
-		painter.begin(&image);
-			painter.fillRect(0,0,imageWidth,yTop,bg);
-			painter.fillRect(0,yTop,xLeft,yBottom,bg);
-			painter.fillRect(xRight,yTop,imageWidth,yBottom,bg);
-			painter.fillRect(0,yBottom,imageWidth,imageHeight,bg);
-		painter.end();
-
-		QRgb * line =(QRgb *) image.bits();
-		line += imageWidth*yTop;
-		for ( j=yTop ; j<yBottom ; ++j ) {
-			line += xLeft;
-			for ( i=xLeft ; i<xRight ; ++i ) {
-				if ( !polygon.containsPoint(QPoint(i,j),Qt::WindingFill) ) {
-					 *line = bg;
-				}
-				line++;
-			}
-			line += endLineWidth;
-		}
-	}
-
-	painter.begin(&image);
+	QPainter painter(&image);
 	painter.setPen(Qt::green);
 	painter.drawPolygon(polygon);
 }
-
-//void SliceView::drawRestrictedArea( QImage &image, const Billon &billon, const int &sliceNumber, const Interval &intensityInterval ) {
-//	const int nbPoints = _restrictedAreaResolution;
-
-//	const int max = intensityInterval.max();
-//	const int min = intensityInterval.min();
-//	const int threshold = qBound(min,_restrictedAreaThreshold,max);
-
-//	const Slice &currentSlice = billon.slice(sliceNumber);
-
-//	QPainter painter(&image);
-//	painter.setPen(Qt::green);
-
-//	const int xCenter = image.width()/2;
-//	const int yCenter = image.height()/2;
-
-//	qreal xEdge, yEdge, xOldEdge, yOldEdge, xOrigin, yOrigin, xBary, yBary, orientation, radiusMax, radiusMean, cosAngle, sinAngle;
-//	orientation = xBary = yBary = radiusMax = radiusMean = 0.;
-
-//	for ( int i=0 ; i<nbPoints ; ++i ) {
-//		orientation += (TWO_PI/(qreal)nbPoints);
-//		cosAngle = qCos(orientation);
-//		sinAngle = -qSin(orientation);
-//		xEdge = xCenter + 50*cosAngle;
-//		yEdge = yCenter + 50*sinAngle;
-//		while ( qBound(min,currentSlice.at(yEdge,xEdge),max) > threshold ) {
-//			xEdge += cosAngle;
-//			yEdge += sinAngle;
-//		}
-//		if ( i == 0 ) {
-//			xOrigin = xEdge;
-//			yOrigin = yEdge;
-//		}
-//		else {
-//			painter.drawLine(static_cast<int>(xOldEdge),static_cast<int>(yOldEdge),static_cast<int>(xEdge),static_cast<int>(yEdge));
-//		}
-//		xBary += xEdge;
-//		yBary += yEdge;
-//		xOldEdge = xEdge;
-//		yOldEdge = yEdge;
-//		radiusMean += qSqrt( qPow(xEdge-xCenter,2) + qPow(yEdge-yCenter,2) );
-//		radiusMax = qMax(radiusMax, qSqrt(qPow(xEdge-xCenter,2) + qPow(yEdge-yCenter,2)) );
-//	}
-//	painter.drawLine(xOldEdge,yOldEdge,xOrigin,yOrigin);
-
-//	if ( _restrictedAreaDrawCircle ) {
-//		xBary /= (qreal)nbPoints;
-//		yBary /= (qreal)nbPoints;
-//		radiusMean /= (qreal)nbPoints;
-//		const QPointF center(xBary,yBary);
-//		painter.drawEllipse(center,3,3);
-//		painter.drawEllipse(center,radiusMax,radiusMax);
-//		painter.setPen(Qt::red);
-////		painter.drawEllipse(center,radiusMean,radiusMean);
-//		painter.setPen(QColor(255,127,0));
-//		painter.drawEllipse(center,(radiusMean+radiusMax)/2.,(radiusMean+radiusMax)/2.);
-
-////		QRgb * line =(QRgb *) image.bits();
-////		QRgb bg = qRgb(0,0,0);
-////		const int width = currentSlice.n_cols;
-////		const int height = currentSlice.n_rows;
-////		for ( int j=0 ; j<height ; ++j ) {
-////			for ( int i=0 ; i<width ; ++i ) {
-////				if ( qSqrt( qPow(i-xBary,2) + qPow(j-yBary,2) ) > radiusLength ) {
-////					 *line = bg;
-////				}
-////				line++;
-////			}
-////		}
-
-//	}
-//}

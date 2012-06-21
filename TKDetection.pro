@@ -28,6 +28,7 @@ SOURCES		=	main.cpp \
 				datexport.cpp \
 				dicomreader.cpp \
 				histoexport.cpp \
+				histogram.cpp \
 				interval.cpp \
 				intervalscomputer.cpp \
 				mainwindow.cpp \
@@ -55,6 +56,7 @@ HEADERS		=	billon.h \
 				dicomreader.h \
 				global.h \
 				histoexport.h \
+				histogram.h \
 				interval.h \
 				intervalscomputer.h \
 				intervalscomputerdefaultparameters.h \

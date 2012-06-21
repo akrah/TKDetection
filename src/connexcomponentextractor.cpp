@@ -10,9 +10,11 @@
 
 #include <QDebug>
 
-namespace ConnexComponentExtractor {
+namespace ConnexComponentExtractor
+{
 
-	namespace {
+	namespace
+	{
 		/**
 		 * \fn		int twoPassAlgorithm( arma::Slice &oldSlice, arma::Slice &currentSlice, arma::Slice &labels, QMap<int, QList<iCoord3D> > &connexComponentList, int k, int nbLabel )
 		 * \brief	Algorithme de labelisation de composantes connexes en 3 dimensions
@@ -27,7 +29,8 @@ namespace ConnexComponentExtractor {
 		int twoPassAlgorithm( arma::imat &oldSlice, arma::Slice &currentSlice, arma::imat &labels, QMap<int, QList<iCoord3D> > &connexComponentList, int k, int nbLabel, const __billon_type__ &threshold );
 	}
 
-	Billon * extractConnexComponent( Billon &billon, const int &minimumSize, const __billon_type__ &threshold ) {
+	Billon * extractConnexComponent( Billon &billon, const int &minimumSize, const __billon_type__ &threshold )
+	{
 
 		const uint width = billon.n_cols;
 		const uint height = billon.n_rows;
@@ -41,7 +44,8 @@ namespace ConnexComponentExtractor {
 		arma::imat* tmp;
 
 		//On parcours les tranches 1 par 1
-		for ( unsigned int k=0 ; k<depth ; k++ ) {
+		for ( unsigned int k=0 ; k<depth ; k++ )
+		{
 			nbLabel = twoPassAlgorithm((*oldSlice),billon.slice(k),(*labels),connexComponentList,k,nbLabel,threshold);
 			tmp = oldSlice;
 			oldSlice = labels;
@@ -52,54 +56,6 @@ namespace ConnexComponentExtractor {
 		delete labels;
 		delete oldSlice;
 
-		//On identifie les valeurs minimales en x, y, et z pour chaque composante
-//		QMap<int, QPair<iCoord3D, iCoord3D> > saveMinMax;
-//		int curVal;
-//		iCoord3D currentCoord;
-
-//		QMapIterator<int, QList<iCoord3D> > iter(connexComponentList);
-//		while (iter.hasNext()) {
-//			iter.next();
-//			if ( iter.value().size() > minimumSize) {
-//				curVal = iter.key();
-//				saveMinMax[curVal] = QPair<iCoord3D, iCoord3D>(iter.value().first(), iter.value().first());
-//				QListIterator<iCoord3D> coords(iter.value());
-//				while (coords.hasNext()) {
-//					currentCoord = coords.next();
-//					saveMinMax[curVal].first.x = qMin(saveMinMax[curVal].first.x,currentCoord.x);
-//					saveMinMax[curVal].first.y = qMin(saveMinMax[curVal].first.y,currentCoord.y);
-//					saveMinMax[curVal].first.z = qMin(saveMinMax[curVal].first.z,currentCoord.z);
-
-//					saveMinMax[curVal].second.x = qMax(saveMinMax[curVal].second.x,currentCoord.x);
-//					saveMinMax[curVal].second.y = qMax(saveMinMax[curVal].second.y,currentCoord.y);
-//					saveMinMax[curVal].second.z = qMax(saveMinMax[curVal].second.z,currentCoord.z);
-//				}
-//			}
-//		}
-
-		//On ajoute les composantes connexes à l'image
-//		QMapIterator<int, QPair<iCoord3D, iCoord3D> > iterMinMax(saveMinMax);
-//		iCoord3D pmin,pmax, unit;
-//		unit = iCoord3D(1,1,1);
-//		int counter = 1;
-//		while (iterMinMax.hasNext()) {
-//			iterMinMax.next();
-//			pmin = iterMinMax.value().first - unit;
-//			pmax = iterMinMax.value().second + unit;
-//			Billon* con = new Billon(pmin, pmax);
-//			con->setMaximumValue(1.0f);
-//			QListIterator<iCoord3D> coords(connexComponentList[iterMinMax.key()]);
-//			while (coords.hasNext()) {
-//				currentCoord = coords.next();
-//				con->value(currentCoord-pmin) = 1.0f;
-//			}
-//			if ( components.contains(counter) ) {
-//				delete components[counter];
-//				components.remove(counter);
-//			}
-//			components.insert(counter++,con);
-//		}
-
 		Billon* components = new Billon(width,height,depth);
 		components->setVoxelSize(billon.voxelWidth(),billon.voxelHeight(),billon.voxelDepth());
 		components->fill(0);
@@ -107,11 +63,14 @@ namespace ConnexComponentExtractor {
 		QMapIterator<int, QList<iCoord3D> > iter(connexComponentList);
 		iCoord3D currentCoord;
 		int counter = 1;
-		while (iter.hasNext()) {
+		while (iter.hasNext())
+		{
 			iter.next();
-			if ( iter.value().size() > minimumSize ) {
+			if ( iter.value().size() > minimumSize )
+			{
 				QListIterator<iCoord3D> coords(iter.value());
-				while (coords.hasNext()) {
+				while (coords.hasNext())
+				{
 					currentCoord = coords.next();
 					components->at(currentCoord.y,currentCoord.x,currentCoord.z) = counter;
 				}
@@ -125,8 +84,10 @@ namespace ConnexComponentExtractor {
 		return components;
 	}
 
-	namespace {
-		int twoPassAlgorithm( arma::imat &oldSlice, arma::Slice &currentSlice, arma::imat &labels, QMap<int, QList<iCoord3D> > &connexComponentList, int k, int nbLabel, const __billon_type__ &threshold ) {
+	namespace
+	{
+		int twoPassAlgorithm( arma::imat &oldSlice, arma::Slice &currentSlice, arma::imat &labels, QMap<int, QList<iCoord3D> > &connexComponentList, int k, int nbLabel, const __billon_type__ &threshold )
+		{
 			const uint width = currentSlice.n_cols;
 			const uint height = currentSlice.n_rows;
 
@@ -137,10 +98,13 @@ namespace ConnexComponentExtractor {
 			bool isOld;
 			labels.fill(0);
 			//On parcourt une première fois la tranche
-			for ( j=1 ; j<height-1 ; j++) {
-				for ( i=1 ; i<width-1 ; i++) {
+			for ( j=1 ; j<height-1 ; j++)
+			{
+				for ( i=1 ; i<width-1 ; i++)
+				{
 					//Si on a un voxel
-					if ( currentSlice.at(j,i) > threshold ) {
+					if ( currentSlice.at(j,i) > threshold )
+					{
 						//On sauvegarde la valeur des voisins non nuls
 						voisinage.clear();
 						//Voisinage de la face courante
@@ -160,15 +124,18 @@ namespace ConnexComponentExtractor {
 						if (oldSlice.at(j+1,i)) voisinage.append(oldSlice.at(j+1,i));
 						if (oldSlice.at(j+1,i+1)) voisinage.append(oldSlice.at(j+1,i+1));
 						//Si ses voisins n'ont pas d'étiquette
-						if ( voisinage.isEmpty() ) {
+						if ( voisinage.isEmpty() )
+						{
 							nbLabel++;
 							labels.at(j,i) = nbLabel;
 						}
 						//Si ses voisins ont une étiquette
-						else {
+						else
+						{
 							QListIterator<int> iterVoisin(voisinage);
 							mini = iterVoisin.next();
-							while(iterVoisin.hasNext()) {
+							while(iterVoisin.hasNext())
+							{
 								mini = qMin(mini,iterVoisin.next());
 							}
 							//Attribution de la valeur minimale au voxel courant
@@ -176,22 +143,30 @@ namespace ConnexComponentExtractor {
 							isOld = connexComponentList.contains(mini);
 							//Mise à jour de la table d'équivalence pour la face courante
 							//et fusion des liste de sommets si un voxel fusionne des composantes connexes antérieures
-							for ( int ind=0 ; ind<oldStart ; ind++ ) {
-								if ( voisinage[ind] > mini ) {
+							for ( int ind=0 ; ind<oldStart ; ind++ )
+							{
+								if ( voisinage[ind] > mini )
+								{
 									tableEquiv[voisinage[ind]] = mini;
-									if (isOld && connexComponentList.contains(voisinage[ind])) {
+									if (isOld && connexComponentList.contains(voisinage[ind]))
+									{
 										connexComponentList[mini].append(connexComponentList.take(voisinage[ind]));
 										//tableEquiv[voisinage[ind]] = mini; EST DEJA FAIT AU DESSUS DU IF
 									}
 								}
 							}
-							if ( isOld ) {
-								for ( int ind=oldStart ; ind<voisinage.size() ; ind++ ) {
-									if ( voisinage[ind] != mini ) {
-										if ( mini>voisinage[ind] ) {
+							if ( isOld )
+							{
+								for ( int ind=oldStart ; ind<voisinage.size() ; ind++ )
+								{
+									if ( voisinage[ind] != mini )
+									{
+										if ( mini>voisinage[ind] )
+										{
 											sup = mini;
 											inf = voisinage[ind];
-										} else {
+										} else
+										{
 											sup = voisinage[ind];
 											inf = mini;
 										}
@@ -206,18 +181,24 @@ namespace ConnexComponentExtractor {
 			}
 			//Résolution des chaines dans la table d'équivalence
 			QMapIterator<int, int> iter(tableEquiv);
-			while (iter.hasNext()) {
+			while (iter.hasNext())
+			{
 				iter.next();
-				if (tableEquiv.contains(iter.value())) {
+				if (tableEquiv.contains(iter.value()))
+				{
 					tableEquiv[iter.key()] = tableEquiv[iter.value()];
 				}
 			}
-			for ( j=0 ; j<height ; j++ ) {
-				for ( i=0 ; i<width ; i++ ) {
+			for ( j=0 ; j<height ; j++ )
+			{
+				for ( i=0 ; i<width ; i++ )
+				{
 					label = labels.at(j,i);
 					//Si on a un voxel
-					if (label) {
-						if (tableEquiv.contains(label)) {
+					if (label)
+					{
+						if (tableEquiv.contains(label))
+						{
 							labels.at(j,i) = tableEquiv[label];
 							label = labels.at(j,i);
 						}

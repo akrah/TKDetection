@@ -41,29 +41,29 @@ private slots:
 	void updateSliceHistogram();
 	void setMarrowAroundDiameter( const int &diameter );
 	void setHistogramIntervalMinimumWidth( const int &width );
-	void enableHistogramSmoothing( const bool &enable );
+	void setHistogramSmoothingType( const int &type );
 	void setHistogramMaximumsNeighborhood( const int &neighborhood );
+	void setHistogramDerivativePercentage( const int &percentage );
 	void highlightSliceHistogram( const int &slicePosition );
 	void updateMarrow();
 	void computeSectorsHistogramsForCurrentSliceIntervall();
 	void highlightSectorHistogram( const int &sectorIdx );
-	void setMinimumOfSlicesIntervalToCurrentSlice();
-	void setMaximumOfSlicesIntervalToCurrentSlice();
+	void setMinimumOfSliceInterval( const int &min );
+	void setMinimumOfSliceIntervalToCurrentSlice();
+	void setMaximumOfSliceInterval( const int &max );
+	void setMaximumOfSliceIntervalToCurrentSlice();
 	void previousMaximumInSliceHistogram();
 	void nextMaximumInSliceHistogram();
 	void zoomInSliceView( const qreal &zoomFactor, const QPoint &focalPoint );
 	void dragInSliceView( const QPoint &movementVector );
 	void setMovementThresholdMin( const int &threshold );
 	void setMovementThresholdMax( const int &threshold );
-	void enableMovementWithBackground( const bool &enable );
 	void useNextSliceInsteadOfCurrentSlice( const bool &enable );
 	void flowApplied();
 	void setRestrictedAreaResolution( const int &resolution );
 	void setRestrictedAreaThreshold( const int &threshold );
-	void enableRestrictedAreaCircle( const bool &enable ) ;
 	void setRestrictedAreaBeginRadius( const int &radius );
-	void computeRestrictedBillon();
-	void changeBillonUsed();
+	void setEdgeDetectionType( const int &type );
 	void exportToDat();
 	void exportToOfs();
 	void exportToOfsRestricted();
@@ -71,7 +71,7 @@ private slots:
 	void exportAllSectorInAllIntervalsToOfs();
 	void exportToV3D();
 	void exportFlowToV3D();
-	void exportHistogramToV3D();
+	void exportHistogramToSep();
 	void exportMovementsToV3D();
 	void selectSliceInterval( const int &index );
 	void selectCurrentSliceInterval();
@@ -95,7 +95,6 @@ private:
 	QButtonGroup _groupSliceView;
 
 	Billon *_billon;
-	Billon *_unusedBillon;
 	Billon *_sectorBillon;
 	Billon *_componentBillon;
 	Marrow *_marrow;
@@ -112,7 +111,6 @@ private:
 
 	int _currentSlice;
 	int _currentMaximum;
-	bool _isUsedOriginalBillon;
 	int _currentSector;
 };
 

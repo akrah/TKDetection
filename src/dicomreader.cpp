@@ -10,20 +10,24 @@
 #include <itkGDCMImageIO.h>
 #include <itkGDCMSeriesFileNames.h>
 
-namespace DicomReader {
+namespace DicomReader
+{
 
 	// Déclaration de fonctions privées
-	namespace {
+	namespace
+	{
 		Billon* makeBillonFromDicomWithITK( const QString &repository );
 		QString getTag( const QString &entryId, const itk::MetaDataDictionary &dictionary );
 	}
 
 
-	Billon* read( const QString &repository ) {
+	Billon* read( const QString &repository )
+	{
 
 		Billon* cube = makeBillonFromDicomWithITK( repository );
 
-		if ( cube == 0 ) {
+		if ( cube == 0 )
+		{
 			qWarning() << QObject::tr("ERREUR : Impossible de lire le contenu du répertoire.");
 		}
 
@@ -31,12 +35,15 @@ namespace DicomReader {
 	}
 
 	// Implémentation des fonction privées
-	namespace {
+	namespace
+	{
 		inline
-		Billon* makeBillonFromDicomWithITK( const QString &repository ) {
-
+		Billon* makeBillonFromDicomWithITK( const QString &repository )
+		{
 			// Définition des type de l'image
-			typedef itk::Image<int,3> ImageType;
+			const unsigned int InputDimension = 3;
+			typedef int PixelType; // INT à la base marchais bien.
+			typedef itk::Image<PixelType,InputDimension> ImageType;
 			typedef itk::ImageSeriesReader<ImageType> ReaderType;
 			ReaderType::Pointer reader = ReaderType::New();
 
@@ -51,10 +58,12 @@ namespace DicomReader {
 			nameGenerator->SetDirectory(repository.toStdString());
 			reader->SetFileNames(nameGenerator->GetInputFileNames());
 
-			try {
+			try
+			{
 				reader->Update();
 			}
-			catch( itk::ExceptionObject &ex ) {
+			catch( itk::ExceptionObject &ex )
+			{
 				qDebug() << ex.GetDescription();
 				return 0;
 			}
@@ -66,12 +75,14 @@ namespace DicomReader {
 			bool size_ok;
 
 			const uint height = getTag("0028|0010",dictionary).toUInt(&size_ok);
-			if ( !size_ok ) {
+			if ( !size_ok )
+			{
 				qWarning() << QObject::tr("ERREUR : Lecture des dimensions de l'image impossible.");
 				return 0;
 			}
 			const uint width = getTag("0028|0011",dictionary).toUInt(&size_ok);
-			if ( !size_ok ) {
+			if ( !size_ok )
+			{
 				qWarning() << QObject::tr("ERREUR : Lecture des dimensions de l'image impossible.");
 				return 0;
 			}
@@ -85,10 +96,13 @@ namespace DicomReader {
 			int max, min;
 			max = min = in.Value();
 
-			for ( uint k=0; k<depth; k++ ) {
+			for ( uint k=0; k<depth; k++ )
+			{
 				arma::Slice &slice = billon->slice(k);
-				for ( uint j=0; j<height; j++ ) {
-					for ( uint i=0; i<width; i++ ) {
+				for ( uint j=0; j<height; j++ )
+				{
+					for ( uint i=0; i<width; i++ )
+					{
 						const int &current = in.Value();
 						slice.at(j,i) = current;
 						max = qMax(max,current);
@@ -108,19 +122,24 @@ namespace DicomReader {
 		}
 
 		inline
-		QString getTag( const QString &entryId, const itk::MetaDataDictionary &dictionary ) {
+		QString getTag( const QString &entryId, const itk::MetaDataDictionary &dictionary )
+		{
 			QString value = QObject::tr("indéfinie");
 
 			itk::MetaDataObject<std::string>::ConstPointer entryValue = 0;
 			const itk::MetaDataDictionary::ConstIterator tagItr = dictionary.Find(entryId.toStdString());
 
-			if( tagItr != dictionary.End ()) {
+			if( tagItr != dictionary.End ())
+			{
 				entryValue = dynamic_cast<itk::MetaDataObject<std::string> *> (tagItr->second.GetPointer());
-				if ( entryValue ) {
+				if ( entryValue )
+				{
 					value = QString::fromStdString(entryValue->GetMetaDataObjectValue());
 				}
 			}
 			return value;
 		}
 	}
+
 }
+

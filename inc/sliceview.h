@@ -19,7 +19,6 @@ public:
 
 	void setMovementThresholdMin( const int &threshold );
 	void setMovementThresholdMax( const int &threshold );
-	void enableMovementWithBackground( const bool &enable );
 	void useNextSliceInsteadOfCurrentSlice( const bool &enable );
 
 	qreal flowAlpha() const;
@@ -31,8 +30,9 @@ public:
 
 	void setRestrictedAreaResolution( const int &resolution );
 	void setRestrictedAreaThreshold( const int &threshold );
-	void enableRestrictedAreaCircle( const bool &enable );
 	void setRestrictedAreaBeginRadius( const int &radius );
+
+	void setEdgeDetectionType( const EdgeDetectionType::EdgeDetectionType &type );
 
 	void drawSlice( QImage &image, const Billon &billon, const Marrow *marrow, const int &sliceNumber, const Interval &intensityInterval );
 
@@ -41,6 +41,7 @@ private :
 	void drawAverageSlice( QImage &image, const Billon &billon, const Interval &intensityInterval );
 	void drawMedianSlice( QImage &image, const Billon &billon, const Interval &intensityInterval );
 	void drawMovementSlice( QImage &image, const Billon &billon, const int &sliceNumber, const Interval &intensityInterval );
+	void drawEdgeDetectionSlice( QImage &image, const Billon &billon, const int &sliceNumber, const Interval &intensityInterval );
 	void drawFlowSlice( QImage &image, const Billon &billon, const int &sliceNumber );
 	void drawRestrictedArea( QImage &image, const Billon &billon, const Marrow *marrow, const int &sliceNumber, const Interval &intensityInterval );
 
@@ -49,7 +50,6 @@ private:
 
 	int _movementThresholdMin;
 	int _movementThresholdMax;
-	bool _movementWithBackground;
 	bool _useNextSliceInsteadOfCurrentSlice;
 
 	qreal _flowAlpha;
@@ -58,8 +58,9 @@ private:
 
 	int _restrictedAreaResolution;
 	int _restrictedAreaThreshold;
-	bool _restrictedAreaDrawCircle;
 	int _restrictedAreaBeginRadius;
+
+	EdgeDetectionType::EdgeDetectionType _typeOfEdgeDetection;
 };
 
 #endif // SLICEVIEW_H

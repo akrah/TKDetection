@@ -117,7 +117,7 @@ namespace OfsExport {
 	}
 
 	void processRestrictedMesh( const Billon &billon, const Marrow &marrow, const Interval &interval, const QString &fileName, const int &resolutionCercle, const int &seuilContour ) {
-		  QVector<rCoord2D> vectVertex = billon.getRestrictedAreaVertex( resolutionCercle,seuilContour, &marrow );
+		  QVector<rCoord2D> vectVertex = billon.getAllRestrictedAreaVertex( resolutionCercle,seuilContour, &marrow );
 
 		  QFile file(fileName);
 		  if ( file.open(QIODevice::WriteOnly) ) {

@@ -28,6 +28,11 @@ namespace {
 	inline qreal GAUSSIAN( qreal x ) {
 		return GAUSSIAN_CONSTANT*qExp(-0.5*(x*x));
 	}
+
+	template<typename T>
+	inline T RESTRICT_TO( const T min, const T value, const T max ) {
+		return value<min||value>max?min:value;
+	}
 }
 
 #define MINIMUM_INTENSITY -900
@@ -35,13 +40,5 @@ namespace {
 
 #define MINIMUM_Z_MOTION 200
 #define MAXIMUM_Z_MOTION 500
-
-#define SMOOTHING_RADIUS 2
-
-#define MAXIMUMS_NEIGHBORHOOD_RADIUS 10
-
-#define PERCENTAGE_FOR_MAXIMUM_CANDIDATE 0.05
-
-#define MINIMUM_INTERVAL_WIDTH 10
 
 #endif // GLOBAL_H

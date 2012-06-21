@@ -43,8 +43,8 @@ bool SliceZoomer::eventFilter(QObject *, QEvent *event) {
 				const QWheelEvent *wheelEvent = static_cast<const QWheelEvent*>(event);
 				const int wheelDelta = wheelEvent->delta();
 				if ( wheelDelta != 0 ) {
-					_zoomFactor *= wheelDelta>0 ? 1.10 : 0.90;
-					emit zoomFactorChanged(_zoomFactor,wheelEvent->pos());
+					_zoomFactor += wheelDelta>0 ? 0.10 : -0.10;
+					emit zoomFactorChanged(_zoomFactor,wheelEvent->globalPos());
 				}
 				isFiltered = true;
 			}
