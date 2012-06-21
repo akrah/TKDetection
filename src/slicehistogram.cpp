@@ -160,9 +160,9 @@ void SliceHistogram::constructHistogram( const Billon &billon, const Marrow *mar
 
 	if ( _smoothing == SmoothingType::GAUSSIAN ) _datas = IntervalsComputer::gaussianSmoothing( _datas, DEFAULT_MASK_RADIUS, false );
 	else if ( _smoothing == SmoothingType::MEANS ) _datas = IntervalsComputer::meansSmoothing( _datas, DEFAULT_MASK_RADIUS, false );
-	_derivativeThreshold = IntervalsComputer::minimumThresholdPercentage( _datas, _derivativePercentage );
+	_derivativeThreshold = IntervalsComputer::minimumThresholdPercentage( _datas, 0.05 );
 	_maximums = IntervalsComputer::maximumsComputing( _datas, _derivativeThreshold, _maximumsNeighborhood, false );
-	_intervals = IntervalsComputer::intervalsComputing( _datas, _maximums, _derivativeThreshold, _minimumIntervalWidth, false );
+	_intervals = IntervalsComputer::intervalsComputing( _datas, _maximums, _derivativePercentage, _minimumIntervalWidth, false );
 
 	computeValues();
 	computeMaximums();

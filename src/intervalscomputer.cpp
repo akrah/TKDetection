@@ -71,19 +71,18 @@ namespace IntervalsComputer {
 		return maximums;
 	}
 
-	QVector<Interval> intervalsComputing( const QVector<qreal> &hist, const QVector<int> &maximums, qreal derivativeThreshold, int minimumWidthOfIntervals, bool loop ) {
+	QVector<Interval> intervalsComputing( const QVector<qreal> &hist, const QVector<int> &maximums, qreal derivativePercentage, int minimumWidthOfIntervals, bool loop ) {
 		QVector<Interval> intervals;
 		if ( !maximums.isEmpty() ) {
 			const int nbSectors = hist.size();
 			const int nbMaximums = maximums.size();
-			int cursorMax, cursorMin;
+			int cursorMax, cursorMin, derivativeThreshold;
 			bool isSupToThreshold;
 			cursorMax = 0;
 			for ( int i=0 ; i<nbMaximums ; ++i ) {
 				cursorMin = maximums[i];
-				// Si c'est le premier intervalle ou que le maximum courant n'est pas compris dans l'intervalle précédent.
+				derivativeThreshold = derivativePercentage*hist[cursorMin];
 				if ( cursorMax < cursorMin ) {
-					// On recherche les bornes min et max des potentielles de l'intervalle contenant le ième maximum
 					isSupToThreshold = hist[cursorMin] > derivativeThreshold;
 					while ( isSupToThreshold ) {
 						cursorMin--;
@@ -110,9 +109,7 @@ namespace IntervalsComputer {
 					cursorMax--;
 					if ( cursorMax<0 ) cursorMax = nbSectors-1;
 
-					// Si c'est le premier intervalle ou que le maximum courant n'est pas compris dans l'intervalle précédent.
 					if ( intervals.isEmpty() || intervals.first().maxValue() != cursorMax ) {
-						// Si l'intervalle est plus large que minimumWidthOfIntervals
 						if ( cursorMax>cursorMin && qAbs(cursorMax-cursorMin) >= minimumWidthOfIntervals ) {
 							intervals.append(Interval(cursorMin,cursorMax));
 						}

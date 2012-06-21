@@ -238,7 +238,15 @@ void SliceView::drawMovementSlice( QImage &image, const Billon &billon, const in
 		for ( i=0 ; i<width ; i++)
 		{
 			color = qAbs(RESTRICT_TO(minValue,previousSlice.at(j,i),maxValue) - RESTRICT_TO(minValue,toCompareSlice.at(j,i),maxValue)) * fact;
+//			color += 0.5*color;
+//			color = qBound(0,color,255);
 			*(line++) = qRgb(color,color,color);
+//			if ( qAbs(RESTRICT_TO(minValue,previousSlice.at(j,i),maxValue) - RESTRICT_TO(minValue,toCompareSlice.at(j,i),maxValue)) > 200 ) {
+//				*(line++) = qRgb(255,255,255);
+//			}
+//			else {
+//				*(line++) = qRgb(0,0,0);
+//			}
 		}
 	}
 }
