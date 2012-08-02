@@ -64,6 +64,10 @@ private slots:
 	void setRestrictedAreaThreshold( const int &threshold );
 	void setRestrictedAreaBeginRadius( const int &radius );
 	void setEdgeDetectionType( const int &type );
+	void setCannyRadiusOfGaussianMask( const int &radius );
+	void setCannySigmaOfGaussianMask( const double &sigma );
+	void setCannyMinimumGradient( const int &minimumGradient );
+	void setCannyMinimumDeviation( const double &minimumDeviation );
 	void exportToDat();
 	void exportToOfs();
 	void exportToOfsRestricted();
@@ -81,6 +85,7 @@ private slots:
 	void exportConnexComponentToPgm3D();
 	void exportSliceHistogram();
 	void exportSectorDiagramAndHistogram();
+	void exportContours();
 
 private:
 	void openNewBillon(const QString &folderName = "");

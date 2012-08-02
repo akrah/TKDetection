@@ -21,6 +21,7 @@ namespace EdgeDetectionType {
 		_EDGE_DETECTION_MIN_ = -1,
 		SOBEL,
 		LAPLACIAN,
+		CANNY,
 		_EDGE_DETECTION_MAX_
 	};
 }

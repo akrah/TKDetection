@@ -65,6 +65,7 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 	_ui->_comboHistogramSmoothing->setCurrentIndex(SmoothingType::GAUSSIAN);
 	_ui->_comboEdgeDetectionType->insertItem(EdgeDetectionType::SOBEL,tr("Sobel"));
 	_ui->_comboEdgeDetectionType->insertItem(EdgeDetectionType::LAPLACIAN,tr("Laplacian"));
+	_ui->_comboEdgeDetectionType->insertItem(EdgeDetectionType::CANNY,tr("Canny"));
 
 	_ui->_spinFlowAlpha->setValue(_sliceView->flowAlpha());
 	_ui->_spinFlowEpsilon->setValue(_sliceView->flowEpsilon());
@@ -100,6 +101,10 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 	QObject::connect(_ui->_sliderRestrictedAreaBeginRadius, SIGNAL(valueChanged(int)), this, SLOT(setRestrictedAreaBeginRadius(int)));
 	QObject::connect(_ui->_spinRestrictedAreaBeginRadius, SIGNAL(valueChanged(int)), this, SLOT(setRestrictedAreaBeginRadius(int)));
 	QObject::connect(_ui->_comboEdgeDetectionType, SIGNAL(currentIndexChanged(int)), this, SLOT(setEdgeDetectionType(int)));
+	QObject::connect(_ui->_spinCannyRadiusOfGaussianMask, SIGNAL(valueChanged(int)), this, SLOT(setCannyRadiusOfGaussianMask(int)));
+	QObject::connect(_ui->_spinCannySigmaOfGaussianMask, SIGNAL(valueChanged(double)), this, SLOT(setCannySigmaOfGaussianMask(double)));
+	QObject::connect(_ui->_spinCannyMinimumGradient, SIGNAL(valueChanged(int)), this, SLOT(setCannyMinimumGradient(int)));
+	QObject::connect(_ui->_spinCannyMinimumDeviation, SIGNAL(valueChanged(double)), this, SLOT(setCannyMinimumDeviation(double)));
 
 	// Évènements déclenchés par le slider de seuillage
 	QObject::connect(_ui->_spansliderSliceThreshold, SIGNAL(lowerValueChanged(int)), this, SLOT(setLowThreshold(int)));
@@ -140,6 +145,7 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 	QObject::connect(_ui->_buttonExportConnexComponentToPgm3D, SIGNAL(clicked()), this, SLOT(exportConnexComponentToPgm3D()));
 	QObject::connect(_ui->_buttonExportSectorToOfs, SIGNAL(clicked()), this, SLOT(exportSectorToOfs()));
 	QObject::connect(_ui->_buttonExportAllSectorsInAllIntervalsToOfs, SIGNAL(clicked()), this, SLOT(exportAllSectorInAllIntervalsToOfs()));
+	QObject::connect(_ui->_buttonContours, SIGNAL(clicked()), this, SLOT(exportContours()));
 
 	// Évènements déclenchés par la souris sur le visualiseur de coupes
 	QObject::connect(&_sliceZoomer, SIGNAL(zoomFactorChanged(qreal,QPoint)), this, SLOT(zoomInSliceView(qreal,QPoint)));
@@ -320,6 +326,14 @@ void MainWindow::drawSlice( const int &sliceNumber ) {
 							}
 						}
 					}
+				}
+
+
+				qDebug() << "Extraction des plus proches pixels :";
+				QList<rCoord2D> contourPoints = _componentBillon->extractEdges(_marrow,sliceNumber-sliceInterval.minValue(),selectedComponents?selectedComponents:1);
+				painter.setPen(Qt::red);
+				for ( int i=0 ; i<contourPoints.size() ; ++i ) {
+					painter.drawPoint(contourPoints[i].x,contourPoints[i].y);
 				}
 			}
 		}
@@ -648,6 +662,30 @@ void MainWindow::setRestrictedAreaBeginRadius( const int &radius ) {
 void MainWindow::setEdgeDetectionType( const int &type )
 {
 	_sliceView->setEdgeDetectionType( static_cast<const EdgeDetectionType::EdgeDetectionType>(type) );
+	drawSlice();
+}
+
+void MainWindow::setCannyRadiusOfGaussianMask( const int &radius )
+{
+	_sliceView->setRadiusOfGaussianMask(radius);
+	drawSlice();
+}
+
+void MainWindow::setCannySigmaOfGaussianMask( const double &sigma )
+{
+	_sliceView->setSigmaOfGaussianMask(sigma);
+	drawSlice();
+}
+
+void MainWindow::setCannyMinimumGradient( const int &minimumGradient )
+{
+	_sliceView->setCannyMinimumGradient(minimumGradient);
+	drawSlice();
+}
+
+void MainWindow::setCannyMinimumDeviation( const double &minimumDeviation )
+{
+	_sliceView->setCannyMinimumDeviation(minimumDeviation);
 	drawSlice();
 }
 
@@ -1033,6 +1071,29 @@ void MainWindow::exportSectorDiagramAndHistogram() {
 	_ui->_plotAngularHistogram->setAxisTitle(QwtPlot::xBottom,"");
 	_ui->_plotAngularHistogram->setAxisTitle(QwtPlot::yLeft,"");
 	_ui->_plotAngularHistogram->enableAxis(QwtPlot::yLeft,false);
+}
+
+void MainWindow::exportContours() {
+	if ( _componentBillon != 0 ) {
+		const Interval &sliceInterval = _sliceHistogram->branchesAreas()[_ui->_comboSelectSliceInterval->currentIndex()-1];
+		const int selectedComponents = _ui->_comboConnexComponents->currentIndex();
+
+		QString fileName = QFileDialog::getSaveFileName(this, tr("Exporter le contour en .ctr"), "output.ctr", tr("Fichiers de contours (*.ctr);;Tous les fichiers (*.*)"));
+		if ( !fileName.isEmpty() ) {
+			QFile file(fileName);
+			if( !file.open(QIODevice::WriteOnly) ) {
+				qDebug() << QObject::tr("ERREUR : Impossible de créer le ficher de contours %1.").arg(fileName);
+				return;
+			}
+			QList<rCoord2D> contourPoints = _componentBillon->extractEdges(_marrow,_currentSlice-sliceInterval.minValue(),selectedComponents?selectedComponents:1);
+			QTextStream stream(&file);
+			stream << contourPoints.size() << endl;
+			for ( int i=0 ; i<contourPoints.size() ; ++i ) {
+				stream << contourPoints.at(i).x << " " << contourPoints.at(i).y << endl;
+			}
+			file.close();
+		}
+	}
 }
 
 /*******************************

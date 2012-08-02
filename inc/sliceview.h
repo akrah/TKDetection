@@ -33,6 +33,10 @@ public:
 	void setRestrictedAreaBeginRadius( const int &radius );
 
 	void setEdgeDetectionType( const EdgeDetectionType::EdgeDetectionType &type );
+	void setRadiusOfGaussianMask( const int &radius );
+	void setSigmaOfGaussianMask( const qreal &sigma );
+	void setCannyMinimumGradient( const qreal &minimumGradient );
+	void setCannyMinimumDeviation( const qreal &minimumDeviation );
 
 	void drawSlice( QImage &image, const Billon &billon, const Marrow *marrow, const int &sliceNumber, const Interval &intensityInterval );
 
@@ -41,7 +45,7 @@ private :
 	void drawAverageSlice( QImage &image, const Billon &billon, const Interval &intensityInterval );
 	void drawMedianSlice( QImage &image, const Billon &billon, const Interval &intensityInterval );
 	void drawMovementSlice( QImage &image, const Billon &billon, const int &sliceNumber, const Interval &intensityInterval );
-	void drawEdgeDetectionSlice( QImage &image, const Billon &billon, const int &sliceNumber, const Interval &intensityInterval );
+	void drawEdgeDetectionSlice( QImage &image, const Billon &billon, const Marrow *marrow, const int &sliceNumber, const Interval &intensityInterval );
 	void drawFlowSlice( QImage &image, const Billon &billon, const int &sliceNumber );
 	void drawRestrictedArea( QImage &image, const Billon &billon, const Marrow *marrow, const int &sliceNumber, const Interval &intensityInterval );
 
@@ -61,6 +65,10 @@ private:
 	int _restrictedAreaBeginRadius;
 
 	EdgeDetectionType::EdgeDetectionType _typeOfEdgeDetection;
+	int _cannyRadiusOfGaussianMask;
+	qreal _cannySigmaOfGaussianMask;
+	qreal _cannyMinimumGradient;
+	qreal _cannyMinimumDeviation;
 };
 
 #endif // SLICEVIEW_H

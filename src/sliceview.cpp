@@ -12,7 +12,8 @@
 SliceView::SliceView() : _typeOfView(SliceType::CURRENT),
 	_movementThresholdMin(100), _movementThresholdMax(200), _useNextSliceInsteadOfCurrentSlice(false),
 	_flowAlpha(FLOW_ALPHA_DEFAULT), _flowEpsilon(FLOW_EPSILON_DEFAULT), _flowMaximumIterations(FLOW_MAXIMUM_ITERATIONS),
-	_restrictedAreaResolution(100), _restrictedAreaThreshold(-900), _restrictedAreaBeginRadius(5), _typeOfEdgeDetection(EdgeDetectionType::SOBEL)
+	_restrictedAreaResolution(100), _restrictedAreaThreshold(-900), _restrictedAreaBeginRadius(5), _typeOfEdgeDetection(EdgeDetectionType::SOBEL),
+	_cannyRadiusOfGaussianMask(2), _cannySigmaOfGaussianMask(2), _cannyMinimumGradient(100.), _cannyMinimumDeviation(0.9)
 {
 }
 
@@ -96,6 +97,22 @@ void SliceView::setEdgeDetectionType( const EdgeDetectionType::EdgeDetectionType
 	}
 }
 
+void SliceView::setRadiusOfGaussianMask( const int &radius ) {
+	_cannyRadiusOfGaussianMask = radius;
+}
+
+void SliceView::setSigmaOfGaussianMask( const qreal &sigma ) {
+	_cannySigmaOfGaussianMask = sigma;
+}
+
+void SliceView::setCannyMinimumGradient( const qreal &minimumGradient ) {
+	_cannyMinimumGradient = minimumGradient;
+}
+
+void SliceView::setCannyMinimumDeviation( const qreal &minimumDeviation ) {
+	_cannyMinimumDeviation = minimumDeviation;
+}
+
 void SliceView::drawSlice( QImage &image, const Billon &billon, const Marrow *marrow, const int &sliceNumber, const Interval &intensityInterval )
 {
 	if ( sliceNumber > -1 && sliceNumber < static_cast<int>(billon.n_slices) )
@@ -116,7 +133,7 @@ void SliceView::drawSlice( QImage &image, const Billon &billon, const Marrow *ma
 				break;
 			// Affichage de la coupe de détection de mouvements
 			case SliceType::EDGE_DETECTION :
-				drawEdgeDetectionSlice( image, billon, sliceNumber, intensityInterval );
+				drawEdgeDetectionSlice( image, billon, marrow, sliceNumber, intensityInterval );
 				break;
 			// Affichage de la coupe de flot optique
 			case SliceType::FLOW :
@@ -251,32 +268,75 @@ void SliceView::drawMovementSlice( QImage &image, const Billon &billon, const in
 	}
 }
 
-void SliceView::drawEdgeDetectionSlice( QImage &image, const Billon &billon, const int &sliceNumber, const Interval &intensityInterval )
+void SliceView::drawEdgeDetectionSlice( QImage &image, const Billon &billon, const Marrow *marrow, const int &sliceNumber, const Interval &intensityInterval )
 {
 	const Slice &slice = billon.slice(sliceNumber);
-	const uint width = slice.n_cols;
-	const uint height = slice.n_rows;
-	const int minValue = intensityInterval.minValue();
-	const int maxValue = intensityInterval.maxValue();
-	const int nbValues = intensityInterval.size()*4;
-	const qreal fact = 255./nbValues;
+	const int width = slice.n_cols;
+	const int height = slice.n_rows;
+	const qreal minValue = intensityInterval.minValue();
+	const qreal maxValue = intensityInterval.maxValue();
 
-	QRgb * line = (QRgb *) image.bits() + width + 1;
-	int color, gx, gy, gNorme, max;
-	uint i,j;
+	QRgb * line = (QRgb *) image.bits();
+	int color, gNorme;
+	int i,j,ki,kj;
+	qreal nbValues, fact;
 
-	max = 0;
+	arma::Mat<qreal> gaussianMask;
+	arma::Mat<qreal> gaussianMat(billon.n_rows,billon.n_cols);
+	gaussianMat.fill(0);
+	arma::Mat<qreal> gradientMat(billon.n_rows,billon.n_cols);
+	gradientMat.fill(0);
+	arma::Mat<qreal> directionMat(billon.n_rows,billon.n_cols);
+	directionMat.fill(0);
+	const qreal radius = _cannyRadiusOfGaussianMask;
+	const qreal diameter = 2*radius+1;
+	const qreal sigma = _cannySigmaOfGaussianMask;
+	const qreal sigmaDiv = 2*sigma*sigma;
+	qreal gaussianFactor, e, cannyValue, gx, gy, grad, centerX, centerY, distX, distY;
+	QPainter painter;
+
 	switch (_typeOfEdgeDetection) {
 		case EdgeDetectionType::SOBEL :
+			// Gaussian filter construction
+			gaussianMask.resize(2*radius+1,2*radius+1);
+			gaussianFactor = 0;
+			for ( kj=-radius ; kj<=radius ; ++kj ) {
+				for ( ki=-radius ; ki<=radius ; ++ki ) {
+					e = qExp( -(kj*kj+ki*ki) / sigmaDiv );
+					gaussianFactor += e;
+					gaussianMask.at(kj+radius,ki+radius) = e;
+				}
+			}
+			for ( kj=0 ; kj<diameter ; ++kj ) {
+				for ( ki=0 ; ki<diameter ; ++ki ) {
+					gaussianMask.at(kj,ki) /= gaussianFactor;
+				}
+			}
+			// Gaussian filter
+			for ( j=radius ; j<height-radius ; j++ )
+			{
+				for ( i=radius ; i<width-radius ; i++ )
+				{
+					cannyValue = 0;
+					for ( kj=-radius ; kj<radius ; ++kj ) {
+						for ( ki=-radius ; ki<radius ; ++ki ) {
+							cannyValue += gaussianMask.at(kj+radius,ki+radius)*RESTRICT_TO(minValue,(qreal)slice.at(j+kj,i+ki),maxValue);
+						}
+					}
+					gaussianMat.at(j,i) = cannyValue;
+				}
+			}
+			nbValues = intensityInterval.size();
+			fact = 255./nbValues;
+			line += width + 1;
 			for ( j=1 ; j<height-1 ; j++)
 			{
 				for ( i=1 ; i<width-1 ; i++)
 				{
-					gx = gy = RESTRICT_TO(minValue,slice.at(j-1,i-1),maxValue) - RESTRICT_TO(minValue,slice.at(j+1,i+1),maxValue);
-					gx += 2.*RESTRICT_TO(minValue,slice.at(j,i-1),maxValue) + RESTRICT_TO(minValue,slice.at(j+1,i-1),maxValue) - RESTRICT_TO(minValue,slice.at(j-1,i+1),maxValue) - 2.*RESTRICT_TO(minValue,slice.at(j,i+1),maxValue);
-					gy += 2.*RESTRICT_TO(minValue,slice.at(j-1,i),maxValue) + RESTRICT_TO(minValue,slice.at(j-1,i+1),maxValue) - RESTRICT_TO(minValue,slice.at(j+1,i-1),maxValue) - 2.*RESTRICT_TO(minValue,slice.at(j+1,i),maxValue);
+					gx = gy = RESTRICT_TO(minValue,gaussianMat.at(j-1,i-1),maxValue) - RESTRICT_TO(minValue,gaussianMat.at(j+1,i+1),maxValue);
+					gx += 2.*RESTRICT_TO(minValue,gaussianMat.at(j,i-1),maxValue) + RESTRICT_TO(minValue,gaussianMat.at(j+1,i-1),maxValue) - RESTRICT_TO(minValue,gaussianMat.at(j-1,i+1),maxValue) - 2.*RESTRICT_TO(minValue,gaussianMat.at(j,i+1),maxValue);
+					gy += 2.*RESTRICT_TO(minValue,gaussianMat.at(j-1,i),maxValue) + RESTRICT_TO(minValue,gaussianMat.at(j-1,i+1),maxValue) - RESTRICT_TO(minValue,gaussianMat.at(j+1,i-1),maxValue) - 2.*RESTRICT_TO(minValue,gaussianMat.at(j+1,i),maxValue);
 					gNorme = qSqrt(gx*gx+gy*gy);
-					max = qMax(max,(int)(gNorme*fact));
 					color = qBound(0.,gNorme*fact,255.);
 					*(line++) = qRgb(color,color,color);
 				}
@@ -284,14 +344,80 @@ void SliceView::drawEdgeDetectionSlice( QImage &image, const Billon &billon, con
 			}
 			break;
 		case EdgeDetectionType::LAPLACIAN :
+			nbValues = intensityInterval.size()*8;
+			fact = 255./nbValues;
+			line += width + 1;
 			for ( j=1 ; j<height-1 ; j++)
 			{
 				for ( i=1 ; i<width-1 ; i++)
 				{
-					color = qBound(0,4*RESTRICT_TO(minValue,slice.at(j,i),maxValue) - RESTRICT_TO(minValue,slice.at(j-1,i),maxValue) - RESTRICT_TO(minValue,slice.at(j+1,i),maxValue) - RESTRICT_TO(minValue,slice.at(j,i-1),maxValue) - RESTRICT_TO(minValue,slice.at(j,i+1),maxValue),255);
+					color = qBound(0,
+								   static_cast<int>(-6*RESTRICT_TO(minValue,(qreal)slice.at(j,i),maxValue) + RESTRICT_TO(minValue,(qreal)slice.at(j-1,i),maxValue) + RESTRICT_TO(minValue,(qreal)slice.at(j+1,i),maxValue) +
+								   RESTRICT_TO(minValue,(qreal)slice.at(j,i-1),maxValue) + RESTRICT_TO(minValue,(qreal)slice.at(j,i+1),maxValue) + 0.5*RESTRICT_TO(minValue,(qreal)slice.at(j+1,i+1),maxValue) +
+								   0.5*RESTRICT_TO(minValue,(qreal)slice.at(j+1,i-1),maxValue) + 0.5*RESTRICT_TO(minValue,(qreal)slice.at(j-1,i+1),maxValue) + 0.5*RESTRICT_TO(minValue,(qreal)slice.at(j-1,i-1),maxValue)),
+								   255);
 					*(line++) = qRgb(color,color,color);
 				}
 				line+=2;
+			}
+			break;
+		case EdgeDetectionType::CANNY :
+			// Gaussian filter construction
+			gaussianMask.resize(2*radius+1,2*radius+1);
+			gaussianFactor = 0;
+			for ( kj=-radius ; kj<=radius ; ++kj ) {
+				for ( ki=-radius ; ki<=radius ; ++ki ) {
+					e = qExp( -(kj*kj+ki*ki) / sigmaDiv );
+					gaussianFactor += e;
+					gaussianMask.at(kj+radius,ki+radius) = e;
+				}
+			}
+			for ( kj=0 ; kj<diameter ; ++kj ) {
+				for ( ki=0 ; ki<diameter ; ++ki ) {
+					gaussianMask.at(kj,ki) /= gaussianFactor;
+				}
+			}
+			// Gaussian filter
+			for ( j=radius ; j<height-radius ; j++ )
+			{
+				for ( i=radius ; i<width-radius ; i++ )
+				{
+					cannyValue = 0;
+					for ( kj=-radius ; kj<radius ; ++kj ) {
+						for ( ki=-radius ; ki<radius ; ++ki ) {
+							cannyValue += gaussianMask.at(kj+radius,ki+radius)*RESTRICT_TO(minValue,(qreal)slice.at(j+kj,i+ki),maxValue);
+						}
+					}
+					gaussianMat.at(j,i) = cannyValue-minValue;
+				}
+			}
+			// Intensity gradient
+			for ( j=radius ; j<height-radius ; j++ )
+			{
+				for ( i=radius ; i<width-radius ; i++ )
+				{
+					gx = gaussianMat.at(j,i+1) - gaussianMat.at(j,i-1);
+					gy = gaussianMat.at(j-1,i) - gaussianMat.at(j+1,i);
+					gradientMat.at(j,i) = qAbs(gx) + qAbs(gy);
+					directionMat.at(j,i) = qAtan(gx/gy);
+				}
+			}
+			painter.begin(&image);
+			painter.setPen(Qt::white);
+			centerX = marrow!=0?marrow->at(sliceNumber).x:width/2.;
+			centerY = marrow!=0?marrow->at(sliceNumber).y:height/2.;
+			for ( j=radius ; j<height-radius ; j++)
+			{
+				for ( i=radius ; i<width-radius ; i++)
+				{
+					grad = gradientMat.at(j,i);
+					distX = qCos(directionMat.at(j,i));
+					distY = qSin(directionMat.at(j,i));
+					if ( grad > _cannyMinimumGradient && qAbs(qSqrt((centerX-i)*(centerX-i) + (centerY-j)*(centerY-j)) - qSqrt((centerX-i-distX)*(centerX-i-distX) + (centerY-j-distY)*(centerY-j-distY))) > _cannyMinimumDeviation ) {
+						//painter.drawLine(i,j,i+distX,j+distY);
+						painter.drawPoint(i,j);
+					}
+				}
 			}
 			break;
 		default :

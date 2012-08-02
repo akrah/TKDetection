@@ -31,6 +31,8 @@ public:
 	qreal getRestrictedAreaBoudingBoxRadius( const Marrow *marrow, const int &nbPolygonPoints, int intensityThreshold ) const;
 	qreal getRestrictedAreaMeansRadius( const Marrow *marrow, const int &nbPolygonPoints, int intensityThreshold ) const;
 
+	QList<rCoord2D> extractEdges( const Marrow *marrow, const int &sliceNumber, const int &componentNumber );
+
 protected:
 	T _minValue;
 	T _maxValue;
@@ -207,6 +209,83 @@ qreal BillonTpl<T>::getRestrictedAreaMeansRadius( const Marrow *marrow, const in
 	radius/=(depth*nbPolygonPoints);
 	qDebug() << "Rayon de la boite englobante (en pixels) : " << radius;
 	return radius;
+}
+
+
+template< typename T >
+QList<rCoord2D> BillonTpl<T>::extractEdges( const Marrow *marrow, const int &sliceNumber, const int &componentNumber ) {
+	// Find the pixel closest to the pith
+	const arma::Mat<T> &currentSlice = this->slice(sliceNumber);
+	const int width = this->n_cols;
+	const int height = this->n_rows;
+	const int xCenter = marrow != 0 ? marrow->at(sliceNumber).x : width/2;
+	const int yCenter = marrow != 0 ? marrow->at(sliceNumber).y : height/2;
+
+	qreal radius, radiusMax, orientation, xEdge, yEdge, cosAngle, sinAngle;
+	int step;
+	bool edgeFind = false;
+	radius = 1;
+	radiusMax = qMin( qMin(xCenter,width-xCenter), qMin(yCenter,height-yCenter) );
+
+	step = 0;
+	while ( !edgeFind && radius < radiusMax )
+	{
+		step++;
+		for ( orientation = 0. ; orientation <= TWO_PI && !edgeFind ; orientation+=(PI/180.) )
+		{
+			cosAngle = qCos(orientation);
+			sinAngle = -qSin(orientation);
+			xEdge = xCenter + step*cosAngle;
+			yEdge = yCenter + step*sinAngle;
+			radius = qMax(radius,qSqrt( (xCenter-xEdge)*(xCenter-xEdge) + (yCenter-yEdge)*(yCenter-yEdge) ));
+			if ( xEdge>0 && yEdge>0 && xEdge<width && yEdge<height && currentSlice.at(yEdge,xEdge) == componentNumber ) edgeFind = true;
+		}
+	}
+
+	rCoord2D position;
+	if ( edgeFind ) {
+		qDebug() << "Pixel le plus proche de la moelle : ( " << xEdge << ", " << yEdge << " )";
+	}
+	else {
+		qDebug() << "Aucun pixel et donc aucune composante connexe";
+		xEdge = 0;
+		yEdge = 0;
+	}
+	position.x = xEdge;
+	position.y = yEdge;
+
+	// Suivi du contour
+	QList<rCoord2D> contourPoints;
+	if ( edgeFind ) {
+		int xBegin, yBegin, xCurrent, yCurrent, interdit, j;
+		QVector<int> vx(8), vy(8);
+
+		xBegin = xCurrent = xEdge;
+		yBegin = yCurrent = yEdge;
+		interdit = orientation*8./TWO_PI;
+		interdit = (interdit+4)%8;
+		do
+		{
+			contourPoints.append(rCoord2D(xCurrent,yCurrent));
+			vx[0] = vx[1] = vx[7] = xCurrent+1;
+			vx[2] = vx[6] = xCurrent;
+			vx[3] = vx[4] = vx[5] = xCurrent-1;
+			vy[1] = vy[2] = vy[3] = yCurrent-1;
+			vy[0] = vy[4] = yCurrent;
+			vy[5] = vy[6] = vy[7] = yCurrent+1;
+			j = (interdit+1)%8;
+			while ( currentSlice.at(vy[j%8],vx[j%8]) != componentNumber && j < interdit+8 ) ++j;
+			xCurrent = vx[j%8];
+			yCurrent = vy[j%8];
+			interdit = (j+4)%8;
+		}
+		while ( xBegin != xCurrent || yBegin != yCurrent );
+	}
+	else {
+		contourPoints.append(position);
+	}
+
+	return contourPoints;
 }
 
 
