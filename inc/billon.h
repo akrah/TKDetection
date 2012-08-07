@@ -31,7 +31,7 @@ public:
 	qreal getRestrictedAreaBoudingBoxRadius( const Marrow *marrow, const int &nbPolygonPoints, int intensityThreshold ) const;
 	qreal getRestrictedAreaMeansRadius( const Marrow *marrow, const int &nbPolygonPoints, int intensityThreshold ) const;
 
-	QList<rCoord2D> extractEdges( const Marrow *marrow, const int &sliceNumber, const int &componentNumber );
+	QVector<iCoord2D> extractEdges( const Marrow *marrow, const int &sliceNumber, const int &componentNumber ) const;
 
 protected:
 	T _minValue;
@@ -213,7 +213,7 @@ qreal BillonTpl<T>::getRestrictedAreaMeansRadius( const Marrow *marrow, const in
 
 
 template< typename T >
-QList<rCoord2D> BillonTpl<T>::extractEdges( const Marrow *marrow, const int &sliceNumber, const int &componentNumber ) {
+QVector<iCoord2D> BillonTpl<T>::extractEdges( const Marrow *marrow, const int &sliceNumber, const int &componentNumber ) const {
 	// Find the pixel closest to the pith
 	const arma::Mat<T> &currentSlice = this->slice(sliceNumber);
 	const int width = this->n_cols;
@@ -255,8 +255,9 @@ QList<rCoord2D> BillonTpl<T>::extractEdges( const Marrow *marrow, const int &sli
 	position.y = yEdge;
 
 	// Suivi du contour
-	QList<rCoord2D> contourPoints;
-	if ( edgeFind ) {
+	QVector<iCoord2D> contourPoints;
+	if ( edgeFind )
+	{
 		int xBegin, yBegin, xCurrent, yCurrent, interdit, j;
 		QVector<int> vx(8), vy(8);
 
@@ -266,7 +267,7 @@ QList<rCoord2D> BillonTpl<T>::extractEdges( const Marrow *marrow, const int &sli
 		interdit = (interdit+4)%8;
 		do
 		{
-			contourPoints.append(rCoord2D(xCurrent,yCurrent));
+			contourPoints.append(iCoord2D(xCurrent,yCurrent));
 			vx[0] = vx[1] = vx[7] = xCurrent+1;
 			vx[2] = vx[6] = xCurrent;
 			vx[3] = vx[4] = vx[5] = xCurrent-1;
@@ -280,9 +281,6 @@ QList<rCoord2D> BillonTpl<T>::extractEdges( const Marrow *marrow, const int &sli
 			interdit = (j+4)%8;
 		}
 		while ( xBegin != xCurrent || yBegin != yCurrent );
-	}
-	else {
-		contourPoints.append(position);
 	}
 
 	return contourPoints;

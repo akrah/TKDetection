@@ -19,6 +19,7 @@
 #include "inc/connexcomponentextractor.h"
 #include "inc/pgm3dexport.h"
 #include "inc/intervalscomputerdefaultparameters.h"
+#include "inc/contourcurvaturecurve.h"
 
 #include <QFileDialog>
 #include <QMouseEvent>
@@ -32,7 +33,10 @@
 #include <qwt_polar_grid.h>
 #include <qwt_round_scale_draw.h>
 
-MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::MainWindow), _billon(0), _sectorBillon(0), _componentBillon(0), _marrow(0), _sliceView(new SliceView()), _sliceHistogram(new SliceHistogram()), _pieChart(new PieChart(0,1)), _pieChartDiagrams(new PieChartDiagrams()), _currentSlice(0), _currentMaximum(0) {
+MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::MainWindow), _billon(0), _sectorBillon(0), _componentBillon(0), _marrow(0),
+	_sliceView(new SliceView()), _sliceHistogram(new SliceHistogram()), _pieChart(new PieChart(0,1)), _pieChartDiagrams(new PieChartDiagrams()), _curvatureCurve(new ContourCurvatureCurve()),
+	_currentSlice(0), _currentMaximum(0)
+{
 	_ui->setupUi(this);
 	setCorner(Qt::TopLeftCorner,Qt::LeftDockWidgetArea);
 	setCorner(Qt::TopRightCorner,Qt::RightDockWidgetArea);
@@ -82,6 +86,8 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 	grid->showAxis(QwtPolar::AxisBottom,false);
 	grid->setMajorGridPen(QPen(Qt::lightGray));
 	grid->attach(_ui->_polarSectorSum);
+
+	_curvatureCurve->attach(_ui->_plotComponentCurvature);
 
 	/**** Mise en place de la communication MVC ****/
 
@@ -166,6 +172,8 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 	QObject::connect(_ui->_buttonExportMovementsToV3D, SIGNAL(clicked()), this, SLOT(exportMovementsToV3D()));
 	QObject::connect(_ui->_buttonExportToOfsRestricted, SIGNAL(clicked()), this, SLOT(exportToOfsRestricted()));
 	QObject::connect(_ui->_buttonExportSectorsDiagramAndHistogram, SIGNAL(clicked()), this, SLOT(exportSectorDiagramAndHistogram()));
+	QObject::connect(_ui->_sliderComponentCurvature, SIGNAL(valueChanged(int)), this, SLOT(setCurvatureCurvePosition(int)));
+
 
 	// Raccourcis des actions du menu
 	_ui->_actionOpenDicom->setShortcut(Qt::CTRL + Qt::Key_O);
@@ -180,6 +188,7 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 }
 
 MainWindow::~MainWindow() {
+	delete _curvatureCurve;
 	delete _pieChartDiagrams;
 	delete _pieChart;
 	delete _sliceHistogram;
@@ -328,13 +337,19 @@ void MainWindow::drawSlice( const int &sliceNumber ) {
 					}
 				}
 
+				_curvatureCurve->constructCurve( *_componentBillon, _marrow, sliceNumber-sliceInterval.minValue(), selectedComponents?selectedComponents:1 );
+				_ui->_plotComponentCurvature->replot();
 
-				qDebug() << "Extraction des plus proches pixels :";
-				QList<rCoord2D> contourPoints = _componentBillon->extractEdges(_marrow,sliceNumber-sliceInterval.minValue(),selectedComponents?selectedComponents:1);
+				qDebug() << "Extraction des plus proches pixels.";
+				const QVector<iCoord2D> &contourPoints = _curvatureCurve->curvatureEdges();
+				_ui->_sliderComponentCurvature->setMaximum(contourPoints.size()-1);
 				painter.setPen(Qt::red);
 				for ( int i=0 ; i<contourPoints.size() ; ++i ) {
 					painter.drawPoint(contourPoints[i].x,contourPoints[i].y);
 				}
+
+				painter.setPen(Qt::yellow);
+				painter.drawPoint(contourPoints[_ui->_sliderComponentCurvature->value()].x,contourPoints[_ui->_sliderComponentCurvature->value()].y);
 			}
 		}
 	}
@@ -1085,7 +1100,7 @@ void MainWindow::exportContours() {
 				qDebug() << QObject::tr("ERREUR : Impossible de créer le ficher de contours %1.").arg(fileName);
 				return;
 			}
-			QList<rCoord2D> contourPoints = _componentBillon->extractEdges(_marrow,_currentSlice-sliceInterval.minValue(),selectedComponents?selectedComponents:1);
+			QVector<iCoord2D> contourPoints = _componentBillon->extractEdges(_marrow,_currentSlice-sliceInterval.minValue(),selectedComponents?selectedComponents:1);
 			QTextStream stream(&file);
 			stream << contourPoints.size() << endl;
 			for ( int i=0 ; i<contourPoints.size() ; ++i ) {
@@ -1094,6 +1109,13 @@ void MainWindow::exportContours() {
 			file.close();
 		}
 	}
+}
+
+void MainWindow::setCurvatureCurvePosition( const int &position )
+{
+	drawSlice();
+	_curvatureCurve->setCurvePosition(position);
+	_ui->_plotComponentCurvature->replot();
 }
 
 /*******************************

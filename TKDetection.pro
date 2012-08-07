@@ -25,6 +25,7 @@ DEPENDPATH	*=	./src/ ./inc/ ./ui/ ./tst/
 
 SOURCES		=	main.cpp \
 				connexcomponentextractor.cpp \
+				contourcurvaturecurve.cpp \
 				datexport.cpp \
 				dicomreader.cpp \
 				histoexport.cpp \
@@ -52,6 +53,7 @@ SOURCES		=	main.cpp \
 HEADERS		=	billon.h \
 				billon_def.h \
 				connexcomponentextractor.h \
+				contourcurvaturecurve.h \
 				datexport.h \
 				dicomreader.h \
 				global.h \

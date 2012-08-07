@@ -19,6 +19,7 @@ class SliceView;
 class SliceHistogram;
 class PieChart;
 class PieChartDiagrams;
+class ContourCurvatureCurve;
 
 class MainWindow : public QMainWindow
 {
@@ -86,6 +87,7 @@ private slots:
 	void exportSliceHistogram();
 	void exportSectorDiagramAndHistogram();
 	void exportContours();
+	void setCurvatureCurvePosition( const int &position );
 
 private:
 	void openNewBillon(const QString &folderName = "");
@@ -109,6 +111,8 @@ private:
 
 	PieChart *_pieChart;
 	PieChartDiagrams *_pieChartDiagrams;
+
+	ContourCurvatureCurve *_curvatureCurve;
 
 	SliceZoomer _sliceZoomer;
 	Interval _slicesInterval;
