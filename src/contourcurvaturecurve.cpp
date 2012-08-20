@@ -4,12 +4,21 @@
 #include "inc/marrow.h"
 
 #include <QProcess>
+<<<<<<< HEAD
 #include <QTemporaryFile>
 
 ContourCurvatureCurve::ContourCurvatureCurve()
 {
 	_curveCurvature.setPen(QPen(Qt::blue));
 	_curveCurrentPosition.setPen(QPen(Qt::red));
+=======
+#include <QFile>
+
+ContourCurvatureCurve::ContourCurvatureCurve()
+{
+	_curveCurvature.setPen(QPen(Qt::red));
+	_curveCurrentPosition.setPen(QPen(Qt::yellow));
+>>>>>>> d51d019e6f6e4c1b23ddfd74c670e687d428b1ff
 }
 
 ContourCurvatureCurve::~ContourCurvatureCurve()
@@ -40,6 +49,7 @@ void ContourCurvatureCurve::clear()
 
 void ContourCurvatureCurve::setCurvePosition( const int &position )
 {
+<<<<<<< HEAD
 	QVector<QPointF> curvePosition(2);
 	curvePosition[0] = QPointF(position, 0.);
 	curvePosition[1] = QPointF(position, _datasCurvature[position]);
@@ -150,11 +160,75 @@ void ContourCurvatureCurve::constructCurve( const Billon &billon, const Marrow *
 		}
 
 		mainDominantPoints();
+=======
+	QVector<QPointF> curvePosition(1);
+	curvePosition[0] = QPointF(position, _datasCurvature[position]);
+	_curveCurrentPosition.setSamples(curvePosition);
+}
+
+const QVector<iCoord2D> &ContourCurvatureCurve::curvatureEdges() const
+{
+	return _datasEdges;
+}
+
+void ContourCurvatureCurve::constructCurve( const Billon &billon, const Marrow *marrow, const int &sliceNumber, const int &componentNumber )
+{
+	_datasCurvature.clear();
+	_datasEdges.clear();
+	_datasEdges = billon.extractEdges( marrow, sliceNumber, componentNumber );
+
+	int nbPoints = _datasEdges.size();
+	QVector<QPointF> curveDatas(nbPoints), curvePosition(1);
+
+	if ( nbPoints )
+	{
+		QFile fileContours("01234567890123456789.ctr");
+		if( !fileContours.open(QIODevice::WriteOnly) )
+		{
+			qDebug() << QObject::tr("ERREUR : Impossible de créer le ficher de contours 01234567890123456789.ctr.");
+			return;
+		}
+		QTextStream streamContours(&fileContours);
+		for ( int i=0 ; i<nbPoints ; ++i )
+		{
+			streamContours << _datasEdges.at(i).x << " " << _datasEdges.at(i).y << endl;
+		}
+		fileContours.close();
+
+		QProcess curvatureExtraction;
+		curvatureExtraction.setStandardInputFile("01234567890123456789.ctr");
+		curvatureExtraction.setStandardOutputFile("01234567890123456789.crv");
+		curvatureExtraction.start("curvature_gmcb -setWidth 1");
+
+		if ( curvatureExtraction.waitForFinished(5000) )
+		{
+			QFile fileCurvature("01234567890123456789.crv");
+			if( !fileCurvature.open(QIODevice::ReadOnly) )
+			{
+				qDebug() << QObject::tr("ERREUR : Impossible de lire le ficher de contours 01234567890123456789.crv.");
+				return;
+			}
+			QTextStream streamCurvature(&fileCurvature);
+			streamCurvature.readLine();
+			int temp;
+			qreal curvature;
+			for ( int i=0 ; i<nbPoints ; ++i )
+			{
+				streamCurvature >> temp >> temp >> curvature;
+				_datasCurvature << curvature;
+				curveDatas[i] = QPointF(i,curvature);
+				qDebug() << curvature;
+			}
+			curvePosition[0] = curveDatas[0];
+			fileCurvature.close();
+		}
+>>>>>>> d51d019e6f6e4c1b23ddfd74c670e687d428b1ff
 	}
 
 	_curveCurvature.setSamples(curveDatas);
 	_curveCurrentPosition.setSamples(curvePosition);
 }
+<<<<<<< HEAD
 
 QVector<iCoord2D> ContourCurvatureCurve::mainDominantPoints() const
 {
@@ -175,3 +249,5 @@ QVector<iCoord2D> ContourCurvatureCurve::mainDominantPoints() const
 	}
 	return mainPoints;
 }
+=======
+>>>>>>> d51d019e6f6e4c1b23ddfd74c670e687d428b1ff

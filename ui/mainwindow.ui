@@ -231,7 +231,11 @@
               <x>0</x>
               <y>0</y>
               <width>446</width>
+<<<<<<< HEAD
               <height>316</height>
+=======
+              <height>281</height>
+>>>>>>> d51d019e6f6e4c1b23ddfd74c670e687d428b1ff
              </rect>
             </property>
             <attribute name="label">
@@ -1063,7 +1067,7 @@ autour de la moelle</string>
             <layout class="QVBoxLayout" name="verticalLayout_8">
              <item>
               <widget class="QwtPolarPlot" name="_polarSectorSum">
-               <property name="plotBackground" stdset="0">
+               <property name="plotBackground">
                 <brush brushstyle="SolidPattern">
                  <color alpha="0">
                   <red>255</red>
@@ -1244,6 +1248,7 @@ autour de la moelle</string>
             <widget class="QLabel" name="label_34">
              <property name="text">
               <string>Taille minimum</string>
+<<<<<<< HEAD
              </property>
             </widget>
            </item>
@@ -1348,6 +1353,105 @@ autour de la moelle</string>
             <widget class="QLabel" name="label_35">
              <property name="text">
               <string>Epaisseur segment flou</string>
+=======
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="1">
+            <layout class="QHBoxLayout" name="horizontalLayout_19">
+             <item>
+              <widget class="QComboBox" name="_comboConnexComponents">
+               <property name="maxCount">
+                <number>2147483647</number>
+               </property>
+               <item>
+                <property name="text">
+                 <string>Toutes</string>
+                </property>
+               </item>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="_buttonExportConnexComponentToPgm3D">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="text">
+                <string>PGM3D</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="_buttonContours">
+               <property name="text">
+                <string>Contours</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item row="2" column="1">
+            <layout class="QHBoxLayout" name="horizontalLayout_17">
+             <item>
+              <widget class="QSlider" name="_sliderSectorThresholding">
+               <property name="minimum">
+                <number>-900</number>
+               </property>
+               <property name="maximum">
+                <number>500</number>
+               </property>
+               <property name="value">
+                <number>-70</number>
+               </property>
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QSpinBox" name="_spinSectorThresholding">
+               <property name="minimum">
+                <number>-900</number>
+               </property>
+               <property name="maximum">
+                <number>500</number>
+               </property>
+               <property name="value">
+                <number>-70</number>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item row="3" column="1">
+            <layout class="QHBoxLayout" name="horizontalLayout_18">
+             <item>
+              <widget class="QSlider" name="_sliderMinimalSizeOfConnexComponents">
+               <property name="maximum">
+                <number>1000</number>
+               </property>
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QSpinBox" name="_spinMinimalSizeOfConnexComponents">
+               <property name="maximum">
+                <number>1000</number>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item row="4" column="1">
+            <widget class="QPushButton" name="_buttonSelectSectorIntervalUpdate">
+             <property name="text">
+              <string>Mettre à jour</string>
+>>>>>>> d51d019e6f6e4c1b23ddfd74c670e687d428b1ff
              </property>
             </widget>
            </item>
@@ -1770,15 +1874,15 @@ autour de la moelle</string>
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>QxtSpanSlider</class>
-   <extends>QSlider</extends>
-   <header>QxtSpanSlider</header>
-  </customwidget>
-  <customwidget>
    <class>QwtPolarPlot</class>
    <extends>QFrame</extends>
    <header>qwt_polar_plot.h</header>
    <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>QxtSpanSlider</class>
+   <extends>QSlider</extends>
+   <header>QxtSpanSlider</header>
   </customwidget>
  </customwidgets>
  <tabstops>
