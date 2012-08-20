@@ -19,6 +19,7 @@
 #include "inc/connexcomponentextractor.h"
 #include "inc/pgm3dexport.h"
 #include "inc/intervalscomputerdefaultparameters.h"
+#include "inc/contourcurvaturecurve.h"
 
 #include <QFileDialog>
 #include <QMouseEvent>
@@ -32,7 +33,10 @@
 #include <qwt_polar_grid.h>
 #include <qwt_round_scale_draw.h>
 
-MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::MainWindow), _billon(0), _sectorBillon(0), _componentBillon(0), _marrow(0), _sliceView(new SliceView()), _sliceHistogram(new SliceHistogram()), _pieChart(new PieChart(0,1)), _pieChartDiagrams(new PieChartDiagrams()), _currentSlice(0), _currentMaximum(0) {
+MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::MainWindow), _billon(0), _sectorBillon(0), _componentBillon(0), _marrow(0),
+	_sliceView(new SliceView()), _sliceHistogram(new SliceHistogram()), _pieChart(new PieChart(0,1)), _pieChartDiagrams(new PieChartDiagrams()), _curvatureCurve(new ContourCurvatureCurve()),
+	_currentSlice(0), _currentMaximum(0)
+{
 	_ui->setupUi(this);
 	setCorner(Qt::TopLeftCorner,Qt::LeftDockWidgetArea);
 	setCorner(Qt::TopRightCorner,Qt::RightDockWidgetArea);
@@ -83,10 +87,13 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 	grid->setMajorGridPen(QPen(Qt::lightGray));
 	grid->attach(_ui->_polarSectorSum);
 
+	_curvatureCurve->attach(_ui->_plotComponentCurvature);
+	_ui->_plotComponentCurvature->setAxisScale(QwtPlot::yLeft,-2.,2.);
+
 	/**** Mise en place de la communication MVC ****/
 
 	// Évènements déclenchés par le slider de n° de coupe
-	QObject::connect(_ui->_sliderSelectSlice, SIGNAL(valueChanged(int)), this, SLOT(drawSlice(int)));
+	QObject::connect(_ui->_sliderSelectSlice, SIGNAL(valueChanged(int)), this, SLOT(setSlice(int)));
 
 	// Évènements déclenchés par les boutons de sélection de la vue
 	QObject::connect(_ui->_comboSliceType, SIGNAL(activated(int)), this, SLOT(setTypeOfView(int)));
@@ -166,6 +173,8 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 	QObject::connect(_ui->_buttonExportMovementsToV3D, SIGNAL(clicked()), this, SLOT(exportMovementsToV3D()));
 	QObject::connect(_ui->_buttonExportToOfsRestricted, SIGNAL(clicked()), this, SLOT(exportToOfsRestricted()));
 	QObject::connect(_ui->_buttonExportSectorsDiagramAndHistogram, SIGNAL(clicked()), this, SLOT(exportSectorDiagramAndHistogram()));
+	//QObject::connect(_ui->_sliderComponentCurvature, SIGNAL(valueChanged(int)), this, SLOT(setCurvatureCurvePosition(int)));
+	QObject::connect(_ui->_spinBlurredSegmentsThickness, SIGNAL(valueChanged(int)), this, SLOT(drawSlice()));
 
 	// Raccourcis des actions du menu
 	_ui->_actionOpenDicom->setShortcut(Qt::CTRL + Qt::Key_O);
@@ -180,6 +189,7 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 }
 
 MainWindow::~MainWindow() {
+	delete _curvatureCurve;
 	delete _pieChartDiagrams;
 	delete _pieChart;
 	delete _sliceHistogram;
@@ -299,8 +309,13 @@ void MainWindow::drawSlice( const int &sliceNumber ) {
 				const QColor colors[] = { QColor(0,0,255,127), QColor(255,0,255,127), QColor(255,0,0,127), QColor(255,255,0,127), QColor(0,255,0,127) };
 				const int nbColors = sizeof(colors)/sizeof(QColor);
 
+
 				const Interval &sliceInterval = _sliceHistogram->branchesAreas()[_ui->_comboSelectSliceInterval->currentIndex()-1];
-				const Slice &sectorSlice = _componentBillon->slice(sliceNumber-sliceInterval.minValue());
+				//Billon *biggestComponent = ConnexComponentExtractor::extractBiggestConnexComponent( _componentBillon->slice(sliceNumber-sliceInterval.minValue()), 0 );
+				Billon *biggestComponents = ConnexComponentExtractor::extractBiggestConnexComponents( _componentBillon->slice(sliceNumber-sliceInterval.minValue()), 0, _ui->_spinMinimalSizeOfConnexComponents->value() );
+				//const Slice &sectorSlice = _componentBillon->slice(sliceNumber-sliceInterval.minValue());
+				//const Slice &sectorSlice = biggestComponent->slice(0);
+				const Slice &sectorSlice = biggestComponents->slice(0);
 				const int selectedComponents = _ui->_comboConnexComponents->currentIndex();
 
 				QPainter painter(&_pix);
@@ -328,13 +343,49 @@ void MainWindow::drawSlice( const int &sliceNumber ) {
 					}
 				}
 
+				_ui->_sliderComponentCurvature->blockSignals(true);
+				//_curvatureCurve->constructCurve( *_componentBillon, _marrow, sliceNumber-sliceInterval.minValue(), selectedComponents?selectedComponents:1, _ui->_spinBlurredSegmentsThickness->value() );
+				//_curvatureCurve->constructCurve( *biggestComponent, _marrow, 0, 1, _ui->_spinBlurredSegmentsThickness->value() );
+				_curvatureCurve->constructCurve( *biggestComponents, _marrow, 0, 1, _ui->_spinBlurredSegmentsThickness->value() );
+				_ui->_plotComponentCurvature->replot();
 
-				qDebug() << "Extraction des plus proches pixels :";
-				QList<rCoord2D> contourPoints = _componentBillon->extractEdges(_marrow,sliceNumber-sliceInterval.minValue(),selectedComponents?selectedComponents:1);
-				painter.setPen(Qt::red);
-				for ( int i=0 ; i<contourPoints.size() ; ++i ) {
-					painter.drawPoint(contourPoints[i].x,contourPoints[i].y);
+				const QVector<iCoord2D> &contourPoints = _curvatureCurve->contourPoints();
+				const int nbContourPoints = contourPoints.size();
+				if ( nbContourPoints > 0 )
+				{
+					_ui->_sliderComponentCurvature->setMaximum(nbContourPoints-1);
+					painter.setPen(Qt::blue);
+					for ( int i=0 ; i<nbContourPoints ; ++i ) {
+						painter.drawPoint(contourPoints[i].x,contourPoints[i].y);
+					}
+
+					const QVector<iCoord2D> &dominantPoints = _curvatureCurve->dominantPoints();
+					const int nbDominantPoints = dominantPoints.size();
+					if ( nbDominantPoints > 0 )
+					{
+						painter.setPen(Qt::green);
+						for ( int i=0 ; i<nbDominantPoints ; ++i ) {
+							painter.drawEllipse(dominantPoints[i].x-2,dominantPoints[i].y-2,4,4);
+						}
+					}
+
+					const QVector<iCoord2D> &mainPoints = _curvatureCurve->mainDominantPoints();
+					const int nbMainPoints = mainPoints.size();
+					if ( nbMainPoints > 0  )
+					{
+						painter.setPen(Qt::red);
+						for ( int i=0 ; i<nbMainPoints ; ++i ) {
+							painter.drawEllipse(mainPoints[i].x-3,mainPoints[i].y-3,6,6);
+						}
+					}
+
+
+					painter.setPen(Qt::red);
+					painter.drawEllipse(contourPoints[nbContourPoints-1-_ui->_sliderComponentCurvature->value()].x-1,contourPoints[nbContourPoints-1-_ui->_sliderComponentCurvature->value()].y-1,2,2);
 				}
+				_ui->_sliderComponentCurvature->blockSignals(false);
+
+				delete biggestComponents;
 			}
 		}
 	}
@@ -343,6 +394,14 @@ void MainWindow::drawSlice( const int &sliceNumber ) {
 		_pix = QImage(0,0);
 	}
 	_ui->_labelSliceView->setPixmap(_billon != 0 ? QPixmap::fromImage(_pix).scaled(_pix.width()*_sliceZoomer.factor(),_pix.height()*_sliceZoomer.factor(),Qt::KeepAspectRatio) : QPixmap::fromImage(_pix));
+}
+
+void MainWindow::setSlice( const int &sliceNumber )
+{
+	_ui->_sliderComponentCurvature->blockSignals(true);
+	_ui->_sliderComponentCurvature->setValue(0);
+	_ui->_sliderComponentCurvature->blockSignals(false);
+	drawSlice(sliceNumber);
 }
 
 void MainWindow::setTypeOfView( const int &type ) {
@@ -959,7 +1018,7 @@ void MainWindow::exportConnexComponentToPgm3D() {
 			bool ok;
 			qreal contrastFactor = QInputDialog::getInt(this,tr("Facteur de contraste"), tr("Contraste de l'image (image originale avec contraste à 0)"), 0, -100, 100, 1, &ok);
 			if ( ok ) {
-				Pgm3dExport::process( *_componentBillon, fileName, (contrastFactor+100.)/100. );
+				Pgm3dExport::process( *_componentBillon, fileName, (contrastFactor+100.)/100., _ui->_comboConnexComponents->currentIndex() );
 			}
 		}
 	}
@@ -1028,7 +1087,8 @@ void MainWindow::exportSectorDiagramAndHistogram() {
 	_ui->_plotAngularHistogram->enableAxis(QwtPlot::yLeft);
 	_ui->_plotAngularHistogram->setAxisTitle(QwtPlot::yLeft,tr("Cumul du z-mouvement"));
 
-	while (!sizeOk && !abort) {
+	while (!sizeOk && !abort)
+	{
 		sizeFact = QInputDialog::getInt(this,tr("Taille de l'image"), tr("Pourcentage"), 100, 10, 100, 1, &sizeOk);
 		if ( sizeOk ) {
 			QPixmap image1( 1240*sizeFact/100 , 874*sizeFact/100 );
@@ -1076,7 +1136,7 @@ void MainWindow::exportSectorDiagramAndHistogram() {
 void MainWindow::exportContours() {
 	if ( _componentBillon != 0 ) {
 		const Interval &sliceInterval = _sliceHistogram->branchesAreas()[_ui->_comboSelectSliceInterval->currentIndex()-1];
-		const int selectedComponents = _ui->_comboConnexComponents->currentIndex();
+		//const int selectedComponents = _ui->_comboConnexComponents->currentIndex();
 
 		QString fileName = QFileDialog::getSaveFileName(this, tr("Exporter le contour en .ctr"), "output.ctr", tr("Fichiers de contours (*.ctr);;Tous les fichiers (*.*)"));
 		if ( !fileName.isEmpty() ) {
@@ -1085,15 +1145,25 @@ void MainWindow::exportContours() {
 				qDebug() << QObject::tr("ERREUR : Impossible de créer le ficher de contours %1.").arg(fileName);
 				return;
 			}
-			QList<rCoord2D> contourPoints = _componentBillon->extractEdges(_marrow,_currentSlice-sliceInterval.minValue(),selectedComponents?selectedComponents:1);
+			//QVector<iCoord2D> contourPoints = _componentBillon->extractEdges(_marrow,_currentSlice-sliceInterval.minValue(),selectedComponents?selectedComponents:1);
+			Billon *biggestComponent = ConnexComponentExtractor::extractBiggestConnexComponent( _componentBillon->slice(_currentSlice-sliceInterval.minValue()), 0 );
+			QVector<iCoord2D> contourPoints = biggestComponent->extractContour( _marrow, 0, 1 );
 			QTextStream stream(&file);
 			stream << contourPoints.size() << endl;
 			for ( int i=0 ; i<contourPoints.size() ; ++i ) {
 				stream << contourPoints.at(i).x << " " << contourPoints.at(i).y << endl;
 			}
 			file.close();
+			delete biggestComponent;
 		}
 	}
+}
+
+void MainWindow::setCurvatureCurvePosition( const int &position )
+{
+	drawSlice();
+	_curvatureCurve->setCurvePosition(position);
+	_ui->_plotComponentCurvature->replot();
 }
 
 /*******************************

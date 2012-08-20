@@ -31,7 +31,8 @@ public:
 	qreal getRestrictedAreaBoudingBoxRadius( const Marrow *marrow, const int &nbPolygonPoints, int intensityThreshold ) const;
 	qreal getRestrictedAreaMeansRadius( const Marrow *marrow, const int &nbPolygonPoints, int intensityThreshold ) const;
 
-	QList<rCoord2D> extractEdges( const Marrow *marrow, const int &sliceNumber, const int &componentNumber );
+	iCoord2D findNearestPointOfThePith( const Marrow *marrow, const int &sliceNumber, const int &componentNumber ) const;
+	QVector<iCoord2D> extractContour( const Marrow *marrow, const int &sliceNumber, const int &componentNumber, iCoord2D startPoint = iCoord2D(-1,-1) ) const;
 
 protected:
 	T _minValue;
@@ -211,68 +212,180 @@ qreal BillonTpl<T>::getRestrictedAreaMeansRadius( const Marrow *marrow, const in
 	return radius;
 }
 
+//template < typename T >
+//iCoord2D BillonTpl<T>::findNearestPointOfThePith( const Marrow *marrow, const int &sliceNumber, const int &componentNumber ) const
+//{
+//	// Find the pixel closest to the pith
+//	const arma::Mat<T> &currentSlice = this->slice(sliceNumber);
+//	const int width = this->n_cols;
+//	const int height = this->n_rows;
+//	const int xCenter = marrow != 0 ? marrow->at(sliceNumber).x : width/2;
+//	const int yCenter = marrow != 0 ? marrow->at(sliceNumber).y : height/2;
 
-template< typename T >
-QList<rCoord2D> BillonTpl<T>::extractEdges( const Marrow *marrow, const int &sliceNumber, const int &componentNumber ) {
+//	rCoord2D position;
+//	qreal radiusMax, orientation, step;
+//	bool edgeFind = false;
+//	radiusMax = qMin( qMin(xCenter,width-xCenter), qMin(yCenter,height-yCenter) );
+
+//	step = 0.;
+//	while ( !edgeFind && step < radiusMax-1 )
+//	{
+//		step+=0.5;
+//		for ( orientation = 0. ; orientation <= TWO_PI && !edgeFind ; orientation+=(1./(2*PI*radiusMax)) )
+//		{
+//			position.x = xCenter + step*qCos(orientation);
+//			position.y = yCenter - step*qSin(orientation);
+//			if ( currentSlice.at(position.y,position.x) == componentNumber ) edgeFind = true;
+//		}
+//	}
+
+//	if ( edgeFind ) {
+//		qDebug() << "Pixel le plus proche de la moelle : ( " << position.x << ", " << position.y << " )";
+//	}
+//	else {
+//		qDebug() << "Aucun pixel et donc aucune composante connexe";
+//		position.x = 0;
+//		position.y = 0;
+//	}
+
+//	return iCoord2D(position.x,position.y);
+//}
+
+template < typename T >
+iCoord2D BillonTpl<T>::findNearestPointOfThePith( const Marrow *marrow, const int &sliceNumber, const int &componentNumber ) const
+{
 	// Find the pixel closest to the pith
 	const arma::Mat<T> &currentSlice = this->slice(sliceNumber);
 	const int width = this->n_cols;
 	const int height = this->n_rows;
 	const int xCenter = marrow != 0 ? marrow->at(sliceNumber).x : width/2;
 	const int yCenter = marrow != 0 ? marrow->at(sliceNumber).y : height/2;
-
-	qreal radius, radiusMax, orientation, xEdge, yEdge, cosAngle, sinAngle;
-	int step;
-	bool edgeFind = false;
-	radius = 1;
-	radiusMax = qMin( qMin(xCenter,width-xCenter), qMin(yCenter,height-yCenter) );
-
-	step = 0;
-	while ( !edgeFind && radius < radiusMax )
-	{
-		step++;
-		for ( orientation = 0. ; orientation <= TWO_PI && !edgeFind ; orientation+=(PI/180.) )
-		{
-			cosAngle = qCos(orientation);
-			sinAngle = -qSin(orientation);
-			xEdge = xCenter + step*cosAngle;
-			yEdge = yCenter + step*sinAngle;
-			radius = qMax(radius,qSqrt( (xCenter-xEdge)*(xCenter-xEdge) + (yCenter-yEdge)*(yCenter-yEdge) ));
-			if ( xEdge>0 && yEdge>0 && xEdge<width && yEdge<height && currentSlice.at(yEdge,xEdge) == componentNumber ) edgeFind = true;
-		}
-	}
+	const int radiusMax = qMin( qMin(xCenter,width-xCenter), qMin(yCenter,height-yCenter) );
 
 	rCoord2D position;
+	bool edgeFind = false;
+	int currentRadius, x, y, d;
+
+	currentRadius = 1;
+	while ( !edgeFind && currentRadius < radiusMax )
+	{
+		x = 0;
+		y = currentRadius;
+		d = currentRadius - 1;
+		while ( y>=x && !edgeFind )
+		{
+			edgeFind = true;
+			if ( currentSlice.at( y+yCenter, x+xCenter ) == componentNumber )
+			{
+				position.x = x+xCenter;
+				position.y = y+yCenter;
+			}
+			else if ( currentSlice.at( x+yCenter, y+xCenter ) == componentNumber )
+			{
+				position.x = y+xCenter;
+				position.y = x+yCenter;
+			}
+			else if ( currentSlice.at( y+yCenter, -x+xCenter ) == componentNumber )
+			{
+				position.x = -x+xCenter;
+				position.y = y+yCenter;
+			}
+			else if ( currentSlice.at( x+yCenter, -y+xCenter ) == componentNumber )
+			{
+				position.x = -y+xCenter;
+				position.y = x+yCenter;
+			}
+			else if ( currentSlice.at( -y+yCenter, x+xCenter ) == componentNumber )
+			{
+				position.x = x+xCenter;
+				position.y = -y+yCenter;
+			}
+			else if ( currentSlice.at( -x+yCenter, y+xCenter ) == componentNumber )
+			{
+				position.x = y+xCenter;
+				position.y = -x+yCenter;
+			}
+			else if ( currentSlice.at( -y+yCenter, -x+xCenter ) == componentNumber )
+			{
+				position.x = -x+xCenter;
+				position.y = -y+yCenter;
+			}
+			else if ( currentSlice.at( -x+yCenter, -y+xCenter ) == componentNumber )
+			{
+				position.x = -y+xCenter;
+				position.y = -x+yCenter;
+			}
+			else
+			{
+				edgeFind = false;
+				if ( d >= 2*(x-1) )
+				{
+					d -= 2*x;
+					x++;
+				}
+				else if ( d <= 2*(currentRadius-y) )
+				{
+					d += 2*y-1;
+					y--;
+				}
+				else
+				{
+					d += 2*(y-x-1);
+					y--;
+					x++;
+				}
+			}
+		}
+		currentRadius++;
+	}
+
 	if ( edgeFind ) {
-		qDebug() << "Pixel le plus proche de la moelle : ( " << xEdge << ", " << yEdge << " )";
+		qDebug() << "Pixel le plus proche de la moelle : ( " << position.x << ", " << position.y << " )";
 	}
 	else {
 		qDebug() << "Aucun pixel et donc aucune composante connexe";
-		xEdge = 0;
-		yEdge = 0;
+		position.x = 0;
+		position.y = 0;
 	}
-	position.x = xEdge;
-	position.y = yEdge;
+
+	return iCoord2D(position.x,position.y);
+}
+
+template< typename T >
+QVector<iCoord2D> BillonTpl<T>::extractContour( const Marrow *marrow, const int &sliceNumber, const int &componentNumber, iCoord2D startPoint ) const
+{
+	if ( startPoint == iCoord2D(-1,-1) )
+	{
+		startPoint = findNearestPointOfThePith( marrow, sliceNumber, componentNumber );
+	}
 
 	// Suivi du contour
-	QList<rCoord2D> contourPoints;
-	if ( edgeFind ) {
+	QVector<iCoord2D> contourPoints;
+	if ( startPoint != iCoord2D(0,0) )
+	{
+		const arma::Mat<T> &currentSlice = this->slice(sliceNumber);
+		const int xCenter = marrow != 0 ? marrow->at(sliceNumber).x : this->n_cols/2;
+		const int yCenter = marrow != 0 ? marrow->at(sliceNumber).y : this->n_rows/2;
+		qreal orientation = ANGLE(xCenter,yCenter,startPoint.x,startPoint.y);
+
+		qDebug() << "Angle entre la moelle et le premier point : " << orientation*RAD_TO_DEG_FACT << "  degrés";
+
 		int xBegin, yBegin, xCurrent, yCurrent, interdit, j;
 		QVector<int> vx(8), vy(8);
 
-		xBegin = xCurrent = xEdge;
-		yBegin = yCurrent = yEdge;
+		xBegin = xCurrent = startPoint.x;
+		yBegin = yCurrent = startPoint.y;
 		interdit = orientation*8./TWO_PI;
-		interdit = (interdit+4)%8;
+		interdit = (interdit+4)%8; // Remettre +3 si ça ne marche plus
 		do
 		{
-			contourPoints.append(rCoord2D(xCurrent,yCurrent));
+			contourPoints.append(iCoord2D(xCurrent,yCurrent));
 			vx[0] = vx[1] = vx[7] = xCurrent+1;
 			vx[2] = vx[6] = xCurrent;
 			vx[3] = vx[4] = vx[5] = xCurrent-1;
-			vy[1] = vy[2] = vy[3] = yCurrent-1;
+			vy[1] = vy[2] = vy[3] = yCurrent+1;
 			vy[0] = vy[4] = yCurrent;
-			vy[5] = vy[6] = vy[7] = yCurrent+1;
+			vy[5] = vy[6] = vy[7] = yCurrent-1;
 			j = (interdit+1)%8;
 			while ( currentSlice.at(vy[j%8],vx[j%8]) != componentNumber && j < interdit+8 ) ++j;
 			xCurrent = vx[j%8];
@@ -280,9 +393,6 @@ QList<rCoord2D> BillonTpl<T>::extractEdges( const Marrow *marrow, const int &sli
 			interdit = (j+4)%8;
 		}
 		while ( xBegin != xCurrent || yBegin != yCurrent );
-	}
-	else {
-		contourPoints.append(position);
 	}
 
 	return contourPoints;
