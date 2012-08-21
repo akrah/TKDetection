@@ -31,8 +31,8 @@ public:
 	qreal getRestrictedAreaBoudingBoxRadius( const Marrow *marrow, const int &nbPolygonPoints, int intensityThreshold ) const;
 	qreal getRestrictedAreaMeansRadius( const Marrow *marrow, const int &nbPolygonPoints, int intensityThreshold ) const;
 
-	iCoord2D findNearestPointOfThePith( const Marrow *marrow, const int &sliceNumber, const int &componentNumber ) const;
-	QVector<iCoord2D> extractContour( const Marrow *marrow, const int &sliceNumber, const int &componentNumber, iCoord2D startPoint = iCoord2D(-1,-1) ) const;
+	iCoord2D findNearestPointOfThePith( const iCoord2D &center, const int &sliceNumber, const int &componentNumber ) const;
+	QVector<iCoord2D> extractContour( const iCoord2D &center, const int &sliceNumber, const int &componentNumber, iCoord2D startPoint = iCoord2D(-1,-1) ) const;
 
 protected:
 	T _minValue;
@@ -252,14 +252,14 @@ qreal BillonTpl<T>::getRestrictedAreaMeansRadius( const Marrow *marrow, const in
 //}
 
 template < typename T >
-iCoord2D BillonTpl<T>::findNearestPointOfThePith( const Marrow *marrow, const int &sliceNumber, const int &componentNumber ) const
+iCoord2D BillonTpl<T>::findNearestPointOfThePith( const iCoord2D &center, const int &sliceNumber, const int &componentNumber ) const
 {
 	// Find the pixel closest to the pith
 	const arma::Mat<T> &currentSlice = this->slice(sliceNumber);
 	const int width = this->n_cols;
 	const int height = this->n_rows;
-	const int xCenter = marrow != 0 ? marrow->at(sliceNumber).x : width/2;
-	const int yCenter = marrow != 0 ? marrow->at(sliceNumber).y : height/2;
+	const int xCenter = center.x;
+	const int yCenter = center.y;
 	const int radiusMax = qMin( qMin(xCenter,width-xCenter), qMin(yCenter,height-yCenter) );
 
 	rCoord2D position;
@@ -275,62 +275,62 @@ iCoord2D BillonTpl<T>::findNearestPointOfThePith( const Marrow *marrow, const in
 		while ( y>=x && !edgeFind )
 		{
 			edgeFind = true;
-			if ( currentSlice.at( y+yCenter, x+xCenter ) == componentNumber )
+			if ( currentSlice.at( yCenter+y, xCenter+x ) == componentNumber )
 			{
-				position.x = x+xCenter;
-				position.y = y+yCenter;
+				position.x = xCenter+x;
+				position.y = yCenter+y;
 			}
-			else if ( currentSlice.at( x+yCenter, y+xCenter ) == componentNumber )
+			else if ( currentSlice.at( yCenter+y, xCenter-x ) == componentNumber )
 			{
-				position.x = y+xCenter;
-				position.y = x+yCenter;
+				position.x = xCenter-x;
+				position.y = yCenter+y;
 			}
-			else if ( currentSlice.at( y+yCenter, -x+xCenter ) == componentNumber )
+			else if ( currentSlice.at( yCenter+x, xCenter+y ) == componentNumber )
 			{
-				position.x = -x+xCenter;
-				position.y = y+yCenter;
+				position.x = xCenter+y;
+				position.y = yCenter+x;
 			}
-			else if ( currentSlice.at( x+yCenter, -y+xCenter ) == componentNumber )
+			else if ( currentSlice.at( yCenter+x, xCenter-y ) == componentNumber )
 			{
-				position.x = -y+xCenter;
-				position.y = x+yCenter;
+				position.x = xCenter-y;
+				position.y = yCenter+x;
 			}
-			else if ( currentSlice.at( -y+yCenter, x+xCenter ) == componentNumber )
+			else if ( currentSlice.at( yCenter-y, xCenter+x ) == componentNumber )
 			{
-				position.x = x+xCenter;
-				position.y = -y+yCenter;
+				position.x = xCenter+x;
+				position.y = yCenter-y;
 			}
-			else if ( currentSlice.at( -x+yCenter, y+xCenter ) == componentNumber )
+			else if ( currentSlice.at( yCenter-y, xCenter-x ) == componentNumber )
 			{
-				position.x = y+xCenter;
-				position.y = -x+yCenter;
+				position.x = xCenter-x;
+				position.y = yCenter-y;
 			}
-			else if ( currentSlice.at( -y+yCenter, -x+xCenter ) == componentNumber )
+			else if ( currentSlice.at( yCenter-x, xCenter+y ) == componentNumber )
 			{
-				position.x = -x+xCenter;
-				position.y = -y+yCenter;
+				position.x = xCenter+y;
+				position.y = yCenter-x;
 			}
-			else if ( currentSlice.at( -x+yCenter, -y+xCenter ) == componentNumber )
+			else if ( currentSlice.at( yCenter-x, xCenter-y ) == componentNumber )
 			{
-				position.x = -y+xCenter;
-				position.y = -x+yCenter;
+				position.x = xCenter-y;
+				position.y = yCenter-x;
 			}
 			else
 			{
 				edgeFind = false;
-				if ( d >= 2*(x-1) )
+				if ( d >= 2*x )
 				{
 					d -= 2*x;
 					x++;
 				}
 				else if ( d <= 2*(currentRadius-y) )
 				{
-					d += 2*y-1;
+					d += 2*y;
 					y--;
 				}
 				else
 				{
-					d += 2*(y-x-1);
+					d += 2*(y-x);
 					y--;
 					x++;
 				}
@@ -352,11 +352,11 @@ iCoord2D BillonTpl<T>::findNearestPointOfThePith( const Marrow *marrow, const in
 }
 
 template< typename T >
-QVector<iCoord2D> BillonTpl<T>::extractContour( const Marrow *marrow, const int &sliceNumber, const int &componentNumber, iCoord2D startPoint ) const
+QVector<iCoord2D> BillonTpl<T>::extractContour( const iCoord2D &center, const int &sliceNumber, const int &componentNumber, iCoord2D startPoint ) const
 {
 	if ( startPoint == iCoord2D(-1,-1) )
 	{
-		startPoint = findNearestPointOfThePith( marrow, sliceNumber, componentNumber );
+		startPoint = findNearestPointOfThePith( center, sliceNumber, componentNumber );
 	}
 
 	// Suivi du contour
@@ -364,11 +364,9 @@ QVector<iCoord2D> BillonTpl<T>::extractContour( const Marrow *marrow, const int 
 	if ( startPoint != iCoord2D(0,0) )
 	{
 		const arma::Mat<T> &currentSlice = this->slice(sliceNumber);
-		const int xCenter = marrow != 0 ? marrow->at(sliceNumber).x : this->n_cols/2;
-		const int yCenter = marrow != 0 ? marrow->at(sliceNumber).y : this->n_rows/2;
+		const int xCenter = center.x;
+		const int yCenter = center.y;
 		qreal orientation = ANGLE(xCenter,yCenter,startPoint.x,startPoint.y);
-
-		qDebug() << "Angle entre la moelle et le premier point : " << orientation*RAD_TO_DEG_FACT << "  degrés";
 
 		int xBegin, yBegin, xCurrent, yCurrent, interdit, j;
 		QVector<int> vx(8), vy(8);
@@ -376,7 +374,7 @@ QVector<iCoord2D> BillonTpl<T>::extractContour( const Marrow *marrow, const int 
 		xBegin = xCurrent = startPoint.x;
 		yBegin = yCurrent = startPoint.y;
 		interdit = orientation*8./TWO_PI;
-		interdit = (interdit+4)%8; // Remettre +3 si ça ne marche plus
+		interdit = (interdit+4)%8;
 		do
 		{
 			contourPoints.append(iCoord2D(xCurrent,yCurrent));

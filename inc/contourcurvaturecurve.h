@@ -22,7 +22,7 @@ public:
 	const QVector<iCoord2D> &dominantPoints() const;
 	QVector<iCoord2D> mainDominantPoints() const;
 
-	void constructCurve( const Billon &billon, const Marrow *marrow, const int &sliceNumber, const int &componentNumber, const int &blurredSegmentThickness, const iCoord2D &startPoint = iCoord2D(-1,-1) );
+	void constructCurve( const Billon &billon, const iCoord2D &billonCenter, const int &sliceNumber, const int &componentNumber, const int &blurredSegmentThickness, const iCoord2D &startPoint = iCoord2D(-1,-1) );
 
 private:
 	QwtPlotCurve _curveCurvature;

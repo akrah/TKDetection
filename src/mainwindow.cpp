@@ -346,7 +346,7 @@ void MainWindow::drawSlice( const int &sliceNumber ) {
 				_ui->_sliderComponentCurvature->blockSignals(true);
 				//_curvatureCurve->constructCurve( *_componentBillon, _marrow, sliceNumber-sliceInterval.minValue(), selectedComponents?selectedComponents:1, _ui->_spinBlurredSegmentsThickness->value() );
 				//_curvatureCurve->constructCurve( *biggestComponent, _marrow, 0, 1, _ui->_spinBlurredSegmentsThickness->value() );
-				_curvatureCurve->constructCurve( *biggestComponents, _marrow, 0, 1, _ui->_spinBlurredSegmentsThickness->value() );
+				_curvatureCurve->constructCurve( *biggestComponents, _marrow != 0 ? _marrow->at(sliceNumber) : iCoord2D(width/2,height/2), 0, 1, _ui->_spinBlurredSegmentsThickness->value() );
 				_ui->_plotComponentCurvature->replot();
 
 				const QVector<iCoord2D> &contourPoints = _curvatureCurve->contourPoints();
@@ -1147,7 +1147,7 @@ void MainWindow::exportContours() {
 			}
 			//QVector<iCoord2D> contourPoints = _componentBillon->extractEdges(_marrow,_currentSlice-sliceInterval.minValue(),selectedComponents?selectedComponents:1);
 			Billon *biggestComponent = ConnexComponentExtractor::extractBiggestConnexComponent( _componentBillon->slice(_currentSlice-sliceInterval.minValue()), 0 );
-			QVector<iCoord2D> contourPoints = biggestComponent->extractContour( _marrow, 0, 1 );
+			QVector<iCoord2D> contourPoints = biggestComponent->extractContour( _marrow != 0 ? _marrow->at(_currentSlice) : iCoord2D(_billon->n_cols/2,_billon->n_rows/2), 0, 1 );
 
 			QTextStream stream(&file);
 			stream << contourPoints.size() << endl;

@@ -56,12 +56,12 @@ const QVector<iCoord2D> &ContourCurvatureCurve::dominantPoints() const
 	return _datasDominantPoints;
 }
 
-void ContourCurvatureCurve::constructCurve( const Billon &billon, const Marrow *marrow, const int &sliceNumber, const int &componentNumber, const int &blurredSegmentThickness, const iCoord2D &startPoint )
+void ContourCurvatureCurve::constructCurve( const Billon &billon, const iCoord2D &billonCenter, const int &sliceNumber, const int &componentNumber, const int &blurredSegmentThickness, const iCoord2D &startPoint )
 {
 	_datasCurvature.clear();
 	_datasDominantPoints.clear();
 	_datasContourPoints.clear();
-	_datasContourPoints = billon.extractContour( marrow, sliceNumber, componentNumber, startPoint );
+	_datasContourPoints = billon.extractContour( billonCenter, sliceNumber, componentNumber, startPoint );
 
 	int nbPoints = _datasContourPoints.size();
 	QVector<QPointF> curveDatas(nbPoints), curvePosition(1);
