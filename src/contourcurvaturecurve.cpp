@@ -56,10 +56,16 @@ const QVector<iCoord2D> &ContourCurvatureCurve::dominantPoints() const
 	return _datasDominantPoints;
 }
 
+const QVector<iCoord2D> &ContourCurvatureCurve::mainDominantPoints() const
+{
+	return _datasMainDominantPoints;
+}
+
 void ContourCurvatureCurve::constructCurve( const Billon &billon, const iCoord2D &billonCenter, const int &sliceNumber, const int &componentNumber, const int &blurredSegmentThickness, const iCoord2D &startPoint )
 {
 	_datasCurvature.clear();
 	_datasDominantPoints.clear();
+	_datasMainDominantPoints.clear();
 	_datasContourPoints.clear();
 	_datasContourPoints = billon.extractContour( billonCenter, sliceNumber, componentNumber, startPoint );
 
@@ -147,31 +153,25 @@ void ContourCurvatureCurve::constructCurve( const Billon &billon, const iCoord2D
 				_datasDominantPoints << iCoord2D(x,y);
 			}
 			fileDominantPoint.close();
-		}
 
-		mainDominantPoints();
+			if ( nbPoints > 2 )
+			{
+				_datasMainDominantPoints.reserve(2);
+				QVector<iCoord2D> dominantPoints;
+				dominantPoints.reserve(nbPoints+1);
+				dominantPoints << _datasDominantPoints << _datasDominantPoints[0];
+				int index, oldIndex;
+				index = 1;
+				while ( index < nbPoints && dominantPoints[index].angle(dominantPoints[index-1],dominantPoints[index+1]) > PI_ON_TWO ) index++;
+				if ( index < nbPoints ) _datasMainDominantPoints << dominantPoints[index];
+				oldIndex = index;
+				index = nbPoints-1;
+				while ( index > oldIndex && dominantPoints[index].angle(dominantPoints[index-1],dominantPoints[index+1]) > PI_ON_TWO ) index--;
+				if ( index > oldIndex ) _datasMainDominantPoints << dominantPoints[index];
+			}
+		}
 	}
 
 	_curveCurvature.setSamples(curveDatas);
 	_curveCurrentPosition.setSamples(curvePosition);
-}
-
-QVector<iCoord2D> ContourCurvatureCurve::mainDominantPoints() const
-{
-	QVector<iCoord2D> mainPoints(0);
-	const int nbPoints = _datasDominantPoints.size();
-	if ( nbPoints > 2 )
-	{
-		mainPoints.reserve(2);
-		QVector<iCoord2D> dominantPoints;
-		dominantPoints.reserve(nbPoints+1);
-		dominantPoints << _datasDominantPoints << _datasDominantPoints[0];
-		int index = 1;
-		while ( index < nbPoints && dominantPoints[index].angle(dominantPoints[index-1],dominantPoints[index+1]) > PI_ON_TWO ) index++;
-		if (index < nbPoints ) mainPoints << dominantPoints[index];
-		index = nbPoints-1;
-		while ( index > 0 && dominantPoints[index].angle(dominantPoints[index-1],dominantPoints[index+1]) > PI_ON_TWO ) index--;
-		if ( index > 0 ) mainPoints << dominantPoints[index];
-	}
-	return mainPoints;
 }

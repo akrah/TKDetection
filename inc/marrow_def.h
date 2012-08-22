@@ -12,6 +12,13 @@ struct coord2d {
 	coord2d(const T &x, const T &y) : x(x), y(y) {}
 	coord2d shiftTo( const coord2d &other ) const { return coord2d(other.x-x, other.y-y); }
 	qreal distance( const coord2d &other ) const { return qSqrt( qPow(x-other.x,2) + qPow(y-other.y,2) ); }
+	qreal angle( const coord2d &other ) const
+	{
+		coord2d abscisse(x,y+1);
+		qreal distAB = this->distance(abscisse);
+		qreal distAC = this->distance(other);
+		return acos( (qPow(distAB, 2.) + qPow(distAC, 2.) - qPow( abscisse.distance(other), 2.)) / (2*distAB*distAC) );
+	}
 	qreal angle( const coord2d &bottomCoord, const coord2d &topCoord ) const
 	{
 		qreal distAB = this->distance(bottomCoord);
