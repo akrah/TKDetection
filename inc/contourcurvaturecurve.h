@@ -22,6 +22,9 @@ public:
 	const QVector<iCoord2D> &dominantPoints() const;
 	const QVector<iCoord2D> &mainDominantPoints() const;
 
+	const int &indexMainPoint1() const;
+	const int &indexMainPoint2() const;
+
 	void constructCurve( const Billon &billon, const iCoord2D &billonCenter, const int &sliceNumber, const int &componentNumber, const int &blurredSegmentThickness, const iCoord2D &startPoint = iCoord2D(-1,-1) );
 
 private:
@@ -32,6 +35,9 @@ private:
 	QVector<iCoord2D> _datasContourPoints;
 	QVector<iCoord2D> _datasDominantPoints;
 	QVector<iCoord2D> _datasMainDominantPoints;
+
+	int _indexMainPoint1;
+	int _indexMainPoint2;
 };
 
 #endif // CONTOURCURVATURECURVE_H

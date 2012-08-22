@@ -367,18 +367,55 @@ void MainWindow::drawSlice( const int &sliceNumber ) {
 						for ( int i=0 ; i<nbDominantPoints ; ++i ) {
 							painter.drawEllipse(dominantPoints[i].x-2,dominantPoints[i].y-2,4,4);
 						}
-					}
 
-					const QVector<iCoord2D> &mainPoints = _curvatureCurve->mainDominantPoints();
-					const int nbMainPoints = mainPoints.size();
-					if ( nbMainPoints > 0  )
-					{
-						painter.setPen(Qt::red);
-						for ( int i=0 ; i<nbMainPoints ; ++i ) {
-							painter.drawEllipse(mainPoints[i].x-3,mainPoints[i].y-3,6,6);
+						const QVector<iCoord2D> &mainPoints = _curvatureCurve->mainDominantPoints();
+						const int nbMainPoints = mainPoints.size();
+						if ( nbMainPoints > 0  )
+						{
+							painter.setPen(Qt::red);
+							for ( int i=0 ; i<2 ; ++i ) {
+								painter.drawEllipse(mainPoints[i].x-3,mainPoints[i].y-3,6,6);
+							}
+
+							painter.setPen(Qt::gray);
+							qreal a, b;
+							int index;
+							index = _curvatureCurve->indexMainPoint1()-1;
+							if ( index > 0 )
+							{
+								const iCoord2D &main1 = mainPoints[0];
+								while ( index > 0 && dominantPoints[index].distance(main1) < 25 ) index--;
+								const iCoord2D &previousMain1 = dominantPoints[index];
+								a = ( main1.y - previousMain1.y ) / static_cast<qreal>( main1.x - previousMain1.x );
+								b = ( main1.y * previousMain1.x - main1.x * previousMain1.y ) / static_cast<qreal>( previousMain1.x - main1.x );
+								if ( previousMain1.x < main1.x )
+								{
+									painter.drawLine(main1.x, main1.y, width, a * width + b );
+								}
+								else
+								{
+									painter.drawLine(main1.x, main1.y, 0., b );
+								}
+							}
+							if ( _curvatureCurve->indexMainPoint2() != -1 )
+							{
+								index = (_curvatureCurve->indexMainPoint2()+1)%nbDominantPoints;
+								const iCoord2D &main2 = mainPoints[1];
+								while ( index>0 && index<nbDominantPoints-1 && dominantPoints[index].distance(main2) < 25 ) index++;
+								const iCoord2D &previousMain2 = dominantPoints[index];
+								a = ( main2.y - previousMain2.y ) / static_cast<qreal>( main2.x - previousMain2.x );
+								b = ( main2.y * previousMain2.x - main2.x * previousMain2.y ) / static_cast<qreal>( previousMain2.x - main2.x );
+								if ( previousMain2.x < main2.x )
+								{
+									painter.drawLine(main2.x, main2.y, width, a * width + b );
+								}
+								else
+								{
+									painter.drawLine(main2.x, main2.y, 0., b );
+								}
+							}
 						}
 					}
-
 
 					painter.setPen(Qt::red);
 					painter.drawEllipse(contourPoints[nbContourPoints-1-_ui->_sliderComponentCurvature->value()].x-1,contourPoints[nbContourPoints-1-_ui->_sliderComponentCurvature->value()].y-1,2,2);

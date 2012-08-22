@@ -6,7 +6,7 @@
 #include <QProcess>
 #include <QTemporaryFile>
 
-ContourCurvatureCurve::ContourCurvatureCurve()
+ContourCurvatureCurve::ContourCurvatureCurve() : _indexMainPoint1(-1), _indexMainPoint2(-1)
 {
 	_curveCurvature.setPen(QPen(Qt::blue));
 	_curveCurrentPosition.setPen(QPen(Qt::red));
@@ -61,6 +61,16 @@ const QVector<iCoord2D> &ContourCurvatureCurve::mainDominantPoints() const
 	return _datasMainDominantPoints;
 }
 
+const int &ContourCurvatureCurve::indexMainPoint1() const
+{
+	return _indexMainPoint1;
+}
+
+const int &ContourCurvatureCurve::indexMainPoint2() const
+{
+	return _indexMainPoint2;
+}
+
 void ContourCurvatureCurve::constructCurve( const Billon &billon, const iCoord2D &billonCenter, const int &sliceNumber, const int &componentNumber, const int &blurredSegmentThickness, const iCoord2D &startPoint )
 {
 	_datasCurvature.clear();
@@ -68,8 +78,34 @@ void ContourCurvatureCurve::constructCurve( const Billon &billon, const iCoord2D
 	_datasMainDominantPoints.clear();
 	_datasContourPoints.clear();
 	_datasContourPoints = billon.extractContour( billonCenter, sliceNumber, componentNumber, startPoint );
-
 	int nbPoints = _datasContourPoints.size();
+
+	// Lissage du contour
+	const int smoothingRadius = 5;
+	const int smoothingDiameter = 2*smoothingRadius+1;
+	if ( nbPoints > smoothingDiameter )
+	{
+		QVector<iCoord2D> datasContourForSmoothing;
+		datasContourForSmoothing.reserve(nbPoints+2*smoothingRadius);
+		datasContourForSmoothing << _datasContourPoints.mid(nbPoints-smoothingRadius) <<  _datasContourPoints << _datasContourPoints.mid(0,smoothingRadius);
+		int i, j, smoothingValueX, smoothingValueY;
+		smoothingValueX = smoothingValueY = 0;
+		for ( i=0 ; i<smoothingDiameter ; ++i )
+		{
+			smoothingValueX += datasContourForSmoothing[i].x;
+			smoothingValueY += datasContourForSmoothing[i].y;
+		}
+		_datasContourPoints[0].x = smoothingValueX / static_cast<qreal>(smoothingDiameter);
+		_datasContourPoints[0].y = smoothingValueY / static_cast<qreal>(smoothingDiameter);
+		for ( int i=1 ; i<nbPoints ; ++i )
+		{
+			smoothingValueX = smoothingValueX - datasContourForSmoothing[i-1].x + datasContourForSmoothing[i+smoothingDiameter-1].x;
+			smoothingValueY = smoothingValueY - datasContourForSmoothing[i-1].y + datasContourForSmoothing[i+smoothingDiameter-1].y;
+			_datasContourPoints[i].x = smoothingValueX / static_cast<qreal>(smoothingDiameter);
+			_datasContourPoints[i].y = smoothingValueY / static_cast<qreal>(smoothingDiameter);
+		}
+	}
+
 	QVector<QPointF> curveDatas(nbPoints), curvePosition(1);
 
 	if ( nbPoints > 7 )
@@ -162,12 +198,27 @@ void ContourCurvatureCurve::constructCurve( const Billon &billon, const iCoord2D
 				dominantPoints << _datasDominantPoints << _datasDominantPoints[0];
 				int index, oldIndex;
 				index = 1;
-				while ( index < nbPoints && dominantPoints[index].angle(dominantPoints[index-1],dominantPoints[index+1]) > PI_ON_TWO ) index++;
-				if ( index < nbPoints ) _datasMainDominantPoints << dominantPoints[index];
+				while ( index < nbPoints && (dominantPoints[index].angle(dominantPoints[index-1],dominantPoints[index+1]) > PI_ON_TWO || dominantPoints[index].distance(dominantPoints[0]) < 25 ) ) index++;
+				if ( index < nbPoints )
+				{
+					_datasMainDominantPoints << dominantPoints[index];
+					_indexMainPoint1 = oldIndex;
+				}
+				else
+				{
+					_indexMainPoint1 = -1;
+				}
 				oldIndex = index;
 				index = nbPoints-1;
-				while ( index > oldIndex && dominantPoints[index].angle(dominantPoints[index-1],dominantPoints[index+1]) > PI_ON_TWO ) index--;
-				if ( index > oldIndex ) _datasMainDominantPoints << dominantPoints[index];
+				while ( index > oldIndex && (dominantPoints[index].angle(dominantPoints[index-1],dominantPoints[index+1]) > PI_ON_TWO || dominantPoints[index].distance(dominantPoints[0]) < 25 ) ) index--;
+				if ( index > oldIndex ) {
+					_datasMainDominantPoints << dominantPoints[index];
+					_indexMainPoint2 = index;
+				}
+				else
+				{
+					_indexMainPoint2 = -1;
+				}
 			}
 		}
 	}
