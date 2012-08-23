@@ -19,7 +19,7 @@
 #include "inc/connexcomponentextractor.h"
 #include "inc/pgm3dexport.h"
 #include "inc/intervalscomputerdefaultparameters.h"
-#include "inc/contourcurvaturecurve.h"
+#include "inc/contourcurve.h"
 
 #include <QFileDialog>
 #include <QMouseEvent>
@@ -34,7 +34,7 @@
 #include <qwt_round_scale_draw.h>
 
 MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::MainWindow), _billon(0), _sectorBillon(0), _componentBillon(0), _marrow(0),
-	_sliceView(new SliceView()), _sliceHistogram(new SliceHistogram()), _pieChart(new PieChart(0,1)), _pieChartDiagrams(new PieChartDiagrams()), _curvatureCurve(new ContourCurvatureCurve()),
+	_sliceView(new SliceView()), _sliceHistogram(new SliceHistogram()), _pieChart(new PieChart(0,1)), _pieChartDiagrams(new PieChartDiagrams()), _contourCurve(new ContourCurve()),
 	_currentSlice(0), _currentMaximum(0)
 {
 	_ui->setupUi(this);
@@ -86,9 +86,6 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 	grid->showAxis(QwtPolar::AxisBottom,false);
 	grid->setMajorGridPen(QPen(Qt::lightGray));
 	grid->attach(_ui->_polarSectorSum);
-
-	_curvatureCurve->attach(_ui->_plotComponentCurvature);
-	_ui->_plotComponentCurvature->setAxisScale(QwtPlot::yLeft,-2.,2.);
 
 	/**** Mise en place de la communication MVC ****/
 
@@ -173,7 +170,6 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 	QObject::connect(_ui->_buttonExportMovementsToV3D, SIGNAL(clicked()), this, SLOT(exportMovementsToV3D()));
 	QObject::connect(_ui->_buttonExportToOfsRestricted, SIGNAL(clicked()), this, SLOT(exportToOfsRestricted()));
 	QObject::connect(_ui->_buttonExportSectorsDiagramAndHistogram, SIGNAL(clicked()), this, SLOT(exportSectorDiagramAndHistogram()));
-	//QObject::connect(_ui->_sliderComponentCurvature, SIGNAL(valueChanged(int)), this, SLOT(setCurvatureCurvePosition(int)));
 	QObject::connect(_ui->_spinBlurredSegmentsThickness, SIGNAL(valueChanged(int)), this, SLOT(drawSlice()));
 
 	// Raccourcis des actions du menu
@@ -189,7 +185,7 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 }
 
 MainWindow::~MainWindow() {
-	delete _curvatureCurve;
+	delete _contourCurve;
 	delete _pieChartDiagrams;
 	delete _pieChart;
 	delete _sliceHistogram;
@@ -311,10 +307,7 @@ void MainWindow::drawSlice( const int &sliceNumber ) {
 
 
 				const Interval &sliceInterval = _sliceHistogram->branchesAreas()[_ui->_comboSelectSliceInterval->currentIndex()-1];
-				//Billon *biggestComponent = ConnexComponentExtractor::extractBiggestConnexComponent( _componentBillon->slice(sliceNumber-sliceInterval.minValue()), 0 );
 				Billon *biggestComponents = ConnexComponentExtractor::extractBiggestConnexComponents( _componentBillon->slice(sliceNumber-sliceInterval.minValue()), 0, _ui->_spinMinimalSizeOfConnexComponents->value() );
-				//const Slice &sectorSlice = _componentBillon->slice(sliceNumber-sliceInterval.minValue());
-				//const Slice &sectorSlice = biggestComponent->slice(0);
 				const Slice &sectorSlice = biggestComponents->slice(0);
 				const int selectedComponents = _ui->_comboConnexComponents->currentIndex();
 
@@ -342,85 +335,10 @@ void MainWindow::drawSlice( const int &sliceNumber ) {
 						}
 					}
 				}
+				painter.end();
 
-				_ui->_sliderComponentCurvature->blockSignals(true);
-				//_curvatureCurve->constructCurve( *_componentBillon, _marrow, sliceNumber-sliceInterval.minValue(), selectedComponents?selectedComponents:1, _ui->_spinBlurredSegmentsThickness->value() );
-				//_curvatureCurve->constructCurve( *biggestComponent, _marrow, 0, 1, _ui->_spinBlurredSegmentsThickness->value() );
-				_curvatureCurve->constructCurve( *biggestComponents, _marrow != 0 ? _marrow->at(sliceNumber) : iCoord2D(width/2,height/2), 0, 1, _ui->_spinBlurredSegmentsThickness->value() );
-				_ui->_plotComponentCurvature->replot();
-
-				const QVector<iCoord2D> &contourPoints = _curvatureCurve->contourPoints();
-				const int nbContourPoints = contourPoints.size();
-				if ( nbContourPoints > 0 )
-				{
-					_ui->_sliderComponentCurvature->setMaximum(nbContourPoints-1);
-					painter.setPen(Qt::blue);
-					for ( int i=0 ; i<nbContourPoints ; ++i ) {
-						painter.drawPoint(contourPoints[i].x,contourPoints[i].y);
-					}
-
-					const QVector<iCoord2D> &dominantPoints = _curvatureCurve->dominantPoints();
-					const int nbDominantPoints = dominantPoints.size();
-					if ( nbDominantPoints > 0 )
-					{
-						painter.setPen(Qt::green);
-						for ( int i=0 ; i<nbDominantPoints ; ++i ) {
-							painter.drawEllipse(dominantPoints[i].x-2,dominantPoints[i].y-2,4,4);
-						}
-
-						const QVector<iCoord2D> &mainPoints = _curvatureCurve->mainDominantPoints();
-						const int nbMainPoints = mainPoints.size();
-						if ( nbMainPoints > 0  )
-						{
-							painter.setPen(Qt::red);
-							for ( int i=0 ; i<2 ; ++i ) {
-								painter.drawEllipse(mainPoints[i].x-3,mainPoints[i].y-3,6,6);
-							}
-
-							painter.setPen(Qt::gray);
-							qreal a, b;
-							int index;
-							index = _curvatureCurve->indexMainPoint1()-1;
-							if ( index > 0 )
-							{
-								const iCoord2D &main1 = mainPoints[0];
-								while ( index > 0 && dominantPoints[index].distance(main1) < 25 ) index--;
-								const iCoord2D &previousMain1 = dominantPoints[index];
-								a = ( main1.y - previousMain1.y ) / static_cast<qreal>( main1.x - previousMain1.x );
-								b = ( main1.y * previousMain1.x - main1.x * previousMain1.y ) / static_cast<qreal>( previousMain1.x - main1.x );
-								if ( previousMain1.x < main1.x )
-								{
-									painter.drawLine(main1.x, main1.y, width, a * width + b );
-								}
-								else
-								{
-									painter.drawLine(main1.x, main1.y, 0., b );
-								}
-							}
-							if ( _curvatureCurve->indexMainPoint2() != -1 )
-							{
-								index = (_curvatureCurve->indexMainPoint2()+1)%nbDominantPoints;
-								const iCoord2D &main2 = mainPoints[1];
-								while ( index>0 && index<nbDominantPoints-1 && dominantPoints[index].distance(main2) < 25 ) index++;
-								const iCoord2D &previousMain2 = dominantPoints[index];
-								a = ( main2.y - previousMain2.y ) / static_cast<qreal>( main2.x - previousMain2.x );
-								b = ( main2.y * previousMain2.x - main2.x * previousMain2.y ) / static_cast<qreal>( previousMain2.x - main2.x );
-								if ( previousMain2.x < main2.x )
-								{
-									painter.drawLine(main2.x, main2.y, width, a * width + b );
-								}
-								else
-								{
-									painter.drawLine(main2.x, main2.y, 0., b );
-								}
-							}
-						}
-					}
-
-					painter.setPen(Qt::red);
-					painter.drawEllipse(contourPoints[nbContourPoints-1-_ui->_sliderComponentCurvature->value()].x-1,contourPoints[nbContourPoints-1-_ui->_sliderComponentCurvature->value()].y-1,2,2);
-				}
-				_ui->_sliderComponentCurvature->blockSignals(false);
+				_contourCurve->constructCurve( *biggestComponents, _marrow != 0 ? _marrow->at(sliceNumber) : iCoord2D(width/2,height/2), 0, 1, _ui->_spinBlurredSegmentsThickness->value() );
+				_contourCurve->draw(_pix);
 
 				delete biggestComponents;
 			}
@@ -435,9 +353,6 @@ void MainWindow::drawSlice( const int &sliceNumber ) {
 
 void MainWindow::setSlice( const int &sliceNumber )
 {
-	_ui->_sliderComponentCurvature->blockSignals(true);
-	_ui->_sliderComponentCurvature->setValue(0);
-	_ui->_sliderComponentCurvature->blockSignals(false);
 	drawSlice(sliceNumber);
 }
 
@@ -1195,13 +1110,6 @@ void MainWindow::exportContours() {
 			delete biggestComponent;
 		}
 	}
-}
-
-void MainWindow::setCurvatureCurvePosition( const int &position )
-{
-	drawSlice();
-	_curvatureCurve->setCurvePosition(position);
-	_ui->_plotComponentCurvature->replot();
 }
 
 /*******************************

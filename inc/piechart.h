@@ -2,7 +2,7 @@
 #define PIECHART_H
 
 #include <QVector>
-#include "inc/marrow_def.h"
+#include "inc/global.h"
 
 class PiePart;
 class QImage;

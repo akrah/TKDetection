@@ -2,8 +2,8 @@
 #define MARROW_H
 
 #include <QList>
-#include "marrow_def.h"
 #include "interval.h"
+#include "global.h"
 
 class QImage;
 

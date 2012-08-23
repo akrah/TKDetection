@@ -1,43 +1,35 @@
-#ifndef CONTOURCURVATURECURVE_H
-#define CONTOURCURVATURECURVE_H
+#ifndef CONTOURCURVE_H
+#define CONTOURCURVE_H
 
 #include "billon_def.h"
-#include "marrow_def.h"
+#include "global.h"
 #include <qwt_plot_curve.h>
 
 class Marrow;
 
-class ContourCurvatureCurve
+class ContourCurve
 {
 public:
-	ContourCurvatureCurve();
-	~ContourCurvatureCurve();
-
-	void attach( QwtPlot * const plot );
-	void detach();
-	void clear();
-	void setCurvePosition( const int &position );
+	ContourCurve();
+	~ContourCurve();
 
 	const QVector<iCoord2D> &contourPoints() const;
 	const QVector<iCoord2D> &dominantPoints() const;
 	const QVector<iCoord2D> &mainDominantPoints() const;
-
-	const int &indexMainPoint1() const;
-	const int &indexMainPoint2() const;
+	int indexOfMainPoint( const int &number ) const;
 
 	void constructCurve( const Billon &billon, const iCoord2D &billonCenter, const int &sliceNumber, const int &componentNumber, const int &blurredSegmentThickness, const iCoord2D &startPoint = iCoord2D(-1,-1) );
 
-private:
-	QwtPlotCurve _curveCurvature;
-	QwtPlotCurve _curveCurrentPosition;
+	void draw( QImage &image ) const;
 
-	QVector<qreal> _datasCurvature;
+private:
+	void smoothCurve( QVector<iCoord2D> &contour, const int &smoothingRadius = 5 );
+
+private:
 	QVector<iCoord2D> _datasContourPoints;
 	QVector<iCoord2D> _datasDominantPoints;
 	QVector<iCoord2D> _datasMainDominantPoints;
-
-	int _indexMainPoint1;
-	int _indexMainPoint2;
+	QVector<int> _datasIndexMainDominantPoints;
 };
 
 #endif // CONTOURCURVATURECURVE_H

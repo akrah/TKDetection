@@ -2,7 +2,7 @@
 #define MARROWEXTRACTOR_H
 
 #include <QList>
-#include "marrow_def.h"
+#include "global.h"
 
 #include <armadillo>
 using namespace arma;
