@@ -340,6 +340,7 @@ void MainWindow::drawSlice( const int &sliceNumber ) {
 
 				_contourCurve->constructCurve( *biggestComponents, _marrow != 0 ? _marrow->at(sliceNumber) : iCoord2D(width/2,height/2), 0, 1, _ui->_spinBlurredSegmentsThickness->value() );
 				_contourCurve->draw(_pix);
+				_contourCurve->drawRestrictedComponent(_pix,biggestComponents->slice(0),_marrow != 0 ? _marrow->at(sliceNumber) : iCoord2D(width/2,height/2));
 
 				delete biggestComponents;
 			}

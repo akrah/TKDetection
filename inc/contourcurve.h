@@ -20,7 +20,7 @@ public:
 	void setSmoothingRadius( const int &radius );
 	void constructCurve( const Billon &billon, const iCoord2D &billonCenter, const int &sliceNumber, const int &componentNumber, const int &blurredSegmentThickness, const iCoord2D &startPoint = iCoord2D(-1,-1) );
 	void draw( QImage &image ) const;
-	void drawRestrictedComponent( QImage &image, const arma::Slice &slice ) const;
+	void drawRestrictedComponent( QImage &image, const arma::Slice &slice, const iCoord2D &marrow ) const;
 
 private:
 	void smoothCurve( QVector<iCoord2D> &contour, int smoothingRadius = 5 );

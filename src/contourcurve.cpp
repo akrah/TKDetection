@@ -223,12 +223,13 @@ void ContourCurve::draw( QImage &image ) const
 				painter.drawEllipse(_datasDominantPoints[i].x-2,_datasDominantPoints[i].y-2,4,4);
 			}
 
-			painter.setPen(Qt::red);
 
 			const iCoord2D &mainPoint1 = _datasMainDominantPoints[0];
 			const iCoord2D &mainPoint2 = _datasMainDominantPoints[1];
 
+			painter.setPen(Qt::red);
 			if ( _datasIndexMainDominantPoints[0] != -1 ) painter.drawEllipse(mainPoint1.x-3,mainPoint1.y-3,6,6);
+			painter.setPen(Qt::green);
 			if ( _datasIndexMainDominantPoints[1] != -1 ) painter.drawEllipse(mainPoint2.x-3,mainPoint2.y-3,6,6);
 
 			painter.setPen(Qt::gray);
@@ -273,7 +274,7 @@ void ContourCurve::draw( QImage &image ) const
 }
 
 
-void ContourCurve::drawRestrictedComponent( QImage &image, const arma::Slice &slice ) const
+void ContourCurve::drawRestrictedComponent( QImage &image, const arma::Slice &slice, const iCoord2D &marrow ) const
 {
 	const iCoord2D &mainPoint1 = _datasMainDominantPoints[0];
 	const iCoord2D &mainPoint2 = _datasMainDominantPoints[1];
@@ -281,21 +282,88 @@ void ContourCurve::drawRestrictedComponent( QImage &image, const arma::Slice &sl
 	if ( (mainPoint1.x != -1 || mainPoint1.y != -1) && (mainPoint2.x != -1 || mainPoint2.y != -1) )
 	{
 		QPainter painter(&image);
+		painter.setPen(QColor(255,0,0,127));
 
+		const iCoord2D &support1 = _datasMainSupportPoints[0];
+		const iCoord2D &support2 = _datasMainSupportPoints[1];
 		const int width = slice.n_cols;
 		const int height = slice.n_rows;
 
-		int i,j;
+		int i,j, index;
 
+		const qreal daMain1Main2 = mainPoint1.y - mainPoint2.y;
+		const qreal dbMain1Main2 = mainPoint2.x - mainPoint1.x;
+		const qreal dcMain1Main2 = daMain1Main2*mainPoint1.x + dbMain1Main2*mainPoint1.y;
+		const bool supToMain1Main2 = ( daMain1Main2*marrow.x + dbMain1Main2*marrow.y ) > dcMain1Main2;
+
+		const qreal daMain1Support1 = mainPoint1.y - support1.y;
+		const qreal dbMain1Support1 = support1.x - mainPoint1.x;
+		const qreal dcMain1Support1 = daMain1Support1*mainPoint1.x + dbMain1Support1*mainPoint1.y;
+		const bool supToMain1Support1 = ( daMain1Support1*support2.x + dbMain1Support1*support2.y ) > dcMain1Support1;
+
+		const qreal daMain2Support2 = mainPoint2.y - support2.y;
+		const qreal dbMain2Support2 = support2.x - mainPoint2.x;
+		const qreal dcMain2Support2 = daMain2Support2*mainPoint2.x + dbMain2Support2*mainPoint2.y;
+		const bool supToMain2Support2 = ( daMain2Support2*support1.x + dbMain2Support2*support1.y ) > dcMain2Support2;
+
+		// Ajout des pixels du noeud dans l'aubier mais au-dessus de la droite passant par les deux points dominants
+		// et du bon côté de chaque droite de prolongement
 		for ( j=0 ; j<height ; ++j )
 		{
 			for ( i=0 ; i<width ; ++i )
 			{
-				color = slice.at(j,i);
-				if ( color )
+				if ( slice.at(j,i)
+					 && ((daMain1Main2*i+dbMain1Main2*j < dcMain1Main2) == supToMain1Main2)
+					 && ((daMain1Support1*i+dbMain1Support1*j > dcMain1Support1) == supToMain1Support1)
+					 && ((daMain2Support2*i+dbMain2Support2*j > dcMain2Support2) == supToMain2Support2)
+				   )
 				{
-					painter.setPen(colors[color%nbColors]);
 					painter.drawPoint(i,j);
+				}
+			}
+		}
+
+		// Ajout des pixels du noeud en dehors de l'aubier.
+		i = -1;
+		for ( index = _datasIndexMainDominantPoints[0]-1 ; index > -1 ; index-- )
+		{
+			const iCoord2D &currentContour = _datasContourPoints[index];
+			if ( currentContour.x != i )
+			{
+				i = currentContour.x;
+				j = currentContour.y+1;
+				while( slice.at(j,i) && ((daMain1Main2*i+dbMain1Main2*j > dcMain1Main2) == supToMain1Main2 ) )
+				{
+					painter.drawPoint(i,j);
+					j++;
+				}
+				j = currentContour.y-1;
+				while( slice.at(j,i) && ((daMain1Main2*i+dbMain1Main2*j > dcMain1Main2) == supToMain1Main2 ) )
+				{
+					painter.drawPoint(i,j);
+					j--;
+				}
+			}
+		}
+		const int nbPointsContour = _datasContourPoints.size();
+		i = -1;
+		for ( index = _datasIndexMainDominantPoints[1]+1 ; index < nbPointsContour ; index++ )
+		{
+			const iCoord2D &currentContour = _datasContourPoints[index];
+			if ( currentContour.x != i )
+			{
+				i = currentContour.x;
+				j = currentContour.y+1;
+				while( slice.at(j,i) && ((daMain1Main2*i+dbMain1Main2*j > dcMain1Main2) == supToMain1Main2 ) )
+				{
+					painter.drawPoint(i,j);
+					j++;
+				}
+				j = currentContour.y-1;
+				while( slice.at(j,i) && ((daMain1Main2*i+dbMain1Main2*j > dcMain1Main2) == supToMain1Main2 ) )
+				{
+					painter.drawPoint(i,j);
+					j--;
 				}
 			}
 		}
