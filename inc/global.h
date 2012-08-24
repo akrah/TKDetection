@@ -73,7 +73,7 @@ struct coord2d {
 		const qreal cosBAC = ( AB.x * AC.x + AB.y*AC.y ) / ( qSqrt( qPow(AB.x,2) + qPow(AB.y,2) ) * qSqrt( qPow(AC.x,2) + qPow(AC.y,2) ) );
 		// signe (BAC) = prodVectoriel(AB,AC)
 		const qreal sinBAC = ( AB.x * AC.y - AB.y*AC.x );
-		std::cout << "cos = " << cosBAC << " et signe = " << sinBAC/qAbs(sinBAC) << " ==> angle = " << (sinBAC>0?acos(cosBAC):-acos(cosBAC))*RAD_TO_DEG_FACT << std::endl;
+		//std::cout << "cos = " << cosBAC << " et signe = " << sinBAC/qAbs(sinBAC) << " ==> angle = " << (sinBAC>0?acos(cosBAC):-acos(cosBAC))*RAD_TO_DEG_FACT << std::endl;
 		return sinBAC>0?acos(cosBAC):-acos(cosBAC);
 	}
 	void print(std::ostream &flux) const { return flux << "( " << x << ", " << y << " )"; }

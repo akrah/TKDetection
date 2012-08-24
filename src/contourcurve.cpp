@@ -7,7 +7,7 @@
 #include <QTemporaryFile>
 #include <QPainter>
 
-ContourCurve::ContourCurve()
+ContourCurve::ContourCurve() : _smoothingRadius(5)
 {
 }
 
@@ -35,18 +35,29 @@ int ContourCurve::indexOfMainPoint( const int &number ) const
 	return number>-1&&number<2 ? _datasIndexMainDominantPoints[number] : -1;
 }
 
+const QVector<iCoord2D> &ContourCurve::mainSupportPoints() const
+{
+	return _datasMainSupportPoints;
+}
+
+void ContourCurve::setSmoothingRadius( const int &radius )
+{
+	_smoothingRadius = qAbs(radius);
+}
+
 void ContourCurve::constructCurve( const Billon &billon, const iCoord2D &billonCenter, const int &sliceNumber, const int &componentNumber, const int &blurredSegmentThickness, const iCoord2D &startPoint )
 {
 	_datasContourPoints.clear();
 	_datasContourPoints = billon.extractContour( billonCenter, sliceNumber, componentNumber, startPoint );
-	smoothCurve(_datasContourPoints);
+	smoothCurve(_datasContourPoints,_smoothingRadius);
 
 	_datasDominantPoints.clear();
 
 	_datasMainDominantPoints.clear();
 	_datasMainDominantPoints.fill(iCoord2D(-1,-1),2);
-
 	_datasIndexMainDominantPoints.fill(-1,2);
+
+	_datasMainSupportPoints.fill(iCoord2D(-1,-1),2);
 
 	int nbPoints = _datasContourPoints.size();
 	if ( nbPoints > 7 )
@@ -98,7 +109,7 @@ void ContourCurve::constructCurve( const Billon &billon, const iCoord2D &billonC
 
 			if ( nbPoints > 2 )
 			{
-
+				const int padding = qMin(billon.n_cols,billon.n_rows)/20;
 				QVector<iCoord2D> dominantPoints;
 				dominantPoints.reserve(nbPoints+1);
 				dominantPoints << _datasDominantPoints << _datasDominantPoints[0];
@@ -124,37 +135,47 @@ void ContourCurve::constructCurve( const Billon &billon, const iCoord2D &billonC
 				{
 					oldAngle = qAbs(angle);
 					angle = dominantPoints[index].angle(dominantPoints[index-1],dominantPoints[index+1]);
-					if ( (angle < -PI_ON_FOUR || angle  > THREE_PI_ON_FOUR) && oldAngle+qAbs(angle)>PI /*|| dominantPoints[index].distance(dominantPoints[0]) < 25*/ ) index++;
+					if ( ((angle < -PI_ON_FOUR || angle  > THREE_PI_ON_FOUR) && oldAngle+qAbs(angle)>PI) || dominantPoints[index].distance(dominantPoints[0]) < 20 ) index++;
 					else break;
 				}
+				oldIndex = index;
 				if ( index < nbPoints )
 				{
 					_datasMainDominantPoints[0] = dominantPoints[index];
 					_datasIndexMainDominantPoints[0] = index;
+
+					while ( index > 0 && _datasDominantPoints[index].distance(_datasMainDominantPoints[0]) < padding ) index--;
+					_datasMainSupportPoints[0] = _datasDominantPoints[index];
+
 				}
-				oldIndex = index;
 				index = nbPoints-1;
 				angle = dominantPoints[index].angle(dominantPoints[index+1],dominantPoints[index-1]);
 				while ( index > oldIndex )
 				{
 					oldAngle = qAbs(angle);
 					angle = dominantPoints[index].angle(dominantPoints[index+1],dominantPoints[index-1]);
-					if ( (angle > PI_ON_FOUR || angle < -THREE_PI_ON_FOUR) && oldAngle+qAbs(angle)>PI /*|| dominantPoints[index].distance(dominantPoints[0]) < 25*/ ) index--;
+					if ( ((angle > PI_ON_FOUR || angle < -THREE_PI_ON_FOUR) && oldAngle+qAbs(angle)>PI) || dominantPoints[index].distance(dominantPoints[0]) < 20 ) index--;
 					else break;
 				}
-				if ( index > oldIndex ) {
+				if ( index > oldIndex )
+				{
 					_datasMainDominantPoints[1] = dominantPoints[index];
 					_datasIndexMainDominantPoints[1] = index;
+
+					index = (index+1)%nbPoints;
+					while ( index>0 && index<nbPoints-1 && _datasDominantPoints[index].distance(_datasMainDominantPoints[1]) < padding ) index++;
+					_datasMainSupportPoints[1] = _datasDominantPoints[index%nbPoints];
 				}
 			}
 		}
 	}
 }
 
-void ContourCurve::smoothCurve( QVector<iCoord2D> &contour, const int &smoothingRadius )
+void ContourCurve::smoothCurve( QVector<iCoord2D> &contour, int smoothingRadius )
 {
-	const int smoothingDiameter = 2*smoothingRadius+1;
 	const int nbPoints = contour.size();
+	smoothingRadius = qMin(smoothingRadius,nbPoints);
+	const int smoothingDiameter = 2*smoothingRadius+1;
 	if ( nbPoints > smoothingDiameter )
 	{
 		QVector<iCoord2D> datasContourForSmoothing;
@@ -202,58 +223,81 @@ void ContourCurve::draw( QImage &image ) const
 				painter.drawEllipse(_datasDominantPoints[i].x-2,_datasDominantPoints[i].y-2,4,4);
 			}
 
-			const int nbMainPoints = _datasMainDominantPoints.size();
-			if ( nbMainPoints > 0  )
+			painter.setPen(Qt::red);
+
+			const iCoord2D &mainPoint1 = _datasMainDominantPoints[0];
+			const iCoord2D &mainPoint2 = _datasMainDominantPoints[1];
+
+			if ( _datasIndexMainDominantPoints[0] != -1 ) painter.drawEllipse(mainPoint1.x-3,mainPoint1.y-3,6,6);
+			if ( _datasIndexMainDominantPoints[1] != -1 ) painter.drawEllipse(mainPoint2.x-3,mainPoint2.y-3,6,6);
+
+			painter.setPen(Qt::gray);
+
+			qreal a, b;
+
+			const iCoord2D &supportMain1 = _datasMainSupportPoints[0];
+			if ( supportMain1.x != -1 || supportMain1.y != -1 )
 			{
-				painter.setPen(Qt::red);
-
-				const iCoord2D &mainPoint1 = _datasMainDominantPoints[0];
-				const iCoord2D &mainPoint2 = _datasMainDominantPoints[1];
-
-				if ( _datasIndexMainDominantPoints[0] != -1 ) painter.drawEllipse(mainPoint1.x-3,mainPoint1.y-3,6,6);
-				if ( _datasIndexMainDominantPoints[1] != -1 ) painter.drawEllipse(mainPoint2.x-3,mainPoint2.y-3,6,6);
-
-				painter.setPen(Qt::gray);
-				const int padding = qMin(image.width(),image.height())/20;
-				qreal a, b;
-				int index;
-				index = _datasIndexMainDominantPoints[0]-1;
-				if ( index > 0 )
-				{
-					while ( index > 0 && _datasDominantPoints[index].distance(mainPoint1) < padding ) index--;
-					const iCoord2D &previousMain1 = _datasDominantPoints[index];
-					a = ( mainPoint1.y - previousMain1.y ) / static_cast<qreal>( mainPoint1.x - previousMain1.x );
-					b = ( mainPoint1.y * previousMain1.x - mainPoint1.x * previousMain1.y ) / static_cast<qreal>( previousMain1.x - mainPoint1.x );
-					if ( previousMain1.x < mainPoint1.x )
-					{
-						painter.drawLine(mainPoint1.x, mainPoint1.y, image.width(), a * image.width() + b );
-					}
-					else
-					{
-						painter.drawLine(mainPoint1.x, mainPoint1.y, 0., b );
-					}
-				}
-				if ( _datasIndexMainDominantPoints[1] > -1 )
-				{
-					index = (_datasIndexMainDominantPoints[1]+1)%nbDominantPoints;
-					while ( index>0 && index<nbDominantPoints-1 && _datasDominantPoints[index].distance(mainPoint2) < padding ) index++;
-					index %= nbDominantPoints;
-					const iCoord2D &previousMain2 = _datasDominantPoints[index];
-					a = ( mainPoint2.y - previousMain2.y ) / static_cast<qreal>( mainPoint2.x - previousMain2.x );
-					b = ( mainPoint2.y * previousMain2.x - mainPoint2.x * previousMain2.y ) / static_cast<qreal>( previousMain2.x - mainPoint2.x );
-					if ( previousMain2.x < mainPoint2.x )
-					{
-						painter.drawLine(mainPoint2.x, mainPoint2.y, image.width(), a * image.width() + b );
-					}
-					else
-					{
-						painter.drawLine(mainPoint2.x, mainPoint2.y, 0., b );
-					}
-				}
+				a = ( mainPoint1.y - supportMain1.y ) / static_cast<qreal>( mainPoint1.x - supportMain1.x );
+				b = ( mainPoint1.y * supportMain1.x - mainPoint1.x * supportMain1.y ) / static_cast<qreal>( supportMain1.x - mainPoint1.x );
+				painter.drawLine(0, b, image.width(), a * image.width() + b );
+//				if ( supportMain1.x < mainPoint1.x )
+//				{
+//					painter.drawLine(mainPoint1.x, mainPoint1.y, image.width(), a * image.width() + b );
+//				}
+//				else
+//				{
+//					painter.drawLine(mainPoint1.x, mainPoint1.y, 0., b );
+//				}
+			}
+			const iCoord2D &supportMain2 = _datasMainSupportPoints[1];
+			if ( supportMain2.x != -1 || supportMain2.y != -1 )
+			{
+				a = ( mainPoint2.y - supportMain2.y ) / static_cast<qreal>( mainPoint2.x - supportMain2.x );
+				b = ( mainPoint2.y * supportMain2.x - mainPoint2.x * supportMain2.y ) / static_cast<qreal>( supportMain2.x - mainPoint2.x );
+				painter.drawLine(0, b, image.width(), a * image.width() + b );
+//				if ( supportMain2.x < mainPoint2.x )
+//				{
+//					painter.drawLine(mainPoint2.x, mainPoint2.y, image.width(), a * image.width() + b );
+//				}
+//				else
+//				{
+//					painter.drawLine(mainPoint2.x, mainPoint2.y, 0., b );
+//				}
 			}
 		}
 
 		painter.setPen(Qt::red);
 		painter.drawEllipse(_datasContourPoints[0].x-1,_datasContourPoints[0].y-1,2,2);
+	}
+}
+
+
+void ContourCurve::drawRestrictedComponent( QImage &image, const arma::Slice &slice ) const
+{
+	const iCoord2D &mainPoint1 = _datasMainDominantPoints[0];
+	const iCoord2D &mainPoint2 = _datasMainDominantPoints[1];
+
+	if ( (mainPoint1.x != -1 || mainPoint1.y != -1) && (mainPoint2.x != -1 || mainPoint2.y != -1) )
+	{
+		QPainter painter(&image);
+
+		const int width = slice.n_cols;
+		const int height = slice.n_rows;
+
+		int i,j;
+
+		for ( j=0 ; j<height ; ++j )
+		{
+			for ( i=0 ; i<width ; ++i )
+			{
+				color = slice.at(j,i);
+				if ( color )
+				{
+					painter.setPen(colors[color%nbColors]);
+					painter.drawPoint(i,j);
+				}
+			}
+		}
 	}
 }

@@ -88,11 +88,12 @@ private slots:
 	void exportSliceHistogram();
 	void exportSectorDiagramAndHistogram();
 	void exportContours();
+	void setContourCurveSmoothingRadius( const int &radius );
 
 private:
 	void openNewBillon(const QString &folderName = "");
 	void initComponentsValues();
-	void updateComponentsValues();
+	void updateUiComponentsValues();
 	void enabledComponents();
 	void computeSectorsHistogramForInterval( const Interval &interval );
 

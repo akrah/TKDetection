@@ -150,6 +150,7 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 	QObject::connect(_ui->_buttonExportSectorToOfs, SIGNAL(clicked()), this, SLOT(exportSectorToOfs()));
 	QObject::connect(_ui->_buttonExportAllSectorsInAllIntervalsToOfs, SIGNAL(clicked()), this, SLOT(exportAllSectorInAllIntervalsToOfs()));
 	QObject::connect(_ui->_buttonContours, SIGNAL(clicked()), this, SLOT(exportContours()));
+	QObject::connect(_ui->_spinContourSmoothingRadius, SIGNAL(valueChanged(int)), this, SLOT(setContourCurveSmoothingRadius(int)));
 
 	// Évènements déclenchés par la souris sur le visualiseur de coupes
 	QObject::connect(&_sliceZoomer, SIGNAL(zoomFactorChanged(qreal,QPoint)), this, SLOT(zoomInSliceView(qreal,QPoint)));
@@ -230,7 +231,7 @@ void MainWindow::openDicom() {
 		closeImage();
 		openNewBillon(folderName);
 		updateSliceHistogram();
-		updateComponentsValues();
+		updateUiComponentsValues();
 		drawSlice();
 		setWindowTitle(QString("TKDetection - %1").arg(folderName.section(QDir::separator(),-1)));
 	}
@@ -245,7 +246,7 @@ void MainWindow::closeImage() {
 	_ui->_plotAngularHistogram->replot();
 	_ui->_polarSectorSum->replot();
 	selectSectorInterval(0);
-	updateComponentsValues();
+	updateUiComponentsValues();
 	drawSlice();
 	setWindowTitle("TKDetection");
 }
@@ -1112,6 +1113,12 @@ void MainWindow::exportContours() {
 	}
 }
 
+void MainWindow::setContourCurveSmoothingRadius( const int &radius )
+{
+	_contourCurve->setSmoothingRadius(radius);
+	drawSlice();
+}
+
 /*******************************
  * Private functions
  *******************************/
@@ -1201,7 +1208,7 @@ void MainWindow::initComponentsValues() {
 	_ui->_spinSectorsNumber->setValue(360);
 }
 
-void MainWindow::updateComponentsValues() {
+void MainWindow::updateUiComponentsValues() {
 	int minValue, maxValue, nbSlices;
 	const bool existBillon = (_billon != 0);
 
