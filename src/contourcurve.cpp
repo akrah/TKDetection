@@ -124,11 +124,12 @@ void ContourCurve::constructCurve( const Billon &billon, const iCoord2D &billonC
 				dominantPoints << _datasDominantPoints << _datasDominantPoints[0];
 				int index, oldIndex;
 				qreal angle, oldAngle;
+				bool main1Find = false;
 				index = 1;
 				angle = dominantPoints[index].angle(dominantPoints[index-1],dominantPoints[index+1]);
 				while ( index < nbPoints )
 				{
-					oldAngle = angle!=0?180:angle;
+					oldAngle = angle!=0?angle:180.;
 					angle = dominantPoints[index].angle(dominantPoints[index-1],dominantPoints[index+1]);
 					if ( ((angle < -PI_ON_FOUR || angle  > THREE_PI_ON_FOUR) && (angle/oldAngle<0 || qAbs(oldAngle)+qAbs(angle)>PI)) || dominantPoints[index].distance(dominantPoints[0]) < 20 ) index++;
 					else break;
@@ -138,6 +139,7 @@ void ContourCurve::constructCurve( const Billon &billon, const iCoord2D &billonC
 				{
 					_datasMainDominantPoints[0] = dominantPoints[index];
 					_datasIndexMainDominantPoints[0] = index;
+					main1Find = true;
 
 					while ( index > 0 && _datasDominantPoints[index].distance(_datasMainDominantPoints[0]) < padding ) index--;
 					_datasMainSupportPoints[0] = _datasDominantPoints[index];
@@ -152,7 +154,7 @@ void ContourCurve::constructCurve( const Billon &billon, const iCoord2D &billonC
 					if ( ((angle > PI_ON_FOUR || angle < -THREE_PI_ON_FOUR) && (angle/oldAngle<0 || qAbs(oldAngle)+qAbs(angle)>PI)) || dominantPoints[index].distance(dominantPoints[0]) < 20 ) index--;
 					else break;
 				}
-				if ( index > oldIndex )
+				if ( index > oldIndex && (!main1Find || dominantPoints[index].distance(_datasMainDominantPoints[0]) >= 10) )
 				{
 					_datasMainDominantPoints[1] = dominantPoints[index];
 					_datasIndexMainDominantPoints[1] = index;
@@ -236,30 +238,30 @@ void ContourCurve::draw( QImage &image ) const
 			{
 				a = ( mainPoint1.y - supportMain1.y ) / static_cast<qreal>( mainPoint1.x - supportMain1.x );
 				b = ( mainPoint1.y * supportMain1.x - mainPoint1.x * supportMain1.y ) / static_cast<qreal>( supportMain1.x - mainPoint1.x );
-				painter.drawLine(0, b, image.width(), a * image.width() + b );
-//				if ( supportMain1.x < mainPoint1.x )
-//				{
-//					painter.drawLine(mainPoint1.x, mainPoint1.y, image.width(), a * image.width() + b );
-//				}
-//				else
-//				{
-//					painter.drawLine(mainPoint1.x, mainPoint1.y, 0., b );
-//				}
+//				painter.drawLine(0, b, image.width(), a * image.width() + b );
+				if ( supportMain1.x < mainPoint1.x )
+				{
+					painter.drawLine(mainPoint1.x, mainPoint1.y, image.width(), a * image.width() + b );
+				}
+				else
+				{
+					painter.drawLine(mainPoint1.x, mainPoint1.y, 0., b );
+				}
 			}
 			const iCoord2D &supportMain2 = _datasMainSupportPoints[1];
 			if ( supportMain2.x != -1 || supportMain2.y != -1 )
 			{
 				a = ( mainPoint2.y - supportMain2.y ) / static_cast<qreal>( mainPoint2.x - supportMain2.x );
 				b = ( mainPoint2.y * supportMain2.x - mainPoint2.x * supportMain2.y ) / static_cast<qreal>( supportMain2.x - mainPoint2.x );
-				painter.drawLine(0, b, image.width(), a * image.width() + b );
-//				if ( supportMain2.x < mainPoint2.x )
-//				{
-//					painter.drawLine(mainPoint2.x, mainPoint2.y, image.width(), a * image.width() + b );
-//				}
-//				else
-//				{
-//					painter.drawLine(mainPoint2.x, mainPoint2.y, 0., b );
-//				}
+//				painter.drawLine(0, b, image.width(), a * image.width() + b );
+				if ( supportMain2.x < mainPoint2.x )
+				{
+					painter.drawLine(mainPoint2.x, mainPoint2.y, image.width(), a * image.width() + b );
+				}
+				else
+				{
+					painter.drawLine(mainPoint2.x, mainPoint2.y, 0., b );
+				}
 			}
 		}
 
@@ -374,28 +376,31 @@ void ContourCurve::drawRestrictedComponent( QImage &image, const arma::Slice &sl
 	else
 	{
 		const int nbOriginalPointsContour = _datasOriginalContourPoints.size();
-
-		QPolygon contourPolygon;
-		int i, j, minXIndex, maxXIndex, minYIndex, maxYIndex;
-		minXIndex = maxXIndex = _datasOriginalContourPoints[0].x;
-		minYIndex = maxYIndex = _datasOriginalContourPoints[0].y;
-		for ( i=0 ; i<nbOriginalPointsContour ; ++i )
+		if ( nbOriginalPointsContour > 1 )
 		{
-			contourPolygon << QPoint(_datasOriginalContourPoints[i].x,_datasOriginalContourPoints[i].y);
-			minXIndex = qMin(minXIndex,_datasOriginalContourPoints[i].x);
-			maxXIndex = qMax(maxXIndex,_datasOriginalContourPoints[i].x);
-			minYIndex = qMin(minYIndex,_datasOriginalContourPoints[i].y);
-			maxYIndex = qMax(maxYIndex,_datasOriginalContourPoints[i].y);
-		}
-		contourPolygon << QPoint(_datasOriginalContourPoints[0].x,_datasOriginalContourPoints[0].y);
 
-		for ( j = minYIndex ; j<maxYIndex ; j++ )
-		{
-			for ( i = minXIndex ; i<maxXIndex ; i++ )
+			QPolygon contourPolygon;
+			int i, j, minXIndex, maxXIndex, minYIndex, maxYIndex;
+			minXIndex = maxXIndex = _datasOriginalContourPoints[0].x;
+			minYIndex = maxYIndex = _datasOriginalContourPoints[0].y;
+			for ( i=0 ; i<nbOriginalPointsContour ; ++i )
 			{
-				if ( slice.at(j,i) && contourPolygon.containsPoint(QPoint(i,j),Qt::OddEvenFill) )
+				contourPolygon << QPoint(_datasOriginalContourPoints[i].x,_datasOriginalContourPoints[i].y);
+				minXIndex = qMin(minXIndex,_datasOriginalContourPoints[i].x);
+				maxXIndex = qMax(maxXIndex,_datasOriginalContourPoints[i].x);
+				minYIndex = qMin(minYIndex,_datasOriginalContourPoints[i].y);
+				maxYIndex = qMax(maxYIndex,_datasOriginalContourPoints[i].y);
+			}
+			contourPolygon << QPoint(_datasOriginalContourPoints[0].x,_datasOriginalContourPoints[0].y);
+
+			for ( j = minYIndex ; j<maxYIndex ; j++ )
+			{
+				for ( i = minXIndex ; i<maxXIndex ; i++ )
 				{
-					painter.drawPoint(i,j);
+					if ( slice.at(j,i) && contourPolygon.containsPoint(QPoint(i,j),Qt::OddEvenFill) )
+					{
+						painter.drawPoint(i,j);
+					}
 				}
 			}
 		}

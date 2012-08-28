@@ -32,6 +32,7 @@ public:
 	qreal getRestrictedAreaMeansRadius( const Marrow *marrow, const int &nbPolygonPoints, int intensityThreshold ) const;
 
 	iCoord2D findNearestPointOfThePith( const iCoord2D &center, const int &sliceNumber, const int &componentNumber ) const;
+	QVector<iCoord2D> histogramOfNearestPointDistance( const Marrow &marrow, const int &componentNumber ) const;
 	QVector<iCoord2D> extractContour( const iCoord2D &center, const int &sliceNumber, const int &componentNumber, iCoord2D startPoint = iCoord2D(-1,-1) ) const;
 
 protected:
@@ -349,6 +350,18 @@ iCoord2D BillonTpl<T>::findNearestPointOfThePith( const iCoord2D &center, const 
 	}
 
 	return iCoord2D(position.x,position.y);
+}
+
+template< typename T >
+QVector<iCoord2D> BillonTpl<T>::histogramOfNearestPointDistance( const Marrow &marrow, const int &componentNumber ) const
+{
+	const int depth = this->n_slices;
+	QVector<iCoord2D> distanceBySlice(this->n_slices,iCoord2D(0,0));
+	for ( int i=0 ; i<depth ; ++i )
+	{
+		distanceBySlice[i] = iCoord2D(i,findNearestPointOfThePith(marrow[i],i,componentNumber).distance(marrow[i]));
+	}
+	return distanceBySlice;
 }
 
 template< typename T >

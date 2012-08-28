@@ -105,7 +105,7 @@
            <x>0</x>
            <y>0</y>
            <width>277</width>
-           <height>448</height>
+           <height>449</height>
           </rect>
          </property>
          <layout class="QHBoxLayout" name="horizontalLayout_8">
@@ -230,8 +230,8 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>433</width>
-              <height>146</height>
+              <width>446</width>
+              <height>178</height>
              </rect>
             </property>
             <attribute name="label">
@@ -1063,7 +1063,7 @@ autour de la moelle</string>
             <layout class="QVBoxLayout" name="verticalLayout_8">
              <item>
               <widget class="QwtPolarPlot" name="_polarSectorSum">
-               <property name="plotBackground" stdset="0">
+               <property name="plotBackground">
                 <brush brushstyle="SolidPattern">
                  <color alpha="0">
                   <red>255</red>
@@ -1413,6 +1413,9 @@ autour de la moelle</string>
             <string>Export intérieur contours en PGM3D</string>
            </property>
           </widget>
+         </item>
+         <item>
+          <widget class="QwtPlot" name="_plotDistanceMarrowToNearestPoint"/>
          </item>
         </layout>
        </widget>
@@ -1801,15 +1804,15 @@ autour de la moelle</string>
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>QxtSpanSlider</class>
-   <extends>QSlider</extends>
-   <header>QxtSpanSlider</header>
-  </customwidget>
-  <customwidget>
    <class>QwtPolarPlot</class>
    <extends>QFrame</extends>
    <header>qwt_polar_plot.h</header>
    <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>QxtSpanSlider</class>
+   <extends>QSlider</extends>
+   <header>QxtSpanSlider</header>
   </customwidget>
  </customwidgets>
  <tabstops>

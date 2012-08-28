@@ -87,6 +87,10 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 	grid->setMajorGridPen(QPen(Qt::lightGray));
 	grid->attach(_ui->_polarSectorSum);
 
+	_histogramDistanceMarrowToNearestPoint.attach(_ui->_plotDistanceMarrowToNearestPoint);
+	_histogramDistanceMarrowToNearestPoint.setBrush(Qt::blue);
+	_histogramDistanceMarrowToNearestPointCursor.setBrush(Qt::red);
+
 	/**** Mise en place de la communication MVC ****/
 
 	// Évènements déclenchés par le slider de n° de coupe
@@ -418,8 +422,10 @@ void MainWindow::updateSliceHistogram() {
 		_sliceHistogram->constructHistogram(*_billon, _marrow, _intensityInterval);
 	}
 	_histogramCursor.detach();
+	_histogramDistanceMarrowToNearestPointCursor.detach();
 	_sliceHistogram->attach(_ui->_plotSliceHistogram);
 	_histogramCursor.attach(_ui->_plotSliceHistogram);
+	_histogramDistanceMarrowToNearestPointCursor.attach(_ui->_plotDistanceMarrowToNearestPoint);
 	_ui->_plotSliceHistogram->setAxisScale(QwtPlot::xBottom,0,(_billon != 0)?_billon->n_slices:0);
 	highlightSliceHistogram(_currentSlice);
 
@@ -503,6 +509,15 @@ void MainWindow::highlightSliceHistogram( const int &slicePosition ) {
 	qreal y[4] = {0,height,height,0};
 	_histogramCursor.setSamples(x,y,4);
 	_ui->_plotSliceHistogram->replot();
+	if ( _componentBillon != 0 && _ui->_checkEnableConnexComponents->isChecked() && _ui->_comboSelectSectorInterval->currentIndex() > 0 )
+	{
+		int position = qMax(0,qMin(slicePosition-_sliceHistogram->branchesAreas()[_ui->_comboSelectSliceInterval->currentIndex()-1].minValue(),_sliceHistogram->branchesAreas()[_ui->_comboSelectSliceInterval->currentIndex()-1].width()));
+		height = _histogramDistanceMarrowToNearestPoint.sample( position ).value;
+		qreal x[4] = {position,position, position+1,position+1};
+		qreal y[4] = {0,height,height,0};
+		_histogramDistanceMarrowToNearestPointCursor.setSamples(x,y,4);
+		_ui->_plotDistanceMarrowToNearestPoint->replot();
+	}
 }
 
 void MainWindow::updateMarrow() {
@@ -560,7 +575,8 @@ void MainWindow::previousMaximumInSliceHistogram() {
 	const int nbMaximums = _sliceHistogram->nbMaximums();
 	_currentMaximum = nbMaximums <= 0 ? -1 : _currentMaximum < 0 ? 0 : _currentMaximum == 0 ? nbMaximums-1 : ( _currentMaximum - 1 ) % nbMaximums;
 	int sliceIndex = _sliceHistogram->indexOfIemeMaximum(_currentMaximum);
-	if ( sliceIndex > -1 ) {
+	if ( sliceIndex > -1 )
+	{
 		_ui->_sliderSelectSlice->setValue(sliceIndex);
 	}
 }
@@ -569,7 +585,8 @@ void MainWindow::nextMaximumInSliceHistogram() {
 	const int nbMaximums = _sliceHistogram->nbMaximums();
 	_currentMaximum = nbMaximums>0 ? ( _currentMaximum + 1 ) % nbMaximums : -1;
 	int sliceIndex = _sliceHistogram->indexOfIemeMaximum(_currentMaximum);
-	if ( sliceIndex > -1 ) {
+	if ( sliceIndex > -1 )
+	{
 		_ui->_sliderSelectSlice->setValue(sliceIndex);
 	}
 }
@@ -854,15 +871,18 @@ void MainWindow::exportMovementsToV3D()
 	}
 }
 
-void MainWindow::selectSliceInterval( const int &index ) {
+void MainWindow::selectSliceInterval( const int &index )
+{
 	selectSectorInterval(0);
 
-	if ( index > 0 && index <= _sliceHistogram->branchesAreas().size() ) {
+	if ( index > 0 && index <= _sliceHistogram->branchesAreas().size() )
+	{
 		const Interval &interval = _sliceHistogram->branchesAreas()[index-1];
 		computeSectorsHistogramForInterval(interval);
 		_ui->_sliderSelectSlice->setValue(_sliceHistogram->indexOfIemeInterval(index-1));
 	}
-	else {
+	else
+	{
 		computeSectorsHistogramForInterval(_slicesInterval);
 		_ui->_sliderSelectSlice->setValue((_slicesInterval.minValue()+_slicesInterval.maxValue())/2);
 	}
@@ -870,9 +890,11 @@ void MainWindow::selectSliceInterval( const int &index ) {
 	_ui->_comboSelectSectorInterval->clear();
 	_ui->_comboSelectSectorInterval->addItem(tr("Aucun"));
 	const QVector<Interval> &intervals = _pieChartDiagrams->branchesSectors();
-	if ( !intervals.isEmpty() ) {
+	if ( !intervals.isEmpty() )
+	{
 		qreal rightAngle, leftAngle;
-		for ( int i=0 ; i<intervals.size() ; ++i ) {
+		for ( int i=0 ; i<intervals.size() ; ++i )
+		{
 			const Interval interval = intervals[i];
 			rightAngle = _pieChart->sector(interval.minValue()).rightAngle()*RAD_TO_DEG_FACT;
 			leftAngle = _pieChart->sector(interval.maxValue()).leftAngle()*RAD_TO_DEG_FACT;
@@ -886,17 +908,20 @@ void MainWindow::selectCurrentSliceInterval() {
 }
 
 void MainWindow::selectSectorInterval( const int &index ) {
-	if ( _sectorBillon != 0 ) {
+	if ( _sectorBillon != 0 )
+	{
 		delete _sectorBillon;
 		_sectorBillon = 0;
 	}
-	if ( _componentBillon != 0 ) {
+	if ( _componentBillon != 0 )
+	{
 		delete _componentBillon;
 		_componentBillon = 0;
 	}
 	_ui->_comboConnexComponents->clear();
 	_ui->_comboConnexComponents->addItem(tr("Toutes"));
-	if ( index > 0 && index <= _pieChartDiagrams->branchesSectors().size() ) {
+	if ( index > 0 && index <= _pieChartDiagrams->branchesSectors().size() )
+	{
 		const Interval &sectorInterval = _pieChartDiagrams->branchesSectors()[_ui->_comboSelectSectorInterval->currentIndex()-1];
 		const Interval &sliceInterval = _sliceHistogram->branchesAreas()[_ui->_comboSelectSliceInterval->currentIndex()-1];
 		const int firstSlice = sliceInterval.minValue();
@@ -912,31 +937,41 @@ void MainWindow::selectSectorInterval( const int &index ) {
 		_sectorBillon->fill(threshold);
 
 		int i, j, k;
-		if ( sectorInterval.isValid() ) {
-			for ( k=firstSlice ; k<lastSlice ; ++k ) {
+		if ( sectorInterval.isValid() )
+		{
+			for ( k=firstSlice ; k<lastSlice ; ++k )
+			{
 				const Slice &originalSlice = _billon->slice(k);
 				Slice &sectorSlice = _sectorBillon->slice(k-firstSlice);
 				const int marrowX = _marrow->at(k).x;
 				const int marrowY = _marrow->at(k).y;
-				for ( j=0 ; j<height ; ++j ) {
-					for ( i=0 ; i<width ; ++i ) {
-						if ( originalSlice.at(j,i) > threshold && originalSlice.at(j,i) < MAXIMUM_INTENSITY && sectorInterval.contains(_pieChart->partOfAngle(TWO_PI-ANGLE(marrowX, marrowY, i, j))) ) {
+				for ( j=0 ; j<height ; ++j )
+				{
+					for ( i=0 ; i<width ; ++i )
+					{
+						if ( originalSlice.at(j,i) > threshold && originalSlice.at(j,i) < MAXIMUM_INTENSITY && sectorInterval.contains(_pieChart->partOfAngle(TWO_PI-ANGLE(marrowX, marrowY, i, j))) )
+						{
 							sectorSlice.at(j,i) = originalSlice.at(j,i);
 						}
 					}
 				}
 			}
 		}
-		else {
+		else
+		{
 			const Interval sectorIntervalInverted = sectorInterval.inverted();
-			for ( k=firstSlice ; k<lastSlice ; ++k ) {
+			for ( k=firstSlice ; k<lastSlice ; ++k )
+			{
 				const Slice &originalSlice = _billon->slice(k);
 				Slice &sectorSlice = _sectorBillon->slice(k-firstSlice);
 				const int marrowX = _marrow->at(k).x;
 				const int marrowY = _marrow->at(k).y;
-				for ( j=0 ; j<height ; ++j ) {
-					for ( i=0 ; i<width ; ++i ) {
-						if ( originalSlice.at(j,i) > threshold && originalSlice.at(j,i) < MAXIMUM_INTENSITY && !sectorIntervalInverted.contains(_pieChart->partOfAngle(TWO_PI-ANGLE(marrowX, marrowY, i, j))) ) {
+				for ( j=0 ; j<height ; ++j )
+				{
+					for ( i=0 ; i<width ; ++i )
+					{
+						if ( originalSlice.at(j,i) > threshold && originalSlice.at(j,i) < MAXIMUM_INTENSITY && !sectorIntervalInverted.contains(_pieChart->partOfAngle(TWO_PI-ANGLE(marrowX, marrowY, i, j))) )
+						{
 							sectorSlice.at(j,i) = originalSlice.at(j,i);
 						}
 					}
@@ -944,12 +979,29 @@ void MainWindow::selectSectorInterval( const int &index ) {
 			}
 		}
 
-		if ( _ui->_checkEnableConnexComponents->isChecked() ) {
+		if ( _ui->_checkEnableConnexComponents->isChecked() )
+		{
 			_componentBillon = ConnexComponentExtractor::extractConnexComponent(*_sectorBillon,_ui->_sliderMinimalSizeOfConnexComponents->value(),threshold);
 			const int nbComponents = _componentBillon->maxValue()+1;
-			for ( i=1 ; i<nbComponents ; ++i ) {
+			for ( i=1 ; i<nbComponents ; ++i )
+			{
 				_ui->_comboConnexComponents->addItem(tr("Composante %1").arg(i));
 			}
+			const int depth = _componentBillon->n_slices;
+			QVector<QwtIntervalSample> histData(depth,QwtIntervalSample(0,0,0));
+			Billon *biggestComponents;
+			iCoord2D nearestPoint;
+			for ( i=0 ; i<depth ; ++i )
+			{
+				biggestComponents = ConnexComponentExtractor::extractBiggestConnexComponents( _componentBillon->slice(i), 0, _ui->_spinMinimalSizeOfConnexComponents->value() );
+				nearestPoint = biggestComponents->findNearestPointOfThePith( _marrow->at(firstSlice+i), 0, 1 );
+				histData[i].value = nearestPoint.distance(_marrow->at(firstSlice+i));
+				histData[i].interval.setInterval(i,i+1);
+				delete biggestComponents;
+				biggestComponents = 0;
+			}
+			_histogramDistanceMarrowToNearestPoint.setSamples(histData);
+			_ui->_plotDistanceMarrowToNearestPoint->replot();
 		}
 	}
 	drawSlice();

@@ -8,6 +8,7 @@
 #include "slicezoomer.h"
 #include "interval.h"
 #include <qwt_plot_curve.h>
+#include <qwt_plot_histogram.h>
 
 namespace Ui {
 	class MainWindow;
@@ -119,6 +120,9 @@ private:
 	SliceZoomer _sliceZoomer;
 	Interval _slicesInterval;
 	Interval _intensityInterval;
+
+	QwtPlotHistogram _histogramDistanceMarrowToNearestPoint;
+	QwtPlotCurve _histogramDistanceMarrowToNearestPointCursor;
 
 	int _currentSlice;
 	int _currentMaximum;

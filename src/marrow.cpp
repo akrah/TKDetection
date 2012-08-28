@@ -2,16 +2,24 @@
 
 #include <QPainter>
 
-Marrow::Marrow() : QList<iCoord2D>(), _interval(0,0) {
+Marrow::Marrow() : QList<iCoord2D>(), _interval(0,0)
+{
 }
 
-Marrow::Marrow( const int &begin, const int &end ) : QList<iCoord2D>(), _interval(begin,end) {
+Marrow::Marrow( const int &begin, const int &end ) : QList<iCoord2D>(), _interval(begin,end)
+{
+}
+
+Marrow::Marrow( const Marrow &marrow ) : QList<iCoord2D>(marrow)
+{
+	_interval = marrow._interval;
 }
 
 /*******************************
  * Public getters
  *******************************/
-const Interval &Marrow::interval() const {
+const Interval &Marrow::interval() const
+{
 	return _interval;
 }
 
@@ -19,8 +27,10 @@ const Interval &Marrow::interval() const {
 /*******************************
  * Public setters
  *******************************/
-void Marrow::draw( QImage &image, const int &sliceIdx ) const {
-	if ( _interval.containsClosed(sliceIdx) ) {
+void Marrow::draw( QImage &image, const int &sliceIdx ) const
+{
+	if ( _interval.containsClosed(sliceIdx) )
+	{
 		const iCoord2D &coordToDraw = at(sliceIdx-_interval.minValue());
 
 		QPainter painter(&image);
