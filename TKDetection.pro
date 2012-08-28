@@ -13,7 +13,6 @@ macx:QMAKE_CXX=/usr/bin/clang++
 
 macx:MOC_DIR = .moc
 macx:OBJECTS_DIR = .obj
-macx:UI_DIR = .ui
 
 
 # Version d'ITK installée : itk3 | itk4
