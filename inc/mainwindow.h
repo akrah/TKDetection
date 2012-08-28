@@ -89,6 +89,7 @@ private slots:
 	void exportSectorDiagramAndHistogram();
 	void exportContours();
 	void setContourCurveSmoothingRadius( const int &radius );
+	void exportContourComponentToPgm3D();
 
 private:
 	void openNewBillon(const QString &folderName = "");

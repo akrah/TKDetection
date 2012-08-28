@@ -47,8 +47,10 @@ void ContourCurve::setSmoothingRadius( const int &radius )
 
 void ContourCurve::constructCurve( const Billon &billon, const iCoord2D &billonCenter, const int &sliceNumber, const int &componentNumber, const int &blurredSegmentThickness, const iCoord2D &startPoint )
 {
+	_datasOriginalContourPoints.clear();
+	_datasOriginalContourPoints = billon.extractContour( billonCenter, sliceNumber, componentNumber, startPoint );
 	_datasContourPoints.clear();
-	_datasContourPoints = billon.extractContour( billonCenter, sliceNumber, componentNumber, startPoint );
+	_datasContourPoints = _datasOriginalContourPoints;
 	smoothCurve(_datasContourPoints,_smoothingRadius);
 
 	_datasDominantPoints.clear();
@@ -109,33 +111,26 @@ void ContourCurve::constructCurve( const Billon &billon, const iCoord2D &billonC
 
 			if ( nbPoints > 2 )
 			{
+				// On détermine les points dominnants principaux en analysant l'angle formé par 3 points dominants consécutifs.
+				// Les angles sont analysés successivement à partir du premier point de contour (le plus proche de la moelle) et dans chacune des deux direction du contour.
+				// On s'arrête :
+				//    - dès que l'angle est supérieur à 3*PI/4 (+PI/4 dans le sens contraire de la convexité du noeud)
+				//      ou que l'angle est inférieur à PI/4 (+3*PI/4 dans le sens de la convexité du noeud)
+				//    - dès que la somme de la valeur absolue de deux angles consécutifs de même convexité est inférieure à 180.
+				// Ces deux conditions sont vérifiées à partir du premier point dominant à plus de 20 pixels du point de départ
 				const int padding = qMin(billon.n_cols,billon.n_rows)/20;
 				QVector<iCoord2D> dominantPoints;
 				dominantPoints.reserve(nbPoints+1);
 				dominantPoints << _datasDominantPoints << _datasDominantPoints[0];
 				int index, oldIndex;
 				qreal angle, oldAngle;
-//				std::cout << "======================================================" <<  std::endl;
-//				std::cout << "||                                                  ||" <<  std::endl;
-//				std::cout << "Angles depuis le début : " <<  std::endl;
-//				for ( int i = 1; i<nbPoints ; ++i )
-//				{
-//					dominantPoints[i].angle(dominantPoints[i-1],dominantPoints[i+1]);
-//				}
-//				std::cout << "Angles depuis la fin : " <<  std::endl;
-//				for ( int i = nbPoints-1; i>0 ; --i )
-//				{
-//					dominantPoints[i].angle(dominantPoints[i+1],dominantPoints[i-1]);
-//				}
-//				std::cout << "||                                                  ||" <<  std::endl;
-//				std::cout << "======================================================" <<  std::endl;
 				index = 1;
 				angle = dominantPoints[index].angle(dominantPoints[index-1],dominantPoints[index+1]);
 				while ( index < nbPoints )
 				{
-					oldAngle = qAbs(angle);
+					oldAngle = angle!=0?180:angle;
 					angle = dominantPoints[index].angle(dominantPoints[index-1],dominantPoints[index+1]);
-					if ( ((angle < -PI_ON_FOUR || angle  > THREE_PI_ON_FOUR) && oldAngle+qAbs(angle)>PI) || dominantPoints[index].distance(dominantPoints[0]) < 20 ) index++;
+					if ( ((angle < -PI_ON_FOUR || angle  > THREE_PI_ON_FOUR) && (angle/oldAngle<0 || qAbs(oldAngle)+qAbs(angle)>PI)) || dominantPoints[index].distance(dominantPoints[0]) < 20 ) index++;
 					else break;
 				}
 				oldIndex = index;
@@ -152,9 +147,9 @@ void ContourCurve::constructCurve( const Billon &billon, const iCoord2D &billonC
 				angle = dominantPoints[index].angle(dominantPoints[index+1],dominantPoints[index-1]);
 				while ( index > oldIndex )
 				{
-					oldAngle = qAbs(angle);
+					oldAngle = angle;
 					angle = dominantPoints[index].angle(dominantPoints[index+1],dominantPoints[index-1]);
-					if ( ((angle > PI_ON_FOUR || angle < -THREE_PI_ON_FOUR) && oldAngle+qAbs(angle)>PI) || dominantPoints[index].distance(dominantPoints[0]) < 20 ) index--;
+					if ( ((angle > PI_ON_FOUR || angle < -THREE_PI_ON_FOUR) && (angle/oldAngle<0 || qAbs(oldAngle)+qAbs(angle)>PI)) || dominantPoints[index].distance(dominantPoints[0]) < 20 ) index--;
 					else break;
 				}
 				if ( index > oldIndex )
@@ -276,13 +271,15 @@ void ContourCurve::draw( QImage &image ) const
 
 void ContourCurve::drawRestrictedComponent( QImage &image, const arma::Slice &slice, const iCoord2D &marrow ) const
 {
+	QPainter painter(&image);
+	painter.setPen(QColor(255,255,255,127));
+
 	const iCoord2D &mainPoint1 = _datasMainDominantPoints[0];
 	const iCoord2D &mainPoint2 = _datasMainDominantPoints[1];
 
+	// S'il y a deux points dominants principaux
 	if ( (mainPoint1.x != -1 || mainPoint1.y != -1) && (mainPoint2.x != -1 || mainPoint2.y != -1) )
 	{
-		QPainter painter(&image);
-		painter.setPen(QColor(255,0,0,127));
 
 		const iCoord2D &support1 = _datasMainSupportPoints[0];
 		const iCoord2D &support2 = _datasMainSupportPoints[1];
@@ -299,12 +296,12 @@ void ContourCurve::drawRestrictedComponent( QImage &image, const arma::Slice &sl
 		const qreal daMain1Support1 = mainPoint1.y - support1.y;
 		const qreal dbMain1Support1 = support1.x - mainPoint1.x;
 		const qreal dcMain1Support1 = daMain1Support1*mainPoint1.x + dbMain1Support1*mainPoint1.y;
-		const bool supToMain1Support1 = ( daMain1Support1*support2.x + dbMain1Support1*support2.y ) > dcMain1Support1;
+		const bool supToMain1Support1 = ( daMain1Support1*mainPoint2.x + dbMain1Support1*mainPoint2.y ) > dcMain1Support1;
 
 		const qreal daMain2Support2 = mainPoint2.y - support2.y;
 		const qreal dbMain2Support2 = support2.x - mainPoint2.x;
 		const qreal dcMain2Support2 = daMain2Support2*mainPoint2.x + dbMain2Support2*mainPoint2.y;
-		const bool supToMain2Support2 = ( daMain2Support2*support1.x + dbMain2Support2*support1.y ) > dcMain2Support2;
+		const bool supToMain2Support2 = ( daMain2Support2*mainPoint1.x + dbMain2Support2*mainPoint1.y ) > dcMain2Support2;
 
 		// Ajout des pixels du noeud dans l'aubier mais au-dessus de la droite passant par les deux points dominants
 		// et du bon côté de chaque droite de prolongement
@@ -324,48 +321,224 @@ void ContourCurve::drawRestrictedComponent( QImage &image, const arma::Slice &sl
 		}
 
 		// Ajout des pixels du noeud en dehors de l'aubier.
-		i = -1;
-		for ( index = _datasIndexMainDominantPoints[0]-1 ; index > -1 ; index-- )
+		const int nbOriginalPointsContour = _datasOriginalContourPoints.size();
+		int originalMain1Index, originalMain2Index, currentDistanceMain1, currentDistanceMain2, minXIndex, maxXIndex, minYIndex, maxYIndex;
+		currentDistanceMain1 = currentDistanceMain2 = width+height;
+		originalMain1Index = originalMain2Index = 0;
+		minXIndex = maxXIndex = _datasOriginalContourPoints[0].x;
+		minYIndex = maxYIndex = _datasOriginalContourPoints[0].y;
+		for ( index=0 ; index<nbOriginalPointsContour ; index++ )
 		{
-			const iCoord2D &currentContour = _datasContourPoints[index];
-			if ( currentContour.x != i )
+			if ( _datasMainDominantPoints[0].distance(_datasOriginalContourPoints[index]) < currentDistanceMain1 )
 			{
-				i = currentContour.x;
-				j = currentContour.y+1;
-				while( slice.at(j,i) && ((daMain1Main2*i+dbMain1Main2*j > dcMain1Main2) == supToMain1Main2 ) )
+				currentDistanceMain1 = _datasMainDominantPoints[0].distance(_datasOriginalContourPoints[index]);
+				originalMain1Index = index;
+			}
+			if ( _datasMainDominantPoints[1].distance(_datasOriginalContourPoints[index]) < currentDistanceMain2 )
+			{
+				currentDistanceMain2 = _datasMainDominantPoints[1].distance(_datasOriginalContourPoints[index]);
+				originalMain2Index = index;
+			}
+			minXIndex = qMin(minXIndex,_datasOriginalContourPoints[index].x);
+			maxXIndex = qMax(maxXIndex,_datasOriginalContourPoints[index].x);
+			minYIndex = qMin(minYIndex,_datasOriginalContourPoints[index].y);
+			maxYIndex = qMax(maxYIndex,_datasOriginalContourPoints[index].y);
+		}
+
+		// Création du polygone qui servira à tester l'appartenance d'un pixel au noeud.
+		// Ce polygone est constitué :
+		//     - du premier pixel du contour initial (non lissé) au pixel le plus proche du premier point dominant
+		//     - du premier point dominant
+		//     - du second point dominant
+		//     - du pixel du contour initial le plus proche du second point dominant au dernier pixel du contour initial.
+
+		QPolygon contourPolygon;
+		for ( i=0 ; i<originalMain1Index ; ++i ) contourPolygon << QPoint(_datasOriginalContourPoints[i].x,_datasOriginalContourPoints[i].y);
+		contourPolygon << QPoint(_datasMainDominantPoints[0].x,_datasMainDominantPoints[0].y);
+		contourPolygon << QPoint(_datasMainDominantPoints[1].x,_datasMainDominantPoints[1].y);
+		for ( i=originalMain2Index ; i<nbOriginalPointsContour ; ++i ) contourPolygon << QPoint(_datasOriginalContourPoints[i].x,_datasOriginalContourPoints[i].y);
+		contourPolygon << QPoint(_datasOriginalContourPoints[0].x,_datasOriginalContourPoints[0].y);
+
+		for ( j = minYIndex ; j<maxYIndex ; j++ )
+		{
+			for ( i = minXIndex ; i<maxXIndex ; i++ )
+			{
+				if ( slice.at(j,i) && contourPolygon.containsPoint(QPoint(i,j),Qt::OddEvenFill) )
 				{
 					painter.drawPoint(i,j);
-					j++;
-				}
-				j = currentContour.y-1;
-				while( slice.at(j,i) && ((daMain1Main2*i+dbMain1Main2*j > dcMain1Main2) == supToMain1Main2 ) )
-				{
-					painter.drawPoint(i,j);
-					j--;
 				}
 			}
 		}
-		const int nbPointsContour = _datasContourPoints.size();
-		i = -1;
-		for ( index = _datasIndexMainDominantPoints[1]+1 ; index < nbPointsContour ; index++ )
+	}
+	// Sinon on ajoute la composante en entier
+	else
+	{
+		const int nbOriginalPointsContour = _datasOriginalContourPoints.size();
+
+		QPolygon contourPolygon;
+		int i, j, minXIndex, maxXIndex, minYIndex, maxYIndex;
+		minXIndex = maxXIndex = _datasOriginalContourPoints[0].x;
+		minYIndex = maxYIndex = _datasOriginalContourPoints[0].y;
+		for ( i=0 ; i<nbOriginalPointsContour ; ++i )
 		{
-			const iCoord2D &currentContour = _datasContourPoints[index];
-			if ( currentContour.x != i )
+			contourPolygon << QPoint(_datasOriginalContourPoints[i].x,_datasOriginalContourPoints[i].y);
+			minXIndex = qMin(minXIndex,_datasOriginalContourPoints[i].x);
+			maxXIndex = qMax(maxXIndex,_datasOriginalContourPoints[i].x);
+			minYIndex = qMin(minYIndex,_datasOriginalContourPoints[i].y);
+			maxYIndex = qMax(maxYIndex,_datasOriginalContourPoints[i].y);
+		}
+		contourPolygon << QPoint(_datasOriginalContourPoints[0].x,_datasOriginalContourPoints[0].y);
+
+		for ( j = minYIndex ; j<maxYIndex ; j++ )
+		{
+			for ( i = minXIndex ; i<maxXIndex ; i++ )
 			{
-				i = currentContour.x;
-				j = currentContour.y+1;
-				while( slice.at(j,i) && ((daMain1Main2*i+dbMain1Main2*j > dcMain1Main2) == supToMain1Main2 ) )
+				if ( slice.at(j,i) && contourPolygon.containsPoint(QPoint(i,j),Qt::OddEvenFill) )
 				{
 					painter.drawPoint(i,j);
-					j++;
-				}
-				j = currentContour.y-1;
-				while( slice.at(j,i) && ((daMain1Main2*i+dbMain1Main2*j > dcMain1Main2) == supToMain1Main2 ) )
-				{
-					painter.drawPoint(i,j);
-					j--;
 				}
 			}
+		}
+	}
+}
+
+void ContourCurve::writeContourContentInPgm3D( QDataStream &stream, const arma::Slice &slice, const iCoord2D &marrow ) const
+{
+	const iCoord2D &mainPoint1 = _datasMainDominantPoints[0];
+	const iCoord2D &mainPoint2 = _datasMainDominantPoints[1];
+
+	const int width = slice.n_cols;
+	const int height = slice.n_rows;
+	arma::Slice component(slice.n_rows,slice.n_cols);
+	component.fill(0);
+
+	int i,j,index;
+
+	// S'il y a deux points dominants principaux
+	if ( (mainPoint1.x != -1 || mainPoint1.y != -1) && (mainPoint2.x != -1 || mainPoint2.y != -1) )
+	{
+		const iCoord2D &support1 = _datasMainSupportPoints[0];
+		const iCoord2D &support2 = _datasMainSupportPoints[1];
+
+
+		const qreal daMain1Main2 = mainPoint1.y - mainPoint2.y;
+		const qreal dbMain1Main2 = mainPoint2.x - mainPoint1.x;
+		const qreal dcMain1Main2 = daMain1Main2*mainPoint1.x + dbMain1Main2*mainPoint1.y;
+		const bool supToMain1Main2 = ( daMain1Main2*marrow.x + dbMain1Main2*marrow.y ) > dcMain1Main2;
+
+		const qreal daMain1Support1 = mainPoint1.y - support1.y;
+		const qreal dbMain1Support1 = support1.x - mainPoint1.x;
+		const qreal dcMain1Support1 = daMain1Support1*mainPoint1.x + dbMain1Support1*mainPoint1.y;
+		const bool supToMain1Support1 = ( daMain1Support1*mainPoint2.x + dbMain1Support1*mainPoint2.y ) > dcMain1Support1;
+
+		const qreal daMain2Support2 = mainPoint2.y - support2.y;
+		const qreal dbMain2Support2 = support2.x - mainPoint2.x;
+		const qreal dcMain2Support2 = daMain2Support2*mainPoint2.x + dbMain2Support2*mainPoint2.y;
+		const bool supToMain2Support2 = ( daMain2Support2*mainPoint1.x + dbMain2Support2*mainPoint1.y ) > dcMain2Support2;
+
+		// Ajout des pixels du noeud dans l'aubier mais au-dessus de la droite passant par les deux points dominants
+		// et du bon côté de chaque droite de prolongement
+		for ( j=0 ; j<height ; ++j )
+		{
+			for ( i=0 ; i<width ; ++i )
+			{
+				if ( slice.at(j,i)
+					 && ((daMain1Main2*i+dbMain1Main2*j < dcMain1Main2) == supToMain1Main2)
+					 && ((daMain1Support1*i+dbMain1Support1*j > dcMain1Support1) == supToMain1Support1)
+					 && ((daMain2Support2*i+dbMain2Support2*j > dcMain2Support2) == supToMain2Support2)
+				   )
+				{
+					component(i,j) = 1;
+				}
+			}
+		}
+
+		// Ajout des pixels du noeud en dehors de l'aubier.
+		const int nbOriginalPointsContour = _datasOriginalContourPoints.size();
+		int originalMain1Index, originalMain2Index, currentDistanceMain1, currentDistanceMain2, minXIndex, maxXIndex, minYIndex, maxYIndex;
+		currentDistanceMain1 = currentDistanceMain2 = width+height;
+		originalMain1Index = originalMain2Index = 0;
+		minXIndex = maxXIndex = _datasOriginalContourPoints[0].x;
+		minYIndex = maxYIndex = _datasOriginalContourPoints[0].y;
+		for ( index=0 ; index<nbOriginalPointsContour ; index++ )
+		{
+			if ( _datasMainDominantPoints[0].distance(_datasOriginalContourPoints[index]) < currentDistanceMain1 )
+			{
+				currentDistanceMain1 = _datasMainDominantPoints[0].distance(_datasOriginalContourPoints[index]);
+				originalMain1Index = index;
+			}
+			if ( _datasMainDominantPoints[1].distance(_datasOriginalContourPoints[index]) < currentDistanceMain2 )
+			{
+				currentDistanceMain2 = _datasMainDominantPoints[1].distance(_datasOriginalContourPoints[index]);
+				originalMain2Index = index;
+			}
+			minXIndex = qMin(minXIndex,_datasOriginalContourPoints[index].x);
+			maxXIndex = qMax(maxXIndex,_datasOriginalContourPoints[index].x);
+			minYIndex = qMin(minYIndex,_datasOriginalContourPoints[index].y);
+			maxYIndex = qMax(maxYIndex,_datasOriginalContourPoints[index].y);
+		}
+
+		// Création du polygone qui servira à tester l'appartenance d'un pixel au noeud.
+		// Ce polygone est constitué :
+		//     - du premier pixel du contour initial (non lissé) au pixel le plus proche du premier point dominant
+		//     - du premier point dominant
+		//     - du second point dominant
+		//     - du pixel du contour initial le plus proche du second point dominant au dernier pixel du contour initial.
+
+		QPolygon contourPolygon;
+		for ( i=0 ; i<originalMain1Index ; ++i ) contourPolygon << QPoint(_datasOriginalContourPoints[i].x,_datasOriginalContourPoints[i].y);
+		contourPolygon << QPoint(_datasMainDominantPoints[0].x,_datasMainDominantPoints[0].y);
+		contourPolygon << QPoint(_datasMainDominantPoints[1].x,_datasMainDominantPoints[1].y);
+		for ( i=originalMain2Index ; i<nbOriginalPointsContour ; ++i ) contourPolygon << QPoint(_datasOriginalContourPoints[i].x,_datasOriginalContourPoints[i].y);
+		contourPolygon << QPoint(_datasOriginalContourPoints[0].x,_datasOriginalContourPoints[0].y);
+
+		for ( j = minYIndex ; j<maxYIndex ; j++ )
+		{
+			for ( i = minXIndex ; i<maxXIndex ; i++ )
+			{
+				if ( slice.at(j,i) && contourPolygon.containsPoint(QPoint(i,j),Qt::OddEvenFill) )
+				{
+					component(i,j) = 1;
+				}
+			}
+		}
+	}
+	// Sinon on ajoute la composante en entier
+	else
+	{
+		const int nbOriginalPointsContour = _datasOriginalContourPoints.size();
+
+		QPolygon contourPolygon;
+		int i, j, minXIndex, maxXIndex, minYIndex, maxYIndex;
+		minXIndex = maxXIndex = _datasOriginalContourPoints[0].x;
+		minYIndex = maxYIndex = _datasOriginalContourPoints[0].y;
+		for ( i=0 ; i<nbOriginalPointsContour ; ++i )
+		{
+			contourPolygon << QPoint(_datasOriginalContourPoints[i].x,_datasOriginalContourPoints[i].y);
+			minXIndex = qMin(minXIndex,_datasOriginalContourPoints[i].x);
+			maxXIndex = qMax(maxXIndex,_datasOriginalContourPoints[i].x);
+			minYIndex = qMin(minYIndex,_datasOriginalContourPoints[i].y);
+			maxYIndex = qMax(maxYIndex,_datasOriginalContourPoints[i].y);
+		}
+		contourPolygon << QPoint(_datasOriginalContourPoints[0].x,_datasOriginalContourPoints[0].y);
+
+		for ( j = minYIndex ; j<maxYIndex ; j++ )
+		{
+			for ( i = minXIndex ; i<maxXIndex ; i++ )
+			{
+				if ( slice.at(j,i) && contourPolygon.containsPoint(QPoint(i,j),Qt::OddEvenFill) )
+				{
+					component(i,j) = 1;
+				}
+			}
+		}
+	}
+
+	for ( j=0 ; j<height ; ++j )
+	{
+		for ( i=0 ; i<width ; ++i )
+		{
+			stream << static_cast<qint16>(component.at(j,i));
 		}
 	}
 }

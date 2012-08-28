@@ -22,11 +22,14 @@ public:
 	void draw( QImage &image ) const;
 	void drawRestrictedComponent( QImage &image, const arma::Slice &slice, const iCoord2D &marrow ) const;
 
+	void writeContourContentInPgm3D( QDataStream &stream, const arma::Slice &slice, const iCoord2D &marrow ) const;
+
 private:
 	void smoothCurve( QVector<iCoord2D> &contour, int smoothingRadius = 5 );
 
 private:
 	QVector<iCoord2D> _datasContourPoints;
+	QVector<iCoord2D> _datasOriginalContourPoints;
 	QVector<iCoord2D> _datasDominantPoints;
 	QVector<iCoord2D> _datasMainDominantPoints;
 	QVector<int> _datasIndexMainDominantPoints;

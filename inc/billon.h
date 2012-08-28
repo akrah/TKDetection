@@ -344,8 +344,8 @@ iCoord2D BillonTpl<T>::findNearestPointOfThePith( const iCoord2D &center, const 
 	}
 	else {
 		qDebug() << "Aucun pixel et donc aucune composante connexe";
-		position.x = 0;
-		position.y = 0;
+		position.x = -1;
+		position.y = -1;
 	}
 
 	return iCoord2D(position.x,position.y);
@@ -361,7 +361,7 @@ QVector<iCoord2D> BillonTpl<T>::extractContour( const iCoord2D &center, const in
 
 	// Suivi du contour
 	QVector<iCoord2D> contourPoints;
-	if ( startPoint != iCoord2D(0,0) )
+	if ( startPoint != iCoord2D(-1,-1) )
 	{
 		const arma::Mat<T> &currentSlice = this->slice(sliceNumber);
 		const int xCenter = center.x;

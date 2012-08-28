@@ -230,7 +230,7 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>306</width>
+              <width>433</width>
               <height>146</height>
              </rect>
             </property>
@@ -1227,6 +1227,9 @@ autour de la moelle</string>
              <property name="text">
               <string/>
              </property>
+             <property name="checked">
+              <bool>true</bool>
+             </property>
             </widget>
            </item>
            <item row="1" column="0">
@@ -1290,7 +1293,7 @@ autour de la moelle</string>
                 <number>500</number>
                </property>
                <property name="value">
-                <number>-70</number>
+                <number>-150</number>
                </property>
                <property name="orientation">
                 <enum>Qt::Horizontal</enum>
@@ -1306,7 +1309,7 @@ autour de la moelle</string>
                 <number>500</number>
                </property>
                <property name="value">
-                <number>-70</number>
+                <number>-150</number>
                </property>
               </widget>
              </item>
@@ -1326,6 +1329,9 @@ autour de la moelle</string>
                <property name="maximum">
                 <number>1000</number>
                </property>
+               <property name="value">
+                <number>400</number>
+               </property>
                <property name="orientation">
                 <enum>Qt::Horizontal</enum>
                </property>
@@ -1335,6 +1341,9 @@ autour de la moelle</string>
               <widget class="QSpinBox" name="_spinMinimalSizeOfConnexComponents">
                <property name="maximum">
                 <number>1000</number>
+               </property>
+               <property name="value">
+                <number>400</number>
                </property>
               </widget>
              </item>
@@ -1346,9 +1355,6 @@ autour de la moelle</string>
               <string>Mettre à jour</string>
              </property>
             </widget>
-           </item>
-           <item row="5" column="1">
-            <layout class="QHBoxLayout" name="horizontalLayout_5"/>
            </item>
           </layout>
          </item>
@@ -1399,6 +1405,13 @@ autour de la moelle</string>
              </widget>
             </item>
            </layout>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="_buttonExportContourComponentToPgm3D">
+           <property name="text">
+            <string>Export intérieur contours en PGM3D</string>
+           </property>
           </widget>
          </item>
         </layout>

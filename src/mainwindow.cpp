@@ -172,6 +172,7 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 	QObject::connect(_ui->_buttonExportToOfsRestricted, SIGNAL(clicked()), this, SLOT(exportToOfsRestricted()));
 	QObject::connect(_ui->_buttonExportSectorsDiagramAndHistogram, SIGNAL(clicked()), this, SLOT(exportSectorDiagramAndHistogram()));
 	QObject::connect(_ui->_spinBlurredSegmentsThickness, SIGNAL(valueChanged(int)), this, SLOT(drawSlice()));
+	QObject::connect(_ui->_buttonExportContourComponentToPgm3D, SIGNAL(clicked()), this, SLOT(exportContourComponentToPgm3D()));
 
 	// Raccourcis des actions du menu
 	_ui->_actionOpenDicom->setShortcut(Qt::CTRL + Qt::Key_O);
@@ -814,10 +815,13 @@ void MainWindow::exportFlowToV3D() {
 	}
 }
 
-void MainWindow::exportMovementsToV3D() {
-	if ( _billon != 0 ) {
+void MainWindow::exportMovementsToV3D()
+{
+	if ( _billon != 0 )
+	{
 		QString fileName = QFileDialog::getSaveFileName(this, tr("Exporter en .v3d"), "output_diag.v3d", tr("Fichiers de données (*.v3d);;Tous les fichiers (*.*)"));
-		if ( !fileName.isEmpty() ) {
+		if ( !fileName.isEmpty() )
+		{
 			const int width = _billon->n_cols;
 			const int height = _billon->n_rows;
 			const int depth = _slicesInterval.count();
@@ -829,12 +833,15 @@ void MainWindow::exportMovementsToV3D() {
 			Billon billonDiag( *_billon );
 			int i,j,k, pixAbsDiff;
 
-			for ( k=_slicesInterval.minValue()+1 ; k<_slicesInterval.maxValue() ; ++k ) {
+			for ( k=_slicesInterval.minValue()+1 ; k<_slicesInterval.maxValue() ; ++k )
+			{
 				const Slice &previousSlice = _billon->slice(k-1);
 				const Slice &toCompareSlice = _billon->slice(_ui->_checkUseNextSlice && k < _slicesInterval.maxValue()-1 ? k+1 : k );
 				Slice &sliceDiag = billonDiag.slice(k-_slicesInterval.minValue()-1);
-				for ( j=0 ; j<height ; ++j ) {
-					for ( i=0 ; i<width ; ++i ) {
+				for ( j=0 ; j<height ; ++j )
+				{
+					for ( i=0 ; i<width ; ++i )
+					{
 						pixAbsDiff = qAbs(RESTRICT_TO(minValue,previousSlice.at(j,i),maxValue) - RESTRICT_TO(minValue,toCompareSlice.at(j,i),maxValue));
 						if ( (pixAbsDiff <= thresholdMin) || (pixAbsDiff >= thresholdMax) ) sliceDiag.at(j,i) = minValue;
 						else sliceDiag.at(i,j) = maxValue;
@@ -1090,7 +1097,6 @@ void MainWindow::exportSectorDiagramAndHistogram() {
 void MainWindow::exportContours() {
 	if ( _componentBillon != 0 ) {
 		const Interval &sliceInterval = _sliceHistogram->branchesAreas()[_ui->_comboSelectSliceInterval->currentIndex()-1];
-		//const int selectedComponents = _ui->_comboConnexComponents->currentIndex();
 
 		QString fileName = QFileDialog::getSaveFileName(this, tr("Exporter le contour en .ctr"), "output.ctr", tr("Fichiers de contours (*.ctr);;Tous les fichiers (*.*)"));
 		if ( !fileName.isEmpty() ) {
@@ -1099,7 +1105,6 @@ void MainWindow::exportContours() {
 				qDebug() << QObject::tr("ERREUR : Impossible de créer le ficher de contours %1.").arg(fileName);
 				return;
 			}
-			//QVector<iCoord2D> contourPoints = _componentBillon->extractEdges(_marrow,_currentSlice-sliceInterval.minValue(),selectedComponents?selectedComponents:1);
 			Billon *biggestComponent = ConnexComponentExtractor::extractBiggestConnexComponent( _componentBillon->slice(_currentSlice-sliceInterval.minValue()), 0 );
 			QVector<iCoord2D> contourPoints = biggestComponent->extractContour( _marrow != 0 ? _marrow->at(_currentSlice) : iCoord2D(_billon->n_cols/2,_billon->n_rows/2), 0, 1 );
 
@@ -1118,6 +1123,50 @@ void MainWindow::setContourCurveSmoothingRadius( const int &radius )
 {
 	_contourCurve->setSmoothingRadius(radius);
 	drawSlice();
+}
+
+void MainWindow::exportContourComponentToPgm3D()
+{
+	if ( _componentBillon != 0 ) {
+		const Interval &sliceInterval = _sliceHistogram->branchesAreas()[_ui->_comboSelectSliceInterval->currentIndex()-1];
+
+		QString fileName = QFileDialog::getSaveFileName(this, tr("Exporter la composante délimitée par le contour en PGM3D"), "output.pgm3d", tr("Fichiers PGM3D (*.pgm3d);;Tous les fichiers (*.*)"));
+		if ( !fileName.isEmpty() ) {
+			QFile file(fileName);
+			if( !file.open(QIODevice::WriteOnly) ) {
+				qDebug() << QObject::tr("ERREUR : Impossible de créer le ficher %1.").arg(fileName);
+				return;
+			}
+
+			const int &width = _componentBillon->n_cols;
+			const int &height = _componentBillon->n_rows;
+			const int &depth = _componentBillon->n_slices;
+
+			QTextStream stream(&file);
+			stream << "P3D" << endl;
+			stream << width << " " << height << " " << depth << endl;
+			stream << 1 << endl;
+
+			QDataStream dstream(&file);
+
+			Billon *biggestComponents;
+			ContourCurve contourCurve;
+			iCoord2D marrowCoord;
+			for ( int k=0 ; k<depth ; ++k )
+			{
+				marrowCoord = _marrow != 0 ? _marrow->at(sliceInterval.minValue()+k) : iCoord2D(width/2,height/2);
+				biggestComponents = ConnexComponentExtractor::extractBiggestConnexComponents( _componentBillon->slice(k), 0, _ui->_spinMinimalSizeOfConnexComponents->value() );
+				contourCurve.constructCurve( *biggestComponents, marrowCoord, 0, 1, _ui->_spinBlurredSegmentsThickness->value() );
+				contourCurve.writeContourContentInPgm3D(dstream,biggestComponents->slice(0),marrowCoord);
+				delete biggestComponents;
+				biggestComponents = 0;
+			}
+
+			file.close();
+
+			QMessageBox::information(this,"Export de la composante délimitée par le contour en PGM3D", "Export réussi !");
+		}
+	}
 }
 
 /*******************************
