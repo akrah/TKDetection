@@ -2,6 +2,7 @@
 #define CONTOURCURVE_H
 
 #include "billon_def.h"
+#include "billon.h"
 #include "global.h"
 #include <qwt_plot_curve.h>
 
@@ -16,13 +17,14 @@ public:
 	const QVector<iCoord2D> &mainDominantPoints() const;
 	int indexOfMainPoint( const int &number ) const;
 	const QVector<iCoord2D> &mainSupportPoints() const;
+	int volumeContourContent() const;
 
 	void setSmoothingRadius( const int &radius );
 	void constructCurve( const Billon &billon, const iCoord2D &billonCenter, const int &sliceNumber, const int &componentNumber, const int &blurredSegmentThickness, const iCoord2D &startPoint = iCoord2D(-1,-1) );
 	void draw( QImage &image ) const;
-	void drawRestrictedComponent( QImage &image, const arma::Slice &slice, const iCoord2D &marrow ) const;
+	void drawRestrictedComponent( QImage &image ) const;
 
-	void writeContourContentInPgm3D( QDataStream &stream, const arma::Slice &slice, const iCoord2D &marrow ) const;
+	void writeContourContentInPgm3D( QDataStream &stream ) const;
 
 private:
 	void smoothCurve( QVector<iCoord2D> &contour, int smoothingRadius = 5 );
@@ -35,7 +37,10 @@ private:
 	QVector<int> _datasIndexMainDominantPoints;
 	QVector<iCoord2D> _datasMainSupportPoints;
 
+	arma::Slice _component;
+
 	int _smoothingRadius;
+	int _volumeContourContent;
 };
 
 #endif // CONTOURCURVATURECURVE_H

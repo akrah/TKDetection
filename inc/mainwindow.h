@@ -123,6 +123,7 @@ private:
 
 	QwtPlotHistogram _histogramDistanceMarrowToNearestPoint;
 	QwtPlotCurve _histogramDistanceMarrowToNearestPointCursor;
+	Interval _knotIntervalInDistanceMarrowToNearestPointHistogram;
 
 	int _currentSlice;
 	int _currentMaximum;

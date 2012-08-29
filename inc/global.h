@@ -11,10 +11,11 @@
 #define PI_ON_TWO			(PI/2.)
 #define PI_ON_THREE			(PI/3.)
 #define PI_ON_FOUR			(PI/4.)
-#define PI_ON_HEIGHT		(PI/8.)
+#define PI_ON_EIGHT			(PI/8.)
 #define THREE_PI_ON_TWO		(3.*PI_ON_TWO)
 #define THREE_PI_ON_FOUR	(3.*PI_ON_FOUR)
 #define TWO_PI_ON_THREE		(2.*PI_ON_THREE)
+#define SEVEN_PI_ON_EIGHT	(7.*PI_ON_EIGHT)
 #define DEG_TO_RAD_FACT		(PI/180.)
 #define RAD_TO_DEG_FACT		(180./PI)
 
