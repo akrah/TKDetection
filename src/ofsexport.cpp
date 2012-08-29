@@ -229,13 +229,13 @@ namespace OfsExport {
 				const int lastMarrow = qMin(firstMarrow + nbSlices,marrow.size());
 				const qreal depthShift = 1./(qreal)nbSlices;
 				const qreal angleShift = (rightAngle<leftAngle?leftAngle-rightAngle:leftAngle+(TWO_PI-rightAngle))/(qreal)(nbEdges-1);
-				int i,k;
+				
 
 				sumOfnbEdges += nbEdges*(lastMarrow-firstMarrow+1);
 
 				depth = -0.5;
-				for ( k=firstMarrow ; k<=lastMarrow ; ++k ) {
-					const iCoord2D &coord = marrow[k];
+				for (int l=firstMarrow ; l<=lastMarrow ; ++l ) {
+					const iCoord2D &coord = marrow[l];
 					const qreal xOfs = coord.x/(qreal)width - 0.5;
 					const qreal yOfs = coord.y/(qreal)height - 0.5;
 					const qreal ofsXRadius = qMin(coord.x,width-coord.x)/(qreal)width;
@@ -248,7 +248,7 @@ namespace OfsExport {
 					}
 					offsetsIterator = offsets.data();
 					fullStream.append( QString("%1 %2 %3%4").arg(xOfs).arg(yOfs).arg(depth).arg('\n') );
-					for ( i=0 ; i<nbEdges-1 ; ++i ) {
+					for (int i=0 ; i<nbEdges-1 ; ++i ) {
 						fullStream.append( QString("%1 %2 %3%4").arg(xOfs+offsetsIterator->x).arg(yOfs+offsetsIterator->y).arg(depth).arg('\n') );
 						offsetsIterator++;
 					}

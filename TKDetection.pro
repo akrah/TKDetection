@@ -8,6 +8,13 @@
 #
 #-------------------------------------------------------
 
+macx:QMAKE_CC=/usr/bin/clang
+macx:QMAKE_CXX=/usr/bin/clang++
+
+macx:MOC_DIR = .moc
+macx:OBJECTS_DIR = .obj
+
+
 # Version d'ITK installée : itk3 | itk4
 ITK_VERSION = itk4
 ITK_NUMBER =  4.1
