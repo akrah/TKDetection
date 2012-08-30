@@ -3,7 +3,7 @@
 #include "inc/global.h"
 #include "inc/interval.h"
 
-Histogram::Histogram() : _marrowAroundDiameter(100), _smoothing(SmoothingType::GAUSSIAN), _maximumsNeighborhood(DEFAULT_MINIMUM_WIDTH_OF_NEIGHBORHOOD),
+Histogram::Histogram() : _marrowAroundDiameter(100), _smoothing(SmoothingType::MEANS), _maximumsNeighborhood(DEFAULT_MINIMUM_WIDTH_OF_NEIGHBORHOOD),
 	_minimumIntervalWidth(DEFAULT_MINIMUM_WIDTH_OF_INTERVALS), _movementThresholdMin(MINIMUM_Z_MOTION), _movementThresholdMax(MAXIMUM_Z_MOTION),
 	_derivativePercentage(DEFAULT_PERCENTAGE_FOR_MAXIMUM_CANDIDATE), _derivativeThreshold(0.), _useNextSlice(false)
 {

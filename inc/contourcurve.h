@@ -19,8 +19,7 @@ public:
 	const QVector<iCoord2D> &mainSupportPoints() const;
 	int volumeContourContent() const;
 
-	void setSmoothingRadius( const int &radius );
-	void constructCurve( const Billon &billon, const iCoord2D &billonCenter, const int &sliceNumber, const int &componentNumber, const int &blurredSegmentThickness, const iCoord2D &startPoint = iCoord2D(-1,-1) );
+	void constructCurve( const Billon &billon, const iCoord2D &billonCenter, const int &sliceNumber, const int &componentNumber, const int &blurredSegmentThickness, const int &smoothingRadius, const iCoord2D &startPoint = iCoord2D(-1,-1) );
 	void draw( QImage &image ) const;
 	void drawRestrictedComponent( QImage &image ) const;
 
@@ -38,9 +37,6 @@ private:
 	QVector<iCoord2D> _datasMainSupportPoints;
 
 	arma::Slice _component;
-
-	int _smoothingRadius;
-	int _volumeContourContent;
 };
 
 #endif // CONTOURCURVATURECURVE_H

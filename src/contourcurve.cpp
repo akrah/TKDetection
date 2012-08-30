@@ -1,13 +1,12 @@
 #include "inc/contourcurve.h"
 
 #include "inc/billon.h"
-#include "inc/marrow.h"
 
 #include <QProcess>
 #include <QTemporaryFile>
 #include <QPainter>
 
-ContourCurve::ContourCurve() : _smoothingRadius(5)
+ContourCurve::ContourCurve()
 {
 }
 
@@ -54,18 +53,13 @@ int ContourCurve::volumeContourContent() const
 	return volume;
 }
 
-void ContourCurve::setSmoothingRadius( const int &radius )
-{
-	_smoothingRadius = qAbs(radius);
-}
-
-void ContourCurve::constructCurve( const Billon &billon, const iCoord2D &billonCenter, const int &sliceNumber, const int &componentNumber, const int &blurredSegmentThickness, const iCoord2D &startPoint )
+void ContourCurve::constructCurve( const Billon &billon, const iCoord2D &billonCenter, const int &sliceNumber, const int &componentNumber, const int &blurredSegmentThickness, const int &smoothingRadius, const iCoord2D &startPoint )
 {
 	_datasOriginalContourPoints.clear();
 	_datasOriginalContourPoints = billon.extractContour( billonCenter, sliceNumber, componentNumber, startPoint );
 	_datasContourPoints.clear();
 	_datasContourPoints = _datasOriginalContourPoints;
-	smoothCurve(_datasContourPoints,_smoothingRadius);
+	smoothCurve(_datasContourPoints,smoothingRadius);
 
 	_datasDominantPoints.clear();
 
@@ -142,7 +136,7 @@ void ContourCurve::constructCurve( const Billon &billon, const iCoord2D &billonC
 				angle = dominantPoints[index].angle(dominantPoints[index-1],dominantPoints[index+1]);
 				while ( index < nbPoints )
 				{
-					oldAngle = angle!=0?angle:180.;
+					oldAngle = qFuzzyCompare(angle+1,1.)?180.:angle;
 					angle = dominantPoints[index].angle(dominantPoints[index-1],dominantPoints[index+1]);
 					if ( ((angle < -PI_ON_FOUR || angle  > THREE_PI_ON_FOUR) && (angle/oldAngle<0 || qAbs(oldAngle)+qAbs(angle)>PI)) || dominantPoints[index].distance(dominantPoints[0]) < 20 ) index++;
 					else break;
@@ -167,7 +161,7 @@ void ContourCurve::constructCurve( const Billon &billon, const iCoord2D &billonC
 				angle = dominantPoints[index].angle(dominantPoints[index+1],dominantPoints[index-1]);
 				while ( index > oldIndex )
 				{
-					oldAngle = angle;
+					oldAngle = qFuzzyCompare(angle+1,1.)?180.:angle;
 					angle = dominantPoints[index].angle(dominantPoints[index+1],dominantPoints[index-1]);
 					if ( ((angle > PI_ON_FOUR || angle < -THREE_PI_ON_FOUR) && (angle/oldAngle<0 || qAbs(oldAngle)+qAbs(angle)>PI)) || dominantPoints[index].distance(dominantPoints[0]) < 20 ) index--;
 					else break;
@@ -206,7 +200,7 @@ void ContourCurve::constructCurve( const Billon &billon, const iCoord2D &billonC
 	const qreal daMain1Main2 = mainPoint1.y - mainPoint2.y;
 	const qreal dbMain1Main2 = mainPoint2.x - mainPoint1.x;
 	const qreal dcMain1Main2 = daMain1Main2*mainPoint1.x + dbMain1Main2*mainPoint1.y;
-	const bool supToMain1Main2 = ( daMain1Main2*startPoint.x + dbMain1Main2*startPoint.y ) > dcMain1Main2;
+	const bool supToMain1Main2 = ( daMain1Main2*billonCenter.x + dbMain1Main2*billonCenter.y ) > dcMain1Main2;
 
 	const qreal daMain1Support1 = mainPoint1.y - support1.y;
 	const qreal dbMain1Support1 = support1.x - mainPoint1.x;
@@ -310,12 +304,14 @@ void ContourCurve::constructCurve( const Billon &billon, const iCoord2D &billonC
 
 		// Ajout des pixels du noeud du bon côté de chaque la droite de prolongement
 		// et à l'intérieur du contour original
+		const iCoord2D nextMain1( mainPoint1.x - daMain1Support1, mainPoint1.y - dbMain1Support1 );
+		const bool rightToMain1Support1 = ( daMain1Support1*nextMain1.x + dbMain1Support1*nextMain1.y ) > dcMain1Support1;
 		for ( j = minYIndex ; j<maxYIndex ; j++ )
 		{
 			for ( i = minXIndex ; i<maxXIndex ; i++ )
 			{
 				if ( slice.at(j,i)
-					 && ((daMain1Support1*i+dbMain1Support1*j <= dcMain1Support1) == supToMain1Support1)
+					 && ((daMain1Support1*i+dbMain1Support1*j > dcMain1Support1) == rightToMain1Support1)
 					 && contourPolygon.containsPoint(QPoint(i,j),Qt::OddEvenFill) )
 				{
 					_component.at(j,i) = 1;
@@ -343,12 +339,14 @@ void ContourCurve::constructCurve( const Billon &billon, const iCoord2D &billonC
 
 		// Ajout des pixels du noeud du bon côté de chaque la droite de prolongement
 		// et à l'intérieur du contour original
+		const iCoord2D nextMain2( mainPoint2.x + daMain2Support2, mainPoint2.y + dbMain2Support2 );
+		const bool leftToMain2Support2 = ( daMain2Support2*nextMain2.x + dbMain2Support2*nextMain2.y ) > dcMain2Support2;
 		for ( j = minYIndex ; j<maxYIndex ; j++ )
 		{
 			for ( i = minXIndex ; i<maxXIndex ; i++ )
 			{
 				if ( slice.at(j,i)
-					 && ((daMain2Support2*i+dbMain2Support2*j <= dcMain2Support2) == supToMain2Support2)
+					 && ((daMain2Support2*i+dbMain2Support2*j > dcMain2Support2) == leftToMain2Support2)
 					 && contourPolygon.containsPoint(QPoint(i,j),Qt::OddEvenFill) )
 				{
 					_component.at(j,i) = 1;
@@ -357,7 +355,7 @@ void ContourCurve::constructCurve( const Billon &billon, const iCoord2D &billonC
 		}
 	}
 	// Sinon on ajoute la composante en entier
-	else if ( nbOriginalPointsContour > 1 )
+	else if ( nbOriginalPointsContour > 3 )
 	{
 		minXIndex = maxXIndex = _datasOriginalContourPoints[0].x;
 		minYIndex = maxYIndex = _datasOriginalContourPoints[0].y;

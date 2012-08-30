@@ -66,7 +66,7 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 	_ui->_comboHistogramSmoothing->insertItem(SmoothingType::NONE,tr("Aucun"));
 	_ui->_comboHistogramSmoothing->insertItem(SmoothingType::MEANS,tr("Moyen"));
 	_ui->_comboHistogramSmoothing->insertItem(SmoothingType::GAUSSIAN,tr("Gaussien"));
-	_ui->_comboHistogramSmoothing->setCurrentIndex(SmoothingType::GAUSSIAN);
+	_ui->_comboHistogramSmoothing->setCurrentIndex(SmoothingType::MEANS);
 	_ui->_comboEdgeDetectionType->insertItem(EdgeDetectionType::SOBEL,tr("Sobel"));
 	_ui->_comboEdgeDetectionType->insertItem(EdgeDetectionType::LAPLACIAN,tr("Laplacian"));
 	_ui->_comboEdgeDetectionType->insertItem(EdgeDetectionType::CANNY,tr("Canny"));
@@ -154,7 +154,7 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 	QObject::connect(_ui->_buttonExportSectorToOfs, SIGNAL(clicked()), this, SLOT(exportSectorToOfs()));
 	QObject::connect(_ui->_buttonExportAllSectorsInAllIntervalsToOfs, SIGNAL(clicked()), this, SLOT(exportAllSectorInAllIntervalsToOfs()));
 	QObject::connect(_ui->_buttonContours, SIGNAL(clicked()), this, SLOT(exportContours()));
-	QObject::connect(_ui->_spinContourSmoothingRadius, SIGNAL(valueChanged(int)), this, SLOT(setContourCurveSmoothingRadius(int)));
+	QObject::connect(_ui->_spinContourSmoothingRadius, SIGNAL(valueChanged(int)), this, SLOT(drawSlice()));
 
 	// Évènements déclenchés par la souris sur le visualiseur de coupes
 	QObject::connect(&_sliceZoomer, SIGNAL(zoomFactorChanged(qreal,QPoint)), this, SLOT(zoomInSliceView(qreal,QPoint)));
@@ -343,9 +343,9 @@ void MainWindow::drawSlice( const int &sliceNumber ) {
 				}
 				painter.end();
 
-				_contourCurve->constructCurve( *biggestComponents, _marrow != 0 ? _marrow->at(sliceNumber) : iCoord2D(width/2,height/2), 0, 1, _ui->_spinBlurredSegmentsThickness->value() );
-				_contourCurve->draw(_pix);
+				_contourCurve->constructCurve( *biggestComponents, _marrow != 0 ? _marrow->at(sliceNumber) : iCoord2D(width/2,height/2), 0, 1, _ui->_spinBlurredSegmentsThickness->value(), _ui->_spinContourSmoothingRadius->value() );
 				_contourCurve->drawRestrictedComponent(_pix);
+				_contourCurve->draw(_pix);
 
 				delete biggestComponents;
 			}
@@ -995,34 +995,29 @@ void MainWindow::selectSectorInterval( const int &index ) {
 
 			int minIndex, upperIndex, lowerIndex;
 
+			qreal minVal = width;
 			for ( i=0 ; i<depth ; ++i )
 			{
 				biggestComponents = ConnexComponentExtractor::extractBiggestConnexComponents( _componentBillon->slice(i), 0, _ui->_spinMinimalSizeOfConnexComponents->value() );
 				nearestPoint = biggestComponents->findNearestPointOfThePith( _marrow->at(firstSlice+i), 0, 1 );
 				histData[i].value = nearestPoint.distance(_marrow->at(firstSlice+i));
 				histData[i].interval.setInterval(i,i+1);
-				delete biggestComponents;
-				biggestComponents = 0;
-			}
-
-			qreal minVal = width;
-			for ( i=0 ; i<depth ; ++i )
-			{
-				histData[i].value = histData[i>1?(i-2)%depth:(depth-2+i)].value *0.3 + histData[(i+1)%depth].value *0.3 + histData[i].value*0.4;
 				if ( minVal > histData[i].value )
 				{
 					minVal = histData[i].value;
 					minIndex = i;
 				}
+				delete biggestComponents;
+				biggestComponents = 0;
 			}
 
 			_histogramDistanceMarrowToNearestPoint.setSamples(histData);
 			_ui->_plotDistanceMarrowToNearestPoint->replot();
 
 			upperIndex = minIndex+2;
-			while ( histData[upperIndex+1].value - histData[upperIndex].value > 1.5 ) upperIndex++;
+			while ( histData[upperIndex+3].value - histData[upperIndex].value > 3. ) upperIndex++;
 			lowerIndex = minIndex-2;
-			while ( histData[lowerIndex-1].value - histData[lowerIndex].value > 1.5 ) lowerIndex--;
+			while ( histData[lowerIndex-3].value - histData[lowerIndex].value > 3. ) lowerIndex--;
 
 			_knotIntervalInDistanceMarrowToNearestPointHistogram.setBounds(lowerIndex+1,upperIndex-1);
 
@@ -1196,12 +1191,6 @@ void MainWindow::exportContours() {
 	}
 }
 
-void MainWindow::setContourCurveSmoothingRadius( const int &radius )
-{
-	_contourCurve->setSmoothingRadius(radius);
-	drawSlice();
-}
-
 void MainWindow::exportContourComponentToPgm3D()
 {
 	if ( _componentBillon != 0 ) {
@@ -1233,7 +1222,7 @@ void MainWindow::exportContourComponentToPgm3D()
 			{
 				marrowCoord = _marrow != 0 ? _marrow->at(sliceInterval.minValue()+k) : iCoord2D(width/2,height/2);
 				biggestComponents = ConnexComponentExtractor::extractBiggestConnexComponents( _componentBillon->slice(k), 0, _ui->_spinMinimalSizeOfConnexComponents->value() );
-				contourCurve.constructCurve( *biggestComponents, marrowCoord, 0, 1, _ui->_spinBlurredSegmentsThickness->value() );
+				contourCurve.constructCurve( *biggestComponents, marrowCoord, 0, 1, _ui->_spinBlurredSegmentsThickness->value(), _ui->_spinContourSmoothingRadius->value() );
 				contourCurve.writeContourContentInPgm3D(dstream);
 				delete biggestComponents;
 				biggestComponents = 0;

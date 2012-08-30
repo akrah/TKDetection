@@ -89,7 +89,6 @@ private slots:
 	void exportSliceHistogram();
 	void exportSectorDiagramAndHistogram();
 	void exportContours();
-	void setContourCurveSmoothingRadius( const int &radius );
 	void exportContourComponentToPgm3D();
 
 private:
