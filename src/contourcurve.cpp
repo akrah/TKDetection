@@ -42,7 +42,7 @@ const QVector<iCoord2D> &ContourCurve::mainSupportPoints() const
 
 int ContourCurve::volumeContourContent() const
 {
-	int i, j, volume;
+	uint i, j, volume;
 	volume = 0;
 	for ( j=0 ; j<_component.n_rows ; ++j )
 	{
@@ -388,31 +388,34 @@ void ContourCurve::constructCurve( const Billon &billon, const iCoord2D &billonC
 
 void ContourCurve::smoothCurve( QVector<iCoord2D> &contour, int smoothingRadius )
 {
-	const int nbPoints = contour.size();
-	smoothingRadius = qMin(smoothingRadius,nbPoints);
-	const int smoothingDiameter = 2*smoothingRadius+1;
-	if ( nbPoints > smoothingDiameter )
+	if ( smoothingRadius > 0 )
 	{
-		QVector<iCoord2D> datasContourForSmoothing;
-		datasContourForSmoothing.reserve(nbPoints+2*smoothingRadius);
-		datasContourForSmoothing << contour.mid(nbPoints-smoothingRadius) <<  contour << contour.mid(0,smoothingRadius);
-
-		int i, smoothingValueX, smoothingValueY;
-		smoothingValueX = smoothingValueY = 0;
-
-		for ( i=0 ; i<smoothingDiameter ; ++i )
+		const int nbPoints = contour.size();
+		smoothingRadius = qMin(smoothingRadius,nbPoints);
+		const int smoothingDiameter = 2*smoothingRadius+1;
+		if ( nbPoints > smoothingDiameter )
 		{
-			smoothingValueX += datasContourForSmoothing[i].x;
-			smoothingValueY += datasContourForSmoothing[i].y;
-		}
-		contour[0].x = smoothingValueX / static_cast<qreal>(smoothingDiameter);
-		contour[0].y = smoothingValueY / static_cast<qreal>(smoothingDiameter);
-		for ( int i=1 ; i<nbPoints ; ++i )
-		{
-			smoothingValueX = smoothingValueX - datasContourForSmoothing[i-1].x + datasContourForSmoothing[i+smoothingDiameter-1].x;
-			smoothingValueY = smoothingValueY - datasContourForSmoothing[i-1].y + datasContourForSmoothing[i+smoothingDiameter-1].y;
-			contour[i].x = smoothingValueX / static_cast<qreal>(smoothingDiameter);
-			contour[i].y = smoothingValueY / static_cast<qreal>(smoothingDiameter);
+			QVector<iCoord2D> datasContourForSmoothing;
+			datasContourForSmoothing.reserve(nbPoints+2*smoothingRadius);
+			datasContourForSmoothing << contour.mid(nbPoints-smoothingRadius) <<  contour << contour.mid(0,smoothingRadius);
+
+			int i, smoothingValueX, smoothingValueY;
+			smoothingValueX = smoothingValueY = 0;
+
+			for ( i=0 ; i<smoothingDiameter ; ++i )
+			{
+				smoothingValueX += datasContourForSmoothing[i].x;
+				smoothingValueY += datasContourForSmoothing[i].y;
+			}
+			contour[0].x = smoothingValueX / static_cast<qreal>(smoothingDiameter);
+			contour[0].y = smoothingValueY / static_cast<qreal>(smoothingDiameter);
+			for ( int i=1 ; i<nbPoints ; ++i )
+			{
+				smoothingValueX = smoothingValueX - datasContourForSmoothing[i-1].x + datasContourForSmoothing[i+smoothingDiameter-1].x;
+				smoothingValueY = smoothingValueY - datasContourForSmoothing[i-1].y + datasContourForSmoothing[i+smoothingDiameter-1].y;
+				contour[i].x = smoothingValueX / static_cast<qreal>(smoothingDiameter);
+				contour[i].y = smoothingValueY / static_cast<qreal>(smoothingDiameter);
+			}
 		}
 	}
 }
@@ -496,7 +499,7 @@ void ContourCurve::drawRestrictedComponent( QImage &image ) const
 	QPainter painter(&image);
 	painter.setPen(QColor(255,255,255,127));
 
-	int i, j;
+	uint i, j;
 	for ( j=0 ; j<_component.n_rows ; j++ )
 	{
 		for ( i=0 ; i<_component.n_cols ; i++ )
@@ -508,7 +511,7 @@ void ContourCurve::drawRestrictedComponent( QImage &image ) const
 
 void ContourCurve::writeContourContentInPgm3D( QDataStream &stream ) const
 {
-	int i, j;
+	uint i, j;
 	for ( j=0 ; j<_component.n_rows ; ++j )
 	{
 		for ( i=0 ; i<_component.n_cols ; ++i )

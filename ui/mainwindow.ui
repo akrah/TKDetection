@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>786</width>
-    <height>702</height>
+    <height>739</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -105,7 +105,7 @@
            <x>0</x>
            <y>0</y>
            <width>277</width>
-           <height>449</height>
+           <height>485</height>
           </rect>
          </property>
          <layout class="QHBoxLayout" name="horizontalLayout_8">
@@ -230,8 +230,8 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>446</width>
-              <height>178</height>
+              <width>306</width>
+              <height>146</height>
              </rect>
             </property>
             <attribute name="label">
@@ -1063,7 +1063,7 @@ autour de la moelle</string>
             <layout class="QVBoxLayout" name="verticalLayout_8">
              <item>
               <widget class="QwtPolarPlot" name="_polarSectorSum">
-               <property name="plotBackground">
+               <property name="plotBackground" stdset="0">
                 <brush brushstyle="SolidPattern">
                  <color alpha="0">
                   <red>255</red>
@@ -1394,7 +1394,7 @@ autour de la moelle</string>
             <item row="1" column="1">
              <widget class="QSpinBox" name="_spinContourSmoothingRadius">
               <property name="minimum">
-               <number>1</number>
+               <number>0</number>
               </property>
               <property name="maximum">
                <number>20</number>
@@ -1804,15 +1804,15 @@ autour de la moelle</string>
    <container>1</container>
   </customwidget>
   <customwidget>
+   <class>QxtSpanSlider</class>
+   <extends>QSlider</extends>
+   <header>QxtSpanSlider</header>
+  </customwidget>
+  <customwidget>
    <class>QwtPolarPlot</class>
    <extends>QFrame</extends>
    <header>qwt_polar_plot.h</header>
    <container>1</container>
-  </customwidget>
-  <customwidget>
-   <class>QxtSpanSlider</class>
-   <extends>QSlider</extends>
-   <header>QxtSpanSlider</header>
   </customwidget>
  </customwidgets>
  <tabstops>
