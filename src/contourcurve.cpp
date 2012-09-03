@@ -474,14 +474,12 @@ void ContourCurve::draw( QImage &image ) const
 
 			painter.setPen(Qt::red);
 			if ( _datasIndexMainDominantPoints[0] != -1 ) painter.drawEllipse(mainPoint1.x-3,mainPoint1.y-3,6,6);
-			painter.setPen(Qt::green);
 			if ( _datasIndexMainDominantPoints[1] != -1 ) painter.drawEllipse(mainPoint2.x-3,mainPoint2.y-3,6,6);
 
 			painter.setPen(Qt::gray);
 
-			qreal a, b;
-
 			const iCoord2D &supportMain1 = _datasMainSupportPoints[0];
+			qreal a, b;
 			if ( supportMain1.x != -1 || supportMain1.y != -1 )
 			{
 				a = ( mainPoint1.y - supportMain1.y ) / static_cast<qreal>( mainPoint1.x - supportMain1.x );
