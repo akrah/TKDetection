@@ -431,7 +431,7 @@ void MainWindow::updateSliceHistogram() {
 
 	const int oldIntervalIndex = _ui->_comboSelectSliceInterval->currentIndex();
 	_ui->_comboSelectSliceInterval->clear();
-	_ui->_comboSelectSliceInterval->addItem(tr("Personnalisé"));
+	_ui->_comboSelectSliceInterval->addItem(tr("Aucun"));
 	const QVector<Interval> &intervals = _sliceHistogram->branchesAreas();
 	if ( !intervals.isEmpty() ) {
 		for ( int i=0 ; i<intervals.size() ; ++i ) {
@@ -875,32 +875,28 @@ void MainWindow::selectSliceInterval( const int &index )
 {
 	selectSectorInterval(0);
 
+	_ui->_comboSelectSectorInterval->clear();
+	_ui->_comboSelectSectorInterval->addItem(tr("Aucun"));
 	if ( index > 0 && index <= _sliceHistogram->branchesAreas().size() )
 	{
 		const Interval &interval = _sliceHistogram->branchesAreas()[index-1];
 		computeSectorsHistogramForInterval(interval);
 		_ui->_sliderSelectSlice->setValue(_sliceHistogram->indexOfIemeInterval(index-1));
-	}
-	else
-	{
-		computeSectorsHistogramForInterval(_slicesInterval);
-		_ui->_sliderSelectSlice->setValue((_slicesInterval.minValue()+_slicesInterval.maxValue())/2);
-	}
 
-	_ui->_comboSelectSectorInterval->clear();
-	_ui->_comboSelectSectorInterval->addItem(tr("Aucun"));
-	const QVector<Interval> &intervals = _pieChartDiagrams->branchesSectors();
-	if ( !intervals.isEmpty() )
-	{
-		qreal rightAngle, leftAngle;
-		for ( int i=0 ; i<intervals.size() ; ++i )
+		const QVector<Interval> &intervals = _pieChartDiagrams->branchesSectors();
+		if ( !intervals.isEmpty() )
 		{
-			const Interval interval = intervals[i];
-			rightAngle = _pieChart->sector(interval.minValue()).rightAngle()*RAD_TO_DEG_FACT;
-			leftAngle = _pieChart->sector(interval.maxValue()).leftAngle()*RAD_TO_DEG_FACT;
-			_ui->_comboSelectSectorInterval->addItem(tr("Secteur %1 : [ %2, %3 ] (%4 degres)").arg(i).arg(rightAngle).arg(leftAngle).arg(interval.isValid()?leftAngle-rightAngle:leftAngle-rightAngle+360.));
+			qreal rightAngle, leftAngle;
+			for ( int i=0 ; i<intervals.size() ; ++i )
+			{
+				const Interval interval = intervals[i];
+				rightAngle = _pieChart->sector(interval.minValue()).rightAngle()*RAD_TO_DEG_FACT;
+				leftAngle = _pieChart->sector(interval.maxValue()).leftAngle()*RAD_TO_DEG_FACT;
+				_ui->_comboSelectSectorInterval->addItem(tr("Secteur %1 : [ %2, %3 ] (%4 degres)").arg(i).arg(rightAngle).arg(leftAngle).arg(interval.isValid()?leftAngle-rightAngle:leftAngle-rightAngle+360.));
+			}
 		}
 	}
+
 }
 
 void MainWindow::selectCurrentSliceInterval() {

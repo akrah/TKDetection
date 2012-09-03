@@ -99,6 +99,7 @@ void ContourCurve::constructCurve( const Billon &billon, const iCoord2D &billonC
 		QProcess dominantPointExtraction;
 		dominantPointExtraction.setStandardInputFile(fileContours.fileName());
 		dominantPointExtraction.start(QString("cornerdetection -epais %1 -pointFile %2").arg(blurredSegmentThickness).arg(fileDominantPoint.fileName()));
+		//dominantPointExtraction.start(QString("cornerdetection -evalType 0 -pointFile %1").arg(fileDominantPoint.fileName()));
 
 		if ( dominantPointExtraction.waitForFinished(3000) )
 		{
@@ -126,19 +127,22 @@ void ContourCurve::constructCurve( const Billon &billon, const iCoord2D &billonC
 				//      ou que l'angle est inférieur à PI/4 (+3*PI/4 dans le sens de la convexité du noeud)
 				//    - dès que la somme de la valeur absolue de deux angles consécutifs de même convexité est inférieure à 180.
 				// Ces deux conditions sont vérifiées à partir du premier point dominant à plus de 20 pixels du point de départ
-				const int padding = qMin(billon.n_cols,billon.n_rows)/20;
 				int index, oldIndex;
 				qreal angle, oldAngle;
+				bool angleOk;
 
 				// Point dominant dans le sens du contour
 				index = 1;
 				angle = -THREE_PI_ON_FOUR;
-				while ( index < nbPoints )
+				angleOk = true;
+				while ( angleOk && index < nbPoints )
 				{
 					oldAngle = qFuzzyCompare(angle+1,1.)?180.:angle;
 					angle = _datasDominantPoints[index].angle(_datasDominantPoints[index-1],_datasDominantPoints[(index+1)%nbPoints]);
-					if ( ((angle < -PI_ON_FOUR || angle  > THREE_PI_ON_FOUR) && (angle/oldAngle>0 || qAbs(oldAngle)+qAbs(angle)>PI)) || _datasDominantPoints[index].distance(_datasDominantPoints[0]) < 20 ) index++;
-					else break;
+					angleOk = angle<0 ? (angle<-PI_ON_FOUR) :
+										(oldAngle<0 ? (angle>THREE_PI_ON_FOUR || qAbs(angle+oldAngle)<PI_ON_THREE) :
+													  (oldAngle+angle>THREE_PI_ON_TWO));
+					if ( angleOk ) index++;
 				}
 				oldIndex = index;
 				// Si le point dominant trouvé est correct
@@ -172,12 +176,15 @@ void ContourCurve::constructCurve( const Billon &billon, const iCoord2D &billonC
 				// Point dominant dans le sens contraire du contour
 				index = nbPoints-1;
 				angle = THREE_PI_ON_FOUR;
-				while ( index > oldIndex )
+				angleOk = true;
+				while ( angleOk && index > oldIndex )
 				{
 					oldAngle = qFuzzyCompare(angle+1,1.)?180.:angle;
 					angle = _datasDominantPoints[index].angle(_datasDominantPoints[(index+1)%nbPoints],_datasDominantPoints[index-1]);
-					if ( ((angle > PI_ON_FOUR || angle < -THREE_PI_ON_FOUR) && (angle/oldAngle>0 || qAbs(oldAngle)+qAbs(angle)>PI)) || _datasDominantPoints[index].distance(_datasDominantPoints[0]) < 20 ) index--;
-					else break;
+					angleOk = angle>0 ? (angle>PI_ON_FOUR) :
+										(oldAngle>0 ? (angle<-THREE_PI_ON_FOUR || qAbs(angle+oldAngle)<PI_ON_THREE) :
+													  (oldAngle+angle<-THREE_PI_ON_TWO));
+					if ( angleOk ) index--;
 				}
 				// Si le point dominant trouvé est correct
 				if ( index > oldIndex )
