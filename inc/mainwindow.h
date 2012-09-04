@@ -7,6 +7,7 @@
 #include "sliceview_def.h"
 #include "slicezoomer.h"
 #include "interval.h"
+#include "global.h"
 #include <qwt_plot_curve.h>
 #include <qwt_plot_histogram.h>
 
@@ -90,6 +91,11 @@ private slots:
 	void exportSectorDiagramAndHistogram();
 	void exportContours();
 	void exportContourComponentToPgm3D();
+
+        void createVoxelSet(std::vector<iCoord3D> &vectVoxels);
+        void exportAllContourComponentOfVoxels();
+ 
+
 
 private:
 	void openNewBillon(const QString &folderName = "");
