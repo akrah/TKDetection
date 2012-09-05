@@ -19,11 +19,11 @@ public:
 	const QVector<iCoord2D> &mainSupportPoints() const;
 	int volumeContourContent() const;
 
-	void constructCurve( const Billon &billon, const iCoord2D &billonCenter, const int &sliceNumber, const int &componentNumber, const int &blurredSegmentThickness, const int &smoothingRadius, const iCoord2D &startPoint = iCoord2D(-1,-1) );
+	void constructCurve( const Billon &billon, const iCoord2D &billonCenter, const int &sliceNumber, const int &threshold, const int &blurredSegmentThickness, const int &smoothingRadius, const iCoord2D &startPoint = iCoord2D(-1,-1) );
 	void draw( QImage &image ) const;
 	void drawRestrictedComponent( QImage &image ) const;
 	void writeContourContentInPgm3D( QDataStream &stream ) const;
-        void getContourContentPoints(std::vector<iCoord3D> &vectPoints, const unsigned int &sliceNum) const;
+		void getContourContentPoints(std::vector<iCoord3D> &vectPoints, const unsigned int &sliceNum) const;
 
 private:
 	void smoothCurve( QVector<iCoord2D> &contour, int smoothingRadius = 5 );

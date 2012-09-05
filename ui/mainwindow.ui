@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>789</width>
-    <height>819</height>
+    <height>858</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -104,8 +104,8 @@
           <rect>
            <x>0</x>
            <y>0</y>
-           <width>241</width>
-           <height>570</height>
+           <width>301</width>
+           <height>588</height>
           </rect>
          </property>
          <layout class="QHBoxLayout" name="horizontalLayout_8">
@@ -142,7 +142,7 @@
      <x>0</x>
      <y>0</y>
      <width>789</width>
-     <height>22</height>
+     <height>25</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFichier">
@@ -230,8 +230,8 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>314</width>
-              <height>148</height>
+              <width>425</width>
+              <height>281</height>
              </rect>
             </property>
             <attribute name="label">
@@ -388,8 +388,8 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>279</width>
-              <height>225</height>
+              <width>276</width>
+              <height>215</height>
              </rect>
             </property>
             <attribute name="label">
@@ -570,8 +570,8 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>348</width>
-              <height>187</height>
+              <width>341</width>
+              <height>177</height>
              </rect>
             </property>
             <attribute name="label">
@@ -718,7 +718,7 @@
               <x>0</x>
               <y>0</y>
               <width>243</width>
-              <height>126</height>
+              <height>118</height>
              </rect>
             </property>
             <attribute name="label">
@@ -1063,7 +1063,7 @@ autour de la moelle</string>
             <layout class="QVBoxLayout" name="verticalLayout_8">
              <item>
               <widget class="QwtPolarPlot" name="_polarSectorSum">
-               <property name="plotBackground" stdset="0">
+               <property name="plotBackground">
                 <brush brushstyle="SolidPattern">
                  <color alpha="0">
                   <red>255</red>
@@ -1318,14 +1318,14 @@ autour de la moelle</string>
            <item row="3" column="0">
             <widget class="QLabel" name="label_34">
              <property name="text">
-              <string>Taille minimum</string>
+              <string>Taille minimum en 3D</string>
              </property>
             </widget>
            </item>
            <item row="3" column="1">
             <layout class="QHBoxLayout" name="horizontalLayout_18">
              <item>
-              <widget class="QSlider" name="_sliderMinimalSizeOfConnexComponents">
+              <widget class="QSlider" name="_sliderMinimalSizeOf3DConnexComponents">
                <property name="maximum">
                 <number>1000</number>
                </property>
@@ -1338,7 +1338,7 @@ autour de la moelle</string>
               </widget>
              </item>
              <item>
-              <widget class="QSpinBox" name="_spinMinimalSizeOfConnexComponents">
+              <widget class="QSpinBox" name="_spinMinimalSizeOf3DConnexComponents">
                <property name="maximum">
                 <number>1000</number>
                </property>
@@ -1349,10 +1349,47 @@ autour de la moelle</string>
              </item>
             </layout>
            </item>
-           <item row="4" column="1">
+           <item row="5" column="1">
             <widget class="QPushButton" name="_buttonSelectSectorIntervalUpdate">
              <property name="text">
               <string>Mettre à jour</string>
+             </property>
+            </widget>
+           </item>
+           <item row="4" column="1">
+            <layout class="QHBoxLayout" name="horizontalLayout_5">
+             <property name="bottomMargin">
+              <number>0</number>
+             </property>
+             <item>
+              <widget class="QSlider" name="_sliderMinimalSizeOf2DConnexComponents">
+               <property name="maximum">
+                <number>1000</number>
+               </property>
+               <property name="value">
+                <number>25</number>
+               </property>
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QSpinBox" name="_spinMinimalSizeOf2DConnexComponents">
+               <property name="maximum">
+                <number>1000</number>
+               </property>
+               <property name="value">
+                <number>25</number>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item row="4" column="0">
+            <widget class="QLabel" name="label_37">
+             <property name="text">
+              <string>Taille minimum en 2D</string>
              </property>
             </widget>
            </item>
@@ -1686,6 +1723,9 @@ autour de la moelle</string>
    <widget class="QWidget" name="dockWidgetContents">
     <layout class="QVBoxLayout" name="verticalLayout_9">
      <item>
+      <widget class="QWidget" name="widget" native="true"/>
+     </item>
+     <item>
       <widget class="QwtPlot" name="_plotSliceHistogram"/>
      </item>
      <item>
@@ -1812,11 +1852,6 @@ autour de la moelle</string>
  <layoutdefault spacing="6" margin="11"/>
  <customwidgets>
   <customwidget>
-   <class>QxtSpanSlider</class>
-   <extends>QSlider</extends>
-   <header>QxtSpanSlider</header>
-  </customwidget>
-  <customwidget>
    <class>QwtPlot</class>
    <extends>QFrame</extends>
    <header>qwt_plot.h</header>
@@ -1827,6 +1862,11 @@ autour de la moelle</string>
    <extends>QFrame</extends>
    <header>qwt_polar_plot.h</header>
    <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>QxtSpanSlider</class>
+   <extends>QSlider</extends>
+   <header>QxtSpanSlider</header>
   </customwidget>
  </customwidgets>
  <tabstops>

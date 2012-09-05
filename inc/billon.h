@@ -31,9 +31,8 @@ public:
 	qreal getRestrictedAreaBoudingBoxRadius( const Marrow *marrow, const int &nbPolygonPoints, int intensityThreshold ) const;
 	qreal getRestrictedAreaMeansRadius( const Marrow *marrow, const int &nbPolygonPoints, int intensityThreshold ) const;
 
-	iCoord2D findNearestPointOfThePith( const iCoord2D &center, const int &sliceNumber, const int &componentNumber ) const;
-	QVector<iCoord2D> histogramOfNearestPointDistance( const Marrow &marrow, const int &componentNumber ) const;
-	QVector<iCoord2D> extractContour( const iCoord2D &center, const int &sliceNumber, const int &componentNumber, iCoord2D startPoint = iCoord2D(-1,-1) ) const;
+	iCoord2D findNearestPointOfThePith( const iCoord2D &center, const int &sliceNumber, const int &threshold ) const;
+	QVector<iCoord2D> extractContour( const iCoord2D &center, const int &sliceNumber, int threshold, iCoord2D startPoint = iCoord2D(-1,-1) ) const;
 
 protected:
 	T _minValue;
@@ -214,7 +213,7 @@ qreal BillonTpl<T>::getRestrictedAreaMeansRadius( const Marrow *marrow, const in
 }
 
 template < typename T >
-iCoord2D BillonTpl<T>::findNearestPointOfThePith( const iCoord2D &center, const int &sliceNumber, const int &componentNumber ) const
+iCoord2D BillonTpl<T>::findNearestPointOfThePith( const iCoord2D &center, const int &sliceNumber, const int &threshold ) const
 {
 	// Find the pixel closest to the pith
 	const arma::Mat<T> &currentSlice = this->slice(sliceNumber);
@@ -237,42 +236,42 @@ iCoord2D BillonTpl<T>::findNearestPointOfThePith( const iCoord2D &center, const 
 		while ( y>=x && !edgeFind )
 		{
 			edgeFind = true;
-			if ( currentSlice.at( yCenter+y, xCenter+x ) == componentNumber )
+			if ( currentSlice.at( yCenter+y, xCenter+x ) > threshold )
 			{
 				position.x = xCenter+x;
 				position.y = yCenter+y;
 			}
-			else if ( currentSlice.at( yCenter+y, xCenter-x ) == componentNumber )
+			else if ( currentSlice.at( yCenter+y, xCenter-x ) > threshold )
 			{
 				position.x = xCenter-x;
 				position.y = yCenter+y;
 			}
-			else if ( currentSlice.at( yCenter+x, xCenter+y ) == componentNumber )
+			else if ( currentSlice.at( yCenter+x, xCenter+y ) > threshold )
 			{
 				position.x = xCenter+y;
 				position.y = yCenter+x;
 			}
-			else if ( currentSlice.at( yCenter+x, xCenter-y ) == componentNumber )
+			else if ( currentSlice.at( yCenter+x, xCenter-y ) > threshold )
 			{
 				position.x = xCenter-y;
 				position.y = yCenter+x;
 			}
-			else if ( currentSlice.at( yCenter-y, xCenter+x ) == componentNumber )
+			else if ( currentSlice.at( yCenter-y, xCenter+x ) > threshold )
 			{
 				position.x = xCenter+x;
 				position.y = yCenter-y;
 			}
-			else if ( currentSlice.at( yCenter-y, xCenter-x ) == componentNumber )
+			else if ( currentSlice.at( yCenter-y, xCenter-x ) > threshold )
 			{
 				position.x = xCenter-x;
 				position.y = yCenter-y;
 			}
-			else if ( currentSlice.at( yCenter-x, xCenter+y ) == componentNumber )
+			else if ( currentSlice.at( yCenter-x, xCenter+y ) > threshold )
 			{
 				position.x = xCenter+y;
 				position.y = yCenter-x;
 			}
-			else if ( currentSlice.at( yCenter-x, xCenter-y ) == componentNumber )
+			else if ( currentSlice.at( yCenter-x, xCenter-y ) > threshold )
 			{
 				position.x = xCenter-y;
 				position.y = yCenter-x;
@@ -314,25 +313,13 @@ iCoord2D BillonTpl<T>::findNearestPointOfThePith( const iCoord2D &center, const 
 }
 
 template< typename T >
-QVector<iCoord2D> BillonTpl<T>::histogramOfNearestPointDistance( const Marrow &marrow, const int &componentNumber ) const
-{
-	const int depth = this->n_slices;
-	QVector<iCoord2D> distanceBySlice(this->n_slices,iCoord2D(0,0));
-	for ( int i=0 ; i<depth ; ++i )
-	{
-		distanceBySlice[i] = iCoord2D(i,findNearestPointOfThePith(marrow[i],i,componentNumber).distance(marrow[i]));
-	}
-	return distanceBySlice;
-}
-
-template< typename T >
-QVector<iCoord2D> BillonTpl<T>::extractContour( const iCoord2D &center, const int &sliceNumber, const int &componentNumber, iCoord2D startPoint ) const
+QVector<iCoord2D> BillonTpl<T>::extractContour( const iCoord2D &center, const int &sliceNumber, int threshold, iCoord2D startPoint ) const
 {
 	QVector<iCoord2D> contourPoints;
 
 	if ( startPoint == iCoord2D(-1,-1) )
 	{
-		startPoint = findNearestPointOfThePith( center, sliceNumber, componentNumber );
+		startPoint = findNearestPointOfThePith( center, sliceNumber, threshold );
 	}
 
 	if ( startPoint != iCoord2D(-1,-1) )
@@ -349,6 +336,7 @@ QVector<iCoord2D> BillonTpl<T>::extractContour( const iCoord2D &center, const in
 		yBegin = yCurrent = startPoint.y;
 		interdit = orientation*8./TWO_PI;
 		interdit = (interdit+4)%8;
+		threshold++;
 		do
 		{
 			contourPoints.append(iCoord2D(xCurrent,yCurrent));
@@ -359,7 +347,7 @@ QVector<iCoord2D> BillonTpl<T>::extractContour( const iCoord2D &center, const in
 			vy[0] = vy[4] = yCurrent;
 			vy[5] = vy[6] = vy[7] = yCurrent-1;
 			j = (interdit+1)%8;
-			while ( currentSlice.at(vy[j%8],vx[j%8]) != componentNumber && j < interdit+8 ) ++j;
+			while ( currentSlice.at(vy[j%8],vx[j%8]) < threshold && j < interdit+8 ) ++j;
 			xCurrent = vx[j%8];
 			yCurrent = vy[j%8];
 			interdit = (j+4)%8;

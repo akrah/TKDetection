@@ -146,8 +146,10 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 	QObject::connect(_ui->_buttonSelectSectorIntervalUpdate, SIGNAL(clicked()), this, SLOT(selectCurrentSectorInterval()));
 	QObject::connect(_ui->_sliderSectorThresholding, SIGNAL(valueChanged(int)), _ui->_spinSectorThresholding, SLOT(setValue(int)));
 	QObject::connect(_ui->_spinSectorThresholding, SIGNAL(valueChanged(int)), _ui->_sliderSectorThresholding, SLOT(setValue(int)));
-	QObject::connect(_ui->_sliderMinimalSizeOfConnexComponents, SIGNAL(valueChanged(int)), _ui->_spinMinimalSizeOfConnexComponents, SLOT(setValue(int)));
-	QObject::connect(_ui->_spinMinimalSizeOfConnexComponents, SIGNAL(valueChanged(int)), _ui->_sliderMinimalSizeOfConnexComponents, SLOT(setValue(int)));
+	QObject::connect(_ui->_sliderMinimalSizeOf3DConnexComponents, SIGNAL(valueChanged(int)), _ui->_spinMinimalSizeOf3DConnexComponents, SLOT(setValue(int)));
+	QObject::connect(_ui->_spinMinimalSizeOf3DConnexComponents, SIGNAL(valueChanged(int)), _ui->_sliderMinimalSizeOf3DConnexComponents, SLOT(setValue(int)));
+	QObject::connect(_ui->_sliderMinimalSizeOf2DConnexComponents, SIGNAL(valueChanged(int)), _ui->_spinMinimalSizeOf2DConnexComponents, SLOT(setValue(int)));
+	QObject::connect(_ui->_spinMinimalSizeOf2DConnexComponents, SIGNAL(valueChanged(int)), _ui->_sliderMinimalSizeOf2DConnexComponents, SLOT(setValue(int)));
 	QObject::connect(_ui->_comboConnexComponents, SIGNAL(activated(int)), this, SLOT(drawSlice()));
 	QObject::connect(_ui->_buttonExportSectorToPgm3D, SIGNAL(clicked()), this, SLOT(exportSectorToPgm3D()));
 	QObject::connect(_ui->_buttonExportConnexComponentToPgm3D, SIGNAL(clicked()), this, SLOT(exportConnexComponentToPgm3D()));
@@ -315,7 +317,7 @@ void MainWindow::drawSlice( const int &sliceNumber ) {
 
 
 				const Interval &sliceInterval = _sliceHistogram->branchesAreas()[_ui->_comboSelectSliceInterval->currentIndex()-1];
-				Billon *biggestComponents = ConnexComponentExtractor::extractBiggestConnexComponents( _componentBillon->slice(sliceNumber-sliceInterval.minValue()), 0, _ui->_spinMinimalSizeOfConnexComponents->value() );
+				Billon *biggestComponents = ConnexComponentExtractor::extractConnexComponents( _componentBillon->slice(sliceNumber-sliceInterval.minValue()), _ui->_spinMinimalSizeOf2DConnexComponents->value(), 0 );
 				const Slice &sectorSlice = biggestComponents->slice(0);
 //				const Slice &sectorSlice = _componentBillon->slice(sliceNumber-sliceInterval.minValue());
 				const int selectedComponents = _ui->_comboConnexComponents->currentIndex();
@@ -346,7 +348,7 @@ void MainWindow::drawSlice( const int &sliceNumber ) {
 				}
 				painter.end();
 
-				_contourCurve->constructCurve( *biggestComponents, _marrow != 0 ? _marrow->at(sliceNumber) : iCoord2D(width/2,height/2), 0, 1, _ui->_spinBlurredSegmentsThickness->value(), _ui->_spinContourSmoothingRadius->value() );
+				_contourCurve->constructCurve( *biggestComponents, _marrow != 0 ? _marrow->at(sliceNumber) : iCoord2D(width/2,height/2), 0, 0, _ui->_spinBlurredSegmentsThickness->value(), _ui->_spinContourSmoothingRadius->value() );
 				//_contourCurve->constructCurve( *_componentBillon, _marrow != 0 ? _marrow->at(sliceNumber) : iCoord2D(width/2,height/2), sliceNumber-sliceInterval.minValue(), 1, _ui->_spinBlurredSegmentsThickness->value(), _ui->_spinContourSmoothingRadius->value() );
 				_contourCurve->drawRestrictedComponent(_pix);
 				_contourCurve->draw(_pix);
@@ -982,9 +984,9 @@ void MainWindow::selectSectorInterval( const int &index ) {
 
 		if ( _ui->_checkEnableConnexComponents->isChecked() )
 		{
-			//_componentBillon = ConnexComponentExtractor::extractConnexComponent(*_sectorBillon,_ui->_sliderMinimalSizeOfConnexComponents->value(),threshold);
-			_componentBillon = ConnexComponentExtractor::extractBiggestConnexComponent(*_sectorBillon,threshold);
-			const int nbComponents = _componentBillon->maxValue()+1;
+			_componentBillon = ConnexComponentExtractor::extractConnexComponents(*_sectorBillon,_ui->_spinMinimalSizeOf3DConnexComponents->value(),threshold);
+			//_componentBillon = ConnexComponentExtractor::extractBiggestConnexComponent(*_sectorBillon,threshold);
+			const int nbComponents = _componentBillon->maxValue();
 			for ( i=1 ; i<nbComponents ; ++i )
 			{
 				_ui->_comboConnexComponents->addItem(tr("Composante %1").arg(i));
@@ -999,9 +1001,9 @@ void MainWindow::selectSectorInterval( const int &index ) {
 			qreal minVal = width;
 			for ( i=0 ; i<depth ; ++i )
 			{
-				biggestComponents = ConnexComponentExtractor::extractBiggestConnexComponents( _componentBillon->slice(i), 0, _ui->_spinMinimalSizeOfConnexComponents->value() );
-				nearestPoint = biggestComponents->findNearestPointOfThePith( _marrow->at(firstSlice+i), 0, 1 );
-				//nearestPoint = _componentBillon->findNearestPointOfThePith( _marrow->at(firstSlice+i), i, 1 );
+				biggestComponents = ConnexComponentExtractor::extractConnexComponents( _componentBillon->slice(i), _ui->_spinMinimalSizeOf2DConnexComponents->value(), 0 );
+				nearestPoint = biggestComponents->findNearestPointOfThePith( _marrow->at(firstSlice+i), 0, 0 );
+				//nearestPoint = _componentBillon->findNearestPointOfThePith( _marrow->at(firstSlice+i), i, 0 );
 				histData[i].value = nearestPoint.distance(_marrow->at(firstSlice+i));
 				histData[i].interval.setInterval(i,i+1);
 				if ( minVal > histData[i].value )
@@ -1016,10 +1018,10 @@ void MainWindow::selectSectorInterval( const int &index ) {
 			_histogramDistanceMarrowToNearestPoint.setSamples(histData);
 			_ui->_plotDistanceMarrowToNearestPoint->replot();
 
-			upperIndex = minIndex+2;
-			while ( histData[upperIndex+3].value - histData[upperIndex].value > 3. ) upperIndex++;
-			lowerIndex = minIndex-2;
-			while ( histData[lowerIndex-3].value - histData[lowerIndex].value > 3. ) lowerIndex--;
+			upperIndex = qMin(depth-3,minIndex+2);
+			while ( upperIndex < depth-3 && histData[upperIndex+3].value - histData[upperIndex].value > 3. ) upperIndex++;
+			lowerIndex = qMax(3,minIndex-2);
+			while ( lowerIndex > 2 && histData[lowerIndex-3].value - histData[lowerIndex].value > 3. ) lowerIndex--;
 
 			_knotIntervalInDistanceMarrowToNearestPointHistogram.setBounds(lowerIndex+1,upperIndex-1);
 
@@ -1180,7 +1182,7 @@ void MainWindow::exportContours() {
 				return;
 			}
 			Billon *biggestComponent = ConnexComponentExtractor::extractBiggestConnexComponent( _componentBillon->slice(_currentSlice-sliceInterval.minValue()), 0 );
-			QVector<iCoord2D> contourPoints = biggestComponent->extractContour( _marrow != 0 ? _marrow->at(_currentSlice) : iCoord2D(_billon->n_cols/2,_billon->n_rows/2), 0, 1 );
+			QVector<iCoord2D> contourPoints = biggestComponent->extractContour( _marrow != 0 ? _marrow->at(_currentSlice) : iCoord2D(_billon->n_cols/2,_billon->n_rows/2), 0, 0 );
 
 			QTextStream stream(&file);
 			stream << contourPoints.size() << endl;
@@ -1223,7 +1225,7 @@ void MainWindow::exportContourComponentToPgm3D()
 			for ( int k=_knotIntervalInDistanceMarrowToNearestPointHistogram.minValue() ; k<=_knotIntervalInDistanceMarrowToNearestPointHistogram.maxValue() ; ++k )
 			{
 				marrowCoord = _marrow != 0 ? _marrow->at(sliceInterval.minValue()+k) : iCoord2D(width/2,height/2);
-				biggestComponents = ConnexComponentExtractor::extractBiggestConnexComponents( _componentBillon->slice(k), 0, _ui->_spinMinimalSizeOfConnexComponents->value() );
+				biggestComponents = ConnexComponentExtractor::extractConnexComponents( _componentBillon->slice(k), _ui->_spinMinimalSizeOf2DConnexComponents->value(), 0 );
 				contourCurve.constructCurve( *biggestComponents, marrowCoord, 0, 1, _ui->_spinBlurredSegmentsThickness->value(), _ui->_spinContourSmoothingRadius->value() );
 				contourCurve.writeContourContentInPgm3D(dstream);
 				delete biggestComponents;
@@ -1237,157 +1239,138 @@ void MainWindow::exportContourComponentToPgm3D()
 	}
 }
 
+void MainWindow::createVoxelSetAllIntervals(std::vector<iCoord3D> &vectVoxels)
+{
+	for ( int l=0 ; l< ((_ui->_comboSelectSliceInterval)->count())-1 ; l++ )
+	{
+		cerr << "-------------------------"<< endl;
+		cerr << "processing Interval Num=" << l+1 << endl;
+
+		_ui->_comboSelectSliceInterval->setCurrentIndex(l+1);
+		selectSliceInterval(l+1);
+		const Interval &sliceInterval = _sliceHistogram->branchesAreas()[_ui->_comboSelectSliceInterval->currentIndex()];
+		const QVector<Interval> &intervals = _pieChartDiagrams->branchesSectors();
+
+		if ( !intervals.isEmpty() )
+		{
+			Billon *biggestComponents;
+			iCoord2D marrowCoord;
+			ContourCurve contourCurve;
+
+			for ( int i=0 ; i<intervals.size()-1 ; ++i )
+			{
+				cerr << "Generating contours branch num " << i ;
+				_ui->_comboSelectSectorInterval->setCurrentIndex(i+1);
+				selectSectorInterval(i+1);
+
+				const int &width = _componentBillon->n_cols;
+				const int &height = _componentBillon->n_rows;
 
 
+				for ( int k=_knotIntervalInDistanceMarrowToNearestPointHistogram.minValue() ; k<=_knotIntervalInDistanceMarrowToNearestPointHistogram.maxValue() ; ++k )
+				{
+					marrowCoord = _marrow != 0 ? _marrow->at(sliceInterval.minValue()+k) : iCoord2D(width/2,height/2);
+					biggestComponents = ConnexComponentExtractor::extractConnexComponents( _componentBillon->slice(k), _ui->_spinMinimalSizeOf2DConnexComponents->value(), 0 );
+					contourCurve.constructCurve( *biggestComponents, marrowCoord, 0, 0, _ui->_spinBlurredSegmentsThickness->value(), _ui->_spinContourSmoothingRadius->value() );
+					contourCurve.getContourContentPoints(vectVoxels, k+sliceInterval.minValue());
 
+					delete biggestComponents;
+					biggestComponents = 0;
+				}
+				cerr << " ... [done]" <<endl;
+			}
+		}
+	}
+}
 
+void MainWindow::createVoxelSet(std::vector<iCoord3D> &vectVoxels)
+{
+	const Interval &sliceInterval = _sliceHistogram->branchesAreas()[_ui->_comboSelectSliceInterval->currentIndex()-1];
+	const QVector<Interval> &intervals = _pieChartDiagrams->branchesSectors();
 
-void MainWindow::createVoxelSetAllIntervals(std::vector<iCoord3D> &vectVoxels){
+	if ( !intervals.isEmpty() )
+	{
+		Billon *biggestComponents;
+		iCoord2D marrowCoord;
+		ContourCurve contourCurve;
 
-  for(unsigned int l = 0; l< ((_ui->_comboSelectSliceInterval)->count())-1; l++){
-    cerr << "-------------------------"<< endl;
-    cerr << "processing Interval Num=" << l+1 << endl;
-    
-    _ui->_comboSelectSliceInterval->setCurrentIndex(l+1);
-    selectSliceInterval(l+1);
-    const Interval &sliceInterval = _sliceHistogram->branchesAreas()[_ui->_comboSelectSliceInterval->currentIndex()];	  
-    const QVector<Interval> &intervals = _pieChartDiagrams->branchesSectors();
-  
-  if ( !intervals.isEmpty() )
-    {
-      
-      for (unsigned int i=0 ; i<intervals.size()-1 ; ++i )
-        {
-  	  cerr << "Generating contours branch num " << i ;
-  	  _ui->_comboSelectSectorInterval->setCurrentIndex(i+1);
-  	  selectSectorInterval(i+1);
+		for ( int i=0 ; i<intervals.size() ; ++i )
+		{
+			cerr << "Generating contours branch num " << i ;
+			_ui->_comboSelectSectorInterval->setCurrentIndex(i+1);
+			selectSectorInterval(i+1);
 
-  	  const int &width = _componentBillon->n_cols;
-  	  const int &height = _componentBillon->n_rows;
-  	  const int &depth = _knotIntervalInDistanceMarrowToNearestPointHistogram.width()+1;	  
+			const int &width = _componentBillon->n_cols;
+			const int &height = _componentBillon->n_rows;
 
-  	  Billon *biggestComponents;
-  	  iCoord2D marrowCoord;
-	      
-  	  for ( int k=_knotIntervalInDistanceMarrowToNearestPointHistogram.minValue() ; k<=_knotIntervalInDistanceMarrowToNearestPointHistogram.maxValue() ; ++k )
-  	    {
-	     
-  	      marrowCoord = _marrow != 0 ? _marrow->at(sliceInterval.minValue()+k) : iCoord2D(width/2,height/2);
-  	      biggestComponents = ConnexComponentExtractor::extractBiggestConnexComponents( _componentBillon->slice(k), 0, _ui->_spinMinimalSizeOfConnexComponents->value() );
-  	      ContourCurve contourCurve;
-  	      contourCurve.constructCurve( *biggestComponents, marrowCoord, 0, 1, _ui->_spinBlurredSegmentsThickness->value(), _ui->_spinContourSmoothingRadius->value() );
-  	      contourCurve.getContourContentPoints(vectVoxels, k+sliceInterval.minValue());
-	      
-  	      delete biggestComponents;
-  	      biggestComponents = 0;
-  	    }
-  	  cerr << " ... [done]" <<endl;
-	  
-  	}
-    }
+			for ( int k=_knotIntervalInDistanceMarrowToNearestPointHistogram.minValue() ; k<=_knotIntervalInDistanceMarrowToNearestPointHistogram.maxValue() ; ++k )
+			{
+				marrowCoord = _marrow != 0 ? _marrow->at(sliceInterval.minValue()+k) : iCoord2D(width/2,height/2);
+				biggestComponents = ConnexComponentExtractor::extractConnexComponents( _componentBillon->slice(k), _ui->_spinMinimalSizeOf2DConnexComponents->value(), 0 );
+				contourCurve.constructCurve( *biggestComponents, marrowCoord, 0, 0, _ui->_spinBlurredSegmentsThickness->value(), _ui->_spinContourSmoothingRadius->value() );
+				contourCurve.getContourContentPoints(vectVoxels, sliceInterval.minValue()+ k);
 
-  }
+				delete biggestComponents;
+				biggestComponents = 0;
+			}
+			cerr << " ... [done]" <<endl;
+		}
+	}
+}
+
+void MainWindow::exportAllContourComponentOfVoxels()
+{
+	if ( _componentBillon != 0 ) {
+		QString fileName = QFileDialog::getSaveFileName(this, tr("Exporter la composante délimitée par le contour en SDP"), "output.sdp", tr("Fichiers SDP (*.sdp);;Tous les fichiers (*.*)"));
+		if ( !fileName.isEmpty() )
+		{
+			QFile file(fileName);
+			if( !file.open(QIODevice::WriteOnly) )
+			{
+				qDebug() << QObject::tr("ERREUR : Impossible de créer le ficher %1.").arg(fileName);
+				return;
+			}
+			QTextStream stream(&file);
+			stream << "#SDP (Sequence of Discrete Points)" << endl;
+			std::vector<iCoord3D> voxelSet;
+			createVoxelSet(voxelSet);
+			for ( unsigned int i=0 ; i<voxelSet.size() ; i++)
+			{
+				stream << voxelSet.at(i).x << " " << voxelSet.at(i).y << " " << voxelSet.at(i).z << endl;
+			}
+			QMessageBox::information(this,"Export branches en SDP réussie", "Export réussi !");
+		}
+	}
 }
 
 
 
+void MainWindow::exportAllContourComponentOfVoxelsAllIntervals()
+{
+	if ( _componentBillon != 0 )
+	{
+		QString fileName = QFileDialog::getSaveFileName(this, tr("Exporter la composante délimitée par le contour en SDP"), "output.sdp", tr("Fichiers SDP (*.sdp);;Tous les fichiers (*.*)"));
+		if ( !fileName.isEmpty() )
+		{
+			QFile file(fileName);
+			if( !file.open(QIODevice::WriteOnly) )
+			{
+				qDebug() << QObject::tr("ERREUR : Impossible de créer le ficher %1.").arg(fileName);
+				return;
+			}
 
+			QTextStream stream(&file);
+			stream << "#SDP (Sequence of Discrete Points)" << endl;
+			std::vector<iCoord3D> voxelSet;
+			createVoxelSetAllIntervals(voxelSet);
+			for ( unsigned int i=0 ; i<voxelSet.size() ; i++ )
+			{
+				stream << voxelSet.at(i).x << " " << voxelSet.at(i).y << " " << voxelSet.at(i).z << endl;
+			}
 
-
-void MainWindow::createVoxelSet(std::vector<iCoord3D> &vectVoxels){
-
-    const Interval &sliceInterval = _sliceHistogram->branchesAreas()[_ui->_comboSelectSliceInterval->currentIndex()-1];	  
-    const QVector<Interval> &intervals = _pieChartDiagrams->branchesSectors();
-  
-  if ( !intervals.isEmpty() )
-    {
-      
-      for (unsigned int i=0 ; i<intervals.size() ; ++i )
-        {
-	  cerr << "Generating contours branch num " << i ;
-	  _ui->_comboSelectSectorInterval->setCurrentIndex(i+1);
-	  selectSectorInterval(i+1);
-
-	  const int &width = _componentBillon->n_cols;
-	  const int &height = _componentBillon->n_rows;
-	  const int &depth = _knotIntervalInDistanceMarrowToNearestPointHistogram.width()+1;	  
-
-	  Billon *biggestComponents;
-	  iCoord2D marrowCoord;
-	      
-	  for ( int k=_knotIntervalInDistanceMarrowToNearestPointHistogram.minValue() ; k<=_knotIntervalInDistanceMarrowToNearestPointHistogram.maxValue() ; ++k )
-	    {
-	     
-	      marrowCoord = _marrow != 0 ? _marrow->at(sliceInterval.minValue()+k) : iCoord2D(width/2,height/2);
-	      biggestComponents = ConnexComponentExtractor::extractBiggestConnexComponents( _componentBillon->slice(k), 0, _ui->_spinMinimalSizeOfConnexComponents->value() );
-	      ContourCurve contourCurve;
-	      contourCurve.constructCurve( *biggestComponents, marrowCoord, 0, 1, _ui->_spinBlurredSegmentsThickness->value(), _ui->_spinContourSmoothingRadius->value() );
-	      contourCurve.getContourContentPoints(vectVoxels, sliceInterval.minValue()+ k);
-	      
-	      delete biggestComponents;
-	      biggestComponents = 0;
-	    }
-	  cerr << " ... [done]" <<endl;
-	  
-
-    }
-  }
-}
-
-
-
-
-
-void MainWindow::exportAllContourComponentOfVoxels(){
-
-  if ( _componentBillon != 0 ) {
-
-    QString fileName = QFileDialog::getSaveFileName(this, tr("Exporter la composante délimitée par le contour en SDP"), "output.sdp", tr("Fichiers SDP (*.sdp);;Tous les fichiers (*.*)"));
-    if ( !fileName.isEmpty() ) {
-      QFile file(fileName);
-      if( !file.open(QIODevice::WriteOnly) ) {
-	qDebug() << QObject::tr("ERREUR : Impossible de créer le ficher %1.").arg(fileName);
-	return;
-      }
-
-      QTextStream stream(&file);
-      stream << "#SDP (Sequence of Discrete Points)" << endl;
-      std::vector<iCoord3D> voxelSet;
-      createVoxelSet(voxelSet);
-      for(unsigned int i=0; i<voxelSet.size(); i++){
-	stream << voxelSet.at(i).x << " " << voxelSet.at(i).y << " " << voxelSet.at(i).z << endl;
-      }
-	    
-      QMessageBox::information(this,"Export branches en SDP réussie", "Export réussi !");
-    }
-  }
-}
-
-
-
-void MainWindow::exportAllContourComponentOfVoxelsAllIntervals(){
-
-  if ( _componentBillon != 0 ) {
-
-    QString fileName = QFileDialog::getSaveFileName(this, tr("Exporter la composante délimitée par le contour en SDP"), "output.sdp", tr("Fichiers SDP (*.sdp);;Tous les fichiers (*.*)"));
-    if ( !fileName.isEmpty() ) {
-      QFile file(fileName);
-      if( !file.open(QIODevice::WriteOnly) ) {
-	qDebug() << QObject::tr("ERREUR : Impossible de créer le ficher %1.").arg(fileName);
-	return;
-      }
-
-      QTextStream stream(&file);
-      stream << "#SDP (Sequence of Discrete Points)" << endl;
-      std::vector<iCoord3D> voxelSet;
-      createVoxelSetAllIntervals(voxelSet);
-      for(unsigned int i=0; i<voxelSet.size(); i++){
-	stream << voxelSet.at(i).x << " " << voxelSet.at(i).y << " " << voxelSet.at(i).z << endl;
-      }
-	    
-      QMessageBox::information(this,"Export branches en SDP réussie", "Export réussi !");
-    }
-  }
+			QMessageBox::information(this,"Export branches en SDP réussie", "Export réussi !");
+		}
+	}
 }
 
 
