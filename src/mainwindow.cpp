@@ -177,7 +177,8 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 	QObject::connect(_ui->_buttonExportSectorsDiagramAndHistogram, SIGNAL(clicked()), this, SLOT(exportSectorDiagramAndHistogram()));
 	QObject::connect(_ui->_spinBlurredSegmentsThickness, SIGNAL(valueChanged(int)), this, SLOT(drawSlice()));
 	QObject::connect(_ui->_buttonExportContourComponentToPgm3D, SIGNAL(clicked()), this, SLOT(exportContourComponentToPgm3D()));
-	QObject::connect(_ui->_buttonExportContourComponentAllIntervalSDP, SIGNAL(clicked()), this, SLOT(exportAllContourComponentOfVoxels()));
+	QObject::connect(_ui->_buttonExportContourComponentAllInIntervalSDP, SIGNAL(clicked()), this, SLOT(exportAllContourComponentOfVoxels()));
+	QObject::connect(_ui->_buttonExportContourComponentAllIntervalsSDP, SIGNAL(clicked()), this, SLOT(exportAllContourComponentOfVoxelsAllIntervals()));
 
 	// Raccourcis des actions du menu
 	_ui->_actionOpenDicom->setShortcut(Qt::CTRL + Qt::Key_O);
@@ -1237,10 +1238,62 @@ void MainWindow::exportContourComponentToPgm3D()
 
 
 
+void MainWindow::createVoxelSetAllIntervals(std::vector<iCoord3D> &vectVoxels){
+
+  for(unsigned int l = 0; l< ((_ui->_comboSelectSliceInterval)->count())-1; l++){
+    cerr << "-------------------------"<< endl;
+    cerr << "processing Interval Num=" << l+1 << endl;
+    
+    _ui->_comboSelectSliceInterval->setCurrentIndex(l+1);
+    selectSliceInterval(l+1);
+    const Interval &sliceInterval = _sliceHistogram->branchesAreas()[_ui->_comboSelectSliceInterval->currentIndex()];	  
+    const QVector<Interval> &intervals = _pieChartDiagrams->branchesSectors();
+  
+  if ( !intervals.isEmpty() )
+    {
+      
+      for (unsigned int i=0 ; i<intervals.size() ; ++i )
+        {
+  	  cerr << "Generating contours branch num " << i ;
+  	  _ui->_comboSelectSectorInterval->setCurrentIndex(i+1);
+  	  selectSectorInterval(i+1);
+
+  	  const int &width = _componentBillon->n_cols;
+  	  const int &height = _componentBillon->n_rows;
+  	  const int &depth = _knotIntervalInDistanceMarrowToNearestPointHistogram.width()+1;	  
+
+  	  Billon *biggestComponents;
+  	  iCoord2D marrowCoord;
+	      
+  	  for ( int k=_knotIntervalInDistanceMarrowToNearestPointHistogram.minValue() ; k<=_knotIntervalInDistanceMarrowToNearestPointHistogram.maxValue() ; ++k )
+  	    {
+	     
+  	      marrowCoord = _marrow != 0 ? _marrow->at(sliceInterval.minValue()+k) : iCoord2D(width/2,height/2);
+  	      biggestComponents = ConnexComponentExtractor::extractBiggestConnexComponents( _componentBillon->slice(k), 0, _ui->_spinMinimalSizeOfConnexComponents->value() );
+  	      ContourCurve contourCurve;
+  	      contourCurve.constructCurve( *biggestComponents, marrowCoord, 0, 1, _ui->_spinBlurredSegmentsThickness->value(), _ui->_spinContourSmoothingRadius->value() );
+  	      contourCurve.getContourContentPoints(vectVoxels, k);
+	      
+  	      delete biggestComponents;
+  	      biggestComponents = 0;
+  	    }
+  	  cerr << " ... [done]" <<endl;
+	  
+  	}
+    }
+
+  }
+}
+
+
+
+
+
+
 void MainWindow::createVoxelSet(std::vector<iCoord3D> &vectVoxels){
 
-  const Interval &sliceInterval = _sliceHistogram->branchesAreas()[_ui->_comboSelectSliceInterval->currentIndex()-1];	  
-  const QVector<Interval> &intervals = _pieChartDiagrams->branchesSectors();
+    const Interval &sliceInterval = _sliceHistogram->branchesAreas()[_ui->_comboSelectSliceInterval->currentIndex()-1];	  
+    const QVector<Interval> &intervals = _pieChartDiagrams->branchesSectors();
   
   if ( !intervals.isEmpty() )
     {
@@ -1248,19 +1301,19 @@ void MainWindow::createVoxelSet(std::vector<iCoord3D> &vectVoxels){
       for (unsigned int i=0 ; i<intervals.size() ; ++i )
         {
 	  cerr << "Generating contours branch num " << i ;
-	  _ui->_comboSelectSectorInterval->setCurrentIndex(i);
+	  _ui->_comboSelectSectorInterval->setCurrentIndex(i+1);
 	  selectSectorInterval(i+1);
 
 	  const int &width = _componentBillon->n_cols;
 	  const int &height = _componentBillon->n_rows;
 	  const int &depth = _knotIntervalInDistanceMarrowToNearestPointHistogram.width()+1;	  
 
-	  
+	  Billon *biggestComponents;
+	  iCoord2D marrowCoord;
+	      
 	  for ( int k=_knotIntervalInDistanceMarrowToNearestPointHistogram.minValue() ; k<=_knotIntervalInDistanceMarrowToNearestPointHistogram.maxValue() ; ++k )
 	    {
-	      Billon *biggestComponents;
-	      iCoord2D marrowCoord;
-	  
+	     
 	      marrowCoord = _marrow != 0 ? _marrow->at(sliceInterval.minValue()+k) : iCoord2D(width/2,height/2);
 	      biggestComponents = ConnexComponentExtractor::extractBiggestConnexComponents( _componentBillon->slice(k), 0, _ui->_spinMinimalSizeOfConnexComponents->value() );
 	      ContourCurve contourCurve;
@@ -1272,8 +1325,9 @@ void MainWindow::createVoxelSet(std::vector<iCoord3D> &vectVoxels){
 	    }
 	  cerr << " ... [done]" <<endl;
 	  
-	}
+
     }
+  }
 }
 
 
@@ -1296,6 +1350,33 @@ void MainWindow::exportAllContourComponentOfVoxels(){
       stream << "#SDP (Sequence of Discrete Points)" << endl;
       std::vector<iCoord3D> voxelSet;
       createVoxelSet(voxelSet);
+      for(unsigned int i=0; i<voxelSet.size(); i++){
+	stream << voxelSet.at(i).x << " " << voxelSet.at(i).y << " " << voxelSet.at(i).z << endl;
+      }
+	    
+      QMessageBox::information(this,"Export branches en SDP réussie", "Export réussi !");
+    }
+  }
+}
+
+
+
+void MainWindow::exportAllContourComponentOfVoxelsAllIntervals(){
+
+  if ( _componentBillon != 0 ) {
+
+    QString fileName = QFileDialog::getSaveFileName(this, tr("Exporter la composante délimitée par le contour en SDP"), "output.sdp", tr("Fichiers SDP (*.sdp);;Tous les fichiers (*.*)"));
+    if ( !fileName.isEmpty() ) {
+      QFile file(fileName);
+      if( !file.open(QIODevice::WriteOnly) ) {
+	qDebug() << QObject::tr("ERREUR : Impossible de créer le ficher %1.").arg(fileName);
+	return;
+      }
+
+      QTextStream stream(&file);
+      stream << "#SDP (Sequence of Discrete Points)" << endl;
+      std::vector<iCoord3D> voxelSet;
+      createVoxelSetAllIntervals(voxelSet);
       for(unsigned int i=0; i<voxelSet.size(); i++){
 	stream << voxelSet.at(i).x << " " << voxelSet.at(i).y << " " << voxelSet.at(i).z << endl;
       }

@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>789</width>
-    <height>785</height>
+    <height>819</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -105,7 +105,7 @@
            <x>0</x>
            <y>0</y>
            <width>241</width>
-           <height>536</height>
+           <height>570</height>
           </rect>
          </property>
          <layout class="QHBoxLayout" name="horizontalLayout_8">
@@ -1415,9 +1415,16 @@ autour de la moelle</string>
           </widget>
          </item>
          <item>
-          <widget class="QPushButton" name="_buttonExportContourComponentAllIntervalSDP">
+          <widget class="QPushButton" name="_buttonExportContourComponentAllInIntervalSDP">
            <property name="text">
             <string>Export  intérieur contours en SDP (tous ceux de l'interval)</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="_buttonExportContourComponentAllIntervalsSDP">
+           <property name="text">
+            <string>Export  intérieur contours en SDP (tous)</string>
            </property>
           </widget>
          </item>
