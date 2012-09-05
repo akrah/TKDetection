@@ -550,3 +550,25 @@ void ContourCurve::writeContourContentInPgm3D( QDataStream &stream ) const
 		}
 	}
 }
+
+
+void
+ContourCurve::getContourContentPoints(std::vector<iCoord3D> &vectPoints, const unsigned int &sliceNum) const
+{
+
+  for (unsigned int j=0 ; j< _component.n_rows ; ++j )
+   {
+     
+     for (unsigned i=0 ; i< _component.n_cols ; ++i )
+       
+       {
+	 
+	 if(_component(j,i)==1){
+	   
+	   vectPoints.push_back(iCoord3D(j,i, sliceNum));
+	   
+	 }
+	 
+       }
+   }
+}
