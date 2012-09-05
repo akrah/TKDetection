@@ -213,45 +213,6 @@ qreal BillonTpl<T>::getRestrictedAreaMeansRadius( const Marrow *marrow, const in
 	return radius;
 }
 
-//template < typename T >
-//iCoord2D BillonTpl<T>::findNearestPointOfThePith( const Marrow *marrow, const int &sliceNumber, const int &componentNumber ) const
-//{
-//	// Find the pixel closest to the pith
-//	const arma::Mat<T> &currentSlice = this->slice(sliceNumber);
-//	const int width = this->n_cols;
-//	const int height = this->n_rows;
-//	const int xCenter = marrow != 0 ? marrow->at(sliceNumber).x : width/2;
-//	const int yCenter = marrow != 0 ? marrow->at(sliceNumber).y : height/2;
-
-//	rCoord2D position;
-//	qreal radiusMax, orientation, step;
-//	bool edgeFind = false;
-//	radiusMax = qMin( qMin(xCenter,width-xCenter), qMin(yCenter,height-yCenter) );
-
-//	step = 0.;
-//	while ( !edgeFind && step < radiusMax-1 )
-//	{
-//		step+=0.5;
-//		for ( orientation = 0. ; orientation <= TWO_PI && !edgeFind ; orientation+=(1./(2*PI*radiusMax)) )
-//		{
-//			position.x = xCenter + step*qCos(orientation);
-//			position.y = yCenter - step*qSin(orientation);
-//			if ( currentSlice.at(position.y,position.x) == componentNumber ) edgeFind = true;
-//		}
-//	}
-
-//	if ( edgeFind ) {
-//		qDebug() << "Pixel le plus proche de la moelle : ( " << position.x << ", " << position.y << " )";
-//	}
-//	else {
-//		qDebug() << "Aucun pixel et donc aucune composante connexe";
-//		position.x = 0;
-//		position.y = 0;
-//	}
-
-//	return iCoord2D(position.x,position.y);
-//}
-
 template < typename T >
 iCoord2D BillonTpl<T>::findNearestPointOfThePith( const iCoord2D &center, const int &sliceNumber, const int &componentNumber ) const
 {
@@ -263,7 +224,7 @@ iCoord2D BillonTpl<T>::findNearestPointOfThePith( const iCoord2D &center, const 
 	const int yCenter = center.y;
 	const int radiusMax = qMin( qMin(xCenter,width-xCenter), qMin(yCenter,height-yCenter) );
 
-	rCoord2D position;
+	iCoord2D position;
 	bool edgeFind = false;
 	int currentRadius, x, y, d;
 
@@ -349,7 +310,7 @@ iCoord2D BillonTpl<T>::findNearestPointOfThePith( const iCoord2D &center, const 
 		position.y = -1;
 	}
 
-	return iCoord2D(position.x,position.y);
+	return position;
 }
 
 template< typename T >
@@ -367,23 +328,23 @@ QVector<iCoord2D> BillonTpl<T>::histogramOfNearestPointDistance( const Marrow &m
 template< typename T >
 QVector<iCoord2D> BillonTpl<T>::extractContour( const iCoord2D &center, const int &sliceNumber, const int &componentNumber, iCoord2D startPoint ) const
 {
+	QVector<iCoord2D> contourPoints;
+
 	if ( startPoint == iCoord2D(-1,-1) )
 	{
 		startPoint = findNearestPointOfThePith( center, sliceNumber, componentNumber );
 	}
 
-	// Suivi du contour
-	QVector<iCoord2D> contourPoints;
 	if ( startPoint != iCoord2D(-1,-1) )
 	{
 		const arma::Mat<T> &currentSlice = this->slice(sliceNumber);
 		const int xCenter = center.x;
 		const int yCenter = center.y;
-		qreal orientation = ANGLE(xCenter,yCenter,startPoint.x,startPoint.y);
-
+		qreal orientation;
 		int xBegin, yBegin, xCurrent, yCurrent, interdit, j;
 		QVector<int> vx(8), vy(8);
 
+		orientation = ANGLE(xCenter,yCenter,startPoint.x,startPoint.y);
 		xBegin = xCurrent = startPoint.x;
 		yBegin = yCurrent = startPoint.y;
 		interdit = orientation*8./TWO_PI;

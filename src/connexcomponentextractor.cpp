@@ -83,6 +83,62 @@ namespace ConnexComponentExtractor
 		return components;
 	}
 
+	Billon * extractBiggestConnexComponent( Billon &billon, const __billon_type__ &threshold )
+	{
+		const uint width = billon.n_cols;
+		const uint height = billon.n_rows;
+		const uint depth = billon.n_slices;
+
+		int nbLabel = 0;
+		QMap<int, QList<iCoord3D> > connexComponentList;
+		arma::imat* labels = new arma::imat(height, width);
+		arma::imat* oldSlice = new arma::imat(height, width);
+		oldSlice->fill(0);
+		arma::imat* tmp;
+
+		//On parcours les tranches 1 par 1
+		for ( unsigned int k=0 ; k<depth ; k++ )
+		{
+			nbLabel = twoPassAlgorithm((*oldSlice),billon.slice(k),(*labels),connexComponentList,k,nbLabel,threshold);
+			tmp = oldSlice;
+			oldSlice = labels;
+			labels = tmp;
+			tmp = 0;
+		}
+
+		delete labels;
+		delete oldSlice;
+
+		int bigestIndex, bigestSize;
+		bigestIndex = bigestSize = 0;
+		QMapIterator<int, QList<iCoord3D> > iterComponents(connexComponentList);
+		while (iterComponents.hasNext())
+		{
+			iterComponents.next();
+			if ( iterComponents.value().size() > bigestSize )
+			{
+				bigestSize = iterComponents.value().size();
+				bigestIndex = iterComponents.key();
+			}
+		}
+
+		Billon* components = new Billon(width,height,depth);
+		components->setVoxelSize(billon.voxelWidth(),billon.voxelHeight(),billon.voxelDepth());
+		components->setMinValue(0);
+		components->setMaxValue(1);
+		components->fill(0);
+
+		QListIterator<iCoord3D> coords(connexComponentList[bigestIndex]);
+		iCoord3D currentCoord;
+		while (coords.hasNext())
+		{
+			currentCoord = coords.next();
+			components->at(currentCoord.y,currentCoord.x,currentCoord.z) = 1;
+		}
+
+		return components;
+	}
+
 	Billon * extractBiggestConnexComponent( arma::Slice &currentSlice, const __billon_type__ &threshold )
 	{
 		const uint width = currentSlice.n_cols;

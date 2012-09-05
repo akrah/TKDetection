@@ -315,6 +315,7 @@ void MainWindow::drawSlice( const int &sliceNumber ) {
 				const Interval &sliceInterval = _sliceHistogram->branchesAreas()[_ui->_comboSelectSliceInterval->currentIndex()-1];
 				Billon *biggestComponents = ConnexComponentExtractor::extractBiggestConnexComponents( _componentBillon->slice(sliceNumber-sliceInterval.minValue()), 0, _ui->_spinMinimalSizeOfConnexComponents->value() );
 				const Slice &sectorSlice = biggestComponents->slice(0);
+//				const Slice &sectorSlice = _componentBillon->slice(sliceNumber-sliceInterval.minValue());
 				const int selectedComponents = _ui->_comboConnexComponents->currentIndex();
 
 				QPainter painter(&_pix);
@@ -344,6 +345,7 @@ void MainWindow::drawSlice( const int &sliceNumber ) {
 				painter.end();
 
 				_contourCurve->constructCurve( *biggestComponents, _marrow != 0 ? _marrow->at(sliceNumber) : iCoord2D(width/2,height/2), 0, 1, _ui->_spinBlurredSegmentsThickness->value(), _ui->_spinContourSmoothingRadius->value() );
+				//_contourCurve->constructCurve( *_componentBillon, _marrow != 0 ? _marrow->at(sliceNumber) : iCoord2D(width/2,height/2), sliceNumber-sliceInterval.minValue(), 1, _ui->_spinBlurredSegmentsThickness->value(), _ui->_spinContourSmoothingRadius->value() );
 				_contourCurve->drawRestrictedComponent(_pix);
 				_contourCurve->draw(_pix);
 
@@ -978,7 +980,8 @@ void MainWindow::selectSectorInterval( const int &index ) {
 
 		if ( _ui->_checkEnableConnexComponents->isChecked() )
 		{
-			_componentBillon = ConnexComponentExtractor::extractConnexComponent(*_sectorBillon,_ui->_sliderMinimalSizeOfConnexComponents->value(),threshold);
+			//_componentBillon = ConnexComponentExtractor::extractConnexComponent(*_sectorBillon,_ui->_sliderMinimalSizeOfConnexComponents->value(),threshold);
+			_componentBillon = ConnexComponentExtractor::extractBiggestConnexComponent(*_sectorBillon,threshold);
 			const int nbComponents = _componentBillon->maxValue()+1;
 			for ( i=1 ; i<nbComponents ; ++i )
 			{
@@ -996,6 +999,7 @@ void MainWindow::selectSectorInterval( const int &index ) {
 			{
 				biggestComponents = ConnexComponentExtractor::extractBiggestConnexComponents( _componentBillon->slice(i), 0, _ui->_spinMinimalSizeOfConnexComponents->value() );
 				nearestPoint = biggestComponents->findNearestPointOfThePith( _marrow->at(firstSlice+i), 0, 1 );
+				//nearestPoint = _componentBillon->findNearestPointOfThePith( _marrow->at(firstSlice+i), i, 1 );
 				histData[i].value = nearestPoint.distance(_marrow->at(firstSlice+i));
 				histData[i].interval.setInterval(i,i+1);
 				if ( minVal > histData[i].value )
