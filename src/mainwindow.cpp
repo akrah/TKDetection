@@ -1252,7 +1252,7 @@ void MainWindow::createVoxelSetAllIntervals(std::vector<iCoord3D> &vectVoxels){
   if ( !intervals.isEmpty() )
     {
       
-      for (unsigned int i=0 ; i<intervals.size() ; ++i )
+      for (unsigned int i=0 ; i<intervals.size()-1 ; ++i )
         {
   	  cerr << "Generating contours branch num " << i ;
   	  _ui->_comboSelectSectorInterval->setCurrentIndex(i+1);
@@ -1272,7 +1272,7 @@ void MainWindow::createVoxelSetAllIntervals(std::vector<iCoord3D> &vectVoxels){
   	      biggestComponents = ConnexComponentExtractor::extractBiggestConnexComponents( _componentBillon->slice(k), 0, _ui->_spinMinimalSizeOfConnexComponents->value() );
   	      ContourCurve contourCurve;
   	      contourCurve.constructCurve( *biggestComponents, marrowCoord, 0, 1, _ui->_spinBlurredSegmentsThickness->value(), _ui->_spinContourSmoothingRadius->value() );
-  	      contourCurve.getContourContentPoints(vectVoxels, k);
+  	      contourCurve.getContourContentPoints(vectVoxels, k+sliceInterval.minValue());
 	      
   	      delete biggestComponents;
   	      biggestComponents = 0;
@@ -1318,7 +1318,7 @@ void MainWindow::createVoxelSet(std::vector<iCoord3D> &vectVoxels){
 	      biggestComponents = ConnexComponentExtractor::extractBiggestConnexComponents( _componentBillon->slice(k), 0, _ui->_spinMinimalSizeOfConnexComponents->value() );
 	      ContourCurve contourCurve;
 	      contourCurve.constructCurve( *biggestComponents, marrowCoord, 0, 1, _ui->_spinBlurredSegmentsThickness->value(), _ui->_spinContourSmoothingRadius->value() );
-	      contourCurve.getContourContentPoints(vectVoxels, k);
+	      contourCurve.getContourContentPoints(vectVoxels, sliceInterval.minValue()+ k);
 	      
 	      delete biggestComponents;
 	      biggestComponents = 0;
