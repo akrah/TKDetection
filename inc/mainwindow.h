@@ -91,10 +91,11 @@ private slots:
 	void exportSectorDiagramAndHistogram();
 	void exportContours();
  	void exportContourComponentToPgm3D();
-        void createVoxelSetAllIntervals(std::vector<iCoord3D> &vectVoxels);
+        void createVoxelSetAllIntervals(std::vector<iCoord3D> &vectVoxels, bool useOldMethod=false);
         void createVoxelSet(std::vector<iCoord3D> &vectVoxels);
         void exportAllContourComponentOfVoxels();
         void exportAllContourComponentOfVoxelsAllIntervals();
+        void exportAllContourComponentOfVoxelsAllIntervalsOldMethod();
 
 
 private:

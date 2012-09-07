@@ -95,7 +95,7 @@ INCLUDEPATH *=  /usr/include/ \
 				/usr/local/include/ \
 				/usr/include/qwt/
 
-CXXFLAGS += -std=c++0x
+CXXFLAGS += -std=c++0x 
 
 LIBS *= -lblas -llapack -larmadillo
 

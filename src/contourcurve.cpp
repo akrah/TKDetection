@@ -418,6 +418,93 @@ void ContourCurve::constructCurve( const Billon &billon, const iCoord2D &billonC
 
 }
 
+
+
+
+
+
+void ContourCurve::constructCurveOldMethod( const Billon &billon, const iCoord2D &billonCenter, const int &sliceNumber, const int &threshold, const int &blurredSegmentThickness, const int &smoothingRadius, const iCoord2D &startPoint )
+{
+	_datasOriginalContourPoints.clear();
+	_datasOriginalContourPoints = billon.extractContour( billonCenter, sliceNumber, threshold, startPoint );
+	_datasContourPoints.clear();
+	_datasContourPoints = _datasOriginalContourPoints;
+	smoothCurve(_datasContourPoints,smoothingRadius);
+
+	_datasDominantPoints.clear();
+
+	_datasMainDominantPoints.clear();
+	_datasMainDominantPoints.fill(iCoord2D(-1,-1),2);
+	_datasIndexMainDominantPoints.fill(-1,2);
+
+	_datasMainSupportPoints.fill(iCoord2D(-1,-1),2);
+
+	int nbPoints = _datasContourPoints.size();
+
+
+	const arma::Slice &slice = billon.slice(sliceNumber);
+	const int width = slice.n_cols;
+	const int height = slice.n_rows;
+	_component.resize(height,width);
+	_component.fill(0);
+
+	const iCoord2D &mainPoint1 = _datasMainDominantPoints[0];
+	const iCoord2D &mainPoint2 = _datasMainDominantPoints[1];
+	const iCoord2D &support1 = _datasMainSupportPoints[0];
+	const iCoord2D &support2 = _datasMainSupportPoints[1];
+
+	const qreal daMain1Main2 = mainPoint1.y - mainPoint2.y;
+	const qreal dbMain1Main2 = mainPoint2.x - mainPoint1.x;
+	const qreal dcMain1Main2 = daMain1Main2*mainPoint1.x + dbMain1Main2*mainPoint1.y;
+	const bool supToMain1Main2 = ( daMain1Main2*billonCenter.x + dbMain1Main2*billonCenter.y ) > dcMain1Main2;
+
+	const qreal daMain1Support1 = mainPoint1.y - support1.y;
+	const qreal dbMain1Support1 = support1.x - mainPoint1.x;
+	const qreal dcMain1Support1 = daMain1Support1*mainPoint1.x + dbMain1Support1*mainPoint1.y;
+	const bool supToMain1Support1 = ( daMain1Support1*mainPoint2.x + dbMain1Support1*mainPoint2.y ) > dcMain1Support1;
+
+	const qreal daMain2Support2 = mainPoint2.y - support2.y;
+	const qreal dbMain2Support2 = support2.x - mainPoint2.x;
+	const qreal dcMain2Support2 = daMain2Support2*mainPoint2.x + dbMain2Support2*mainPoint2.y;
+	const bool supToMain2Support2 = ( daMain2Support2*mainPoint1.x + dbMain2Support2*mainPoint1.y ) > dcMain2Support2;
+
+	const bool hasMain1 = (mainPoint1.x != -1 || mainPoint1.y != -1);
+	const bool hasMain2 = (mainPoint2.x != -1 || mainPoint2.y != -1);
+	const int nbOriginalPointsContour = _datasOriginalContourPoints.size();
+
+	QPolygon contourPolygonBottom;
+	QPolygon contourPolygonTop;
+	int i,j, index, originalMain1Index, originalMain2Index, currentDistanceMain1, currentDistanceMain2, minXIndex, maxXIndex, minYIndex, maxYIndex;
+
+
+	// Sinon on ajoute la composante en entier
+	minXIndex = maxXIndex = _datasOriginalContourPoints[0].x;
+	minYIndex = maxYIndex = _datasOriginalContourPoints[0].y;
+	for ( i=0 ; i<nbOriginalPointsContour ; ++i )
+	  {
+	    contourPolygonBottom << QPoint(_datasOriginalContourPoints[i].x,_datasOriginalContourPoints[i].y);
+	    minXIndex = qMin(minXIndex,_datasOriginalContourPoints[i].x);
+	    maxXIndex = qMax(maxXIndex,_datasOriginalContourPoints[i].x);
+	    minYIndex = qMin(minYIndex,_datasOriginalContourPoints[i].y);
+	    maxYIndex = qMax(maxYIndex,_datasOriginalContourPoints[i].y);
+	  }
+	contourPolygonBottom << QPoint(_datasOriginalContourPoints[0].x,_datasOriginalContourPoints[0].y);
+	
+	for ( j = minYIndex ; j<maxYIndex ; j++ )
+	  {
+	    for ( i = minXIndex ; i<maxXIndex ; i++ )
+	      {
+		if ( slice.at(j,i) && contourPolygonBottom.containsPoint(QPoint(i,j),Qt::OddEvenFill) )
+		  {
+		    _component.at(j,i) = 1;
+		  }
+	      }
+	  }
+}
+
+
+
+
 void ContourCurve::smoothCurve( QVector<iCoord2D> &contour, int smoothingRadius )
 {
 	if ( smoothingRadius > 0 )

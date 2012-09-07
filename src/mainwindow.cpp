@@ -181,6 +181,7 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 	QObject::connect(_ui->_buttonExportContourComponentToPgm3D, SIGNAL(clicked()), this, SLOT(exportContourComponentToPgm3D()));
 	QObject::connect(_ui->_buttonExportContourComponentAllInIntervalSDP, SIGNAL(clicked()), this, SLOT(exportAllContourComponentOfVoxels()));
 	QObject::connect(_ui->_buttonExportContourComponentAllIntervalsSDP, SIGNAL(clicked()), this, SLOT(exportAllContourComponentOfVoxelsAllIntervals()));
+	QObject::connect(_ui->_buttonExportContourComponentAllIntervalsSDPOldMethod, SIGNAL(clicked()), this, SLOT(exportAllContourComponentOfVoxelsAllIntervalsOldMethod()));
 
 	// Raccourcis des actions du menu
 	_ui->_actionOpenDicom->setShortcut(Qt::CTRL + Qt::Key_O);
@@ -1239,7 +1240,7 @@ void MainWindow::exportContourComponentToPgm3D()
 	}
 }
 
-void MainWindow::createVoxelSetAllIntervals(std::vector<iCoord3D> &vectVoxels)
+void MainWindow::createVoxelSetAllIntervals(std::vector<iCoord3D> &vectVoxels, bool useOldMethod)
 {
 	for ( int l=0 ; l< ((_ui->_comboSelectSliceInterval)->count())-1 ; l++ )
 	{
@@ -1271,7 +1272,11 @@ void MainWindow::createVoxelSetAllIntervals(std::vector<iCoord3D> &vectVoxels)
 				{
 					marrowCoord = _marrow != 0 ? _marrow->at(sliceInterval.minValue()+k) : iCoord2D(width/2,height/2);
 					biggestComponents = ConnexComponentExtractor::extractConnexComponents( _componentBillon->slice(k), _ui->_spinMinimalSizeOf2DConnexComponents->value(), 0 );
-					contourCurve.constructCurve( *biggestComponents, marrowCoord, 0, 0, _ui->_spinBlurredSegmentsThickness->value(), _ui->_spinContourSmoothingRadius->value() );
+					if(useOldMethod){
+					  contourCurve.constructCurveOldMethod( *biggestComponents, marrowCoord, 0, 0, _ui->_spinBlurredSegmentsThickness->value(), _ui->_spinContourSmoothingRadius->value() );
+					}else{
+					  contourCurve.constructCurve( *biggestComponents, marrowCoord, 0, 0, _ui->_spinBlurredSegmentsThickness->value(), _ui->_spinContourSmoothingRadius->value() );
+					}
 					contourCurve.getContourContentPoints(vectVoxels, k+sliceInterval.minValue());
 
 					delete biggestComponents;
@@ -1363,6 +1368,37 @@ void MainWindow::exportAllContourComponentOfVoxelsAllIntervals()
 			stream << "#SDP (Sequence of Discrete Points)" << endl;
 			std::vector<iCoord3D> voxelSet;
 			createVoxelSetAllIntervals(voxelSet);
+			for ( unsigned int i=0 ; i<voxelSet.size() ; i++ )
+			{
+				stream << voxelSet.at(i).x << " " << voxelSet.at(i).y << " " << voxelSet.at(i).z << endl;
+			}
+
+			QMessageBox::information(this,"Export branches en SDP réussie", "Export réussi !");
+		}
+	}
+}
+
+
+
+
+void MainWindow::exportAllContourComponentOfVoxelsAllIntervalsOldMethod()
+{
+	if ( _componentBillon != 0 )
+	{
+		QString fileName = QFileDialog::getSaveFileName(this, tr("Exporter la composante délimitée par le contour en SDP"), "output.sdp", tr("Fichiers SDP (*.sdp);;Tous les fichiers (*.*)"));
+		if ( !fileName.isEmpty() )
+		{
+			QFile file(fileName);
+			if( !file.open(QIODevice::WriteOnly) )
+			{
+				qDebug() << QObject::tr("ERREUR : Impossible de créer le ficher %1.").arg(fileName);
+				return;
+			}
+
+			QTextStream stream(&file);
+			stream << "#SDP (Sequence of Discrete Points)" << endl;
+			std::vector<iCoord3D> voxelSet;
+			createVoxelSetAllIntervals(voxelSet, true);
 			for ( unsigned int i=0 ; i<voxelSet.size() ; i++ )
 			{
 				stream << voxelSet.at(i).x << " " << voxelSet.at(i).y << " " << voxelSet.at(i).z << endl;
