@@ -597,7 +597,7 @@ void MainWindow::nextMaximumInSliceHistogram() {
 	}
 }
 
-void MainWindow::zoomInSliceView( const qreal &zoomFactor, const QPoint &focalPoint ) {
+void MainWindow::zoomInSliceView( const qreal &zoomFactor, const QPoint & /*focalPoint*/ ) {
 	_ui->_labelSliceView->setPixmap(_billon != 0 ? QPixmap::fromImage(_pix).scaled(_pix.width()*zoomFactor,_pix.height()*zoomFactor,Qt::KeepAspectRatio) : QPixmap::fromImage(_pix));
 }
 
@@ -997,8 +997,10 @@ void MainWindow::selectSectorInterval( const int &index ) {
 			iCoord2D nearestPoint;
 
 			int minIndex, upperIndex, lowerIndex;
+			qreal minVal;
 
-			qreal minVal = width;
+			minIndex = 0;
+			minVal = width;
 			for ( i=0 ; i<depth ; ++i )
 			{
 				biggestComponents = ConnexComponentExtractor::extractConnexComponents( _componentBillon->slice(i), _ui->_spinMinimalSizeOf2DConnexComponents->value(), 0 );
