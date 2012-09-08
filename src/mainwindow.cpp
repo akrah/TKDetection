@@ -1249,7 +1249,7 @@ void MainWindow::createVoxelSetAllIntervals(std::vector<iCoord3D> &vectVoxels, b
 
 		_ui->_comboSelectSliceInterval->setCurrentIndex(l+1);
 		selectSliceInterval(l+1);
-		const Interval &sliceInterval = _sliceHistogram->branchesAreas()[_ui->_comboSelectSliceInterval->currentIndex()];
+		const Interval &sliceInterval = _sliceHistogram->branchesAreas()[l];
 		const QVector<Interval> &intervals = _pieChartDiagrams->branchesSectors();
 
 		if ( !intervals.isEmpty() )
@@ -1352,8 +1352,6 @@ void MainWindow::exportAllContourComponentOfVoxels()
 
 void MainWindow::exportAllContourComponentOfVoxelsAllIntervals()
 {
-	if ( _componentBillon != 0 )
-	{
 		QString fileName = QFileDialog::getSaveFileName(this, tr("Exporter la composante délimitée par le contour en SDP"), "output.sdp", tr("Fichiers SDP (*.sdp);;Tous les fichiers (*.*)"));
 		if ( !fileName.isEmpty() )
 		{
@@ -1375,7 +1373,7 @@ void MainWindow::exportAllContourComponentOfVoxelsAllIntervals()
 
 			QMessageBox::information(this,"Export branches en SDP réussie", "Export réussi !");
 		}
-	}
+
 }
 
 
