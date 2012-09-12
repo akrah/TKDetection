@@ -199,7 +199,7 @@ void PieChartDiagrams::compute( const Billon &billon, const Marrow *marrow, cons
 		else if ( _smoothing == SmoothingType::MEANS ) _datas = IntervalsComputer::meansSmoothing( _datas, DEFAULT_MASK_RADIUS, true );
 		_derivativeThreshold = IntervalsComputer::minimumThresholdPercentage( _datas, _derivativePercentage );
 		_maximums = IntervalsComputer::maximumsComputing( _datas, _derivativeThreshold, _maximumsNeighborhood, true );
-		_intervals = IntervalsComputer::intervalsComputing( _datas, _maximums, _derivativeThreshold, _minimumIntervalWidth, true );
+		_intervals = IntervalsComputer::intervalsComputing( _datas, _maximums, _derivativePercentage, _minimumIntervalWidth, true );
 
 		computeValues();
 		computeMaximums();

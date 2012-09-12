@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>789</width>
-    <height>876</height>
+    <height>891</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -104,8 +104,8 @@
           <rect>
            <x>0</x>
            <y>0</y>
-           <width>241</width>
-           <height>608</height>
+           <width>301</width>
+           <height>621</height>
           </rect>
          </property>
          <layout class="QHBoxLayout" name="horizontalLayout_8">
@@ -142,7 +142,7 @@
      <x>0</x>
      <y>0</y>
      <width>789</width>
-     <height>22</height>
+     <height>25</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFichier">
@@ -230,8 +230,8 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>314</width>
-              <height>148</height>
+              <width>425</width>
+              <height>314</height>
              </rect>
             </property>
             <attribute name="label">
@@ -388,8 +388,8 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>279</width>
-              <height>225</height>
+              <width>276</width>
+              <height>215</height>
              </rect>
             </property>
             <attribute name="label">
@@ -570,8 +570,8 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>348</width>
-              <height>187</height>
+              <width>341</width>
+              <height>177</height>
              </rect>
             </property>
             <attribute name="label">
@@ -718,7 +718,7 @@
               <x>0</x>
               <y>0</y>
               <width>243</width>
-              <height>126</height>
+              <height>118</height>
              </rect>
             </property>
             <attribute name="label">
@@ -1063,7 +1063,7 @@ autour de la moelle</string>
             <layout class="QVBoxLayout" name="verticalLayout_8">
              <item>
               <widget class="QwtPolarPlot" name="_polarSectorSum">
-               <property name="plotBackground" stdset="0">
+               <property name="plotBackground">
                 <brush brushstyle="SolidPattern">
                  <color alpha="0">
                   <red>255</red>
@@ -1367,7 +1367,7 @@ autour de la moelle</string>
                 <number>1000</number>
                </property>
                <property name="value">
-                <number>25</number>
+                <number>400</number>
                </property>
                <property name="orientation">
                 <enum>Qt::Horizontal</enum>
@@ -1380,7 +1380,7 @@ autour de la moelle</string>
                 <number>1000</number>
                </property>
                <property name="value">
-                <number>25</number>
+                <number>400</number>
                </property>
               </widget>
              </item>
@@ -1859,11 +1859,6 @@ autour de la moelle</string>
  <layoutdefault spacing="6" margin="11"/>
  <customwidgets>
   <customwidget>
-   <class>QxtSpanSlider</class>
-   <extends>QSlider</extends>
-   <header>QxtSpanSlider</header>
-  </customwidget>
-  <customwidget>
    <class>QwtPlot</class>
    <extends>QFrame</extends>
    <header>qwt_plot.h</header>
@@ -1874,6 +1869,11 @@ autour de la moelle</string>
    <extends>QFrame</extends>
    <header>qwt_polar_plot.h</header>
    <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>QxtSpanSlider</class>
+   <extends>QSlider</extends>
+   <header>QxtSpanSlider</header>
   </customwidget>
  </customwidgets>
  <tabstops>
