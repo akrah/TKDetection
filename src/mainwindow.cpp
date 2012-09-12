@@ -1021,12 +1021,12 @@ void MainWindow::selectSectorInterval( const int &index ) {
 			_histogramDistanceMarrowToNearestPoint.setSamples(histData);
 			_ui->_plotDistanceMarrowToNearestPoint->replot();
 
-			upperIndex = qMin(depth-3,minIndex+2);
-			while ( upperIndex < depth-3 && histData[upperIndex+3].value - histData[upperIndex].value > 3. ) upperIndex++;
-			lowerIndex = qMax(3,minIndex-2);
-			while ( lowerIndex > 2 && histData[lowerIndex-3].value - histData[lowerIndex].value > 3. ) lowerIndex--;
+			upperIndex = qMin(depth-4,minIndex+3);
+			while ( upperIndex < depth-4 && histData[upperIndex+4].value - histData[upperIndex].value > 3. ) upperIndex++;
+			lowerIndex = qMax(4,minIndex-3);
+			while ( lowerIndex > 3 && histData[lowerIndex-4].value - histData[lowerIndex].value > 3. ) lowerIndex--;
 
-			_knotIntervalInDistanceMarrowToNearestPointHistogram.setBounds(lowerIndex+1,upperIndex-1);
+			_knotIntervalInDistanceMarrowToNearestPointHistogram.setBounds(lowerIndex+3,upperIndex-3);
 
 			std::cout << "Bornes du noeud : [ " << lowerIndex+1+firstSlice << ", " << upperIndex-1+firstSlice << " ]" << std::endl;
 		}
