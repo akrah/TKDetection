@@ -137,7 +137,7 @@ namespace OfsExport {
 		void computeAllEdges( const Billon &billon, const Marrow &marrow, const Interval &interval, const int &nbEdges, const int &radius, QTextStream &stream ) {
 			const int width = billon.n_cols;
 			const int height = billon.n_rows;
-			const int nbSlices = interval.size();
+			const int nbSlices = interval.count();
 			const int firstMarrow = interval.minValue() - marrow.interval().minValue();
 			const int lastMarrow = qMin(firstMarrow + nbSlices,marrow.size());
 			qreal depth = -0.5;
@@ -229,7 +229,7 @@ namespace OfsExport {
 				const int lastMarrow = qMin(firstMarrow + nbSlices,marrow.size());
 				const qreal depthShift = 1./(qreal)nbSlices;
 				const qreal angleShift = (rightAngle<leftAngle?leftAngle-rightAngle:leftAngle+(TWO_PI-rightAngle))/(qreal)(nbEdges-1);
-				
+
 
 				sumOfnbEdges += nbEdges*(lastMarrow-firstMarrow+1);
 
@@ -265,7 +265,7 @@ namespace OfsExport {
 			const int width = billon.n_cols;
 			const int height = billon.n_rows;
 			const int firstMarrow = interval.minValue() - marrow.interval().minValue();
-			const int nbSlices=interval.size();
+			const int nbSlices=interval.count();
 			const int lastMarrow = qMin(firstMarrow + nbSlices,marrow.size());
 			qreal depth = -0.5;
 			stream << endl;

@@ -183,7 +183,7 @@
      <item>
       <widget class="QTabWidget" name="_tabs">
        <property name="currentIndex">
-        <number>3</number>
+        <number>2</number>
        </property>
        <widget class="QWidget" name="_tabGeneral">
         <attribute name="title">
@@ -230,8 +230,8 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>425</width>
-              <height>314</height>
+              <width>306</width>
+              <height>146</height>
              </rect>
             </property>
             <attribute name="label">
@@ -1001,7 +1001,7 @@ autour de la moelle</string>
               <number>100</number>
              </property>
              <property name="value">
-              <number>1</number>
+              <number>30</number>
              </property>
              <property name="orientation">
               <enum>Qt::Horizontal</enum>
@@ -1014,7 +1014,7 @@ autour de la moelle</string>
               <number>100</number>
              </property>
              <property name="value">
-              <number>1</number>
+              <number>30</number>
              </property>
             </widget>
            </item>
@@ -1293,7 +1293,7 @@ autour de la moelle</string>
                 <number>500</number>
                </property>
                <property name="value">
-                <number>-170</number>
+                <number>-100</number>
                </property>
                <property name="orientation">
                 <enum>Qt::Horizontal</enum>
@@ -1309,7 +1309,7 @@ autour de la moelle</string>
                 <number>500</number>
                </property>
                <property name="value">
-                <number>-170</number>
+                <number>-100</number>
                </property>
               </widget>
              </item>
@@ -1437,7 +1437,7 @@ autour de la moelle</string>
                <number>20</number>
               </property>
               <property name="value">
-               <number>5</number>
+               <number>3</number>
               </property>
              </widget>
             </item>
@@ -1616,10 +1616,10 @@ autour de la moelle</string>
        <item row="0" column="1">
         <layout class="QHBoxLayout" name="horizontalLayout_2">
          <item>
-          <widget class="QSpinBox" name="_spinMinThreshold"/>
+          <widget class="QSpinBox" name="_spinMinIntensity"/>
          </item>
          <item>
-          <widget class="QxtSpanSlider" name="_spansliderSliceThreshold">
+          <widget class="QxtSpanSlider" name="_spansliderIntensityThreshold">
            <property name="maximum">
             <number>0</number>
            </property>
@@ -1632,7 +1632,7 @@ autour de la moelle</string>
           </widget>
          </item>
          <item>
-          <widget class="QSpinBox" name="_spinMaxThreshold"/>
+          <widget class="QSpinBox" name="_spinMaxIntensity"/>
          </item>
         </layout>
        </item>
@@ -1885,9 +1885,9 @@ autour de la moelle</string>
   <tabstop>_spinMovementThresholdMax</tabstop>
   <tabstop>_checkUseNextSlice</tabstop>
   <tabstop>_buttonExportMovementsToV3D</tabstop>
-  <tabstop>_spinMinThreshold</tabstop>
-  <tabstop>_spansliderSliceThreshold</tabstop>
-  <tabstop>_spinMaxThreshold</tabstop>
+  <tabstop>_spinMinIntensity</tabstop>
+  <tabstop>_spansliderIntensityThreshold</tabstop>
+  <tabstop>_spinMaxIntensity</tabstop>
   <tabstop>_sliderSelectSlice</tabstop>
   <tabstop>_buttonPreviousMaximum</tabstop>
   <tabstop>_buttonUpdateSliceHistogram</tabstop>

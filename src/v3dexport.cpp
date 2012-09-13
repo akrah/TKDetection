@@ -62,7 +62,7 @@ namespace V3DExport {
 		void appendComponent( const Billon &billon, const Interval &interval, const int &index, const int &threshold, QXmlStreamWriter &stream ) {
 			int width = billon.n_cols;
 			int height = billon.n_rows;
-			int depth = interval.size();
+			int depth = interval.count();
 
 			// components
 			QByteArray data;

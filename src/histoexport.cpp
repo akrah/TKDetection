@@ -10,7 +10,7 @@ namespace HistoExport {
 			QFile file(fileName);
 			if ( file.open(QIODevice::WriteOnly) ) {
 				QTextStream stream(&file);
-				for ( int i=interval.minValue() ; i<interval.maxValue() ; i++ ) {
+				for ( int i=interval.minValue() ; i<=interval.maxValue() ; i++ ) {
 					stream << i << " " <<  sliceHisto.value(i) << endl;
 				}
 				file.close();

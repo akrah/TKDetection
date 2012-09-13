@@ -40,8 +40,6 @@ private slots:
 	void drawSlice( const int &sliceNumber );
 	void setSlice( const int &sliceNumber );
 	void setTypeOfView( const int &type );
-	void setLowThreshold( const int &threshold );
-	void setHighThreshold( const int &threshold );
 	void updateSliceHistogram();
 	void setMarrowAroundDiameter( const int &diameter );
 	void setHistogramIntervalMinimumWidth( const int &width );
@@ -50,7 +48,6 @@ private slots:
 	void setHistogramDerivativePercentage( const int &percentage );
 	void highlightSliceHistogram( const int &slicePosition );
 	void updateMarrow();
-	void computeSectorsHistogramsForCurrentSliceIntervall();
 	void highlightSectorHistogram( const int &sectorIdx );
 	void setMinimumOfSliceInterval( const int &min );
 	void setMinimumOfSliceIntervalToCurrentSlice();
@@ -90,12 +87,12 @@ private slots:
 	void exportSliceHistogram();
 	void exportSectorDiagramAndHistogram();
 	void exportContours();
- 	void exportContourComponentToPgm3D();
-        void createVoxelSetAllIntervals(std::vector<iCoord3D> &vectVoxels, bool useOldMethod=false);
-        void createVoxelSet(std::vector<iCoord3D> &vectVoxels);
-        void exportAllContourComponentOfVoxels();
-        void exportAllContourComponentOfVoxelsAllIntervals();
-        void exportAllContourComponentOfVoxelsAllIntervalsOldMethod();
+	void exportContourComponentToPgm3D();
+		void createVoxelSetAllIntervals(std::vector<iCoord3D> &vectVoxels, bool useOldMethod=false);
+		void createVoxelSet(std::vector<iCoord3D> &vectVoxels);
+		void exportAllContourComponentOfVoxels();
+		void exportAllContourComponentOfVoxelsAllIntervals();
+		void exportAllContourComponentOfVoxelsAllIntervalsOldMethod();
 
 
 private:
@@ -124,8 +121,6 @@ private:
 	ContourCurve *_contourCurve;
 
 	SliceZoomer _sliceZoomer;
-	Interval _slicesInterval;
-	Interval _intensityInterval;
 
 	QwtPlotHistogram _histogramDistanceMarrowToNearestPoint;
 	QwtPlotCurve _histogramDistanceMarrowToNearestPointCursor;
