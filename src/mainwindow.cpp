@@ -97,7 +97,7 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 	QObject::connect(_ui->_sliderSelectSlice, SIGNAL(valueChanged(int)), this, SLOT(setSlice(int)));
 
 	// Évènements déclenchés par les boutons de sélection de la vue
-	QObject::connect(_ui->_comboSliceType, SIGNAL(activated(int)), this, SLOT(setTypeOfView(int)));
+	QObject::connect(_ui->_comboSliceType, SIGNAL(currentIndexChanged(int)), this, SLOT(setTypeOfView(int)));
 	QObject::connect(_ui->_sliderMovementThresholdMin, SIGNAL(valueChanged(int)), this, SLOT(setMovementThresholdMin(int)));
 	QObject::connect(_ui->_spinMovementThresholdMin, SIGNAL(valueChanged(int)), this, SLOT(setMovementThresholdMin(int)));
 	QObject::connect(_ui->_sliderMovementThresholdMax, SIGNAL(valueChanged(int)), this, SLOT(setMovementThresholdMax(int)));
@@ -142,9 +142,9 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 	QObject::connect(_ui->_buttonComputeMarrow, SIGNAL(clicked()), this, SLOT(updateMarrow()));
 
 	// Évènements déclenchés par les bouton associès aux histogrammes de secteurs
-	QObject::connect(_ui->_comboSelectSliceInterval, SIGNAL(activated(int)), this, SLOT(selectSliceInterval(int)));
+	QObject::connect(_ui->_comboSelectSliceInterval, SIGNAL(currentIndexChanged(int)), this, SLOT(selectSliceInterval(int)));
 	QObject::connect(_ui->_buttonSelectSliceIntervalUpdate, SIGNAL(clicked()), this, SLOT(selectCurrentSliceInterval()));
-	QObject::connect(_ui->_comboSelectSectorInterval, SIGNAL(activated(int)), this, SLOT(selectSectorInterval(int)));
+	QObject::connect(_ui->_comboSelectSectorInterval, SIGNAL(currentIndexChanged(int)), this, SLOT(selectSectorInterval(int)));
 	QObject::connect(_ui->_buttonSelectSectorIntervalUpdate, SIGNAL(clicked()), this, SLOT(selectCurrentSectorInterval()));
 	QObject::connect(_ui->_sliderSectorThresholding, SIGNAL(valueChanged(int)), _ui->_spinSectorThresholding, SLOT(setValue(int)));
 	QObject::connect(_ui->_spinSectorThresholding, SIGNAL(valueChanged(int)), _ui->_sliderSectorThresholding, SLOT(setValue(int)));
@@ -152,7 +152,7 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 	QObject::connect(_ui->_spinMinimalSizeOf3DConnexComponents, SIGNAL(valueChanged(int)), _ui->_sliderMinimalSizeOf3DConnexComponents, SLOT(setValue(int)));
 	QObject::connect(_ui->_sliderMinimalSizeOf2DConnexComponents, SIGNAL(valueChanged(int)), _ui->_spinMinimalSizeOf2DConnexComponents, SLOT(setValue(int)));
 	QObject::connect(_ui->_spinMinimalSizeOf2DConnexComponents, SIGNAL(valueChanged(int)), _ui->_sliderMinimalSizeOf2DConnexComponents, SLOT(setValue(int)));
-	QObject::connect(_ui->_comboConnexComponents, SIGNAL(activated(int)), this, SLOT(drawSlice()));
+	QObject::connect(_ui->_comboConnexComponents, SIGNAL(currentIndexChanged(int)), this, SLOT(drawSlice()));
 	QObject::connect(_ui->_buttonExportSectorToPgm3D, SIGNAL(clicked()), this, SLOT(exportSectorToPgm3D()));
 	QObject::connect(_ui->_buttonExportConnexComponentToPgm3D, SIGNAL(clicked()), this, SLOT(exportConnexComponentToPgm3D()));
 	QObject::connect(_ui->_buttonExportSectorToOfs, SIGNAL(clicked()), this, SLOT(exportSectorToOfs()));
@@ -333,7 +333,7 @@ void MainWindow::drawSlice( const int &sliceNumber )
 
 
 				const Interval &sliceInterval = _sliceHistogram->branchesAreas()[_ui->_comboSelectSliceInterval->currentIndex()-1];
-				Billon *biggestComponents = ConnexComponentExtractor::extractConnexComponents( _componentBillon->slice(sliceNumber-sliceInterval.minValue()), _ui->_spinMinimalSizeOf2DConnexComponents->value(), 0 );
+				Billon *biggestComponents = ConnexComponentExtractor::extractConnexComponents( _componentBillon->slice(sliceNumber-sliceInterval.minValue()), qPow(_ui->_spinMinimalSizeOf2DConnexComponents->value(),2), 0 );
 				const Slice &sectorSlice = biggestComponents->slice(0);
 //				const Slice &sectorSlice = _componentBillon->slice(sliceNumber-sliceInterval.minValue());
 				const int selectedComponents = _ui->_comboConnexComponents->currentIndex();
@@ -1019,7 +1019,7 @@ void MainWindow::selectSectorInterval( const int &index ) {
 
 		if ( _ui->_checkEnableConnexComponents->isChecked() )
 		{
-			_componentBillon = ConnexComponentExtractor::extractConnexComponents(*_sectorBillon,_ui->_spinMinimalSizeOf3DConnexComponents->value(),threshold);
+			_componentBillon = ConnexComponentExtractor::extractConnexComponents(*_sectorBillon,qPow(_ui->_spinMinimalSizeOf3DConnexComponents->value(),3),threshold);
 			//_componentBillon = ConnexComponentExtractor::extractBiggestConnexComponent(*_sectorBillon,threshold);
 			const int nbComponents = _componentBillon->maxValue();
 			for ( i=1 ; i<nbComponents ; ++i )
@@ -1038,7 +1038,7 @@ void MainWindow::selectSectorInterval( const int &index ) {
 			minVal = width;
 			for ( i=0 ; i<depth ; ++i )
 			{
-				biggestComponents = ConnexComponentExtractor::extractConnexComponents( _componentBillon->slice(i), _ui->_spinMinimalSizeOf2DConnexComponents->value(), 0 );
+				biggestComponents = ConnexComponentExtractor::extractConnexComponents( _componentBillon->slice(i), qPow(_ui->_spinMinimalSizeOf2DConnexComponents->value(),2), 0 );
 				nearestPoint = biggestComponents->findNearestPointOfThePith( _marrow->at(firstSlice+i), 0, 0 );
 				//nearestPoint = _componentBillon->findNearestPointOfThePith( _marrow->at(firstSlice+i), i, 0 );
 				histData[i].value = nearestPoint.distance(_marrow->at(firstSlice+i));
@@ -1055,10 +1055,10 @@ void MainWindow::selectSectorInterval( const int &index ) {
 			_histogramDistanceMarrowToNearestPoint.setSamples(histData);
 			_ui->_plotDistanceMarrowToNearestPoint->replot();
 
-			upperIndex = qMin(depth-4,minIndex+3);
-			while ( upperIndex < depth-4 && histData[upperIndex+4].value - histData[upperIndex].value > 3. ) upperIndex++;
-			lowerIndex = qMax(4,minIndex-3);
-			while ( lowerIndex > 3 && histData[lowerIndex-4].value - histData[lowerIndex].value > 3. ) lowerIndex--;
+			upperIndex = qMin(depth-4,minIndex);
+			while ( upperIndex < depth-4 && (histData[upperIndex+4].value - histData[upperIndex].value > 5.) ) upperIndex++;
+			lowerIndex = qMax(4,minIndex);
+			while ( lowerIndex > 3 && histData[lowerIndex-4].value - histData[lowerIndex].value > 5. ) lowerIndex--;
 
 			_knotIntervalInDistanceMarrowToNearestPointHistogram.setBounds(lowerIndex+3,upperIndex-3);
 
@@ -1262,7 +1262,7 @@ void MainWindow::exportContourComponentToPgm3D()
 			for ( int k=_knotIntervalInDistanceMarrowToNearestPointHistogram.minValue() ; k<=_knotIntervalInDistanceMarrowToNearestPointHistogram.maxValue() ; ++k )
 			{
 				marrowCoord = _marrow != 0 ? _marrow->at(sliceInterval.minValue()+k) : iCoord2D(width/2,height/2);
-				biggestComponents = ConnexComponentExtractor::extractConnexComponents( _componentBillon->slice(k), _ui->_spinMinimalSizeOf2DConnexComponents->value(), 0 );
+				biggestComponents = ConnexComponentExtractor::extractConnexComponents( _componentBillon->slice(k), qPow(_ui->_spinMinimalSizeOf2DConnexComponents->value(),2), 0 );
 				contourCurve.constructCurve( *biggestComponents, marrowCoord, 0, 1, _ui->_spinBlurredSegmentsThickness->value(), _ui->_spinContourSmoothingRadius->value() );
 				contourCurve.writeContourContentInPgm3D(dstream);
 				delete biggestComponents;
@@ -1278,14 +1278,14 @@ void MainWindow::exportContourComponentToPgm3D()
 
 void MainWindow::createVoxelSetAllIntervals(std::vector<iCoord3D> &vectVoxels, bool useOldMethod)
 {
-	for ( int l=0 ; l< ((_ui->_comboSelectSliceInterval)->count())-1 ; l++ )
+	for ( int l=1 ; l< _ui->_comboSelectSliceInterval->count() ; l++ )
 	{
 		cerr << "-------------------------"<< endl;
-		cerr << "processing Interval Num=" << l+1 << endl;
+		cerr << "processing Interval Num=" << l << endl;
 
-		_ui->_comboSelectSliceInterval->setCurrentIndex(l+1);
-		selectSliceInterval(l+1);
-		const Interval &sliceInterval = _sliceHistogram->branchesAreas()[l];
+		_ui->_comboSelectSliceInterval->setCurrentIndex(l);
+		selectSliceInterval(l);
+		const Interval &sliceInterval = _sliceHistogram->branchesAreas()[l-1];
 		const QVector<Interval> &intervals = _pieChartDiagrams->branchesSectors();
 
 		if ( !intervals.isEmpty() )
@@ -1298,16 +1298,14 @@ void MainWindow::createVoxelSetAllIntervals(std::vector<iCoord3D> &vectVoxels, b
 			{
 				cerr << "Generating contours branch num " << i ;
 				_ui->_comboSelectSectorInterval->setCurrentIndex(i+1);
-				selectSectorInterval(i+1);
 
 				const int &width = _componentBillon->n_cols;
 				const int &height = _componentBillon->n_rows;
 
-
 				for ( int k=_knotIntervalInDistanceMarrowToNearestPointHistogram.minValue() ; k<=_knotIntervalInDistanceMarrowToNearestPointHistogram.maxValue() ; ++k )
 				{
 					marrowCoord = _marrow != 0 ? _marrow->at(sliceInterval.minValue()+k) : iCoord2D(width/2,height/2);
-					biggestComponents = ConnexComponentExtractor::extractConnexComponents( _componentBillon->slice(k), _ui->_spinMinimalSizeOf2DConnexComponents->value(), 0 );
+					biggestComponents = ConnexComponentExtractor::extractConnexComponents( _componentBillon->slice(k), qPow(_ui->_spinMinimalSizeOf2DConnexComponents->value(),2), 0 );
 					if(useOldMethod){
 					  contourCurve.constructCurveOldMethod( *biggestComponents, marrowCoord, 0, 0, _ui->_spinBlurredSegmentsThickness->value(), _ui->_spinContourSmoothingRadius->value() );
 					}else{
@@ -1327,6 +1325,7 @@ void MainWindow::createVoxelSetAllIntervals(std::vector<iCoord3D> &vectVoxels, b
 void MainWindow::createVoxelSet(std::vector<iCoord3D> &vectVoxels)
 {
 	const Interval &sliceInterval = _sliceHistogram->branchesAreas()[_ui->_comboSelectSliceInterval->currentIndex()-1];
+	const int minSlice = sliceInterval.minValue();
 	const QVector<Interval> &intervals = _pieChartDiagrams->branchesSectors();
 
 	if ( !intervals.isEmpty() )
@@ -1339,17 +1338,16 @@ void MainWindow::createVoxelSet(std::vector<iCoord3D> &vectVoxels)
 		{
 			cerr << "Generating contours branch num " << i ;
 			_ui->_comboSelectSectorInterval->setCurrentIndex(i+1);
-			selectSectorInterval(i+1);
 
 			const int &width = _componentBillon->n_cols;
 			const int &height = _componentBillon->n_rows;
 
 			for ( int k=_knotIntervalInDistanceMarrowToNearestPointHistogram.minValue() ; k<=_knotIntervalInDistanceMarrowToNearestPointHistogram.maxValue() ; ++k )
 			{
-				marrowCoord = _marrow != 0 ? _marrow->at(sliceInterval.minValue()+k) : iCoord2D(width/2,height/2);
-				biggestComponents = ConnexComponentExtractor::extractConnexComponents( _componentBillon->slice(k), _ui->_spinMinimalSizeOf2DConnexComponents->value(), 0 );
+				marrowCoord = _marrow != 0 ? _marrow->at(minSlice+k) : iCoord2D(width/2,height/2);
+				biggestComponents = ConnexComponentExtractor::extractConnexComponents( _componentBillon->slice(k), qPow(_ui->_spinMinimalSizeOf2DConnexComponents->value(),2), 0 );
 				contourCurve.constructCurve( *biggestComponents, marrowCoord, 0, 0, _ui->_spinBlurredSegmentsThickness->value(), _ui->_spinContourSmoothingRadius->value() );
-				contourCurve.getContourContentPoints(vectVoxels, sliceInterval.minValue()+ k);
+				contourCurve.getContourContentPoints(vectVoxels, minSlice+ k);
 
 				delete biggestComponents;
 				biggestComponents = 0;
@@ -1469,7 +1467,6 @@ void MainWindow::openNewBillon( const QString &folderName )
 	{
 		_pix = QImage(0,0,QImage::Format_ARGB32);
 	}
-	_ui->_spansliderSelectInterval->setLowerValue(0);
 }
 
 void MainWindow::drawSlice() {
