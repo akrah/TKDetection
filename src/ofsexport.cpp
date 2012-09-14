@@ -16,19 +16,31 @@
 namespace OfsExport {
 
 	namespace {
-		// Calcul les coordonnées des sommets du maillage de la moelle
-		void computeAllEdges( const Billon &billon, const Marrow &marrow, const Interval &interval, const int &nbEdges, const int &radius, QTextStream &stream );
-		void computeSectorEdges( const Billon &billon, const Marrow &marrow, const Interval &interval, const int &nbEdges, const qreal &rightAngle, const qreal &leftAngle, QTextStream &stream );
-		void computeAllSectorInAllIntervalsEdges( const Billon &billon, const Marrow &marrow, const QVector<QPair<Interval, QPair<qreal, qreal> > > &intervals, const int &nbEdges, QTextStream &stream );
+	  // Calcul les coordonnées des sommets du maillage de la moelle
+	  void computeAllEdges( const Billon &billon, const Marrow &marrow, const Interval &interval, 
+				const int &nbEdges, const int &radius, QTextStream &stream, bool normalized = true );
 
-		//Rajout BK: Affiche les coordonnées des sommets pour l'export OFS (utile iuniquement pour le maillage de la zone réduite)
-		void displayExportedVertex( const Billon &billon, const Marrow &marrow, QVector<rCoord2D> vectVertex, const Interval &interval, const int &resolutionCercle, QTextStream &stream );
+	  void computeSectorEdges( const Billon &billon, const Marrow &marrow, const Interval &interval, 
+				   const int &nbEdges, const qreal &rightAngle, const qreal &leftAngle,
+				   QTextStream &stream , bool normalized = true);
 
-		// Calcul les faces du maillages de la moelle
-		void computeEgesLinks( const int &nbEdges, const int &nbSlices, QTextStream &stream );
+	  void computeAllSectorInAllIntervalsEdges( const Billon &billon, const Marrow &marrow, 
+						    const QVector<QPair<Interval, QPair<qreal, qreal> > > &intervals, 
+						    const int &nbEdges, QTextStream &stream,  bool normalized = true );
+	  
+	  
+	  //Rajout BK: Affiche les coordonnées des sommets pour l'export OFS (utile iuniquement pour le maillage de la zone réduite)
+	  void displayExportedVertex( const Billon &billon, const Marrow &marrow, 
+				      QVector<rCoord2D> vectVertex, const Interval &interval, 
+				      const int &resolutionCercle, QTextStream &stream, bool normalized = true );
+	  
+	  // Calcul les faces du maillages de la moelle
+	  void computeEgesLinks( const int &nbEdges, const int &nbSlices, QTextStream &stream );
 	}
 
-	void process( const Billon &billon, const Marrow &marrow, const Interval &interval, const QString &fileName, const int &nbEdgesPerSlice, const int &radiusOfTubes ) {
+	void process( const Billon &billon, const Marrow &marrow, const Interval &interval, 
+		      const QString &fileName, const int &nbEdgesPerSlice, 
+		      const int &radiusOfTubes,  bool normalized ) {
 		if ( marrow.interval().containsClosed(interval) ) {
 			QFile file(fileName);
 			if ( file.open(QIODevice::WriteOnly) ) {
@@ -43,14 +55,16 @@ namespace OfsExport {
 			qDebug() << QObject::tr("Saving not possible since the mesh is outside the SlicesInterval");
 		}
 	}
-
-	void processOnSector( const Billon &billon, const Marrow &marrow, const Interval &interval, const QString &fileName, const qreal &rightAngle, const qreal &leftAngle, const int &nbEdgesPerSlice ) {
+  
+	void processOnSector( const Billon &billon, const Marrow &marrow, const Interval &interval, 
+			      const QString &fileName, const qreal &rightAngle, const qreal &leftAngle,
+			      const int &nbEdgesPerSlice,  bool normalized ) {
 		if ( marrow.interval().containsClosed(interval) ) {
 			QFile file(fileName);
 			if ( file.open(QIODevice::WriteOnly) ) {
 				QTextStream stream(&file);
 				stream << "OFS MHD" << endl;
-				computeSectorEdges( billon, marrow, interval, nbEdgesPerSlice, rightAngle, leftAngle, stream );
+				computeSectorEdges( billon, marrow, interval, nbEdgesPerSlice, rightAngle, leftAngle, stream, normalized );
 				computeEgesLinks( nbEdgesPerSlice, interval.count(), stream );
 				file.close();
 			}
@@ -60,12 +74,14 @@ namespace OfsExport {
 		}
 	}
 
-	void processOnAllSectorInAllIntervals( const Billon &billon, const Marrow &marrow, const QVector< QPair< Interval, QPair<qreal,qreal> > > &intervals, const QString &fileName, const int &nbEdgesPerSlice ) {
+	void processOnAllSectorInAllIntervals( const Billon &billon, const Marrow &marrow, 
+					       const QVector< QPair< Interval, QPair<qreal,qreal> > > &intervals,
+					       const QString &fileName, const int &nbEdgesPerSlice,  bool normalized ) {
 		QFile file(fileName);
 		if ( file.open(QIODevice::WriteOnly) ) {
 				QTextStream stream(&file);
 				stream << "OFS MHD" << endl;
-				computeAllSectorInAllIntervalsEdges( billon, marrow, intervals, nbEdgesPerSlice, stream );
+				computeAllSectorInAllIntervalsEdges( billon, marrow, intervals, nbEdgesPerSlice, stream, normalized );
 
 				QString fullStream;
 				int sumNbLinks = 0;
@@ -116,177 +132,186 @@ namespace OfsExport {
 			}
 	}
 
-	void processRestrictedMesh( const Billon &billon, const Marrow &marrow, const Interval &interval, const QString &fileName, const int &resolutionCercle, const int &seuilContour ) {
+	void processRestrictedMesh( const Billon &billon, const Marrow &marrow, const Interval &interval, 
+				    const QString &fileName, const int &resolutionCercle,
+				    const int &seuilContour, bool normalized ) {
 		  QVector<rCoord2D> vectVertex = billon.getAllRestrictedAreaVertex( resolutionCercle,seuilContour, &marrow );
 
 		  QFile file(fileName);
 		  if ( file.open(QIODevice::WriteOnly) ) {
 			QTextStream stream(&file);
 			stream << "OFS MHD" << endl;
-			displayExportedVertex(billon, marrow, vectVertex, interval, resolutionCercle, stream);
+			displayExportedVertex(billon, marrow, vectVertex, interval, resolutionCercle, stream, normalized);
 			computeEgesLinks( resolutionCercle, interval.count(), stream );
 			file.close();
 		  }
-
 	}
 
 
 	namespace {
 
 
-		void computeAllEdges( const Billon &billon, const Marrow &marrow, const Interval &interval, const int &nbEdges, const int &radius, QTextStream &stream ) {
-			const int width = billon.n_cols;
-			const int height = billon.n_rows;
-			const int nbSlices = interval.count();
-			const int firstMarrow = interval.minValue() - marrow.interval().minValue();
-			const int lastMarrow = qMin(firstMarrow + nbSlices,marrow.size());
-			qreal depth = -0.5;
-			const qreal depthShift = 1./(qreal)nbSlices;
-			int i,k;
+		void computeAllEdges( const Billon &billon, const Marrow &marrow, const Interval &interval,
+				      const int &nbEdges, const int &radius, QTextStream &stream, bool normalized ) {
+		 const int width = billon.n_cols;
+      const int height = billon.n_rows;
+      const int nbSlices = interval.size();
+      const int firstMarrow = interval.minValue() - marrow.interval().minValue();
+      const int lastMarrow = qMin(firstMarrow + nbSlices,marrow.size());
+      qreal depth = -0.5;
+      const qreal depthShift = 1./(normalized? (qreal)nbSlices: 1.0);
+      int i,k;
 
-			QVector<rCoord2D> offsets;
-			const qreal angleShift = TWO_PI/(qreal)nbEdges;
-			const qreal ofsXRadius = radius/(qreal)width;
-			const qreal ofsYRadius = radius/(qreal)height;
-			qreal angle = 0;
-			while ( angle < TWO_PI ) {
-				offsets.append( rCoord2D( qCos(angle)*ofsXRadius, qSin(angle)*ofsYRadius ) );
-				angle += angleShift;
-			}
+      QVector<rCoord2D> offsets;
+      const qreal angleShift = TWO_PI/(qreal)nbEdges;
+      const qreal ofsXRadius = radius/(normalized? (qreal)width: 1.0);
+      const qreal ofsYRadius = radius/(normalized? (qreal)height: 1.0);
+      qreal angle = 0;
+      while ( angle < TWO_PI ) {
+	offsets.append( rCoord2D( qCos(angle)*ofsXRadius, qSin(angle)*ofsYRadius ) );
+	angle += angleShift;
+      }
 
-			stream << endl;
-			stream << nbEdges*(lastMarrow-firstMarrow+1) << endl;
-			rCoord2D *offsetsIterator = 0;
-			for ( k=firstMarrow ; k<=lastMarrow ; ++k ) {
-				const iCoord2D &coord = marrow[k];
-				const qreal xOfs = coord.x/(qreal)width - 0.5;
-				const qreal yOfs = coord.y/(qreal)height - 0.5;
-				offsetsIterator = offsets.data();
-				for ( i=0 ; i<nbEdges ; ++i ) {
-					stream << xOfs+offsetsIterator->x << ' ' << yOfs+offsetsIterator->y << ' ' << depth << endl;
-					offsetsIterator++;
-				}
-				depth += depthShift;
-			}
+      stream << endl;
+      stream << nbEdges*(lastMarrow-firstMarrow+1) << endl;
+      rCoord2D *offsetsIterator = 0;
+      for ( k=firstMarrow ; k<=lastMarrow ; ++k ) {
+	const iCoord2D &coord = marrow[k];
+	const qreal xOfs = coord.x/(normalized? (qreal)width:1.0) - 0.5;
+	const qreal yOfs = coord.y/(normalized? (qreal)height:1.0) - 0.5;
+	offsetsIterator = offsets.data();
+	for ( i=0 ; i<nbEdges ; ++i ) {
+	  stream << xOfs+offsetsIterator->x << ' ' << yOfs+offsetsIterator->y << ' ' << depth << endl;
+	  offsetsIterator++;
+	}
+	depth += depthShift;
+      }		}
+
+	
+
+
+	  void computeSectorEdges( const Billon &billon, const Marrow &marrow, const Interval &interval, const int &nbEdges, const qreal &rightAngle, const qreal &leftAngle, QTextStream &stream, bool normalized ) {
+		   const int width = billon.n_cols;
+      const int height = billon.n_rows;
+      const int nbSlices = interval.size();
+      const int firstMarrow = interval.minValue() - marrow.interval().minValue();
+      const int lastMarrow = qMin(firstMarrow + nbSlices,marrow.size());
+      const qreal depthShift = 1./(normalized? (qreal)nbSlices:1.0);
+      const qreal angleShift = (rightAngle<leftAngle?leftAngle-rightAngle:leftAngle+(TWO_PI-rightAngle))/(qreal)(nbEdges-1);
+      int i,k;
+
+      stream << endl;
+      stream << nbEdges*(lastMarrow-firstMarrow+1) << endl;
+
+      QVector<rCoord2D> offsets;
+      rCoord2D *offsetsIterator = 0;
+      qreal depth = -0.5;
+      qreal angle;
+      for ( k=firstMarrow ; k<=lastMarrow ; ++k ) {
+	const iCoord2D &coord = marrow[k];
+	const qreal xOfs = coord.x/(normalized? (qreal)width:1.0) - 0.5;
+	const qreal yOfs = coord.y/(normalized? (qreal)height:1.0) - 0.5;
+	const qreal ofsXRadius = qMin(coord.x,width-coord.x)/(normalized? (qreal)width:1.0);
+	const qreal ofsYRadius = qMin(coord.y,width-coord.y)/(normalized? (qreal)height:1.0);
+	angle = rightAngle<leftAngle?rightAngle:-TWO_PI+rightAngle;
+	offsets.clear();
+	while ( angle < leftAngle ) {
+	  offsets.append( rCoord2D( qCos(angle)*ofsXRadius, qSin(angle)*ofsYRadius ) );
+	  angle += angleShift;
+	}
+	offsetsIterator = offsets.data();
+	stream << xOfs << ' ' << yOfs << ' ' << depth << endl;
+	for ( i=0 ; i<nbEdges-1 ; ++i ) {
+	  stream << xOfs+offsetsIterator->x << ' ' << yOfs+offsetsIterator->y << ' ' << depth << endl;
+	  offsetsIterator++;
+	}
+	depth += depthShift;
+      }
 		}
 
-		void computeSectorEdges( const Billon &billon, const Marrow &marrow, const Interval &interval, const int &nbEdges, const qreal &rightAngle, const qreal &leftAngle, QTextStream &stream ) {
-			const int width = billon.n_cols;
-			const int height = billon.n_rows;
-			const int nbSlices = interval.size();
-			const int firstMarrow = interval.minValue() - marrow.interval().minValue();
-			const int lastMarrow = qMin(firstMarrow + nbSlices,marrow.size());
-			const qreal depthShift = 1./(qreal)nbSlices;
-			const qreal angleShift = (rightAngle<leftAngle?leftAngle-rightAngle:leftAngle+(TWO_PI-rightAngle))/(qreal)(nbEdges-1);
-			int i,k;
 
-			stream << endl;
-			stream << nbEdges*(lastMarrow-firstMarrow+1) << endl;
 
-			QVector<rCoord2D> offsets;
-			rCoord2D *offsetsIterator = 0;
-			qreal depth = -0.5;
-			qreal angle;
-			for ( k=firstMarrow ; k<=lastMarrow ; ++k ) {
-				const iCoord2D &coord = marrow[k];
-				const qreal xOfs = coord.x/(qreal)width - 0.5;
-				const qreal yOfs = coord.y/(qreal)height - 0.5;
-				const qreal ofsXRadius = qMin(coord.x,width-coord.x)/(qreal)width;
-				const qreal ofsYRadius = qMin(coord.y,width-coord.y)/(qreal)height;
-				angle = rightAngle<leftAngle?rightAngle:-TWO_PI+rightAngle;
-				offsets.clear();
-				while ( angle < leftAngle ) {
-					offsets.append( rCoord2D( qCos(angle)*ofsXRadius, qSin(angle)*ofsYRadius ) );
-					angle += angleShift;
-				}
-				offsetsIterator = offsets.data();
-				stream << xOfs << ' ' << yOfs << ' ' << depth << endl;
-				for ( i=0 ; i<nbEdges-1 ; ++i ) {
-					stream << xOfs+offsetsIterator->x << ' ' << yOfs+offsetsIterator->y << ' ' << depth << endl;
-					offsetsIterator++;
-				}
-				depth += depthShift;
-			}
+		void computeAllSectorInAllIntervalsEdges( const Billon &billon, const Marrow &marrow, 
+							  const QVector< QPair< Interval, QPair<qreal,qreal> > > &intervals,
+							  const int &nbEdges, QTextStream &stream, bool normalized ) {
+		  const int width = billon.n_cols;
+      const int height = billon.n_rows;
+
+      QString fullStream;
+      int sumOfnbEdges = 0;
+      QVector<rCoord2D> offsets;
+      rCoord2D *offsetsIterator;
+      qreal depth, angle;
+      for ( int k = 0; k<intervals.size() ; ++k ) {
+
+	const Interval interval = intervals[k].first;
+	const int nbSlices = interval.size();
+	const qreal rightAngle = intervals[k].second.first;
+	const qreal leftAngle = intervals[k].second.second;
+
+	const int firstMarrow = interval.minValue() - marrow.interval().minValue();
+	const int lastMarrow = qMin(firstMarrow + nbSlices,marrow.size());
+	const qreal depthShift = 1./(normalized? (qreal)nbSlices:1.0);
+	const qreal angleShift = (rightAngle<leftAngle?leftAngle-rightAngle:leftAngle+(TWO_PI-rightAngle))/(qreal)(nbEdges-1);
+				
+
+	sumOfnbEdges += nbEdges*(lastMarrow-firstMarrow+1);
+
+	depth = -0.5;
+	for (int l=firstMarrow ; l<=lastMarrow ; ++l ) {
+	  const iCoord2D &coord = marrow[l];
+	  const qreal xOfs = coord.x/(normalized? (qreal)width: 1.0) - 0.5;
+	  const qreal yOfs = coord.y/(normalized? (qreal)height: 1.0) - 0.5;
+	  const qreal ofsXRadius = qMin(coord.x,width-coord.x)/(normalized ? (qreal)width: 1.0);
+	  const qreal ofsYRadius = qMin(coord.y,width-coord.y)/(normalized ? (qreal)height: 1.0);
+	  angle = rightAngle<leftAngle?rightAngle:-TWO_PI+rightAngle;
+	  offsets.clear();
+	  while ( angle < leftAngle ) {
+	    offsets.append( rCoord2D( qCos(angle)*ofsXRadius, qSin(angle)*ofsYRadius ) );
+	    angle += angleShift;
+	  }
+	  offsetsIterator = offsets.data();
+	  fullStream.append( QString("%1 %2 %3%4").arg(xOfs).arg(yOfs).arg(depth).arg('\n') );
+	  for (int i=0 ; i<nbEdges-1 ; ++i ) {
+	    fullStream.append( QString("%1 %2 %3%4").arg(xOfs+offsetsIterator->x).arg(yOfs+offsetsIterator->y).arg(depth).arg('\n') );
+	    offsetsIterator++;
+	  }
+	  depth += depthShift;
+	}
+
+      }
+      stream << endl;
+      stream << sumOfnbEdges << endl;
+      stream << fullStream;
 		}
 
-		void computeAllSectorInAllIntervalsEdges( const Billon &billon, const Marrow &marrow, const QVector< QPair< Interval, QPair<qreal,qreal> > > &intervals, const int &nbEdges, QTextStream &stream ) {
-			const int width = billon.n_cols;
-			const int height = billon.n_rows;
-
-			QString fullStream;
-			int sumOfnbEdges = 0;
-			QVector<rCoord2D> offsets;
-			rCoord2D *offsetsIterator;
-			qreal depth, angle;
-			for ( int k = 0; k<intervals.size() ; ++k ) {
-
-				const Interval interval = intervals[k].first;
-				const int nbSlices = interval.size();
-				const qreal rightAngle = intervals[k].second.first;
-				const qreal leftAngle = intervals[k].second.second;
-
-				const int firstMarrow = interval.minValue() - marrow.interval().minValue();
-				const int lastMarrow = qMin(firstMarrow + nbSlices,marrow.size());
-				const qreal depthShift = 1./(qreal)nbSlices;
-				const qreal angleShift = (rightAngle<leftAngle?leftAngle-rightAngle:leftAngle+(TWO_PI-rightAngle))/(qreal)(nbEdges-1);
-
-
-				sumOfnbEdges += nbEdges*(lastMarrow-firstMarrow+1);
-
-				depth = -0.5;
-				for (int l=firstMarrow ; l<=lastMarrow ; ++l ) {
-					const iCoord2D &coord = marrow[l];
-					const qreal xOfs = coord.x/(qreal)width - 0.5;
-					const qreal yOfs = coord.y/(qreal)height - 0.5;
-					const qreal ofsXRadius = qMin(coord.x,width-coord.x)/(qreal)width;
-					const qreal ofsYRadius = qMin(coord.y,width-coord.y)/(qreal)height;
-					angle = rightAngle<leftAngle?rightAngle:-TWO_PI+rightAngle;
-					offsets.clear();
-					while ( angle < leftAngle ) {
-						offsets.append( rCoord2D( qCos(angle)*ofsXRadius, qSin(angle)*ofsYRadius ) );
-						angle += angleShift;
-					}
-					offsetsIterator = offsets.data();
-					fullStream.append( QString("%1 %2 %3%4").arg(xOfs).arg(yOfs).arg(depth).arg('\n') );
-					for (int i=0 ; i<nbEdges-1 ; ++i ) {
-						fullStream.append( QString("%1 %2 %3%4").arg(xOfs+offsetsIterator->x).arg(yOfs+offsetsIterator->y).arg(depth).arg('\n') );
-						offsetsIterator++;
-					}
-					depth += depthShift;
-				}
-
-			}
-			stream << endl;
-			stream << sumOfnbEdges << endl;
-			stream << fullStream;
-		}
-
-		void displayExportedVertex( const Billon &billon, const Marrow &marrow, QVector<rCoord2D> vectVertex, const Interval &interval,const int &resolutionCercle, QTextStream &stream ){
-			const int width = billon.n_cols;
-			const int height = billon.n_rows;
-			const int firstMarrow = interval.minValue() - marrow.interval().minValue();
-			const int nbSlices=interval.count();
-			const int lastMarrow = qMin(firstMarrow + nbSlices,marrow.size());
-			qreal depth = -0.5;
-			stream << endl;
-			stream << resolutionCercle*(lastMarrow-firstMarrow+1) << endl;
-			const qreal depthShift = 1./(qreal)nbSlices;
-			int pos=0;
-			for (int k=firstMarrow ; k<=lastMarrow ; ++k ) {
-				pos=(k-firstMarrow)*resolutionCercle;
-				for(int i=0; i< resolutionCercle; i++){
-					if((k==firstMarrow) && i==0)
-						stream << 0 << ' ' << 0 << ' ' << -0.5 << endl;
-					else if((k==lastMarrow) && i==0)
-						stream << 0 << ' ' << 0 << ' ' << depth << endl;
-					else {
-						stream << ((vectVertex.at(pos).x /(qreal)width) -0.5)<< ' ' << ((vectVertex.at(pos).y/(qreal)height) -0.5)<< ' ' << depth << endl;
-					}
-					 pos++;
-				}
-				depth += depthShift;
-			}
-		}
+		void displayExportedVertex( const Billon &billon, const Marrow &marrow, QVector<rCoord2D> vectVertex,
+					    const Interval &interval,const int &resolutionCercle, QTextStream &stream, 
+					    bool normalized  ){
+		 const int width = billon.n_cols;
+      const int height = billon.n_rows;
+      const int firstMarrow = interval.minValue() - marrow.interval().minValue();
+      const int nbSlices=interval.size();
+      const int lastMarrow = qMin(firstMarrow + nbSlices,marrow.size());
+      qreal depth = -0.5;
+      stream << endl;
+      stream << resolutionCercle*(lastMarrow-firstMarrow+1) << endl;
+      const qreal depthShift = 1./(normalized? (qreal)nbSlices: 1.0);
+      int pos=0;
+      for (int k=firstMarrow ; k<=lastMarrow ; ++k ) {
+	pos=(k-firstMarrow)*resolutionCercle;
+	for(int i=0; i< resolutionCercle; i++){
+	  if((k==firstMarrow) && i==0)
+	    stream << (normalized? 0:(width/2.0)) << ' ' << (normalized? 0:(height/2.0)) << ' ' << -0.5 << endl;
+	  else if((k==lastMarrow) && i==0)
+	    stream << (normalized? 0:(width/2.0)) << ' ' << (normalized? 0:(height/2.0)) << ' ' << depth << endl;
+	  else {
+	    stream << ((vectVertex.at(pos).x /(normalized?(qreal)width: 1.0)) -0.5)<< ' ' << ((vectVertex.at(pos).y/(normalized? (qreal)height:1.0)) -0.5)<< ' ' << depth << endl;
+	  }
+	  pos++;
+	}
+	depth += depthShift;
+      }		}
 
 		void computeEgesLinks( const int &nbEdges, const int &nbSlices, QTextStream &stream ) {
 			const int nbPoints = nbEdges*(nbSlices-1);
