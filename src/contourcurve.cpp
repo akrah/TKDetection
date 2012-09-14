@@ -242,7 +242,8 @@ void ContourCurve::constructCurve( const Billon &billon, const iCoord2D &billonC
 
 	QPolygon contourPolygonBottom;
 	QPolygon contourPolygonTop;
-	int i,j, index, originalMain1Index, originalMain2Index, currentDistanceMain1, currentDistanceMain2, minXIndex, maxXIndex, minYIndex, maxYIndex;
+	int i,j, index, originalMain1Index, originalMain2Index, minXIndex, maxXIndex, minYIndex, maxYIndex;
+	qreal currentDistanceMain1, currentDistanceMain2;
 
 	// S'il y a deux points dominants principaux
 	if ( hasMain1 && hasMain2 )
@@ -260,7 +261,7 @@ void ContourCurve::constructCurve( const Billon &billon, const iCoord2D &billonC
 				currentDistanceMain1 = _datasMainDominantPoints[0].distance(_datasOriginalContourPoints[index]);
 				originalMain1Index = index;
 			}
-			if ( _datasMainDominantPoints[1].distance(_datasOriginalContourPoints[index]) < currentDistanceMain2 )
+			if ( _datasMainDominantPoints[1].distance(_datasOriginalContourPoints[index]) <= currentDistanceMain2 )
 			{
 				currentDistanceMain2 = _datasMainDominantPoints[1].distance(_datasOriginalContourPoints[index]);
 				originalMain2Index = index;
@@ -271,26 +272,15 @@ void ContourCurve::constructCurve( const Billon &billon, const iCoord2D &billonC
 			maxYIndex = qMax(maxYIndex,_datasOriginalContourPoints[index].y);
 		}
 
-		if ( originalMain1Index > originalMain2Index )
-		{
-			currentDistanceMain1 = originalMain1Index;
-			originalMain1Index = originalMain2Index;
-			originalMain2Index = currentDistanceMain1;
-		}
-
 		// Création du polygone qui servira à tester l'appartenance d'un pixel en dessous de la droite des deux points dominants principaux au noeud.
 		// Ce polygone est constitué :
 		//     - des points compris entre le premier point du contour initial (non lissé) et le plus proche du premier point dominant
 		//     - du point le plus proche du premier point dominant
 		//     - du point le plus proche du second point dominant
 		//     - des points compris entre le point du contour initial le plus proche du second point dominant et le dernier points du contour initial.
-		for ( i=0 ; i<originalMain1Index ; ++i ) contourPolygonBottom << QPoint(_datasOriginalContourPoints[i].x,_datasOriginalContourPoints[i].y);
-		if ( originalMain1Index != originalMain2Index )
-		{
-			contourPolygonBottom << QPoint(_datasOriginalContourPoints[originalMain1Index].x,_datasOriginalContourPoints[originalMain2Index].y)
-								 << QPoint(mainPoint1.x,mainPoint1.y)
-								 << QPoint(mainPoint2.x,mainPoint2.y);
-		}
+		for ( i=0 ; i<=originalMain1Index ; ++i ) contourPolygonBottom << QPoint(_datasOriginalContourPoints[i].x,_datasOriginalContourPoints[i].y);
+		contourPolygonBottom << QPoint(mainPoint1.x,mainPoint1.y)
+							 << QPoint(mainPoint2.x,mainPoint2.y);
 		for ( i=originalMain2Index ; i<nbOriginalPointsContour ; ++i ) contourPolygonBottom << QPoint(_datasOriginalContourPoints[i].x,_datasOriginalContourPoints[i].y);
 		contourPolygonBottom << QPoint(_datasOriginalContourPoints[0].x,_datasOriginalContourPoints[0].y);
 
@@ -299,13 +289,10 @@ void ContourCurve::constructCurve( const Billon &billon, const iCoord2D &billonC
 		//     - du point le plus proche du premier point dominant
 		//     - des points du contour initial (non lissé) situés entre le point le plus proche du premier point dominant et le point le plus proche du second point dominant
 		//     - du point le plus proche du second point dominant
-		if ( originalMain1Index != originalMain2Index ) contourPolygonTop << QPoint(mainPoint1.x,mainPoint1.y);
+		contourPolygonTop << QPoint(mainPoint1.x,mainPoint1.y);
 		for ( i=originalMain1Index ; i<=originalMain2Index ; ++i ) contourPolygonTop << QPoint(_datasOriginalContourPoints[i].x,_datasOriginalContourPoints[i].y);
-		if ( originalMain1Index != originalMain2Index )
-		{
-			contourPolygonTop << QPoint(mainPoint2.x,mainPoint2.y)
-							  << QPoint(mainPoint1.x,mainPoint1.y);
-		}
+		contourPolygonTop << QPoint(mainPoint2.x,mainPoint2.y)
+						  << QPoint(mainPoint1.x,mainPoint1.y);
 
 		// Ajout des pixel
 		for ( j = minYIndex ; j<maxYIndex ; j++ )
@@ -399,7 +386,7 @@ void ContourCurve::constructCurve( const Billon &billon, const iCoord2D &billonC
 	}
 }
 
-void ContourCurve::constructCurveOldMethod( const Billon &billon, const iCoord2D &billonCenter, const int &sliceNumber, const int &threshold, const int &blurredSegmentThickness, const int &smoothingRadius, const iCoord2D &startPoint )
+void ContourCurve::constructCurveOldMethod( const Billon &billon, const iCoord2D &billonCenter, const int &sliceNumber, const int &threshold, const int &smoothingRadius, const iCoord2D &startPoint )
 {
 	_datasOriginalContourPoints.clear();
 	_datasOriginalContourPoints = billon.extractContour( billonCenter, sliceNumber, threshold, startPoint );

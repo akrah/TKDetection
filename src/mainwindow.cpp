@@ -285,7 +285,7 @@ void MainWindow::drawSlice( const int &sliceNumber )
 			}
 		}
 
-		const bool inDrawingArea = (_ui->_comboSelectSliceInterval->currentIndex() != 0 && _sliceHistogram->branchesAreas().at(_ui->_comboSelectSliceInterval->currentIndex()-1).contains(sliceNumber));
+		const bool inDrawingArea = (_ui->_comboSelectSliceInterval->currentIndex() > 0 && _sliceHistogram->branchesAreas().at(_ui->_comboSelectSliceInterval->currentIndex()-1).contains(sliceNumber));
 		if ( (_pieChartDiagrams->count() != 0) && inDrawingArea )
 		{
 			iCoord2D center(_pix.width()/2,_pix.height()/2);
@@ -1031,7 +1031,7 @@ void MainWindow::selectSectorInterval( const int &index ) {
 			Billon *biggestComponents;
 			iCoord2D nearestPoint;
 
-			int minIndex, upperIndex, lowerIndex;
+			int minIndex;
 			qreal minVal;
 
 			minIndex = 0;
@@ -1055,10 +1055,12 @@ void MainWindow::selectSectorInterval( const int &index ) {
 			_histogramDistanceMarrowToNearestPoint.setSamples(histData);
 			_ui->_plotDistanceMarrowToNearestPoint->replot();
 
-			upperIndex = qMin(depth-4,minIndex);
-			while ( upperIndex < depth-4 && (histData[upperIndex+4].value - histData[upperIndex].value > 5.) ) upperIndex++;
-			lowerIndex = qMax(4,minIndex);
-			while ( lowerIndex > 3 && histData[lowerIndex-4].value - histData[lowerIndex].value > 5. ) lowerIndex--;
+			int upperIndex, lowerIndex;
+
+			upperIndex = qMin(depth-5,minIndex);
+			while ( upperIndex < depth-4 && (histData[upperIndex+5].value - histData[upperIndex].value > 5.) ) upperIndex++;
+			lowerIndex = qMax(5,minIndex);
+			while ( lowerIndex > 3 && histData[lowerIndex-5].value - histData[lowerIndex].value > 5. ) lowerIndex--;
 
 			_knotIntervalInDistanceMarrowToNearestPointHistogram.setBounds(lowerIndex+3,upperIndex-3);
 
@@ -1307,7 +1309,7 @@ void MainWindow::createVoxelSetAllIntervals(std::vector<iCoord3D> &vectVoxels, b
 					marrowCoord = _marrow != 0 ? _marrow->at(sliceInterval.minValue()+k) : iCoord2D(width/2,height/2);
 					biggestComponents = ConnexComponentExtractor::extractConnexComponents( _componentBillon->slice(k), qPow(_ui->_spinMinimalSizeOf2DConnexComponents->value(),2), 0 );
 					if(useOldMethod){
-					  contourCurve.constructCurveOldMethod( *biggestComponents, marrowCoord, 0, 0, _ui->_spinBlurredSegmentsThickness->value(), _ui->_spinContourSmoothingRadius->value() );
+					  contourCurve.constructCurveOldMethod( *biggestComponents, marrowCoord, 0, 0, _ui->_spinContourSmoothingRadius->value() );
 					}else{
 					  contourCurve.constructCurve( *biggestComponents, marrowCoord, 0, 0, _ui->_spinBlurredSegmentsThickness->value(), _ui->_spinContourSmoothingRadius->value() );
 					}
