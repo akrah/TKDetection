@@ -32,7 +32,8 @@ int main(int argc, char** argv)
   general_opt.add_options()
     ("help,h", "display this message")
     ("input-file,i", po::value<std::string>(), "vol file (.vol) , pgm3d (.p3d or .pgm3d) file or sdp (sequence of discrete points)" )
-    ("mesh-file, mesh", po::value<std::string>(), "ofs mesh file (.ofs)" )
+    ("trunkBark-mesh,t", po::value<std::string>(), "mesh of the trunk bark in format OFS non normalized (.ofs)" )
+    ("marrow-mesh,a", po::value<std::string>(), "mesh of trunk marrow  in format OFS non normalized (.ofs)" )
     ("thresholdMin,m",  po::value<int>()->default_value(0), "threshold min to define binary shape" ) 
     ("thresholdMax,M",  po::value<int>()->default_value(255), "threshold max to define binary shape" )
     ("transparency,t",  po::value<uint>()->default_value(255), "transparency") ; 
@@ -134,12 +135,12 @@ int main(int argc, char** argv)
   gradient.addColor(DGtal::Color::Magenta);
   gradient.addColor(DGtal::Color::Red);  
  
-  viewer << SetMode3D(vectConnectedSCell.at(0).at(0).className(), "Basic");
+  viewer << SetMode3D(vectConnectedSCell.at(0).at(0).className(), "");
   for(uint i=0; i< vectConnectedSCell.size();i++){
     DGtal::Color c= gradient(i);
     viewer << CustomColors3D(Color(250, 0,0,100), Color(c.red(), 
-  							 c.green(),
-  							 c.blue(),100));
+							c.green(),
+							c.blue(),100));
     
     for(uint j=0; j< vectConnectedSCell.at(i).size();j++){
       viewer << vectConnectedSCell.at(i).at(j);
@@ -151,10 +152,19 @@ int main(int argc, char** argv)
 
   }
   
-  if(vm.count("mesh-file")){
+  if(vm.count("trunkBark-mesh")){
+    string meshFilename = vm["trunkBark-mesh"].as<std::string>();
+    MeshFromPoints<Display3D::pointD3D> anImportedMesh(DGtal::Color(160, 30, 30,50));
+    bool import = anImportedMesh << meshFilename;
+    if(import){
+      viewer << anImportedMesh;  
+    }
+  }
 
-    string meshFilename = vm["mesh-file"].as<std::string>();
-    MeshFromPoints<Display3D::pointD3D> anImportedMesh(true);
+
+  if(vm.count("marrow-mesh")){
+    string meshFilename = vm["marrow-mesh"].as<std::string>();
+    MeshFromPoints<Display3D::pointD3D> anImportedMesh(DGtal::Color(70,70,70,255));
     bool import = anImportedMesh << meshFilename;
     if(import){
       viewer << anImportedMesh;  
