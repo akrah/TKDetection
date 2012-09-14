@@ -773,7 +773,7 @@ void MainWindow::exportToOfs()
 		QString fileName = QFileDialog::getSaveFileName(this, tr("Exporter en .ofs"), "output.ofs", tr("Fichiers de données (*.ofs);;Tous les fichiers (*.*)"));
 		if ( !fileName.isEmpty() )
 		{
-			OfsExport::process( *_billon, *_marrow, Interval(_ui->_spansliderSelectInterval->lowerValue(),_ui->_spansliderSelectInterval->upperValue()), fileName, _ui->_spinExportNbEdges->value(), _ui->_spinExportRadius->value() );
+		  OfsExport::process( *_billon, *_marrow, Interval(_ui->_spansliderSelectInterval->lowerValue(),_ui->_spansliderSelectInterval->upperValue()), fileName, _ui->_spinExportNbEdges->value(), _ui->_spinExportRadius->value(), false );
 		}
 	}
 }
@@ -782,7 +782,7 @@ void MainWindow::exportToOfsRestricted() {
 	if ( _billon != 0 && _marrow != 0 ) {
 		QString fileName = QFileDialog::getSaveFileName(this, tr("Exporter en .ofs"), "output.ofs", tr("Fichiers de données (*.ofs);;Tous les fichiers (*.*)"));
 		if ( !fileName.isEmpty() ) {
-			OfsExport::processRestrictedMesh( *_billon, *_marrow, Interval(_ui->_spansliderSelectInterval->lowerValue(),_ui->_spansliderSelectInterval->upperValue()),  fileName);
+		  OfsExport::processRestrictedMesh( *_billon, *_marrow, Interval(_ui->_spansliderSelectInterval->lowerValue(),_ui->_spansliderSelectInterval->upperValue()),  fileName, 100, -900, false );
 		}
 	}
 }

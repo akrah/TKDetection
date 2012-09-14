@@ -46,11 +46,12 @@ namespace OfsExport {
 			if ( file.open(QIODevice::WriteOnly) ) {
 				QTextStream stream(&file);
 				stream << "OFS MHD" << endl;
-				computeAllEdges( billon, marrow, interval, nbEdgesPerSlice, radiusOfTubes, stream );
+				computeAllEdges( billon, marrow, interval, nbEdgesPerSlice, radiusOfTubes, stream, normalized );
 				computeEgesLinks( nbEdgesPerSlice, interval.count(), stream );
 				file.close();
 			}
 		}
+
 		else {
 			qDebug() << QObject::tr("Saving not possible since the mesh is outside the SlicesInterval");
 		}
