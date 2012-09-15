@@ -135,7 +135,7 @@ int main(int argc, char** argv)
   gradient.addColor(DGtal::Color::Magenta);
   gradient.addColor(DGtal::Color::Red);  
  
-  viewer << SetMode3D(vectConnectedSCell.at(0).at(0).className(), "");
+  //viewer << SetMode3D(vectConnectedSCell.at(0).at(0).className(), "");
   for(uint i=0; i< vectConnectedSCell.size();i++){
     DGtal::Color c= gradient(i);
     viewer << CustomColors3D(Color(250, 0,0,100), Color(c.red(), 
