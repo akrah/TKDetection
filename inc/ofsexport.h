@@ -22,7 +22,7 @@ namespace OfsExport {
 					       const QString &fileName, const int &nbEdgesPerSlice = 4,  bool normalized=true );
 	void processRestrictedMesh( const Billon &billon, const Marrow &marrow, const Interval &interval, 
 				    const QString &fileName, const int &resolutionCercle = 100,
-				    const int &seuilContour = -900,  bool normalized=true ) ;
+				    const int &seuilContour = -900,  bool normalized=true, bool displayBegEndFaces=true ) ;
 }
 
 

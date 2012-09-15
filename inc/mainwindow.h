@@ -71,6 +71,7 @@ private slots:
 	void setCannyMinimumDeviation( const double &minimumDeviation );
 	void exportToDat();
 	void exportToOfs();
+	void exportToOfsAll();
 	void exportToOfsRestricted();
 	void exportSectorToOfs();
 	void exportAllSectorInAllIntervalsToOfs();

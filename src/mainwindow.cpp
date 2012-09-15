@@ -172,6 +172,7 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 	QObject::connect(_ui->_spansliderSelectInterval, SIGNAL(upperValueChanged(int)), this, SLOT(setMaximumOfSliceInterval(int)));
 	QObject::connect(_ui->_buttonMaxSlice, SIGNAL(clicked()), this, SLOT(setMaximumOfSliceIntervalToCurrentSlice()));
 	QObject::connect(_ui->_buttonExportToDat, SIGNAL(clicked()), this, SLOT(exportToDat()));
+	QObject::connect(_ui->_buttonExportToOfsAll, SIGNAL(clicked()), this, SLOT(exportToOfsAll()));
 	QObject::connect(_ui->_buttonExportToOfs, SIGNAL(clicked()), this, SLOT(exportToOfs()));
 	QObject::connect(_ui->_buttonExportHistogramToSep, SIGNAL(clicked()), this, SLOT(exportHistogramToSep()));
 	QObject::connect(_ui->_buttonExportToV3D, SIGNAL(clicked()), this, SLOT(exportToV3D()));
@@ -777,13 +778,25 @@ void MainWindow::exportToOfs()
 		}
 	}
 }
+void MainWindow::exportToOfsAll()
+{
+	if (  _marrow != 0 )
+	{
+		QString fileName = QFileDialog::getSaveFileName(this, tr("Exporter en .ofs"), "output.ofs", tr("Fichiers de données (*.ofs);;Tous les fichiers (*.*)"));
+		if ( !fileName.isEmpty() )
+		{
+		  OfsExport::process( *_billon, *_marrow, _marrow->interval(), fileName, _ui->_spinExportNbEdges->value(), _ui->_spinExportRadius->value(), false );
+		}
+	}
+}
 
 void MainWindow::exportToOfsRestricted() {
 	if ( _billon != 0 && _marrow != 0 ) {
 		QString fileName = QFileDialog::getSaveFileName(this, tr("Exporter en .ofs"), "output.ofs", tr("Fichiers de données (*.ofs);;Tous les fichiers (*.*)"));
 		if ( !fileName.isEmpty() ) {
-		  OfsExport::processRestrictedMesh( *_billon, *_marrow, Interval(_ui->_spansliderSelectInterval->lowerValue(),_ui->_spansliderSelectInterval->upperValue()),  fileName, 100, -900, false );
-		}
+		  OfsExport::processRestrictedMesh( *_billon, *_marrow, Interval(_ui->_spansliderSelectInterval->lowerValue(),_ui->_spansliderSelectInterval->upperValue()),  fileName, 100, -900, false, (_ui->_closeTrunk)->isChecked() );
+		  //Interval(_ui->_spansliderSelectInterval->lowerValue(),_ui->_spansliderSelectInterval->upperValue())
+	}
 	}
 }
 
@@ -915,11 +928,11 @@ void MainWindow::selectSliceInterval( const int &index )
 
 	_ui->_comboSelectSectorInterval->clear();
 	_ui->_comboSelectSectorInterval->addItem(tr("Aucun"));
-	_ui->_spansliderSelectInterval->setLowerValue(0);
-	_ui->_spansliderSelectInterval->setUpperValue(0);
 	if ( index > 0 && index <= _sliceHistogram->branchesAreas().size() )
 	{
 		const Interval &interval = _sliceHistogram->branchesAreas()[index-1];
+    
+	
 		computeSectorsHistogramForInterval(interval);
 		_ui->_sliderSelectSlice->setValue(_sliceHistogram->indexOfIemeInterval(index-1));
 
@@ -935,8 +948,9 @@ void MainWindow::selectSliceInterval( const int &index )
 				_ui->_comboSelectSectorInterval->addItem(tr("Secteur %1 : [ %2, %3 ] (%4 degres)").arg(i).arg(rightAngle).arg(leftAngle).arg(interval.isValid()?leftAngle-rightAngle:leftAngle-rightAngle+360.));
 			}
 		}
+		_ui->_spansliderSelectInterval->setUpperValue(interval.maxValue());	
 		_ui->_spansliderSelectInterval->setLowerValue(interval.minValue());
-		_ui->_spansliderSelectInterval->setUpperValue(interval.maxValue());
+	
 	}
 }
 

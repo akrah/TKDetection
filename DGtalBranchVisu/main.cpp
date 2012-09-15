@@ -49,8 +49,8 @@ int main(int argc, char** argv)
   if( !parseOK || vm.count("help")||argc<=1)
     {
       std::cout << "Usage: " << argv[0] << " [input-file]\n"
-    << "Display volume file as a voxel set by using QGLviewer"
-    << general_opt << "\n";
+		<< "Display volume file as a voxel set by using QGLviewer"
+		<< general_opt << "\n";
       return 0;
     }
   
@@ -111,42 +111,42 @@ int main(int argc, char** argv)
       set3d.insert(vectVoxels.at(i));
     }
     //A KhalimskySpace is constructed from the domain boundary points.
-   KSpace K;
-   K.init(pMin, pMax, true);
+    KSpace K;
+    K.init(pMin, pMax, true);
   
-   SurfelAdjacency<3> SAdj( true );
-   vector<vector<SCell> > vectConnectedSCell;
+    SurfelAdjacency<3> SAdj( true );
+    vector<vector<SCell> > vectConnectedSCell;
   
-   cerr << "Extracting digital set .." ;
-   SetPredicate<DigitalSet> shape_set_predicate( set3d );
-   Surfaces<KSpace>::extractAllConnectedSCell(vectConnectedSCell,K, SAdj, shape_set_predicate, true);
+    cerr << "Extracting digital set .." ;
+    SetPredicate<DigitalSet> shape_set_predicate( set3d );
+    Surfaces<KSpace>::extractAllConnectedSCell(vectConnectedSCell,K, SAdj, shape_set_predicate, true);
 
-   //   Surfaces<KSpace>::extractAllConnectedSCell(vectConnectedSCell,K, SAdj, set3d, true);
-   cerr << "[done]"<< endl;
+    //   Surfaces<KSpace>::extractAllConnectedSCell(vectConnectedSCell,K, SAdj, set3d, true);
+    cerr << "[done]"<< endl;
    
    
    
-   GradientColorMap<long> gradient( 0,vectConnectedSCell.size());
-  gradient.addColor(DGtal::Color::Red);
-  gradient.addColor(DGtal::Color::Yellow);
-  gradient.addColor(DGtal::Color::Green);
-  gradient.addColor(DGtal::Color::Cyan);
-  gradient.addColor(DGtal::Color::Blue);
-  gradient.addColor(DGtal::Color::Magenta);
-  gradient.addColor(DGtal::Color::Red);  
- 
-  //viewer << SetMode3D(vectConnectedSCell.at(0).at(0).className(), "");
-  for(uint i=0; i< vectConnectedSCell.size();i++){
-    DGtal::Color c= gradient(i);
-    viewer << CustomColors3D(Color(250, 0,0,100), Color(c.red(), 
-							c.green(),
-							c.blue(),100));
+    GradientColorMap<long> gradient( 0,vectConnectedSCell.size());
+    gradient.addColor(DGtal::Color::Red);
+    gradient.addColor(DGtal::Color::Yellow);
+    gradient.addColor(DGtal::Color::Green);
+    gradient.addColor(DGtal::Color::Cyan);
+    gradient.addColor(DGtal::Color::Blue);
+    gradient.addColor(DGtal::Color::Magenta);
+    gradient.addColor(DGtal::Color::Red);  
+  
+    viewer << SetMode3D(vectConnectedSCell.at(0).at(0).className(), "Basic");
+    for(uint i=0; i< vectConnectedSCell.size();i++){
+      DGtal::Color c= gradient(i);
+      viewer << CustomColors3D(Color(250, 0,0,100), Color(c.red(), 
+							  c.green(),
+							  c.blue(),100));
     
-    for(uint j=0; j< vectConnectedSCell.at(i).size();j++){
-      viewer << vectConnectedSCell.at(i).at(j);
-    }    
+      for(uint j=0; j< vectConnectedSCell.at(i).size();j++){
+	viewer << vectConnectedSCell.at(i).at(j);
+      }    
+    }
 
-  }
 
       
 
@@ -178,9 +178,6 @@ int main(int argc, char** argv)
 
   
   
-
-
-
   return application.exec();
 }
 
