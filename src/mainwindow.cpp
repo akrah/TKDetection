@@ -773,7 +773,7 @@ void MainWindow::exportToOfs()
 		QString fileName = QFileDialog::getSaveFileName(this, tr("Exporter en .ofs"), "output.ofs", tr("Fichiers de données (*.ofs);;Tous les fichiers (*.*)"));
 		if ( !fileName.isEmpty() )
 		{
-			OfsExport::process( *_billon, *_marrow, Interval(_ui->_spansliderSelectInterval->lowerValue(),_ui->_spansliderSelectInterval->upperValue()), fileName, _ui->_spinExportNbEdges->value(), _ui->_spinExportRadius->value() );
+		  OfsExport::process( *_billon, *_marrow, Interval(_ui->_spansliderSelectInterval->lowerValue(),_ui->_spansliderSelectInterval->upperValue()), fileName, _ui->_spinExportNbEdges->value(), _ui->_spinExportRadius->value(), false );
 		}
 	}
 }
@@ -782,7 +782,7 @@ void MainWindow::exportToOfsRestricted() {
 	if ( _billon != 0 && _marrow != 0 ) {
 		QString fileName = QFileDialog::getSaveFileName(this, tr("Exporter en .ofs"), "output.ofs", tr("Fichiers de données (*.ofs);;Tous les fichiers (*.*)"));
 		if ( !fileName.isEmpty() ) {
-			OfsExport::processRestrictedMesh( *_billon, *_marrow, Interval(_ui->_spansliderSelectInterval->lowerValue(),_ui->_spansliderSelectInterval->upperValue()),  fileName);
+		  OfsExport::processRestrictedMesh( *_billon, *_marrow, Interval(_ui->_spansliderSelectInterval->lowerValue(),_ui->_spansliderSelectInterval->upperValue()),  fileName, 100, -900, false );
 		}
 	}
 }
@@ -1377,7 +1377,8 @@ void MainWindow::exportAllContourComponentOfVoxels()
 			createVoxelSet(voxelSet);
 			for ( unsigned int i=0 ; i<voxelSet.size() ; i++)
 			{
-				stream << voxelSet.at(i).x << " " << voxelSet.at(i).y << " " << voxelSet.at(i).z << endl;
+			  // invert X/Y (due to compatibility with DGtalViewer
+				stream << voxelSet.at(i).y << " " << voxelSet.at(i).x << " " << voxelSet.at(i).z << endl;
 			}
 			QMessageBox::information(this,"Export branches en SDP réussie", "Export réussi !");
 		}
@@ -1404,7 +1405,8 @@ void MainWindow::exportAllContourComponentOfVoxelsAllIntervals()
 			createVoxelSetAllIntervals(voxelSet);
 			for ( unsigned int i=0 ; i<voxelSet.size() ; i++ )
 			{
-				stream << voxelSet.at(i).x << " " << voxelSet.at(i).y << " " << voxelSet.at(i).z << endl;
+			  // invert X/Y (due to compatibility with DGtalViewer
+				stream << voxelSet.at(i).y << " " << voxelSet.at(i).x << " " << voxelSet.at(i).z << endl;
 			}
 
 			QMessageBox::information(this,"Export branches en SDP réussie", "Export réussi !");
