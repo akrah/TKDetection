@@ -250,6 +250,8 @@ void MainWindow::openDicom()
 		drawSlice();
 		setWindowTitle(QString("TKDetection - %1").arg(folderName.section(QDir::separator(),-1)));
 	}
+
+	(_ui->_labelZwidth)->setText(QString::number( _billon->voxelDepth()));
 }
 
 void MainWindow::closeImage()
