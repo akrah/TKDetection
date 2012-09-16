@@ -36,6 +36,9 @@ int main(int argc, char** argv)
     ("marrow-mesh,a", po::value<std::string>(), "mesh of trunk marrow  in format OFS non normalized (.ofs)" )
     ("thresholdMin,m",  po::value<int>()->default_value(0), "threshold min to define binary shape" ) 
     ("thresholdMax,M",  po::value<int>()->default_value(255), "threshold max to define binary shape" )
+    ("scaleX,x",  po::value<float>()->default_value(1.0), "set the scale value in the X direction (default 1.0)" )
+    ("scaleY,y",  po::value<float>()->default_value(1.0), "set the scale value in the Y direction (default 1.0)" )
+    ("scaleY,z",  po::value<float>()->default_value(1.0), "set the scale value in the Z direction (default 1.0)") 
     ("transparency,t",  po::value<uint>()->default_value(255), "transparency") ; 
   bool parseOK=true;
   po::variables_map vm;
@@ -68,9 +71,14 @@ int main(int argc, char** argv)
   int thresholdMin = vm["thresholdMin"].as<int>();
   int thresholdMax = vm["thresholdMax"].as<int>();
   unsigned char transp = vm["transparency"].as<uint>();
- 
+  float sx = vm["scaleX"].as<float>();
+  float sy = vm["scaleY"].as<float>();
+  float sz = vm["scaleZ"].as<float>();
+  
   QApplication application(argc,argv);
   Viewer3D viewer;
+  
+  viewer.setScale(sx,sy,sz);
   viewer.setWindowTitle("simple Volume Viewer");
   viewer.show();
   
