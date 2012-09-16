@@ -251,6 +251,8 @@ void MainWindow::openDicom()
 		setWindowTitle(QString("TKDetection - %1").arg(folderName.section(QDir::separator(),-1)));
 	}
 
+	(_ui->_labelXwidth)->setText(QString::number( _billon->voxelWidth()));
+	(_ui->_labelYwidth)->setText(QString::number( _billon->voxelHeight()));
 	(_ui->_labelZwidth)->setText(QString::number( _billon->voxelDepth()));
 }
 

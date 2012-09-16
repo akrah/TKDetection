@@ -230,8 +230,8 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>449</width>
-              <height>340</height>
+              <width>314</width>
+              <height>148</height>
              </rect>
             </property>
             <attribute name="label">
@@ -1585,14 +1585,14 @@ autour de la moelle</string>
            </property>
           </widget>
          </item>
-         <item row="10" column="1">
+         <item row="13" column="1">
           <widget class="QPushButton" name="_buttonExportToV3D">
            <property name="text">
             <string>Export en .v3d</string>
            </property>
           </widget>
          </item>
-         <item row="12" column="1">
+         <item row="15" column="1">
           <widget class="QPushButton" name="_buttonExportToOfsRestricted">
            <property name="text">
             <string>Exporter en.ofs Restricted</string>
@@ -1606,21 +1606,48 @@ autour de la moelle</string>
            </property>
           </widget>
          </item>
-         <item row="11" column="1">
+         <item row="14" column="1">
           <widget class="QRadioButton" name="_closeTrunk">
            <property name="text">
             <string>Ferme faces avant/arrière du tronc</string>
            </property>
           </widget>
          </item>
-         <item row="9" column="0">
-          <widget class="QLabel" name="label_38">
+         <item row="10" column="0">
+          <widget class="QLabel" name="label_40">
            <property name="text">
-            <string>Voxel Z-width:</string>
+            <string>Voxel X-width:</string>
            </property>
           </widget>
          </item>
-         <item row="9" column="1">
+         <item row="10" column="1">
+          <widget class="QLabel" name="_labelXwidth">
+           <property name="text">
+            <string>--</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignCenter</set>
+           </property>
+          </widget>
+         </item>
+         <item row="11" column="1">
+          <widget class="QLabel" name="_labelYwidth">
+           <property name="text">
+            <string>--</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignCenter</set>
+           </property>
+          </widget>
+         </item>
+         <item row="11" column="0">
+          <widget class="QLabel" name="label_41">
+           <property name="text">
+            <string>Voxel Y-width:</string>
+           </property>
+          </widget>
+         </item>
+         <item row="12" column="1">
           <widget class="QLabel" name="_labelZwidth">
            <property name="font">
             <font>
@@ -1633,6 +1660,13 @@ autour de la moelle</string>
            </property>
            <property name="alignment">
             <set>Qt::AlignCenter</set>
+           </property>
+          </widget>
+         </item>
+         <item row="12" column="0">
+          <widget class="QLabel" name="label_38">
+           <property name="text">
+            <string>Voxel Z-width:</string>
            </property>
           </widget>
          </item>
