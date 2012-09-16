@@ -173,6 +173,7 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 	QObject::connect(_ui->_spanSliderSelectInterval, SIGNAL(upperValueChanged(int)), _ui->_spinMaxSlice, SLOT(setValue(int)));
 	QObject::connect(_ui->_buttonMaxSlice, SIGNAL(clicked()), this, SLOT(setMaximumOfSliceIntervalToCurrentSlice()));
 	QObject::connect(_ui->_buttonExportToDat, SIGNAL(clicked()), this, SLOT(exportToDat()));
+	QObject::connect(_ui->_buttonExportToOfsAll, SIGNAL(clicked()), this, SLOT(exportToOfsAll()));
 	QObject::connect(_ui->_buttonExportToOfs, SIGNAL(clicked()), this, SLOT(exportToOfs()));
 	QObject::connect(_ui->_buttonExportHistogramToSep, SIGNAL(clicked()), this, SLOT(exportHistogramToSep()));
 	QObject::connect(_ui->_buttonExportToV3D, SIGNAL(clicked()), this, SLOT(exportToV3D()));
@@ -778,12 +779,26 @@ void MainWindow::exportToOfs()
 		}
 	}
 }
-
-void MainWindow::exportToOfsRestricted() {
-	if ( _billon != 0 && _marrow != 0 ) {
+void MainWindow::exportToOfsAll()
+{
+	if (  _marrow != 0 )
+	{
 		QString fileName = QFileDialog::getSaveFileName(this, tr("Exporter en .ofs"), "output.ofs", tr("Fichiers de données (*.ofs);;Tous les fichiers (*.*)"));
-		if ( !fileName.isEmpty() ) {
-		  OfsExport::processRestrictedMesh( *_billon, *_marrow, Interval(_ui->_spanSliderSelectInterval->lowerValue(),_ui->_spanSliderSelectInterval->upperValue()),  fileName, 100, -900, false );
+		if ( !fileName.isEmpty() )
+		{
+		  OfsExport::process( *_billon, *_marrow, _marrow->interval(), fileName, _ui->_spinExportNbEdges->value(), _ui->_spinExportRadius->value(), false );
+		}
+	}
+}
+
+void MainWindow::exportToOfsRestricted()
+{
+	if ( _billon != 0 && _marrow != 0 )
+	{
+		QString fileName = QFileDialog::getSaveFileName(this, tr("Exporter en .ofs"), "output.ofs", tr("Fichiers de données (*.ofs);;Tous les fichiers (*.*)"));
+		if ( !fileName.isEmpty() )
+		{
+		  OfsExport::processRestrictedMesh( *_billon, *_marrow, Interval(_ui->_spanSliderSelectInterval->lowerValue(),_ui->_spanSliderSelectInterval->upperValue()),  fileName, 100, -900, false, (_ui->_closeTrunk)->isChecked() );
 		}
 	}
 }

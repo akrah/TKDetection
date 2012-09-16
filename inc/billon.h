@@ -28,6 +28,8 @@ public:
 	void setVoxelSize( const qreal &width, const qreal &height, const qreal &depth );
 
 	QVector<rCoord2D> getAllRestrictedAreaVertex( const int &nbPolygonsPoints, const int &threshold, const Marrow *marrow = 0 ) const;
+		QVector<rCoord2D> getRestrictedAreaVertex( const int &nbPolygonsPoints, const int &threshold,
+						   unsigned int minSlice, unsigned int maxSlice, const Marrow *marrow = 0) const;
 	qreal getRestrictedAreaBoudingBoxRadius( const Marrow *marrow, const int &nbPolygonPoints, int intensityThreshold ) const;
 	qreal getRestrictedAreaMeansRadius( const Marrow *marrow, const int &nbPolygonPoints, int intensityThreshold ) const;
 
@@ -123,6 +125,41 @@ QVector<rCoord2D> BillonTpl<T>::getAllRestrictedAreaVertex( const int &nbPolygon
 	 }
 	return vectAllVertex;
 }
+
+
+template< typename T >
+QVector<rCoord2D> BillonTpl<T>::getRestrictedAreaVertex( const int &nbPolygonPoints, const int &threshold,
+							 unsigned int minSlice, unsigned int maxSlice, const Marrow *marrow ) const {
+	 QVector<rCoord2D> vectAllVertex;
+	 const int thresholdRestrict = threshold-1;
+	 for ( uint indexSlice = minSlice ; indexSlice<=maxSlice ; ++indexSlice ) {
+		 const arma::Mat<T> &currentSlice = this->slice(indexSlice);
+
+		 const int sliceWidth = currentSlice.n_cols;
+		 const int sliceHeight = currentSlice.n_rows;
+		 const int xCenter = (marrow != 0 && marrow->interval().containsClosed(indexSlice))?marrow->at(indexSlice).x:sliceWidth/2;
+		 const int yCenter = (marrow != 0 && marrow->interval().containsClosed(indexSlice))?marrow->at(indexSlice).y:sliceHeight/2;
+
+		 qreal xEdge, yEdge, orientation, cosAngle, sinAngle;
+		 orientation = 0.;
+		 for ( int i=0 ; i<nbPolygonPoints ; ++i ) {
+			 orientation += (TWO_PI/static_cast<qreal>(nbPolygonPoints));
+			 cosAngle = qCos(orientation);
+			 sinAngle = -qSin(orientation);
+			 xEdge = xCenter + 5*cosAngle;
+			 yEdge = yCenter + 5*sinAngle;
+			 while ( xEdge>0. && yEdge>0. && xEdge<sliceWidth && yEdge<sliceHeight && currentSlice.at(yEdge,xEdge) > thresholdRestrict ) {
+					 xEdge += cosAngle;
+					 yEdge += sinAngle;
+			 }
+			 vectAllVertex.push_back(rCoord2D(xEdge,yEdge));
+		 }
+	 }
+	return vectAllVertex;
+}
+
+
+
 
 template< typename T >
 qreal BillonTpl<T>::getRestrictedAreaBoudingBoxRadius( const Marrow *marrow, const int &nbPolygonPoints, int intensityThreshold ) const
