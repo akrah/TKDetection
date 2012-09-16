@@ -105,7 +105,7 @@
            <x>0</x>
            <y>0</y>
            <width>301</width>
-           <height>627</height>
+           <height>628</height>
           </rect>
          </property>
          <layout class="QHBoxLayout" name="horizontalLayout_8">
@@ -183,7 +183,7 @@
      <item>
       <widget class="QTabWidget" name="_tabs">
        <property name="currentIndex">
-        <number>2</number>
+        <number>3</number>
        </property>
        <widget class="QWidget" name="_tabGeneral">
         <attribute name="title">
@@ -1063,7 +1063,7 @@ autour de la moelle</string>
             <layout class="QVBoxLayout" name="verticalLayout_8">
              <item>
               <widget class="QwtPolarPlot" name="_polarSectorSum">
-               <property name="plotBackground">
+               <property name="plotBackground" stdset="0">
                 <brush brushstyle="SolidPattern">
                  <color alpha="0">
                   <red>255</red>
@@ -1477,6 +1477,13 @@ autour de la moelle</string>
          <item>
           <widget class="QwtPlot" name="_plotDistanceMarrowToNearestPoint"/>
          </item>
+         <item>
+          <widget class="QPushButton" name="_buttonExportKnotIntervalHistogram">
+           <property name="text">
+            <string>Export knot interval histogram</string>
+           </property>
+          </widget>
+         </item>
         </layout>
        </widget>
        <widget class="QWidget" name="tab">
@@ -1671,7 +1678,7 @@ autour de la moelle</string>
           </widget>
          </item>
          <item>
-          <widget class="QxtSpanSlider" name="_spansliderSelectInterval">
+          <widget class="QxtSpanSlider" name="_spanSliderSelectInterval">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
              <horstretch>0</horstretch>
@@ -1867,15 +1874,15 @@ autour de la moelle</string>
    <container>1</container>
   </customwidget>
   <customwidget>
+   <class>QxtSpanSlider</class>
+   <extends>QSlider</extends>
+   <header>QxtSpanSlider</header>
+  </customwidget>
+  <customwidget>
    <class>QwtPolarPlot</class>
    <extends>QFrame</extends>
    <header>qwt_polar_plot.h</header>
    <container>1</container>
-  </customwidget>
-  <customwidget>
-   <class>QxtSpanSlider</class>
-   <extends>QSlider</extends>
-   <header>QxtSpanSlider</header>
   </customwidget>
  </customwidgets>
  <tabstops>

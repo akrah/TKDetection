@@ -137,6 +137,7 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 	QObject::connect(_ui->_sliderHistogramIntervalMinimumWidth, SIGNAL(valueChanged(int)), this, SLOT(setHistogramIntervalMinimumWidth(int)));
 	QObject::connect(_ui->_spinHistogramIntervalMinimumWidth, SIGNAL(valueChanged(int)), this, SLOT(setHistogramIntervalMinimumWidth(int)));
 	QObject::connect(_ui->_buttonExportSliceHistogram, SIGNAL(clicked()), this, SLOT(exportSliceHistogram()));
+	QObject::connect(_ui->_buttonExportKnotIntervalHistogram, SIGNAL(clicked()), this, SLOT(exportKnotIntervalHistogram()));
 
 	// Évènements déclenchés par les bouton associès à la moelle
 	QObject::connect(_ui->_buttonComputeMarrow, SIGNAL(clicked()), this, SLOT(updateMarrow()));
@@ -165,11 +166,11 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 	QObject::connect(&_sliceZoomer, SIGNAL(isMovedFrom(QPoint)), this, SLOT(dragInSliceView(QPoint)));
 
 	// Évènements déclenchés par les boutons relatifs aux intervalles de coupes
-	QObject::connect(_ui->_spinMinSlice, SIGNAL(valueChanged(int)), this, SLOT(setMinimumOfSliceInterval(int)));
-	QObject::connect(_ui->_spansliderSelectInterval, SIGNAL(lowerValueChanged(int)), this, SLOT(setMinimumOfSliceInterval(int)));
+	QObject::connect(_ui->_spinMinSlice, SIGNAL(valueChanged(int)), _ui->_spanSliderSelectInterval, SLOT(setLowerValue(int)));
+	QObject::connect(_ui->_spanSliderSelectInterval, SIGNAL(lowerValueChanged(int)), _ui->_spinMinSlice, SLOT(setValue(int)));
 	QObject::connect(_ui->_buttonMinSlice, SIGNAL(clicked()), this, SLOT(setMinimumOfSliceIntervalToCurrentSlice()));
-	QObject::connect(_ui->_spinMaxSlice, SIGNAL(valueChanged(int)), this, SLOT(setMaximumOfSliceInterval(int)));
-	QObject::connect(_ui->_spansliderSelectInterval, SIGNAL(upperValueChanged(int)), this, SLOT(setMaximumOfSliceInterval(int)));
+	QObject::connect(_ui->_spinMaxSlice, SIGNAL(valueChanged(int)), _ui->_spanSliderSelectInterval, SLOT(setUpperValue(int)));
+	QObject::connect(_ui->_spanSliderSelectInterval, SIGNAL(upperValueChanged(int)), _ui->_spinMaxSlice, SLOT(setValue(int)));
 	QObject::connect(_ui->_buttonMaxSlice, SIGNAL(clicked()), this, SLOT(setMaximumOfSliceIntervalToCurrentSlice()));
 	QObject::connect(_ui->_buttonExportToDat, SIGNAL(clicked()), this, SLOT(exportToDat()));
 	QObject::connect(_ui->_buttonExportToOfs, SIGNAL(clicked()), this, SLOT(exportToOfs()));
@@ -560,9 +561,9 @@ void MainWindow::setMinimumOfSliceInterval( const int &min )
 	_ui->_spinMinSlice->blockSignals(true);
 		_ui->_spinMinSlice->setValue(min);
 	_ui->_spinMinSlice->blockSignals(false);
-	_ui->_spansliderSelectInterval->blockSignals(true);
-		_ui->_spansliderSelectInterval->setLowerValue(min);
-	_ui->_spansliderSelectInterval->blockSignals(false);
+	_ui->_spanSliderSelectInterval->blockSignals(true);
+		_ui->_spanSliderSelectInterval->setLowerValue(min);
+	_ui->_spanSliderSelectInterval->blockSignals(false);
 }
 
 void MainWindow::setMinimumOfSliceIntervalToCurrentSlice()
@@ -577,9 +578,9 @@ void MainWindow::setMaximumOfSliceInterval(const int &max)
 	_ui->_spinMaxSlice->blockSignals(true);
 		_ui->_spinMaxSlice->setValue(max);
 	_ui->_spinMaxSlice->blockSignals(false);
-	_ui->_spansliderSelectInterval->blockSignals(true);
-		_ui->_spansliderSelectInterval->setUpperValue(max);
-	_ui->_spansliderSelectInterval->blockSignals(false);
+	_ui->_spanSliderSelectInterval->blockSignals(true);
+		_ui->_spanSliderSelectInterval->setUpperValue(max);
+	_ui->_spanSliderSelectInterval->blockSignals(false);
 }
 
 void MainWindow::setMaximumOfSliceIntervalToCurrentSlice()
@@ -760,7 +761,7 @@ void MainWindow::exportToDat()
 			qreal contrastFactor = QInputDialog::getInt(this,tr("Facteur de contraste"), tr("Contraste de l'image (image originale avec contraste à 0)"), 0, -100, 100, 1, &ok);
 			if ( ok )
 			{
-				DatExport::process( *_billon, Interval(_ui->_spansliderSelectInterval->lowerValue(),_ui->_spansliderSelectInterval->upperValue()), Interval(_ui->_spinMinIntensity->value(),_ui->_spinMaxIntensity->value()), fileName, _ui->_spinExportResolution->value(), (contrastFactor+100.)/100. );
+				DatExport::process( *_billon, Interval(_ui->_spanSliderSelectInterval->lowerValue(),_ui->_spanSliderSelectInterval->upperValue()), Interval(_ui->_spinMinIntensity->value(),_ui->_spinMaxIntensity->value()), fileName, _ui->_spinExportResolution->value(), (contrastFactor+100.)/100. );
 			}
 		}
 	}
@@ -773,7 +774,7 @@ void MainWindow::exportToOfs()
 		QString fileName = QFileDialog::getSaveFileName(this, tr("Exporter en .ofs"), "output.ofs", tr("Fichiers de données (*.ofs);;Tous les fichiers (*.*)"));
 		if ( !fileName.isEmpty() )
 		{
-		  OfsExport::process( *_billon, *_marrow, Interval(_ui->_spansliderSelectInterval->lowerValue(),_ui->_spansliderSelectInterval->upperValue()), fileName, _ui->_spinExportNbEdges->value(), _ui->_spinExportRadius->value(), false );
+		  OfsExport::process( *_billon, *_marrow, Interval(_ui->_spanSliderSelectInterval->lowerValue(),_ui->_spanSliderSelectInterval->upperValue()), fileName, _ui->_spinExportNbEdges->value(), _ui->_spinExportRadius->value(), false );
 		}
 	}
 }
@@ -782,7 +783,7 @@ void MainWindow::exportToOfsRestricted() {
 	if ( _billon != 0 && _marrow != 0 ) {
 		QString fileName = QFileDialog::getSaveFileName(this, tr("Exporter en .ofs"), "output.ofs", tr("Fichiers de données (*.ofs);;Tous les fichiers (*.*)"));
 		if ( !fileName.isEmpty() ) {
-		  OfsExport::processRestrictedMesh( *_billon, *_marrow, Interval(_ui->_spansliderSelectInterval->lowerValue(),_ui->_spansliderSelectInterval->upperValue()),  fileName, 100, -900, false );
+		  OfsExport::processRestrictedMesh( *_billon, *_marrow, Interval(_ui->_spanSliderSelectInterval->lowerValue(),_ui->_spanSliderSelectInterval->upperValue()),  fileName, 100, -900, false );
 		}
 	}
 }
@@ -821,7 +822,7 @@ void MainWindow::exportHistogramToSep() {
 	if ( _sliceHistogram != 0 ) {
 		QString fileName = QFileDialog::getSaveFileName(this, tr("Exporter l'histo' .sep"), "output.sep", tr("Fichiers séquences de point euclidiens (*.sep);;Tous les fichiers (*.*)"));
 		if ( !fileName.isEmpty() ) {
-			HistoExport::process( *_sliceHistogram, Interval(_ui->_spansliderSelectInterval->lowerValue(),_ui->_spansliderSelectInterval->upperValue()), fileName );
+			HistoExport::process( *_sliceHistogram, Interval(_ui->_spanSliderSelectInterval->lowerValue(),_ui->_spanSliderSelectInterval->upperValue()), fileName );
 		}
 	}
 }
@@ -830,7 +831,7 @@ void MainWindow::exportToV3D() {
 	if ( _billon != 0 ) {
 		QString fileName = QFileDialog::getSaveFileName(this, tr("Exporter en .v3d"), "output.v3d", tr("Fichiers de données (*.v3d);;Tous les fichiers (*.*)"));
 		if ( !fileName.isEmpty() ) {
-			V3DExport::process( *_billon, _marrow, fileName, Interval(_ui->_spansliderSelectInterval->lowerValue(),_ui->_spansliderSelectInterval->upperValue()), _ui->_spinExportThreshold->value() );
+			V3DExport::process( *_billon, _marrow, fileName, Interval(_ui->_spanSliderSelectInterval->lowerValue(),_ui->_spanSliderSelectInterval->upperValue()), _ui->_spinExportThreshold->value() );
 		}
 	}
 }
@@ -839,7 +840,7 @@ void MainWindow::exportFlowToV3D() {
 	if ( _billon != 0 ) {
 		QString fileName = QFileDialog::getSaveFileName(this, tr("Exporter en .v3d"), "output_flow.v3d", tr("Fichiers de données (*.v3d);;Tous les fichiers (*.*)"));
 		if ( !fileName.isEmpty() ) {
-			const Interval slicesInterval(_ui->_spansliderSelectInterval->lowerValue(),_ui->_spansliderSelectInterval->upperValue());
+			const Interval slicesInterval(_ui->_spanSliderSelectInterval->lowerValue(),_ui->_spanSliderSelectInterval->upperValue());
 			const int width = _billon->n_cols;
 			const int height = _billon->n_rows;
 			const int depth = slicesInterval.count();
@@ -876,7 +877,7 @@ void MainWindow::exportMovementsToV3D()
 		QString fileName = QFileDialog::getSaveFileName(this, tr("Exporter en .v3d"), "output_diag.v3d", tr("Fichiers de données (*.v3d);;Tous les fichiers (*.*)"));
 		if ( !fileName.isEmpty() )
 		{
-			const Interval slicesInterval(_ui->_spansliderSelectInterval->lowerValue(),_ui->_spansliderSelectInterval->upperValue());
+			const Interval slicesInterval(_ui->_spanSliderSelectInterval->lowerValue(),_ui->_spanSliderSelectInterval->upperValue());
 			const int width = _billon->n_cols;
 			const int height = _billon->n_rows;
 			const int depth = slicesInterval.count();
@@ -915,28 +916,28 @@ void MainWindow::selectSliceInterval( const int &index )
 
 	_ui->_comboSelectSectorInterval->clear();
 	_ui->_comboSelectSectorInterval->addItem(tr("Aucun"));
-	_ui->_spansliderSelectInterval->setLowerValue(0);
-	_ui->_spansliderSelectInterval->setUpperValue(0);
+	_ui->_spanSliderSelectInterval->setLowerValue(0);
+	_ui->_spanSliderSelectInterval->setUpperValue(0);
 	if ( index > 0 && index <= _sliceHistogram->branchesAreas().size() )
 	{
-		const Interval &interval = _sliceHistogram->branchesAreas()[index-1];
-		computeSectorsHistogramForInterval(interval);
+		const Interval &sliceInterval = _sliceHistogram->branchesAreas()[index-1];
+		computeSectorsHistogramForInterval(sliceInterval);
 		_ui->_sliderSelectSlice->setValue(_sliceHistogram->indexOfIemeInterval(index-1));
 
-		const QVector<Interval> &intervals = _pieChartDiagrams->branchesSectors();
-		if ( !intervals.isEmpty() )
+		const QVector<Interval> &angularIntervals = _pieChartDiagrams->branchesSectors();
+		if ( !angularIntervals.isEmpty() )
 		{
 			qreal rightAngle, leftAngle;
-			for ( int i=0 ; i<intervals.size() ; ++i )
+			for ( int i=0 ; i<angularIntervals.size() ; ++i )
 			{
-				const Interval interval = intervals[i];
-				rightAngle = _pieChart->sector(interval.minValue()).rightAngle()*RAD_TO_DEG_FACT;
-				leftAngle = _pieChart->sector(interval.maxValue()).leftAngle()*RAD_TO_DEG_FACT;
-				_ui->_comboSelectSectorInterval->addItem(tr("Secteur %1 : [ %2, %3 ] (%4 degres)").arg(i).arg(rightAngle).arg(leftAngle).arg(interval.isValid()?leftAngle-rightAngle:leftAngle-rightAngle+360.));
+				const Interval currentAngularInterval = angularIntervals[i];
+				rightAngle = _pieChart->sector(currentAngularInterval.minValue()).rightAngle()*RAD_TO_DEG_FACT;
+				leftAngle = _pieChart->sector(currentAngularInterval.maxValue()).leftAngle()*RAD_TO_DEG_FACT;
+				_ui->_comboSelectSectorInterval->addItem(tr("Secteur %1 : [ %2, %3 ] (%4 degres)").arg(i).arg(rightAngle).arg(leftAngle).arg(currentAngularInterval.isValid()?leftAngle-rightAngle:leftAngle-rightAngle+360.));
 			}
 		}
-		_ui->_spansliderSelectInterval->setLowerValue(interval.minValue());
-		_ui->_spansliderSelectInterval->setUpperValue(interval.maxValue());
+		_ui->_spanSliderSelectInterval->setUpperValue(sliceInterval.maxValue());
+		_ui->_spanSliderSelectInterval->setLowerValue(sliceInterval.minValue());
 	}
 }
 
@@ -1207,6 +1208,56 @@ void MainWindow::exportSectorDiagramAndHistogram() {
 	_ui->_plotAngularHistogram->setAxisTitle(QwtPlot::xBottom,"");
 	_ui->_plotAngularHistogram->setAxisTitle(QwtPlot::yLeft,"");
 	_ui->_plotAngularHistogram->enableAxis(QwtPlot::yLeft,false);
+}
+
+void MainWindow::exportKnotIntervalHistogram()
+{
+	QwtPlotRenderer histoRenderer;
+	QLabel label;
+	QString fileName;
+	QMessageBox::StandardButton button;
+	int sizeFact;
+	bool sizeOk;
+	sizeOk = false;
+
+	_ui->_plotDistanceMarrowToNearestPoint->setAxisTitle(QwtPlot::xBottom,tr("Indice de la coupe"));
+	_ui->_plotDistanceMarrowToNearestPoint->setAxisTitle(QwtPlot::yLeft,tr("Distance to the pith"));
+
+	while (!sizeOk)
+	{
+		sizeFact = QInputDialog::getInt(this,tr("Taille de l'image"), tr("Pourcentage"), 100, 10, 100, 1, &sizeOk);
+		if ( sizeOk )
+		{
+			QPixmap image( 1240*sizeFact/100 , 874*sizeFact/100 );
+			image.fill();
+			histoRenderer.renderTo(_ui->_plotDistanceMarrowToNearestPoint,image);
+			image = image.scaledToHeight(600,Qt::SmoothTransformation);
+			label.setPixmap(image);
+			label.show();
+			button = QMessageBox::question(&label,tr("Taille correcte"),tr("La taille de l'image est-elle correcte ?"),QMessageBox::Abort|QMessageBox::Yes|QMessageBox::No,QMessageBox::Yes);
+			switch (button) {
+				case QMessageBox::Yes:
+					fileName = QFileDialog::getSaveFileName(&label, tr("Exporter l'histogramme de distances"), "output.pdf", tr("Fichiers PDF (*.pdf);;Fichiers PS (*.ps);;Fichiers PNG (*.png);;Fichiers SVG (*.svg);;Tous les fichiers (*.*)"));
+					if ( !fileName.isEmpty() ) {
+						histoRenderer.renderDocument(_ui->_plotDistanceMarrowToNearestPoint,fileName,QSize(297*sizeFact/100,140*sizeFact/100),100);
+					}
+					sizeOk = true;
+					break;
+				case QMessageBox::Abort:
+					sizeOk = true;
+					break;
+				default :
+					sizeOk = false;
+					break;
+			}
+		}
+		else {
+			sizeOk = true;
+		}
+	}
+
+	_ui->_plotDistanceMarrowToNearestPoint->setAxisTitle(QwtPlot::xBottom,"");
+	_ui->_plotDistanceMarrowToNearestPoint->setAxisTitle(QwtPlot::yLeft,"");
 }
 
 void MainWindow::exportContours() {
@@ -1499,10 +1550,10 @@ void MainWindow::initComponentsValues() {
 	_ui->_spinMaxSlice->setMaximum(0);
 	_ui->_spinMaxSlice->setValue(0);
 
-	_ui->_spansliderSelectInterval->setMinimum(0);
-	_ui->_spansliderSelectInterval->setMaximum(0);
-	_ui->_spansliderSelectInterval->setLowerValue(0);
-	_ui->_spansliderSelectInterval->setUpperValue(0);
+	_ui->_spanSliderSelectInterval->setMinimum(0);
+	_ui->_spanSliderSelectInterval->setMaximum(0);
+	_ui->_spanSliderSelectInterval->setLowerValue(0);
+	_ui->_spanSliderSelectInterval->setUpperValue(0);
 
 	_ui->_sliderSelectSlice->setValue(0);
 	_ui->_sliderSelectSlice->setRange(0,0);
@@ -1579,10 +1630,10 @@ void MainWindow::updateUiComponentsValues() {
 	_ui->_spinMaxSlice->setMaximum(nbSlices);
 	_ui->_spinMaxSlice->setValue(nbSlices);
 
-	_ui->_spansliderSelectInterval->setMinimum(0);
-	_ui->_spansliderSelectInterval->setMaximum(nbSlices);
-	_ui->_spansliderSelectInterval->setLowerValue(0);
-	_ui->_spansliderSelectInterval->setUpperValue(nbSlices);
+	_ui->_spanSliderSelectInterval->setMinimum(0);
+	_ui->_spanSliderSelectInterval->setMaximum(nbSlices);
+	_ui->_spanSliderSelectInterval->setLowerValue(0);
+	_ui->_spanSliderSelectInterval->setUpperValue(nbSlices);
 
 	_ui->_sliderSelectSlice->setValue(0);
 	_ui->_sliderSelectSlice->setRange(0,nbSlices);

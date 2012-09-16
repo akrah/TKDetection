@@ -123,13 +123,8 @@ void ContourCurve::constructCurve( const Billon &billon, const iCoord2D &billonC
 				_datasDominantPoints << _datasDominantPoints[0];
 				nbPoints++;
 
-				// On détermine les points dominants principaux en analysant l'angle formé par 3 points dominants consécutifs.
-				// Les angles sont analysés successivement à partir du premier point de contour (le plus proche de la moelle) et dans chacune des deux direction du contour.
-				// On s'arrête :
-				//    - dès que l'angle est supérieur à 3*PI/4 (+PI/4 dans le sens contraire de la convexité du noeud)
-				//      ou que l'angle est inférieur à PI/4 (+3*PI/4 dans le sens de la convexité du noeud)
-				//    - dès que la somme de la valeur absolue de deux angles consécutifs de même convexité est inférieure à 180.
-				// Ces deux conditions sont vérifiées à partir du premier point dominant à plus de 20 pixels du point de départ
+				// On détermine les points dominants principaux en comparant la distance à la moelle d'un point dominant
+				// à la distance à la moelle des deux points dominants précdents et du point dominant suivant.
 				int index, oldIndex;
 				qreal distanceP0Pm2, distanceP0Pm1, distanceP0Pp1, distanceP0Pp2, distanceP0Px;
 				bool angleOk;

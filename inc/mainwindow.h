@@ -86,6 +86,7 @@ private slots:
 	void exportConnexComponentToPgm3D();
 	void exportSliceHistogram();
 	void exportSectorDiagramAndHistogram();
+	void exportKnotIntervalHistogram();
 	void exportContours();
 	void exportContourComponentToPgm3D();
 		void createVoxelSetAllIntervals(std::vector<iCoord3D> &vectVoxels, bool useOldMethod=false);
