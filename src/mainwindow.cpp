@@ -1239,7 +1239,7 @@ void MainWindow::exportKnotIntervalHistogram()
 	bool sizeOk;
 	sizeOk = false;
 
-	_ui->_plotDistanceMarrowToNearestPoint->setAxisTitle(QwtPlot::xBottom,tr("Indice de la coupe"));
+	_ui->_plotDistanceMarrowToNearestPoint->setAxisTitle(QwtPlot::xBottom,tr("Slice index"));
 	_ui->_plotDistanceMarrowToNearestPoint->setAxisTitle(QwtPlot::yLeft,tr("Distance to the pith"));
 
 	while (!sizeOk)
