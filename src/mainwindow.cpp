@@ -1507,7 +1507,8 @@ void MainWindow::exportAllContourComponentOfVoxelsAllIntervalsOldMethod()
 			createVoxelSetAllIntervals(voxelSet, true);
 			for ( unsigned int i=0 ; i<voxelSet.size() ; i++ )
 			{
-				stream << voxelSet.at(i).x << " " << voxelSet.at(i).y << " " << voxelSet.at(i).z << endl;
+			  // invert X/Y (due to compatibility with DGtalViewer
+				stream << voxelSet.at(i).y << " " << voxelSet.at(i).x << " " << voxelSet.at(i).z << endl;
 			}
 
 			QMessageBox::information(this,"Export branches en SDP réussie", "Export réussi !");

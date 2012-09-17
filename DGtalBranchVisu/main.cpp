@@ -38,7 +38,7 @@ int main(int argc, char** argv)
     ("thresholdMax,M",  po::value<int>()->default_value(255), "threshold max to define binary shape" )
     ("scaleX,x",  po::value<float>()->default_value(1.0), "set the scale value in the X direction (default 1.0)" )
     ("scaleY,y",  po::value<float>()->default_value(1.0), "set the scale value in the Y direction (default 1.0)" )
-    ("scaleY,z",  po::value<float>()->default_value(1.0), "set the scale value in the Z direction (default 1.0)") 
+    ("scaleZ,z",  po::value<float>()->default_value(1.0), "set the scale value in the Z direction (default 1.0)") 
     ("transparency,t",  po::value<uint>()->default_value(255), "transparency") ; 
   bool parseOK=true;
   po::variables_map vm;
@@ -148,7 +148,7 @@ int main(int argc, char** argv)
       DGtal::Color c= gradient(i);
       viewer << CustomColors3D(Color(250, 0,0,100), Color(c.red(), 
 							  c.green(),
-							  c.blue(),100));
+							  c.blue(),120));
     
       for(uint j=0; j< vectConnectedSCell.at(i).size();j++){
 	viewer << vectConnectedSCell.at(i).at(j);
@@ -162,7 +162,8 @@ int main(int argc, char** argv)
   
   if(vm.count("trunkBark-mesh")){
     string meshFilename = vm["trunkBark-mesh"].as<std::string>();
-    MeshFromPoints<Display3D::pointD3D> anImportedMesh(DGtal::Color(160, 30, 30,50));
+    MeshFromPoints<Display3D::pointD3D> anImportedMesh(DGtal::Color(160, 30, 30,20));
+    anImportedMesh.invertVertexFaceOrder();
     bool import = anImportedMesh << meshFilename;
     if(import){
       viewer << anImportedMesh;  
