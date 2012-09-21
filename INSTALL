@@ -18,6 +18,8 @@ DÉPENDANCES
 	| - Qwt				|	6.0.0	|
 	| - Qxt				|	0.6.2	|
 	| - QwtPolar		|	1.0.0	|
+	| - DGtalTools      |  current  |
+	| - DGLib           |  perso    |
 	 ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
 
 PRE-REQUIS
@@ -130,4 +132,36 @@ PRE-REQUIS
 		> cd /usr/local/qwtpolar-1.0.0/plugins/designer/
 		> sudo ln -s libqwt_polar_designer_plugin.so /usr/lib/x86_64-linux-gnu/qt4/plugins/designer/
 
+6) DGtalTools
+   **********
+
+	Nécessite l'installation de DGtal :
+	
+	> git checkout git://github.com/DGtal-team/DGtal.git DGtal
+	> mkdir DGtal/build
+	> cd DGtal/build
+	> cmake .. -DWITH_GMP=true -DWITH_ITK=true -DWITH_QGLVIEWER=true
+	> make
+	> sudo make install
+
+	On peut ensuite installer DGtalTools :
+
+	> git checkout git://github.com/DGtal-team/DGtalTools.git DGtalTools
+	> mkdir DGtalTools/build
+	> cd DGTalTools/build
+	> cmake .. -DWITH_VISU3D_QGLVIEWER=true
+	> make
+	> sudo make install
+
+7) DGLib
+   *****
+
+	Doit être téléchargé ici : http://www.loria.fr/~krahenbu/dgci2013/DGLib_for_TKDetection.zip
+
+	> unzip DGLib_for_TKDetection
+	> mkdir DGLib_for_TKDetection/build
+	> cd DGLib_for_TKDetection/build
+	> cmake ..
+	> make
+	> sudo make install
 
