@@ -3,14 +3,13 @@
 #include "inc/billon.h"
 #include "inc/marrow.h"
 #include "inc/opticalflow.h"
-#include "inc/interval.h"
 #include "inc/piechart.h"
 #include "inc/piepart.h"
 
 #include <QPainter>
 
 SliceView::SliceView() : _typeOfView(SliceType::CURRENT),
-	_movementThresholdMin(100), _movementThresholdMax(200), _useNextSliceInsteadOfCurrentSlice(false),
+	_movementThreshold(MINIMUM_Z_MOTION,MAXIMUM_Z_MOTION), _useNextSliceInsteadOfCurrentSlice(false),
 	_flowAlpha(FLOW_ALPHA_DEFAULT), _flowEpsilon(FLOW_EPSILON_DEFAULT), _flowMaximumIterations(FLOW_MAXIMUM_ITERATIONS),
 	_restrictedAreaResolution(100), _restrictedAreaThreshold(-900), _restrictedAreaBeginRadius(5), _typeOfEdgeDetection(EdgeDetectionType::SOBEL),
 	_cannyRadiusOfGaussianMask(2), _cannySigmaOfGaussianMask(2), _cannyMinimumGradient(100.), _cannyMinimumDeviation(0.9)
@@ -31,12 +30,12 @@ void SliceView::setTypeOfView( const SliceType::SliceType &type )
 
 void SliceView::setMovementThresholdMin( const int &threshold )
 {
-	_movementThresholdMin = threshold;
+	_movementThreshold.setMin(threshold);
 }
 
 void SliceView::setMovementThresholdMax( const int &threshold )
 {
-	_movementThresholdMax = threshold;
+	_movementThreshold.setMax(threshold);
 }
 
 void SliceView::useNextSliceInsteadOfCurrentSlice( const bool &enable )
@@ -244,8 +243,9 @@ void SliceView::drawMovementSlice( QImage &image, const Billon &billon, const in
 	const uint height = previousSlice.n_rows;
 	const int minValue = intensityInterval.minValue();
 	const int maxValue = intensityInterval.maxValue();
-	const qreal fact = 255./intensityInterval.width();
+	const qreal fact = 255./_movementThreshold.width();
 
+	image.fill(0xff000000);
 	QRgb * line = (QRgb *) image.bits();
 	int color;
 	uint i,j;
@@ -254,16 +254,13 @@ void SliceView::drawMovementSlice( QImage &image, const Billon &billon, const in
 	{
 		for ( i=0 ; i<width ; i++)
 		{
-			color = qAbs(RESTRICT_TO(minValue,previousSlice.at(j,i),maxValue) - RESTRICT_TO(minValue,toCompareSlice.at(j,i),maxValue)) * fact;
-//			color += 0.5*color;
-//			color = qBound(0,color,255);
-			*(line++) = qRgb(color,color,color);
-//			if ( qAbs(RESTRICT_TO(minValue,previousSlice.at(j,i),maxValue) - RESTRICT_TO(minValue,toCompareSlice.at(j,i),maxValue)) > 200 ) {
-//				*(line++) = qRgb(255,255,255);
-//			}
-//			else {
-//				*(line++) = qRgb(0,0,0);
-//			}
+			color = qAbs(RESTRICT_TO(minValue,previousSlice.at(j,i),maxValue) - RESTRICT_TO(minValue,toCompareSlice.at(j,i),maxValue));
+			if ( _movementThreshold.containsClosed(color) )
+			{
+				color *= fact;
+				*line = qRgb(color,color,color);
+			}
+			++line;
 		}
 	}
 }

@@ -5,9 +5,9 @@
 #include "sliceview_def.h"
 
 #include "billon_def.h"
+#include "interval.h"
 class QImage;
 class Marrow;
-class Interval;
 
 class SliceView
 {
@@ -52,8 +52,7 @@ private :
 private:
 	SliceType::SliceType _typeOfView;
 
-	int _movementThresholdMin;
-	int _movementThresholdMax;
+	Interval _movementThreshold;
 	bool _useNextSliceInsteadOfCurrentSlice;
 
 	qreal _flowAlpha;
