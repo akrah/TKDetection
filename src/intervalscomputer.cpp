@@ -6,7 +6,7 @@ namespace IntervalsComputer {
 
 	namespace {
 		QVector<qreal> smoothing( const QVector<qreal> &hist, const QVector<qreal> &weights, bool loop = false );
-		qreal weightedAccumulation( QVector<qreal>::ConstIterator valBegin, QVector<qreal>::ConstIterator valEnd, QVector<qreal>::ConstIterator weightBegin );
+		qreal weightedAccumulation( QVector<qreal>::const_iterator valBegin, QVector<qreal>::const_iterator valEnd, QVector<qreal>::const_iterator weightBegin );
 	}
 
 	QVector<qreal> meansSmoothing( const QVector<qreal> &hist, int maskRadius, bool loop ) {
@@ -24,46 +24,58 @@ namespace IntervalsComputer {
 		return smoothing(hist,gaussianWeight,loop);
 	}
 
-	QVector<int> maximumsComputing( const QVector<qreal> &hist, qreal minimumThreshold, int minimumWidthOfNeighborhood, bool loop ) {
+	QVector<int> maximumsComputing( const QVector<qreal> &hist, qreal minimumThreshold, int minimumWidthOfNeighborhood, bool loop )
+	{
 		const int nbSectors = hist.size();
 		QVector<int> maximums;
-		if ( nbSectors > 0 ) {
+		if ( nbSectors > 0 )
+		{
 			qreal value;
 			int i, cursor;
 			bool isMax;
 
 			QVector<qreal> old;
-			if ( loop ) {
-				for ( i=nbSectors-minimumWidthOfNeighborhood ; i<nbSectors ; ++i ) {
+			if ( loop )
+			{
+				for ( i=nbSectors-minimumWidthOfNeighborhood ; i<nbSectors ; ++i )
+				{
 					old << hist[i];
 				}
 				old << hist;
-				for ( i=0 ; i<minimumWidthOfNeighborhood ; ++i ) {
+				for ( i=0 ; i<minimumWidthOfNeighborhood ; ++i )
+				{
 					old << hist[i];
 				}
 			}
-			else {
-				for ( i=nbSectors-minimumWidthOfNeighborhood ; i<nbSectors ; ++i ) {
+			else
+			{
+				for ( i=nbSectors-minimumWidthOfNeighborhood ; i<nbSectors ; ++i )
+				{
 					old << hist[0];
 				}
 				old << hist;
-				for ( i=nbSectors-minimumWidthOfNeighborhood ; i<minimumWidthOfNeighborhood ; ++i ) {
+				for ( i=0 ; i<minimumWidthOfNeighborhood ; ++i )
+				{
 					old << hist[nbSectors-1];
 				}
 			}
 
 			const int end = nbSectors+minimumWidthOfNeighborhood;
-			for ( i=minimumWidthOfNeighborhood ; i<end ; ++i ) {
+			for ( i=minimumWidthOfNeighborhood ; i<end ; ++i )
+			{
 				value = old[i];
-				if ( value > minimumThreshold ) {
+				if ( value > minimumThreshold )
+				{
 					cursor = 1;
-					do {
+					do
+					{
 						isMax = ( (value > old[i-cursor]) && (value > old[i+cursor]) );
 						cursor++;
 					}
-					while ( isMax && cursor<minimumWidthOfNeighborhood );
-					if ( isMax ) {
-						maximums.append(i-minimumWidthOfNeighborhood);
+					while ( isMax && cursor<=minimumWidthOfNeighborhood );
+					if ( isMax )
+					{
+						maximums.append(i-minimumWidthOfNeighborhood); i+=(minimumWidthOfNeighborhood-1);
 					}
 				}
 			}
@@ -71,62 +83,142 @@ namespace IntervalsComputer {
 		return maximums;
 	}
 
-	QVector<Interval> intervalsComputing( const QVector<qreal> &hist, const QVector<int> &maximums, qreal derivativePercentage, int minimumWidthOfIntervals, bool loop ) {
+	QVector<Interval> intervalsComputing( const QVector<qreal> &hist, const QVector<int> &maximums, int derivativePercentage, int minimumWidthOfIntervals, bool loop )
+	{
 		QVector<Interval> intervals;
-		if ( !maximums.isEmpty() ) {
+		if ( !maximums.isEmpty() )
+		{
 			const int nbSectors = hist.size();
 			const int nbMaximums = maximums.size();
 			int cursorMax, cursorMin, derivativeThreshold;
-			bool isSupToThreshold;
-			cursorMax = 0;
-			for ( int i=0 ; i<nbMaximums ; ++i ) {
+			bool fusionLast, fusionFirst;
+			cursorMax = -1;
+			for ( int i=0 ; i<nbMaximums ; ++i )
+			{
 				cursorMin = maximums[i];
-				derivativeThreshold = derivativePercentage*hist[cursorMin];
-				if ( cursorMax < cursorMin ) {
-					isSupToThreshold = hist[cursorMin] > derivativeThreshold;
-					while ( isSupToThreshold ) {
-						cursorMin--;
-						if ( cursorMin < 0 ) cursorMin = nbSectors-1;
-						isSupToThreshold = hist[cursorMin] > derivativeThreshold;
-					}
-					while ( firstdDerivated(hist,cursorMin,loop) > 0. ) {
-						cursorMin--;
-						if ( cursorMin < 0 ) cursorMin = nbSectors-1;
-					}
+				derivativeThreshold = hist[cursorMin]*derivativePercentage/100.;
+				while ( hist[cursorMin] > derivativeThreshold )
+				{
+					cursorMin--;
+					if ( cursorMin < 0 ) cursorMin = nbSectors-1;
+				}
+				while ( firstdDerivated(hist,cursorMin,loop) > 0. )
+				{
+					cursorMin--;
+					if ( cursorMin < 0 ) cursorMin = nbSectors-1;
+				}
 
-					cursorMax = maximums[i]+1;
+				cursorMax = maximums[i]+1;
+				if ( cursorMax == nbSectors ) cursorMax = 0;
+
+				while ( hist[cursorMax] > derivativeThreshold )
+				{
+					cursorMax++;
 					if ( cursorMax == nbSectors ) cursorMax = 0;
-					isSupToThreshold = hist[cursorMax] > derivativeThreshold;
-					while ( isSupToThreshold ) {
-						cursorMax++;
-						if ( cursorMax >= nbSectors ) cursorMax = 0;
-						isSupToThreshold = hist[cursorMax] > derivativeThreshold;
-					}
-					while ( firstdDerivated(hist,cursorMax,loop) < 0. ) {
-						cursorMax++;
-						if ( cursorMax >= nbSectors ) cursorMax = 0;
-					}
-					cursorMax--;
-					if ( cursorMax<0 ) cursorMax = nbSectors-1;
+				}
+				while ( firstdDerivated(hist,cursorMax,loop) < 0. )
+				{
+					cursorMax++;
+					if ( cursorMax == nbSectors ) cursorMax = 0;
+				}
+				cursorMax--;
+				if ( cursorMax<0 ) cursorMax = nbSectors-1;
 
-					if ( intervals.isEmpty() || intervals.first().maxValue() != cursorMax ) {
-						if ( cursorMax>cursorMin && qAbs(cursorMax-cursorMin) >= minimumWidthOfIntervals ) {
-							intervals.append(Interval(cursorMin,cursorMax));
-						}
-						else if ( cursorMax<cursorMin && qAbs(cursorMax-(cursorMin-nbSectors)) >= minimumWidthOfIntervals ) {
-							if ( loop ) intervals.append(Interval(cursorMin,cursorMax));
-							else if ( intervals.isEmpty() ) {
-								intervals.append(Interval(0,cursorMax));
-							}
-							else {
-								intervals.append(Interval(cursorMin,nbSectors-1));
-							}
-						}
+				if ( cursorMax>cursorMin && (cursorMax-cursorMin) >= minimumWidthOfIntervals )
+				{
+					if ( intervals.isEmpty() || intervals.last().maxValue() <= cursorMin )
+					{
+						intervals.append(Interval(cursorMin,cursorMax));
 					}
-					else {
-						i=nbMaximums;
+					else if ( intervals.last().isValid() )
+					{
+						intervals.last().setMin( qMin(intervals.last().minValue(), cursorMin) );
+						intervals.last().setMax( qMax(intervals.last().maxValue(), cursorMax) );
+						if ( intervals.size() > 1 )
+						{
+							Interval &previousOfLast = intervals[intervals.size()-2];
+							if ( previousOfLast.maxValue() > intervals.last().minValue() )
+							{
+								previousOfLast.setMin( qMin(previousOfLast.minValue(), intervals.last().minValue()) );
+								previousOfLast.setMax( qMax(previousOfLast.maxValue(), intervals.last().maxValue()) );
+								intervals.pop_back();
+							}
+						}
+						cursorMin = intervals.last().minValue();
+						cursorMax = intervals.last().maxValue();
+					}
+					else
+					{
+						intervals.last().setMax( qMax(intervals.last().maxValue(), cursorMax) );
+						cursorMax = intervals.last().maxValue();
 					}
 				}
+				else if ( cursorMax<cursorMin && (nbSectors-cursorMin+cursorMax) >= minimumWidthOfIntervals )
+				{
+					if ( loop )
+					{
+						if ( intervals.isEmpty() || (intervals.last().isValid() && intervals.last().maxValue() <= cursorMin && intervals.first().isValid() && intervals.first().minValue() >= cursorMax) )
+						{
+							intervals.append(Interval(cursorMin,cursorMax));
+						}
+						else
+						{
+							fusionLast = false;
+							if ( intervals.last().isValid() && intervals.last().maxValue() > cursorMin )
+							{
+								intervals.last().setMin( qMin(intervals.last().minValue(), cursorMin) );
+								intervals.last().setMax(cursorMax);
+								fusionLast = true;
+							}
+							if ( !intervals.last().isValid() )
+							{
+								intervals.last().setMin( qMin(intervals.last().minValue(), cursorMin) );
+								intervals.last().setMax( qMax(intervals.last().maxValue(), cursorMax) );
+								fusionLast = true;
+							}
+							if ( !fusionLast ) intervals.append( Interval(cursorMin, cursorMax) );
+							else
+							{
+								cursorMin = intervals.last().minValue();
+								cursorMax = intervals.last().maxValue();
+							}
+							fusionFirst = false;
+							if ( intervals.first().isValid() && intervals.first().minValue() < intervals.last().maxValue() )
+							{
+								intervals.first().setMin( intervals.last().minValue() );
+								intervals.first().setMax( qMax(intervals.first().maxValue(), intervals.last().maxValue()) );
+								fusionFirst = true;
+							}
+							if ( !intervals.first().isValid() )
+							{
+								intervals.first().setMin( qMin(intervals.first().minValue(), intervals.last().minValue()) );
+								intervals.first().setMax( qMax(intervals.first().maxValue(), intervals.last().maxValue()) );
+								fusionFirst = true;
+							}
+							if (fusionFirst)
+							{
+								intervals.pop_back();
+								cursorMin = intervals.first().minValue();
+								cursorMax = intervals.first().maxValue();
+							}
+						}
+					}
+					else if ( intervals.isEmpty() )
+					{
+						intervals.append(Interval(0,cursorMax));
+						cursorMin = 0;
+					}
+					else
+					{
+						intervals.append(Interval(cursorMin,nbSectors-1));
+						cursorMax = nbSectors-1;
+					}
+				}
+			}
+			if ( !intervals.first().isValid() && intervals.last().isValid() && intervals.first().minValue() < intervals.last().maxValue() )
+			{
+				intervals.first().setMin( qMin(intervals.first().minValue(),intervals.last().minValue()) );
+				intervals.pop_back();
 			}
 		}
 		return intervals;
@@ -145,16 +237,16 @@ namespace IntervalsComputer {
 		return (max-min)*percentage+min;
 	}
 
-	qreal minValue( QVector<qreal>::ConstIterator begin, QVector<qreal>::ConstIterator end ) {
-		qreal res = *begin++;
+	qreal minValue( QVector<qreal>::const_iterator begin, QVector<qreal>::const_iterator end ) {
+		qreal res = 0.;
 		while ( begin != end ) {
 			res = qMin(res,*begin++);
 		}
 		return res;
 	}
 
-	qreal maxValue( QVector<qreal>::ConstIterator begin, QVector<qreal>::ConstIterator end ) {
-		qreal res = *begin++;
+	qreal maxValue( QVector<qreal>::const_iterator begin, QVector<qreal>::const_iterator end ) {
+		qreal res = 0.;
 		while ( begin != end ) {
 			res = qMax(res,*begin++);
 		}
@@ -193,16 +285,16 @@ namespace IntervalsComputer {
 			}
 
 			QVector<qreal> smoothedHist;
-			QVector<qreal>::ConstIterator vectBegin = old.begin();
-			QVector<qreal>::ConstIterator vectEnd = vectBegin+maskWidth;
-			for ( i=0 ; i<nbSectors ; ++i ) {
+			QVector<qreal>::const_iterator vectBegin = old.begin();
+			QVector<qreal>::const_iterator vectEnd = vectBegin+maskWidth;
+			while ( vectEnd != old.end() ) {
 				smoothedHist.append(weightedAccumulation( vectBegin++, vectEnd++, weights.begin() ));
 			}
 
 			return smoothedHist;
 		}
 
-		qreal weightedAccumulation( QVector<qreal>::ConstIterator valBegin, QVector<qreal>::ConstIterator valEnd, QVector<qreal>::ConstIterator weightBegin ) {
+		qreal weightedAccumulation( QVector<qreal>::const_iterator valBegin, QVector<qreal>::const_iterator valEnd, QVector<qreal>::const_iterator weightBegin ) {
 			qreal res = 0.;
 			while ( valBegin != valEnd ) {
 				res += (*valBegin++)*(*weightBegin++);

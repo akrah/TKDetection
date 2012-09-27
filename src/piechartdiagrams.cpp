@@ -94,11 +94,12 @@ void PieChartDiagrams::clear()
 	_highlightCurveDatas->clear();
 	_highlightCurveHistogram.setSamples(empty);
 
-	_derivativeThreshold = 0.;
 	_curvePercentage.setSamples(QVector<QPointF>(0));
 }
 
-void PieChartDiagrams::compute( const Billon &billon, const Marrow *marrow, const PieChart &pieChart, const Interval &slicesInterval, const Interval &intensity )
+void PieChartDiagrams::compute( const Billon &billon, const Marrow *marrow, const PieChart &pieChart, const Interval &slicesInterval, const Interval &intensity, const Interval &motionInterval,
+								const int &smoothingType, const int &smoothingRadius, const int &minimumHeightPercentageOfMaximum, const int &maximumsNeighborhood,
+								const int &derivativePercentage, const int &minimumIntervalWidth, const int &radiusAroundPith )
 {
 	if ( slicesInterval.isValid() && slicesInterval.width() > 0 )
 	{
@@ -111,11 +112,8 @@ void PieChartDiagrams::compute( const Billon &billon, const Marrow *marrow, cons
 		const int nbSectors = _pieChart.nbSectors();
 		const uint minOfInterval = slicesInterval.minValue();
 		const uint maxOfInterval = slicesInterval.maxValue();
-		//const int radius = _marrowAroundDiameter;
-		const int radius = billon.getRestrictedAreaMeansRadius(marrow,20,-900)*0.8;
-		qDebug() << "80% du radius : " << radius;
-		const int radiusMax = radius+1;
-		const qreal squareRadius = qPow(radius,2);
+		const int radiusMax = radiusAroundPith+1;
+		const qreal squareRadius = qPow(radiusAroundPith,2);
 
 		// Calcul des diagrammes en parcourant les tranches du billon comprises dans l'intervalle
 		_datas.fill(0.,nbSectors);
@@ -123,8 +121,8 @@ void PieChartDiagrams::compute( const Billon &billon, const Marrow *marrow, cons
 		QList<int> circleLines;
 		if ( marrow != 0 )
 		{
-			circleLines.reserve(2*radius+1);
-			for ( int lineIndex=-radius ; lineIndex<radiusMax ; ++lineIndex )
+			circleLines.reserve(2*radiusAroundPith+1);
+			for ( int lineIndex=-radiusAroundPith ; lineIndex<radiusMax ; ++lineIndex )
 			{
 				circleLines.append(qSqrt(squareRadius-qPow(lineIndex,2)));
 			}
@@ -143,9 +141,9 @@ void PieChartDiagrams::compute( const Billon &billon, const Marrow *marrow, cons
 				const arma::Slice &prevSlice = billon.slice(k-1);
 				marrowX = marrow->at(k).x;
 				marrowY = marrow->at(k).y;
-				for ( j=-radius ; j<radiusMax ; ++j )
+				for ( j=-radiusAroundPith ; j<radiusMax ; ++j )
 				{
-					iRadius = circleLines[j+radius];
+					iRadius = circleLines[j+radiusAroundPith];
 					iRadiusMax = iRadius+1;
 					for ( i=-iRadius ; i<iRadiusMax ; ++i )
 					{
@@ -159,9 +157,9 @@ void PieChartDiagrams::compute( const Billon &billon, const Marrow *marrow, cons
 							if ( (currentSliceValue > minValue) && (previousSliceValue > minValue) )
 							{
 								diff = qAbs(RESTRICT_TO(minValue,currentSliceValue,maxValue) - RESTRICT_TO(minValue,previousSliceValue,maxValue));
-								if ( (diff >= _movementThresholdMin) && (diff <= _movementThresholdMax) )
+								if ( motionInterval.containsClosed(diff) )
 								{
-									_datas[sectorIdx] += (diff-_movementThresholdMin);
+									_datas[sectorIdx] += (diff-motionInterval.minValue());
 								}
 							}
 						}
@@ -185,9 +183,9 @@ void PieChartDiagrams::compute( const Billon &billon, const Marrow *marrow, cons
 						if ( (currentSliceValue > minValue) && (previousSliceValue > minValue) )
 						{
 							diff = qAbs(RESTRICT_TO(minValue,currentSliceValue,maxValue) - RESTRICT_TO(minValue,previousSliceValue,maxValue));
-							if ( diff >= _movementThresholdMin && diff <= _movementThresholdMax )
+							if ( motionInterval.containsClosed(diff) )
 							{
-								_datas[sectorIdx] += (diff-_movementThresholdMin);
+								_datas[sectorIdx] += (diff-motionInterval.maxValue());
 							}
 						}
 					}
@@ -195,18 +193,18 @@ void PieChartDiagrams::compute( const Billon &billon, const Marrow *marrow, cons
 			}
 		}
 
-		if ( _smoothing == SmoothingType::GAUSSIAN ) _datas = IntervalsComputer::gaussianSmoothing( _datas, DEFAULT_MASK_RADIUS, true );
-		else if ( _smoothing == SmoothingType::MEANS ) _datas = IntervalsComputer::meansSmoothing( _datas, DEFAULT_MASK_RADIUS, true );
-		_derivativeThreshold = IntervalsComputer::minimumThresholdPercentage( _datas, _derivativePercentage );
-		_maximums = IntervalsComputer::maximumsComputing( _datas, _derivativeThreshold, _maximumsNeighborhood, true );
-		_intervals = IntervalsComputer::intervalsComputing( _datas, _maximums, _derivativePercentage, _minimumIntervalWidth, true );
+		if ( smoothingType == SmoothingType::MEANS ) _datas = IntervalsComputer::meansSmoothing( _datas, smoothingRadius, true );
+		else if ( smoothingType == SmoothingType::GAUSSIAN ) _datas = IntervalsComputer::gaussianSmoothing( _datas, smoothingRadius, true );
+		qreal derivativeThreshold = IntervalsComputer::minimumThresholdPercentage( _datas, minimumHeightPercentageOfMaximum/100. );
+		_maximums = IntervalsComputer::maximumsComputing( _datas, derivativeThreshold, maximumsNeighborhood, true );
+		_intervals = IntervalsComputer::intervalsComputing( _datas, _maximums, derivativePercentage, minimumIntervalWidth, true );
 
 		computeValues();
 		computeMaximums();
 		computeIntervals();
 
 		const qreal x[] = { 0., TWO_PI };
-		const qreal y[] = { _derivativeThreshold, _derivativeThreshold };
+		const qreal y[] = { derivativeThreshold, derivativeThreshold };
 		_curvePercentage.setSamples(x,y,2);
 	}
 }
@@ -214,7 +212,7 @@ void PieChartDiagrams::compute( const Billon &billon, const Marrow *marrow, cons
 void PieChartDiagrams::highlightCurve( const int &index )
 {
 	QVector<QwtIntervalSample> highlightCurveHistogramDatas(1);
-	if ( index > -1 && index < count() )
+	if ( index > -1 && index < _datas.size() )
 	{
 		_highlightCurveDatas->resize(4);
 		const qreal rightAngle = _pieChart.sector(index).rightAngle();

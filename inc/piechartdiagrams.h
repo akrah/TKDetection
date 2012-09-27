@@ -30,7 +30,9 @@ public:
 	void attach( QwtPlot * const plot );
 	void clear();
 
-	void compute( const Billon &billon, const Marrow *marrow, const PieChart &pieChart, const Interval &slicesInterval, const Interval &intensity );
+	void compute( const Billon &billon, const Marrow *marrow, const PieChart &pieChart, const Interval &slicesInterval, const Interval &intensity, const Interval &motionInterval,
+				  const int &smoothingType,  const int &smoothingRadius, const int &minimumHeightPercentageOfMaximum, const int &maximumsNeighborhood,
+				  const int &derivativePercentage, const int &minimumIntervalWidth, const int &radiusAroundPith );
 	void highlightCurve( const int &index );
 
 	void draw( QImage &image, const iCoord2D &center ) const;

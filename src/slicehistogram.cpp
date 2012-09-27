@@ -58,22 +58,21 @@ void SliceHistogram::clear()
 	_histogramData.setSamples(emptyData);
 	_histogramMaximums.setSamples(emptyData);
 	_histogramIntervals.setSamples(emptyData);
-	_derivativeThreshold = 0.;
 	_curvePercentage.setSamples(QVector<QPointF>(0));
 }
 
-void SliceHistogram::constructHistogram( const Billon &billon, const Marrow *marrow, const Interval &intensity )
+void SliceHistogram::constructHistogram( const Billon &billon, const Marrow *marrow, const Interval &intensity, const Interval &motionInterval,
+										 const int &smoothingType, const int &smoothingRadius, const int &minimumHeightPercentageOfMaximum,
+										 const int &maximumsNeighborhood, const int &derivativePercentage, const int &minimumIntervalWidth,
+										 const int &borderPercentageToCut, const int &radiusAroundPith )
 {
 	const uint width = billon.n_cols;
 	const uint height = billon.n_rows;
 	const uint depth = _useNextSlice?billon.n_slices-1:billon.n_slices;
 	const int minValue = intensity.minValue();
 	const int maxValue = intensity.maxValue();
-	//const int radius = _marrowAroundDiameter;
-	const int radius = billon.getRestrictedAreaMeansRadius(marrow,20,-900)*0.8;
-	qDebug() << "80% du radius : " << radius;
-	const int radiusMax = radius+1;
-	const qreal squareRadius = qPow(radius,2);
+	const int radiusMax = radiusAroundPith+1;
+	const qreal squareRadius = qPow(radiusAroundPith,2);
 
 	_datas.clear();
 	_datas.resize(depth-1);
@@ -81,8 +80,8 @@ void SliceHistogram::constructHistogram( const Billon &billon, const Marrow *mar
 	QList<int> circleLines;
 	if ( marrow != 0 )
 	{
-		circleLines.reserve(2*radius+1);
-		for ( int lineIndex=-radius ; lineIndex<radiusMax ; ++lineIndex )
+		circleLines.reserve(2*radiusAroundPith+1);
+		for ( int lineIndex=-radiusAroundPith ; lineIndex<radiusMax ; ++lineIndex )
 		{
 			circleLines.append(qSqrt(squareRadius-qPow(lineIndex,2)));
 		}
@@ -92,7 +91,7 @@ void SliceHistogram::constructHistogram( const Billon &billon, const Marrow *mar
 	uint marrowX, marrowY, xPos, yPos;
 	qreal cumul, diff;
 
-	const int kLimitMin = 0.02*depth;
+	const int kLimitMin = borderPercentageToCut*depth/100.;
 	const int kLimitMax = depth-kLimitMin;
 	if ( marrow != 0 )
 	{
@@ -103,9 +102,9 @@ void SliceHistogram::constructHistogram( const Billon &billon, const Marrow *mar
 			cumul = 0.;
 			marrowX = marrow->at(k).x;
 			marrowY = marrow->at(k).y;
-			for ( j=-radius ; j<radiusMax ; ++j )
+			for ( j=-radiusAroundPith ; j<radiusMax ; ++j )
 			{
-				iRadius = circleLines[j+radius];
+				iRadius = circleLines[j+radiusAroundPith];
 				iRadiusMax = iRadius+1;
 				for ( i=-iRadius ; i<iRadiusMax ; ++i )
 				{
@@ -118,7 +117,7 @@ void SliceHistogram::constructHistogram( const Billon &billon, const Marrow *mar
 						if ( (currentSliceValue > minValue) && (previousSliceValue > minValue) )
 						{
 							diff = qAbs(RESTRICT_TO(minValue,currentSliceValue,maxValue) - RESTRICT_TO(minValue,previousSliceValue,maxValue));
-							if ( (diff >= _movementThresholdMin) && (diff <= _movementThresholdMax) )
+							if ( motionInterval.containsClosed(diff) )
 							{
 								cumul += diff;
 							}
@@ -147,7 +146,7 @@ void SliceHistogram::constructHistogram( const Billon &billon, const Marrow *mar
 					if ( (currentSliceValue > minValue) && (previousSliceValue > minValue) )
 					{
 						diff = qAbs(RESTRICT_TO(minValue,currentSliceValue,maxValue) - RESTRICT_TO(minValue,previousSliceValue,maxValue));
-						if ( (diff >= _movementThresholdMin) && (diff <= _movementThresholdMax) )
+						if ( motionInterval.containsClosed(diff) )
 						{
 							cumul += diff;
 						}
@@ -158,18 +157,18 @@ void SliceHistogram::constructHistogram( const Billon &billon, const Marrow *mar
 		}
 	}
 
-	if ( _smoothing == SmoothingType::GAUSSIAN ) _datas = IntervalsComputer::gaussianSmoothing( _datas, DEFAULT_MASK_RADIUS, false );
-	else if ( _smoothing == SmoothingType::MEANS ) _datas = IntervalsComputer::meansSmoothing( _datas, DEFAULT_MASK_RADIUS, false );
-	_derivativeThreshold = IntervalsComputer::minimumThresholdPercentage( _datas, 0.05 );
-	_maximums = IntervalsComputer::maximumsComputing( _datas, _derivativeThreshold, _maximumsNeighborhood, false );
-	_intervals = IntervalsComputer::intervalsComputing( _datas, _maximums, _derivativePercentage, _minimumIntervalWidth, false );
+	if ( smoothingType == SmoothingType::MEANS ) _datas = IntervalsComputer::meansSmoothing( _datas, smoothingRadius, false );
+	else if ( smoothingType == SmoothingType::GAUSSIAN ) _datas = IntervalsComputer::gaussianSmoothing( _datas, smoothingRadius, false );
+	qreal derivativeThreshold = IntervalsComputer::minimumThresholdPercentage( _datas, minimumHeightPercentageOfMaximum/100. );
+	_maximums = IntervalsComputer::maximumsComputing( _datas, derivativeThreshold, maximumsNeighborhood, false );
+	_intervals = IntervalsComputer::intervalsComputing( _datas, _maximums, derivativePercentage, minimumIntervalWidth, false );
 
 	computeValues();
 	computeMaximums();
 	computeIntervals();
 
 	const qreal x[] = { 0., depth };
-	const qreal y[] = { _derivativeThreshold, _derivativeThreshold };
+	const qreal y[] = { derivativeThreshold, derivativeThreshold };
 	_curvePercentage.setSamples(x,y,2);
 }
 

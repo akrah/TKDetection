@@ -98,10 +98,13 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 
 	// Évènements déclenchés par les boutons de sélection de la vue
 	QObject::connect(_ui->_comboSliceType, SIGNAL(currentIndexChanged(int)), this, SLOT(setTypeOfView(int)));
-	QObject::connect(_ui->_sliderMovementThresholdMin, SIGNAL(valueChanged(int)), this, SLOT(setMovementThresholdMin(int)));
-	QObject::connect(_ui->_spinMovementThresholdMin, SIGNAL(valueChanged(int)), this, SLOT(setMovementThresholdMin(int)));
-	QObject::connect(_ui->_sliderMovementThresholdMax, SIGNAL(valueChanged(int)), this, SLOT(setMovementThresholdMax(int)));
-	QObject::connect(_ui->_spinMovementThresholdMax, SIGNAL(valueChanged(int)), this, SLOT(setMovementThresholdMax(int)));
+	QObject::connect(_ui->_sliderMovementThresholdInterval, SIGNAL(lowerValueChanged(int)), _ui->_spinMovementThresholdMin, SLOT(setValue(int)));
+	QObject::connect(_ui->_spinMovementThresholdMin, SIGNAL(valueChanged(int)), _ui->_sliderMovementThresholdInterval, SLOT(setLowerValue(int)));
+	QObject::connect(_ui->_spinMovementThresholdMin, SIGNAL(valueChanged(int)), this, SLOT(drawSlice()));
+	QObject::connect(_ui->_sliderMovementThresholdInterval, SIGNAL(upperValueChanged(int)), _ui->_spinMovementThresholdMax, SLOT(setValue(int)));
+	QObject::connect(_ui->_spinMovementThresholdMax, SIGNAL(valueChanged(int)), _ui->_sliderMovementThresholdInterval, SLOT(setUpperValue(int)));
+	QObject::connect(_ui->_spinMovementThresholdMax, SIGNAL(valueChanged(int)), this, SLOT(drawSlice()));
+
 	QObject::connect(_ui->_checkUseNextSlice, SIGNAL(toggled(bool)), this, SLOT(useNextSliceInsteadOfCurrentSlice(bool)));
 	QObject::connect(_ui->_buttonFlowApplied, SIGNAL(clicked()), this, SLOT(flowApplied()));
 	QObject::connect(_ui->_spinRestrictedAreaResolution, SIGNAL(valueChanged(int)), this, SLOT(setRestrictedAreaResolution(int)));
@@ -126,16 +129,19 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 	QObject::connect(_ui->_buttonUpdateSliceHistogram, SIGNAL(clicked()), this, SLOT(updateSliceHistogram()));
 	QObject::connect(_ui->_buttonPreviousMaximum, SIGNAL(clicked()), this, SLOT(previousMaximumInSliceHistogram()));
 	QObject::connect(_ui->_buttonNextMaximum, SIGNAL(clicked()), this, SLOT(nextMaximumInSliceHistogram()));
-	QObject::connect(_ui->_sliderMarrowAroundDiameter, SIGNAL(valueChanged(int)), this, SLOT(setMarrowAroundDiameter(int)));
-	QObject::connect(_ui->_spinMarrowAroundDiameter, SIGNAL(valueChanged(int)), this, SLOT(setMarrowAroundDiameter(int)));
-	QObject::connect(_ui->_checkMarrowAroundDiameter, SIGNAL(clicked()), this, SLOT(drawSlice()));
-	QObject::connect(_ui->_comboHistogramSmoothing, SIGNAL(currentIndexChanged(int)), this, SLOT(setHistogramSmoothingType(int)));
-	QObject::connect(_ui->_sliderDerivativePercentage, SIGNAL(valueChanged(int)), this, SLOT(setHistogramDerivativePercentage(int)));
-	QObject::connect(_ui->_spinDerivativePercentage, SIGNAL(valueChanged(int)), this, SLOT(setHistogramDerivativePercentage(int)));
-	QObject::connect(_ui->_sliderMinimumNeighborhood, SIGNAL(valueChanged(int)), this, SLOT(setHistogramMaximumsNeighborhood(int)));
-	QObject::connect(_ui->_spinMaximumsNeighborhood, SIGNAL(valueChanged(int)), this, SLOT(setHistogramMaximumsNeighborhood(int)));
-	QObject::connect(_ui->_sliderHistogramIntervalMinimumWidth, SIGNAL(valueChanged(int)), this, SLOT(setHistogramIntervalMinimumWidth(int)));
-	QObject::connect(_ui->_spinHistogramIntervalMinimumWidth, SIGNAL(valueChanged(int)), this, SLOT(setHistogramIntervalMinimumWidth(int)));
+	QObject::connect(_ui->_checkRadiusAroundPith, SIGNAL(clicked()), this, SLOT(drawSlice()));
+	QObject::connect(_ui->_sliderSmoothingRadiusOfHistogram, SIGNAL(valueChanged(int)), _ui->_spinSmoothingRadiusOfHistogram, SLOT(setValue(int)));
+	QObject::connect(_ui->_spinSmoothingRadiusOfHistogram, SIGNAL(valueChanged(int)), _ui->_sliderSmoothingRadiusOfHistogram, SLOT(setValue(int)));
+	QObject::connect(_ui->_sliderMinimumHeightofMaximum, SIGNAL(valueChanged(int)), _ui->_spinMinimumHeightofMaximum, SLOT(setValue(int)));
+	QObject::connect(_ui->_spinMinimumHeightofMaximum, SIGNAL(valueChanged(int)), _ui->_sliderMinimumHeightofMaximum, SLOT(setValue(int)));
+	QObject::connect(_ui->_sliderMaximumsNeighborhood, SIGNAL(valueChanged(int)), _ui->_spinMaximumsNeighborhood, SLOT(setValue(int)));
+	QObject::connect(_ui->_spinMaximumsNeighborhood, SIGNAL(valueChanged(int)), _ui->_sliderMaximumsNeighborhood, SLOT(setValue(int)));
+	QObject::connect(_ui->_sliderDerivativePercentage, SIGNAL(valueChanged(int)), _ui->_spinDerivativePercentage, SLOT(setValue(int)));
+	QObject::connect(_ui->_spinDerivativePercentage, SIGNAL(valueChanged(int)), _ui->_sliderDerivativePercentage, SLOT(setValue(int)));
+	QObject::connect(_ui->_sliderHistogramIntervalMinimumWidth, SIGNAL(valueChanged(int)), _ui->_spinHistogramIntervalMinimumWidth, SLOT(setValue(int)));
+	QObject::connect(_ui->_spinHistogramIntervalMinimumWidth, SIGNAL(valueChanged(int)), _ui->_sliderHistogramIntervalMinimumWidth, SLOT(setValue(int)));
+	QObject::connect(_ui->_sliderBorderPercentageToCut, SIGNAL(valueChanged(int)), _ui->_spinBorderPercentageToCut, SLOT(setValue(int)));
+	QObject::connect(_ui->_spinBorderPercentageToCut, SIGNAL(valueChanged(int)), _ui->_sliderBorderPercentageToCut, SLOT(setValue(int)));
 	QObject::connect(_ui->_buttonExportSliceHistogram, SIGNAL(clicked()), this, SLOT(exportSliceHistogram()));
 	QObject::connect(_ui->_buttonExportKnotIntervalHistogram, SIGNAL(clicked()), this, SLOT(exportKnotIntervalHistogram()));
 
@@ -245,15 +251,11 @@ void MainWindow::openDicom()
 	if ( !folderName.isEmpty() ) {
 		closeImage();
 		openNewBillon(folderName);
-		updateSliceHistogram();
 		updateUiComponentsValues();
+		updateSliceHistogram();
 		drawSlice();
 		setWindowTitle(QString("TKDetection - %1").arg(folderName.section(QDir::separator(),-1)));
 	}
-
-	(_ui->_labelXwidth)->setText(QString::number( _billon->voxelWidth()));
-	(_ui->_labelYwidth)->setText(QString::number( _billon->voxelHeight()));
-	(_ui->_labelZwidth)->setText(QString::number( _billon->voxelDepth()));
 }
 
 void MainWindow::closeImage()
@@ -277,17 +279,17 @@ void MainWindow::drawSlice( const int &sliceNumber )
 	{
 		_ui->_labelSliceNumber->setNum(sliceNumber);
 		_pix.fill(0xff000000);
-		_sliceView->drawSlice(_pix,*_billon,_marrow,sliceNumber,Interval(_ui->_spinMinIntensity->value(),_ui->_spinMaxIntensity->value()));
+		_sliceView->drawSlice(_pix,*_billon,_marrow,sliceNumber,Interval(_ui->_spinMinIntensity->value(),_ui->_spinMaxIntensity->value()), Interval(_ui->_spinMovementThresholdMin->value(),_ui->_spinMovementThresholdMax->value()));
 		highlightSliceHistogram(sliceNumber);
 		if ( _marrow != 0 )
 		{
 			_marrow->draw(_pix,sliceNumber);
-			if ( _ui->_checkMarrowAroundDiameter->isChecked() && _sliceHistogram->marrowAroundDiameter() > 0 )
+			if ( _ui->_checkRadiusAroundPith->isChecked() && _ui->_checkRadiusAroundPith->text().toInt() > 0 )
 			{
 				QPainter painter(&_pix);
 				painter.setPen(Qt::yellow);
 				iCoord2D center = _marrow->at(sliceNumber-_marrow->interval().minValue());
-				painter.drawEllipse(QPointF(center.x,center.y),_sliceHistogram->marrowAroundDiameter(),_sliceHistogram->marrowAroundDiameter());
+				painter.drawEllipse(QPointF(center.x,center.y),_ui->_checkRadiusAroundPith->text().toInt(),_ui->_checkRadiusAroundPith->text().toInt());
 			}
 		}
 
@@ -430,7 +432,11 @@ void MainWindow::updateSliceHistogram()
 	_sliceHistogram->clear();
 	if ( _billon != 0 )
 	{
-		_sliceHistogram->constructHistogram(*_billon, _marrow, Interval(_ui->_spinMinIntensity->value(),_ui->_spinMaxIntensity->value()));
+		_sliceHistogram->constructHistogram(*_billon, _marrow, Interval(_ui->_spinMinIntensity->value(),_ui->_spinMaxIntensity->value()),
+											Interval(_ui->_spinMovementThresholdMin->value(),_ui->_spinMovementThresholdMax->value()),
+											_ui->_comboHistogramSmoothing->currentIndex(), _ui->_spinSmoothingRadiusOfHistogram->value(),
+											_ui->_spinMinimumHeightofMaximum->value(), _ui->_spinMaximumsNeighborhood->value(), _ui->_spinDerivativePercentage->value(),
+											_ui->_spinHistogramIntervalMinimumWidth->value(), _ui->_spinBorderPercentageToCut->value(), _ui->_checkRadiusAroundPith->text().toInt());
 	}
 	_histogramCursor.detach();
 	_histogramDistanceMarrowToNearestPointCursor.detach();
@@ -453,70 +459,6 @@ void MainWindow::updateSliceHistogram()
 		}
 	}
 	_ui->_comboSelectSliceInterval->setCurrentIndex(oldIntervalIndex<=intervals.size()?oldIntervalIndex:0);
-}
-
-void MainWindow::setMarrowAroundDiameter( const int &diameter )
-{
-	_sliceHistogram->setMarrowAroundDiameter(diameter);
-	_pieChartDiagrams->setMarrowAroundDiameter(diameter);
-
-	_ui->_spinMarrowAroundDiameter->blockSignals(true);
-		_ui->_spinMarrowAroundDiameter->setValue(diameter);
-	_ui->_spinMarrowAroundDiameter->blockSignals(false);
-
-	_ui->_sliderMarrowAroundDiameter->blockSignals(true);
-		_ui->_sliderMarrowAroundDiameter->setValue(diameter);
-	_ui->_sliderMarrowAroundDiameter->blockSignals(false);
-
-	drawSlice();
-}
-
-void MainWindow::setHistogramIntervalMinimumWidth( const int &width )
-{
-	_sliceHistogram->setMinimumIntervalWidth(width);
-	_pieChartDiagrams->setMinimumIntervalWidth(width);
-
-	_ui->_spinHistogramIntervalMinimumWidth->blockSignals(true);
-		_ui->_spinHistogramIntervalMinimumWidth->setValue(width);
-	_ui->_spinHistogramIntervalMinimumWidth->blockSignals(false);
-
-	_ui->_sliderHistogramIntervalMinimumWidth->blockSignals(true);
-		_ui->_sliderHistogramIntervalMinimumWidth->setValue(width);
-	_ui->_sliderHistogramIntervalMinimumWidth->blockSignals(false);
-}
-
-void MainWindow::setHistogramSmoothingType( const int &type )
-{
-	_sliceHistogram->setSmoothingType(static_cast<SmoothingType::SmoothingType>(type));
-	_pieChartDiagrams->setSmoothingType(static_cast<SmoothingType::SmoothingType>(type));
-}
-
-void MainWindow::setHistogramMaximumsNeighborhood( const int &neighborhood )
-{
-	_sliceHistogram->setMaximumsNeighborhood(neighborhood);
-	_pieChartDiagrams->setMaximumsNeighborhood(neighborhood);
-
-	_ui->_spinMaximumsNeighborhood->blockSignals(true);
-		_ui->_spinMaximumsNeighborhood->setValue(neighborhood);
-	_ui->_spinMaximumsNeighborhood->blockSignals(false);
-
-	_ui->_sliderMinimumNeighborhood->blockSignals(true);
-		_ui->_sliderMinimumNeighborhood->setValue(neighborhood);
-	_ui->_sliderMinimumNeighborhood->blockSignals(false);
-}
-
-void MainWindow::setHistogramDerivativePercentage( const int &percentage )
-{
-	_sliceHistogram->setDerivativePercentage(static_cast<qreal>(percentage)/100.);
-	_pieChartDiagrams->setDerivativePercentage(static_cast<qreal>(percentage)/100.);
-
-	_ui->_spinDerivativePercentage->blockSignals(true);
-		_ui->_spinDerivativePercentage->setValue(percentage);
-	_ui->_spinDerivativePercentage->blockSignals(false);
-
-	_ui->_sliderDerivativePercentage->blockSignals(true);
-		_ui->_sliderDerivativePercentage->setValue(percentage);
-	_ui->_sliderDerivativePercentage->blockSignals(false);
 }
 
 void MainWindow::highlightSliceHistogram( const int &slicePosition )
@@ -544,10 +486,15 @@ void MainWindow::updateMarrow()
 		delete _marrow;
 		_marrow = 0;
 	}
+	_ui->_checkRadiusAroundPith->setText( QString::number(100) );
 	if ( _billon != 0 )
 	{
 		MarrowExtractor extractor;
 		_marrow = extractor.process(*_billon,0,_billon->n_slices-1);
+		if ( _marrow != 0 )
+		{
+			_ui->_checkRadiusAroundPith->setText( QString::number(static_cast<int>(_billon->getRestrictedAreaMeansRadius(_marrow,20,_ui->_spinMinIntensity->value())*0.75)) );
+		}
 	}
 	drawSlice();
 	updateSliceHistogram();
@@ -625,40 +572,6 @@ void MainWindow::dragInSliceView( const QPoint &movementVector )
 	QScrollArea &scrollArea = *(_ui->_scrollSliceView);
 	if ( movementVector.x() != 0 ) scrollArea.horizontalScrollBar()->setValue(scrollArea.horizontalScrollBar()->value()-movementVector.x());
 	if ( movementVector.y() != 0 ) scrollArea.verticalScrollBar()->setValue(scrollArea.verticalScrollBar()->value()-movementVector.y());
-}
-
-void MainWindow::setMovementThresholdMin( const int &threshold )
-{
-	_sliceView->setMovementThresholdMin(threshold);
-	_sliceHistogram->setMovementThresholdMin(threshold);
-	_pieChartDiagrams->setMovementThresholdMin(threshold);
-
-	_ui->_spinMovementThresholdMin->blockSignals(true);
-		_ui->_spinMovementThresholdMin->setValue(threshold);
-	_ui->_spinMovementThresholdMin->blockSignals(false);
-
-	_ui->_sliderMovementThresholdMin->blockSignals(true);
-		_ui->_sliderMovementThresholdMin->setValue(threshold);
-	_ui->_sliderMovementThresholdMin->blockSignals(false);
-
-	drawSlice();
-}
-
-void MainWindow::setMovementThresholdMax( const int &threshold )
-{
-	_sliceView->setMovementThresholdMax(threshold);
-	_sliceHistogram->setMovementThresholdMax(threshold);
-	_pieChartDiagrams->setMovementThresholdMax(threshold);
-
-	_ui->_spinMovementThresholdMax->blockSignals(true);
-		_ui->_spinMovementThresholdMax->setValue(threshold);
-	_ui->_spinMovementThresholdMax->blockSignals(false);
-
-	_ui->_sliderMovementThresholdMax->blockSignals(true);
-		_ui->_sliderMovementThresholdMax->setValue(threshold);
-	_ui->_sliderMovementThresholdMax->blockSignals(false);
-
-	drawSlice();
 }
 
 void MainWindow::useNextSliceInsteadOfCurrentSlice( const bool &enable )
@@ -902,8 +815,8 @@ void MainWindow::exportMovementsToV3D()
 			const int depth = slicesInterval.count();
 			const int minValue = _ui->_spinMinIntensity->value();
 			const int maxValue = _ui->_spinMaxIntensity->value();
-			const int thresholdMin = _ui->_sliderMovementThresholdMin->value();
-			const int thresholdMax = _ui->_sliderMovementThresholdMax->value();
+			const int thresholdMin = _ui->_sliderMovementThresholdInterval->lowerValue();
+			const int thresholdMax = _ui->_sliderMovementThresholdInterval->upperValue();
 
 			Billon billonDiag( *_billon );
 			int i,j,k, pixAbsDiff;
@@ -1578,21 +1491,19 @@ void MainWindow::initComponentsValues() {
 	_ui->_sliderSelectSlice->setValue(0);
 	_ui->_sliderSelectSlice->setRange(0,0);
 
-	_ui->_sliderMovementThresholdMin->setMinimum(0);
-	_ui->_sliderMovementThresholdMin->setMaximum(1000);
-	_ui->_sliderMovementThresholdMin->setValue(MINIMUM_Z_MOTION);
-
-	_ui->_sliderMovementThresholdMax->setMinimum(0);
-	_ui->_sliderMovementThresholdMax->setMaximum(2000);
-	_ui->_sliderMovementThresholdMax->setValue(MAXIMUM_Z_MOTION);
+	_ui->_sliderMovementThresholdInterval->setMinimum(0);
+	_ui->_sliderMovementThresholdInterval->setMaximum(1000);
+	_ui->_sliderMovementThresholdInterval->setLowerValue(0);
+	_ui->_sliderMovementThresholdInterval->setUpperValue(MAXIMUM_Z_MOTION);
+	_ui->_sliderMovementThresholdInterval->setLowerValue(MINIMUM_Z_MOTION);
 
 	_ui->_checkUseNextSlice->setChecked(false);
 
 	_ui->_comboHistogramSmoothing->setEnabled(true);
 
-	_ui->_sliderMinimumNeighborhood->setMinimum(0);
-	_ui->_sliderMinimumNeighborhood->setMaximum(50);
-	_ui->_sliderMinimumNeighborhood->setValue(DEFAULT_MINIMUM_WIDTH_OF_NEIGHBORHOOD);
+	_ui->_sliderMaximumsNeighborhood->setMinimum(0);
+	_ui->_sliderMaximumsNeighborhood->setMaximum(50);
+	_ui->_sliderMaximumsNeighborhood->setValue(DEFAULT_MINIMUM_WIDTH_OF_NEIGHBORHOOD);
 
 	_ui->_spinMaximumsNeighborhood->setMinimum(0);
 	_ui->_spinMaximumsNeighborhood->setMaximum(50);
@@ -1621,12 +1532,18 @@ void MainWindow::updateUiComponentsValues() {
 		nbSlices = _billon->n_slices-1;
 		_ui->_labelSliceNumber->setNum(0);
 		_ui->_scrollSliceView->setFixedSize(_billon->n_cols,_billon->n_rows);
+		_ui->_labelXwidth->setText(tr("Larg. %1").arg(_billon->voxelWidth()));
+		_ui->_labelYwidth->setText(tr("Haut.%1").arg(_billon->voxelHeight()));
+		_ui->_labelZwidth->setText(tr("Prof. %1").arg(_billon->voxelDepth()));
 	}
 	else {
 		minValue = maxValue = 0;
 		nbSlices = 0;
 		_ui->_labelSliceNumber->setText(tr("Aucune coupe présente."));
 		_ui->_scrollSliceView->setFixedSize(0,0);
+		_ui->_labelXwidth->setText("NaN");
+		_ui->_labelYwidth->setText("NaN");
+		_ui->_labelZwidth->setText("NaN");
 	}
 
 	_ui->_spansliderIntensityThreshold->setMinimum(minValue);
@@ -1658,6 +1575,8 @@ void MainWindow::updateUiComponentsValues() {
 	_ui->_sliderSelectSlice->setValue(0);
 	_ui->_sliderSelectSlice->setRange(0,nbSlices);
 
+	_ui->_checkRadiusAroundPith->setText( QString::number(100) );
+
 	enabledComponents();
 }
 
@@ -1682,7 +1601,11 @@ void MainWindow::computeSectorsHistogramForInterval( const Interval &interval ) 
 	_pieChart->setOrientation(0);
 	_pieChart->setSectorsNumber(_ui->_spinSectorsNumber->value());
 
-	if ( _billon != 0 ) _pieChartDiagrams->compute( *_billon, _marrow, *_pieChart, interval, Interval(_ui->_spinMinIntensity->value(),_ui->_spinMaxIntensity->value()) );
+	if ( _billon != 0 ) _pieChartDiagrams->compute( *_billon, _marrow, *_pieChart, interval, Interval(_ui->_spinMinIntensity->value(),_ui->_spinMaxIntensity->value()),
+													Interval(_ui->_spinMovementThresholdMin->value(),_ui->_spinMovementThresholdMax->value()),
+													_ui->_comboHistogramSmoothing->currentIndex(), _ui->_spinSmoothingRadiusOfHistogram->value(),
+													_ui->_spinMinimumHeightofMaximum->value(), _ui->_spinMaximumsNeighborhood->value(), _ui->_spinDerivativePercentage->value(),
+													_ui->_spinHistogramIntervalMinimumWidth->value(), _ui->_checkRadiusAroundPith->text().toInt());
 
 	_ui->_plotAngularHistogram->replot();
 	_ui->_polarSectorSum->replot();

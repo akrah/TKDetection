@@ -17,8 +17,6 @@ public:
 
 	void setTypeOfView( const SliceType::SliceType &type );
 
-	void setMovementThresholdMin( const int &threshold );
-	void setMovementThresholdMax( const int &threshold );
 	void useNextSliceInsteadOfCurrentSlice( const bool &enable );
 
 	qreal flowAlpha() const;
@@ -38,21 +36,19 @@ public:
 	void setCannyMinimumGradient( const qreal &minimumGradient );
 	void setCannyMinimumDeviation( const qreal &minimumDeviation );
 
-	void drawSlice( QImage &image, const Billon &billon, const Marrow *marrow, const int &sliceNumber, const Interval &intensityInterval );
+	void drawSlice( QImage &image, const Billon &billon, const Marrow *marrow, const int &sliceNumber, const Interval &intensityInterval, const Interval &motionInterval );
 
 private :
 	void drawCurrentSlice( QImage &image, const Billon &billon, const int &sliceNumber, const Interval &intensityInterval );
 	void drawAverageSlice( QImage &image, const Billon &billon, const Interval &intensityInterval );
 	void drawMedianSlice( QImage &image, const Billon &billon, const Interval &intensityInterval );
-	void drawMovementSlice( QImage &image, const Billon &billon, const int &sliceNumber, const Interval &intensityInterval );
+	void drawMovementSlice( QImage &image, const Billon &billon, const int &sliceNumber, const Interval &intensityInterval, const Interval &motionInterval );
 	void drawEdgeDetectionSlice( QImage &image, const Billon &billon, const Marrow *marrow, const int &sliceNumber, const Interval &intensityInterval );
 	void drawFlowSlice( QImage &image, const Billon &billon, const int &sliceNumber );
 	void drawRestrictedArea( QImage &image, const Billon &billon, const Marrow *marrow, const int &sliceNumber, const Interval &intensityInterval );
 
 private:
 	SliceType::SliceType _typeOfView;
-
-	Interval _movementThreshold;
 	bool _useNextSliceInsteadOfCurrentSlice;
 
 	qreal _flowAlpha;

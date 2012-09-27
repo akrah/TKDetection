@@ -41,11 +41,6 @@ private slots:
 	void setSlice( const int &sliceNumber );
 	void setTypeOfView( const int &type );
 	void updateSliceHistogram();
-	void setMarrowAroundDiameter( const int &diameter );
-	void setHistogramIntervalMinimumWidth( const int &width );
-	void setHistogramSmoothingType( const int &type );
-	void setHistogramMaximumsNeighborhood( const int &neighborhood );
-	void setHistogramDerivativePercentage( const int &percentage );
 	void highlightSliceHistogram( const int &slicePosition );
 	void updateMarrow();
 	void highlightSectorHistogram( const int &sectorIdx );
@@ -57,8 +52,6 @@ private slots:
 	void nextMaximumInSliceHistogram();
 	void zoomInSliceView( const qreal &zoomFactor, const QPoint &focalPoint );
 	void dragInSliceView( const QPoint &movementVector );
-	void setMovementThresholdMin( const int &threshold );
-	void setMovementThresholdMax( const int &threshold );
 	void useNextSliceInsteadOfCurrentSlice( const bool &enable );
 	void flowApplied();
 	void setRestrictedAreaResolution( const int &resolution );

@@ -240,11 +240,11 @@ qreal BillonTpl<T>::getRestrictedAreaMeansRadius( const Marrow *marrow, const in
 			}
 			xEdge -= xCenter;
 			yEdge -= yCenter;
-			radius += qSqrt( xEdge*xEdge + yEdge*yEdge );
+			radius += qSqrt( xEdge*xEdge + yEdge*yEdge )/static_cast<qreal>(nbPolygonPoints);
 		}
 	}
 
-	radius/=(depth*nbPolygonPoints);
+	radius/=depth;
 	qDebug() << "Rayon de la boite englobante (en pixels) : " << radius;
 	return radius;
 }
