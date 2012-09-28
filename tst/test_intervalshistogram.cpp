@@ -112,10 +112,10 @@ namespace Test_IntervalsHistogram {
 	void routineCommune( QVector<qreal> &hist, bool loop ) {
 		std::cout << "Avant : ";
 		coutHistogram( hist.begin(), hist.end() );
-		const QVector<qreal> smootheddHist = IntervalsComputer::gaussianSmoothing(hist,DEFAULT_MASK_RADIUS,loop);
+		IntervalsComputer::meansSmoothing(hist,DEFAULT_MASK_RADIUS,loop);
 		std::cout << "Après : ";
-		coutHistogram( smootheddHist.begin(), smootheddHist.end() );
-		const QVector<int> maximums = IntervalsComputer::maximumsComputing( smootheddHist, IntervalsComputer::minimumThresholdPercentage(smootheddHist), DEFAULT_MINIMUM_WIDTH_OF_NEIGHBORHOOD, loop );
+		coutHistogram( hist.begin(), hist.end() );
+		const QVector<int> maximums = IntervalsComputer::maximumsComputing( hist, IntervalsComputer::thresholdOfMaximums(hist), DEFAULT_MINIMUM_WIDTH_OF_NEIGHBORHOOD, loop );
 		std::cout << "Maximums : ";
 		coutHistogram(maximums.begin(),maximums.end());
 	}

@@ -98,8 +98,8 @@ void PieChartDiagrams::clear()
 }
 
 void PieChartDiagrams::compute( const Billon &billon, const Marrow *marrow, const PieChart &pieChart, const Interval &slicesInterval, const Interval &intensity, const Interval &motionInterval,
-								const int &smoothingType, const int &smoothingRadius, const int &minimumHeightPercentageOfMaximum, const int &maximumsNeighborhood,
-								const int &derivativePercentage, const int &minimumIntervalWidth, const int &radiusAroundPith )
+								const int &smoothingRadius, const int &minimumHeightPercentageOfMaximum, const int &neighborhoodOfMaximums,
+								const int &derivativesPercentage, const int &minimumWidthOfIntervals, const int &radiusAroundPith )
 {
 	if ( slicesInterval.isValid() && slicesInterval.width() > 0 )
 	{
@@ -135,10 +135,10 @@ void PieChartDiagrams::compute( const Billon &billon, const Marrow *marrow, cons
 		marrowY = height/2;
 		if ( marrow != 0 )
 		{
-			for ( k=minOfInterval==0?1:minOfInterval ; k<maxOfInterval ; ++k )
+			for ( k=minOfInterval ; k<maxOfInterval ; ++k )
 			{
-				const arma::Slice &slice = _useNextSlice?billon.slice(k+1):billon.slice(k);
-				const arma::Slice &prevSlice = billon.slice(k-1);
+				const arma::Slice &currentSlice = billon.slice(k);
+				const arma::Slice &prevSlice = billon.slice(k>0?k-1:k+1);
 				marrowX = marrow->at(k).x;
 				marrowY = marrow->at(k).y;
 				for ( j=-radiusAroundPith ; j<radiusMax ; ++j )
@@ -152,7 +152,7 @@ void PieChartDiagrams::compute( const Billon &billon, const Marrow *marrow, cons
 						if ( xPos < width && yPos < height )
 						{
 							sectorIdx = _pieChart.partOfAngle( TWO_PI-ANGLE(marrowX,marrowY,xPos,yPos) );
-							currentSliceValue = slice.at(yPos,xPos);
+							currentSliceValue = currentSlice.at(yPos,xPos);
 							previousSliceValue = prevSlice.at(yPos,xPos);
 							if ( (currentSliceValue > minValue) && (previousSliceValue > minValue) )
 							{
@@ -169,16 +169,16 @@ void PieChartDiagrams::compute( const Billon &billon, const Marrow *marrow, cons
 		}
 		else
 		{
-			for ( k=minOfInterval==0?1:minOfInterval ; k<maxOfInterval ; ++k )
+			for ( k=minOfInterval ; k<maxOfInterval ; ++k )
 			{
-				const arma::Slice &slice = _useNextSlice?billon.slice(k+1):billon.slice(k);
-				const arma::Slice &prevSlice = billon.slice(k-1);
+				const arma::Slice &currentSlice = billon.slice(k);
+				const arma::Slice &prevSlice = billon.slice(k>0?k-1:k+1);
 				for ( j=0 ; j<static_cast<int>(height) ; ++j )
 				{
 					for ( i=0 ; i<static_cast<int>(width) ; ++i )
 					{
 						sectorIdx = _pieChart.partOfAngle( TWO_PI-ANGLE(marrowX,marrowY,i,j) );
-						currentSliceValue = slice.at(j,i);
+						currentSliceValue = currentSlice.at(j,i);
 						previousSliceValue = prevSlice.at(j,i);
 						if ( (currentSliceValue > minValue) && (previousSliceValue > minValue) )
 						{
@@ -193,16 +193,13 @@ void PieChartDiagrams::compute( const Billon &billon, const Marrow *marrow, cons
 			}
 		}
 
-		if ( smoothingType == SmoothingType::MEANS ) _datas = IntervalsComputer::meansSmoothing( _datas, smoothingRadius, true );
-		else if ( smoothingType == SmoothingType::GAUSSIAN ) _datas = IntervalsComputer::gaussianSmoothing( _datas, smoothingRadius, true );
-		qreal derivativeThreshold = IntervalsComputer::minimumThresholdPercentage( _datas, minimumHeightPercentageOfMaximum/100. );
-		_maximums = IntervalsComputer::maximumsComputing( _datas, derivativeThreshold, maximumsNeighborhood, true );
-		_intervals = IntervalsComputer::intervalsComputing( _datas, _maximums, derivativePercentage, minimumIntervalWidth, true );
+		computeAll( smoothingRadius, minimumHeightPercentageOfMaximum, neighborhoodOfMaximums, derivativesPercentage, minimumWidthOfIntervals, true );
 
 		computeValues();
 		computeMaximums();
 		computeIntervals();
 
+		const qreal derivativeThreshold = thresholdOfMaximums( minimumHeightPercentageOfMaximum );
 		const qreal x[] = { 0., TWO_PI };
 		const qreal y[] = { derivativeThreshold, derivativeThreshold };
 		_curvePercentage.setSamples(x,y,2);
@@ -317,7 +314,6 @@ void PieChartDiagrams::computeIntervals()
 	int nbMaximums = _maximums.size();
 	if ( nbMaximums > 0 )
 	{
-		curveHistogramIntervalsDatas.reserve(nbMaximums*25);
 		int min, max, i;
 		Interval currentInterval;
 		QVector<Interval>::ConstIterator begin = _intervals.begin();
@@ -334,9 +330,10 @@ void PieChartDiagrams::computeIntervals()
 				_datasCurveIntervals->append(QwtPointPolar( _pieChart.sector(min).rightAngle(), 0. ));
 				for ( i=min ; i<max ; ++i )
 				{
-					_datasCurveIntervals->append(QwtPointPolar(_pieChart.sector(i).rightAngle(),_datas[i]));
-					_datasCurveIntervals->append(QwtPointPolar(_pieChart.sector(i).leftAngle(),_datas[i]));
-					curveHistogramIntervalsDatas.append(QwtIntervalSample(_datas[i],_pieChart.sector(i).rightAngle(),_pieChart.sector(i).leftAngle()));
+					const PiePart &currentSector = _pieChart.sector(i);
+					_datasCurveIntervals->append(QwtPointPolar(currentSector.rightAngle(),_datas[i]));
+					_datasCurveIntervals->append(QwtPointPolar(currentSector.leftAngle(),_datas[i]));
+					curveHistogramIntervalsDatas.append(QwtIntervalSample(_datas[i],currentSector.rightAngle(),currentSector.leftAngle()));
 				}
 				_datasCurveIntervals->append(QwtPointPolar( _pieChart.sector(max).leftAngle(), 0. ));
 			}
@@ -345,15 +342,17 @@ void PieChartDiagrams::computeIntervals()
 				_datasCurveIntervals->append(QwtPointPolar( _pieChart.sector(min).rightAngle(), 0. ));
 				for ( i=min ; i<nbSectors ; ++i )
 				{
-					_datasCurveIntervals->append(QwtPointPolar(_pieChart.sector(i).rightAngle(),_datas[i]));
-					_datasCurveIntervals->append(QwtPointPolar(_pieChart.sector(i).leftAngle(),_datas[i]));
-					curveHistogramIntervalsDatas.append(QwtIntervalSample(_datas[i],_pieChart.sector(i).rightAngle(),_pieChart.sector(i).leftAngle()));
+					const PiePart &currentSector = _pieChart.sector(i);
+					_datasCurveIntervals->append(QwtPointPolar(currentSector.rightAngle(),_datas[i]));
+					_datasCurveIntervals->append(QwtPointPolar(currentSector.leftAngle(),_datas[i]));
+					curveHistogramIntervalsDatas.append(QwtIntervalSample(_datas[i],currentSector.rightAngle(),currentSector.leftAngle()));
 				}
 				for ( i=0 ; i<max ; ++i )
 				{
-					_datasCurveIntervals->append(QwtPointPolar(_pieChart.sector(i).rightAngle(),_datas[i]));
-					_datasCurveIntervals->append(QwtPointPolar(_pieChart.sector(i).leftAngle(),_datas[i]));
-					curveHistogramIntervalsDatas.append(QwtIntervalSample(_datas[i],_pieChart.sector(i).rightAngle(),_pieChart.sector(i).leftAngle()));
+					const PiePart &currentSector = _pieChart.sector(i);
+					_datasCurveIntervals->append(QwtPointPolar(currentSector.rightAngle(),_datas[i]));
+					_datasCurveIntervals->append(QwtPointPolar(currentSector.leftAngle(),_datas[i]));
+					curveHistogramIntervalsDatas.append(QwtIntervalSample(_datas[i],currentSector.rightAngle(),currentSector.leftAngle()));
 				}
 				_datasCurveIntervals->append(QwtPointPolar( _pieChart.sector(max>=0?max:nbSectors-1).leftAngle(), 0. ));
 			}

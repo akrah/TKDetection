@@ -62,13 +62,13 @@ void SliceHistogram::clear()
 }
 
 void SliceHistogram::constructHistogram( const Billon &billon, const Marrow *marrow, const Interval &intensity, const Interval &motionInterval,
-										 const int &smoothingType, const int &smoothingRadius, const int &minimumHeightPercentageOfMaximum,
-										 const int &maximumsNeighborhood, const int &derivativePercentage, const int &minimumIntervalWidth,
+										 const int &smoothingRadius, const int &minimumHeightPercentageOfMaximum,
+										 const int &neighborhoodOfMaximums, const int &derivativesPercentage, const int &minimumWidthOfIntervals,
 										 const int &borderPercentageToCut, const int &radiusAroundPith )
 {
 	const uint width = billon.n_cols;
 	const uint height = billon.n_rows;
-	const uint depth = _useNextSlice?billon.n_slices-1:billon.n_slices;
+	const uint depth = billon.n_slices;
 	const int minValue = intensity.minValue();
 	const int maxValue = intensity.maxValue();
 	const int radiusMax = radiusAroundPith+1;
@@ -95,10 +95,10 @@ void SliceHistogram::constructHistogram( const Billon &billon, const Marrow *mar
 	const int kLimitMax = depth-kLimitMin;
 	if ( marrow != 0 )
 	{
-		for ( k=1+kLimitMin ; k<kLimitMax ; ++k )
+		for ( k=kLimitMin ; k<kLimitMax ; ++k )
 		{
-			const arma::Slice &slice = _useNextSlice?billon.slice(k+1):billon.slice(k);
-			const arma::Slice &prevSlice = billon.slice(k-1);
+			const arma::Slice &currentSlice = billon.slice(k);
+			const arma::Slice &prevSlice = billon.slice(k>0?k-1:k+1);
 			cumul = 0.;
 			marrowX = marrow->at(k).x;
 			marrowY = marrow->at(k).y;
@@ -112,7 +112,7 @@ void SliceHistogram::constructHistogram( const Billon &billon, const Marrow *mar
 					yPos = marrowY+j;
 					if ( xPos < width && yPos < height )
 					{
-						currentSliceValue = slice.at(yPos,xPos);
+						currentSliceValue = currentSlice.at(yPos,xPos);
 						previousSliceValue = prevSlice.at(yPos,xPos);
 						if ( (currentSliceValue > minValue) && (previousSliceValue > minValue) )
 						{
@@ -132,16 +132,16 @@ void SliceHistogram::constructHistogram( const Billon &billon, const Marrow *mar
 	{
 		const int iHeight = static_cast<int>(height);
 		const int iWidth = static_cast<int>(width);
-		for ( k=1+kLimitMin ; k<kLimitMax ; ++k )
+		for ( k=kLimitMin ; k<kLimitMax ; ++k )
 		{
-			const arma::Slice &slice = _useNextSlice?billon.slice(k+1):billon.slice(k);
-			const arma::Slice &prevSlice = billon.slice(k-1);
+			const arma::Slice &currentSlice = billon.slice(k);
+			const arma::Slice &prevSlice = billon.slice(k>0?k-1:k+1);
 			cumul = 0.;
 			for ( j=0 ; j<iHeight ; ++j )
 			{
 				for ( i=0 ; i<iWidth ; ++i )
 				{
-					currentSliceValue = slice.at(j,i);
+					currentSliceValue = currentSlice.at(j,i);
 					previousSliceValue = prevSlice.at(j,i);
 					if ( (currentSliceValue > minValue) && (previousSliceValue > minValue) )
 					{
@@ -157,16 +157,13 @@ void SliceHistogram::constructHistogram( const Billon &billon, const Marrow *mar
 		}
 	}
 
-	if ( smoothingType == SmoothingType::MEANS ) _datas = IntervalsComputer::meansSmoothing( _datas, smoothingRadius, false );
-	else if ( smoothingType == SmoothingType::GAUSSIAN ) _datas = IntervalsComputer::gaussianSmoothing( _datas, smoothingRadius, false );
-	qreal derivativeThreshold = IntervalsComputer::minimumThresholdPercentage( _datas, minimumHeightPercentageOfMaximum/100. );
-	_maximums = IntervalsComputer::maximumsComputing( _datas, derivativeThreshold, maximumsNeighborhood, false );
-	_intervals = IntervalsComputer::intervalsComputing( _datas, _maximums, derivativePercentage, minimumIntervalWidth, false );
+	computeAll( smoothingRadius, minimumHeightPercentageOfMaximum, neighborhoodOfMaximums, derivativesPercentage, minimumWidthOfIntervals, false );
 
 	computeValues();
 	computeMaximums();
 	computeIntervals();
 
+	const qreal derivativeThreshold = thresholdOfMaximums( minimumHeightPercentageOfMaximum );
 	const qreal x[] = { 0., depth };
 	const qreal y[] = { derivativeThreshold, derivativeThreshold };
 	_curvePercentage.setSamples(x,y,2);

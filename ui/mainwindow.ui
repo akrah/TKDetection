@@ -104,7 +104,7 @@
           <rect>
            <x>0</x>
            <y>0</y>
-           <width>244</width>
+           <width>256</width>
            <height>660</height>
           </rect>
          </property>
@@ -183,7 +183,7 @@
      <item>
       <widget class="QTabWidget" name="_tabs">
        <property name="currentIndex">
-        <number>4</number>
+        <number>0</number>
        </property>
        <widget class="QWidget" name="_tabGeneral">
         <attribute name="title">
@@ -230,7 +230,7 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>482</width>
+              <width>470</width>
               <height>353</height>
              </rect>
             </property>
@@ -312,36 +312,7 @@
                </item>
               </layout>
              </item>
-             <item row="1" column="0">
-              <widget class="QLabel" name="label_12">
-               <property name="font">
-                <font>
-                 <weight>50</weight>
-                 <bold>false</bold>
-                </font>
-               </property>
-               <property name="text">
-                <string>Utiliser la coupe suivante</string>
-               </property>
-              </widget>
-             </item>
              <item row="1" column="1">
-              <widget class="QCheckBox" name="_checkUseNextSlice">
-               <property name="font">
-                <font>
-                 <weight>50</weight>
-                 <bold>false</bold>
-                </font>
-               </property>
-               <property name="text">
-                <string/>
-               </property>
-               <property name="checked">
-                <bool>true</bool>
-               </property>
-              </widget>
-             </item>
-             <item row="2" column="1">
               <widget class="QPushButton" name="_buttonExportMovementsToV3D">
                <property name="font">
                 <font>
@@ -361,8 +332,8 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>276</width>
-              <height>215</height>
+              <width>470</width>
+              <height>353</height>
              </rect>
             </property>
             <attribute name="label">
@@ -543,8 +514,8 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>341</width>
-              <height>177</height>
+              <width>470</width>
+              <height>353</height>
              </rect>
             </property>
             <attribute name="label">
@@ -690,8 +661,8 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>243</width>
-              <height>118</height>
+              <width>470</width>
+              <height>353</height>
              </rect>
             </property>
             <attribute name="label">

@@ -105,7 +105,6 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 	QObject::connect(_ui->_spinMovementThresholdMax, SIGNAL(valueChanged(int)), _ui->_sliderMovementThresholdInterval, SLOT(setUpperValue(int)));
 	QObject::connect(_ui->_spinMovementThresholdMax, SIGNAL(valueChanged(int)), this, SLOT(drawSlice()));
 
-	QObject::connect(_ui->_checkUseNextSlice, SIGNAL(toggled(bool)), this, SLOT(useNextSliceInsteadOfCurrentSlice(bool)));
 	QObject::connect(_ui->_buttonFlowApplied, SIGNAL(clicked()), this, SLOT(flowApplied()));
 	QObject::connect(_ui->_spinRestrictedAreaResolution, SIGNAL(valueChanged(int)), this, SLOT(setRestrictedAreaResolution(int)));
 	QObject::connect(_ui->_spinRestrictedAreaThreshold, SIGNAL(valueChanged(int)), this, SLOT(setRestrictedAreaThreshold(int)));
@@ -294,7 +293,7 @@ void MainWindow::drawSlice( const int &sliceNumber )
 		}
 
 		const bool inDrawingArea = (_ui->_comboSelectSliceInterval->currentIndex() > 0 && _sliceHistogram->branchesAreas().at(_ui->_comboSelectSliceInterval->currentIndex()-1).contains(sliceNumber));
-		if ( (_pieChartDiagrams->count() != 0) && inDrawingArea )
+		if ( (_pieChartDiagrams->size() != 0) && inDrawingArea )
 		{
 			iCoord2D center(_pix.width()/2,_pix.height()/2);
 			if ( _marrow != 0 &&  _marrow->interval().containsClosed(sliceNumber) )
@@ -434,8 +433,8 @@ void MainWindow::updateSliceHistogram()
 	{
 		_sliceHistogram->constructHistogram(*_billon, _marrow, Interval(_ui->_spinMinIntensity->value(),_ui->_spinMaxIntensity->value()),
 											Interval(_ui->_spinMovementThresholdMin->value(),_ui->_spinMovementThresholdMax->value()),
-											_ui->_comboHistogramSmoothing->currentIndex(), _ui->_spinSmoothingRadiusOfHistogram->value(),
-											_ui->_spinMinimumHeightofMaximum->value(), _ui->_spinMaximumsNeighborhood->value(), _ui->_spinDerivativePercentage->value(),
+											_ui->_spinSmoothingRadiusOfHistogram->value(), _ui->_spinMinimumHeightofMaximum->value(),
+											_ui->_spinMaximumsNeighborhood->value(), _ui->_spinDerivativePercentage->value(),
 											_ui->_spinHistogramIntervalMinimumWidth->value(), _ui->_spinBorderPercentageToCut->value(), _ui->_checkRadiusAroundPith->text().toInt());
 	}
 	_histogramCursor.detach();
@@ -544,7 +543,7 @@ void MainWindow::previousMaximumInSliceHistogram()
 {
 	const int nbMaximums = _sliceHistogram->nbMaximums();
 	_currentMaximum = nbMaximums <= 0 ? -1 : _currentMaximum < 0 ? 0 : _currentMaximum == 0 ? nbMaximums-1 : ( _currentMaximum - 1 ) % nbMaximums;
-	int sliceIndex = _sliceHistogram->indexOfIemeMaximum(_currentMaximum);
+	int sliceIndex = _sliceHistogram->maximumIndex(_currentMaximum);
 	if ( sliceIndex > -1 )
 	{
 		_ui->_sliderSelectSlice->setValue(sliceIndex);
@@ -555,7 +554,7 @@ void MainWindow::nextMaximumInSliceHistogram()
 {
 	const int nbMaximums = _sliceHistogram->nbMaximums();
 	_currentMaximum = nbMaximums>0 ? ( _currentMaximum + 1 ) % nbMaximums : -1;
-	int sliceIndex = _sliceHistogram->indexOfIemeMaximum(_currentMaximum);
+	int sliceIndex = _sliceHistogram->maximumIndex(_currentMaximum);
 	if ( sliceIndex > -1 )
 	{
 		_ui->_sliderSelectSlice->setValue(sliceIndex);
@@ -572,14 +571,6 @@ void MainWindow::dragInSliceView( const QPoint &movementVector )
 	QScrollArea &scrollArea = *(_ui->_scrollSliceView);
 	if ( movementVector.x() != 0 ) scrollArea.horizontalScrollBar()->setValue(scrollArea.horizontalScrollBar()->value()-movementVector.x());
 	if ( movementVector.y() != 0 ) scrollArea.verticalScrollBar()->setValue(scrollArea.verticalScrollBar()->value()-movementVector.y());
-}
-
-void MainWindow::useNextSliceInsteadOfCurrentSlice( const bool &enable )
-{
-	_sliceView->useNextSliceInsteadOfCurrentSlice(enable);
-	_sliceHistogram->useNextSliceInsteadOfCurrentSlice(enable);
-	_pieChartDiagrams->useNextSliceInsteadOfCurrentSlice(enable);
-	drawSlice();
 }
 
 void MainWindow::flowApplied()
@@ -821,16 +812,16 @@ void MainWindow::exportMovementsToV3D()
 			Billon billonDiag( *_billon );
 			int i,j,k, pixAbsDiff;
 
-			for ( k=slicesInterval.minValue()+1 ; k<slicesInterval.maxValue() ; ++k )
+			for ( k=slicesInterval.minValue() ; k<slicesInterval.maxValue() ; ++k )
 			{
-				const Slice &previousSlice = _billon->slice(k-1);
-				const Slice &toCompareSlice = _billon->slice(_ui->_checkUseNextSlice && k < slicesInterval.maxValue()-1 ? k+1 : k );
+				const Slice &currentSlice = _billon->slice(k);
+				const Slice &previousSlice = _billon->slice(k>0?k-1:k+1);
 				Slice &sliceDiag = billonDiag.slice(k-slicesInterval.minValue()-1);
 				for ( j=0 ; j<height ; ++j )
 				{
 					for ( i=0 ; i<width ; ++i )
 					{
-						pixAbsDiff = qAbs(RESTRICT_TO(minValue,previousSlice.at(j,i),maxValue) - RESTRICT_TO(minValue,toCompareSlice.at(j,i),maxValue));
+						pixAbsDiff = qAbs(RESTRICT_TO(minValue,previousSlice.at(j,i),maxValue) - RESTRICT_TO(minValue,currentSlice.at(j,i),maxValue));
 						if ( (pixAbsDiff <= thresholdMin) || (pixAbsDiff >= thresholdMax) ) sliceDiag.at(j,i) = minValue;
 						else sliceDiag.at(i,j) = maxValue;
 					}
@@ -854,7 +845,7 @@ void MainWindow::selectSliceInterval( const int &index )
 	{
 		const Interval &sliceInterval = _sliceHistogram->branchesAreas()[index-1];
 		computeSectorsHistogramForInterval(sliceInterval);
-		_ui->_sliderSelectSlice->setValue(_sliceHistogram->indexOfIemeInterval(index-1));
+		_ui->_sliderSelectSlice->setValue(_sliceHistogram->intervalIndex(index-1));
 
 		const QVector<Interval> &angularIntervals = _pieChartDiagrams->branchesSectors();
 		if ( !angularIntervals.isEmpty() )
@@ -1497,8 +1488,6 @@ void MainWindow::initComponentsValues() {
 	_ui->_sliderMovementThresholdInterval->setUpperValue(MAXIMUM_Z_MOTION);
 	_ui->_sliderMovementThresholdInterval->setLowerValue(MINIMUM_Z_MOTION);
 
-	_ui->_checkUseNextSlice->setChecked(false);
-
 	_ui->_comboHistogramSmoothing->setEnabled(true);
 
 	_ui->_sliderMaximumsNeighborhood->setMinimum(0);
@@ -1603,8 +1592,8 @@ void MainWindow::computeSectorsHistogramForInterval( const Interval &interval ) 
 
 	if ( _billon != 0 ) _pieChartDiagrams->compute( *_billon, _marrow, *_pieChart, interval, Interval(_ui->_spinMinIntensity->value(),_ui->_spinMaxIntensity->value()),
 													Interval(_ui->_spinMovementThresholdMin->value(),_ui->_spinMovementThresholdMax->value()),
-													_ui->_comboHistogramSmoothing->currentIndex(), _ui->_spinSmoothingRadiusOfHistogram->value(),
-													_ui->_spinMinimumHeightofMaximum->value(), _ui->_spinMaximumsNeighborhood->value(), _ui->_spinDerivativePercentage->value(),
+													_ui->_spinSmoothingRadiusOfHistogram->value(), _ui->_spinMinimumHeightofMaximum->value(),
+													_ui->_spinMaximumsNeighborhood->value(), _ui->_spinDerivativePercentage->value(),
 													_ui->_spinHistogramIntervalMinimumWidth->value(), _ui->_checkRadiusAroundPith->text().toInt());
 
 	_ui->_plotAngularHistogram->replot();

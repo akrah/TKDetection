@@ -8,7 +8,7 @@
 
 #include <QPainter>
 
-SliceView::SliceView() : _typeOfView(SliceType::CURRENT), _useNextSliceInsteadOfCurrentSlice(false),
+SliceView::SliceView() : _typeOfView(SliceType::CURRENT),
 	_flowAlpha(FLOW_ALPHA_DEFAULT), _flowEpsilon(FLOW_EPSILON_DEFAULT), _flowMaximumIterations(FLOW_MAXIMUM_ITERATIONS),
 	_restrictedAreaResolution(100), _restrictedAreaThreshold(-900), _restrictedAreaBeginRadius(5), _typeOfEdgeDetection(EdgeDetectionType::SOBEL),
 	_cannyRadiusOfGaussianMask(2), _cannySigmaOfGaussianMask(2), _cannyMinimumGradient(100.), _cannyMinimumDeviation(0.9)
@@ -25,11 +25,6 @@ void SliceView::setTypeOfView( const SliceType::SliceType &type )
 	{
 		_typeOfView = type;
 	}
-}
-
-void SliceView::useNextSliceInsteadOfCurrentSlice( const bool &enable )
-{
-	_useNextSliceInsteadOfCurrentSlice = enable;
 }
 
 qreal SliceView::flowAlpha() const
@@ -226,8 +221,8 @@ void SliceView::drawMedianSlice( QImage &image, const Billon &billon, const Inte
 
 void SliceView::drawMovementSlice( QImage &image, const Billon &billon, const int &sliceNumber, const Interval &intensityInterval, const Interval &motionInterval )
 {
+	const Slice &currentSlice = billon.slice(sliceNumber);
 	const Slice &previousSlice = billon.slice(sliceNumber > 0 ? sliceNumber-1 : sliceNumber+1);
-	const Slice &toCompareSlice = billon.slice(_useNextSliceInsteadOfCurrentSlice && sliceNumber < static_cast<int>(billon.n_slices)-1 ? sliceNumber+1 : sliceNumber );
 	const uint width = previousSlice.n_cols;
 	const uint height = previousSlice.n_rows;
 	const int minValue = intensityInterval.minValue();
@@ -243,7 +238,7 @@ void SliceView::drawMovementSlice( QImage &image, const Billon &billon, const in
 	{
 		for ( i=0 ; i<width ; i++)
 		{
-			color = qAbs(RESTRICT_TO(minValue,previousSlice.at(j,i),maxValue) - RESTRICT_TO(minValue,toCompareSlice.at(j,i),maxValue));
+			color = qAbs(RESTRICT_TO(minValue,previousSlice.at(j,i),maxValue) - RESTRICT_TO(minValue,currentSlice.at(j,i),maxValue));
 			if ( motionInterval.containsClosed(color) )
 			{
 				color *= fact;

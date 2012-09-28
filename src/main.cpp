@@ -3,6 +3,7 @@
 
 #include "inc/mainwindow.h"
 #include <QMessageBox>
+#include "tst/test_intervalshistogram.h"
 
 void outputHandler(QtMsgType type, const char *msg)
 {
@@ -28,6 +29,6 @@ int main(int argc, char *argv[])
 	w.show();
 	return a.exec();
 
-	//Test_IntervalsHistogram::allTests();
-	//return 0;
+//	Test_IntervalsHistogram::allTests();
+//	return 0;
 }

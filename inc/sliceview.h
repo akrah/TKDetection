@@ -17,8 +17,6 @@ public:
 
 	void setTypeOfView( const SliceType::SliceType &type );
 
-	void useNextSliceInsteadOfCurrentSlice( const bool &enable );
-
 	qreal flowAlpha() const;
 	qreal flowEpsilon() const;
 	int flowMaximumIterations() const;
@@ -49,7 +47,6 @@ private :
 
 private:
 	SliceType::SliceType _typeOfView;
-	bool _useNextSliceInsteadOfCurrentSlice;
 
 	qreal _flowAlpha;
 	qreal _flowEpsilon;

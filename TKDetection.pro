@@ -36,7 +36,6 @@ SOURCES		=	main.cpp \
 				datexport.cpp \
 				dicomreader.cpp \
 				histoexport.cpp \
-				histogram.cpp \
 				interval.cpp \
 				intervalscomputer.cpp \
 				mainwindow.cpp \
@@ -95,7 +94,7 @@ INCLUDEPATH *=  /usr/include/ \
 				/usr/local/include/ \
 				/usr/include/qwt/
 
-CXXFLAGS += -std=c++0x 
+CXXFLAGS += -std=c++0x
 
 LIBS *= -lblas -llapack -larmadillo
 

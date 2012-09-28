@@ -18,7 +18,7 @@ class QwtPolarPlot;
 class QwtIntervalSample;
 class Interval;
 
-class PieChartDiagrams : public Histogram
+class PieChartDiagrams : public Histogram<qreal>
 {
 public:
 	PieChartDiagrams();
@@ -31,7 +31,7 @@ public:
 	void clear();
 
 	void compute( const Billon &billon, const Marrow *marrow, const PieChart &pieChart, const Interval &slicesInterval, const Interval &intensity, const Interval &motionInterval,
-				  const int &smoothingType,  const int &smoothingRadius, const int &minimumHeightPercentageOfMaximum, const int &maximumsNeighborhood,
+				  const int &smoothingRadius, const int &minimumHeightPercentageOfMaximum, const int &maximumsNeighborhood,
 				  const int &derivativePercentage, const int &minimumIntervalWidth, const int &radiusAroundPith );
 	void highlightCurve( const int &index );
 

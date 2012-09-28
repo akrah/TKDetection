@@ -15,7 +15,7 @@ class QwtIntervalSample;
 class QwtInterval;
 class Interval;
 
-class SliceHistogram : public Histogram
+class SliceHistogram : public Histogram<qreal>
 {
 
 public:
@@ -29,9 +29,9 @@ public:
 	void clear();
 
 	void constructHistogram( const Billon &billon, const Marrow *marrow, const Interval &intensity, const Interval &motionInterval,
-							 const int &smoothingType, const int &smoothingRadius, const int &minimumHeightPercentageOfMaximum,
-							 const int &maximumsNeighborhood, const int &derivativePercentage, const int &minimumIntervalWidth,
-							 const int &borderPercentageToCut, const int &radiusAroundPith );
+							 const int &smoothingRadius, const int &minimumHeightPercentageOfMaximum, const int &maximumsNeighborhood,
+							 const int &derivativePercentage, const int &minimumIntervalWidth, const int &borderPercentageToCut,
+							 const int &radiusAroundPith );
 
 private:
 	void computeValues();
