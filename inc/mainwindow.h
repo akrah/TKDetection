@@ -94,7 +94,7 @@ private:
 	void initComponentsValues();
 	void updateUiComponentsValues();
 	void enabledComponents();
-	void computeSectorsHistogramForInterval( const Interval &interval );
+	void computeSectorsHistogramForInterval( const Interval<int> &interval );
 
 private:
 	Ui::MainWindow *_ui;
@@ -118,7 +118,7 @@ private:
 
 	QwtPlotHistogram _histogramDistanceMarrowToNearestPoint;
 	QwtPlotCurve _histogramDistanceMarrowToNearestPointCursor;
-	Interval _knotIntervalInDistanceMarrowToNearestPointHistogram;
+	Interval<int> _knotIntervalInDistanceMarrowToNearestPointHistogram;
 
 	int _currentSlice;
 	int _currentMaximum;

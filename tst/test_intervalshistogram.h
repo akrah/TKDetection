@@ -1,7 +1,9 @@
 #ifndef TEST_INTERVALSHISTOGRAM_H
 #define TEST_INTERVALSHISTOGRAM_H
 
-#include <QVector>
+#include <QtGlobal>
+
+template< typename T> class Histogram;
 
 namespace Test_IntervalsHistogram {
 	void allTests();
@@ -11,7 +13,7 @@ namespace Test_IntervalsHistogram {
 	void test4();
 	void test5();
 
-	void routineCommune( QVector<qreal> &hist, bool loop );
+	void routineCommune( Histogram<qreal> &hist, bool loop );
 }
 
 #endif // TEST_INTERVALSHISTOGRAM_H

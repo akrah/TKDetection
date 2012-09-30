@@ -96,7 +96,7 @@ void SliceView::setCannyMinimumDeviation( const qreal &minimumDeviation ) {
 	_cannyMinimumDeviation = minimumDeviation;
 }
 
-void SliceView::drawSlice( QImage &image, const Billon &billon, const Marrow *marrow, const int &sliceNumber, const Interval &intensityInterval, const Interval &motionInterval )
+void SliceView::drawSlice( QImage &image, const Billon &billon, const Marrow *marrow, const int &sliceNumber, const Interval<int> &intensityInterval, const Interval<int> &motionInterval )
 {
 	if ( sliceNumber > -1 && sliceNumber < static_cast<int>(billon.n_slices) )
 	{
@@ -142,13 +142,13 @@ void SliceView::drawSlice( QImage &image, const Billon &billon, const Marrow *ma
  * Private functions
  *******************************/
 
-void SliceView::drawCurrentSlice( QImage &image, const Billon &billon, const int &sliceNumber, const Interval &intensityInterval )
+void SliceView::drawCurrentSlice( QImage &image, const Billon &billon, const int &sliceNumber, const Interval<int> &intensityInterval )
 {
 	const Slice &slice = billon.slice(sliceNumber);
 	const uint width = slice.n_cols;
 	const uint height = slice.n_rows;
-	const int minValue = intensityInterval.minValue();
-	const int maxValue = intensityInterval.maxValue();
+	const int minValue = intensityInterval.min();
+	const int maxValue = intensityInterval.max();
 	const qreal fact = 255.0/intensityInterval.size();
 
 	QRgb * line = (QRgb *) image.bits();
@@ -165,13 +165,13 @@ void SliceView::drawCurrentSlice( QImage &image, const Billon &billon, const int
 	}
 }
 
-void SliceView::drawAverageSlice( QImage &image, const Billon &billon, const Interval &intensityInterval )
+void SliceView::drawAverageSlice( QImage &image, const Billon &billon, const Interval<int> &intensityInterval )
 {
 	const uint width = billon.n_cols;
 	const uint height = billon.n_rows;
 	const uint depth = billon.n_slices;
-	const int minValue = intensityInterval.minValue();
-	const int maxValue = intensityInterval.maxValue();
+	const int minValue = intensityInterval.min();
+	const int maxValue = intensityInterval.max();
 	const double fact = 255.0/(depth*intensityInterval.size());
 
 	QRgb * line = (QRgb *) image.bits();
@@ -192,13 +192,13 @@ void SliceView::drawAverageSlice( QImage &image, const Billon &billon, const Int
 	}
 }
 
-void SliceView::drawMedianSlice( QImage &image, const Billon &billon, const Interval &intensityInterval )
+void SliceView::drawMedianSlice( QImage &image, const Billon &billon, const Interval<int> &intensityInterval )
 {
 	const uint width = billon.n_cols;
 	const uint height = billon.n_rows;
 	const uint depth = billon.n_slices;
-	const int minValue = intensityInterval.minValue();
-	const int maxValue = intensityInterval.maxValue();
+	const int minValue = intensityInterval.min();
+	const int maxValue = intensityInterval.max();
 	const double fact = 255.0/intensityInterval.size();
 
 	QRgb * line =(QRgb *) image.bits();
@@ -219,14 +219,14 @@ void SliceView::drawMedianSlice( QImage &image, const Billon &billon, const Inte
 	}
 }
 
-void SliceView::drawMovementSlice( QImage &image, const Billon &billon, const int &sliceNumber, const Interval &intensityInterval, const Interval &motionInterval )
+void SliceView::drawMovementSlice( QImage &image, const Billon &billon, const int &sliceNumber, const Interval<int> &intensityInterval, const Interval<int> &motionInterval )
 {
 	const Slice &currentSlice = billon.slice(sliceNumber);
 	const Slice &previousSlice = billon.slice(sliceNumber > 0 ? sliceNumber-1 : sliceNumber+1);
 	const uint width = previousSlice.n_cols;
 	const uint height = previousSlice.n_rows;
-	const int minValue = intensityInterval.minValue();
-	const int maxValue = intensityInterval.maxValue();
+	const int minValue = intensityInterval.min();
+	const int maxValue = intensityInterval.max();
 	const qreal fact = 255./motionInterval.width();
 
 	image.fill(0xff000000);
@@ -249,13 +249,13 @@ void SliceView::drawMovementSlice( QImage &image, const Billon &billon, const in
 	}
 }
 
-void SliceView::drawEdgeDetectionSlice( QImage &image, const Billon &billon, const Marrow *marrow, const int &sliceNumber, const Interval &intensityInterval )
+void SliceView::drawEdgeDetectionSlice( QImage &image, const Billon &billon, const Marrow *marrow, const int &sliceNumber, const Interval<int> &intensityInterval )
 {
 	const Slice &slice = billon.slice(sliceNumber);
 	const int width = slice.n_cols;
 	const int height = slice.n_rows;
-	const qreal minValue = intensityInterval.minValue();
-	const qreal maxValue = intensityInterval.maxValue();
+	const qreal minValue = intensityInterval.min();
+	const qreal maxValue = intensityInterval.max();
 
 	QRgb * line = (QRgb *) image.bits();
 	int color, gNorme;
@@ -447,20 +447,20 @@ void SliceView::drawFlowSlice( QImage &image, const Billon &billon, const int &s
 	delete field;
 }
 
-void SliceView::drawRestrictedArea( QImage &image, const Billon &billon, const Marrow *marrow, const int &sliceNumber, const Interval &intensityInterval )
+void SliceView::drawRestrictedArea( QImage &image, const Billon &billon, const Marrow *marrow, const int &sliceNumber, const Interval<int> &intensityInterval )
 {
 	const int nbPoints = _restrictedAreaResolution;
 
-	const int max = intensityInterval.maxValue();
-	const int min = intensityInterval.minValue();
+	const int max = intensityInterval.max();
+	const int min = intensityInterval.min();
 	const int threshold = qBound(min,_restrictedAreaThreshold,max);
 
 	const Slice &currentSlice = billon.slice(sliceNumber);
 
 	const int imageWidth = currentSlice.n_cols;
 	const int imageHeight = currentSlice.n_rows;
-	const int xCenter = (marrow != 0 && marrow->interval().containsClosed(sliceNumber))?marrow->at(sliceNumber-marrow->interval().minValue()).x:imageWidth/2;
-	const int yCenter = (marrow != 0 && marrow->interval().containsClosed(sliceNumber))?marrow->at(sliceNumber-marrow->interval().minValue()).y:imageHeight/2;
+	const int xCenter = (marrow != 0 && marrow->interval().containsClosed(sliceNumber))?marrow->at(sliceNumber-marrow->interval().min()).x:imageWidth/2;
+	const int yCenter = (marrow != 0 && marrow->interval().containsClosed(sliceNumber))?marrow->at(sliceNumber-marrow->interval().min()).y:imageHeight/2;
 
 	QPolygon polygon(nbPoints);
 	int polygonPoints[2*nbPoints+2];

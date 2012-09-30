@@ -17,7 +17,7 @@ int Interval::minValue() const
 	return _min;
 }
 
-int Interval::maxValue() const
+int Interval::max() const
 {
 	return _max;
 }
@@ -49,32 +49,32 @@ bool Interval::contains( const Interval &interval ) const
 
 bool Interval::containsOpen( const int &value ) const
 {
-	return (value > minValue()) && (value < maxValue());
+	return (value > minValue()) && (valmaxValue());
 }
 
 bool Interval::containsOpen( const Interval &interval ) const
 {
-	return (minValue() < interval.minValue()) && (maxValue() > interval.maxValue());
+	return (minValue() < interval.minValmax (maxValue() >maxl.maxValue());
 }
 
 bool Interval::containsClosed( const int &value ) const
 {
-	return (value >= minValue()) && (value <= maxValue());
+	return (value >= minValue()) && (valumaxValue());
 }
 
 bool Interval::containsClosed( const Interval &interval ) const
 {
-	return (minValue() <= interval.minValue()) && (maxValue() >= interval.maxValue());
+	return (minValue() <= interval.minValmax (maxValue() >=maxl.maxValue());
 }
 
 bool Interval::isValid() const
 {
-	return minValue()<=maxValue();
+	return minValumaxValue();
 }
 
 Interval Interval::inverted() const
 {
-	return Interval(maxValue(),minValue());
+	return Interval(max(),minValue());
 }
 
 Interval& Interval::operator =(const Interval& other)

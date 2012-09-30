@@ -14,12 +14,12 @@ public:
 	Marrow( const int &begin, const int &end );
 	Marrow( const Marrow &marrow );
 
-	const Interval &interval() const;
+	const Interval<int> &interval() const;
 
 	void draw( QImage &image, const int &sliceIdx ) const;
 
 private:
-	Interval _interval;
+	Interval<int> _interval;
 };
 
 #endif // MARROW_H

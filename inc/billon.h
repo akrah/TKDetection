@@ -176,8 +176,8 @@ qreal BillonTpl<T>::getRestrictedAreaBoudingBoxRadius( const Marrow *marrow, con
 	radius = 0.;
 	for ( k=0 ; k<depth ; ++k ) {
 		const arma::Mat<T> &currentSlice = this->slice(k);
-		const int xCenter = (marrow != 0 && marrow->interval().containsClosed(k))?marrow->at(k-marrow->interval().minValue()).x:width/2;
-		const int yCenter = (marrow != 0 && marrow->interval().containsClosed(k))?marrow->at(k-marrow->interval().minValue()).y:height/2;
+		const int xCenter = (marrow != 0 && marrow->interval().containsClosed(k))?marrow->at(k-marrow->interval().min()).x:width/2;
+		const int yCenter = (marrow != 0 && marrow->interval().containsClosed(k))?marrow->at(k-marrow->interval().min()).y:height/2;
 
 		orientation = 0.;
 		counter = 0;
@@ -222,8 +222,8 @@ qreal BillonTpl<T>::getRestrictedAreaMeansRadius( const Marrow *marrow, const in
 	radius = 0.;
 	for ( k=0 ; k<depth ; ++k ) {
 		const arma::Mat<T> &currentSlice = this->slice(k);
-		const int xCenter = (marrow != 0 && marrow->interval().containsClosed(k))?marrow->at(k-marrow->interval().minValue()).x:width/2;
-		const int yCenter = (marrow != 0 && marrow->interval().containsClosed(k))?marrow->at(k-marrow->interval().minValue()).y:height/2;
+		const int xCenter = (marrow != 0 && marrow->interval().containsClosed(k))?marrow->at(k-marrow->interval().min()).x:width/2;
+		const int yCenter = (marrow != 0 && marrow->interval().containsClosed(k))?marrow->at(k-marrow->interval().min()).y:height/2;
 
 		orientation = 0.;
 		for ( i=0 ; i<nbPolygonPoints ; ++i )

@@ -3,7 +3,6 @@
 #include "inc/billon.h"
 #include "inc/marrow.h"
 #include "inc/interval.h"
-#include "inc/intervalscomputer.h"
 
 SliceHistogram::SliceHistogram()
 {
@@ -24,9 +23,9 @@ SliceHistogram::~SliceHistogram()
  * Public getters
  *******************************/
 
-const QVector<Interval> &SliceHistogram::branchesAreas() const
+const QVector< Interval<int> > &SliceHistogram::knotAreas() const
 {
-	return _intervals;
+	return intervals();
 }
 
 /*******************************
@@ -54,6 +53,8 @@ void SliceHistogram::detach()
 
 void SliceHistogram::clear()
 {
+	Histogram::clear();
+
 	const QVector<QwtIntervalSample> emptyData(0);
 	_histogramData.setSamples(emptyData);
 	_histogramMaximums.setSamples(emptyData);
@@ -61,7 +62,7 @@ void SliceHistogram::clear()
 	_curvePercentage.setSamples(QVector<QPointF>(0));
 }
 
-void SliceHistogram::constructHistogram( const Billon &billon, const Marrow *marrow, const Interval &intensity, const Interval &motionInterval,
+void SliceHistogram::constructHistogram( const Billon &billon, const Marrow *marrow, const Interval<int> &intensity, const Interval<int> &motionInterval,
 										 const int &smoothingRadius, const int &minimumHeightPercentageOfMaximum,
 										 const int &neighborhoodOfMaximums, const int &derivativesPercentage, const int &minimumWidthOfIntervals,
 										 const int &borderPercentageToCut, const int &radiusAroundPith )
@@ -69,13 +70,13 @@ void SliceHistogram::constructHistogram( const Billon &billon, const Marrow *mar
 	const uint width = billon.n_cols;
 	const uint height = billon.n_rows;
 	const uint depth = billon.n_slices;
-	const int minValue = intensity.minValue();
-	const int maxValue = intensity.maxValue();
+	const int minValue = intensity.min();
+	const int maxValue = intensity.max();
 	const int radiusMax = radiusAroundPith+1;
 	const qreal squareRadius = qPow(radiusAroundPith,2);
 
-	_datas.clear();
-	_datas.resize(depth-1);
+	clear();
+	this->resize(depth-1);
 
 	QList<int> circleLines;
 	if ( marrow != 0 )
@@ -125,7 +126,7 @@ void SliceHistogram::constructHistogram( const Billon &billon, const Marrow *mar
 					}
 				}
 			}
-			_datas[k] = cumul;
+			(*this)[k] = cumul;
 		}
 	}
 	else
@@ -153,7 +154,7 @@ void SliceHistogram::constructHistogram( const Billon &billon, const Marrow *mar
 					}
 				}
 			}
-			_datas[k] = cumul;
+			(*this)[k] = cumul;
 		}
 	}
 
@@ -172,13 +173,13 @@ void SliceHistogram::constructHistogram( const Billon &billon, const Marrow *mar
 void SliceHistogram::computeValues()
 {
 	QVector<QwtIntervalSample> datasHistogram;
-	if ( _datas.size() > 0 )
+	if ( this->size() > 0 )
 	{
-		datasHistogram.reserve(_datas.size());
+		datasHistogram.reserve(this->size());
 		qreal sliceValue;
 		int i=0;
-		QVector<qreal>::ConstIterator begin = _datas.begin();
-		const QVector<qreal>::ConstIterator end = _datas.end();
+		QVector<qreal>::ConstIterator begin = this->begin();
+		const QVector<qreal>::ConstIterator end = this->end();
 		while ( begin != end )
 		{
 			sliceValue = *begin++;
@@ -200,7 +201,7 @@ void SliceHistogram::computeMaximums()
 		while ( begin != end )
 		{
 			slice = *begin++;
-			datasMaximums.append(QwtIntervalSample(_datas[slice],slice,slice+1));
+			datasMaximums.append(QwtIntervalSample(at(slice),slice,slice+1));
 		}
 	}
 	_histogramMaximums.setSamples(datasMaximums);
@@ -214,16 +215,16 @@ void SliceHistogram::computeIntervals()
 	{
 		dataIntervals.reserve(nbMaximums*25);
 		int min, max;
-		QVector<Interval>::ConstIterator begin = _intervals.begin();
-		const QVector<Interval>::ConstIterator end = _intervals.end();
-		qDebug() << "Intervalles de branches :";
+		QVector< Interval<int> >::ConstIterator begin = _intervals.begin();
+		const QVector< Interval<int> >::ConstIterator end = _intervals.end();
+		qDebug() << "Intervalles de nœuds :";
 		while ( begin != end )
 		{
-			min = (*begin).minValue();
-			max = (*begin++).maxValue();
+			min = (*begin).min();
+			max = (*begin++).max();
 			for ( int i=min ; i<max ; ++i )
 			{
-				dataIntervals.append(QwtIntervalSample(_datas[i],i,i+1));
+				dataIntervals.append(QwtIntervalSample(at(i),i,i+1));
 			}
 			qDebug() << "  [ " << min << ", " << max << " ] avec largeur = " << max-min;
 		}

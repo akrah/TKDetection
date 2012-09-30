@@ -9,22 +9,22 @@
 
 namespace DatExport
 {
-	void process( const Billon &billon, const Interval &slicesInterval, const Interval &intensityInterval, const QString &fileName, const int &resolution, const qreal &contrastFactor )
+	void process( const Billon &billon, const Interval<int> &slicesInterval, const Interval<int> &intensityInterval, const QString &fileName, const int &resolution, const qreal &contrastFactor )
 	{
 		QFile file(fileName);
 		if ( file.open(QIODevice::WriteOnly) )
 		{
-			const int firstSlice = slicesInterval.minValue();
-			const int lastSlice = slicesInterval.maxValue();
+			const int firstSlice = slicesInterval.min();
+			const int lastSlice = slicesInterval.max();
 			const int width = billon.n_cols;
 			const int height = billon.n_rows;
-			const int minValue = intensityInterval.minValue();
-			const int maxValue = intensityInterval.maxValue();
+			const int minValue = intensityInterval.min();
+			const int maxValue = intensityInterval.max();
 			const int shift = resolution-1;
 			const qreal fact = 255.0/(intensityInterval.size());
 
 			QTextStream tStream(&file);
-			tStream << "1 " << width/resolution << " " << height/resolution << " " << slicesInterval.count() << " 1 1 1 1";
+			tStream << "1 " << width/resolution << " " << height/resolution << " " << slicesInterval.width()+1 << " 1 1 1 1";
 			tStream.flush();
 
 			QDataStream dStream(&file);

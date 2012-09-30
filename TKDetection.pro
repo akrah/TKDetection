@@ -35,9 +35,6 @@ SOURCES		=	main.cpp \
 				contourcurve.cpp \
 				datexport.cpp \
 				dicomreader.cpp \
-				histoexport.cpp \
-				interval.cpp \
-				intervalscomputer.cpp \
 				mainwindow.cpp \
 				marrow.cpp \
 				marrowextractor.cpp \
@@ -63,10 +60,8 @@ HEADERS		=	billon.h \
 				datexport.h \
 				dicomreader.h \
 				global.h \
-				histoexport.h \
 				histogram.h \
 				interval.h \
-				intervalscomputer.h \
 				intervalscomputerdefaultparameters.h \
 				mainwindow.h \
 				marrow.h \

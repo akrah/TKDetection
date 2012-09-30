@@ -18,7 +18,7 @@ Marrow::Marrow( const Marrow &marrow ) : QList<iCoord2D>(marrow)
 /*******************************
  * Public getters
  *******************************/
-const Interval &Marrow::interval() const
+const Interval<int> &Marrow::interval() const
 {
 	return _interval;
 }
@@ -31,7 +31,7 @@ void Marrow::draw( QImage &image, const int &sliceIdx ) const
 {
 	if ( _interval.containsClosed(sliceIdx) )
 	{
-		const iCoord2D &coordToDraw = at(sliceIdx-_interval.minValue());
+		const iCoord2D &coordToDraw = at(sliceIdx-_interval.min());
 
 		QPainter painter(&image);
 		QPainterPath ellipsePath;

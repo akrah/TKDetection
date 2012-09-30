@@ -13,22 +13,22 @@ class Marrow;
 class QwtPlot;
 class QwtIntervalSample;
 class QwtInterval;
-class Interval;
+template<typename T> class Interval;
 
 class SliceHistogram : public Histogram<qreal>
 {
 
 public:
 	SliceHistogram();
-	~SliceHistogram();
+	virtual ~SliceHistogram();
 
-	const QVector<Interval> &branchesAreas() const;
+	const QVector< Interval<int> > & knotAreas() const;
 
 	void attach( QwtPlot * const plot );
 	void detach();
 	void clear();
 
-	void constructHistogram( const Billon &billon, const Marrow *marrow, const Interval &intensity, const Interval &motionInterval,
+	void constructHistogram( const Billon &billon, const Marrow *marrow, const Interval<int> &intensity, const Interval<int> &motionInterval,
 							 const int &smoothingRadius, const int &minimumHeightPercentageOfMaximum, const int &maximumsNeighborhood,
 							 const int &derivativePercentage, const int &minimumIntervalWidth, const int &borderPercentageToCut,
 							 const int &radiusAroundPith );

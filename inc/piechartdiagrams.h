@@ -16,7 +16,7 @@ class PieChart;
 class QwtPlot;
 class QwtPolarPlot;
 class QwtIntervalSample;
-class Interval;
+template<typename T> class Interval;
 
 class PieChartDiagrams : public Histogram<qreal>
 {
@@ -24,13 +24,14 @@ public:
 	PieChartDiagrams();
 	~PieChartDiagrams();
 
-	const QVector<Interval> &branchesSectors() const;
+	const QVector< Interval<int> > &knotIntervals() const;
 
 	void attach( QwtPolarPlot * const polarPlot );
 	void attach( QwtPlot * const plot );
 	void clear();
 
-	void compute( const Billon &billon, const Marrow *marrow, const PieChart &pieChart, const Interval &slicesInterval, const Interval &intensity, const Interval &motionInterval,
+	void compute( const Billon &billon, const Marrow *marrow, const PieChart &pieChart,
+				  const Interval<int> &slicesInterval, const Interval<int> &intensity, const Interval<int> &motionInterval,
 				  const int &smoothingRadius, const int &minimumHeightPercentageOfMaximum, const int &maximumsNeighborhood,
 				  const int &derivativePercentage, const int &minimumIntervalWidth, const int &radiusAroundPith );
 	void highlightCurve( const int &index );
@@ -45,7 +46,7 @@ private:
 private:
 	QwtPolarCurve _curve;
 	PointPolarSeriesData *_datasCurve;
-	QwtPlotHistogram _histogram;
+	QwtPlotHistogram _plotHistogram;
 
 	QwtPolarCurve _curveMaximums;
 	PointPolarSeriesData *_datasCurveMaximums;

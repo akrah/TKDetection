@@ -1,7 +1,7 @@
 #include "tst/test_intervalshistogram.h"
 
-#include "inc/intervalscomputer.h"
 #include <iostream>
+#include <inc/histogram.h>
 
 namespace {
 	void coutHistogram( QVector<qreal>::const_iterator begin, QVector<qreal>::const_iterator end ) {
@@ -16,9 +16,9 @@ namespace {
 		}
 		std::cout << std::endl;
 	}
-	void coutHistogram( QVector<Interval>::const_iterator begin, QVector<Interval>::const_iterator end ) {
+	void coutHistogram( QVector< Interval<int> >::const_iterator begin, QVector< Interval<int> >::const_iterator end ) {
 		while ( begin != end ) {
-			std::cout << '[' << (*begin).minValue() <<  ", " << (*begin).maxValue() << "] ";
+			std::cout << '[' << (*begin).min() <<  ", " << (*begin).max() << "] ";
 			begin++;
 		}
 		std::cout << std::endl;
@@ -40,7 +40,7 @@ namespace Test_IntervalsHistogram {
 	}
 
 	void test1() {
-		QVector<qreal> hist;
+		Histogram<qreal> hist;
 		hist << 1 << 1 << 1 << 1 << 1 << 1 << 1 << 1 << 1 << 1 << 1 << 1 << 1 << 1 << 1 << 1 << 1 << 1 << 1;
 
 		std::cout << "Histogramme constant sans boucle" << std::endl;
@@ -54,7 +54,7 @@ namespace Test_IntervalsHistogram {
 	}
 
 	void test2() {
-		QVector<qreal> hist;
+		Histogram<qreal> hist;
 		hist << 1 << 1 << 1 << 1 << 1 << 1 << 1 << 1 << 0 << 1 << 1 << 1 << 1 << 1 << 1 << 1 << 1 << 1 << 1;
 
 		std::cout << "Histogramme avec une valeur différente sans boucle" << std::endl;
@@ -68,7 +68,7 @@ namespace Test_IntervalsHistogram {
 	}
 
 	void test3() {
-		QVector<qreal> hist;
+		Histogram<qreal> hist;
 		hist << 0 << 1 << 1 << 1 << 1 << 1 << 1 << 1 << 1 << 1 << 1 << 1 << 1 << 1 << 1 << 1 << 1 << 1 << 1;
 
 		std::cout << "Histogramme avec une valeur différente en début sans boucle" << std::endl;
@@ -82,7 +82,7 @@ namespace Test_IntervalsHistogram {
 	}
 
 	void test4() {
-		QVector<qreal> hist;
+		Histogram<qreal> hist;
 		hist << 1 << 1 << 1 << 1 << 1 << 1 << 2 << 1 << 1 << 1 << 1 << 1 << 1 << 1 << 1 << 1 << 1 << 1 << 1;
 
 		std::cout << "Histogramme avec un max en 6 sans boucle" << std::endl;
@@ -96,7 +96,7 @@ namespace Test_IntervalsHistogram {
 	}
 
 	void test5() {
-		QVector<qreal> hist;
+		Histogram<qreal> hist;
 		hist << 2 << 1 << 1 << 1 << 1 << 1 << 1 << 1 << 1 << 1 << 1 << 1 << 1 << 1 << 1 << 1 << 1 << 1 << 1;
 
 		std::cout << "Histogramme avec un max en 0 sans boucle" << std::endl;
@@ -109,15 +109,15 @@ namespace Test_IntervalsHistogram {
 		routineCommune(hist,true);
 	}
 
-	void routineCommune( QVector<qreal> &hist, bool loop ) {
+	void routineCommune( Histogram<qreal> &hist, bool loop ) {
 		std::cout << "Avant : ";
 		coutHistogram( hist.begin(), hist.end() );
-		IntervalsComputer::meansSmoothing(hist,DEFAULT_MASK_RADIUS,loop);
+		hist.meansSmoothing(DEFAULT_MASK_RADIUS,loop);
 		std::cout << "Après : ";
 		coutHistogram( hist.begin(), hist.end() );
-		const QVector<int> maximums = IntervalsComputer::maximumsComputing( hist, IntervalsComputer::thresholdOfMaximums(hist), DEFAULT_MINIMUM_WIDTH_OF_NEIGHBORHOOD, loop );
+		hist.computeMaximums( DEFAULT_PERCENTAGE_FOR_MAXIMUM_CANDIDATE, DEFAULT_MINIMUM_WIDTH_OF_NEIGHBORHOOD, loop );
 		std::cout << "Maximums : ";
-		coutHistogram(maximums.begin(),maximums.end());
+		coutHistogram(hist.maximums().begin(),hist.maximums().end());
 	}
 
 }
