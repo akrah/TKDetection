@@ -5,98 +5,84 @@
 
 #include <QPainter>
 
-PieChart::PieChart( const qreal &orientation, const int &nbSectors ) : _orientation(orientation), _angle(TWO_PI/static_cast<qreal>(nbSectors)) {
+PieChart::PieChart( const int &nbSectors ) : _sectorAngle(TWO_PI/static_cast<qreal>(nbSectors))
+{
 	updateSectors(nbSectors);
 }
 
 
-PieChart::PieChart( const PieChart &pieChart ) : _orientation(pieChart._orientation), _angle(pieChart._angle), _sectors(pieChart._sectors) {
-
+PieChart::PieChart( const PieChart &pieChart ) : _sectorAngle(pieChart._sectorAngle), _sectors(pieChart._sectors)
+{
 }
 
 /*******************************
  * Public getters
  *******************************/
 
-qreal PieChart::orientation() const {
-	return _orientation;
+qreal PieChart::sectorAngle() const
+{
+	return _sectorAngle;
 }
 
-qreal PieChart::angle() const {
-	return _angle;
+uint PieChart::nbSectors() const
+{
+	return qRound(TWO_PI/_sectorAngle);
 }
 
-int PieChart::nbSectors() const {
-	return qRound(TWO_PI/_angle);
-}
-
-const PiePart &PieChart::sector( const int &index ) const {
+const PiePart &PieChart::sector( const int &index ) const
+{
 	return _sectors[index];
 }
 
-int PieChart::partOfAngle( const qreal &angle ) const {
-	int sectorId;
-	bool ok = false;
-	const int nbSectors = _sectors.size();
-	for ( sectorId = 0 ; !ok && (sectorId < nbSectors) ; sectorId++ ) {
-		ok = _sectors[sectorId].contains(angle);
-	}
-	return sectorId-1;
+uint PieChart::sectorIndexOfAngle( qreal angle ) const
+{
+	while ( angle<0 ) angle += TWO_PI;
+	return fmod(angle,TWO_PI)*nbSectors()/TWO_PI;
 }
 
 /*******************************
  * Public setters
  *******************************/
 
-void PieChart::setOrientation( const qreal &orientation ) {
-	_orientation = orientation;
-	updateSectors(_sectors.size());
-}
-
-void PieChart::setSectorsNumber( const int &nbSectors ) {
-	_angle = TWO_PI/static_cast<qreal>(nbSectors);
+void PieChart::setSectorsNumber( const int &nbSectors )
+{
+	_sectorAngle = TWO_PI/static_cast<qreal>(nbSectors);
 	updateSectors(nbSectors);
 }
 
-void PieChart::draw( QImage &image, const int &sectorIdx, const iCoord2D &center ) const {
+void PieChart::draw( QImage &image, const int &sectorIdx, const iCoord2D &center ) const
+{
 	const int width = image.width();
 	const int height = image.height();
-	const int centerX = center.x;
-	const int centerY = center.y;
 
 	// Liste qui va contenir les angles des deux côté du secteur à dessiner
 	// Permet de factoriser le code de calcul des coordonnées juste en dessous
 	QList<qreal> twoSides;
-	twoSides.append( TWO_PI-_sectors.at(sectorIdx).rightAngle() );
-	twoSides.append( TWO_PI-_sectors.at(sectorIdx).leftAngle() );
+	twoSides.append( _sectors.at(sectorIdx).rightAngle() );
+	twoSides.append( _sectors.at(sectorIdx).leftAngle() );
 
 	QPainter painter(&image);
 	painter.setPen(Qt::red);
 
 	// Dessin des deux côtés du secteur
-	qreal angle, x1,y1,x2,y2;
-	while ( !twoSides.isEmpty() ) {
+	qreal angle;
+	iCoord2D c1, c2;
+	while ( !twoSides.isEmpty() )
+	{
 		// Calcul des coordonnées du segment à tracer
 		angle = twoSides.takeLast();
-		x1 = x2 = centerX;
-		y1 = y2 = centerY;
-		if ( qFuzzyCompare(angle,PI_ON_TWO) ) y2 = height;
-		else if ( qFuzzyCompare(angle,THREE_PI_ON_TWO) ) y1 = 0;
+		c1 = c2 = center;
+		if ( qFuzzyCompare(angle,PI_ON_TWO) ) c2.y = height;
+		else if ( qFuzzyCompare(angle,THREE_PI_ON_TWO) ) c1.y = 0;
 		else {
 			const qreal a = tan(angle);
-			const qreal b = centerY - (a*centerX);
-			if ( angle < PI_ON_TWO || angle > THREE_PI_ON_TWO ) {
-				x2 = width;
-				y2 = a*width+b;
-			}
-			else {
-				x1 = 0;
-				y1 = b;
-			}
+			const qreal b = center.y - (a*center.x);
+			if ( angle < PI_ON_TWO || angle > THREE_PI_ON_TWO ) c2 = iCoord2D(width,a*width+b);
+			else c1 = iCoord2D(0,b);
 		}
 
 		// Tracé du segment droit
-		painter.drawLine(x1,y1,x2,y2);
+		painter.drawLine(c1.x,c1.y,c2.x,c2.y);
 	}
 }
 
@@ -104,11 +90,13 @@ void PieChart::draw( QImage &image, const int &sectorIdx, const iCoord2D &center
  * Private setters
  *******************************/
 
-void PieChart::updateSectors( const int &nbSectors ) {
+void PieChart::updateSectors( const int &nbSectors )
+{
 	_sectors.clear();
-	qreal currentOrientation = _orientation;
-	for ( int i=0 ; i<nbSectors ; ++i ) {
-		_sectors.append(PiePart( fmod( currentOrientation, TWO_PI ), _angle ));
-		currentOrientation += _angle;
+	qreal currentOrientation = 0.;
+	for ( int i=0 ; i<nbSectors ; ++i )
+	{
+		_sectors.append(PiePart( currentOrientation, _sectorAngle ));
+		currentOrientation += _sectorAngle;
 	}
 }

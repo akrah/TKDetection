@@ -14,7 +14,7 @@
 #include <QPainter>
 
 PieChartDiagrams::PieChartDiagrams() : Histogram(), _datasCurve(new PointPolarSeriesData()), _datasCurveMaximums(new PointPolarSeriesData()),
-	_datasCurveIntervals(new PointPolarSeriesData()),  _highlightCurveDatas(new PointPolarSeriesData()), _pieChart(PieChart(0.,360))
+	_datasCurveIntervals(new PointPolarSeriesData()),  _highlightCurveDatas(new PointPolarSeriesData()), _pieChart(PieChart(360))
 {
 	_highlightCurve.setPen(QPen(Qt::red));
 	_highlightCurveHistogram.setBrush(Qt::red);
@@ -150,7 +150,7 @@ void PieChartDiagrams::compute( const Billon &billon, const Marrow *marrow, cons
 						yPos = marrowY+j;
 						if ( xPos < width && yPos < height )
 						{
-							sectorIdx = _pieChart.partOfAngle( TWO_PI-ANGLE(marrowX,marrowY,xPos,yPos) );
+							sectorIdx = _pieChart.sectorIndexOfAngle( TWO_PI-ANGLE(marrowX,marrowY,xPos,yPos) );
 							currentSliceValue = currentSlice.at(yPos,xPos);
 							previousSliceValue = prevSlice.at(yPos,xPos);
 							if ( (currentSliceValue > minValue) && (previousSliceValue > minValue) )
@@ -176,7 +176,7 @@ void PieChartDiagrams::compute( const Billon &billon, const Marrow *marrow, cons
 				{
 					for ( i=0 ; i<static_cast<int>(width) ; ++i )
 					{
-						sectorIdx = _pieChart.partOfAngle( TWO_PI-ANGLE(marrowX,marrowY,i,j) );
+						sectorIdx = _pieChart.sectorIndexOfAngle( TWO_PI-ANGLE(marrowX,marrowY,i,j) );
 						currentSliceValue = currentSlice.at(j,i);
 						previousSliceValue = prevSlice.at(j,i);
 						if ( (currentSliceValue > minValue) && (previousSliceValue > minValue) )

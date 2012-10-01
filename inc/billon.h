@@ -333,34 +333,30 @@ QVector<iCoord2D> BillonTpl<T>::extractContour( const iCoord2D &center, const in
 	if ( startPoint != iCoord2D(-1,-1) )
 	{
 		const arma::Mat<T> &currentSlice = this->slice(sliceNumber);
-		const int xCenter = center.x;
-		const int yCenter = center.y;
+		iCoord2D currentPos(startPoint);
+		QVector<iCoord2D> mask(8);
 		qreal orientation;
-		int xBegin, yBegin, xCurrent, yCurrent, interdit, j;
-		QVector<int> vx(8), vy(8);
+		int interdit, j;
 
-		orientation = ANGLE(xCenter,yCenter,startPoint.x,startPoint.y);
-		xBegin = xCurrent = startPoint.x;
-		yBegin = yCurrent = startPoint.y;
+		orientation = center.angle(startPoint);
 		interdit = orientation*8./TWO_PI;
 		interdit = (interdit+4)%8;
 		threshold++;
 		do
 		{
-			contourPoints.append(iCoord2D(xCurrent,yCurrent));
-			vx[0] = vx[1] = vx[7] = xCurrent+1;
-			vx[2] = vx[6] = xCurrent;
-			vx[3] = vx[4] = vx[5] = xCurrent-1;
-			vy[1] = vy[2] = vy[3] = yCurrent+1;
-			vy[0] = vy[4] = yCurrent;
-			vy[5] = vy[6] = vy[7] = yCurrent-1;
+			contourPoints.append(currentPos);
+			mask[0].x = mask[1].x = mask[7].x = currentPos.x+1;
+			mask[2].x = mask[6].x = currentPos.x;
+			mask[3].x = mask[4].x = mask[5].x = currentPos.x-1;
+			mask[1].y = mask[2].y = mask[3].y = currentPos.y+1;
+			mask[0].y = mask[4].y = currentPos.y;
+			mask[5].y = mask[6].y = mask[7].y = currentPos.y-1;
 			j = (interdit+1)%8;
-			while ( currentSlice.at(vy[j%8],vx[j%8]) < threshold && j < interdit+8 ) ++j;
-			xCurrent = vx[j%8];
-			yCurrent = vy[j%8];
+			while ( currentSlice.at(mask[j%8].y,mask[j%8].x) < threshold && j < interdit+8 ) ++j;
+			currentPos = mask[j%8];
 			interdit = (j+4)%8;
 		}
-		while ( xBegin != xCurrent || yBegin != yCurrent );
+		while ( startPoint != currentPos );
 	}
 
 	return contourPoints;

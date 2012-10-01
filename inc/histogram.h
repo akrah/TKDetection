@@ -140,7 +140,7 @@ T Histogram<T>::thresholdOfMaximums( const int percentage ) const
 template <typename T>
 T Histogram<T>::firstdDerivated( int i, bool loop ) const
 {
-	Q_ASSERT_X( i>=0 && i<size(), "Histogram::firstDerivated", "index en dehors des bornes de l'histogramme" );
+	Q_ASSERT_X( i>=0 && i<this->size(), "Histogram::firstDerivated", "index en dehors des bornes de l'histogramme" );
 	return i>1 ? this->at(i) - this->at(i-2) : loop && this->size()>1 ? this->at(i) - this->at(this->size()-2+i) : T();
 }
 

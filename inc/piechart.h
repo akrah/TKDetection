@@ -10,16 +10,14 @@ class QImage;
 class PieChart
 {
 public:
-	PieChart( const qreal &orientation, const int &nbSectors );
+	PieChart( const int &nbSectors );
 	PieChart( const PieChart &pieChart );
 
-	qreal orientation() const;
-	qreal angle() const;
-	int nbSectors() const;
+	qreal sectorAngle() const;
+	uint nbSectors() const;
 	const PiePart &sector( const int &index ) const;
-	int partOfAngle( const qreal &angle ) const;
+	uint sectorIndexOfAngle( qreal sectorAngle ) const;
 
-	void setOrientation( const qreal &orientation );
 	void setSectorsNumber( const int &nbSectors );
 
 	void draw( QImage &painter, const int &sectorIdx, const iCoord2D &center ) const;
@@ -28,9 +26,7 @@ private:
 	void updateSectors( const int &nbSectors );
 
 private:
-	qreal _orientation;
-	qreal _angle; // En radians
-
+	qreal _sectorAngle; // En radians
 	QVector<PiePart> _sectors;
 };
 

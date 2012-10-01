@@ -33,7 +33,7 @@
 #include <qwt_round_scale_draw.h>
 
 MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::MainWindow), _billon(0), _sectorBillon(0), _componentBillon(0), _marrow(0),
-	_sliceView(new SliceView()), _sliceHistogram(new SliceHistogram()), _pieChart(new PieChart(0,1)), _pieChartDiagrams(new PieChartDiagrams()), _contourCurve(new ContourCurve()),
+	_sliceView(new SliceView()), _sliceHistogram(new SliceHistogram()), _pieChart(new PieChart(1)), _pieChartDiagrams(new PieChartDiagrams()), _contourCurve(new ContourCurve()),
 	_currentSlice(0), _currentMaximum(0)
 {
 	_ui->setupUi(this);
@@ -218,20 +218,21 @@ MainWindow::~MainWindow() {
  * Public fonctions
  *******************************/
 
-bool MainWindow::eventFilter(QObject *obj, QEvent *event) {
-	if ( obj == _ui->_labelSliceView ) {
-		if ( event->type() == QEvent::MouseButtonPress ) {
+bool MainWindow::eventFilter(QObject *obj, QEvent *event)
+{
+	if ( obj == _ui->_labelSliceView )
+	{
+		if ( event->type() == QEvent::MouseButtonPress )
+		{
 			const QMouseEvent *mouseEvent = static_cast<const QMouseEvent*>(event);
 			if ( (mouseEvent->button() == Qt::LeftButton) && _billon != 0 ) {
-				const int x = mouseEvent->x()/_sliceZoomer.factor();
-				const int y = mouseEvent->y()/_sliceZoomer.factor();
-				const int centerX = (_marrow !=0) ? _marrow->at(_currentSlice).x:_billon->n_cols/2;
-				const int centerY = (_marrow !=0) ? _marrow->at(_currentSlice).y:_billon->n_rows/2;
-
-				const int sector = _pieChart->partOfAngle( TWO_PI-ANGLE(centerX,centerY,x,y) );
-
+				iCoord2D mousePos(mouseEvent->x(),mouseEvent->y());
+				mousePos /= _sliceZoomer.factor();
+				iCoord2D center = _marrow != 0 ? _marrow->at(_currentSlice) : iCoord2D(_billon->n_cols/2,_billon->n_rows/2);
+				iCoord2D abscisse = center;
+				abscisse.x++;
+				const int sector = _pieChart->sectorIndexOfAngle( center.angle(mousePos,abscisse)+PI );
 				highlightSectorHistogram(sector);
-
 				_pieChartDiagrams->highlightCurve(sector);
 			}
 		}
@@ -919,7 +920,7 @@ void MainWindow::selectSectorInterval( const int &index ) {
 				{
 					for ( i=0 ; i<width ; ++i )
 					{
-						if ( originalSlice.at(j,i) > threshold && originalSlice.at(j,i) < MAXIMUM_INTENSITY && sectorInterval.containsClosed(_pieChart->partOfAngle(TWO_PI-ANGLE(marrowX, marrowY, i, j))) )
+						if ( originalSlice.at(j,i) > threshold && originalSlice.at(j,i) < MAXIMUM_INTENSITY && sectorInterval.containsClosed(_pieChart->sectorIndexOfAngle(TWO_PI-ANGLE(marrowX, marrowY, i, j))) )
 						{
 							sectorSlice.at(j,i) = originalSlice.at(j,i);
 						}
@@ -940,7 +941,7 @@ void MainWindow::selectSectorInterval( const int &index ) {
 				{
 					for ( i=0 ; i<width ; ++i )
 					{
-						if ( originalSlice.at(j,i) > threshold && originalSlice.at(j,i) < MAXIMUM_INTENSITY && !sectorIntervalInverted.containsClosed(_pieChart->partOfAngle(TWO_PI-ANGLE(marrowX, marrowY, i, j))) )
+						if ( originalSlice.at(j,i) > threshold && originalSlice.at(j,i) < MAXIMUM_INTENSITY && !sectorIntervalInverted.containsClosed(_pieChart->sectorIndexOfAngle(TWO_PI-ANGLE(marrowX, marrowY, i, j))) )
 						{
 							sectorSlice.at(j,i) = originalSlice.at(j,i);
 						}
@@ -1595,7 +1596,6 @@ void MainWindow::enabledComponents() {
 
 
 void MainWindow::computeSectorsHistogramForInterval( const Interval<int> &interval ) {
-	_pieChart->setOrientation(0);
 	_pieChart->setSectorsNumber(_ui->_spinSectorsNumber->value());
 
 	if ( _billon != 0 ) _pieChartDiagrams->compute( *_billon, _marrow, *_pieChart, interval, Interval<int>(_ui->_spinMinIntensity->value(),_ui->_spinMaxIntensity->value()),
