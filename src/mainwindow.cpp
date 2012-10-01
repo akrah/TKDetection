@@ -973,7 +973,7 @@ void MainWindow::selectSectorInterval( const int &index ) {
 				biggestComponents = ConnexComponentExtractor::extractConnexComponents( _componentBillon->slice(i), qPow(_ui->_spinMinimalSizeOf2DConnexComponents->value(),2), 0 );
 				nearestPoint = biggestComponents->findNearestPointOfThePith( _marrow->at(firstSlice+i), 0, 0 );
 				//nearestPoint = _componentBillon->findNearestPointOfThePith( _marrow->at(firstSlice+i), i, 0 );
-				histData[i].value = nearestPoint.distance(_marrow->at(firstSlice+i));
+				histData[i].value = nearestPoint.euclideanDistance(_marrow->at(firstSlice+i));
 				histData[i].interval.setInterval(i,i+1);
 				if ( minVal > histData[i].value )
 				{

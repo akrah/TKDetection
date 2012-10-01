@@ -131,10 +131,10 @@ void ContourCurve::constructCurve( const Billon &billon, const iCoord2D &billonC
 
 				// Point dominant dans le sens du contour
 				index = 1;
-				distanceP0Pm1 = billonCenter.distance(_datasDominantPoints[index-1]);
-				distanceP0Px = billonCenter.distance(_datasDominantPoints[index]);
-				distanceP0Pp1 = billonCenter.distance(_datasDominantPoints[index+1]);
-				distanceP0Pp2 = billonCenter.distance(_datasDominantPoints[index+2]);
+				distanceP0Pm1 = billonCenter.euclideanDistance(_datasDominantPoints[index-1]);
+				distanceP0Px = billonCenter.euclideanDistance(_datasDominantPoints[index]);
+				distanceP0Pp1 = billonCenter.euclideanDistance(_datasDominantPoints[index+1]);
+				distanceP0Pp2 = billonCenter.euclideanDistance(_datasDominantPoints[index+2]);
 				angleOk = (distanceP0Pp1-distanceP0Px>10) || (distanceP0Pm1<distanceP0Pp1 && (distanceP0Px<distanceP0Pp1 || distanceP0Px<distanceP0Pp2) );
 				if ( angleOk ) index++;
 				while ( angleOk && index < nbPoints-1 )
@@ -142,7 +142,7 @@ void ContourCurve::constructCurve( const Billon &billon, const iCoord2D &billonC
 					distanceP0Pm2 = distanceP0Pm1;
 					distanceP0Pm1 = distanceP0Px;
 					distanceP0Px = distanceP0Pp1;
-					distanceP0Pp1 = billonCenter.distance(_datasDominantPoints[index+1]);
+					distanceP0Pp1 = billonCenter.euclideanDistance(_datasDominantPoints[index+1]);
 					angleOk = (distanceP0Pp1-distanceP0Px>10) || (distanceP0Pm2<distanceP0Pm1 && distanceP0Pm1<distanceP0Pp1 && distanceP0Px<distanceP0Pp1);
 					if ( angleOk ) index++;
 				}
@@ -167,10 +167,10 @@ void ContourCurve::constructCurve( const Billon &billon, const iCoord2D &billonC
 
 				// Point dominant dans le sens contraire du contour
 				index = nbPoints-2;
-				distanceP0Pm1 = billonCenter.distance(_datasDominantPoints[index+1]);
-				distanceP0Px = billonCenter.distance(_datasDominantPoints[index]);
-				distanceP0Pp1 = billonCenter.distance(_datasDominantPoints[index-1]);
-				distanceP0Pp2 = billonCenter.distance(_datasDominantPoints[index-2]);
+				distanceP0Pm1 = billonCenter.euclideanDistance(_datasDominantPoints[index+1]);
+				distanceP0Px = billonCenter.euclideanDistance(_datasDominantPoints[index]);
+				distanceP0Pp1 = billonCenter.euclideanDistance(_datasDominantPoints[index-1]);
+				distanceP0Pp2 = billonCenter.euclideanDistance(_datasDominantPoints[index-2]);
 				angleOk = (distanceP0Pp1-distanceP0Px>10) || (distanceP0Pm1<distanceP0Pp1 && (distanceP0Px<distanceP0Pp1 || distanceP0Px<distanceP0Pp2) );
 				if ( angleOk ) index--;
 				while ( angleOk && index > oldIndex )
@@ -178,7 +178,7 @@ void ContourCurve::constructCurve( const Billon &billon, const iCoord2D &billonC
 					distanceP0Pm2 = distanceP0Pm1;
 					distanceP0Pm1 = distanceP0Px;
 					distanceP0Px = distanceP0Pp1;
-					distanceP0Pp1 = billonCenter.distance(_datasDominantPoints[index-1]);
+					distanceP0Pp1 = billonCenter.euclideanDistance(_datasDominantPoints[index-1]);
 					angleOk = (distanceP0Pp1-distanceP0Px>10) || (distanceP0Pm2<distanceP0Pm1 && distanceP0Pm1<distanceP0Pp1 && distanceP0Px<distanceP0Pp1);
 					if ( angleOk ) index--;
 				}
@@ -250,14 +250,14 @@ void ContourCurve::constructCurve( const Billon &billon, const iCoord2D &billonC
 			minYIndex = maxYIndex = _datasOriginalContourPoints[0].y;
 			for ( index=0 ; index<nbOriginalPointsContour ; index++ )
 			{
-				if ( _datasMainDominantPoints[0].distance(_datasOriginalContourPoints[index]) < currentDistanceMain1 )
+				if ( _datasMainDominantPoints[0].euclideanDistance(_datasOriginalContourPoints[index]) < currentDistanceMain1 )
 				{
-					currentDistanceMain1 = _datasMainDominantPoints[0].distance(_datasOriginalContourPoints[index]);
+					currentDistanceMain1 = _datasMainDominantPoints[0].euclideanDistance(_datasOriginalContourPoints[index]);
 					originalMain1Index = index;
 				}
-				if ( _datasMainDominantPoints[1].distance(_datasOriginalContourPoints[index]) <= currentDistanceMain2 )
+				if ( _datasMainDominantPoints[1].euclideanDistance(_datasOriginalContourPoints[index]) <= currentDistanceMain2 )
 				{
-					currentDistanceMain2 = _datasMainDominantPoints[1].distance(_datasOriginalContourPoints[index]);
+					currentDistanceMain2 = _datasMainDominantPoints[1].euclideanDistance(_datasOriginalContourPoints[index]);
 					originalMain2Index = index;
 				}
 				minXIndex = qMin(minXIndex,_datasOriginalContourPoints[index].x);

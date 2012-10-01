@@ -19,8 +19,6 @@
 #define DEG_TO_RAD_FACT		(PI/180.)
 #define RAD_TO_DEG_FACT		(180./PI)
 
-#define GAUSSIAN_CONSTANT (1./(qSqrt(TWO_PI)))
-
 #define DOUBLE_ERR_POS 0.0000000001
 #define DOUBLE_ERR_NEG (-DOUBLE_ERR_POS)
 
@@ -31,10 +29,6 @@ namespace {
 		qreal arcos = !qFuzzyCompare(sqrt,0.)?qAcos(x_diff / sqrt):0;
 		if ( yo > y2 ) arcos = -arcos+TWO_PI;
 		return arcos;
-	}
-
-	inline qreal GAUSSIAN( qreal x ) {
-		return GAUSSIAN_CONSTANT*qExp(-0.5*(x*x));
 	}
 
 	template<typename T>
@@ -55,36 +49,45 @@ namespace {
 #define MAXIMUM_Z_MOTION 500
 
 
+template<typename T> struct coord2d;
+template<typename T> struct vec2d;
+
 template<typename T>
-struct coord2d {
+struct coord2d
+{
 	T x, y;
 	coord2d() : x((T)0), y((T)0) {}
-	coord2d(const T &x, const T &y) : x(x), y(y) {}
-	coord2d shiftTo( const coord2d &other ) const { return coord2d(other.x-x, other.y-y); }
-	qreal distance( const coord2d &other ) const { return qSqrt( qPow(x-other.x,2) + qPow(y-other.y,2) ); }
-	qreal angle( const coord2d &other ) const
-	{
-		coord2d abscisse(x,y+1);
-		qreal distAB = this->distance(abscisse);
-		qreal distAC = this->distance(other);
-		return acos( (qPow(distAB, 2.) + qPow(distAC, 2.) - qPow( abscisse.distance(other), 2.)) / (2*distAB*distAC) );
-	}
+	coord2d(T x, T y) : x(x), y(y) {}
+	inline qreal euclideanDistance( const coord2d &other ) const { return qSqrt( qPow(x-other.x,2) + qPow(y-other.y,2) ); }
+	bool operator ==( const coord2d<T> & other ) { return other.x == x && other.y == y; }
+	bool operator !=( const coord2d<T> & other ) { return other.x != x || other.y != y; }
+	void print( std::ostream &flux ) const { return flux << "( " << x << ", " << y << " )"; }
 	qreal angle( const coord2d &bottomCoord, const coord2d &topCoord ) const
 	{
-		// Vector AB
-		const coord2d AB(bottomCoord.x-x,bottomCoord.y-y);
-		// Vector AC
-		const coord2d AC(topCoord.x-x,topCoord.y-y);
+		const vec2d<T> AB(bottomCoord.x-x,bottomCoord.y-y);
+		const vec2d<T> AC(topCoord.x-x,topCoord.y-y);
 		// cos (ABC) = ( prodScalaire(AB,AC) ) / ( norme(AB) * norme (AC) )
-		const qreal cosBAC = ( AB.x * AC.x + AB.y*AC.y ) / ( qSqrt( qPow(AB.x,2) + qPow(AB.y,2) ) * qSqrt( qPow(AC.x,2) + qPow(AC.y,2) ) );
-		// signe (BAC) = prodVectoriel(AB,AC)
-		const qreal sinBAC = ( AB.x * AC.y - AB.y*AC.x );
-		//std::cout << "cos = " << cosBAC << " et signe = " << sinBAC/qAbs(sinBAC) << " ==> angle = " << (sinBAC>0?acos(cosBAC):-acos(cosBAC))*RAD_TO_DEG_FACT << std::endl;
+		const qreal cosBAC = ( AB.dotProduct(AC) ) / ( AB.norm() * AC.norm() );
+		const qreal sinBAC = ( AB.x * AC.y - AB.y * AC.x );
 		return sinBAC>0?acos(cosBAC):-acos(cosBAC);
 	}
-	void print(std::ostream &flux) const { return flux << "( " << x << ", " << y << " )"; }
-	bool operator ==( const coord2d<T> &other ) { return other.x == x && other.y == y; }
-	bool operator !=( const coord2d<T> &other ) { return other.x != x || other.y != y; }
+};
+
+template<typename T>
+struct vec2d : public coord2d<T>
+{
+	vec2d() : coord2d<T>((T)0,(T)0) {}
+	vec2d( T dx, T dy ) : coord2d<T>(dx,dy) {}
+	inline qreal dotProduct( const vec2d<T> & other ) const { return this->x*other.x + this->y*other.y; }
+	inline qreal norm() const { return qSqrt( qPow(this->x,2) + qPow(this->y,2) ); }
+	// Angle orienté compris entre -180 et 180
+	qreal angle( const vec2d<T> &other ) const
+	{
+		coord2d<T> abscisse(x,y+1);
+		qreal distAB = this->euclideanDistance(abscisse);
+		qreal distAC = this->euclideanDistance(other);
+		return acos( (qPow(distAB, 2.) + qPow(distAC, 2.) - qPow( abscisse.euclideanDistance(other), 2.)) / (2*distAB*distAC) );
+	}
 };
 
 template <typename T>
