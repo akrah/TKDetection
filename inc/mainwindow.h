@@ -4,7 +4,6 @@
 #include <QMainWindow>
 #include <QButtonGroup>
 
-#include "sliceview_def.h"
 #include "slicezoomer.h"
 #include "interval.h"
 #include "global.h"

@@ -1,14 +1,13 @@
 #include "inc/marrowextractor.h"
 
 #include "inc/marrow.h"
-#include "inc/marrowextractor_def.h"
 
 MarrowExtractor::MarrowExtractor() :
-	_falseCutPercent(MarrowExtractorDefaultsParameters::FALSE_CUT_PERCENT),
-	_windowWidth(MarrowExtractorDefaultsParameters::NEIGHBORHOOD_WINDOW_WIDTH),
-	_windowHeight(MarrowExtractorDefaultsParameters::NEIGHBORHOOD_WINDOW_HEIGHT),
-	_binarizationThreshold(MarrowExtractorDefaultsParameters::BINARIZATION_THRESHOLD),
-	_marrowLag(MarrowExtractorDefaultsParameters::MARROW_LAG)
+	_falseCutPercent(FALSE_CUT_PERCENT),
+	_windowWidth(NEIGHBORHOOD_WINDOW_WIDTH),
+	_windowHeight(NEIGHBORHOOD_WINDOW_HEIGHT),
+	_binarizationThreshold(BINARIZATION_THRESHOLD),
+	_marrowLag(MARROW_LAG)
 {
 }
 

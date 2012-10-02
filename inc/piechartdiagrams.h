@@ -34,14 +34,14 @@ public:
 				  const Interval<int> &slicesInterval, const Interval<int> &intensity, const Interval<int> &motionInterval,
 				  const int &smoothingRadius, const int &minimumHeightPercentageOfMaximum, const int &maximumsNeighborhood,
 				  const int &derivativePercentage, const int &minimumIntervalWidth, const int &radiusAroundPith );
-	void highlightCurve( const int &index );
+	void highlightCurve( const int &index, const PieChart &pieChart );
 
-	void draw( QImage &image, const iCoord2D &center ) const;
+	void draw( QImage &image, const iCoord2D &center, const PieChart & pieChart ) const;
 
 private:
-	void computeValues();
-	void computeMaximums();
-	void computeIntervals();
+	void computeValues(const PieChart & pieChart);
+	void computeMaximums(const PieChart & pieChart);
+	void computeIntervals(const PieChart & pieChart);
 
 private:
 	QwtPolarCurve _curve;
@@ -61,8 +61,6 @@ private:
 	QwtPlotHistogram _highlightCurveHistogram;
 
 	QwtPlotCurve _curvePercentage;
-
-	PieChart _pieChart;
 };
 
 #endif // PIECHARTDIAGRAMS_H

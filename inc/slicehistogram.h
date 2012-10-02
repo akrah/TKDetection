@@ -4,7 +4,6 @@
 #include <QVector>
 #include "histogram.h"
 #include "billon_def.h"
-#include "intervalscomputerdefaultparameters.h"
 
 #include <qwt_plot_histogram.h>
 #include <qwt_plot_curve.h>

@@ -15,12 +15,12 @@ public:
 
 	qreal sectorAngle() const;
 	uint nbSectors() const;
-	const PiePart &sector( const int &index ) const;
+	const PiePart &sector( const uint &index ) const;
 	uint sectorIndexOfAngle( qreal sectorAngle ) const;
 
-	void setSectorsNumber( const int &nbSectors );
+	void setSectorsNumber( const uint &nbSectors );
 
-	void draw( QImage &painter, const int &sectorIdx, const iCoord2D &center ) const;
+	void draw( QImage &painter, const uint &sectorIdx, const iCoord2D &center ) const;
 
 private:
 	void updateSectors( const int &nbSectors );

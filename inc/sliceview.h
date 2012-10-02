@@ -2,9 +2,9 @@
 #define SLICEVIEW_H
 
 #include <QtGlobal>
-#include "sliceview_def.h"
-
 #include "billon_def.h"
+#include "global.h"
+
 template<typename T> class Interval;
 class QImage;
 class Marrow;

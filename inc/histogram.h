@@ -1,7 +1,6 @@
 #ifndef HISTOGRAM_H
 #define HISTOGRAM_H
 
-#include "intervalscomputerdefaultparameters.h"
 #include "interval.h"
 #include <numeric>
 #include <QVector>

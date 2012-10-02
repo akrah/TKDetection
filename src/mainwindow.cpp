@@ -17,7 +17,6 @@
 #include "inc/opticalflow.h"
 #include "inc/connexcomponentextractor.h"
 #include "inc/pgm3dexport.h"
-#include "inc/intervalscomputerdefaultparameters.h"
 #include "inc/contourcurve.h"
 
 #include <QFileDialog>
@@ -62,10 +61,6 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 	//_ui->_comboSliceType->insertItem(SliceType::MEDIAN,tr("Coupe médiane"));
 	_ui->_comboSliceType->setCurrentIndex(SliceType::CURRENT);
 
-	_ui->_comboHistogramSmoothing->insertItem(SmoothingType::NONE,tr("Aucun"));
-	_ui->_comboHistogramSmoothing->insertItem(SmoothingType::MEANS,tr("Moyen"));
-	_ui->_comboHistogramSmoothing->insertItem(SmoothingType::GAUSSIAN,tr("Gaussien"));
-	_ui->_comboHistogramSmoothing->setCurrentIndex(SmoothingType::MEANS);
 	_ui->_comboEdgeDetectionType->insertItem(EdgeDetectionType::SOBEL,tr("Sobel"));
 	_ui->_comboEdgeDetectionType->insertItem(EdgeDetectionType::LAPLACIAN,tr("Laplacian"));
 	_ui->_comboEdgeDetectionType->insertItem(EdgeDetectionType::CANNY,tr("Canny"));
@@ -76,7 +71,7 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 
 	_ui->_plotAngularHistogram->enableAxis(QwtPlot::yLeft,false);
 
-	_ui->_polarSectorSum->setScale( QwtPolar::Azimuth, 0.0, TWO_PI );
+	_ui->_polarSectorSum->setScale( QwtPolar::Azimuth, TWO_PI, 0.0 );
 	_pieChartDiagrams->attach(_ui->_polarSectorSum);
 	_pieChartDiagrams->attach(_ui->_plotAngularHistogram);
 
@@ -229,11 +224,9 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *event)
 				iCoord2D mousePos(mouseEvent->x(),mouseEvent->y());
 				mousePos /= _sliceZoomer.factor();
 				iCoord2D center = _marrow != 0 ? _marrow->at(_currentSlice) : iCoord2D(_billon->n_cols/2,_billon->n_rows/2);
-				iCoord2D abscisse = center;
-				abscisse.x++;
-				const int sector = _pieChart->sectorIndexOfAngle( center.angle(mousePos,abscisse)+PI );
+				const int sector = _pieChart->sectorIndexOfAngle( center.angle(mousePos) );
 				highlightSectorHistogram(sector);
-				_pieChartDiagrams->highlightCurve(sector);
+				_pieChartDiagrams->highlightCurve(sector,*_pieChart);
 			}
 		}
 	}
@@ -300,7 +293,7 @@ void MainWindow::drawSlice( const int &sliceNumber )
 			{
 				center = _marrow->at(sliceNumber-_marrow->interval().min());
 			}
-			_pieChartDiagrams->draw(_pix,center);
+			_pieChartDiagrams->draw(_pix,center,*_pieChart);
 			_pieChart->draw(_pix,_currentSector, center);
 		}
 		if ( _sectorBillon != 0 && inDrawingArea )
@@ -899,52 +892,27 @@ void MainWindow::selectSectorInterval( const int &index ) {
 		const int lastSlice = sliceInterval.max()+1;
 		const int width = _billon->n_cols;
 		const int height = _billon->n_rows;
-		const int threshold = _ui->_sliderSectorThresholding->value();
+		const Interval<int> intensityInterval(_ui->_spinSectorThresholding->value(), _ui->_spinMaxIntensity->value());
 
 		_sectorBillon = new Billon(_billon->n_cols,_billon->n_rows,sliceInterval.width()+1);
-		_sectorBillon->setMinValue(threshold);
+		_sectorBillon->setMinValue(intensityInterval.min());
 		_sectorBillon->setMaxValue(MAXIMUM_INTENSITY);
 		_sectorBillon->setVoxelSize(_billon->voxelWidth(),_billon->voxelHeight(),_billon->voxelDepth());
-		_sectorBillon->fill(threshold);
+		_sectorBillon->fill(intensityInterval.min());
 
 		int i, j, k;
-		if ( sectorInterval.isValid() )
+		for ( k=firstSlice ; k<lastSlice ; ++k )
 		{
-			for ( k=firstSlice ; k<lastSlice ; ++k )
+			const Slice &originalSlice = _billon->slice(k);
+			Slice &sectorSlice = _sectorBillon->slice(k-firstSlice);
+			const iCoord2D &marrowCoord = _marrow->at(k);
+			for ( j=0 ; j<height ; ++j )
 			{
-				const Slice &originalSlice = _billon->slice(k);
-				Slice &sectorSlice = _sectorBillon->slice(k-firstSlice);
-				const int marrowX = _marrow->at(k).x;
-				const int marrowY = _marrow->at(k).y;
-				for ( j=0 ; j<height ; ++j )
+				for ( i=0 ; i<width ; ++i )
 				{
-					for ( i=0 ; i<width ; ++i )
+					if ( intensityInterval.containsOpen(originalSlice.at(j,i)) && sectorInterval.containsClosed(_pieChart->sectorIndexOfAngle(marrowCoord.angle(iCoord2D(i,j)))) )
 					{
-						if ( originalSlice.at(j,i) > threshold && originalSlice.at(j,i) < MAXIMUM_INTENSITY && sectorInterval.containsClosed(_pieChart->sectorIndexOfAngle(TWO_PI-ANGLE(marrowX, marrowY, i, j))) )
-						{
-							sectorSlice.at(j,i) = originalSlice.at(j,i);
-						}
-					}
-				}
-			}
-		}
-		else
-		{
-			const Interval<int> sectorIntervalInverted = sectorInterval.inverted();
-			for ( k=firstSlice ; k<lastSlice ; ++k )
-			{
-				const Slice &originalSlice = _billon->slice(k);
-				Slice &sectorSlice = _sectorBillon->slice(k-firstSlice);
-				const int marrowX = _marrow->at(k).x;
-				const int marrowY = _marrow->at(k).y;
-				for ( j=0 ; j<height ; ++j )
-				{
-					for ( i=0 ; i<width ; ++i )
-					{
-						if ( originalSlice.at(j,i) > threshold && originalSlice.at(j,i) < MAXIMUM_INTENSITY && !sectorIntervalInverted.containsClosed(_pieChart->sectorIndexOfAngle(TWO_PI-ANGLE(marrowX, marrowY, i, j))) )
-						{
-							sectorSlice.at(j,i) = originalSlice.at(j,i);
-						}
+						sectorSlice.at(j,i) = originalSlice.at(j,i);
 					}
 				}
 			}
@@ -952,7 +920,7 @@ void MainWindow::selectSectorInterval( const int &index ) {
 
 		if ( _ui->_checkEnableConnexComponents->isChecked() )
 		{
-			_componentBillon = ConnexComponentExtractor::extractConnexComponents(*_sectorBillon,qPow(_ui->_spinMinimalSizeOf3DConnexComponents->value(),3),threshold);
+			_componentBillon = ConnexComponentExtractor::extractConnexComponents(*_sectorBillon,qPow(_ui->_spinMinimalSizeOf3DConnexComponents->value(),3),intensityInterval.min());
 			//_componentBillon = ConnexComponentExtractor::extractBiggestConnexComponent(*_sectorBillon,threshold);
 			const int nbComponents = _componentBillon->maxValue();
 			for ( i=1 ; i<nbComponents ; ++i )
@@ -1496,8 +1464,6 @@ void MainWindow::initComponentsValues() {
 	_ui->_sliderMovementThresholdInterval->setLowerValue(0);
 	_ui->_sliderMovementThresholdInterval->setUpperValue(MAXIMUM_Z_MOTION);
 	_ui->_sliderMovementThresholdInterval->setLowerValue(MINIMUM_Z_MOTION);
-
-	_ui->_comboHistogramSmoothing->setEnabled(true);
 
 	_ui->_sliderMaximumsNeighborhood->setMinimum(0);
 	_ui->_sliderMaximumsNeighborhood->setMaximum(50);

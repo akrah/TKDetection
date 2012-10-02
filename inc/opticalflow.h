@@ -1,7 +1,7 @@
 #ifndef OPTICALFLOW_H
 #define OPTICALFLOW_H
 
-#include "opticalflow_def.h"
+#include "global.h"
 
 #include <armadillo>
 using namespace arma;

@@ -38,7 +38,6 @@ SOURCES		=	main.cpp \
 				mainwindow.cpp \
 				marrow.cpp \
 				marrowextractor.cpp \
-				marrowextractor_def.cpp \
 				ofsexport.cpp \
 				opticalflow.cpp \
 				pgm3dexport.cpp \
@@ -62,14 +61,11 @@ HEADERS		=	billon.h \
 				global.h \
 				histogram.h \
 				interval.h \
-				intervalscomputerdefaultparameters.h \
 				mainwindow.h \
 				marrow.h \
 				marrowextractor.h \
-				marrowextractor_def.h \
 				ofsexport.h \
 				opticalflow.h \
-				opticalflow_def.h \
 				pgm3dexport.h \
 				piepart.h \
 				piechartdiagrams.h \
@@ -77,7 +73,6 @@ HEADERS		=	billon.h \
 				pointpolarseriesdata.h \
 				slicehistogram.h \
 				sliceview.h \
-				sliceview_def.h \
 				slicezoomer.h \
 				test_intervalshistogram.h \
 				v3dexport.h \
