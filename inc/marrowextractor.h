@@ -1,10 +1,11 @@
 #ifndef MARROWEXTRACTOR_H
 #define MARROWEXTRACTOR_H
 
-#include <QList>
+#include "def/def_coordinate.h"
 
 #include <armadillo>
 
+template <typename T> class QList;
 class Marrow;
 
 class MarrowExtractor {

@@ -1,8 +1,11 @@
 #ifndef SLICEVIEW_H
 #define SLICEVIEW_H
 
-#include <QtGlobal>
 #include "define.h"
+#include "def/def_billon.h"
+#include "def/def_coordinate.h"
+
+#include <QtGlobal>
 
 template<typename T> class Interval;
 class QImage;

@@ -1,5 +1,7 @@
 #include "inc/marrow.h"
 
+#include "inc/coordinate.h"
+
 #include <QPainter>
 
 Marrow::Marrow() : QList<iCoord2D>(), _interval(0,0)

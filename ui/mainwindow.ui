@@ -183,7 +183,7 @@
      <item>
       <widget class="QTabWidget" name="_tabs">
        <property name="currentIndex">
-        <number>2</number>
+        <number>4</number>
        </property>
        <widget class="QWidget" name="_tabGeneral">
         <attribute name="title">
@@ -1101,7 +1101,7 @@ maximum
             <layout class="QVBoxLayout" name="verticalLayout_8">
              <item>
               <widget class="QwtPolarPlot" name="_polarSectorSum">
-               <property name="plotBackground">
+               <property name="plotBackground" stdset="0">
                 <brush brushstyle="SolidPattern">
                  <color alpha="0">
                   <red>255</red>
@@ -1677,17 +1677,17 @@ maximum
            </property>
           </widget>
          </item>
-         <item row="13" column="1">
-          <widget class="QRadioButton" name="_closeTrunk">
-           <property name="text">
-            <string>Ferme faces avant/arrière du tronc</string>
-           </property>
-          </widget>
-         </item>
          <item row="14" column="1">
           <widget class="QPushButton" name="_buttonExportToOfsRestricted">
            <property name="text">
             <string>Exporter en.ofs Restricted</string>
+           </property>
+          </widget>
+         </item>
+         <item row="13" column="1">
+          <widget class="QCheckBox" name="_checkCloseBillon">
+           <property name="text">
+            <string>Ferme faces avant/arrière du tronc</string>
            </property>
           </widget>
          </item>
@@ -1966,15 +1966,15 @@ maximum
    <container>1</container>
   </customwidget>
   <customwidget>
+   <class>QxtSpanSlider</class>
+   <extends>QSlider</extends>
+   <header>QxtSpanSlider</header>
+  </customwidget>
+  <customwidget>
    <class>QwtPolarPlot</class>
    <extends>QFrame</extends>
    <header>qwt_polar_plot.h</header>
    <container>1</container>
-  </customwidget>
-  <customwidget>
-   <class>QxtSpanSlider</class>
-   <extends>QSlider</extends>
-   <header>QxtSpanSlider</header>
   </customwidget>
  </customwidgets>
  <tabstops>

@@ -1,8 +1,9 @@
 #include "tst/test_intervalshistogram.h"
 
+#include "inc/histogram.h"
+#include "inc/define.h"
+
 #include <iostream>
-#include <inc/histogram.h>
-#include <inc/global.h>
 
 namespace {
 	void coutHistogram( QVector<qreal>::const_iterator begin, QVector<qreal>::const_iterator end ) {

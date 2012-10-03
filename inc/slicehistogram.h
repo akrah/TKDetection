@@ -1,18 +1,15 @@
 #ifndef SLICEHISTOGRAM_H
 #define SLICEHISTOGRAM_H
 
-#include <QVector>
 #include "histogram.h"
-#include "billon_def.h"
+#include "def/def_billon.h"
 
 #include <qwt_plot_histogram.h>
 #include <qwt_plot_curve.h>
 
 class Marrow;
 class QwtPlot;
-class QwtIntervalSample;
-class QwtInterval;
-template<typename T> class Interval;
+template <typename T> class Interval;
 
 class SliceHistogram : public Histogram<qreal>
 {

@@ -1,14 +1,6 @@
 #include "inc/connexcomponentextractor.h"
 
-#include "inc/marrow_def.h"
 #include "inc/billon.h"
-
-#include <armadillo>
-
-#include <QList>
-#include <QPair>
-
-#include <QDebug>
 
 namespace ConnexComponentExtractor
 {

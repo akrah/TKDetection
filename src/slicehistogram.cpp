@@ -91,8 +91,8 @@ void SliceHistogram::constructHistogram( const Billon &billon, const Marrow &mar
 	const int kLimitMax = depth-kLimitMin;
 	for ( k=kLimitMin ; k<kLimitMax ; ++k )
 	{
-		const arma::Slice &currentSlice = billon.slice(k);
-		const arma::Slice &prevSlice = billon.slice(k>0?k-1:k+1);
+		const Slice &currentSlice = billon.slice(k);
+		const Slice &prevSlice = billon.slice(k>0?k-1:k+1);
 		cumul = 0.;
 		currentPos.y = marrow.at(k).y-radiusAroundPith;
 		for ( j=-radiusAroundPith ; j<radiusMax ; ++j )

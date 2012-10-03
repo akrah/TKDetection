@@ -1,18 +1,15 @@
 #include "inc/v3dexport.h"
 
 #include "inc/billon.h"
-#include "inc/marrow.h"
-#include "inc/interval.h"
 
-#include <QDomDocument>
-#include <QFile>
-#include <QTextStream>
-#include <QDebug>
 #include <QXmlStreamWriter>
+#include <QFile>
+#include <QDebug>
 
 namespace V3DExport {
 
-	namespace {
+	namespace
+	{
 		void appendTags( const Billon &billon, QXmlStreamWriter &stream );
 		void appendComponent( const Billon &billon, const Interval<int> &interval, const int &index, const int &threshold, QXmlStreamWriter &stream );
 		void appendMarrow( const Marrow &marrow, QXmlStreamWriter &stream );
@@ -20,10 +17,12 @@ namespace V3DExport {
 		void writeTag( QXmlStreamWriter &stream, const QString &name, const QString &value );
 	}
 
-	void process( const Billon &billon, const Marrow *marrow, const QString &fileName, const Interval<int> &interval, const int &threshold ) {
+	void process( const Billon &billon, const Marrow *marrow, const QString &fileName, const Interval<int> &interval, const int &threshold )
+	{
 		QFile file(fileName);
 
-		if( !file.open(QIODevice::WriteOnly) ) {
+		if( !file.open(QIODevice::WriteOnly) )
+		{
 			qDebug() << QObject::tr("ERREUR : Impossible de créer le ficher XML %1.").arg(fileName);
 			return;
 		}
@@ -44,8 +43,10 @@ namespace V3DExport {
 		file.close();
 	}
 
-	namespace {
-		void appendTags( const Billon &billon, QXmlStreamWriter &stream ) {
+	namespace
+	{
+		void appendTags( const Billon &billon, QXmlStreamWriter &stream )
+		{
 			stream.writeStartElement("tags");
 				writeTag(stream,"width",QString::number(billon.n_cols));
 				writeTag(stream,"height",QString::number(billon.n_rows));
@@ -59,7 +60,8 @@ namespace V3DExport {
 			stream.writeEndElement();
 		}
 
-		void appendComponent( const Billon &billon, const Interval<int> &interval, const int &index, const int &threshold, QXmlStreamWriter &stream ) {
+		void appendComponent( const Billon &billon, const Interval<int> &interval, const int &index, const int &threshold, QXmlStreamWriter &stream )
+		{
 			int width = billon.n_cols;
 			int height = billon.n_rows;
 			int depth = interval.width()+1;
@@ -109,10 +111,13 @@ namespace V3DExport {
 						stream.writeCharacters("");
 						data.clear();
 						data.reserve(width*height*depth*2);
-						for ( int k=interval.min(); k<=interval.max(); k++ ) {
-							const arma::Slice slice = billon.slice(k);
-							for ( int j=0; j<height; j++ ) {
-								for ( int i=0; i<width; i++ ) {
+						for ( int k=interval.min(); k<=interval.max(); k++ )
+						{
+							const Slice slice = billon.slice(k);
+							for ( int j=0; j<height; j++ )
+							{
+								for ( int i=0; i<width; i++ )
+								{
 									voxelValue.clear();
 									voxelStream << (slice.at(j,i) > threshold);
 									voxelValue = voxelValue.right(2);
@@ -127,9 +132,11 @@ namespace V3DExport {
 			stream.writeEndElement();
 		}
 
-		void appendMarrow( const Marrow &marrow, QXmlStreamWriter &stream ) {
+		void appendMarrow( const Marrow &marrow, QXmlStreamWriter &stream )
+		{
 			stream.writeStartElement("marrow");
-			for ( int k=0, sliceIdx = marrow.interval().min() ; k<marrow.size() ; ++k, ++sliceIdx ) {
+			for ( int k=0, sliceIdx = marrow.interval().min() ; k<marrow.size() ; ++k, ++sliceIdx )
+			{
 				const iCoord2D &coord = marrow[k];
 				stream.writeStartElement("coord");
 					stream.writeTextElement("x",QString::number(coord.x));
@@ -140,14 +147,16 @@ namespace V3DExport {
 			stream.writeEndElement();
 		}
 
-		void writeXmlElementWithAttribute( QXmlStreamWriter &stream, const QString &elementName, const QString &attributeName, const QString &attributeValue, const QString &elementValue ) {
+		void writeXmlElementWithAttribute( QXmlStreamWriter &stream, const QString &elementName, const QString &attributeName, const QString &attributeValue, const QString &elementValue )
+		{
 			stream.writeStartElement(elementName);
 				stream.writeAttribute(attributeName,attributeValue);
 				stream.writeCharacters(elementValue);
 			stream.writeEndElement();
 		}
 
-		void writeTag( QXmlStreamWriter &stream, const QString &name, const QString &value ) {
+		void writeTag( QXmlStreamWriter &stream, const QString &name, const QString &value )
+		{
 			writeXmlElementWithAttribute(stream,"tag","name",name,value);
 		}
 	}

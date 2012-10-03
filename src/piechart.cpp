@@ -1,9 +1,12 @@
 #include "inc/piechart.h"
 
-#include "inc/global.h"
+#include "inc/define.h"
 #include "inc/piepart.h"
+#include "inc/coordinate.h"
 
 #include <QPainter>
+
+#include <cmath>
 
 PieChart::PieChart( const int &nbSectors ) : _sectorAngle(TWO_PI/static_cast<qreal>(nbSectors))
 {

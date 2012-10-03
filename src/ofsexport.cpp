@@ -1,16 +1,12 @@
 #include "inc/ofsexport.h"
 
+#include "def/def_coordinate.h"
+#include "inc/coordinate.h"
 #include "inc/billon.h"
 #include "inc/marrow.h"
-#include "inc/interval.h"
-#include "inc/global.h"
-#include "inc/piepart.h"
 
-#include <QFile>
 #include <QTextStream>
-#include <QVector>
-#include <qmath.h>
-
+#include <QFile>
 #include <QDebug>
 
 namespace OfsExport {

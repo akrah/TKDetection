@@ -1,7 +1,8 @@
 #ifndef PGM3DEXPORT_H
 #define PGM3DEXPORT_H
 
-#include "billon_def.h"
+#include "def/def_billon.h"
+
 #include <QtGlobal>
 
 class QString;

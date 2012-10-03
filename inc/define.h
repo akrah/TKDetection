@@ -51,15 +51,6 @@
  * Enumerations
  *************************************/
 
-// Type de lissage
-enum SmoothingType {
-	_SMOOTHING_TYPE_MIN_ = -1,
-	NONE,
-	MEANS,
-	GAUSSIAN,
-	_SMOOTHING_TYPE_MAX_
-};
-
 // Types de coupe possibles
 enum SliceType {
 	_SLICE_TYPE_MIN_ = -1,

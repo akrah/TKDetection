@@ -1,5 +1,7 @@
 #include "inc/marrowextractor.h"
 
+#include "inc/define.h"
+#include "inc/coordinate.h"
 #include "inc/marrow.h"
 
 MarrowExtractor::MarrowExtractor() :
@@ -15,12 +17,12 @@ MarrowExtractor::MarrowExtractor() :
  * Fonction principale d'extraction de la moelle
  ********************************************************/
 
-Marrow* MarrowExtractor::process( const icube &image, const int &sliceMin, const int &sliceMax ) {
+Marrow* MarrowExtractor::process( const arma::icube &image, const int &sliceMin, const int &sliceMax ) {
 	const int width = image.n_cols;
 	const int height = image.n_rows;
 	const int depth = image.n_slices;
 
-	iCoord2D coordPrec,coordCurrent;
+	iCoord2D coordPrec, coordCurrent;
 	float maxStandList[depth];
 	float *maxStandList2 = 0;
 	float shift,houghStandThreshold;
@@ -119,19 +121,19 @@ Marrow* MarrowExtractor::process( const icube &image, const int &sliceMin, const
 /******************************************************************
  * Fonctions secondaires appelées lors de l'extraction de la moelle
  ******************************************************************/
-iCoord2D MarrowExtractor::transHough(const imat &slice, int width, int height, int *x, int *y, int *sliceMaxValue, int *nbContourPoints) {
+iCoord2D MarrowExtractor::transHough(const arma::imat &slice, int width, int height, int *x, int *y, int *sliceMaxValue, int *nbContourPoints) {
 	int x_accu, y_accu, longueur, min;
 	int *droite;
-	imat *tabaccu;
-	fmat *orientation, *cont;
+	arma::imat *tabaccu;
+	arma::fmat *orientation, *cont;
 	iCoord2D coordmax;
 	orientation = 0;
 	{ // bloc de limitation de vie de la variable voisinage
 		// attention x represente les colonne et y les lignes
-		const imat voisinage = slice.submat( *y, *x, (uint)( (*y)+height-1 ), (uint)( (*x)+width-1 ) );
+		const arma::imat voisinage = slice.submat( *y, *x, (uint)( (*y)+height-1 ), (uint)( (*x)+width-1 ) );
 		cont = contour(voisinage, &orientation);
 	}
-	tabaccu = new imat(width, height);
+	tabaccu = new arma::imat(width, height);
 	tabaccu->zeros();
 	//verifie orientation et table d'accumlation tous les points se trouvent a 0
 	*nbContourPoints = 0;
@@ -167,17 +169,17 @@ iCoord2D MarrowExtractor::transHough(const imat &slice, int width, int height, i
 	return iCoord2D(*x, *y);
 }
 
-fmat * MarrowExtractor::contour(const imat &slice, fmat **orientation) {
+arma::fmat * MarrowExtractor::contour(const arma::imat &slice, arma::fmat **orientation) {
 	const uint height = slice.n_rows;
 	const uint width = slice.n_cols;
 
-	fcolvec filtre1 = "1 2 1";			//filtre Sobel Gx
-	frowvec filtre2 = "-1 0 1";
-	imat *resultatGX, *resultatGY;
-	fmat norm = fmat(height, width);
-	fmat *contour = new fmat(height, width);
+	arma::fcolvec filtre1 = "1 2 1";			//filtre Sobel Gx
+	arma::frowvec filtre2 = "-1 0 1";
+	arma::imat *resultatGX, *resultatGY;
+	arma::fmat norm = arma::fmat(height, width);
+	arma::fmat *contour = new arma::fmat(height, width);
 
-	*orientation = new fmat(height, width);
+	*orientation = new arma::fmat(height, width);
 	(*orientation)->zeros();
 	resultatGX = convolution(slice, filtre1, filtre2);		//convolution Sobel GX
 	filtre1 = "1 0 -1";										//filtre Sobel Gy
@@ -205,13 +207,13 @@ fmat * MarrowExtractor::contour(const imat &slice, fmat **orientation) {
 	return contour;
 }
 
-imat * MarrowExtractor::convolution(const imat &slice, fcolvec verticalFilter, frowvec horizontalFilter) {
+arma::imat * MarrowExtractor::convolution(const arma::imat &slice, arma::fcolvec verticalFilter, arma::frowvec horizontalFilter) {
 	const uint height = slice.n_rows;
 	const uint width = slice.n_cols;
-	imat *resultat = new imat(height, width);
+	arma::imat *resultat = new arma::imat(height, width);
 
-	fmat tmpSum;
-	fvec sum = fvec(width);
+	arma::fmat tmpSum;
+	arma::fvec sum = arma::fvec(width);
 	resultat->zeros();
 	int kOffset;
 	int kCenter;
@@ -224,7 +226,7 @@ imat * MarrowExtractor::convolution(const imat &slice, fcolvec verticalFilter, f
 	kCenter = horizontalFilter.n_cols/2;
 	endIndex = width-kCenter;
 
-	tmpSum = fmat(height, width);
+	tmpSum = arma::fmat(height, width);
 	tmpSum.zeros();
 	for (uint i=0; i<height; i++) { //height pictures (nb rows)
 		kOffset = 0;
@@ -461,7 +463,7 @@ int MarrowExtractor::floatCompare(const void *first, const void *second)
 	and positive if a > b */
 }
 
-void MarrowExtractor::minSlice(const imat &slice, int *minValue, int *maxValue, iCoord2D *coordmax) {
+void MarrowExtractor::minSlice(const arma::imat &slice, int *minValue, int *maxValue, iCoord2D *coordmax) {
 	const uint height = slice.n_rows-1;
 	const uint width = slice.n_cols-1;
 

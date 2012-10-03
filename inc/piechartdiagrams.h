@@ -2,20 +2,18 @@
 #define PIECHARTDIAGRAMS_H
 
 #include "histogram.h"
-#include "billon_def.h"
-#include "marrow_def.h"
-#include "piechart.h"
-#include "pointpolarseriesdata.h"
+#include "def/def_billon.h"
+#include "def/def_coordinate.h"
 
-#include <qwt_plot_histogram.h>
-#include <qwt_plot_curve.h>
 #include <qwt_polar_curve.h>
+#include <qwt_plot_curve.h>
+#include <qwt_plot_histogram.h>
 
 class Marrow;
 class PieChart;
 class QwtPlot;
 class QwtPolarPlot;
-class QwtIntervalSample;
+class PointPolarSeriesData;
 template<typename T> class Interval;
 
 class PieChartDiagrams : public Histogram<qreal>

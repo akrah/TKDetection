@@ -1,8 +1,9 @@
 #ifndef PIECHART_H
 #define PIECHART_H
 
+#include "def/def_coordinate.h"
+
 #include <QVector>
-#include "inc/global.h"
 
 class PiePart;
 class QImage;

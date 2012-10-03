@@ -1,13 +1,10 @@
 #include "inc/piechartdiagrams.h"
 
 #include "inc/billon.h"
-#include "inc/marrow.h"
 #include "inc/piechart.h"
 #include "inc/piepart.h"
-#include "inc/interval.h"
 #include "inc/pointpolarseriesdata.h"
 
-#include <qwt_plot_histogram.h>
 #include <qwt_polar_plot.h>
 #include <qwt_plot.h>
 
@@ -130,8 +127,8 @@ void PieChartDiagrams::compute( const Billon &billon, const Marrow *marrow, cons
 		// Calcul du diagramme en parcourant les tranches du billon comprises dans l'intervalle
 		for ( k=minOfInterval ; k<maxOfInterval ; ++k )
 		{
-			const arma::Slice &currentSlice = billon.slice(k);
-			const arma::Slice &prevSlice = billon.slice(k>0?k-1:k+1);
+			const Slice &currentSlice = billon.slice(k);
+			const Slice &prevSlice = billon.slice(k>0?k-1:k+1);
 			if ( marrow != 0 ) marrowCoord = marrow->at(k);
 			for ( j=-radiusAroundPith ; j<radiusMax ; ++j )
 			{

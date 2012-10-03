@@ -1,19 +1,22 @@
 #include "inc/opticalflow.h"
 
-#include <inc/billon_def.h>
+#include "def/def_billon.h"
 
-#include <qmath.h>
+#include <QVector>
+#include <QVector2D>
+#include <QVector3D>
 #include <QDebug>
+#include <qmath.h>
 
 namespace OpticalFlow {
 
 	namespace {
-		void computePartialDerivatives( const icube &cube, const int &k, PartialDerivatives &E );
+		void computePartialDerivatives( const arma::icube &cube, const int &k, PartialDerivatives &E );
 		void computeLaplacian( const VectorsField &flow, VectorsField &laplacian );
 	}
 
 	// Donne le champ de vecteurs associé (sauf la dernière ligne et la dernière colonne)
-	VectorsField * compute( const icube &cube, const int &k, const qreal &alpha, const qreal &epsilon, const int &maxIter )
+	VectorsField * compute( const arma::icube &cube, const int &k, const qreal &alpha, const qreal &epsilon, const int &maxIter )
 	{
 		VectorsField * flow = 0;
 		if ( k>=0 && k<static_cast<int>(cube.n_slices)-1 ) {
@@ -60,7 +63,7 @@ namespace OpticalFlow {
 	namespace {
 		// Donne les dérivées partielles de la tranche K saur pour la dernière ligne et la dernière colonne
 		inline
-		void computePartialDerivatives( const icube &cube, const int &k, PartialDerivatives &E ) {
+		void computePartialDerivatives( const arma::icube &cube, const int &k, PartialDerivatives &E ) {
 			const Slice &sliceK = cube.slice(k);
 			const Slice &sliceK1 = cube.slice(k+1);
 			const int width = sliceK.n_cols-1;

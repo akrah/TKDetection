@@ -1,6 +1,8 @@
 #include "inc/piepart.h"
 
-#include "inc/global.h"
+#include "inc/define.h"
+
+#include <cmath>
 
 PiePart::PiePart() : _orientation(0.), _angle(0.)
 {

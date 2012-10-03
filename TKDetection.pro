@@ -80,6 +80,7 @@ HEADERS		=	billon.h \
 				test_intervalshistogram.h \
 				v3dexport.h \
 				v3dreader.h \
+    def/def_opticalflow.h
 
 FORMS		=	mainwindow.ui
 

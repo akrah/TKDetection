@@ -1,23 +1,23 @@
 #include "inc/mainwindow.h"
 
 #include "ui_mainwindow.h"
+
 #include "inc/billon.h"
-#include "inc/global.h"
-#include "inc/marrow.h"
-#include "inc/sliceview.h"
+#include "inc/connexcomponentextractor.h"
+#include "inc/contourcurve.h"
+#include "inc/datexport.h"
 #include "inc/dicomreader.h"
-#include "inc/slicehistogram.h"
+#include "inc/marrow.h"
 #include "inc/marrowextractor.h"
-#include "inc/piepart.h"
+#include "inc/ofsexport.h"
+#include "inc/opticalflow.h"
+#include "inc/pgm3dexport.h"
 #include "inc/piechart.h"
 #include "inc/piechartdiagrams.h"
-#include "inc/datexport.h"
-#include "inc/ofsexport.h"
+#include "inc/piepart.h"
+#include "inc/slicehistogram.h"
+#include "inc/sliceview.h"
 #include "inc/v3dexport.h"
-#include "inc/opticalflow.h"
-#include "inc/connexcomponentextractor.h"
-#include "inc/pgm3dexport.h"
-#include "inc/contourcurve.h"
 
 #include <QFileDialog>
 #include <QMouseEvent>
@@ -25,9 +25,10 @@
 #include <QScrollBar>
 #include <QMessageBox>
 #include <QInputDialog>
+#include <QVector2D>
+
 #include <qwt_plot_renderer.h>
 #include <qwt_polar_renderer.h>
-
 #include <qwt_polar_grid.h>
 #include <qwt_round_scale_draw.h>
 
@@ -697,7 +698,7 @@ void MainWindow::exportToOfsRestricted()
 		QString fileName = QFileDialog::getSaveFileName(this, tr("Exporter en .ofs"), "output.ofs", tr("Fichiers de données (*.ofs);;Tous les fichiers (*.*)"));
 		if ( !fileName.isEmpty() )
 		{
-		  OfsExport::processRestrictedMesh( *_billon, *_marrow, Interval<uint>(_ui->_spanSliderSelectInterval->lowerValue(),_ui->_spanSliderSelectInterval->upperValue()), fileName, 100, MINIMUM_INTENSITY, false, (_ui->_closeTrunk)->isChecked() );
+		  OfsExport::processRestrictedMesh( *_billon, *_marrow, Interval<uint>(_ui->_spanSliderSelectInterval->lowerValue(),_ui->_spanSliderSelectInterval->upperValue()), fileName, 100, MINIMUM_INTENSITY, false, _ui->_checkCloseBillon->isChecked() );
 		}
 	}
 }
@@ -771,7 +772,7 @@ void MainWindow::exportFlowToV3D() {
 			billonFlow.setMinValue(_billon->minValue());
 			billonFlow.setMaxValue(_billon->maxValue());
 			billonFlow.setVoxelSize(_billon->voxelWidth(),_billon->voxelHeight(),_billon->voxelDepth());
-			OpticalFlow::VectorsField *field = 0;
+			VectorsField *field = 0;
 			int i,j,k;
 
 			for ( k=0 ; k<depth ; ++k ) {
@@ -815,9 +816,9 @@ void MainWindow::exportMovementsToV3D()
 
 			for ( k=slicesInterval.min() ; k<slicesInterval.max() ; ++k )
 			{
-				const arma::Slice &currentSlice = _billon->slice(k);
-				const arma::Slice &previousSlice = _billon->slice(k>0?k-1:k+1);
-				arma::Slice &sliceDiag = billonDiag.slice(k-slicesInterval.min()-1);
+				const Slice &currentSlice = _billon->slice(k);
+				const Slice &previousSlice = _billon->slice(k>0?k-1:k+1);
+				Slice &sliceDiag = billonDiag.slice(k-slicesInterval.min()-1);
 				for ( j=0 ; j<height ; ++j )
 				{
 					for ( i=0 ; i<width ; ++i )
@@ -903,8 +904,8 @@ void MainWindow::selectSectorInterval( const int &index ) {
 		int i, j, k;
 		for ( k=firstSlice ; k<lastSlice ; ++k )
 		{
-			const arma::Slice &originalSlice = _billon->slice(k);
-			arma::Slice &sectorSlice = _sectorBillon->slice(k-firstSlice);
+			const Slice &originalSlice = _billon->slice(k);
+			Slice &sectorSlice = _sectorBillon->slice(k-firstSlice);
 			const iCoord2D &marrowCoord = _marrow->at(k);
 			for ( j=0 ; j<height ; ++j )
 			{

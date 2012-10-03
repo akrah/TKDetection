@@ -1,15 +1,17 @@
 #include "inc/sliceview.h"
 
+#include "def/def_opticalflow.h"
 #include "inc/billon.h"
 #include "inc/opticalflow.h"
-#include "inc/piechart.h"
-#include "inc/piepart.h"
 
+#include <QColor>
+#include <QImage>
 #include <QPainter>
+#include <QVector2D>
 
-SliceView::SliceView() : _typeOfView(SliceType::CURRENT),
+SliceView::SliceView() : _typeOfView(CURRENT),
 	_flowAlpha(FLOW_ALPHA_DEFAULT), _flowEpsilon(FLOW_EPSILON_DEFAULT), _flowMaximumIterations(FLOW_MAXIMUM_ITERATIONS),
-	_restrictedAreaResolution(100), _restrictedAreaThreshold(-900), _restrictedAreaBeginRadius(5), _typeOfEdgeDetection(EdgeDetectionType::SOBEL),
+	_restrictedAreaResolution(100), _restrictedAreaThreshold(-900), _restrictedAreaBeginRadius(5), _typeOfEdgeDetection(SOBEL),
 	_cannyRadiusOfGaussianMask(2), _cannySigmaOfGaussianMask(2), _cannyMinimumGradient(100.), _cannyMinimumDeviation(0.9)
 {
 }
@@ -18,9 +20,9 @@ SliceView::SliceView() : _typeOfView(SliceType::CURRENT),
  * Public setters
  *******************************/
 
-void SliceView::setTypeOfView( const SliceType::SliceType &type )
+void SliceView::setTypeOfView( const SliceType &type )
 {
-	if ( type > SliceType::_SLICE_TYPE_MIN_ && type < SliceType::_SLICE_TYPE_MAX_ )
+	if ( type > _SLICE_TYPE_MIN_ && type < _SLICE_TYPE_MAX_ )
 	{
 		_typeOfView = type;
 	}
@@ -71,9 +73,9 @@ void SliceView::setRestrictedAreaBeginRadius( const int &radius )
 	_restrictedAreaBeginRadius = radius;
 }
 
-void SliceView::setEdgeDetectionType( const EdgeDetectionType::EdgeDetectionType &type )
+void SliceView::setEdgeDetectionType( const EdgeDetectionType &type )
 {
-	if ( type > EdgeDetectionType::_EDGE_DETECTION_MIN_ && type < EdgeDetectionType::_EDGE_DETECTION_MAX_ )
+	if ( type > _EDGE_DETECTION_MIN_ && type < _EDGE_DETECTION_MAX_ )
 	{
 		_typeOfEdgeDetection = type;
 	}
@@ -102,24 +104,24 @@ void SliceView::drawSlice( QImage &image, const Billon &billon, const iCoord2D &
 		switch (_typeOfView)
 		{
 			// Affichage de la coupe de mouvements
-			case SliceType::MOVEMENT :
+			case MOVEMENT :
 				drawMovementSlice( image, billon, sliceIndex, intensityInterval, motionInterval );
 				break;
 			// Affichage de la coupe de détection de mouvements
-			case SliceType::EDGE_DETECTION :
+			case EDGE_DETECTION :
 				drawEdgeDetectionSlice( image, billon, center, sliceIndex, intensityInterval );
 				break;
 			// Affichage de la coupe de flot optique
-			case SliceType::FLOW :
+			case FLOW :
 				drawFlowSlice( image, billon, sliceIndex );
 				break;
 			// Affichage de la zone réduite
-			case SliceType::RESTRICTED_AREA :
+			case RESTRICTED_AREA :
 				drawCurrentSlice( image, billon, sliceIndex, intensityInterval );
 				drawRestrictedArea( image, billon, center, sliceIndex, intensityInterval.min() );
 				break;
 			// Affichage de la coupe originale
-			case SliceType::CURRENT:
+			case CURRENT:
 			default :
 				// Affichage de la coupe courante
 				drawCurrentSlice( image, billon, sliceIndex, intensityInterval );
@@ -215,7 +217,7 @@ void SliceView::drawEdgeDetectionSlice( QImage &image, const Billon &billon, con
 	QPainter painter;
 
 	switch (_typeOfEdgeDetection) {
-		case EdgeDetectionType::SOBEL :
+		case SOBEL :
 			// Gaussian filter construction
 			gaussianMask.resize(2*radius+1,2*radius+1);
 			gaussianFactor = 0;
@@ -267,7 +269,7 @@ void SliceView::drawEdgeDetectionSlice( QImage &image, const Billon &billon, con
 				line+=2;
 			}
 			break;
-		case EdgeDetectionType::LAPLACIAN :
+		case LAPLACIAN :
 			nbValues = intensityInterval.size()*8;
 			fact = 255./nbValues;
 			line += width + 1;
@@ -285,7 +287,7 @@ void SliceView::drawEdgeDetectionSlice( QImage &image, const Billon &billon, con
 				line+=2;
 			}
 			break;
-		case EdgeDetectionType::CANNY :
+		case CANNY :
 			// Gaussian filter construction
 			gaussianMask.resize(2*radius+1,2*radius+1);
 			gaussianFactor = 0;

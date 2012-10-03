@@ -38,7 +38,7 @@ namespace Pgm3dExport
 		{
 			for ( k=0 ; k<depth ; ++k )
 			{
-				const arma::Slice &slice = billon.slice(k);
+				const Slice &slice = billon.slice(k);
 				for ( j=0 ; j<height ; ++j )
 				{
 					for ( i=0 ; i<width ; ++i )
@@ -53,7 +53,7 @@ namespace Pgm3dExport
 		{
 			for ( k=0 ; k<depth ; ++k )
 			{
-				const arma::Slice &slice = billon.slice(k);
+				const Slice &slice = billon.slice(k);
 				for ( j=0 ; j<height ; ++j )
 				{
 					for ( i=0 ; i<width ; ++i )
