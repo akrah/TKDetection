@@ -145,10 +145,14 @@ struct coord2d
 	T x, y;
 	coord2d() : x((T)0), y((T)0) {}
 	coord2d( T x, T y ) : x(x), y(y) {}
+	coord2d( const coord2d<T> & other ) : x(other.x), y(other.y) {}
+	coord2d( const vec2d<T> & other ) : x(other.x), y(other.y) {}
 	inline bool operator ==( const coord2d<T> & other ) const { return other.x == x && other.y == y; }
 	inline bool operator !=( const coord2d<T> & other ) const { return other.x != x || other.y != y; }
-	inline coord2d<T> & operator /= ( qreal div ) { x /= div; y /= div ; return *this; }
+	inline coord2d<T> & operator += ( const coord2d<T> & other ) { x += other.x; y += other.y ; return *this; }
 	inline coord2d<T> & operator *= ( qreal fact ) { x *= fact; y *= fact ; return *this; }
+	inline coord2d<T> & operator -= ( const coord2d<T> & other ) { x -= other.x; y -= other.y ; return *this; }
+	inline coord2d<T> & operator /= ( qreal div ) { x /= div; y /= div ; return *this; }
 	inline void print( std::ostream &flux ) const { return flux << "( " << x << ", " << y << " )"; }
 	inline qreal euclideanDistance( const coord2d &other ) const { return qSqrt( qPow(x-other.x,2) + qPow(y-other.y,2) ); }
 	// Angle orienté du vecteur (this,secondCoord) vers le vecteur (this,thirdCoord).
@@ -171,6 +175,8 @@ struct vec2d : public coord2d<T>
 {
 	vec2d() : coord2d<T>((T)0,(T)0) {}
 	vec2d( T dx, T dy ) : coord2d<T>(dx,dy) {}
+	vec2d( const vec2d<T> & other ) : coord2d<T>(other) {}
+	vec2d( const coord2d<T> & other ) : coord2d<T>(other) {}
 	inline qreal dotProduct( const vec2d<T> & other ) const { return this->x*other.x + this->y*other.y; }
 	inline qreal norm() const { return qSqrt( qPow(this->x,2) + qPow(this->y,2) ); }
 	qreal angle( const vec2d<T> &other ) const
@@ -180,6 +186,15 @@ struct vec2d : public coord2d<T>
 		return ( this->x * other.y - this->y * other.x ) > T() ? qAcos(cosinus) : -qAcos(cosinus);
 	}
 };
+
+template <typename T>
+inline const coord2d<T> operator +( const coord2d<T> & first, const coord2d<T> & other ) { return coord2d<T>(first.x+other.x,first.y+other.y); }
+template <typename T>
+inline const coord2d<T> operator *( const coord2d<T> & coord, qreal fact ) { return coord2d<T>(coord.x*fact,coord.y*fact); }
+template <typename T>
+inline const coord2d<T> operator -( const coord2d<T> & coord, const coord2d<T> & other ) { return coord2d<T>(coord.x-other.x,coord.y-other.y); }
+template <typename T>
+inline const coord2d<T> operator /( const coord2d<T> & coord, qreal fact ) { return coord2d<T>(coord.x/fact,coord.y/fact); }
 
 template <typename T>
 std::ostream & operator<< ( std::ostream &flux , const coord2d<T> & coord )

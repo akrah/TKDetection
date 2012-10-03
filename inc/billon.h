@@ -18,8 +18,8 @@ class BillonTpl : public arma::Cube<T>
 {
 public:
 	BillonTpl();
-	BillonTpl( int width, int height, int depth );
-	BillonTpl( const BillonTpl &billon );
+	BillonTpl( const int & width, const int & height, const int & depth );
+	BillonTpl( const BillonTpl<T> &billon );
 
 	T minValue() const;
 	T maxValue() const;
@@ -27,16 +27,15 @@ public:
 	qreal voxelHeight() const;
 	qreal voxelDepth() const;
 
-	void setMinValue( T value );
-	void setMaxValue( T value );
-	void setVoxelSize( qreal width, qreal height, qreal depth );
+	void setMinValue( const T &value );
+	void setMaxValue( const T &value );
+	void setVoxelSize( const qreal &width, const qreal &height, const qreal &depth );
 
-	QVector<rCoord2D> getAllRestrictedAreaVertex( const int &nbPolygonsPoints, const int &threshold, const Marrow *marrow = 0 ) const;
-	QVector<rCoord2D> getRestrictedAreaVertex( const int &nbPolygonsPoints, const int &threshold, unsigned int minSlice, unsigned int maxSlice, const Marrow *marrow = 0) const;
-	qreal getRestrictedAreaMeansRadius( const Marrow *marrow, const int &nbPolygonPoints, int intensityThreshold ) const;
+	QVector<rCoord2D> getRestrictedAreaVertex( const Marrow &marrow, const Interval<uint> &sliceInterval, const uint &nbPolygonPoints, const int &intenstyThreshold ) const;
+	qreal getRestrictedAreaMeansRadius( const Marrow &marrow, const uint &nbPolygonPoints, int intensityThreshold ) const;
 
-	iCoord2D findNearestPointOfThePith( const iCoord2D &center, const int &sliceNumber, const int &threshold ) const;
-	QVector<iCoord2D> extractContour( const iCoord2D &center, const int &sliceNumber, int threshold, iCoord2D startPoint = iCoord2D(-1,-1) ) const;
+	iCoord2D findNearestPointOfThePith( const iCoord2D &center, const uint &sliceIndex, const int &intensityThreshold ) const;
+	QVector<iCoord2D> extractContour( const iCoord2D &center, const uint &sliceIndex, int threshold, iCoord2D startPoint = iCoord2D(-1,-1) ) const;
 
 protected:
 	T _minValue;        // Valeur minimum à considérer (mais une valeur PEUT être plus petite)
@@ -55,8 +54,8 @@ protected:
  **********************************/
 
 template< typename T > BillonTpl<T>::BillonTpl() : arma::Cube<T>(), _minValue(T(0)), _maxValue(T(0)), _voxelWidth(0.), _voxelHeight(0.), _voxelDepth(0.) {}
-template< typename T > BillonTpl<T>::BillonTpl( int width, int height, int depth ) : arma::Cube<T>(height,width,depth), _minValue(T(0)), _maxValue(T(0)), _voxelWidth(0.), _voxelHeight(0.), _voxelDepth(0.) {}
-template< typename T > BillonTpl<T>::BillonTpl( const BillonTpl &billon ) : arma::Cube<T>(billon), _minValue(billon._minValue), _maxValue(billon._maxValue), _voxelWidth(billon._voxelWidth), _voxelHeight(billon._voxelHeight), _voxelDepth(billon._voxelDepth) {}
+template< typename T > BillonTpl<T>::BillonTpl( const int & width, const int & height, const int & depth ) : arma::Cube<T>(height,width,depth), _minValue(T(0)), _maxValue(T(0)), _voxelWidth(0.), _voxelHeight(0.), _voxelDepth(0.) {}
+template< typename T > BillonTpl<T>::BillonTpl( const BillonTpl<T> & billon ) : arma::Cube<T>(billon), _minValue(billon._minValue), _maxValue(billon._maxValue), _voxelWidth(billon._voxelWidth), _voxelHeight(billon._voxelHeight), _voxelDepth(billon._voxelDepth) {}
 
 /**********************************
  * Public getters
@@ -97,19 +96,19 @@ qreal BillonTpl<T>::voxelDepth() const
  **********************************/
 
 template< typename T >
-void BillonTpl<T>::setMinValue( T value )
+void BillonTpl<T>::setMinValue( const T & value )
 {
 	_minValue = value;
 }
 
 template< typename T >
-void BillonTpl<T>::setMaxValue( T value )
+void BillonTpl<T>::setMaxValue( const T & value )
 {
 	_maxValue = value;
 }
 
 template< typename T >
-void BillonTpl<T>::setVoxelSize( qreal width, qreal height, qreal depth )
+void BillonTpl<T>::setVoxelSize( const qreal & width, const qreal & height, const qreal & depth )
 {
 	_voxelWidth = width;
 	_voxelHeight = height;
@@ -117,101 +116,69 @@ void BillonTpl<T>::setVoxelSize( qreal width, qreal height, qreal depth )
 }
 
 template< typename T >
-QVector<rCoord2D> BillonTpl<T>::getAllRestrictedAreaVertex( const int &nbPolygonPoints, const int &threshold, const Marrow *marrow ) const
+QVector<rCoord2D> BillonTpl<T>::getRestrictedAreaVertex( const Marrow & marrow, const Interval<uint> & sliceInterval, const uint & nbPolygonPoints, const int & intenstyThreshold ) const
 {
-	 QVector<rCoord2D> vectAllVertex;
-	 const int nbSlices = this->n_slices;
-	 const int thresholdRestrict = threshold-1;
-	 for ( int indexSlice = 0 ; indexSlice<nbSlices ; ++indexSlice ) {
-		 const arma::Mat<T> &currentSlice = this->slice(indexSlice);
+	Q_ASSERT_X( nbPolygonPoints>0 , "BillonTpl<T>::getRestrictedAreaVertex", "nbPolygonPoints arguments equals to 0 => division by zero" );
 
-		 const int sliceWidth = currentSlice.n_cols;
-		 const int sliceHeight = currentSlice.n_rows;
-		 const int xCenter = (marrow != 0 && marrow->interval().containsClosed(indexSlice))?marrow->at(indexSlice).x:sliceWidth/2;
-		 const int yCenter = (marrow != 0 && marrow->interval().containsClosed(indexSlice))?marrow->at(indexSlice).y:sliceHeight/2;
-
-		 qreal xEdge, yEdge, orientation, cosAngle, sinAngle;
-		 orientation = 0.;
-		 for ( int i=0 ; i<nbPolygonPoints ; ++i ) {
-			 orientation += (TWO_PI/static_cast<qreal>(nbPolygonPoints));
-			 cosAngle = qCos(orientation);
-			 sinAngle = -qSin(orientation);
-			 xEdge = xCenter + 5*cosAngle;
-			 yEdge = yCenter + 5*sinAngle;
-			 while ( xEdge>0. && yEdge>0. && xEdge<sliceWidth && yEdge<sliceHeight && currentSlice.at(yEdge,xEdge) > thresholdRestrict ) {
-					 xEdge += cosAngle;
-					 yEdge += sinAngle;
-			 }
-			 vectAllVertex.push_back(rCoord2D(xEdge,yEdge));
-		 }
-	 }
+	QVector<rCoord2D> vectAllVertex;
+	const int width = this->n_cols;
+	const int height = this->n_rows;
+	const qreal angleIncrement = TWO_PI/static_cast<qreal>(nbPolygonPoints);
+	rCoord2D edge, center;
+	rVec2D direction;
+	qreal orientation;
+	for ( uint indexSlice = sliceInterval.min() ; indexSlice<=sliceInterval.max() ; ++indexSlice )
+	{
+		const arma::Mat<T> & currentSlice = this->slice(indexSlice);
+		center.x = marrow.at(indexSlice).x;
+		center.y = marrow.at(indexSlice).y;
+		orientation = 0.;
+		while (orientation < TWO_PI)
+		{
+			orientation += angleIncrement;
+			direction = rVec2D(qCos(orientation),qSin(orientation));
+			edge = center + direction*30;
+			while ( edge.x>0. && edge.y>0. && edge.x<width && edge.y<height && currentSlice.at(edge.y,edge.x) >= intenstyThreshold )
+			{
+				edge += direction;
+			}
+			vectAllVertex.push_back(edge);
+		}
+	}
 	return vectAllVertex;
 }
 
-
-template< typename T >
-QVector<rCoord2D> BillonTpl<T>::getRestrictedAreaVertex( const int &nbPolygonPoints, const int &threshold,
-							 unsigned int minSlice, unsigned int maxSlice, const Marrow *marrow ) const {
-	 QVector<rCoord2D> vectAllVertex;
-	 const int thresholdRestrict = threshold-1;
-	 for ( uint indexSlice = minSlice ; indexSlice<=maxSlice ; ++indexSlice ) {
-		 const arma::Mat<T> &currentSlice = this->slice(indexSlice);
-
-		 const int sliceWidth = currentSlice.n_cols;
-		 const int sliceHeight = currentSlice.n_rows;
-		 const int xCenter = (marrow != 0 && marrow->interval().containsClosed(indexSlice))?marrow->at(indexSlice).x:sliceWidth/2;
-		 const int yCenter = (marrow != 0 && marrow->interval().containsClosed(indexSlice))?marrow->at(indexSlice).y:sliceHeight/2;
-
-		 qreal xEdge, yEdge, orientation, cosAngle, sinAngle;
-		 orientation = 0.;
-		 for ( int i=0 ; i<nbPolygonPoints ; ++i ) {
-			 orientation += (TWO_PI/static_cast<qreal>(nbPolygonPoints));
-			 cosAngle = qCos(orientation);
-			 sinAngle = -qSin(orientation);
-			 xEdge = xCenter + 5*cosAngle;
-			 yEdge = yCenter + 5*sinAngle;
-			 while ( xEdge>0. && yEdge>0. && xEdge<sliceWidth && yEdge<sliceHeight && currentSlice.at(yEdge,xEdge) > thresholdRestrict ) {
-					 xEdge += cosAngle;
-					 yEdge += sinAngle;
-			 }
-			 vectAllVertex.push_back(rCoord2D(xEdge,yEdge));
-		 }
-	 }
-	return vectAllVertex;
-}
-
-template< typename T >
-qreal BillonTpl<T>::getRestrictedAreaMeansRadius( const Marrow *marrow, const int &nbPolygonPoints, int intensityThreshold ) const
+template <typename T>
+qreal BillonTpl<T>::getRestrictedAreaMeansRadius( const Marrow &marrow, const uint &nbPolygonPoints, int intensityThreshold ) const
 {
-	qreal xEdge, yEdge, orientation, cosAngle, sinAngle, radius;
-	int i,k;
+	Q_ASSERT_X( nbPolygonPoints>0 , "BillonTpl<T>::getRestrictedAreaMeansRadius", "nbPolygonPoints arguments equals to 0 => division by zero" );
 
 	const int width = this->n_cols;
 	const int height = this->n_rows;
 	const int depth = this->n_slices;
+	const qreal angleIncrement = TWO_PI/static_cast<qreal>(nbPolygonPoints);
+
+	rCoord2D center, edge;
+	rVec2D direction;
+	qreal orientation, radius;
 
 	radius = 0.;
-	for ( k=0 ; k<depth ; ++k ) {
+	for ( int k=0 ; k<depth ; ++k ) {
 		const arma::Mat<T> &currentSlice = this->slice(k);
-		const int xCenter = (marrow != 0 && marrow->interval().containsClosed(k))?marrow->at(k-marrow->interval().min()).x:width/2;
-		const int yCenter = (marrow != 0 && marrow->interval().containsClosed(k))?marrow->at(k-marrow->interval().min()).y:height/2;
-
+		center.x = marrow.at(k).x;
+		center.y = marrow.at(k).y;
 		orientation = 0.;
-		for ( i=0 ; i<nbPolygonPoints ; ++i )
+		while (orientation < TWO_PI)
 		{
-			orientation += (TWO_PI/static_cast<qreal>(nbPolygonPoints));
-			cosAngle = qCos(orientation);
-			sinAngle = -qSin(orientation);
-			xEdge = xCenter + 10*cosAngle;
-			yEdge = yCenter + 10*sinAngle;
-			while ( xEdge>0 && yEdge>0 && xEdge<width && yEdge<height && currentSlice.at(yEdge,xEdge) > intensityThreshold )
+			orientation += angleIncrement;
+			direction = rVec2D(qCos(orientation),qSin(orientation));
+			edge = center + direction*30;
+			while ( edge.x>0 && edge.y>0 && edge.x<width && edge.y<height && currentSlice.at(edge.y,edge.x) > intensityThreshold )
 			{
-				xEdge += cosAngle;
-				yEdge += sinAngle;
+				edge += direction;
 			}
-			xEdge -= xCenter;
-			yEdge -= yCenter;
-			radius += qSqrt( xEdge*xEdge + yEdge*yEdge )/static_cast<qreal>(nbPolygonPoints);
+			edge -= center;
+			radius += rVec2D(edge).norm()/nbPolygonPoints;
 		}
 	}
 
@@ -220,88 +187,89 @@ qreal BillonTpl<T>::getRestrictedAreaMeansRadius( const Marrow *marrow, const in
 	return radius;
 }
 
-template < typename T >
-iCoord2D BillonTpl<T>::findNearestPointOfThePith( const iCoord2D &center, const int &sliceNumber, const int &threshold ) const
+template <typename T>
+iCoord2D BillonTpl<T>::findNearestPointOfThePith( const iCoord2D &center, const uint &sliceIndex, const int &intensityThreshold ) const
 {
+	Q_ASSERT_X( sliceIndex<this->n_slices , "BillonTpl<T>::findNearestPointOfThePith", "sliceIndex is biggest than slice number" );
+
 	// Find the pixel closest to the pith
-	const arma::Mat<T> &currentSlice = this->slice(sliceNumber);
+	const arma::Mat<T> &currentSlice = this->slice(sliceIndex);
 	const int width = this->n_cols;
 	const int height = this->n_rows;
-	const int xCenter = center.x;
-	const int yCenter = center.y;
-	const int radiusMax = qMin( qMin(xCenter,width-xCenter), qMin(yCenter,height-yCenter) );
+	const int radiusMax = qMin( qMin(center.x,width-center.x), qMin(center.y,height-center.y) );
 
-	iCoord2D position;
+	iCoord2D position, circlePoint;
 	bool edgeFind = false;
-	int currentRadius, x, y, d;
+	int currentRadius, d;
 
 	currentRadius = 1;
+	// Using Andres circle algorithm
 	while ( !edgeFind && currentRadius < radiusMax )
 	{
-		x = 0;
-		y = currentRadius;
+		circlePoint.x = 0;
+		circlePoint.y = currentRadius;
 		d = currentRadius - 1;
-		while ( y>=x && !edgeFind )
+		while ( circlePoint.y>=circlePoint.x && !edgeFind )
 		{
 			edgeFind = true;
-			if ( currentSlice.at( yCenter+y, xCenter+x ) > threshold )
+			if ( currentSlice.at( center.y+circlePoint.y, center.x+circlePoint.x ) > intensityThreshold )
 			{
-				position.x = xCenter+x;
-				position.y = yCenter+y;
+				position.x = center.x+circlePoint.x;
+				position.y = center.y+circlePoint.y;
 			}
-			else if ( currentSlice.at( yCenter+y, xCenter-x ) > threshold )
+			else if ( currentSlice.at( center.y+circlePoint.y, center.x-circlePoint.x ) > intensityThreshold )
 			{
-				position.x = xCenter-x;
-				position.y = yCenter+y;
+				position.x = center.x-circlePoint.x;
+				position.y = center.y+circlePoint.y;
 			}
-			else if ( currentSlice.at( yCenter+x, xCenter+y ) > threshold )
+			else if ( currentSlice.at( center.y+circlePoint.x, center.x+circlePoint.y ) > intensityThreshold )
 			{
-				position.x = xCenter+y;
-				position.y = yCenter+x;
+				position.x = center.x+circlePoint.y;
+				position.y = center.y+circlePoint.x;
 			}
-			else if ( currentSlice.at( yCenter+x, xCenter-y ) > threshold )
+			else if ( currentSlice.at( center.y+circlePoint.x, center.x-circlePoint.y ) > intensityThreshold )
 			{
-				position.x = xCenter-y;
-				position.y = yCenter+x;
+				position.x = center.x-circlePoint.y;
+				position.y = center.y+circlePoint.x;
 			}
-			else if ( currentSlice.at( yCenter-y, xCenter+x ) > threshold )
+			else if ( currentSlice.at( center.y-circlePoint.y, center.x+circlePoint.x ) > intensityThreshold )
 			{
-				position.x = xCenter+x;
-				position.y = yCenter-y;
+				position.x = center.x+circlePoint.x;
+				position.y = center.y-circlePoint.y;
 			}
-			else if ( currentSlice.at( yCenter-y, xCenter-x ) > threshold )
+			else if ( currentSlice.at( center.y-circlePoint.y, center.x-circlePoint.x ) > intensityThreshold )
 			{
-				position.x = xCenter-x;
-				position.y = yCenter-y;
+				position.x = center.x-circlePoint.x;
+				position.y = center.y-circlePoint.y;
 			}
-			else if ( currentSlice.at( yCenter-x, xCenter+y ) > threshold )
+			else if ( currentSlice.at( center.y-circlePoint.x, center.x+circlePoint.y ) > intensityThreshold )
 			{
-				position.x = xCenter+y;
-				position.y = yCenter-x;
+				position.x = center.x+circlePoint.y;
+				position.y = center.y-circlePoint.x;
 			}
-			else if ( currentSlice.at( yCenter-x, xCenter-y ) > threshold )
+			else if ( currentSlice.at( center.y-circlePoint.x, center.x-circlePoint.y ) > intensityThreshold )
 			{
-				position.x = xCenter-y;
-				position.y = yCenter-x;
+				position.x = center.x-circlePoint.y;
+				position.y = center.y-circlePoint.x;
 			}
 			else
 			{
 				edgeFind = false;
-				if ( d >= 2*x )
+				if ( d >= 2*circlePoint.x )
 				{
-					d -= 2*x;
-					x++;
+					d -= 2*circlePoint.x;
+					circlePoint.x++;
 				}
-				else if ( d <= 2*(currentRadius-y) )
+				else if ( d <= 2*(currentRadius-circlePoint.y) )
 				{
-					d += 2*y;
-					y--;
+					d += 2*circlePoint.y;
+					circlePoint.y--;
 				}
 				else
 				{
-					d += 2*(y-x);
-					y--;
-					x++;
+					d += 2*(circlePoint.y-circlePoint.x);
+					circlePoint.y--;
+					circlePoint.x++;
 				}
 			}
 		}
@@ -310,29 +278,27 @@ iCoord2D BillonTpl<T>::findNearestPointOfThePith( const iCoord2D &center, const 
 
 	if ( edgeFind ) {
 		qDebug() << "Pixel le plus proche de la moelle : ( " << position.x << ", " << position.y << " )";
+		return position;
 	}
 	else {
 		qDebug() << "Aucun pixel et donc aucune composante connexe";
-		position.x = -1;
-		position.y = -1;
+		return iCoord2D(-1,-1);
 	}
-
-	return position;
 }
 
 template< typename T >
-QVector<iCoord2D> BillonTpl<T>::extractContour( const iCoord2D &center, const int &sliceNumber, int threshold, iCoord2D startPoint ) const
+QVector<iCoord2D> BillonTpl<T>::extractContour( const iCoord2D & center, const uint & sliceIndex, int threshold, iCoord2D startPoint ) const
 {
-	QVector<iCoord2D> contourPoints;
+	Q_ASSERT_X( sliceIndex<this->n_slices , "BillonTpl<T>::extractContour", "sliceIndex is biggest than slice number" );
 
+	QVector<iCoord2D> contourPoints;
 	if ( startPoint == iCoord2D(-1,-1) )
 	{
-		startPoint = findNearestPointOfThePith( center, sliceNumber, threshold );
+		startPoint = findNearestPointOfThePith( center, sliceIndex, threshold );
 	}
-
 	if ( startPoint != iCoord2D(-1,-1) )
 	{
-		const arma::Mat<T> &currentSlice = this->slice(sliceNumber);
+		const arma::Mat<T> &currentSlice = this->slice(sliceIndex);
 		iCoord2D currentPos(startPoint);
 		QVector<iCoord2D> mask(8);
 		qreal orientation;
@@ -361,6 +327,5 @@ QVector<iCoord2D> BillonTpl<T>::extractContour( const iCoord2D &center, const in
 
 	return contourPoints;
 }
-
 
 #endif // BILLON_H

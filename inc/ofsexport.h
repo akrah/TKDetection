@@ -20,9 +20,7 @@ namespace OfsExport {
 	void processOnAllSectorInAllIntervals( const Billon &billon, const Marrow &marrow,
 						   const QVector< QPair< Interval<int>, QPair<qreal,qreal> > > &intervals,
 						   const QString &fileName, const int &nbEdgesPerSlice = 4,  bool normalized=true );
-	void processRestrictedMesh( const Billon &billon, const Marrow &marrow, const Interval<int> &interval,
-					const QString &fileName, const int &resolutionCercle = 100,
-					const int &seuilContour = -900,  bool normalized=true, bool displayBegEndFaces=true ) ;
+	void processRestrictedMesh( const Billon &billon, const Marrow &marrow, const Interval<uint> &interval, const QString &fileName, const uint resolutionCercle = 100, const int seuilContour = -900,  const bool normalized = true, const bool displayBegEndFaces = true ) ;
 }
 
 

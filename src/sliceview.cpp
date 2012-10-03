@@ -409,29 +409,27 @@ void SliceView::drawEdgeDetectionSlice( QImage &image, const Billon &billon, con
 void SliceView::drawFlowSlice( QImage &image, const Billon &billon, const int &sliceNumber )
 {
 
-	const Slice &currentSlice = billon.slice(sliceNumber);
-
-	const int width = currentSlice.n_cols;
-	const int height = currentSlice.n_rows;
-	int i, j;
-
 	VectorsField *field = OpticalFlow::compute(billon,sliceNumber,_flowAlpha,_flowEpsilon,_flowMaximumIterations);
 
 	QRgb * line =(QRgb *) image.bits();
 	qreal angle, norme;
 	QColor color;
+	rCoord2D origin(0,0);
+	rVec2D currentCoord;
 
-	for ( j=0 ; j<height-1 ; j++)
+	QVector< QVector< QVector2D > >::const_iterator iterLine;
+	QVector< QVector2D >::const_iterator iterCol;
+	for ( iterLine = (*field).constBegin() ; iterLine != (*field).constEnd() ; ++iterLine )
 	{
-		for ( i=0 ; i<width-1 ; i++)
+		for ( iterCol = (*iterLine).constBegin() ; iterCol != (*iterLine).constEnd() ; ++iterCol )
 		{
-			angle = (ANGLE(0,0,(*field)[j][i].x(),(*field)[j][i].y())+PI_ON_FOUR)*RAD_TO_DEG_FACT;
-			if (angle>360.) angle -= 360.;
-			norme = qMin(qSqrt( qPow((*field)[j][i].x(),2) + qPow((*field)[j][i].y(),2) )*20.,255.);
+			currentCoord = rCoord2D( (*iterCol).x(), (*iterCol).y() );
+			angle = (TWO_PI-origin.angle(currentCoord))*RAD_TO_DEG_FACT;
+			while (angle>360.) angle -= 360.;
+			norme = qMin(currentCoord.norm()*20.,255.);
 			color.setHsv(angle,norme,norme);
 			*(line++) = color.rgb();
 		}
-		line++;
 	}
 
 //	QPainter painter(&image);

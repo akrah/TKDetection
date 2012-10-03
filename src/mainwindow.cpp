@@ -485,7 +485,7 @@ void MainWindow::updateMarrow()
 		_marrow = extractor.process(*_billon,0,_billon->n_slices-1);
 		if ( _marrow != 0 )
 		{
-			_ui->_checkRadiusAroundPith->setText( QString::number(static_cast<int>(_billon->getRestrictedAreaMeansRadius(_marrow,20,_ui->_spinMinIntensity->value())*0.75)) );
+			_ui->_checkRadiusAroundPith->setText( QString::number(static_cast<int>(_billon->getRestrictedAreaMeansRadius(*_marrow,20,_ui->_spinMinIntensity->value())*0.75)) );
 		}
 	}
 	drawSlice();
@@ -699,7 +699,7 @@ void MainWindow::exportToOfsRestricted()
 		QString fileName = QFileDialog::getSaveFileName(this, tr("Exporter en .ofs"), "output.ofs", tr("Fichiers de données (*.ofs);;Tous les fichiers (*.*)"));
 		if ( !fileName.isEmpty() )
 		{
-		  OfsExport::processRestrictedMesh( *_billon, *_marrow, Interval<int>(_ui->_spanSliderSelectInterval->lowerValue(),_ui->_spanSliderSelectInterval->upperValue()),  fileName, 100, -900, false, (_ui->_closeTrunk)->isChecked() );
+		  OfsExport::processRestrictedMesh( *_billon, *_marrow, Interval<uint>(_ui->_spanSliderSelectInterval->lowerValue(),_ui->_spanSliderSelectInterval->upperValue()), fileName, 100, MINIMUM_INTENSITY, false, (_ui->_closeTrunk)->isChecked() );
 		}
 	}
 }
