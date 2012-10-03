@@ -13,7 +13,8 @@ namespace OpticalFlow {
 	}
 
 	// Donne le champ de vecteurs associé (sauf la dernière ligne et la dernière colonne)
-	VectorsField * compute( const icube &cube, const int &k, const qreal &alpha, const qreal &epsilon, const int &maxIter ) {
+	VectorsField * compute( const icube &cube, const int &k, const qreal &alpha, const qreal &epsilon, const int &maxIter )
+	{
 		VectorsField * flow = 0;
 		if ( k>=0 && k<static_cast<int>(cube.n_slices)-1 ) {
 			const int &width = cube.slice(k).n_cols-1;

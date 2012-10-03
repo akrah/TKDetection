@@ -1,0 +1,5 @@
+class BillonTpl :
+	- Ajouter une fonction previousSlice( int k )
+Suppimer la fonction RESTRICT_TO
+Supprimer struct SmoothingType
+Revoir les flots optiques avec iVec2D

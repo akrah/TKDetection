@@ -62,100 +62,61 @@ void SliceHistogram::clear()
 	_curvePercentage.setSamples(QVector<QPointF>(0));
 }
 
-void SliceHistogram::constructHistogram( const Billon &billon, const Marrow *marrow, const Interval<int> &intensity, const Interval<int> &motionInterval,
+void SliceHistogram::constructHistogram( const Billon &billon, const Marrow &marrow, const Interval<int> &intensity, const Interval<int> &motionInterval,
 										 const int &smoothingRadius, const int &minimumHeightPercentageOfMaximum,
 										 const int &neighborhoodOfMaximums, const int &derivativesPercentage, const int &minimumWidthOfIntervals,
 										 const int &borderPercentageToCut, const int &radiusAroundPith )
 {
-	const uint width = billon.n_cols;
-	const uint height = billon.n_rows;
-	const uint depth = billon.n_slices;
-	const int minValue = intensity.min();
-	const int maxValue = intensity.max();
+	const int width = billon.n_cols;
+	const int height = billon.n_rows;
+	const int depth = billon.n_slices;
 	const int radiusMax = radiusAroundPith+1;
 	const qreal squareRadius = qPow(radiusAroundPith,2);
 
 	clear();
 	this->resize(depth-1);
 
-	QList<int> circleLines;
-	if ( marrow != 0 )
+	QVector<int> circleLines;
+	circleLines.reserve(2*radiusAroundPith+1);
+	for ( int lineIndex=-radiusAroundPith ; lineIndex<radiusMax ; ++lineIndex )
 	{
-		circleLines.reserve(2*radiusAroundPith+1);
-		for ( int lineIndex=-radiusAroundPith ; lineIndex<radiusMax ; ++lineIndex )
-		{
-			circleLines.append(qSqrt(squareRadius-qPow(lineIndex,2)));
-		}
+		circleLines.append(qSqrt(squareRadius-qPow(lineIndex,2)));
 	}
 
 	int i, j, k, iRadius, iRadiusMax, currentSliceValue, previousSliceValue;
-	uint marrowX, marrowY, xPos, yPos;
+	iCoord2D currentPos;
 	qreal cumul, diff;
 
 	const int kLimitMin = borderPercentageToCut*depth/100.;
 	const int kLimitMax = depth-kLimitMin;
-	if ( marrow != 0 )
+	for ( k=kLimitMin ; k<kLimitMax ; ++k )
 	{
-		for ( k=kLimitMin ; k<kLimitMax ; ++k )
+		const arma::Slice &currentSlice = billon.slice(k);
+		const arma::Slice &prevSlice = billon.slice(k>0?k-1:k+1);
+		cumul = 0.;
+		currentPos.y = marrow.at(k).y-radiusAroundPith;
+		for ( j=-radiusAroundPith ; j<radiusMax ; ++j )
 		{
-			const arma::Slice &currentSlice = billon.slice(k);
-			const arma::Slice &prevSlice = billon.slice(k>0?k-1:k+1);
-			cumul = 0.;
-			marrowX = marrow->at(k).x;
-			marrowY = marrow->at(k).y;
-			for ( j=-radiusAroundPith ; j<radiusMax ; ++j )
+			iRadius = circleLines[j+radiusAroundPith];
+			iRadiusMax = iRadius+1;
+			currentPos.x = marrow.at(k).x-iRadius;
+			for ( i=-iRadius ; i<iRadiusMax ; ++i )
 			{
-				iRadius = circleLines[j+radiusAroundPith];
-				iRadiusMax = iRadius+1;
-				for ( i=-iRadius ; i<iRadiusMax ; ++i )
+				if ( currentPos.x < width && currentPos.y < height )
 				{
-					xPos = marrowX+i;
-					yPos = marrowY+j;
-					if ( xPos < width && yPos < height )
+					currentSliceValue = currentSlice.at(currentPos.y,currentPos.x);
+					previousSliceValue = prevSlice.at(currentPos.y,currentPos.x);
+					if ( intensity.containsClosed(currentSliceValue) && intensity.containsClosed(previousSliceValue) )
 					{
-						currentSliceValue = currentSlice.at(yPos,xPos);
-						previousSliceValue = prevSlice.at(yPos,xPos);
-						if ( (currentSliceValue > minValue) && (previousSliceValue > minValue) )
-						{
-							diff = qAbs(RESTRICT_TO(minValue,currentSliceValue,maxValue) - RESTRICT_TO(minValue,previousSliceValue,maxValue));
-							if ( motionInterval.containsClosed(diff) )
-							{
-								cumul += diff;
-							}
-						}
+						diff = qAbs(currentSliceValue - previousSliceValue);
+						if ( motionInterval.containsClosed(diff) ) cumul += diff;
 					}
 				}
+				currentPos.x++;
 			}
-			(*this)[k] = cumul;
+			currentPos.y++;
 		}
-	}
-	else
-	{
-		const int iHeight = static_cast<int>(height);
-		const int iWidth = static_cast<int>(width);
-		for ( k=kLimitMin ; k<kLimitMax ; ++k )
-		{
-			const arma::Slice &currentSlice = billon.slice(k);
-			const arma::Slice &prevSlice = billon.slice(k>0?k-1:k+1);
-			cumul = 0.;
-			for ( j=0 ; j<iHeight ; ++j )
-			{
-				for ( i=0 ; i<iWidth ; ++i )
-				{
-					currentSliceValue = currentSlice.at(j,i);
-					previousSliceValue = prevSlice.at(j,i);
-					if ( (currentSliceValue > minValue) && (previousSliceValue > minValue) )
-					{
-						diff = qAbs(RESTRICT_TO(minValue,currentSliceValue,maxValue) - RESTRICT_TO(minValue,previousSliceValue,maxValue));
-						if ( motionInterval.containsClosed(diff) )
-						{
-							cumul += diff;
-						}
-					}
-				}
-			}
-			(*this)[k] = cumul;
-		}
+		(*this)[k] = cumul;
 	}
 
 	computeAll( smoothingRadius, minimumHeightPercentageOfMaximum, neighborhoodOfMaximums, derivativesPercentage, minimumWidthOfIntervals, false );

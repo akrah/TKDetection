@@ -75,8 +75,6 @@ namespace SliceType {
 		EDGE_DETECTION,
 		FLOW,
 		RESTRICTED_AREA,
-		AVERAGE,
-		MEDIAN,
 		_SLICE_TYPE_MAX_
 	};
 }
@@ -112,22 +110,6 @@ typedef struct coord3d<qreal> rCoord3D;
 
 namespace
 {
-	inline qreal ANGLE( const qreal &xo, const qreal &yo, const qreal &x2, const qreal &y2 ) {
-		const qreal x_diff = x2-xo;
-		const qreal distance = qSqrt(qPow(x_diff,2)+pow(y2-yo,2));
-		qreal arcos = !qFuzzyIsNull(distance)?qAcos(x_diff / distance):0;
-		if ( yo > y2 ) arcos = -arcos+TWO_PI;
-		return arcos;
-	}
-
-	template <typename T>
-	inline qreal ANGLE( const coord2d<T> &origin, const coord2d<T> &end ) {
-		const qreal distance = origin.euclideanDistance(end);
-		qreal arcos = !qFuzzyIsNull(distance)?qAcos((end.x-origin.x) / distance):0;
-		if ( origin.y > end.y ) arcos = -arcos+TWO_PI;
-		return arcos;
-	}
-
 	template<typename T>
 	inline T RESTRICT_TO( const T min, const T value, const T max ) {
 		return value<min||value>max?min:value;

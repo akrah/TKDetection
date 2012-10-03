@@ -32,7 +32,7 @@
 #include <qwt_round_scale_draw.h>
 
 MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::MainWindow), _billon(0), _sectorBillon(0), _componentBillon(0), _marrow(0),
-	_sliceView(new SliceView()), _sliceHistogram(new SliceHistogram()), _pieChart(new PieChart(1)), _pieChartDiagrams(new PieChartDiagrams()), _contourCurve(new ContourCurve()),
+	_sliceView(new SliceView()), _sliceHistogram(new SliceHistogram()), _pieChart(new PieChart(360)), _pieChartDiagrams(new PieChartDiagrams()), _contourCurve(new ContourCurve()),
 	_currentSlice(0), _currentMaximum(0)
 {
 	_ui->setupUi(this);
@@ -57,8 +57,6 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 	_ui->_comboSliceType->insertItem(SliceType::EDGE_DETECTION,tr("Coupe de détection de contours"));
 	_ui->_comboSliceType->insertItem(SliceType::FLOW,tr("Coupe de flots optiques"));
 	_ui->_comboSliceType->insertItem(SliceType::RESTRICTED_AREA,tr("Coupe de zone réduite"));
-	//_ui->_comboSliceType->insertItem(SliceType::AVERAGE,tr("Coupe moyenne"));
-	//_ui->_comboSliceType->insertItem(SliceType::MEDIAN,tr("Coupe médiane"));
 	_ui->_comboSliceType->setCurrentIndex(SliceType::CURRENT);
 
 	_ui->_comboEdgeDetectionType->insertItem(EdgeDetectionType::SOBEL,tr("Sobel"));
@@ -271,7 +269,7 @@ void MainWindow::drawSlice( const int &sliceNumber )
 	{
 		_ui->_labelSliceNumber->setNum(sliceNumber);
 		_pix.fill(0xff000000);
-		_sliceView->drawSlice(_pix,*_billon,_marrow,sliceNumber,Interval<int>(_ui->_spinMinIntensity->value(),_ui->_spinMaxIntensity->value()), Interval<int>(_ui->_spinMovementThresholdMin->value(),_ui->_spinMovementThresholdMax->value()));
+		_sliceView->drawSlice(_pix,*_billon,_marrow!=0?_marrow->at(_currentSlice):iCoord2D(_billon->n_cols/2,_billon->n_rows/2),sliceNumber,Interval<int>(_ui->_spinMinIntensity->value(),_ui->_spinMaxIntensity->value()), Interval<int>(_ui->_spinMovementThresholdMin->value(),_ui->_spinMovementThresholdMax->value()));
 		highlightSliceHistogram(sliceNumber);
 		if ( _marrow != 0 )
 		{
@@ -302,7 +300,7 @@ void MainWindow::drawSlice( const int &sliceNumber )
 			{
 				const int width = _sectorBillon->n_cols;
 				const int height = _sectorBillon->n_rows;
-				const int threshold = _ui->_sliderSectorThresholding->value();
+				const int threshold = _ui->_spinSectorThresholding->value();
 
 				const Interval<int> &sliceInterval = _sliceHistogram->knotAreas()[_ui->_comboSelectSliceInterval->currentIndex()-1];
 				const Slice &sectorSlice = _sectorBillon->slice(sliceNumber-sliceInterval.min());
@@ -422,9 +420,9 @@ void MainWindow::updateSliceHistogram()
 {
 	_sliceHistogram->detach();
 	_sliceHistogram->clear();
-	if ( _billon != 0 )
+	if ( _billon != 0 && _marrow != 0 )
 	{
-		_sliceHistogram->constructHistogram(*_billon, _marrow, Interval<int>(_ui->_spinMinIntensity->value(),_ui->_spinMaxIntensity->value()),
+		_sliceHistogram->constructHistogram(*_billon, *_marrow, Interval<int>(_ui->_spinMinIntensity->value(),_ui->_spinMaxIntensity->value()),
 											Interval<int>(_ui->_spinMovementThresholdMin->value(),_ui->_spinMovementThresholdMax->value()),
 											_ui->_spinSmoothingRadiusOfHistogram->value(), _ui->_spinMinimumHeightofMaximum->value(),
 											_ui->_spinMaximumsNeighborhood->value(), _ui->_spinDerivativePercentage->value(),
@@ -802,17 +800,18 @@ void MainWindow::exportMovementsToV3D()
 		QString fileName = QFileDialog::getSaveFileName(this, tr("Exporter en .v3d"), "output_diag.v3d", tr("Fichiers de données (*.v3d);;Tous les fichiers (*.*)"));
 		if ( !fileName.isEmpty() )
 		{
-			const Interval<int> slicesInterval(_ui->_spanSliderSelectInterval->lowerValue(),_ui->_spanSliderSelectInterval->upperValue());
+			const Interval<int> slicesInterval(_ui->_spinMinSlice->value(),_ui->_spinMaxSlice->value());
+			const Interval<int> intensityInterval(_ui->_spinMinIntensity->value()+1, _ui->_spinMaxIntensity->value());
+			const Interval<int> motionInterval( _ui->_spinMovementThresholdMin->value(), _ui->_spinMovementThresholdMax->value() );
 			const int width = _billon->n_cols;
 			const int height = _billon->n_rows;
 			const int depth = slicesInterval.width()+1;
-			const int minValue = _ui->_spinMinIntensity->value();
-			const int maxValue = _ui->_spinMaxIntensity->value();
-			const int thresholdMin = _ui->_sliderMovementThresholdInterval->lowerValue();
-			const int thresholdMax = _ui->_sliderMovementThresholdInterval->upperValue();
 
 			Billon billonDiag( *_billon );
-			int i,j,k, pixAbsDiff;
+			billonDiag.setMinValue(0);
+			billonDiag.setMaxValue(1);
+			billonDiag.fill(0);
+			int i,j,k;
 
 			for ( k=slicesInterval.min() ; k<slicesInterval.max() ; ++k )
 			{
@@ -823,9 +822,10 @@ void MainWindow::exportMovementsToV3D()
 				{
 					for ( i=0 ; i<width ; ++i )
 					{
-						pixAbsDiff = qAbs(RESTRICT_TO(minValue,previousSlice.at(j,i),maxValue) - RESTRICT_TO(minValue,currentSlice.at(j,i),maxValue));
-						if ( (pixAbsDiff <= thresholdMin) || (pixAbsDiff >= thresholdMax) ) sliceDiag.at(j,i) = minValue;
-						else sliceDiag.at(i,j) = maxValue;
+						if ( intensityInterval.containsClosed(previousSlice.at(j,i)) && intensityInterval.containsClosed(currentSlice.at(j,i)) )
+						{
+							sliceDiag.at(j,i) = motionInterval.containsClosed( qAbs(previousSlice.at(j,i) - currentSlice.at(j,i)) );
+						}
 					}
 				}
 			}
@@ -1545,8 +1545,7 @@ void MainWindow::updateUiComponentsValues() {
 }
 
 void MainWindow::enabledComponents() {
-	const int sliceType = _ui->_comboSliceType->currentIndex();
-	const bool enable = (_billon != 0) && ( sliceType == SliceType::CURRENT || sliceType == SliceType::MOVEMENT || sliceType == SliceType::EDGE_DETECTION || sliceType == SliceType::FLOW || sliceType == SliceType::RESTRICTED_AREA );
+	const bool enable = (_billon != 0);
 	_ui->_sliderSelectSlice->setEnabled(enable);
 	_ui->_spansliderIntensityThreshold->setEnabled(enable);
 	_ui->_buttonComputeMarrow->setEnabled(enable);

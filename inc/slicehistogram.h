@@ -27,7 +27,7 @@ public:
 	void detach();
 	void clear();
 
-	void constructHistogram( const Billon &billon, const Marrow *marrow, const Interval<int> &intensity, const Interval<int> &motionInterval,
+	void constructHistogram( const Billon &billon, const Marrow &marrow, const Interval<int> &intensity, const Interval<int> &motionInterval,
 							 const int &smoothingRadius, const int &minimumHeightPercentageOfMaximum, const int &maximumsNeighborhood,
 							 const int &derivativePercentage, const int &minimumIntervalWidth, const int &borderPercentageToCut,
 							 const int &radiusAroundPith );
