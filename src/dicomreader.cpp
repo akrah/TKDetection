@@ -98,7 +98,7 @@ namespace DicomReader
 
 			for ( uint k=0; k<depth; k++ )
 			{
-				arma::Slice &slice = billon->slice(k);
+				Slice &slice = billon->slice(k);
 				for ( uint j=0; j<height; j++ )
 				{
 					for ( uint i=0; i<width; i++ )

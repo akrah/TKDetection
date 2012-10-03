@@ -16,7 +16,7 @@ namespace ConnexComponentExtractor
 	namespace
 	{
 		/**
-		 * \fn		int twoPassAlgorithm( arma::Slice &oldSlice, arma::Slice &currentSlice, arma::Slice &labels, QMap<int, QList<iCoord3D> > &connexComponentList, int k, int nbLabel )
+		 * \fn		int twoPassAlgorithm( Slice &oldSlice, Slice &currentSlice, Slice &labels, QMap<int, QList<iCoord3D> > &connexComponentList, int k, int nbLabel )
 		 * \brief	Algorithme de labelisation de composantes connexes en 3 dimensions
 		 * \param	oldSlice Tranche précédente déjà labelisée
 		 * \param	currentSlice Tranche courante où sont extraites les composantes connexes
@@ -26,10 +26,10 @@ namespace ConnexComponentExtractor
 		 * \param	nbLabel Nombre de labels déjà attribués
 		 * \return	le dernier label attribué
 		 */
-		int twoPassAlgorithm( arma::Slice &oldSlice, arma::Slice &currentSlice, arma::Slice &labels, QMap<int, QList<iCoord3D> > &connexComponentList, int k, int nbLabel, const __billon_type__ &threshold );
+		int twoPassAlgorithm( Slice &oldSlice, Slice &currentSlice, Slice &labels, QMap<int, QList<iCoord3D> > &connexComponentList, int k, int nbLabel, const __billon_type__ &threshold );
 	}
 
-	Billon * extractConnexComponents( Billon &billon, const int &minimumSize, const __billon_type__ &threshold )
+	Billon * extractConnexComponents( Billon &billon, const int &minimumSize, const int &threshold )
 	{
 		const uint width = billon.n_cols;
 		const uint height = billon.n_rows;
@@ -37,10 +37,10 @@ namespace ConnexComponentExtractor
 
 		int nbLabel = 0;
 		QMap<int, QList<iCoord3D> > connexComponentList;
-		arma::Slice* labels = new arma::Slice(height, width);
-		arma::Slice* oldSlice = new arma::Slice(height, width);
+		Slice* labels = new Slice(height, width);
+		Slice* oldSlice = new Slice(height, width);
 		oldSlice->fill(0);
-		arma::Slice* tmp;
+		Slice* tmp;
 
 		//On parcours les tranches 1 par 1
 		for ( unsigned int k=0 ; k<depth ; k++ )
@@ -91,10 +91,10 @@ namespace ConnexComponentExtractor
 
 		int nbLabel = 0;
 		QMap<int, QList<iCoord3D> > connexComponentList;
-		arma::Slice* labels = new arma::Slice(height, width);
-		arma::Slice* oldSlice = new arma::Slice(height, width);
+		Slice* labels = new Slice(height, width);
+		Slice* oldSlice = new Slice(height, width);
 		oldSlice->fill(0);
-		arma::Slice* tmp;
+		Slice* tmp;
 
 		//On parcours les tranches 1 par 1
 		for ( unsigned int k=0 ; k<depth ; k++ )
@@ -139,7 +139,7 @@ namespace ConnexComponentExtractor
 		return components;
 	}
 
-	Billon * extractConnexComponents( arma::Slice &currentSlice, const int &minimumSize, const __billon_type__ &threshold )
+	Billon * extractConnexComponents( Slice &currentSlice, const int &minimumSize, const int &threshold )
 	{
 		const uint width = currentSlice.n_cols;
 		const uint height = currentSlice.n_rows;
@@ -150,7 +150,7 @@ namespace ConnexComponentExtractor
 		uint j, i;
 		int mini, nbLabel, label;
 
-		arma::Slice labels(height, width);
+		Slice labels(height, width);
 		labels.fill(0);
 		nbLabel = 0;
 		//On parcourt une première fois la tranche
@@ -259,7 +259,7 @@ namespace ConnexComponentExtractor
 		return bigestComponentsInBillon;
 	}
 
-	Billon * extractBiggestConnexComponent( arma::Slice &currentSlice, const __billon_type__ &threshold )
+	Billon * extractBiggestConnexComponent( Slice &currentSlice, const __billon_type__ &threshold )
 	{
 		const uint width = currentSlice.n_cols;
 		const uint height = currentSlice.n_rows;
@@ -270,7 +270,7 @@ namespace ConnexComponentExtractor
 		uint j, i;
 		int mini, nbLabel, label;
 
-		arma::Slice labels(height, width);
+		Slice labels(height, width);
 		labels.fill(0);
 		nbLabel = 0;
 		//On parcourt une première fois la tranche
@@ -387,7 +387,7 @@ namespace ConnexComponentExtractor
 
 	namespace
 	{
-		int twoPassAlgorithm( arma::Slice &oldSlice, arma::Slice &currentSlice, arma::Slice &labels, QMap<int, QList<iCoord3D> > &connexComponentList, int k, int nbLabel, const __billon_type__ &threshold )
+		int twoPassAlgorithm( Slice &oldSlice, Slice &currentSlice, Slice &labels, QMap<int, QList<iCoord3D> > &connexComponentList, int k, int nbLabel, const __billon_type__ &threshold )
 		{
 			const uint width = currentSlice.n_cols;
 			const uint height = currentSlice.n_rows;

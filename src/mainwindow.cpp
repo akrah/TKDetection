@@ -52,16 +52,16 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 	_histogramCursor.attach(_ui->_plotSliceHistogram);
 	_histogramCursor.setBrush(Qt::red);
 
-	_ui->_comboSliceType->insertItem(SliceType::CURRENT,tr("Coupe originale"));
-	_ui->_comboSliceType->insertItem(SliceType::MOVEMENT,tr("Coupe de mouvements"));
-	_ui->_comboSliceType->insertItem(SliceType::EDGE_DETECTION,tr("Coupe de détection de contours"));
-	_ui->_comboSliceType->insertItem(SliceType::FLOW,tr("Coupe de flots optiques"));
-	_ui->_comboSliceType->insertItem(SliceType::RESTRICTED_AREA,tr("Coupe de zone réduite"));
-	_ui->_comboSliceType->setCurrentIndex(SliceType::CURRENT);
+	_ui->_comboSliceType->insertItem(CURRENT,tr("Coupe originale"));
+	_ui->_comboSliceType->insertItem(MOVEMENT,tr("Coupe de mouvements"));
+	_ui->_comboSliceType->insertItem(EDGE_DETECTION,tr("Coupe de détection de contours"));
+	_ui->_comboSliceType->insertItem(FLOW,tr("Coupe de flots optiques"));
+	_ui->_comboSliceType->insertItem(RESTRICTED_AREA,tr("Coupe de zone réduite"));
+	_ui->_comboSliceType->setCurrentIndex(CURRENT);
 
-	_ui->_comboEdgeDetectionType->insertItem(EdgeDetectionType::SOBEL,tr("Sobel"));
-	_ui->_comboEdgeDetectionType->insertItem(EdgeDetectionType::LAPLACIAN,tr("Laplacian"));
-	_ui->_comboEdgeDetectionType->insertItem(EdgeDetectionType::CANNY,tr("Canny"));
+	_ui->_comboEdgeDetectionType->insertItem(SOBEL,tr("Sobel"));
+	_ui->_comboEdgeDetectionType->insertItem(LAPLACIAN,tr("Laplacian"));
+	_ui->_comboEdgeDetectionType->insertItem(CANNY,tr("Canny"));
 
 	_ui->_spinFlowAlpha->setValue(_sliceView->flowAlpha());
 	_ui->_spinFlowEpsilon->setValue(_sliceView->flowEpsilon());
@@ -395,19 +395,19 @@ void MainWindow::setSlice( const int &sliceNumber )
 void MainWindow::setTypeOfView( const int &type )
 {
 	enabledComponents();
-	_sliceView->setTypeOfView( static_cast<const SliceType::SliceType>(type) );
+	_sliceView->setTypeOfView( static_cast<const SliceType>(type) );
 	switch (type)
 	{
-		case SliceType::MOVEMENT:
+		case MOVEMENT:
 			_ui->_toolboxSliceParameters->setCurrentWidget(_ui->_pageMovementParameters);
 			break;
-		case SliceType::EDGE_DETECTION :
+		case EDGE_DETECTION :
 			_ui->_toolboxSliceParameters->setCurrentWidget(_ui->_pageEdgeDetection);
 			break;
-		case SliceType::FLOW:
+		case FLOW:
 			_ui->_toolboxSliceParameters->setCurrentWidget(_ui->_pageFlowParameters);
 			break;
-		case SliceType::RESTRICTED_AREA:
+		case RESTRICTED_AREA:
 			_ui->_toolboxSliceParameters->setCurrentWidget(_ui->_pageRestrictedAreaParameters);
 			break;
 		default:
@@ -623,7 +623,7 @@ void MainWindow::setRestrictedAreaBeginRadius( const int &radius )
 
 void MainWindow::setEdgeDetectionType( const int &type )
 {
-	_sliceView->setEdgeDetectionType( static_cast<const EdgeDetectionType::EdgeDetectionType>(type) );
+	_sliceView->setEdgeDetectionType( static_cast<const EdgeDetectionType>(type) );
 	drawSlice();
 }
 
@@ -771,7 +771,7 @@ void MainWindow::exportFlowToV3D() {
 			billonFlow.setMinValue(_billon->minValue());
 			billonFlow.setMaxValue(_billon->maxValue());
 			billonFlow.setVoxelSize(_billon->voxelWidth(),_billon->voxelHeight(),_billon->voxelDepth());
-			VectorsField *field = 0;
+			OpticalFlow::VectorsField *field = 0;
 			int i,j,k;
 
 			for ( k=0 ; k<depth ; ++k ) {
@@ -815,9 +815,9 @@ void MainWindow::exportMovementsToV3D()
 
 			for ( k=slicesInterval.min() ; k<slicesInterval.max() ; ++k )
 			{
-				const Slice &currentSlice = _billon->slice(k);
-				const Slice &previousSlice = _billon->slice(k>0?k-1:k+1);
-				Slice &sliceDiag = billonDiag.slice(k-slicesInterval.min()-1);
+				const arma::Slice &currentSlice = _billon->slice(k);
+				const arma::Slice &previousSlice = _billon->slice(k>0?k-1:k+1);
+				arma::Slice &sliceDiag = billonDiag.slice(k-slicesInterval.min()-1);
 				for ( j=0 ; j<height ; ++j )
 				{
 					for ( i=0 ; i<width ; ++i )
@@ -903,8 +903,8 @@ void MainWindow::selectSectorInterval( const int &index ) {
 		int i, j, k;
 		for ( k=firstSlice ; k<lastSlice ; ++k )
 		{
-			const Slice &originalSlice = _billon->slice(k);
-			Slice &sectorSlice = _sectorBillon->slice(k-firstSlice);
+			const arma::Slice &originalSlice = _billon->slice(k);
+			arma::Slice &sectorSlice = _sectorBillon->slice(k-firstSlice);
 			const iCoord2D &marrowCoord = _marrow->at(k);
 			for ( j=0 ; j<height ; ++j )
 			{
@@ -1233,8 +1233,8 @@ void MainWindow::createVoxelSetAllIntervals(std::vector<iCoord3D> &vectVoxels, b
 {
 	for ( int l=1 ; l< _ui->_comboSelectSliceInterval->count() ; l++ )
 	{
-		cerr << "-------------------------"<< endl;
-		cerr << "processing Interval Num=" << l << endl;
+		qDebug() << "-------------------------";
+		qDebug() << "processing Interval Num=" << l;
 
 		_ui->_comboSelectSliceInterval->setCurrentIndex(l);
 		selectSliceInterval(l);
@@ -1249,7 +1249,7 @@ void MainWindow::createVoxelSetAllIntervals(std::vector<iCoord3D> &vectVoxels, b
 
 			for ( int i=0 ; i<intervals.size()-1 ; ++i )
 			{
-				cerr << "Generating contours knot num " << i ;
+				qDebug() << "Generating contours knot num " << i ;
 				_ui->_comboSelectSectorInterval->setCurrentIndex(i+1);
 
 				const int &width = _componentBillon->n_cols;
@@ -1269,7 +1269,7 @@ void MainWindow::createVoxelSetAllIntervals(std::vector<iCoord3D> &vectVoxels, b
 					delete biggestComponents;
 					biggestComponents = 0;
 				}
-				cerr << " ... [done]" <<endl;
+				qDebug() << " ... [done]";
 			}
 		}
 	}
@@ -1289,7 +1289,7 @@ void MainWindow::createVoxelSet(std::vector<iCoord3D> &vectVoxels)
 
 		for ( int i=0 ; i<intervals.size() ; ++i )
 		{
-			cerr << "Generating contours knot num " << i ;
+			qDebug() << "Generating contours knot num " << i ;
 			_ui->_comboSelectSectorInterval->setCurrentIndex(i+1);
 
 			const int &width = _componentBillon->n_cols;
@@ -1305,7 +1305,7 @@ void MainWindow::createVoxelSet(std::vector<iCoord3D> &vectVoxels)
 				delete biggestComponents;
 				biggestComponents = 0;
 			}
-			cerr << " ... [done]" <<endl;
+			qDebug() << " ... [done]";
 		}
 	}
 }

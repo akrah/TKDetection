@@ -28,7 +28,7 @@ QXT			=	core gui
 TEMPLATE	=	app
 TARGET		=	TKDetection
 
-DEPENDPATH	*=	./src/ ./inc/ ./ui/ ./tst/
+DEPENDPATH	*=	./src/ ./inc/ ./ui/ ./tst/ ./def/
 
 SOURCES		=	main.cpp \
 				connexcomponentextractor.cpp \
@@ -53,10 +53,13 @@ SOURCES		=	main.cpp \
 				v3dreader.cpp \
 
 HEADERS		=	billon.h \
-				billon_def.h \
 				connexcomponentextractor.h \
 				contourcurve.h \
+				coordinate.h \
 				datexport.h \
+				define.h \
+				def_billon.h \
+				def_coordinate.h \
 				dicomreader.h \
 				global.h \
 				histogram.h \

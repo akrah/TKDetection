@@ -1,8 +1,9 @@
 #ifndef BILLON_H
 #define BILLON_H
 
-#include "global.h"
 #include "marrow.h"
+#include "define.h"
+#include "coordinate.h"
 
 #include <QDebug>
 #include <armadillo>
@@ -46,7 +47,7 @@ protected:
 };
 
 /*######################################################
-  # INSTANCIATION
+  # IMPLEMENTATION
   ######################################################*/
 
 /**********************************

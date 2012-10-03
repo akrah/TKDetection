@@ -30,7 +30,7 @@ namespace DatExport
 			QDataStream dStream(&file);
 			for ( int k=firstSlice ; k<=lastSlice ; ++k )
 			{
-				const arma::Slice &slice = billon.slice(k);
+				const Slice &slice = billon.slice(k);
 				for ( int j=0 ; j<height-shift ; j+=resolution )
 				{
 					for ( int i=0 ; i<width-shift ; i+=resolution )

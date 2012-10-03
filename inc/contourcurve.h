@@ -1,9 +1,11 @@
 #ifndef CONTOURCURVE_H
 #define CONTOURCURVE_H
 
-#include "billon_def.h"
+#include "def/def_coordinate.h"
+#include "def/def_billon.h"
+
 #include "billon.h"
-#include "global.h"
+
 #include <qwt_plot_curve.h>
 
 class ContourCurve
@@ -37,7 +39,7 @@ private:
 	QVector<int> _datasIndexMainDominantPoints;
 	QVector<iCoord2D> _datasMainSupportPoints;
 
-	arma::Slice _component;
+	Slice _component;
 };
 
 #endif // CONTOURCURVATURECURVE_H

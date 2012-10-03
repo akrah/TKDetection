@@ -2,10 +2,8 @@
 #define MARROWEXTRACTOR_H
 
 #include <QList>
-#include "global.h"
 
 #include <armadillo>
-using namespace arma;
 
 class Marrow;
 
@@ -22,7 +20,7 @@ public:
 	 * \param	sliceMax Dernière coupe à traiter
 	 * \return	la liste des coordonnées de la moelle
 	 */
-	Marrow* process( const icube &image, const int &sliceMin, const int &sliceMax );
+	Marrow* process( const arma::icube &image, const int &sliceMin, const int &sliceMax );
 
 	/********************************************************
 	 * Get functions
@@ -96,7 +94,7 @@ public:
 
 private:
 	/**
-	 * \fn		Coord transHough(const imat &slice, int width, int height, int *x, int *y, int* z, int *sliceMaxValue, int* nbContourPoints);
+	 * \fn		Coord transHough(const arma::imat &slice, int width, int height, int *x, int *y, int* z, int *sliceMaxValue, int* nbContourPoints);
 	 * \brief	Transformée de Hough sur une coupe
 	 * \param	slice Coupe à traiter
 	 * \param	width Largeur de la fenetre
@@ -107,26 +105,26 @@ private:
 	 * \param	nbContourPoints Nombre de points de contour
 	 * \return	les coordonnées de la moelle pour la coupe traitée
 	 */
-	iCoord2D transHough( const imat &slice, int width, int height, int *x, int *y, int *sliceMaxValue, int *nbContourPoints );
+	iCoord2D transHough( const arma::imat &slice, int width, int height, int *x, int *y, int *sliceMaxValue, int *nbContourPoints );
 
 	/**
-	 * \fn		fmat * contour(const imat &slice, fmat **orientation);
+	 * \fn		arma::fmat * contour(const arma::imat &slice, arma::fmat **orientation);
 	 * \brief	Détection des contour
 	 * \param	slice Coupe à traiter
 	 * \param	orientation Matrice contenant le gradient de chaque point du contour
 	 * \return	matrice de contour
 	 */
-	fmat * contour( const imat &slice, fmat **orientation );
+	arma::fmat * contour( const arma::imat &slice, arma::fmat **orientation );
 
 	/**
-	 * \fn		imat * convolution(const imat &slice, fcolvec verticalFilter, frowvec horizontalFilter);
+	 * \fn		arma::imat * convolution(const arma::imat &slice, arma::fcolvec verticalFilter, arma::frowvec horizontalFilter);
 	 * \brief	Effectue le produit de convolution d'un filtre separable sur une matrice
 	 * \param	slice Coupe à traiter
 	 * \param	verticalFilter Vecteur colonne du filtre separable
 	 * \param	horizontalFilter Vecteur ligne du filtre separable
 	 * \return	matrice apres convolution
 	 */
-	imat * convolution( const imat &slice, fcolvec verticalFilter, frowvec horizontalFilter );
+	arma::imat * convolution( const arma::imat &slice, arma::fcolvec verticalFilter, arma::frowvec horizontalFilter );
 
 	/**
 	 * \fn		int * drawLine(int xOrigine, int yOrigine, float orientation, int width, int height, int *length);
@@ -151,10 +149,10 @@ private:
 	static int floatCompare( const void *first, const void *second );
 
 	/**
-	 * \fn		void minSlice(const imat &slice, int *minValue, int *maxValue, Coord *coordMax);
+	 * \fn		void minSlice(const arma::imat &slice, int *minValue, int *maxValue, Coord *coordMax);
 	 * \brief	Calcul les valeurs minimum et maximum d'une coupe ainsi que la liste des coordonnées ou apparrait la valeur maximum
 	 */
-	void minSlice( const imat &slice, int *minValue, int *maxValue, iCoord2D *coordMax );
+	void minSlice( const arma::imat &slice, int *minValue, int *maxValue, iCoord2D *coordMax );
 
 	/**
 	 * \fn		void corrigeMoelle(QList<Coord> *moelle, float *listMax, float seuilHough);

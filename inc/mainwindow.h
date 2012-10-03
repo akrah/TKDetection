@@ -6,15 +6,17 @@
 
 #include "slicezoomer.h"
 #include "interval.h"
-#include "global.h"
+#include "def/def_coordinate.h"
+#include "def/def_billon.h"
+
 #include <qwt_plot_curve.h>
 #include <qwt_plot_histogram.h>
 
-namespace Ui {
+namespace Ui
+{
 	class MainWindow;
 }
 
-#include "billon_def.h"
 class Marrow;
 class SliceView;
 class SliceHistogram;

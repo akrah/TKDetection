@@ -3,7 +3,7 @@
 
 #include <QList>
 #include "interval.h"
-#include "global.h"
+#include "def/def_coordinate.h"
 
 class QImage;
 

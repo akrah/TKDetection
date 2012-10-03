@@ -204,7 +204,7 @@ void ContourCurve::constructCurve( const Billon &billon, const iCoord2D &billonC
 			}
 		}
 
-		const arma::Slice &slice = billon.slice(sliceNumber);
+		const Slice &slice = billon.slice(sliceNumber);
 		const int width = slice.n_cols;
 		const int height = slice.n_rows;
 		_component.resize(height,width);
@@ -397,7 +397,7 @@ void ContourCurve::constructCurveOldMethod( const Billon &billon, const iCoord2D
 	_datasMainSupportPoints.fill(iCoord2D(-1,-1),2);
 
 
-	const arma::Slice &slice = billon.slice(sliceNumber);
+	const Slice &slice = billon.slice(sliceNumber);
 	const int width = slice.n_cols;
 	const int height = slice.n_rows;
 	_component.resize(height,width);

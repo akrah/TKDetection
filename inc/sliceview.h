@@ -2,8 +2,7 @@
 #define SLICEVIEW_H
 
 #include <QtGlobal>
-#include "billon_def.h"
-#include "global.h"
+#include "define.h"
 
 template<typename T> class Interval;
 class QImage;
@@ -14,7 +13,7 @@ class SliceView
 public:
 	explicit SliceView();
 
-	void setTypeOfView( const SliceType::SliceType &type );
+	void setTypeOfView( const SliceType &type );
 
 	qreal flowAlpha() const;
 	qreal flowEpsilon() const;
@@ -27,7 +26,7 @@ public:
 	void setRestrictedAreaThreshold( const int &threshold );
 	void setRestrictedAreaBeginRadius( const int &radius );
 
-	void setEdgeDetectionType( const EdgeDetectionType::EdgeDetectionType &type );
+	void setEdgeDetectionType( const EdgeDetectionType &type );
 	void setRadiusOfGaussianMask( const int &radius );
 	void setSigmaOfGaussianMask( const qreal &sigma );
 	void setCannyMinimumGradient( const qreal &minimumGradient );
@@ -43,7 +42,7 @@ private :
 	void drawRestrictedArea( QImage &image, const Billon &billon, const iCoord2D &center, const int &sliceNumber, const int &intensityThreshold );
 
 private:
-	SliceType::SliceType _typeOfView;
+	SliceType _typeOfView;
 
 	qreal _flowAlpha;
 	qreal _flowEpsilon;
@@ -53,7 +52,7 @@ private:
 	int _restrictedAreaThreshold;
 	int _restrictedAreaBeginRadius;
 
-	EdgeDetectionType::EdgeDetectionType _typeOfEdgeDetection;
+	EdgeDetectionType _typeOfEdgeDetection;
 	int _cannyRadiusOfGaussianMask;
 	qreal _cannySigmaOfGaussianMask;
 	qreal _cannyMinimumGradient;
