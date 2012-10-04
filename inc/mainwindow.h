@@ -20,6 +20,7 @@ namespace Ui
 class Marrow;
 class SliceView;
 class SliceHistogram;
+class PlotSliceHistogram;
 class PieChart;
 class PieChartDiagrams;
 class ContourCurve;
@@ -107,8 +108,11 @@ private:
 	Billon *_componentBillon;
 	Marrow *_marrow;
 	SliceView *_sliceView;
+
 	SliceHistogram *_sliceHistogram;
+	PlotSliceHistogram *_plotSliceHistogram;
 	QwtPlotCurve _histogramCursor;
+	QwtPlotHistogram _histogramDistanceMarrowToNearestPoint;
 
 	PieChart *_pieChart;
 	PieChartDiagrams *_pieChartDiagrams;
@@ -117,7 +121,6 @@ private:
 
 	SliceZoomer _sliceZoomer;
 
-	QwtPlotHistogram _histogramDistanceMarrowToNearestPoint;
 	QwtPlotCurve _histogramDistanceMarrowToNearestPointCursor;
 	Interval<int> _knotIntervalInDistanceMarrowToNearestPointHistogram;
 

@@ -20,8 +20,8 @@ namespace OpticalFlow {
 	{
 		VectorsField * flow = 0;
 		if ( k>=0 && k<static_cast<int>(cube.n_slices)-1 ) {
-			const int &width = cube.slice(k).n_cols-1;
-			const int &height = cube.slice(k).n_rows-1;
+			const int width = cube.n_cols-1;
+			const int height = cube.n_rows-1;
 			if ( width>2 && height>2 ) {
 				flow = new VectorsField( height+1, QVector<QVector2D>( width+1 ) );
 

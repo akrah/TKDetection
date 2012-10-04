@@ -8,93 +8,105 @@
 #
 #-------------------------------------------------------
 
-macx:QMAKE_CC=/usr/bin/clang
-macx:QMAKE_CXX=/usr/bin/clang++
-
-macx:MOC_DIR = .moc
-macx:OBJECTS_DIR = .obj
-
-
 # Version d'ITK installée : itk3 | itk4
 ITK_VERSION = itk4
 ITK_NUMBER =  4.1
 
-#------------- NE PAS MODIFIER EN DESSOUS -------------#
+#                                                                #
+#                  NE PAS MODIFIER EN DESSOUS                    #
+##################################################################
 
-QT			*=	core gui xml
-CONFIG		*=	qwt qxt qwtpolar
+# Configuration
+#--------------#
+TEMPLATE	=	app
+QT			=	core gui xml
+CONFIG		*=	copy_dir_files warn_on
+CONFIG		*=	qwt qxt qwtpolar $${ITK_VERSION}
 QXT			=	core gui
 
-TEMPLATE	=	app
-TARGET		=	TKDetection
+# Répertoires
+#------------#
+TARGET				= TKDetection
+DEPENDPATH			= ./src/ ./inc/ ./ui/ ./tst/ ./def/
+macx:MOC_DIR		= .moc
+macx:OBJECTS_DIR	= .obj
 
-DEPENDPATH	*=	./src/ ./inc/ ./ui/ ./tst/ ./def/
+# Fichiers
+#---------#
+SOURCES	=	main.cpp \
+			connexcomponentextractor.cpp \
+			contourcurve.cpp \
+			datexport.cpp \
+			dicomreader.cpp \
+			mainwindow.cpp \
+			marrow.cpp \
+			marrowextractor.cpp \
+			ofsexport.cpp \
+			opticalflow.cpp \
+			pgm3dexport.cpp \
+			piechart.cpp \
+			piechartdiagrams.cpp \
+			piepart.cpp \
+			plotslicehistogram.cpp \
+			pointpolarseriesdata.cpp \
+			slicehistogram.cpp \
+			sliceview.cpp \
+			slicezoomer.cpp \
+			test_intervalshistogram.cpp \
+			v3dexport.cpp \
+			v3dreader.cpp \
 
-SOURCES		=	main.cpp \
-				connexcomponentextractor.cpp \
-				contourcurve.cpp \
-				datexport.cpp \
-				dicomreader.cpp \
-				mainwindow.cpp \
-				marrow.cpp \
-				marrowextractor.cpp \
-				ofsexport.cpp \
-				opticalflow.cpp \
-				pgm3dexport.cpp \
-				piechart.cpp \
-				piechartdiagrams.cpp \
-				piepart.cpp \
-				pointpolarseriesdata.cpp \
-				slicehistogram.cpp \
-				sliceview.cpp \
-				slicezoomer.cpp \
-				test_intervalshistogram.cpp \
-				v3dexport.cpp \
-				v3dreader.cpp \
+HEADERS	=	billon.h \
+			connexcomponentextractor.h \
+			contourcurve.h \
+			coordinate.h \
+			datexport.h \
+			define.h \
+			def_billon.h \
+			def_coordinate.h \
+			def_opticalflow.h \
+			dicomreader.h \
+			histogram.h \
+			interval.h \
+			mainwindow.h \
+			marrow.h \
+			marrowextractor.h \
+			ofsexport.h \
+			opticalflow.h \
+			pgm3dexport.h \
+			piepart.h \
+			piechartdiagrams.h \
+			piechart.h \
+			plotslicehistogram.h \
+			pointpolarseriesdata.h \
+			slicehistogram.h \
+			sliceview.h \
+			slicezoomer.h \
+			test_intervalshistogram.h \
+			v3dexport.h \
+			v3dreader.h \
 
-HEADERS		=	billon.h \
-				connexcomponentextractor.h \
-				contourcurve.h \
-				coordinate.h \
-				datexport.h \
-				define.h \
-				def_billon.h \
-				def_coordinate.h \
-				dicomreader.h \
-				global.h \
-				histogram.h \
-				interval.h \
-				mainwindow.h \
-				marrow.h \
-				marrowextractor.h \
-				ofsexport.h \
-				opticalflow.h \
-				pgm3dexport.h \
-				piepart.h \
-				piechartdiagrams.h \
-				piechart.h \
-				pointpolarseriesdata.h \
-				slicehistogram.h \
-				sliceview.h \
-				slicezoomer.h \
-				test_intervalshistogram.h \
-				v3dexport.h \
-				v3dreader.h \
-    def/def_opticalflow.h
+FORMS =	mainwindow.ui
 
-FORMS		=	mainwindow.ui
-
-INCLUDEPATH *=  /usr/include/ \
-				/usr/local/include/ \
-				/usr/include/qwt/
-
+# Directives compilateur
+#-----------------------#
 CXXFLAGS += -std=c++0x
+macx:QMAKE_CC=/usr/bin/clang
+macx:QMAKE_CXX=/usr/bin/clang++
+
+
+# Librairies externes
+#--------------------#
+INCLUDEPATH *=	/usr/include/ \
+				/usr/local/include/
 
 LIBS *= -lblas -llapack -larmadillo
 
-CONFIG += $${ITK_VERSION}
+# ITK
+#----#
 itk3 {
-# SI ITK_VERSION = itk3
+	# SI ITK_VERSION = itk3
+	#----------------------#
 	ITK_PATH	 =	/usr/local/include/InsightToolkit/
 	INCLUDEPATH	*=	$${ITK_PATH}/ \
 					$${ITK_PATH}/IO/ \
@@ -106,48 +118,49 @@ itk3 {
 
 	QMAKE_LIBDIR *=	/usr/local/lib/
 
-	LIBS		*=	-lITKIO \
-					-litkgdcm \
-					-litkjpeg8 \
-					-litktiff \
-					-lITKMetaIO \
-					-lITKNrrdIO \
-					-litkpng \
-					-litkzlib \
-					-lITKDICOMParser \
-					-litkjpeg12 \
-					-litkjpeg16 \
-					-litkopenjpeg \
-					-lITKniftiio \
-					-lITKznz \
-					-lITKCommon \
-					-litksys \
-					-litkvnl_algo \
-					-litkv3p_netlib \
-					-litkvnl
-} else:itk4 {
-# SI ITK_VERSION = itk4
+	LIBS *=	-lITKIO \
+			-litkgdcm \
+			-litkjpeg8 \
+			-litktiff \
+			-lITKMetaIO \
+			-lITKNrrdIO \
+			-litkpng \
+			-litkzlib \
+			-lITKDICOMParser \
+			-litkjpeg12 \
+			-litkjpeg16 \
+			-litkopenjpeg \
+			-lITKniftiio \
+			-lITKznz \
+			-lITKCommon \
+			-litksys \
+			-litkvnl_algo \
+			-litkv3p_netlib \
+			-litkvnl
+}
+else:itk4 {
+	# SI ITK_VERSION = itk4
+	#----------------------#
 	ITK_PATH	 =	/usr/local/include/ITK-$${ITK_NUMBER}/
 	INCLUDEPATH	*=	$${ITK_PATH}/
 
-	LIBS		*=	\
-				-lITKIOGDCM-$${ITK_NUMBER} \
-					-litkgdcmDICT-$${ITK_NUMBER} \
-					-litkgdcmMSFF-$${ITK_NUMBER} \
-						-litkgdcmIOD-$${ITK_NUMBER} \
-						-litkgdcmDSED-$${ITK_NUMBER} \
-							-litkzlib-$${ITK_NUMBER} \
-						-litkgdcmCommon-$${ITK_NUMBER} \
-						-litkgdcmuuid-$${ITK_NUMBER} \
-						-litkopenjpeg-$${ITK_NUMBER} \
-						-litkgdcmjpeg12-$${ITK_NUMBER} \
-						-litkgdcmjpeg16-$${ITK_NUMBER} \
-						-litkgdcmjpeg8-$${ITK_NUMBER} \
-					-lITKIOImageBase-$${ITK_NUMBER} \
-						-lITKCommon-$${ITK_NUMBER} \
-							-litksys-$${ITK_NUMBER} \
-							-litkvnl_algo-$${ITK_NUMBER} \
-							-litkv3p_netlib-$${ITK_NUMBER} \
-							-litkvnl-$${ITK_NUMBER}
+	LIBS *=	-lITKIOGDCM-$${ITK_NUMBER} \
+				-litkgdcmDICT-$${ITK_NUMBER} \
+				-litkgdcmMSFF-$${ITK_NUMBER} \
+					-litkgdcmIOD-$${ITK_NUMBER} \
+					-litkgdcmDSED-$${ITK_NUMBER} \
+						-litkzlib-$${ITK_NUMBER} \
+					-litkgdcmCommon-$${ITK_NUMBER} \
+					-litkgdcmuuid-$${ITK_NUMBER} \
+					-litkopenjpeg-$${ITK_NUMBER} \
+					-litkgdcmjpeg12-$${ITK_NUMBER} \
+					-litkgdcmjpeg16-$${ITK_NUMBER} \
+					-litkgdcmjpeg8-$${ITK_NUMBER} \
+				-lITKIOImageBase-$${ITK_NUMBER} \
+					-lITKCommon-$${ITK_NUMBER} \
+						-litksys-$${ITK_NUMBER} \
+						-litkvnl_algo-$${ITK_NUMBER} \
+						-litkv3p_netlib-$${ITK_NUMBER} \
+						-litkvnl-$${ITK_NUMBER}
 
 }

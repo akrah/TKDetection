@@ -27,6 +27,8 @@ public:
 	qreal voxelWidth() const;
 	qreal voxelHeight() const;
 	qreal voxelDepth() const;
+	Slice& previousSlice( const uint currentSlice );
+	const Slice& previousSlice( const uint currentSlice) const;
 
 	void setMinValue( const T &value );
 	void setMaxValue( const T &value );
@@ -90,6 +92,18 @@ template< typename T >
 qreal BillonTpl<T>::voxelDepth() const
 {
 	return _voxelDepth;
+}
+
+template< typename T >
+Slice& BillonTpl<T>::previousSlice( const uint currentSlice )
+{
+	return this->slice(currentSlice>0 ? currentSlice-1 : currentSlice+1);
+}
+
+template< typename T >
+const Slice& BillonTpl<T>::previousSlice( const uint currentSlice) const
+{
+	return this->slice(currentSlice>0 ? currentSlice-1 : currentSlice+1);
 }
 
 /**********************************

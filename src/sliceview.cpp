@@ -161,7 +161,7 @@ void SliceView::drawCurrentSlice( QImage &image, const Billon &billon, const int
 void SliceView::drawMovementSlice( QImage &image, const Billon &billon, const int &sliceIndex, const Interval<int> &intensityInterval, const Interval<int> &motionInterval )
 {
 	const Slice &currentSlice = billon.slice(sliceIndex);
-	const Slice &previousSlice = billon.slice(sliceIndex > 0 ? sliceIndex-1 : sliceIndex+1);
+	const Slice &previousSlice = billon.previousSlice(sliceIndex);
 	const uint width = previousSlice.n_cols;
 	const uint height = previousSlice.n_rows;
 	const qreal fact = 255./motionInterval.width();

@@ -128,7 +128,7 @@ void PieChartDiagrams::compute( const Billon &billon, const Marrow *marrow, cons
 		for ( k=minOfInterval ; k<maxOfInterval ; ++k )
 		{
 			const Slice &currentSlice = billon.slice(k);
-			const Slice &prevSlice = billon.slice(k>0?k-1:k+1);
+			const Slice &previousSlice = billon.previousSlice(k);
 			if ( marrow != 0 ) marrowCoord = marrow->at(k);
 			for ( j=-radiusAroundPith ; j<radiusMax ; ++j )
 			{
@@ -142,7 +142,7 @@ void PieChartDiagrams::compute( const Billon &billon, const Marrow *marrow, cons
 					{
 						sectorIdx = pieChart.sectorIndexOfAngle( marrowCoord.angle(currentPos) );
 						currentSliceValue = currentSlice.at(currentPos.y,currentPos.x);
-						previousSliceValue = prevSlice.at(currentPos.y,currentPos.x);
+						previousSliceValue = previousSlice.at(currentPos.y,currentPos.x);
 						if ( intensity.containsOpen(currentSliceValue) && intensity.containsOpen(previousSliceValue) )
 						{
 							diff = qAbs(currentSliceValue - previousSliceValue);
@@ -156,7 +156,7 @@ void PieChartDiagrams::compute( const Billon &billon, const Marrow *marrow, cons
 			}
 		}
 
-		computeAll( smoothingRadius, minimumHeightPercentageOfMaximum, neighborhoodOfMaximums, derivativesPercentage, minimumWidthOfIntervals, true );
+		computeMaximumsAndIntervals( smoothingRadius, minimumHeightPercentageOfMaximum, neighborhoodOfMaximums, derivativesPercentage, minimumWidthOfIntervals, true );
 
 		computeValues(pieChart);
 		computeMaximums(pieChart);
