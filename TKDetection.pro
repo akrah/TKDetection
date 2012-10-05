@@ -45,16 +45,17 @@ SOURCES	=	main.cpp \
 			opticalflow.cpp \
 			pgm3dexport.cpp \
 			piechart.cpp \
-			piechartdiagrams.cpp \
 			piepart.cpp \
 			plotslicehistogram.cpp \
 			pointpolarseriesdata.cpp \
+			sectorhistogram.cpp \
 			slicehistogram.cpp \
 			sliceview.cpp \
 			slicezoomer.cpp \
 			test_intervalshistogram.cpp \
 			v3dexport.cpp \
 			v3dreader.cpp \
+    src/plotsectorhistogram.cpp
 
 HEADERS	=	billon.h \
 			connexcomponentextractor.h \
@@ -75,16 +76,17 @@ HEADERS	=	billon.h \
 			opticalflow.h \
 			pgm3dexport.h \
 			piepart.h \
-			piechartdiagrams.h \
 			piechart.h \
 			plotslicehistogram.h \
 			pointpolarseriesdata.h \
+			sectorhistogram.h \
 			slicehistogram.h \
 			sliceview.h \
 			slicezoomer.h \
 			test_intervalshistogram.h \
 			v3dexport.h \
 			v3dreader.h \
+    inc/plotsectorhistogram.h
 
 FORMS =	mainwindow.ui
 

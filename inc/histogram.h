@@ -30,6 +30,7 @@ public:
 	T thresholdOfMaximums( const int &percentage ) const;
 	T firstdDerivated( int i, bool loop ) const;
 
+	void clear();
 	void computeMaximumsAndIntervals( const int & smoothingRadius,
 									  const int & minimumHeightPercentageOfMaximum, const int & neighborhoodOfMaximums,
 									  const int & derivativesPercentage, const int &minimumWidthOfIntervals, const bool & loop );
@@ -63,7 +64,7 @@ QTextStream & operator <<( QTextStream & stream, const Histogram<T> & histogram 
  * Public constructors/destructors
  **********************************/
 
-template <typename T> Histogram<T>::Histogram() {}
+template <typename T> Histogram<T>::Histogram() : QVector<T>() {}
 template <typename T> Histogram<T>::~Histogram() {}
 
 
@@ -158,6 +159,14 @@ T Histogram<T>::firstdDerivated( int i, bool loop ) const
 /**********************************
  * Public setters
  **********************************/
+template <typename T>
+void Histogram<T>::clear()
+{
+	QVector<T>::clear();
+	_maximums.clear();
+	_intervals.clear();
+}
+
 template <typename T>
 void Histogram<T>::computeMaximumsAndIntervals( const int & smoothingRadius,
 												const int & minimumHeightPercentageOfMaximum, const int & neighborhoodOfMaximums,

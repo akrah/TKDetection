@@ -14,7 +14,6 @@ public:
 	~PlotSliceHistogram();
 
 	void attach( QwtPlot * const plot );
-	void detach();
 	void clear();
 
 	void update( const SliceHistogram & histogram );

@@ -17,13 +17,14 @@ namespace Ui
 	class MainWindow;
 }
 
-class Marrow;
-class SliceView;
-class SliceHistogram;
-class PlotSliceHistogram;
-class PieChart;
-class PieChartDiagrams;
 class ContourCurve;
+class Marrow;
+class PieChart;
+class PlotSectorHistogram;
+class PlotSliceHistogram;
+class SectorHistogram;
+class SliceHistogram;
+class SliceView;
 
 class MainWindow : public QMainWindow
 {
@@ -115,7 +116,8 @@ private:
 	QwtPlotHistogram _histogramDistanceMarrowToNearestPoint;
 
 	PieChart *_pieChart;
-	PieChartDiagrams *_pieChartDiagrams;
+	SectorHistogram *_sectorHistogram;
+	PlotSectorHistogram * _plotSectorHistogram;
 
 	ContourCurve *_contourCurve;
 

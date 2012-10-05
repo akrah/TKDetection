@@ -1,8 +1,9 @@
 #include "inc/piechart.h"
 
-#include "inc/define.h"
-#include "inc/piepart.h"
 #include "inc/coordinate.h"
+#include "inc/define.h"
+#include "inc/interval.h"
+#include "inc/piepart.h"
 
 #include <QPainter>
 
@@ -53,7 +54,7 @@ void PieChart::setSectorsNumber( const uint &nbSectors )
 	updateSectors(nbSectors);
 }
 
-void PieChart::draw( QImage &image, const uint &sectorIdx, const iCoord2D &center ) const
+void PieChart::draw( QImage &image, const iCoord2D &center, const uint &sectorIdx ) const
 {
 	Q_ASSERT_X( sectorIdx<nbSectors() , "draw", "sector index greater than sector number" );
 
@@ -88,6 +89,52 @@ void PieChart::draw( QImage &image, const uint &sectorIdx, const iCoord2D &cente
 		}
 		// Tracé du segment
 		painter.drawLine(center.x,center.y,end.x,end.y);
+	}
+}
+
+void PieChart::draw( QImage &image, const iCoord2D &center, const QVector< Interval<int> > & intervals ) const
+{
+	if ( !intervals.isEmpty() )
+	{
+		// Liste qui va contenir les angles des deux côté du secteur à dessiner
+		// Permet de factoriser le code de calcul des coordonnées juste en dessous
+		QList<qreal> twoSides;
+		QVector< Interval<int> >::ConstIterator interval;
+		for ( interval = intervals.constBegin() ; interval < intervals.constEnd() ; ++interval )
+		{
+			twoSides.append( sector((*interval).min()).orientation()-0.01 );
+			twoSides.append( sector((*interval).max()).orientation() );
+		}
+
+		// Dessin des deux côtés du secteur
+		const int width = image.width();
+		const int height = image.height();
+		const QColor colors[] = { Qt::blue, Qt::cyan, Qt::magenta };
+		QColor color;
+		iCoord2D end;
+		int colorIndex = 0;
+
+		QPainter painter(&image);
+		QList<qreal>::ConstIterator angle;
+		for ( angle = twoSides.constBegin() ; angle < twoSides.constEnd() ; ++angle )
+		{
+			// Calcul des coordonnées du segment à tracer
+			color = colors[(colorIndex++/2)%3];
+			painter.setPen(color);
+			painter.setBrush(color);
+			end = center;
+			if ( qFuzzyCompare(*angle,PI_ON_TWO) ) end.y = height;
+			else if ( qFuzzyCompare(*angle,THREE_PI_ON_TWO) ) end.y = 0;
+			else
+			{
+				const qreal a = qTan(*angle);
+				const qreal b = center.y - (a*center.x);
+				if ( (*angle) < PI_ON_TWO || (*angle) > THREE_PI_ON_TWO ) end = iCoord2D(width,a*width+b);
+				else end = iCoord2D(0,b);
+			}
+			// Tracé du segment
+			painter.drawLine(center.x,center.y,end.x,end.y);
+		}
 	}
 }
 

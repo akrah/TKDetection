@@ -2,7 +2,7 @@
 
 #include "inc/billon.h"
 
-SliceHistogram::SliceHistogram()
+SliceHistogram::SliceHistogram() : Histogram<qreal>()
 {
 }
 
@@ -23,33 +23,35 @@ void SliceHistogram::construct( const Billon &billon, const Marrow &marrow, cons
 	const int radiusMax = radiusAroundPith+1;
 	const qreal squareRadius = qPow(radiusAroundPith,2);
 
-	this->clear();
-	this->resize(depth-1);
+	clear();
+	resize(depth-1);
 
-	QVector<int> circleLines;
+	QList<int> circleLines;
 	circleLines.reserve(2*radiusAroundPith+1);
 	for ( int lineIndex=-radiusAroundPith ; lineIndex<radiusMax ; ++lineIndex )
 	{
 		circleLines.append(qSqrt(squareRadius-qPow(lineIndex,2)));
 	}
 
-	int i, j, k, iRadius, iRadiusMax, currentSliceValue, previousSliceValue;
+	const uint minOfInterval = borderPercentageToCut*depth/100.;
+	const uint maxOfInterval = depth-minOfInterval;
+	int i, j, iRadius, iRadiusMax;
+	__billon_type__ currentSliceValue, previousSliceValue, diff;
 	iCoord2D currentPos;
-	qreal cumul, diff;
+	uint k;
+	qreal cumul;
 
-	const int kLimitMin = borderPercentageToCut*depth/100.;
-	const int kLimitMax = depth-kLimitMin;
-	for ( k=kLimitMin ; k<kLimitMax ; ++k )
+	for ( k=minOfInterval ; k<maxOfInterval ; ++k )
 	{
 		const Slice &currentSlice = billon.slice(k);
 		const Slice &previousSlice = billon.previousSlice(k);
 		cumul = 0.;
-		currentPos.y = marrow.at(k).y-radiusAroundPith;
+		currentPos.y = marrow[k].y-radiusAroundPith;
 		for ( j=-radiusAroundPith ; j<radiusMax ; ++j )
 		{
 			iRadius = circleLines[j+radiusAroundPith];
 			iRadiusMax = iRadius+1;
-			currentPos.x = marrow.at(k).x-iRadius;
+			currentPos.x = marrow[k].x-iRadius;
 			for ( i=-iRadius ; i<iRadiusMax ; ++i )
 			{
 				if ( currentPos.x < width && currentPos.y < height )

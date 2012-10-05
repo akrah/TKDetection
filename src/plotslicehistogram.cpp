@@ -33,20 +33,13 @@ void PlotSliceHistogram::attach( QwtPlot * const plot )
 	}
 }
 
-void PlotSliceHistogram::detach()
-{
-	_histogramData.detach();
-	_histogramIntervals.detach();
-	_histogramMaximums.detach();
-	_curvePercentage.detach();
-}
-
 void PlotSliceHistogram::clear()
 {
 	const QVector<QwtIntervalSample> emptyData(0);
 	_histogramData.setSamples(emptyData);
 	_histogramMaximums.setSamples(emptyData);
 	_histogramIntervals.setSamples(emptyData);
+
 	_curvePercentage.setSamples(QVector<QPointF>(0));
 }
 
@@ -64,7 +57,7 @@ void PlotSliceHistogram::update( const SliceHistogram & histogram )
 
 void PlotSliceHistogram::computeValues( const SliceHistogram &histogram )
 {
-	QVector<QwtIntervalSample> datasHistogram;
+	QVector<QwtIntervalSample> datasHistogram(0);
 	if ( histogram.size() > 0 )
 	{
 		datasHistogram.reserve(histogram.size());
@@ -82,9 +75,10 @@ void PlotSliceHistogram::computeValues( const SliceHistogram &histogram )
 
 void PlotSliceHistogram::computeMaximums( const SliceHistogram & histogram )
 {
-	QVector<QwtIntervalSample> datasMaximums;
-	if ( histogram.maximums().size() > 0 )
+	QVector<QwtIntervalSample> datasMaximums(0);
+	if ( histogram.nbMaximums() > 0 )
 	{
+		datasMaximums.reserve(histogram.nbMaximums());
 		int slice;
 		QVector<int>::ConstIterator begin = histogram.maximums().begin();
 		const QVector<int>::ConstIterator end = histogram.maximums().end();
@@ -99,9 +93,10 @@ void PlotSliceHistogram::computeMaximums( const SliceHistogram & histogram )
 
 void PlotSliceHistogram::computeIntervals( const SliceHistogram & histogram )
 {
-	QVector<QwtIntervalSample> dataIntervals;
-	if ( histogram.maximums().size() > 0 )
+	QVector<QwtIntervalSample> dataIntervals(0);
+	if ( histogram.nbIntervals() > 0 )
 	{
+		dataIntervals.reserve(histogram.nbIntervals());
 		int i, min, max;
 		QVector< Interval<int> >::ConstIterator begin = histogram.intervals().begin();
 		const QVector< Interval<int> >::ConstIterator end = histogram.intervals().end();

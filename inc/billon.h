@@ -145,8 +145,8 @@ QVector<rCoord2D> BillonTpl<T>::getRestrictedAreaVertex( const Marrow & marrow, 
 	for ( uint indexSlice = sliceInterval.min() ; indexSlice<=sliceInterval.max() ; ++indexSlice )
 	{
 		const arma::Mat<T> & currentSlice = this->slice(indexSlice);
-		center.x = marrow.at(indexSlice).x;
-		center.y = marrow.at(indexSlice).y;
+		center.x = marrow[indexSlice].x;
+		center.y = marrow[indexSlice].y;
 		orientation = 0.;
 		while (orientation < TWO_PI)
 		{
@@ -180,8 +180,8 @@ qreal BillonTpl<T>::getRestrictedAreaMeansRadius( const Marrow &marrow, const ui
 	radius = 0.;
 	for ( int k=0 ; k<depth ; ++k ) {
 		const arma::Mat<T> &currentSlice = this->slice(k);
-		center.x = marrow.at(k).x;
-		center.y = marrow.at(k).y;
+		center.x = marrow[k].x;
+		center.y = marrow[k].y;
 		orientation = 0.;
 		while (orientation < TWO_PI)
 		{

@@ -13,9 +13,10 @@
 #include "inc/opticalflow.h"
 #include "inc/pgm3dexport.h"
 #include "inc/piechart.h"
-#include "inc/piechartdiagrams.h"
 #include "inc/piepart.h"
+#include "inc/plotsectorhistogram.h"
 #include "inc/plotslicehistogram.h"
+#include "inc/sectorhistogram.h"
 #include "inc/slicehistogram.h"
 #include "inc/sliceview.h"
 #include "inc/v3dexport.h"
@@ -34,7 +35,8 @@
 #include <qwt_round_scale_draw.h>
 
 MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::MainWindow), _billon(0), _sectorBillon(0), _componentBillon(0), _marrow(0),
-	_sliceView(new SliceView()), _sliceHistogram(new SliceHistogram()), _plotSliceHistogram(new PlotSliceHistogram()), _pieChart(new PieChart(360)), _pieChartDiagrams(new PieChartDiagrams()), _contourCurve(new ContourCurve()),
+	_sliceView(new SliceView()), _sliceHistogram(new SliceHistogram()), _plotSliceHistogram(new PlotSliceHistogram()), _pieChart(new PieChart(360)),
+	_sectorHistogram(new SectorHistogram()), _plotSectorHistogram(new PlotSectorHistogram()), _contourCurve(new ContourCurve()),
 	_currentSlice(0), _currentMaximum(0)
 {
 	_ui->setupUi(this);
@@ -72,8 +74,8 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 	_ui->_plotAngularHistogram->enableAxis(QwtPlot::yLeft,false);
 
 	_ui->_polarSectorSum->setScale( QwtPolar::Azimuth, TWO_PI, 0.0 );
-	_pieChartDiagrams->attach(_ui->_polarSectorSum);
-	_pieChartDiagrams->attach(_ui->_plotAngularHistogram);
+	_plotSectorHistogram->attach(_ui->_polarSectorSum);
+	_plotSectorHistogram->attach(_ui->_plotAngularHistogram);
 
 	QwtPolarGrid *grid = new QwtPolarGrid();
 	grid->showAxis(QwtPolar::AxisRight,false);
@@ -200,7 +202,8 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 
 MainWindow::~MainWindow() {
 	delete _contourCurve;
-	delete _pieChartDiagrams;
+	delete _plotSectorHistogram;
+	delete _sectorHistogram;
 	delete _pieChart;
 	delete _plotSliceHistogram;
 	delete _sliceHistogram;
@@ -224,10 +227,10 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *event)
 			if ( (mouseEvent->button() == Qt::LeftButton) && _billon != 0 ) {
 				iCoord2D mousePos(mouseEvent->x(),mouseEvent->y());
 				mousePos /= _sliceZoomer.factor();
-				iCoord2D center = _marrow != 0 ? _marrow->at(_currentSlice) : iCoord2D(_billon->n_cols/2,_billon->n_rows/2);
-				const int sector = _pieChart->sectorIndexOfAngle( center.angle(mousePos) );
+				iCoord2D center = _marrow != 0 ? (*_marrow)[_currentSlice] : iCoord2D(_billon->n_cols/2,_billon->n_rows/2);
+				const uint sector = _pieChart->sectorIndexOfAngle( center.angle(mousePos) );
 				highlightSectorHistogram(sector);
-				_pieChartDiagrams->highlightCurve(sector,*_pieChart);
+				_plotSectorHistogram->highlightCurve(sector);
 			}
 		}
 	}
@@ -241,7 +244,8 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *event)
 void MainWindow::openDicom()
 {
 	QString folderName = QFileDialog::getExistingDirectory(0,tr("Sélection du répertoire DICOM"),QDir::homePath(),QFileDialog::ShowDirsOnly);
-	if ( !folderName.isEmpty() ) {
+	if ( !folderName.isEmpty() )
+	{
 		closeImage();
 		openNewBillon(folderName);
 		updateUiComponentsValues();
@@ -256,7 +260,7 @@ void MainWindow::closeImage()
 	openNewBillon();
 	updateMarrow();
 	updateSliceHistogram();
-	_pieChartDiagrams->clear();
+	_sectorHistogram->clear();
 	_ui->_plotAngularHistogram->replot();
 	_ui->_polarSectorSum->replot();
 	selectSectorInterval(0);
@@ -272,8 +276,7 @@ void MainWindow::drawSlice( const int &sliceNumber )
 	{
 		_ui->_labelSliceNumber->setNum(sliceNumber);
 		_pix.fill(0xff000000);
-		_sliceView->drawSlice(_pix,*_billon,_marrow!=0?_marrow->at(_currentSlice):iCoord2D(_billon->n_cols/2,_billon->n_rows/2),sliceNumber,Interval<int>(_ui->_spinMinIntensity->value(),_ui->_spinMaxIntensity->value()), Interval<int>(_ui->_spinMovementThresholdMin->value(),_ui->_spinMovementThresholdMax->value()));
-		highlightSliceHistogram(sliceNumber);
+		_sliceView->drawSlice(_pix,*_billon,_marrow!=0?(*_marrow)[sliceNumber]:iCoord2D(_billon->n_cols/2,_billon->n_rows/2),sliceNumber,Interval<int>(_ui->_spinMinIntensity->value(),_ui->_spinMaxIntensity->value()), Interval<int>(_ui->_spinMovementThresholdMin->value(),_ui->_spinMovementThresholdMax->value()));
 		if ( _marrow != 0 )
 		{
 			_marrow->draw(_pix,sliceNumber);
@@ -281,21 +284,21 @@ void MainWindow::drawSlice( const int &sliceNumber )
 			{
 				QPainter painter(&_pix);
 				painter.setPen(Qt::yellow);
-				iCoord2D center = _marrow->at(sliceNumber-_marrow->interval().min());
+				iCoord2D center = (*_marrow)[sliceNumber-_marrow->interval().min()];
 				painter.drawEllipse(QPointF(center.x,center.y),_ui->_checkRadiusAroundPith->text().toInt(),_ui->_checkRadiusAroundPith->text().toInt());
 			}
 		}
 
 		const bool inDrawingArea = (_ui->_comboSelectSliceInterval->currentIndex() > 0 && _sliceHistogram->interval(_ui->_comboSelectSliceInterval->currentIndex()-1).containsClosed(sliceNumber));
-		if ( (_pieChartDiagrams->size() != 0) && inDrawingArea )
+		if ( (_sectorHistogram->size() != 0) && inDrawingArea )
 		{
 			iCoord2D center(_pix.width()/2,_pix.height()/2);
 			if ( _marrow != 0 &&  _marrow->interval().containsClosed(sliceNumber) )
 			{
-				center = _marrow->at(sliceNumber-_marrow->interval().min());
+				center = (*_marrow)[sliceNumber-_marrow->interval().min()];
 			}
-			_pieChartDiagrams->draw(_pix,center,*_pieChart);
-			_pieChart->draw(_pix,_currentSector, center);
+			_pieChart->draw(_pix, center, _sectorHistogram->intervals());
+			_pieChart->draw(_pix, center, _currentSector);
 		}
 		if ( _sectorBillon != 0 && inDrawingArea )
 		{
@@ -373,8 +376,8 @@ void MainWindow::drawSlice( const int &sliceNumber )
 				}
 				painter.end();
 
-				_contourCurve->constructCurve( *biggestComponents, _marrow != 0 ? _marrow->at(sliceNumber) : iCoord2D(width/2,height/2), 0, 0, _ui->_spinBlurredSegmentsThickness->value(), _ui->_spinContourSmoothingRadius->value() );
-				//_contourCurve->constructCurve( *_componentBillon, _marrow != 0 ? _marrow->at(sliceNumber) : iCoord2D(width/2,height/2), sliceNumber-sliceInterval.minValue(), 1, _ui->_spinBlurredSegmentsThickness->value(), _ui->_spinContourSmoothingRadius->value() );
+				_contourCurve->constructCurve( *biggestComponents, _marrow != 0 ? (*_marrow)[sliceNumber] : iCoord2D(width/2,height/2), 0, 0, _ui->_spinBlurredSegmentsThickness->value(), _ui->_spinContourSmoothingRadius->value() );
+				//_contourCurve->constructCurve( *_componentBillon, _marrow != 0 ? (*_marrow)[sliceNumber] : iCoord2D(width/2,height/2), sliceNumber-sliceInterval.minValue(), 1, _ui->_spinBlurredSegmentsThickness->value(), _ui->_spinContourSmoothingRadius->value() );
 				_contourCurve->drawRestrictedComponent(_pix);
 				_contourCurve->draw(_pix);
 
@@ -421,8 +424,7 @@ void MainWindow::setTypeOfView( const int &type )
 
 void MainWindow::updateSliceHistogram()
 {
-	_plotSliceHistogram->detach();
-	_plotSliceHistogram->clear();
+	_sliceHistogram->clear();
 
 	if ( _billon != 0 && _marrow != 0 )
 	{
@@ -431,15 +433,11 @@ void MainWindow::updateSliceHistogram()
 								   _ui->_spinBorderPercentageToCut->value(), _ui->_checkRadiusAroundPith->text().toInt());
 		_sliceHistogram->computeMaximumsAndIntervals( _ui->_spinSmoothingRadiusOfHistogram->value(), _ui->_spinMinimumHeightofMaximum->value(),
 													  _ui->_spinMaximumsNeighborhood->value(), _ui->_spinDerivativePercentage->value(),
-													  _ui->_spinHistogramIntervalMinimumWidth->value(), _ui->_checkRadiusAroundPith->text().toInt());
-		_plotSliceHistogram->update( *_sliceHistogram );
+													  _ui->_spinHistogramIntervalMinimumWidth->value(), false);
 	}
-	_histogramCursor.detach();
-	_histogramDistanceMarrowToNearestPointCursor.detach();
-	_plotSliceHistogram->attach(_ui->_plotSliceHistogram);
-	_histogramCursor.attach(_ui->_plotSliceHistogram);
-	_histogramDistanceMarrowToNearestPointCursor.attach(_ui->_plotDistanceMarrowToNearestPoint);
+	_plotSliceHistogram->update( *_sliceHistogram );
 	_ui->_plotSliceHistogram->setAxisScale(QwtPlot::xBottom,0,(_billon != 0)?_billon->n_slices:0);
+	_ui->_plotSliceHistogram->replot();
 	highlightSliceHistogram(_currentSlice);
 
 	const int oldIntervalIndex = _ui->_comboSelectSliceInterval->currentIndex();
@@ -487,11 +485,8 @@ void MainWindow::updateMarrow()
 	{
 		MarrowExtractor extractor;
 		_marrow = extractor.process(*_billon,0,_billon->n_slices-1);
-		if ( _marrow != 0 )
-		{
-			_ui->_checkRadiusAroundPith->setText( QString::number(static_cast<int>(_billon->getRestrictedAreaMeansRadius(*_marrow,20,_ui->_spinMinIntensity->value())*0.75)) );
-		}
 	}
+	_ui->_checkRadiusAroundPith->setText( QString::number(_marrow != 0 ? static_cast<int>(_billon->getRestrictedAreaMeansRadius(*_marrow,20,_ui->_spinMinIntensity->value())*0.75) : 100) );
 	drawSlice();
 	updateSliceHistogram();
 }
@@ -710,10 +705,10 @@ void MainWindow::exportToOfsRestricted()
 
 void MainWindow::exportSectorToOfs() {
 	int index = _ui->_comboSelectSectorInterval->currentIndex();
-	if ( _billon != 0 && _marrow != 0 && index > 0 && index <= _pieChartDiagrams->knotIntervals().size() ) {
+	if ( _billon != 0 && _marrow != 0 && index > 0 && index <= _sectorHistogram->nbIntervals() ) {
 		QString fileName = QFileDialog::getSaveFileName(this, tr("Exporter le secteur %1 en .ofs").arg(index), QString("sector_%1.ofs").arg(index), tr("Fichiers de données (*.ofs);;Tous les fichiers (*.*)"));
 		if ( !fileName.isEmpty() ) {
-			const Interval<int> &sectorInterval = _pieChartDiagrams->knotIntervals()[_ui->_comboSelectSectorInterval->currentIndex()-1];
+			const Interval<int> &sectorInterval = _sectorHistogram->interval(_ui->_comboSelectSectorInterval->currentIndex()-1);
 			const Interval<int> &slicesInterval = _sliceHistogram->interval(_ui->_comboSelectSliceInterval->currentIndex()-1);
 			OfsExport::processOnSector( *_billon, *_marrow, slicesInterval, fileName, _pieChart->sector(sectorInterval.min()).rightAngle(), _pieChart->sector(sectorInterval.max()).leftAngle(), _ui->_spinExportNbEdges->value() );
 		}
@@ -728,7 +723,7 @@ void MainWindow::exportAllSectorInAllIntervalsToOfs() {
 			for ( int i=0 ; i<_ui->_comboSelectSliceInterval->count()-1 ; i++ ) {
 				const Interval<int> &slicesInterval = _sliceHistogram->interval(i);
 				for ( int j=0 ; j<_ui->_comboSelectSectorInterval->count()-1 ; j++ ) {
-					const Interval<int> &sectorInterval = _pieChartDiagrams->knotIntervals()[j];
+					const Interval<int> &sectorInterval = _sectorHistogram->interval(j);
 					const QPair<qreal,qreal> angles( _pieChart->sector(sectorInterval.min()).rightAngle(), _pieChart->sector(sectorInterval.max()).leftAngle() );
 					intervals.append( QPair< Interval<int>, QPair<qreal,qreal> >( slicesInterval, angles ) );
 				}
@@ -849,13 +844,13 @@ void MainWindow::selectSliceInterval( const int &index )
 	_ui->_comboSelectSectorInterval->addItem(tr("Aucun"));
 	_ui->_spanSliderSelectInterval->setLowerValue(0);
 	_ui->_spanSliderSelectInterval->setUpperValue(0);
-	if ( index > 0 && index <= _sliceHistogram->intervals().size() )
+	if ( index > 0 && index <= _sliceHistogram->nbIntervals() )
 	{
 		const Interval<int> &sliceInterval = _sliceHistogram->interval(index-1);
 		computeSectorsHistogramForInterval(sliceInterval);
 		_ui->_sliderSelectSlice->setValue(_sliceHistogram->intervalIndex(index-1));
 
-		const QVector< Interval<int> > &angularIntervals = _pieChartDiagrams->knotIntervals();
+		const QVector< Interval<int> > &angularIntervals = _sectorHistogram->intervals();
 		if ( !angularIntervals.isEmpty() )
 		{
 			qreal rightAngle, leftAngle;
@@ -890,9 +885,9 @@ void MainWindow::selectSectorInterval( const int &index ) {
 	_ui->_comboConnexComponents->clear();
 	_ui->_comboConnexComponents->addItem(tr("Toutes"));
 	_knotIntervalInDistanceMarrowToNearestPointHistogram.setBounds(-1,-1);
-	if ( index > 0 && index <= _pieChartDiagrams->knotIntervals().size() )
+	if ( index > 0 && index <= _sectorHistogram->nbIntervals() )
 	{
-		const Interval<int> &sectorInterval = _pieChartDiagrams->knotIntervals()[_ui->_comboSelectSectorInterval->currentIndex()-1];
+		const Interval<int> &sectorInterval = _sectorHistogram->interval(_ui->_comboSelectSectorInterval->currentIndex()-1);
 		const Interval<int> &sliceInterval = _sliceHistogram->interval(_ui->_comboSelectSliceInterval->currentIndex()-1);
 		const int firstSlice = sliceInterval.min();
 		const int lastSlice = sliceInterval.max()+1;
@@ -911,7 +906,7 @@ void MainWindow::selectSectorInterval( const int &index ) {
 		{
 			const Slice &originalSlice = _billon->slice(k);
 			Slice &sectorSlice = _sectorBillon->slice(k-firstSlice);
-			const iCoord2D &marrowCoord = _marrow->at(k);
+			const iCoord2D &marrowCoord = (*_marrow)[k];
 			for ( j=0 ; j<height ; ++j )
 			{
 				for ( i=0 ; i<width ; ++i )
@@ -946,9 +941,9 @@ void MainWindow::selectSectorInterval( const int &index ) {
 			for ( i=0 ; i<depth ; ++i )
 			{
 				biggestComponents = ConnexComponentExtractor::extractConnexComponents( _componentBillon->slice(i), qPow(_ui->_spinMinimalSizeOf2DConnexComponents->value(),2), 0 );
-				nearestPoint = biggestComponents->findNearestPointOfThePith( _marrow->at(firstSlice+i), 0, 0 );
-				//nearestPoint = _componentBillon->findNearestPointOfThePith( _marrow->at(firstSlice+i), i, 0 );
-				histData[i].value = nearestPoint.euclideanDistance(_marrow->at(firstSlice+i));
+				nearestPoint = biggestComponents->findNearestPointOfThePith( (*_marrow)[firstSlice+i], 0, 0 );
+				//nearestPoint = _componentBillon->findNearestPointOfThePith( (*_marrow)[firstSlice+i], i, 0 );
+				histData[i].value = nearestPoint.euclideanDistance((*_marrow)[firstSlice+i]);
 				histData[i].interval.setInterval(i,i+1);
 				if ( minVal > histData[i].value )
 				{
@@ -1178,7 +1173,7 @@ void MainWindow::exportContours() {
 				return;
 			}
 			Billon *biggestComponent = ConnexComponentExtractor::extractBiggestConnexComponent( _componentBillon->slice(_currentSlice-sliceInterval.min()), 0 );
-			QVector<iCoord2D> contourPoints = biggestComponent->extractContour( _marrow != 0 ? _marrow->at(_currentSlice) : iCoord2D(_billon->n_cols/2,_billon->n_rows/2), 0, 0 );
+			QVector<iCoord2D> contourPoints = biggestComponent->extractContour( _marrow != 0 ? (*_marrow)[_currentSlice] : iCoord2D(_billon->n_cols/2,_billon->n_rows/2), 0, 0 );
 
 			QTextStream stream(&file);
 			stream << contourPoints.size() << endl;
@@ -1220,7 +1215,7 @@ void MainWindow::exportContourComponentToPgm3D()
 			iCoord2D marrowCoord;
 			for ( int k=_knotIntervalInDistanceMarrowToNearestPointHistogram.min() ; k<=_knotIntervalInDistanceMarrowToNearestPointHistogram.max() ; ++k )
 			{
-				marrowCoord = _marrow != 0 ? _marrow->at(sliceInterval.min()+k) : iCoord2D(width/2,height/2);
+				marrowCoord = _marrow != 0 ? (*_marrow)[sliceInterval.min()+k] : iCoord2D(width/2,height/2);
 				biggestComponents = ConnexComponentExtractor::extractConnexComponents( _componentBillon->slice(k), qPow(_ui->_spinMinimalSizeOf2DConnexComponents->value(),2), 0 );
 				contourCurve.constructCurve( *biggestComponents, marrowCoord, 0, 1, _ui->_spinBlurredSegmentsThickness->value(), _ui->_spinContourSmoothingRadius->value() );
 				contourCurve.writeContourContentInPgm3D(dstream);
@@ -1245,7 +1240,7 @@ void MainWindow::createVoxelSetAllIntervals(std::vector<iCoord3D> &vectVoxels, b
 		_ui->_comboSelectSliceInterval->setCurrentIndex(l);
 		selectSliceInterval(l);
 		const Interval<int> &sliceInterval = _sliceHistogram->interval(l-1);
-		const QVector< Interval<int> > &intervals = _pieChartDiagrams->knotIntervals();
+		const QVector< Interval<int> > &intervals = _sectorHistogram->intervals();
 
 		if ( !intervals.isEmpty() )
 		{
@@ -1263,7 +1258,7 @@ void MainWindow::createVoxelSetAllIntervals(std::vector<iCoord3D> &vectVoxels, b
 
 				for ( int k=_knotIntervalInDistanceMarrowToNearestPointHistogram.min() ; k<=_knotIntervalInDistanceMarrowToNearestPointHistogram.max() ; ++k )
 				{
-					marrowCoord = _marrow != 0 ? _marrow->at(sliceInterval.min()+k) : iCoord2D(width/2,height/2);
+					marrowCoord = _marrow != 0 ? (*_marrow)[sliceInterval.min()+k] : iCoord2D(width/2,height/2);
 					biggestComponents = ConnexComponentExtractor::extractConnexComponents( _componentBillon->slice(k), qPow(_ui->_spinMinimalSizeOf2DConnexComponents->value(),2), 0 );
 					if(useOldMethod){
 					  contourCurve.constructCurveOldMethod( *biggestComponents, marrowCoord, 0, 0, _ui->_spinContourSmoothingRadius->value() );
@@ -1285,7 +1280,7 @@ void MainWindow::createVoxelSet(std::vector<iCoord3D> &vectVoxels)
 {
 	const Interval<int> &sliceInterval = _sliceHistogram->interval(_ui->_comboSelectSliceInterval->currentIndex()-1);
 	const int minSlice = sliceInterval.min();
-	const QVector< Interval<int> > &intervals = _pieChartDiagrams->knotIntervals();
+	const QVector< Interval<int> > &intervals = _sectorHistogram->intervals();
 
 	if ( !intervals.isEmpty() )
 	{
@@ -1303,7 +1298,7 @@ void MainWindow::createVoxelSet(std::vector<iCoord3D> &vectVoxels)
 
 			for ( int k=_knotIntervalInDistanceMarrowToNearestPointHistogram.min() ; k<=_knotIntervalInDistanceMarrowToNearestPointHistogram.max() ; ++k )
 			{
-				marrowCoord = _marrow != 0 ? _marrow->at(minSlice+k) : iCoord2D(width/2,height/2);
+				marrowCoord = _marrow != 0 ? (*_marrow)[minSlice+k] : iCoord2D(width/2,height/2);
 				biggestComponents = ConnexComponentExtractor::extractConnexComponents( _componentBillon->slice(k), qPow(_ui->_spinMinimalSizeOf2DConnexComponents->value(),2), 0 );
 				contourCurve.constructCurve( *biggestComponents, marrowCoord, 0, 0, _ui->_spinBlurredSegmentsThickness->value(), _ui->_spinContourSmoothingRadius->value() );
 				contourCurve.getContourContentPoints(vectVoxels, minSlice+ k);
@@ -1431,7 +1426,8 @@ void MainWindow::openNewBillon( const QString &folderName )
 	}
 }
 
-void MainWindow::drawSlice() {
+void MainWindow::drawSlice()
+{
 	drawSlice(_currentSlice);
 }
 
@@ -1568,13 +1564,18 @@ void MainWindow::enabledComponents() {
 
 void MainWindow::computeSectorsHistogramForInterval( const Interval<int> &interval ) {
 	_pieChart->setSectorsNumber(_ui->_spinSectorsNumber->value());
+	_sectorHistogram->clear();
 
-	if ( _billon != 0 ) _pieChartDiagrams->compute( *_billon, _marrow, *_pieChart, interval, Interval<int>(_ui->_spinMinIntensity->value(),_ui->_spinMaxIntensity->value()),
-													Interval<int>(_ui->_spinMovementThresholdMin->value(),_ui->_spinMovementThresholdMax->value()),
-													_ui->_spinSmoothingRadiusOfHistogram->value(), _ui->_spinMinimumHeightofMaximum->value(),
-													_ui->_spinMaximumsNeighborhood->value(), _ui->_spinDerivativePercentage->value(),
-													_ui->_spinHistogramIntervalMinimumWidth->value(), _ui->_checkRadiusAroundPith->text().toInt());
+	if ( _billon != 0 && _marrow != 0 )
+	{
+		_sectorHistogram->construct( *_billon, *_marrow, *_pieChart, interval, Interval<int>(_ui->_spinMinIntensity->value(),_ui->_spinMaxIntensity->value()),
+									 Interval<int>(_ui->_spinMovementThresholdMin->value(),_ui->_spinMovementThresholdMax->value()), _ui->_checkRadiusAroundPith->text().toInt());
+		_sectorHistogram->computeMaximumsAndIntervals( _ui->_spinSmoothingRadiusOfHistogram->value(), _ui->_spinMinimumHeightofMaximum->value(),
+													   _ui->_spinMaximumsNeighborhood->value(), _ui->_spinDerivativePercentage->value(),
+													   _ui->_spinHistogramIntervalMinimumWidth->value(), true );
+	}
 
+	_plotSectorHistogram->update(*_sectorHistogram, *_pieChart);
 	_ui->_plotAngularHistogram->replot();
 	_ui->_polarSectorSum->replot();
 	highlightSectorHistogram(0);

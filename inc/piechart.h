@@ -7,6 +7,7 @@
 
 class PiePart;
 class QImage;
+template <typename T> class Interval;
 
 class PieChart
 {
@@ -21,7 +22,8 @@ public:
 
 	void setSectorsNumber( const uint &nbSectors );
 
-	void draw( QImage &painter, const uint &sectorIdx, const iCoord2D &center ) const;
+	void draw( QImage &image, const iCoord2D &center, const uint &sectorIdx ) const;
+	void draw( QImage &image, const iCoord2D &center, const QVector< Interval<int> > & intervals ) const;
 
 private:
 	void updateSectors( const int &nbSectors );
