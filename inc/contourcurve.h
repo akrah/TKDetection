@@ -21,8 +21,8 @@ public:
 	const QVector<iCoord2D> &mainSupportPoints() const;
 	int volumeContourContent() const;
 
-	void constructCurve( const Billon &billon, const iCoord2D &billonCenter, const int &sliceNumber, const int &threshold, const int &blurredSegmentThickness, const int &smoothingRadius, const iCoord2D &startPoint = iCoord2D(-1,-1) );
-	void constructCurveOldMethod( const Billon &billon, const iCoord2D &billonCenter, const int &sliceNumber, const int &threshold, const int &smoothingRadius, const iCoord2D &startPoint = iCoord2D(-1,-1) );
+	void constructCurve( const Slice &slice, const iCoord2D &sliceCenter, const int &intensityThreshold, const int &blurredSegmentThickness, const int &smoothingRadius, const iCoord2D &startPoint = iCoord2D(-1,-1) );
+	void constructCurveOldMethod( const Slice &slice, const iCoord2D &sliceCenter, const int &intensityThreshold, const int &smoothingRadius, const iCoord2D &startPoint = iCoord2D(-1,-1) );
 	void draw( QImage &image ) const;
 	void drawRestrictedComponent( QImage &image ) const;
 	void writeContourContentInPgm3D( QDataStream &stream ) const;

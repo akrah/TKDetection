@@ -18,10 +18,10 @@ namespace ConnexComponentExtractor
 		 * \param	nbLabel Nombre de labels déjà attribués
 		 * \return	le dernier label attribué
 		 */
-		int twoPassAlgorithm( Slice &oldSlice, Slice &currentSlice, Slice &labels, QMap<int, QList<iCoord3D> > &connexComponentList, int k, int nbLabel, const __billon_type__ &threshold );
+		int twoPassAlgorithm( const Slice &oldSlice, const Slice &currentSlice, Slice &labels, QMap<int, QList<iCoord3D> > &connexComponentList, int k, int nbLabel, const __billon_type__ &threshold );
 	}
 
-	Billon * extractConnexComponents( Billon &billon, const int &minimumSize, const int &threshold )
+	Billon * extractConnexComponents( const Billon & billon, const int & minimumSize, const int & threshold )
 	{
 		const uint width = billon.n_cols;
 		const uint height = billon.n_rows;
@@ -51,19 +51,16 @@ namespace ConnexComponentExtractor
 		components->setVoxelSize(billon.voxelWidth(),billon.voxelHeight(),billon.voxelDepth());
 		components->fill(0);
 
-		QMapIterator<int, QList<iCoord3D> > iter(connexComponentList);
-		iCoord3D currentCoord;
+		QMap<int, QList<iCoord3D> >::ConstIterator iterComponents;
+		QList<iCoord3D>::ConstIterator iterCoords;
 		int counter = 1;
-		while (iter.hasNext())
+		for ( iterComponents = connexComponentList.constBegin() ; iterComponents != connexComponentList.constEnd() ; ++iterComponents )
 		{
-			iter.next();
-			if ( iter.value().size() > minimumSize )
+			if ( iterComponents.value().size() > minimumSize )
 			{
-				QListIterator<iCoord3D> coords(iter.value());
-				while (coords.hasNext())
+				for ( iterCoords = iterComponents.value().constBegin() ; iterCoords != iterComponents.value().constEnd() ; ++iterCoords )
 				{
-					currentCoord = coords.next();
-					components->at(currentCoord.y,currentCoord.x,currentCoord.z) = counter;
+					components->at((*iterCoords).y,(*iterCoords).x,(*iterCoords).z) = counter;
 				}
 				counter++;
 			}
@@ -75,66 +72,10 @@ namespace ConnexComponentExtractor
 		return components;
 	}
 
-	Billon * extractBiggestConnexComponent( Billon &billon, const __billon_type__ &threshold )
+	Slice * extractConnexComponents( const Slice & slice, const int & minimumSize, const int & threshold )
 	{
-		const uint width = billon.n_cols;
-		const uint height = billon.n_rows;
-		const uint depth = billon.n_slices;
-
-		int nbLabel = 0;
-		QMap<int, QList<iCoord3D> > connexComponentList;
-		Slice* labels = new Slice(height, width);
-		Slice* oldSlice = new Slice(height, width);
-		oldSlice->fill(0);
-		Slice* tmp;
-
-		//On parcours les tranches 1 par 1
-		for ( unsigned int k=0 ; k<depth ; k++ )
-		{
-			nbLabel = twoPassAlgorithm((*oldSlice),billon.slice(k),(*labels),connexComponentList,k,nbLabel,threshold);
-			tmp = oldSlice;
-			oldSlice = labels;
-			labels = tmp;
-			tmp = 0;
-		}
-
-		delete labels;
-		delete oldSlice;
-
-		int bigestIndex, bigestSize;
-		bigestIndex = bigestSize = 0;
-		QMapIterator<int, QList<iCoord3D> > iterComponents(connexComponentList);
-		while (iterComponents.hasNext())
-		{
-			iterComponents.next();
-			if ( iterComponents.value().size() > bigestSize )
-			{
-				bigestSize = iterComponents.value().size();
-				bigestIndex = iterComponents.key();
-			}
-		}
-
-		Billon* components = new Billon(width,height,depth);
-		components->setVoxelSize(billon.voxelWidth(),billon.voxelHeight(),billon.voxelDepth());
-		components->setMinValue(0);
-		components->setMaxValue(1);
-		components->fill(0);
-
-		QListIterator<iCoord3D> coords(connexComponentList[bigestIndex]);
-		iCoord3D currentCoord;
-		while (coords.hasNext())
-		{
-			currentCoord = coords.next();
-			components->at(currentCoord.y,currentCoord.x,currentCoord.z) = 1;
-		}
-
-		return components;
-	}
-
-	Billon * extractConnexComponents( Slice &currentSlice, const int &minimumSize, const int &threshold )
-	{
-		const uint width = currentSlice.n_cols;
-		const uint height = currentSlice.n_rows;
+		const uint width = slice.n_cols;
+		const uint height = slice.n_rows;
 
 		QMap<int, QList<iCoord2D> > connexComponentList;
 		QMap<int, int> tableEquiv;
@@ -151,13 +92,13 @@ namespace ConnexComponentExtractor
 			for ( i=1 ; i<width-1 ; i++)
 			{
 				//Si on a un voxel
-				if ( currentSlice.at(j,i) > threshold )
+				if ( slice.at(j,i) > threshold )
 				{
 					//On sauvegarde la valeur des voisins non nuls
 					voisinage.clear();
 					//Voisinage de la face courante
 					if (labels.at(j,i-1)) voisinage.append(labels.at(j,i-1));
-					if (labels.at(j-1,i-1))voisinage.append(labels.at(j-1,i-1));
+					if (labels.at(j-1,i-1)) voisinage.append(labels.at(j-1,i-1));
 					if (labels.at(j-1,i)) voisinage.append(labels.at(j-1,i));
 					if (labels.at(j-1,i+1)) voisinage.append(labels.at(j-1,i+1));
 					//Si ses voisins n'ont pas d'étiquette
@@ -173,20 +114,19 @@ namespace ConnexComponentExtractor
 					}
 					else
 					{
-						QListIterator<int> iterVoisin(voisinage);
-						mini = iterVoisin.next();
-						while(iterVoisin.hasNext())
+						QList<int>::ConstIterator iterVoisin = voisinage.constBegin();
+						mini = (*iterVoisin++);
+						while ( iterVoisin != voisinage.constEnd() )
 						{
-							mini = qMin(mini,iterVoisin.next());
+							mini = qMin(mini,(*iterVoisin++));
 						}
 						labels.at(j,i) = mini;
-						iterVoisin.toFront();
-						while(iterVoisin.hasNext())
+						for ( iterVoisin = voisinage.constBegin() ; iterVoisin != voisinage.constEnd() ; ++iterVoisin )
 						{
-							label = iterVoisin.next();
-							if ( label != mini )
+							if ( (*iterVoisin) != mini )
 							{
-								tableEquiv[label] = mini;
+								if ( mini < *iterVoisin ) tableEquiv[*iterVoisin] = mini;
+								else tableEquiv[mini] = *iterVoisin;
 							}
 						}
 					}
@@ -195,17 +135,16 @@ namespace ConnexComponentExtractor
 		}
 
 		//Résolution des chaines dans la table d'équivalence
-		QMapIterator<int, int> iter(tableEquiv);
+		QMap<int, int>::ConstIterator iterTable;
 		int value;
-		while (iter.hasNext())
+		for ( iterTable = tableEquiv.constBegin() ; iterTable != tableEquiv.constEnd() ; ++iterTable )
 		{
-			iter.next();
-			value = iter.value();
+			value = iterTable.value();
 			while (tableEquiv.contains(value))
 			{
 				value = tableEquiv[value];
 			}
-			tableEquiv[iter.key()] = value;
+			tableEquiv[iterTable.key()] = value;
 		}
 		for ( j=0 ; j<height ; j++ )
 		{
@@ -226,160 +165,29 @@ namespace ConnexComponentExtractor
 			}
 		}
 
-		Billon *bigestComponentsInBillon = new Billon(width,height,1);
-		bigestComponentsInBillon->setMinValue(0);
-		bigestComponentsInBillon->fill(0);
-		iCoord2D coord;
+		Slice *bigestComponentsInSlice = new Slice(width,height);
+		bigestComponentsInSlice->fill(0);
+		QMap<int, QList<iCoord2D> >::ConstIterator iterComponents;
+		QList<iCoord2D>::ConstIterator iterCoords;
 		int counter = 1;
-		QMapIterator<int, QList<iCoord2D> > iterComponents(connexComponentList);
-		while (iterComponents.hasNext())
+		for ( iterComponents = connexComponentList.constBegin() ; iterComponents != connexComponentList.constEnd() ; ++iterComponents )
 		{
-			iterComponents.next();
 			if ( iterComponents.value().size() > minimumSize )
 			{
-				QListIterator<iCoord2D> coordIterator(iterComponents.value());
-				while ( coordIterator.hasNext() )
+				for ( iterCoords = iterComponents.value().constBegin() ; iterCoords != iterComponents.value().constEnd() ; ++ iterCoords )
 				{
-					coord = coordIterator.next();
-					bigestComponentsInBillon->at(coord.y,coord.x,0) = counter;
+					bigestComponentsInSlice->at((*iterCoords).y,(*iterCoords).x) = counter;
 				}
 				counter++;
 			}
 		}
-		bigestComponentsInBillon->setMaxValue(counter-1);
 
-		return bigestComponentsInBillon;
+		return bigestComponentsInSlice;
 	}
-
-	Billon * extractBiggestConnexComponent( Slice &currentSlice, const __billon_type__ &threshold )
-	{
-		const uint width = currentSlice.n_cols;
-		const uint height = currentSlice.n_rows;
-
-		QMap<int, QList<iCoord2D> > connexComponentList;
-		QMap<int, int> tableEquiv;
-		QList<int> voisinage;
-		uint j, i;
-		int mini, nbLabel, label;
-
-		Slice labels(height, width);
-		labels.fill(0);
-		nbLabel = 0;
-		//On parcourt une première fois la tranche
-		for ( j=1 ; j<height ; j++)
-		{
-			for ( i=1 ; i<width-1 ; i++)
-			{
-				//Si on a un voxel
-				if ( currentSlice.at(j,i) > threshold )
-				{
-					//On sauvegarde la valeur des voisins non nuls
-					voisinage.clear();
-					//Voisinage de la face courante
-					if (labels.at(j,i-1)) voisinage.append(labels.at(j,i-1));
-					if (labels.at(j-1,i-1))voisinage.append(labels.at(j-1,i-1));
-					if (labels.at(j-1,i)) voisinage.append(labels.at(j-1,i));
-					if (labels.at(j-1,i+1)) voisinage.append(labels.at(j-1,i+1));
-					//Si ses voisins n'ont pas d'étiquette
-					if ( voisinage.isEmpty() )
-					{
-						nbLabel++;
-						labels.at(j,i) = nbLabel;
-					}
-					//Si ses voisins ont une étiquette
-					else if ( voisinage.size() == 1 )
-					{
-						labels.at(j,i) = voisinage[0];
-					}
-					else
-					{
-						QListIterator<int> iterVoisin(voisinage);
-						mini = iterVoisin.next();
-						while(iterVoisin.hasNext())
-						{
-							mini = qMin(mini,iterVoisin.next());
-						}
-						labels.at(j,i) = mini;
-						iterVoisin.toFront();
-						while(iterVoisin.hasNext())
-						{
-							label = iterVoisin.next();
-							if ( label != mini )
-							{
-								tableEquiv[label] = mini;
-							}
-						}
-					}
-				}
-			}
-		}
-
-		//Résolution des chaines dans la table d'équivalence
-		QMapIterator<int, int> iter(tableEquiv);
-		int value;
-		while (iter.hasNext())
-		{
-			iter.next();
-			value = iter.value();
-			while (tableEquiv.contains(value))
-			{
-				value = tableEquiv[value];
-			}
-			tableEquiv[iter.key()] = value;
-		}
-		for ( j=0 ; j<height ; j++ )
-		{
-			for ( i=0 ; i<width ; i++ )
-			{
-				label = labels.at(j,i);
-				//Si on a un voxel
-				if (label)
-				{
-					if (tableEquiv.contains(label))
-					{
-						labels.at(j,i) = tableEquiv[label];
-						label = labels.at(j,i);
-					}
-					if (!connexComponentList.contains(label)) connexComponentList[label] = QList<iCoord2D>();
-					connexComponentList[label].append(iCoord2D(i,j));
-				}
-			}
-		}
-
-		int bigestIndex, bigestSize;
-		bigestIndex = bigestSize = 0;
-		QMapIterator<int, QList<iCoord2D> > iterComponents(connexComponentList);
-		while (iterComponents.hasNext())
-		{
-			iterComponents.next();
-			if ( iterComponents.value().size() > bigestSize )
-			{
-				bigestSize = iterComponents.value().size();
-				bigestIndex = iterComponents.key();
-			}
-		}
-
-		Billon *bigestComponentInBillon = new Billon(width,height,1);
-		bigestComponentInBillon->setMinValue(0);
-		bigestComponentInBillon->setMaxValue(1);
-		bigestComponentInBillon->fill(0);
-		if ( bigestSize > 0 )
-		{
-			QListIterator<iCoord2D> bigestComponentIterator(connexComponentList.value(bigestIndex));
-			while ( bigestComponentIterator.hasNext() )
-			{
-				iCoord2D coord = bigestComponentIterator.next();
-				bigestComponentInBillon->at(coord.y,coord.x,0) = 1;
-			}
-		}
-
-		return bigestComponentInBillon;
-	}
-
 
 	namespace
 	{
-		int twoPassAlgorithm( Slice &oldSlice, Slice &currentSlice, Slice &labels, QMap<int, QList<iCoord3D> > &connexComponentList, int k, int nbLabel, const __billon_type__ &threshold )
+		int twoPassAlgorithm( const Slice &oldSlice, const Slice &currentSlice, Slice &labels, QMap<int, QList<iCoord3D> > &connexComponentList, int k, int nbLabel, const __billon_type__ &threshold )
 		{
 			const uint width = currentSlice.n_cols;
 			const uint height = currentSlice.n_rows;
@@ -425,11 +233,11 @@ namespace ConnexComponentExtractor
 						//Si ses voisins ont une étiquette
 						else
 						{
-							QListIterator<int> iterVoisin(voisinage);
-							mini = iterVoisin.next();
-							while(iterVoisin.hasNext())
+							QList<int>::ConstIterator iterVoisin = voisinage.constBegin();
+							mini = (*iterVoisin++);
+							while ( iterVoisin != voisinage.constEnd() )
 							{
-								mini = qMin(mini,iterVoisin.next());
+								mini = qMin(mini,(*iterVoisin++));
 							}
 							//Attribution de la valeur minimale au voxel courant
 							labels.at(j,i) = mini;
@@ -458,7 +266,8 @@ namespace ConnexComponentExtractor
 										{
 											sup = mini;
 											inf = voisinage[ind];
-										} else
+										}
+										else
 										{
 											sup = voisinage[ind];
 											inf = mini;
@@ -473,14 +282,24 @@ namespace ConnexComponentExtractor
 				}
 			}
 			//Résolution des chaines dans la table d'équivalence
-			QMapIterator<int, int> iter(tableEquiv);
-			while (iter.hasNext())
+//			QMap<int, int>::ConstIterator iterTable;
+//			for ( iterTable = tableEquiv.constBegin() ; iterTable != tableEquiv.constEnd() ; ++iterTable )
+//			{
+//				if (tableEquiv.contains(iterTable.value()))
+//				{
+//					tableEquiv[iterTable.key()] = tableEquiv[iterTable.value()];
+//				}
+//			}
+			QMap<int, int>::ConstIterator iterTable;
+			int value;
+			for ( iterTable = tableEquiv.constBegin() ; iterTable != tableEquiv.constEnd() ; ++iterTable )
 			{
-				iter.next();
-				if (tableEquiv.contains(iter.value()))
+				value = iterTable.value();
+				while (tableEquiv.contains(value))
 				{
-					tableEquiv[iter.key()] = tableEquiv[iter.value()];
+					value = tableEquiv[value];
 				}
+				tableEquiv[iterTable.key()] = value;
 			}
 			for ( j=0 ; j<height ; j++ )
 			{

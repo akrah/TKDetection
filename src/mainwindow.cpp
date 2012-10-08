@@ -3,6 +3,7 @@
 #include "ui_mainwindow.h"
 
 #include "inc/billon.h"
+#include "inc/billonalgorithms.h"
 #include "inc/connexcomponentextractor.h"
 #include "inc/contourcurve.h"
 #include "inc/datexport.h"
@@ -345,9 +346,7 @@ void MainWindow::drawSlice()
 
 
 				const Interval<int> &sliceInterval = _sliceHistogram->interval(_ui->_comboSelectSliceInterval->currentIndex()-1);
-				Billon *biggestComponents = ConnexComponentExtractor::extractConnexComponents( _componentBillon->slice(_currentSlice-sliceInterval.min()), qPow(_ui->_spinMinimalSizeOf2DConnexComponents->value(),2), 0 );
-				const Slice &sectorSlice = biggestComponents->slice(0);
-//				const Slice &sectorSlice = _componentBillon->slice(sliceNumber-sliceInterval.minValue());
+				const Slice * sectorSlice = ConnexComponentExtractor::extractConnexComponents( _componentBillon->slice(_currentSlice-sliceInterval.min()), qPow(_ui->_spinMinimalSizeOf2DConnexComponents->value(),2), 0 );
 				const int selectedComponents = _ui->_comboConnexComponents->currentIndex();
 
 				QPainter painter(&_mainPix);
@@ -358,7 +357,7 @@ void MainWindow::drawSlice()
 					{
 						for ( i=0 ; i<width ; ++i )
 						{
-							color = sectorSlice.at(j,i);
+							color = sectorSlice->at(j,i);
 							if ( color == selectedComponents )
 							{
 								painter.setPen(colors[color%nbColors]);
@@ -373,7 +372,7 @@ void MainWindow::drawSlice()
 					{
 						for ( i=0 ; i<width ; ++i )
 						{
-							color = sectorSlice.at(j,i);
+							color = sectorSlice->at(j,i);
 							if ( color )
 							{
 								painter.setPen(colors[color%nbColors]);
@@ -384,12 +383,12 @@ void MainWindow::drawSlice()
 				}
 				painter.end();
 
-				_contourCurve->constructCurve( *biggestComponents, _pith != 0 ? (*_pith)[_currentSlice] : iCoord2D(width/2,height/2), 0, 0, _ui->_spinBlurredSegmentsThickness->value(), _ui->_spinContourSmoothingRadius->value() );
+				_contourCurve->constructCurve( *sectorSlice, _pith != 0 ? (*_pith)[_currentSlice] : iCoord2D(width/2,height/2), 0, _ui->_spinBlurredSegmentsThickness->value(), _ui->_spinContourSmoothingRadius->value() );
 				//_contourCurve->constructCurve( *_componentBillon, _pith != 0 ? (*_pith)[sliceNumber] : iCoord2D(width/2,height/2), sliceNumber-sliceInterval.minValue(), 1, _ui->_spinBlurredSegmentsThickness->value(), _ui->_spinContourSmoothingRadius->value() );
 				_contourCurve->drawRestrictedComponent(_mainPix);
 				_contourCurve->draw(_mainPix);
 
-				delete biggestComponents;
+				delete sectorSlice;
 			}
 		}
 	}
@@ -481,7 +480,7 @@ void MainWindow::updatePith()
 		PithExtractor extractor;
 		_pith = extractor.process(*_billon,0,_billon->n_slices-1);
 	}
-	_ui->_checkRadiusAroundPith->setText( QString::number(_pith != 0 ? static_cast<int>(_billon->getRestrictedAreaMeansRadius(*_pith,20,_ui->_spinMinIntensity->value())*0.75) : 100) );
+	_ui->_checkRadiusAroundPith->setText( QString::number(_pith != 0 ? static_cast<int>(BillonAlgorithms::getRestrictedAreaMeansRadius(*_billon,*_pith,20,_ui->_spinMinIntensity->value())*0.75) : 100) );
 	drawSlice();
 	updateSliceHistogram();
 }
@@ -861,7 +860,8 @@ void MainWindow::selectCurrentSliceInterval()
 	selectSliceInterval(_ui->_comboSelectSliceInterval->currentIndex());
 }
 
-void MainWindow::selectSectorInterval( const int &index ) {
+void MainWindow::selectSectorInterval( const int &index )
+{
 	if ( _sectorBillon != 0 )
 	{
 		delete _sectorBillon;
@@ -879,19 +879,20 @@ void MainWindow::selectSectorInterval( const int &index ) {
 	{
 		const Interval<int> &sectorInterval = _sectorHistogram->interval(_ui->_comboSelectSectorInterval->currentIndex()-1);
 		const Interval<int> &sliceInterval = _sliceHistogram->interval(_ui->_comboSelectSliceInterval->currentIndex()-1);
+		const Interval<int> intensityInterval(_ui->_spinSectorThresholding->value(), _ui->_spinMaxIntensity->value());
 		const int firstSlice = sliceInterval.min();
 		const int lastSlice = sliceInterval.max()+1;
 		const int width = _billon->n_cols;
 		const int height = _billon->n_rows;
-		const Interval<int> intensityInterval(_ui->_spinSectorThresholding->value(), _ui->_spinMaxIntensity->value());
 
-		_sectorBillon = new Billon(_billon->n_cols,_billon->n_rows,sliceInterval.width()+1);
+		_sectorBillon = new Billon(height,width,sliceInterval.width()+1);
 		_sectorBillon->setMinValue(intensityInterval.min());
 		_sectorBillon->setMaxValue(MAXIMUM_INTENSITY);
 		_sectorBillon->setVoxelSize(_billon->voxelWidth(),_billon->voxelHeight(),_billon->voxelDepth());
 		_sectorBillon->fill(intensityInterval.min());
 
 		int i, j, k;
+		// TODO : Utiliser la copie d'armadillo sur l'intervalle de coupe.
 		for ( k=firstSlice ; k<lastSlice ; ++k )
 		{
 			const Slice &originalSlice = _billon->slice(k);
@@ -912,7 +913,6 @@ void MainWindow::selectSectorInterval( const int &index ) {
 		if ( _ui->_checkEnableConnexComponents->isChecked() )
 		{
 			_componentBillon = ConnexComponentExtractor::extractConnexComponents(*_sectorBillon,qPow(_ui->_spinMinimalSizeOf3DConnexComponents->value(),3),intensityInterval.min());
-			//_componentBillon = ConnexComponentExtractor::extractBiggestConnexComponent(*_sectorBillon,threshold);
 			const int nbComponents = _componentBillon->maxValue();
 			for ( i=1 ; i<nbComponents ; ++i )
 			{
@@ -920,7 +920,7 @@ void MainWindow::selectSectorInterval( const int &index ) {
 			}
 			const int depth = _componentBillon->n_slices;
 			QVector<QwtIntervalSample> histData(depth,QwtIntervalSample(0,0,0));
-			Billon *biggestComponents;
+			Slice *biggestComponents;
 			iCoord2D nearestPoint;
 
 			int minIndex;
@@ -930,9 +930,8 @@ void MainWindow::selectSectorInterval( const int &index ) {
 			minVal = width;
 			for ( i=0 ; i<depth ; ++i )
 			{
-				biggestComponents = ConnexComponentExtractor::extractConnexComponents( _componentBillon->slice(i), qPow(_ui->_spinMinimalSizeOf2DConnexComponents->value(),2), 0 );
-				nearestPoint = biggestComponents->findNearestPointOfThePith( (*_pith)[firstSlice+i], 0, 0 );
-				//nearestPoint = _componentBillon->findNearestPointOfThePith( (*_pith)[firstSlice+i], i, 0 );
+				biggestComponents = ConnexComponentExtractor::extractConnexComponents( _componentBillon->slice(i), qPow(_ui->_spinMinimalSizeOf2DConnexComponents->value(),2), _componentBillon->minValue() );
+				nearestPoint = BillonAlgorithms::findNearestPointOfThePith(*biggestComponents, (*_pith)[firstSlice+i], 0 );
 				histData[i].value = nearestPoint.euclideanDistance((*_pith)[firstSlice+i]);
 				histData[i].interval.setInterval(i,i+1);
 				if ( minVal > histData[i].value )
@@ -1151,19 +1150,23 @@ void MainWindow::exportKnotIntervalHistogram()
 	_ui->_plotDistancePithToNearestPoint->setAxisTitle(QwtPlot::yLeft,"");
 }
 
-void MainWindow::exportContours() {
-	if ( _componentBillon != 0 ) {
+void MainWindow::exportContours()
+{
+	if ( _componentBillon != 0 )
+	{
 		const Interval<int> &sliceInterval = _sliceHistogram->interval(_ui->_comboSelectSliceInterval->currentIndex()-1);
 
 		QString fileName = QFileDialog::getSaveFileName(this, tr("Exporter le contour en .ctr"), "output.ctr", tr("Fichiers de contours (*.ctr);;Tous les fichiers (*.*)"));
-		if ( !fileName.isEmpty() ) {
+		if ( !fileName.isEmpty() )
+		{
 			QFile file(fileName);
-			if( !file.open(QIODevice::WriteOnly) ) {
+			if( !file.open(QIODevice::WriteOnly) )
+			{
 				qDebug() << QObject::tr("ERREUR : Impossible de créer le ficher de contours %1.").arg(fileName);
 				return;
 			}
-			Billon *biggestComponent = ConnexComponentExtractor::extractBiggestConnexComponent( _componentBillon->slice(_currentSlice-sliceInterval.min()), 0 );
-			QVector<iCoord2D> contourPoints = biggestComponent->extractContour( _pith != 0 ? (*_pith)[_currentSlice] : iCoord2D(_billon->n_cols/2,_billon->n_rows/2), 0, 0 );
+			Slice *biggestComponent = ConnexComponentExtractor::extractConnexComponents(_componentBillon->slice(_currentSlice-sliceInterval.min()),qPow(_ui->_spinMinimalSizeOf2DConnexComponents->value(),3),0);
+			QVector<iCoord2D> contourPoints = BillonAlgorithms::extractContour( *biggestComponent, _pith != 0 ? (*_pith)[_currentSlice] : iCoord2D(_billon->n_cols/2,_billon->n_rows/2), 0);
 
 			QTextStream stream(&file);
 			stream << contourPoints.size() << endl;
@@ -1178,13 +1181,16 @@ void MainWindow::exportContours() {
 
 void MainWindow::exportContourComponentToPgm3D()
 {
-	if ( _componentBillon != 0 ) {
+	if ( _componentBillon != 0 )
+	{
 		const Interval<int> &sliceInterval = _sliceHistogram->interval(_ui->_comboSelectSliceInterval->currentIndex()-1);
 
 		QString fileName = QFileDialog::getSaveFileName(this, tr("Exporter la composante délimitée par le contour en PGM3D"), "output.pgm3d", tr("Fichiers PGM3D (*.pgm3d);;Tous les fichiers (*.*)"));
-		if ( !fileName.isEmpty() ) {
+		if ( !fileName.isEmpty() )
+		{
 			QFile file(fileName);
-			if( !file.open(QIODevice::WriteOnly) ) {
+			if( !file.open(QIODevice::WriteOnly) )
+			{
 				qDebug() << QObject::tr("ERREUR : Impossible de créer le ficher %1.").arg(fileName);
 				return;
 			}
@@ -1200,14 +1206,14 @@ void MainWindow::exportContourComponentToPgm3D()
 
 			QDataStream dstream(&file);
 
-			Billon *biggestComponents;
+			Slice *biggestComponents;
 			ContourCurve contourCurve;
 			iCoord2D pithCoord;
 			for ( int k=_knotIntervalInDistancePithToNearestPointHistogram.min() ; k<=_knotIntervalInDistancePithToNearestPointHistogram.max() ; ++k )
 			{
 				pithCoord = _pith != 0 ? (*_pith)[sliceInterval.min()+k] : iCoord2D(width/2,height/2);
 				biggestComponents = ConnexComponentExtractor::extractConnexComponents( _componentBillon->slice(k), qPow(_ui->_spinMinimalSizeOf2DConnexComponents->value(),2), 0 );
-				contourCurve.constructCurve( *biggestComponents, pithCoord, 0, 1, _ui->_spinBlurredSegmentsThickness->value(), _ui->_spinContourSmoothingRadius->value() );
+				contourCurve.constructCurve( *biggestComponents, pithCoord, 1, _ui->_spinBlurredSegmentsThickness->value(), _ui->_spinContourSmoothingRadius->value() );
 				contourCurve.writeContourContentInPgm3D(dstream);
 				delete biggestComponents;
 				biggestComponents = 0;
@@ -1234,7 +1240,7 @@ void MainWindow::createVoxelSetAllIntervals(std::vector<iCoord3D> &vectVoxels, b
 
 		if ( !intervals.isEmpty() )
 		{
-			Billon *biggestComponents;
+			Slice *biggestComponents;
 			iCoord2D pithCoord;
 			ContourCurve contourCurve;
 
@@ -1250,10 +1256,13 @@ void MainWindow::createVoxelSetAllIntervals(std::vector<iCoord3D> &vectVoxels, b
 				{
 					pithCoord = _pith != 0 ? (*_pith)[sliceInterval.min()+k] : iCoord2D(width/2,height/2);
 					biggestComponents = ConnexComponentExtractor::extractConnexComponents( _componentBillon->slice(k), qPow(_ui->_spinMinimalSizeOf2DConnexComponents->value(),2), 0 );
-					if(useOldMethod){
-					  contourCurve.constructCurveOldMethod( *biggestComponents, pithCoord, 0, 0, _ui->_spinContourSmoothingRadius->value() );
-					}else{
-					  contourCurve.constructCurve( *biggestComponents, pithCoord, 0, 0, _ui->_spinBlurredSegmentsThickness->value(), _ui->_spinContourSmoothingRadius->value() );
+					if(useOldMethod)
+					{
+					  contourCurve.constructCurveOldMethod( *biggestComponents, pithCoord, 0, _ui->_spinContourSmoothingRadius->value() );
+					}
+					else
+					{
+					  contourCurve.constructCurve( *biggestComponents, pithCoord, 0, _ui->_spinBlurredSegmentsThickness->value(), _ui->_spinContourSmoothingRadius->value() );
 					}
 					contourCurve.getContourContentPoints(vectVoxels, k+sliceInterval.min());
 
@@ -1274,7 +1283,7 @@ void MainWindow::createVoxelSet(std::vector<iCoord3D> &vectVoxels)
 
 	if ( !intervals.isEmpty() )
 	{
-		Billon *biggestComponents;
+		Slice *biggestComponents;
 		iCoord2D pithCoord;
 		ContourCurve contourCurve;
 
@@ -1290,7 +1299,7 @@ void MainWindow::createVoxelSet(std::vector<iCoord3D> &vectVoxels)
 			{
 				pithCoord = _pith != 0 ? (*_pith)[minSlice+k] : iCoord2D(width/2,height/2);
 				biggestComponents = ConnexComponentExtractor::extractConnexComponents( _componentBillon->slice(k), qPow(_ui->_spinMinimalSizeOf2DConnexComponents->value(),2), 0 );
-				contourCurve.constructCurve( *biggestComponents, pithCoord, 0, 0, _ui->_spinBlurredSegmentsThickness->value(), _ui->_spinContourSmoothingRadius->value() );
+				contourCurve.constructCurve( *biggestComponents, pithCoord, 0, _ui->_spinBlurredSegmentsThickness->value(), _ui->_spinContourSmoothingRadius->value() );
 				contourCurve.getContourContentPoints(vectVoxels, minSlice+ k);
 
 				delete biggestComponents;

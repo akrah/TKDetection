@@ -1,6 +1,7 @@
 #include "inc/contourcurve.h"
 
 #include "inc/billon.h"
+#include "inc/billonalgorithms.h"
 
 #include <QProcess>
 #include <QTemporaryFile>
@@ -53,10 +54,10 @@ int ContourCurve::volumeContourContent() const
 	return volume;
 }
 
-void ContourCurve::constructCurve( const Billon &billon, const iCoord2D &billonCenter, const int &sliceNumber, const int &threshold, const int &blurredSegmentThickness, const int &smoothingRadius, const iCoord2D &startPoint )
+void ContourCurve::constructCurve( const Slice &slice, const iCoord2D &sliceCenter, const int &intensityThreshold, const int &blurredSegmentThickness, const int &smoothingRadius, const iCoord2D &startPoint )
 {
 	_datasOriginalContourPoints.clear();
-	_datasOriginalContourPoints = billon.extractContour( billonCenter, sliceNumber, threshold, startPoint );
+	_datasOriginalContourPoints = BillonAlgorithms::extractContour( slice, sliceCenter, intensityThreshold, startPoint );
 	_datasContourPoints.clear();
 	_datasContourPoints = _datasOriginalContourPoints;
 	smoothCurve(_datasContourPoints,smoothingRadius);
@@ -131,10 +132,10 @@ void ContourCurve::constructCurve( const Billon &billon, const iCoord2D &billonC
 
 				// Point dominant dans le sens du contour
 				index = 1;
-				distanceP0Pm1 = billonCenter.euclideanDistance(_datasDominantPoints[index-1]);
-				distanceP0Px = billonCenter.euclideanDistance(_datasDominantPoints[index]);
-				distanceP0Pp1 = billonCenter.euclideanDistance(_datasDominantPoints[index+1]);
-				distanceP0Pp2 = billonCenter.euclideanDistance(_datasDominantPoints[index+2]);
+				distanceP0Pm1 = sliceCenter.euclideanDistance(_datasDominantPoints[index-1]);
+				distanceP0Px = sliceCenter.euclideanDistance(_datasDominantPoints[index]);
+				distanceP0Pp1 = sliceCenter.euclideanDistance(_datasDominantPoints[index+1]);
+				distanceP0Pp2 = sliceCenter.euclideanDistance(_datasDominantPoints[index+2]);
 				angleOk = (distanceP0Pp1-distanceP0Px>10) || (distanceP0Pm1<distanceP0Pp1 && (distanceP0Px<distanceP0Pp1 || distanceP0Px<distanceP0Pp2) );
 				if ( angleOk ) index++;
 				while ( angleOk && index < nbPoints-1 )
@@ -142,7 +143,7 @@ void ContourCurve::constructCurve( const Billon &billon, const iCoord2D &billonC
 					distanceP0Pm2 = distanceP0Pm1;
 					distanceP0Pm1 = distanceP0Px;
 					distanceP0Px = distanceP0Pp1;
-					distanceP0Pp1 = billonCenter.euclideanDistance(_datasDominantPoints[index+1]);
+					distanceP0Pp1 = sliceCenter.euclideanDistance(_datasDominantPoints[index+1]);
 					angleOk = (distanceP0Pp1-distanceP0Px>10) || (distanceP0Pm2<distanceP0Pm1 && distanceP0Pm1<distanceP0Pp1 && distanceP0Px<distanceP0Pp1);
 					if ( angleOk ) index++;
 				}
@@ -167,10 +168,10 @@ void ContourCurve::constructCurve( const Billon &billon, const iCoord2D &billonC
 
 				// Point dominant dans le sens contraire du contour
 				index = nbPoints-2;
-				distanceP0Pm1 = billonCenter.euclideanDistance(_datasDominantPoints[index+1]);
-				distanceP0Px = billonCenter.euclideanDistance(_datasDominantPoints[index]);
-				distanceP0Pp1 = billonCenter.euclideanDistance(_datasDominantPoints[index-1]);
-				distanceP0Pp2 = billonCenter.euclideanDistance(_datasDominantPoints[index-2]);
+				distanceP0Pm1 = sliceCenter.euclideanDistance(_datasDominantPoints[index+1]);
+				distanceP0Px = sliceCenter.euclideanDistance(_datasDominantPoints[index]);
+				distanceP0Pp1 = sliceCenter.euclideanDistance(_datasDominantPoints[index-1]);
+				distanceP0Pp2 = sliceCenter.euclideanDistance(_datasDominantPoints[index-2]);
 				angleOk = (distanceP0Pp1-distanceP0Px>10) || (distanceP0Pm1<distanceP0Pp1 && (distanceP0Px<distanceP0Pp1 || distanceP0Px<distanceP0Pp2) );
 				if ( angleOk ) index--;
 				while ( angleOk && index > oldIndex )
@@ -178,7 +179,7 @@ void ContourCurve::constructCurve( const Billon &billon, const iCoord2D &billonC
 					distanceP0Pm2 = distanceP0Pm1;
 					distanceP0Pm1 = distanceP0Px;
 					distanceP0Px = distanceP0Pp1;
-					distanceP0Pp1 = billonCenter.euclideanDistance(_datasDominantPoints[index-1]);
+					distanceP0Pp1 = sliceCenter.euclideanDistance(_datasDominantPoints[index-1]);
 					angleOk = (distanceP0Pp1-distanceP0Px>10) || (distanceP0Pm2<distanceP0Pm1 && distanceP0Pm1<distanceP0Pp1 && distanceP0Px<distanceP0Pp1);
 					if ( angleOk ) index--;
 				}
@@ -204,7 +205,6 @@ void ContourCurve::constructCurve( const Billon &billon, const iCoord2D &billonC
 			}
 		}
 
-		const Slice &slice = billon.slice(sliceNumber);
 		const int width = slice.n_cols;
 		const int height = slice.n_rows;
 		_component.resize(height,width);
@@ -218,7 +218,7 @@ void ContourCurve::constructCurve( const Billon &billon, const iCoord2D &billonC
 		const qreal daMain1Main2 = mainPoint1.y - mainPoint2.y;
 		const qreal dbMain1Main2 = mainPoint2.x - mainPoint1.x;
 		const qreal dcMain1Main2 = daMain1Main2*mainPoint1.x + dbMain1Main2*mainPoint1.y;
-		const bool supToMain1Main2 = ( daMain1Main2*billonCenter.x + dbMain1Main2*billonCenter.y ) > dcMain1Main2;
+		const bool supToMain1Main2 = ( daMain1Main2*sliceCenter.x + dbMain1Main2*sliceCenter.y ) > dcMain1Main2;
 
 		const qreal daMain1Support1 = mainPoint1.y - support1.y;
 		const qreal dbMain1Support1 = support1.x - mainPoint1.x;
@@ -381,10 +381,10 @@ void ContourCurve::constructCurve( const Billon &billon, const iCoord2D &billonC
 	}
 }
 
-void ContourCurve::constructCurveOldMethod( const Billon &billon, const iCoord2D &billonCenter, const int &sliceNumber, const int &threshold, const int &smoothingRadius, const iCoord2D &startPoint )
+void ContourCurve::constructCurveOldMethod( const Slice &slice, const iCoord2D &sliceCenter, const int &intensityThreshold, const int &smoothingRadius, const iCoord2D &startPoint )
 {
 	_datasOriginalContourPoints.clear();
-	_datasOriginalContourPoints = billon.extractContour( billonCenter, sliceNumber, threshold, startPoint );
+	_datasOriginalContourPoints = BillonAlgorithms::extractContour( slice, sliceCenter, intensityThreshold, startPoint );
 	_datasContourPoints.clear();
 	_datasContourPoints = _datasOriginalContourPoints;
 	smoothCurve(_datasContourPoints,smoothingRadius);
@@ -396,8 +396,6 @@ void ContourCurve::constructCurveOldMethod( const Billon &billon, const iCoord2D
 	_datasIndexMainDominantPoints.fill(-1,2);
 	_datasMainSupportPoints.fill(iCoord2D(-1,-1),2);
 
-
-	const Slice &slice = billon.slice(sliceNumber);
 	const int width = slice.n_cols;
 	const int height = slice.n_rows;
 	_component.resize(height,width);

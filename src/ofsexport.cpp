@@ -3,6 +3,7 @@
 #include "def/def_coordinate.h"
 #include "inc/coordinate.h"
 #include "inc/billon.h"
+#include "inc/billonalgorithms.h"
 #include "inc/pith.h"
 
 #include <QTextStream>
@@ -130,7 +131,7 @@ namespace OfsExport {
 void processRestrictedMesh( const Billon &billon, const Pith &pith, const Interval<uint> & sliceInterval, const QString &fileName,
 							const uint resolutionCercle, const int seuilContour, const bool normalized, const bool displayBegEndFaces )
 {
-	QVector<rCoord2D> vectVertex = billon.getRestrictedAreaVertex( pith, sliceInterval, resolutionCercle,seuilContour );
+	QVector<rCoord2D> vectVertex = BillonAlgorithms::getRestrictedAreaVertex( billon, pith, sliceInterval, resolutionCercle,seuilContour );
 	if ( !vectVertex.isEmpty() ) {
 		QFile file(fileName);
 		if ( file.open(QIODevice::WriteOnly) )
