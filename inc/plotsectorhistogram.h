@@ -24,7 +24,7 @@ public:
 
 	void update( const SectorHistogram &histogram, const PieChart &pieChart );
 
-	void highlightCurve( const uint &index );
+	void moveCursor( const uint &index );
 
 private:
 	void computeValues( const SectorHistogram &histogram, const PieChart &pieChart );
@@ -35,20 +35,19 @@ private:
 	QwtPlotHistogram _histogramData;
 	QwtPlotHistogram _histogramMaximums;
 	QwtPlotHistogram _histogramIntervals;
-	QwtPlotHistogram _histogramHighlightCurve;
+	QwtPlotHistogram _histogramCursor;
 
 	QwtPlotCurve _curvePercentage;
 
 	QwtPolarCurve _curveData;
 	QwtPolarCurve _curveMaximums;
 	QwtPolarCurve _curveIntervals;
-	QwtPolarCurve _highlightCurve;
+	QwtPolarCurve _curveCursor;
 
 	PointPolarSeriesData *_datasCurve;
 	PointPolarSeriesData *_datasCurveMaximums;
 	PointPolarSeriesData *_datasCurveIntervals;
-	PointPolarSeriesData *_datasHighlightCurve;
-
+	PointPolarSeriesData *_datasCurveCursor;
 };
 
 #endif // PLOTSECTORHISTOGRAM_H

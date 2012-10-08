@@ -10,6 +10,9 @@ PlotSliceHistogram::PlotSliceHistogram()
 	_histogramIntervals.setBrush(Qt::blue);
 	_histogramIntervals.setPen(QPen(Qt::blue));
 
+	_histogramCursor.setBrush(Qt::red);
+	_histogramCursor.setPen(QPen(Qt::red));
+
 	_curvePercentage.setPen(QPen(Qt::red));
 }
 
@@ -29,6 +32,7 @@ void PlotSliceHistogram::attach( QwtPlot * const plot )
 		_histogramData.attach(plot);
 		_histogramIntervals.attach(plot);
 		_histogramMaximums.attach(plot);
+		_histogramCursor.attach(plot);
 		_curvePercentage.attach(plot);
 	}
 }
@@ -39,8 +43,24 @@ void PlotSliceHistogram::clear()
 	_histogramData.setSamples(emptyData);
 	_histogramMaximums.setSamples(emptyData);
 	_histogramIntervals.setSamples(emptyData);
+	_histogramCursor.setSamples(emptyData);
 
 	_curvePercentage.setSamples(QVector<QPointF>(0));
+}
+
+void PlotSliceHistogram::moveCursor( const uint &sliceIndex )
+{
+	QVector<QwtIntervalSample> datasCursor(1);
+	datasCursor[0].interval.setInterval(sliceIndex,sliceIndex+1);
+	datasCursor[0].value = _histogramData.sample(sliceIndex).value;
+	_histogramCursor.setSamples(datasCursor);
+}
+
+void PlotSliceHistogram::updatePercentageCurve( const uint & thresholdOfMaximums )
+{
+	const qreal x[] = { 0., _histogramData.dataSize() };
+	const qreal y[] = { thresholdOfMaximums, thresholdOfMaximums };
+	_curvePercentage.setSamples(x,y,2);
 }
 
 void PlotSliceHistogram::update( const SliceHistogram & histogram )
@@ -48,11 +68,6 @@ void PlotSliceHistogram::update( const SliceHistogram & histogram )
 	computeValues( histogram );
 	computeMaximums( histogram );
 	computeIntervals( histogram );
-
-//	const qreal thresholdOfMaximums = histogram.thresholdOfMaximums( minimumHeightPercentageOfMaximum );
-//	const qreal x[] = { 0., depth };
-//	const qreal y[] = { thresholdOfMaximums, thresholdOfMaximums };
-//	_curvePercentage.setSamples(x,y,2);
 }
 
 void PlotSliceHistogram::computeValues( const SliceHistogram &histogram )

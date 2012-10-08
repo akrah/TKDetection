@@ -1,15 +1,15 @@
-#include "inc/marrowextractor.h"
+#include "inc/pithextractor.h"
 
 #include "inc/define.h"
 #include "inc/coordinate.h"
-#include "inc/marrow.h"
+#include "inc/pith.h"
 
-MarrowExtractor::MarrowExtractor() :
+PithExtractor::PithExtractor() :
 	_falseCutPercent(FALSE_CUT_PERCENT),
 	_windowWidth(NEIGHBORHOOD_WINDOW_WIDTH),
 	_windowHeight(NEIGHBORHOOD_WINDOW_HEIGHT),
 	_binarizationThreshold(BINARIZATION_THRESHOLD),
-	_marrowLag(MARROW_LAG)
+	_pithLag(PITH_LAG)
 {
 }
 
@@ -17,7 +17,7 @@ MarrowExtractor::MarrowExtractor() :
  * Fonction principale d'extraction de la moelle
  ********************************************************/
 
-Marrow* MarrowExtractor::process( const arma::icube &image, const int &sliceMin, const int &sliceMax ) {
+Pith* PithExtractor::process( const arma::icube &image, const int &sliceMin, const int &sliceMax ) {
 	const int width = image.n_cols;
 	const int height = image.n_rows;
 	const int depth = image.n_slices;
@@ -30,7 +30,7 @@ Marrow* MarrowExtractor::process( const arma::icube &image, const int &sliceMin,
 
 	max = x = y = 0;
 
-	Marrow *marrow = new Marrow(sliceMin,sliceMax);
+	Pith *pith = new Pith(sliceMin,sliceMax);
 
 	//extraction de la moelle de la premiere coupe sur la totalité de la coupe
 	//nous permet d'avoir un coordonnée a laquelle appliqué la fenetre
@@ -47,10 +47,10 @@ Marrow* MarrowExtractor::process( const arma::icube &image, const int &sliceMin,
 	coordCurrent = transHough( image.slice(sliceMin), _windowWidth, _windowHeight, &x, &y, &max, &nbContourPoints );
 
 	for (int i = 0; i < sliceMin; ++ i) {
-		marrow->append(coordCurrent);
+		pith->append(coordCurrent);
 		maxStandList[i]=0.;
 	}
-	marrow->append(coordCurrent);	// pour sliceMin
+	pith->append(coordCurrent);	// pour sliceMin
 	maxStandList[sliceMin] = ((float)max)/nbContourPoints;
 
 	//extraction des coupes suivantes
@@ -58,21 +58,21 @@ Marrow* MarrowExtractor::process( const arma::icube &image, const int &sliceMin,
 	for(int i=sliceMin + 1; i<= sliceMax; i++) {
 		//~ if(!listeCoupe->contains(i)){
 			std::cerr << " " << i;
-			coordPrec = marrow->last();
+			coordPrec = pith->last();
 			x = x - (_windowWidth/2);
 			x = x < 0 ? 0 : (x > (width - _windowWidth) ? width - _windowWidth : x);
 			y = y - (_windowHeight/2);
 			y = y < 0 ? 0 : (y > (height - _windowHeight) ? height - _windowHeight : y);
 			//extraction de la moelle de la coupe i
 			coordCurrent = transHough( image.slice(i), _windowWidth, _windowHeight, &x, &y, &max, &nbContourPoints );
-			marrow->append(coordCurrent);
-			shift = sqrt(pow((double) (marrow->last().x - coordPrec.x),(double) 2.0) + pow( (double)(marrow->last().y - coordPrec.y), (double)2.0) );
+			pith->append(coordCurrent);
+			shift = sqrt(pow((double) (pith->last().x - coordPrec.x),(double) 2.0) + pow( (double)(pith->last().y - coordPrec.y), (double)2.0) );
 			//si le resultat obtenu a un decalage trop important avec la coupe precedente alors on recommence l'extraction sur l'ensemble de la coupe
-			if(shift > _marrowLag && width > _windowWidth && height > _windowHeight){
+			if(shift > _pithLag && width > _windowWidth && height > _windowHeight){
 				std::cerr << "*";
-				// std::cerr << "   :> decalage=" << decalage << ">" << _marrowLag << "\n";
+				// std::cerr << "   :> decalage=" << decalage << ">" << _pithLag << "\n";
 
-				marrow->removeLast();
+				pith->removeLast();
 				x = y = 0;
 				transHough(image.slice(i), width, height, &x, &y, &max, &nbContourPoints );
 				x = x - (_windowWidth/2);
@@ -80,7 +80,7 @@ Marrow* MarrowExtractor::process( const arma::icube &image, const int &sliceMin,
 				y = y - (_windowHeight/2);
 				y = y < 0 ? 0 : (y > (height - _windowHeight) ? height - _windowHeight : y);
 				coordCurrent = transHough( image.slice(i), _windowWidth, _windowHeight, &x, &y, &max, &nbContourPoints );
-				marrow->append(coordCurrent);
+				pith->append(coordCurrent);
 			}
 			maxStandList[i] = ((float)max)/nbContourPoints;
 			if (i % 20 == 0) {
@@ -93,13 +93,13 @@ Marrow* MarrowExtractor::process( const arma::icube &image, const int &sliceMin,
 	}
 	std::cerr << "\n";
 
-	coordCurrent = marrow->last();
+	coordCurrent = pith->last();
 	for ( int i = sliceMax+1 ; i<depth ; i++ ) {
-		marrow->append(coordCurrent);
+		pith->append(coordCurrent);
 		maxStandList[i]=0.;
 	}
 
-	std::cerr << "nbCoupes=" << depth << " listMoelle.size()=" << marrow->size() << "\n";
+	std::cerr << "nbCoupes=" << depth << " listMoelle.size()=" << pith->size() << "\n";
 
 	//calcul du seuil a partir du quel les coupes sont considerées comme erronées
 	maxStandList2 = new float[depth];
@@ -113,15 +113,15 @@ Marrow* MarrowExtractor::process( const arma::icube &image, const int &sliceMin,
 	delete [] maxStandList2;
 
 	// applique la coorection a la moelle
-	correctMarrow(*marrow, maxStandList, houghStandThreshold);
+	correctPith(*pith, maxStandList, houghStandThreshold);
 
-	return marrow;
+	return pith;
 }
 
 /******************************************************************
  * Fonctions secondaires appelées lors de l'extraction de la moelle
  ******************************************************************/
-iCoord2D MarrowExtractor::transHough(const arma::imat &slice, int width, int height, int *x, int *y, int *sliceMaxValue, int *nbContourPoints) {
+iCoord2D PithExtractor::transHough(const arma::imat &slice, int width, int height, int *x, int *y, int *sliceMaxValue, int *nbContourPoints) {
 	int x_accu, y_accu, longueur, min;
 	int *droite;
 	arma::imat *tabaccu;
@@ -169,7 +169,7 @@ iCoord2D MarrowExtractor::transHough(const arma::imat &slice, int width, int hei
 	return iCoord2D(*x, *y);
 }
 
-arma::fmat * MarrowExtractor::contour(const arma::imat &slice, arma::fmat **orientation) {
+arma::fmat * PithExtractor::contour(const arma::imat &slice, arma::fmat **orientation) {
 	const uint height = slice.n_rows;
 	const uint width = slice.n_cols;
 
@@ -207,7 +207,7 @@ arma::fmat * MarrowExtractor::contour(const arma::imat &slice, arma::fmat **orie
 	return contour;
 }
 
-arma::imat * MarrowExtractor::convolution(const arma::imat &slice, arma::fcolvec verticalFilter, arma::frowvec horizontalFilter) {
+arma::imat * PithExtractor::convolution(const arma::imat &slice, arma::fcolvec verticalFilter, arma::frowvec horizontalFilter) {
 	const uint height = slice.n_rows;
 	const uint width = slice.n_cols;
 	arma::imat *resultat = new arma::imat(height, width);
@@ -324,7 +324,7 @@ arma::imat * MarrowExtractor::convolution(const arma::imat &slice, arma::fcolvec
 }
 
 
-int * MarrowExtractor::drawLine(int xOrigine, int yOrigine, float orientation_ORI, int width, int height, int *length) {
+int * PithExtractor::drawLine(int xOrigine, int yOrigine, float orientation_ORI, int width, int height, int *length) {
 	float orientation = -orientation_ORI;	// orientation au sens de Fleur = - orientation_ORI
 	int x, y, k1=0, k2=0;
 	int dim = floor(sqrt(pow(width,2.0)+pow(height,2.0)));
@@ -448,7 +448,7 @@ int * MarrowExtractor::drawLine(int xOrigine, int yOrigine, float orientation_OR
 
 }
 
-int MarrowExtractor::floatCompare(const void *first, const void *second)
+int PithExtractor::floatCompare(const void *first, const void *second)
 {
 	// const float *fa = (const float *)first; // casting pointer types
 	// const float *fb = (const float *)second;
@@ -463,7 +463,7 @@ int MarrowExtractor::floatCompare(const void *first, const void *second)
 	and positive if a > b */
 }
 
-void MarrowExtractor::minSlice(const arma::imat &slice, int *minValue, int *maxValue, iCoord2D *coordmax) {
+void PithExtractor::minSlice(const arma::imat &slice, int *minValue, int *maxValue, iCoord2D *coordmax) {
 	const uint height = slice.n_rows-1;
 	const uint width = slice.n_cols-1;
 
@@ -481,23 +481,23 @@ void MarrowExtractor::minSlice(const arma::imat &slice, int *minValue, int *maxV
 	}
 }
 
-void MarrowExtractor::correctMarrow( QList<iCoord2D> &moelle, float *listMax, float seuilHough ) {
-	const int marrowSize = moelle.size();
+void PithExtractor::correctPith( QList<iCoord2D> &moelle, float *listMax, float seuilHough ) {
+	const int pithSize = moelle.size();
 	int startSlice, endSlice, i=0, x1, y1, x2, y2, newx, newy;
 	float ax, ay;
 	std::cerr << "Coupes interpolées :\n";
-	while(i < marrowSize && marrowSize >2){
+	while(i < pithSize && pithSize >2){
 		if(listMax[i] < seuilHough){
 			startSlice = i;
 			i++;
-			while(listMax[i]<seuilHough && i < marrowSize) {i++;}
+			while(listMax[i]<seuilHough && i < pithSize) {i++;}
 			endSlice = i-1;
 			if(startSlice == 0){
 				ax = 9999;
 				ay = 9999;
 				x1 = moelle.at(endSlice+1).x;
 				y1 = moelle.at(endSlice+1).y;
-			}else if(endSlice == marrowSize-1){
+			}else if(endSlice == pithSize-1){
 				ax = 9999;
 				ay = 9999;
 				x1 = moelle.at(startSlice-1).x;

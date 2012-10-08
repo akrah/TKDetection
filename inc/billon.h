@@ -1,7 +1,7 @@
 #ifndef BILLON_H
 #define BILLON_H
 
-#include "marrow.h"
+#include "pith.h"
 #include "define.h"
 #include "coordinate.h"
 
@@ -34,8 +34,8 @@ public:
 	void setMaxValue( const T &value );
 	void setVoxelSize( const qreal &width, const qreal &height, const qreal &depth );
 
-	QVector<rCoord2D> getRestrictedAreaVertex( const Marrow &marrow, const Interval<uint> &sliceInterval, const uint &nbPolygonPoints, const int &intenstyThreshold ) const;
-	qreal getRestrictedAreaMeansRadius( const Marrow &marrow, const uint &nbPolygonPoints, int intensityThreshold ) const;
+	QVector<rCoord2D> getRestrictedAreaVertex( const Pith &pith, const Interval<uint> &sliceInterval, const uint &nbPolygonPoints, const int &intenstyThreshold ) const;
+	qreal getRestrictedAreaMeansRadius( const Pith &pith, const uint &nbPolygonPoints, int intensityThreshold ) const;
 
 	iCoord2D findNearestPointOfThePith( const iCoord2D &center, const uint &sliceIndex, const int &intensityThreshold ) const;
 	QVector<iCoord2D> extractContour( const iCoord2D &center, const uint &sliceIndex, int threshold, iCoord2D startPoint = iCoord2D(-1,-1) ) const;
@@ -131,7 +131,7 @@ void BillonTpl<T>::setVoxelSize( const qreal & width, const qreal & height, cons
 }
 
 template< typename T >
-QVector<rCoord2D> BillonTpl<T>::getRestrictedAreaVertex( const Marrow & marrow, const Interval<uint> & sliceInterval, const uint & nbPolygonPoints, const int & intenstyThreshold ) const
+QVector<rCoord2D> BillonTpl<T>::getRestrictedAreaVertex( const Pith & pith, const Interval<uint> & sliceInterval, const uint & nbPolygonPoints, const int & intenstyThreshold ) const
 {
 	Q_ASSERT_X( nbPolygonPoints>0 , "BillonTpl<T>::getRestrictedAreaVertex", "nbPolygonPoints arguments equals to 0 => division by zero" );
 
@@ -145,8 +145,8 @@ QVector<rCoord2D> BillonTpl<T>::getRestrictedAreaVertex( const Marrow & marrow, 
 	for ( uint indexSlice = sliceInterval.min() ; indexSlice<=sliceInterval.max() ; ++indexSlice )
 	{
 		const arma::Mat<T> & currentSlice = this->slice(indexSlice);
-		center.x = marrow[indexSlice].x;
-		center.y = marrow[indexSlice].y;
+		center.x = pith[indexSlice].x;
+		center.y = pith[indexSlice].y;
 		orientation = 0.;
 		while (orientation < TWO_PI)
 		{
@@ -164,7 +164,7 @@ QVector<rCoord2D> BillonTpl<T>::getRestrictedAreaVertex( const Marrow & marrow, 
 }
 
 template <typename T>
-qreal BillonTpl<T>::getRestrictedAreaMeansRadius( const Marrow &marrow, const uint &nbPolygonPoints, int intensityThreshold ) const
+qreal BillonTpl<T>::getRestrictedAreaMeansRadius( const Pith &pith, const uint &nbPolygonPoints, int intensityThreshold ) const
 {
 	Q_ASSERT_X( nbPolygonPoints>0 , "BillonTpl<T>::getRestrictedAreaMeansRadius", "nbPolygonPoints arguments equals to 0 => division by zero" );
 
@@ -180,8 +180,8 @@ qreal BillonTpl<T>::getRestrictedAreaMeansRadius( const Marrow &marrow, const ui
 	radius = 0.;
 	for ( int k=0 ; k<depth ; ++k ) {
 		const arma::Mat<T> &currentSlice = this->slice(k);
-		center.x = marrow[k].x;
-		center.y = marrow[k].y;
+		center.x = pith[k].x;
+		center.y = pith[k].y;
 		orientation = 0.;
 		while (orientation < TWO_PI)
 		{

@@ -1,26 +1,26 @@
-#include "inc/marrow.h"
+#include "inc/pith.h"
 
 #include "inc/coordinate.h"
 
 #include <QPainter>
 
-Marrow::Marrow() : QList<iCoord2D>(), _interval(0,0)
+Pith::Pith() : QList<iCoord2D>(), _interval(0,0)
 {
 }
 
-Marrow::Marrow( const int &begin, const int &end ) : QList<iCoord2D>(), _interval(begin,end)
+Pith::Pith( const int &begin, const int &end ) : QList<iCoord2D>(), _interval(begin,end)
 {
 }
 
-Marrow::Marrow( const Marrow &marrow ) : QList<iCoord2D>(marrow)
+Pith::Pith( const Pith &pith ) : QList<iCoord2D>(pith)
 {
-	_interval = marrow._interval;
+	_interval = pith._interval;
 }
 
 /*******************************
  * Public getters
  *******************************/
-const Interval<int> &Marrow::interval() const
+const Interval<int> &Pith::interval() const
 {
 	return _interval;
 }
@@ -29,7 +29,7 @@ const Interval<int> &Marrow::interval() const
 /*******************************
  * Public setters
  *******************************/
-void Marrow::draw( QImage &image, const int &sliceIdx ) const
+void Pith::draw( QImage &image, const int &sliceIdx ) const
 {
 	if ( _interval.containsClosed(sliceIdx) )
 	{

@@ -16,6 +16,9 @@ public:
 	void attach( QwtPlot * const plot );
 	void clear();
 
+	void moveCursor( const uint & sliceIndex );
+	void updatePercentageCurve( const uint & thresholdOfMaximums );
+
 	void update( const SliceHistogram & histogram );
 
 private:
@@ -27,6 +30,7 @@ private:
 	QwtPlotHistogram _histogramData;
 	QwtPlotHistogram _histogramMaximums;
 	QwtPlotHistogram _histogramIntervals;
+	QwtPlotHistogram _histogramCursor;
 
 	QwtPlotCurve _curvePercentage;
 };

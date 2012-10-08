@@ -7,12 +7,12 @@
 
 class QImage;
 
-class Marrow : public QList<iCoord2D>
+class Pith : public QList<iCoord2D>
 {
 public:
-	Marrow();
-	Marrow( const int &begin, const int &end );
-	Marrow( const Marrow &marrow );
+	Pith();
+	Pith( const int &begin, const int &end );
+	Pith( const Pith &pith );
 
 	const Interval<int> &interval() const;
 

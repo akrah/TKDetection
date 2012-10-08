@@ -183,7 +183,7 @@
      <item>
       <widget class="QTabWidget" name="_tabs">
        <property name="currentIndex">
-        <number>4</number>
+        <number>2</number>
        </property>
        <widget class="QWidget" name="_tabGeneral">
         <attribute name="title">
@@ -1090,7 +1090,7 @@ maximum
             </attribute>
             <layout class="QGridLayout" name="gridLayout">
              <item row="0" column="0">
-              <widget class="QwtPlot" name="_plotAngularHistogram"/>
+              <widget class="QwtPlot" name="_plotSectorHistogram"/>
              </item>
             </layout>
            </widget>
@@ -1100,7 +1100,7 @@ maximum
             </attribute>
             <layout class="QVBoxLayout" name="verticalLayout_8">
              <item>
-              <widget class="QwtPolarPlot" name="_polarSectorSum">
+              <widget class="QwtPolarPlot" name="_polarSectorHistogram">
                <property name="plotBackground" stdset="0">
                 <brush brushstyle="SolidPattern">
                  <color alpha="0">
@@ -1503,7 +1503,7 @@ maximum
           </widget>
          </item>
          <item>
-          <widget class="QwtPlot" name="_plotDistanceMarrowToNearestPoint"/>
+          <widget class="QwtPlot" name="_plotDistancePithToNearestPoint"/>
          </item>
          <item>
           <widget class="QPushButton" name="_buttonExportKnotIntervalHistogram">
@@ -1696,7 +1696,7 @@ maximum
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="_buttonComputeMarrow">
+      <widget class="QPushButton" name="_buttonComputePith">
        <property name="text">
         <string>Calculer la moelle</string>
        </property>

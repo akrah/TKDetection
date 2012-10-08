@@ -5,8 +5,8 @@
 
 class QString;
 
-namespace DicomReader {
-
+namespace DicomReader
+{
 	Billon* read( const QString &repository );
 }
 

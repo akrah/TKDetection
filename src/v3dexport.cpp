@@ -12,12 +12,12 @@ namespace V3DExport {
 	{
 		void appendTags( const Billon &billon, QXmlStreamWriter &stream );
 		void appendComponent( const Billon &billon, const Interval<int> &interval, const int &index, const int &threshold, QXmlStreamWriter &stream );
-		void appendMarrow( const Marrow &marrow, QXmlStreamWriter &stream );
+		void appendPith( const Pith &pith, QXmlStreamWriter &stream );
 		void writeXmlElementWithAttribute( QXmlStreamWriter &stream, const QString &elementName, const QString &attributeName, const QString &attributeValue, const QString &elementValue );
 		void writeTag( QXmlStreamWriter &stream, const QString &name, const QString &value );
 	}
 
-	void process( const Billon &billon, const Marrow *marrow, const QString &fileName, const Interval<int> &interval, const int &threshold )
+	void process( const Billon &billon, const Pith *pith, const QString &fileName, const Interval<int> &interval, const int &threshold )
 	{
 		QFile file(fileName);
 
@@ -35,7 +35,7 @@ namespace V3DExport {
 			stream.writeStartElement("image");
 				appendTags( billon, stream );
 				appendComponent( billon, interval, 1, threshold, stream );
-				if ( marrow != 0 ) appendMarrow( *marrow, stream );
+				if ( pith != 0 ) appendPith( *pith, stream );
 			stream.writeEndElement();
 
 		stream.writeEndDocument();
@@ -132,12 +132,12 @@ namespace V3DExport {
 			stream.writeEndElement();
 		}
 
-		void appendMarrow( const Marrow &marrow, QXmlStreamWriter &stream )
+		void appendPith( const Pith &pith, QXmlStreamWriter &stream )
 		{
-			stream.writeStartElement("marrow");
-			for ( int k=0, sliceIdx = marrow.interval().min() ; k<marrow.size() ; ++k, ++sliceIdx )
+			stream.writeStartElement("pith");
+			for ( int k=0, sliceIdx = pith.interval().min() ; k<pith.size() ; ++k, ++sliceIdx )
 			{
-				const iCoord2D &coord = marrow[k];
+				const iCoord2D &coord = pith[k];
 				stream.writeStartElement("coord");
 					stream.writeTextElement("x",QString::number(coord.x));
 					stream.writeTextElement("y",QString::number(coord.y));

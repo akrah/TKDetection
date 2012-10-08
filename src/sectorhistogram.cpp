@@ -17,7 +17,7 @@ SectorHistogram::~SectorHistogram()
  * Public setters
  *******************************/
 
-void SectorHistogram::construct( const Billon &billon, const Marrow &marrow, const PieChart &pieChart, const Interval<int> &slicesInterval, const Interval<int> &intensity,
+void SectorHistogram::construct( const Billon &billon, const Pith &pith, const PieChart &pieChart, const Interval<int> &slicesInterval, const Interval<int> &intensity,
 								 const Interval<int> &motionInterval, const int &radiusAroundPith )
 {
 	clear();
@@ -50,13 +50,13 @@ void SectorHistogram::construct( const Billon &billon, const Marrow &marrow, con
 		{
 			const Slice &currentSlice = billon.slice(k);
 			const Slice &previousSlice = billon.previousSlice(k);
-			const iCoord2D &currentMarrowCoord = marrow[k];
-			currentPos.y = currentMarrowCoord.y-radiusAroundPith;
+			const iCoord2D &currentPithCoord = pith[k];
+			currentPos.y = currentPithCoord.y-radiusAroundPith;
 			for ( j=-radiusAroundPith ; j<radiusMax ; ++j )
 			{
 				iRadius = circleLines[j+radiusAroundPith];
 				iRadiusMax = iRadius+1;
-				currentPos.x = currentMarrowCoord.x-iRadius;
+				currentPos.x = currentPithCoord.x-iRadius;
 				for ( i=-iRadius ; i<iRadiusMax ; ++i )
 				{
 					if ( currentPos.x < width && currentPos.y < height )
@@ -68,7 +68,7 @@ void SectorHistogram::construct( const Billon &billon, const Marrow &marrow, con
 							diff = qAbs(currentSliceValue - previousSliceValue);
 							if ( motionInterval.containsClosed(diff) )
 							{
-								(*this)[pieChart.sectorIndexOfAngle( currentMarrowCoord.angle(currentPos) )] += (diff-motionInterval.min());
+								(*this)[pieChart.sectorIndexOfAngle( currentPithCoord.angle(currentPos) )] += (diff-motionInterval.min());
 							}
 						}
 					}

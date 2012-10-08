@@ -5,7 +5,7 @@
 
 #include "def/def_billon.h"
 
-class Marrow;
+class Pith;
 class PieChart;
 
 class SectorHistogram : public Histogram<qreal>
@@ -14,7 +14,7 @@ public:
 	SectorHistogram();
 	virtual ~SectorHistogram();
 
-	void construct( const Billon &billon, const Marrow &marrow, const PieChart &pieChart,
+	void construct( const Billon &billon, const Pith &pith, const PieChart &pieChart,
 				  const Interval<int> &slicesInterval, const Interval<int> &intensity, const Interval<int> &motionInterval,
 				  const int &radiusAroundPith );
 };

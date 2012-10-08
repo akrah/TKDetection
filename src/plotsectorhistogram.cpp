@@ -13,12 +13,8 @@
 #include <QPainter>
 
 PlotSectorHistogram::PlotSectorHistogram() : _datasCurve(new PointPolarSeriesData()), _datasCurveMaximums(new PointPolarSeriesData()),
-	_datasCurveIntervals(new PointPolarSeriesData()),  _datasHighlightCurve(new PointPolarSeriesData())
+	_datasCurveIntervals(new PointPolarSeriesData()),  _datasCurveCursor(new PointPolarSeriesData())
 {
-	_highlightCurve.setPen(QPen(Qt::red));
-	_histogramHighlightCurve.setBrush(Qt::red);
-	_histogramHighlightCurve.setPen(QPen(Qt::red));
-
 	_curveMaximums.setPen(QPen(Qt::green));
 	_histogramMaximums.setBrush(Qt::green);
 	_histogramMaximums.setPen(QPen(Qt::green));
@@ -27,11 +23,15 @@ PlotSectorHistogram::PlotSectorHistogram() : _datasCurve(new PointPolarSeriesDat
 	_histogramIntervals.setBrush(Qt::blue);
 	_histogramIntervals.setPen(QPen(Qt::blue));
 
+	_curveCursor.setPen(QPen(Qt::red));
+	_histogramCursor.setBrush(Qt::red);
+	_histogramCursor.setPen(QPen(Qt::red));
+
 	_curvePercentage.setPen(QPen(Qt::red));
 
 	_curveData.setData(_datasCurve);
 	_curveMaximums.setData(_datasCurveMaximums);
-	_highlightCurve.setData(_datasHighlightCurve);
+	_curveCursor.setData(_datasCurveCursor);
 	_curveIntervals.setData(_datasCurveIntervals);
 }
 
@@ -50,7 +50,7 @@ void PlotSectorHistogram::attach( QwtPolarPlot * const polarPlot )
 		_curveData.attach(polarPlot);
 		_curveIntervals.attach(polarPlot);
 		_curveMaximums.attach(polarPlot);
-		_highlightCurve.attach(polarPlot);
+		_curveCursor.attach(polarPlot);
 	}
 }
 
@@ -61,53 +61,49 @@ void PlotSectorHistogram::attach( QwtPlot * const plot )
 		_histogramData.attach(plot);
 		_histogramIntervals.attach(plot);
 		_histogramMaximums.attach(plot);
-		_histogramHighlightCurve.attach(plot);
+		_histogramCursor.attach(plot);
 		_curvePercentage.attach(plot);
 	}
 }
 
 void PlotSectorHistogram::clear()
 {
-	const QVector<QwtIntervalSample> empty(0);
-	_histogramData.setSamples(empty);
-	_histogramMaximums.setSamples(empty);
-	_histogramIntervals.setSamples(empty);
-	_histogramHighlightCurve.setSamples(empty);
+	const QVector<QwtIntervalSample> emptyDatas(0);
+	_histogramData.setSamples(emptyDatas);
+	_histogramMaximums.setSamples(emptyDatas);
+	_histogramIntervals.setSamples(emptyDatas);
+	_histogramCursor.setSamples(emptyDatas);
 
 	_datasCurve->clear();
 	_datasCurveMaximums->clear();
 	_datasCurveIntervals->clear();
-	_datasHighlightCurve->clear();
+	_datasCurveCursor->clear();
 
 	_curvePercentage.setSamples(QVector<QPointF>(0));
 }
 
-void PlotSectorHistogram::highlightCurve( const uint &index )
+void PlotSectorHistogram::moveCursor( const uint &index )
 {
-	QVector<QwtIntervalSample> highlightCurveHistogramDatas(1);
+	QVector<QwtIntervalSample> datasCursor(1);
 	if ( index < _histogramData.dataSize() )
 	{
-		const qreal rightAngle = _histogramData.sample(index).interval.maxValue();
-		const qreal leftAngle = _histogramData.sample(index).interval.minValue();
-		const qreal valueOfCurve = _histogramData.sample(index).value;
-
-		_datasHighlightCurve->resize(4);
-		_datasHighlightCurve->at(0).setAzimuth(rightAngle);
-		_datasHighlightCurve->at(1).setAzimuth(rightAngle);
-		_datasHighlightCurve->at(1).setRadius(valueOfCurve);
-		_datasHighlightCurve->at(2).setAzimuth(leftAngle);
-		_datasHighlightCurve->at(2).setRadius(valueOfCurve);
-		_datasHighlightCurve->at(3).setAzimuth(leftAngle);
-
-		highlightCurveHistogramDatas[0] = _histogramData.sample(index);
+		const QwtIntervalSample &sample = _histogramData.sample(index);
+		_datasCurveCursor->resize(4);
+		_datasCurveCursor->at(0).setAzimuth(sample.interval.maxValue());
+		_datasCurveCursor->at(1).setAzimuth(sample.interval.minValue());
+		_datasCurveCursor->at(1).setRadius(sample.value);
+		_datasCurveCursor->at(2).setAzimuth(sample.interval.minValue());
+		_datasCurveCursor->at(2).setRadius(sample.value);
+		_datasCurveCursor->at(3).setAzimuth(sample.interval.minValue());
+		datasCursor[0] = sample;
 	}
 	else
 	{
-		_datasHighlightCurve->resize(0);
+		_datasCurveCursor->resize(0);
 	}
-	_histogramHighlightCurve.setSamples(highlightCurveHistogramDatas);
-	_highlightCurve.plot()->replot();
-	_histogramHighlightCurve.plot()->replot();
+	_histogramCursor.setSamples(datasCursor);
+	_curveCursor.plot()->replot();
+	_histogramCursor.plot()->replot();
 }
 
 void PlotSectorHistogram::update( const SectorHistogram & histogram, const PieChart & pieChart )
@@ -115,11 +111,6 @@ void PlotSectorHistogram::update( const SectorHistogram & histogram, const PieCh
 	computeValues(histogram,pieChart);
 	computeMaximums(histogram,pieChart);
 	computeIntervals(histogram,pieChart);
-
-//	const qreal derivativeThreshold = thresholdOfMaximums( minimumHeightPercentageOfMaximum );
-//	const qreal x[] = { 0., TWO_PI };
-//	const qreal y[] = { derivativeThreshold, derivativeThreshold };
-//	_curvePercentage.setSamples(x,y,2);
 }
 
 

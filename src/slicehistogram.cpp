@@ -14,7 +14,7 @@ SliceHistogram::~SliceHistogram()
  * Public setters
  **********************************/
 
-void SliceHistogram::construct( const Billon &billon, const Marrow &marrow, const Interval<int> &intensity, const Interval<int> &motionInterval,
+void SliceHistogram::construct( const Billon &billon, const Pith &pith, const Interval<int> &intensity, const Interval<int> &motionInterval,
 				const int & borderPercentageToCut, const int &radiusAroundPith )
 {
 	const int width = billon.n_cols;
@@ -46,12 +46,12 @@ void SliceHistogram::construct( const Billon &billon, const Marrow &marrow, cons
 		const Slice &currentSlice = billon.slice(k);
 		const Slice &previousSlice = billon.previousSlice(k);
 		cumul = 0.;
-		currentPos.y = marrow[k].y-radiusAroundPith;
+		currentPos.y = pith[k].y-radiusAroundPith;
 		for ( j=-radiusAroundPith ; j<radiusMax ; ++j )
 		{
 			iRadius = circleLines[j+radiusAroundPith];
 			iRadiusMax = iRadius+1;
-			currentPos.x = marrow[k].x-iRadius;
+			currentPos.x = pith[k].x-iRadius;
 			for ( i=-iRadius ; i<iRadiusMax ; ++i )
 			{
 				if ( currentPos.x < width && currentPos.y < height )

@@ -2,6 +2,8 @@
 #include <QTextCodec>
 
 #include "inc/mainwindow.h"
+#include <cstdio>
+
 #include <QMessageBox>
 #include "tst/test_intervalshistogram.h"
 

@@ -39,13 +39,14 @@ SOURCES	=	main.cpp \
 			datexport.cpp \
 			dicomreader.cpp \
 			mainwindow.cpp \
-			marrow.cpp \
-			marrowextractor.cpp \
 			ofsexport.cpp \
 			opticalflow.cpp \
 			pgm3dexport.cpp \
 			piechart.cpp \
 			piepart.cpp \
+			pith.cpp \
+			pithextractor.cpp \
+			plotsectorhistogram.cpp \
 			plotslicehistogram.cpp \
 			pointpolarseriesdata.cpp \
 			sectorhistogram.cpp \
@@ -55,7 +56,7 @@ SOURCES	=	main.cpp \
 			test_intervalshistogram.cpp \
 			v3dexport.cpp \
 			v3dreader.cpp \
-    src/plotsectorhistogram.cpp
+    src/knotareahistogram.cpp
 
 HEADERS	=	billon.h \
 			connexcomponentextractor.h \
@@ -70,13 +71,14 @@ HEADERS	=	billon.h \
 			histogram.h \
 			interval.h \
 			mainwindow.h \
-			marrow.h \
-			marrowextractor.h \
 			ofsexport.h \
 			opticalflow.h \
 			pgm3dexport.h \
 			piepart.h \
 			piechart.h \
+			pith.h \
+			pithextractor.h \
+			plotsectorhistogram.h \
 			plotslicehistogram.h \
 			pointpolarseriesdata.h \
 			sectorhistogram.h \
@@ -86,7 +88,7 @@ HEADERS	=	billon.h \
 			test_intervalshistogram.h \
 			v3dexport.h \
 			v3dreader.h \
-    inc/plotsectorhistogram.h
+    inc/knotareahistogram.h
 
 FORMS =	mainwindow.ui
 
@@ -101,6 +103,8 @@ macx:QMAKE_CXX=/usr/bin/clang++
 #--------------------#
 INCLUDEPATH *=	/usr/include/ \
 				/usr/local/include/
+
+QMAKE_LIBDIR *=	/usr/local/lib/
 
 LIBS *= -lblas -llapack -larmadillo
 
@@ -117,8 +121,6 @@ itk3 {
 					$${ITK_PATH}/Utilities/ \
 					$${ITK_PATH}/Utilities/vxl/vcl/ \
 					$${ITK_PATH}/Utilities/vxl/core/
-
-	QMAKE_LIBDIR *=	/usr/local/lib/
 
 	LIBS *=	-lITKIO \
 			-litkgdcm \

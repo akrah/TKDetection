@@ -18,7 +18,7 @@ namespace Ui
 }
 
 class ContourCurve;
-class Marrow;
+class Pith;
 class PieChart;
 class PlotSectorHistogram;
 class PlotSliceHistogram;
@@ -40,13 +40,10 @@ private slots:
 	void openDicom();
 	void closeImage();
 	void drawSlice();
-	void drawSlice( const int &sliceNumber );
 	void setSlice( const int &sliceNumber );
 	void setTypeOfView( const int &type );
 	void updateSliceHistogram();
-	void highlightSliceHistogram( const int &slicePosition );
-	void updateMarrow();
-	void highlightSectorHistogram( const int &sectorIdx );
+	void updatePith();
 	void setMinimumOfSliceInterval( const int &min );
 	void setMinimumOfSliceIntervalToCurrentSlice();
 	void setMaximumOfSliceInterval( const int &max );
@@ -97,34 +94,32 @@ private:
 	void initComponentsValues();
 	void updateUiComponentsValues();
 	void enabledComponents();
-	void computeSectorsHistogramForInterval( const Interval<int> &interval );
+	void updateSectorHistogram( const Interval<int> &interval );
 
 private:
 	Ui::MainWindow *_ui;
-	QImage _pix;
-	QButtonGroup _groupSliceView;
 
 	Billon *_billon;
 	Billon *_sectorBillon;
 	Billon *_componentBillon;
-	Marrow *_marrow;
+	Pith *_pith;
+
+	QImage _mainPix;
+	SliceZoomer _sliceZoomer;
+
 	SliceView *_sliceView;
+	ContourCurve *_contourCurve;
 
 	SliceHistogram *_sliceHistogram;
 	PlotSliceHistogram *_plotSliceHistogram;
-	QwtPlotCurve _histogramCursor;
-	QwtPlotHistogram _histogramDistanceMarrowToNearestPoint;
 
 	PieChart *_pieChart;
 	SectorHistogram *_sectorHistogram;
 	PlotSectorHistogram * _plotSectorHistogram;
 
-	ContourCurve *_contourCurve;
-
-	SliceZoomer _sliceZoomer;
-
-	QwtPlotCurve _histogramDistanceMarrowToNearestPointCursor;
-	Interval<int> _knotIntervalInDistanceMarrowToNearestPointHistogram;
+	QwtPlotHistogram _histogramDistancePithToNearestPoint;
+	QwtPlotCurve _histogramDistancePithToNearestPointCursor;
+	Interval<int> _knotIntervalInDistancePithToNearestPointHistogram;
 
 	int _currentSlice;
 	int _currentMaximum;

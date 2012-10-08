@@ -4,7 +4,7 @@
 #include "inc/histogram.h"
 #include "def/def_billon.h"
 
-class Marrow;
+class Pith;
 
 /*######################################################
   # DECLARATION
@@ -16,7 +16,7 @@ public:
 	SliceHistogram();
 	virtual ~SliceHistogram();
 
-	void construct( const Billon &billon, const Marrow &marrow, const Interval<int> &intensity, const Interval<int> &motionInterval, const int &borderPercentageToCut,
+	void construct( const Billon &billon, const Pith &pith, const Interval<int> &intensity, const Interval<int> &motionInterval, const int &borderPercentageToCut,
 					const int & radiusAroundPith );
 };
 

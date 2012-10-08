@@ -6,12 +6,12 @@
 #include <armadillo>
 
 template <typename T> class QList;
-class Marrow;
+class Pith;
 
-class MarrowExtractor {
+class PithExtractor {
 
 public:
-	MarrowExtractor();
+	PithExtractor();
 
 	/**
 	 * \fn		QList<Coord>* process( const icube &image, const int &sliceMin, const int &sliceMax )
@@ -21,7 +21,7 @@ public:
 	 * \param	sliceMax Dernière coupe à traiter
 	 * \return	la liste des coordonnées de la moelle
 	 */
-	Marrow* process( const arma::icube &image, const int &sliceMin, const int &sliceMax );
+	Pith* process( const arma::icube &image, const int &sliceMin, const int &sliceMax );
 
 	/********************************************************
 	 * Get functions
@@ -53,10 +53,10 @@ public:
 	int binarizationThreshold();
 
 	/**
-	 * \fn		int getMarrowLag()
+	 * \fn		int getPithLag()
 	 * \return	la distance maximal entre deux voxel pour qu'ils soient acceptés comme appartenant à la moelle
 	 */
-	int marrowLag();
+	int pithLag();
 
 	/********************************************************
 	 * Set functions
@@ -88,10 +88,10 @@ public:
 	void setBinarizationThreshold( const int &threshold );
 
 	/**
-	 * \fn		void setMarrowLag( int lag )
+	 * \fn		void setPithLag( int lag )
 	 * \param	lag Distance maximal entre deux voxel pour qu'ils soient acceptés comme appartenant à la moelle
 	 */
-	void setMarrowLag( const int &lag );
+	void setPithLag( const int &lag );
 
 private:
 	/**
@@ -159,7 +159,7 @@ private:
 	 * \fn		void corrigeMoelle(QList<Coord> *moelle, float *listMax, float seuilHough);
 	 * \brief	Corrige les valeur erronées de la moelle
 	 */
-	void correctMarrow( QList<iCoord2D> &marrow, float *listMax, float seuilHough );
+	void correctPith( QList<iCoord2D> &pith, float *listMax, float seuilHough );
 
 private:
 
@@ -167,7 +167,7 @@ private:
 	int _windowWidth;				/*!< Largeur de la fenêtre de voisinage */
 	int _windowHeight;				/*!< Hauteur de la fenêtre de voisinage */
 	float _binarizationThreshold;	/*!< Valeur du seuil de binarisation d'une image en niveau de gris */
-	int _marrowLag;					/*!< Décalage maximal de la position de la moelle sur 2 coupes consécutives */
+	int _pithLag;					/*!< Décalage maximal de la position de la moelle sur 2 coupes consécutives */
 };
 
 
@@ -176,52 +176,52 @@ private:
  * Définition des fonctions inline
  **********************************/
 inline
-int MarrowExtractor::falseCutPercent() {
+int PithExtractor::falseCutPercent() {
 	return _falseCutPercent;
 }
 
 inline
-int MarrowExtractor::windowWidth() {
+int PithExtractor::windowWidth() {
 	return _windowWidth;
 }
 
 inline
-int MarrowExtractor::windowHeight() {
+int PithExtractor::windowHeight() {
 	return _windowHeight;
 }
 
 inline
-int MarrowExtractor::binarizationThreshold() {
+int PithExtractor::binarizationThreshold() {
 	return _binarizationThreshold;
 }
 
 inline
-int MarrowExtractor::marrowLag() {
-	return _marrowLag;
+int PithExtractor::pithLag() {
+	return _pithLag;
 }
 
 inline
-void MarrowExtractor::setFalseCutPercent( const int &percentage ) {
+void PithExtractor::setFalseCutPercent( const int &percentage ) {
 	_falseCutPercent = percentage;
 }
 
 inline
-void MarrowExtractor::setWindowWidth( const int &width ) {
+void PithExtractor::setWindowWidth( const int &width ) {
 	_windowWidth = width;
 }
 
 inline
-void MarrowExtractor::setWindowHeight( const int &height ) {
+void PithExtractor::setWindowHeight( const int &height ) {
 	_windowHeight = height;
 }
 
 inline
-void MarrowExtractor::setBinarizationThreshold( const int &threshold ) {
+void PithExtractor::setBinarizationThreshold( const int &threshold ) {
 	_binarizationThreshold = threshold;
 }
 
-inline void MarrowExtractor::setMarrowLag( const int &lag ) {
-	_marrowLag = lag;
+inline void PithExtractor::setPithLag( const int &lag ) {
+	_pithLag = lag;
 }
 
 
