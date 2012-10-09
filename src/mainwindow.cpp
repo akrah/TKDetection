@@ -685,7 +685,7 @@ void MainWindow::exportToOfsRestricted()
 }
 
 void MainWindow::exportSectorToOfs() {
-	int index = _ui->_comboSelectSectorInterval->currentIndex();
+	uint index = _ui->_comboSelectSectorInterval->currentIndex();
 	if ( _billon != 0 && _billon->hasPith() && index > 0 && index <= _sectorHistogram->nbIntervals() )
 	{
 		QString fileName = QFileDialog::getSaveFileName(this, tr("Exporter le secteur %1 en .ofs").arg(index), QString("sector_%1.ofs").arg(index), tr("Fichiers de données (*.ofs);;Tous les fichiers (*.*)"));
@@ -826,7 +826,7 @@ void MainWindow::exportMovementsToV3D()
 	}
 }
 
-void MainWindow::selectSliceInterval( const int &index )
+void MainWindow::selectSliceInterval( const uint &index )
 {
 	selectSectorInterval(0);
 
@@ -862,7 +862,7 @@ void MainWindow::selectCurrentSliceInterval()
 	selectSliceInterval(_ui->_comboSelectSliceInterval->currentIndex());
 }
 
-void MainWindow::selectSectorInterval( const int &index )
+void MainWindow::selectSectorInterval( const uint &index )
 {
 	if ( _sectorBillon != 0 )
 	{

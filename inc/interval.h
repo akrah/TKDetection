@@ -38,6 +38,18 @@ protected:
 	T _max;
 };
 
+template <typename T>
+bool operator ==( Interval<T> first, Interval<T> second )
+{
+	return (first.min() == second.min()) && (first.max() == second.max());
+}
+
+template <typename T>
+bool operator !=( Interval<T> first, Interval<T> second )
+{
+	return (first.min() != second.min()) || (first.max() != second.max());
+}
+
 /*######################################################
   # IMPLEMENTATION
   ######################################################*/

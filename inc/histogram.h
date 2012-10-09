@@ -22,11 +22,11 @@ public:
 
 	T min() const;
 	T max() const;
-	int nbMaximums() const;
-	int maximumIndex( int i ) const;
-	int nbIntervals() const;
-	const Interval<uint> &interval( int i ) const;
-	int intervalIndex( int i ) const;
+	uint nbMaximums() const;
+	int maximumIndex( uint i ) const;
+	uint nbIntervals() const;
+	const Interval<uint> &interval( uint i ) const;
+	int intervalIndex( uint i ) const;
 	T thresholdOfMaximums( const int &percentage ) const;
 	T firstdDerivated( int i, bool loop ) const;
 
@@ -38,7 +38,7 @@ public:
 protected:
 	void meansSmoothing( const int &smoothingRadius, const bool &loop );
 	void computeMaximums( const int &minimumHeightPercentageOfMaximum, const int &neighborhoodOfMaximums, const bool &loop );
-	void computeIntervals( const int &derivativesPercentage, const int &minimumWidthOfIntervals, const bool &loop );
+	void computeIntervals( const int &derivativesPercentage, const uint &minimumWidthOfIntervals, const bool &loop );
 
 protected:
 	QVector<uint> _maximums;
@@ -109,35 +109,35 @@ T Histogram<T>::max() const
 }
 
 template <typename T>
-inline int Histogram<T>::nbMaximums() const
+inline uint Histogram<T>::nbMaximums() const
 {
 	return _maximums.size();
 }
 
 template <typename T>
-int Histogram<T>::maximumIndex( int i ) const
+int Histogram<T>::maximumIndex( uint i ) const
 {
-	Q_ASSERT_X( i>=0 && i<nbMaximums(), "Histogram::maximumIndex", "index en dehors des bornes" );
+	Q_ASSERT_X( i<nbMaximums(), "Histogram::maximumIndex", "index en dehors des bornes" );
 	return _maximums[i];
 }
 
 template <typename T>
-inline int Histogram<T>::nbIntervals() const
+inline uint Histogram<T>::nbIntervals() const
 {
 	return _intervals.size();
 }
 
 template <typename T>
-inline const Interval<uint> &Histogram<T>::interval( int i ) const
+inline const Interval<uint> &Histogram<T>::interval( uint i ) const
 {
-	Q_ASSERT_X( i>=0 && i<this->nbIntervals(), "Histogram::interval", "index en dehors des bornes" );
+	Q_ASSERT_X( i<this->nbIntervals(), "Histogram::interval", "index en dehors des bornes" );
 	return _intervals[i];
 }
 
 template <typename T>
-int Histogram<T>::intervalIndex( int i ) const
+int Histogram<T>::intervalIndex( uint i ) const
 {
-	Q_ASSERT_X( i>=0 && i<this->nbIntervals(), "Histogram::intervalIndex", "index en dehors des bornes" );
+	Q_ASSERT_X( i<this->nbIntervals(), "Histogram::intervalIndex", "index en dehors des bornes" );
 	return (_intervals[i].min()+_intervals[i].max())/2;
 }
 
@@ -153,7 +153,8 @@ template <typename T>
 T Histogram<T>::firstdDerivated( int i, bool loop ) const
 {
 	Q_ASSERT_X( i>=0 && i<this->size(), "Histogram::firstDerivated", "index en dehors des bornes de l'histogramme" );
-	return i>1 ? (*this)[i] - (*this)[i-2] : loop && this->size()>1 ? (*this)[i] - (*this)[this->size()-2+i] : T();
+	//return i>1 ? (*this)[i] - (*this)[i-2] : loop && this->size()>1 ? (*this)[i] - (*this)[this->size()-2+i] : T();
+	return i>0 ? (*this)[i] - (*this)[i-1] : loop ? (*this)[0] - (*this)[this->size()-1] : T();
 }
 
 /**********************************
@@ -279,16 +280,16 @@ void Histogram<T>::computeMaximums( const int & minimumHeightPercentageOfMaximum
 }
 
 template <typename T>
-void Histogram<T>::computeIntervals( const int & derivativesPercentage, const int & minimumWidthOfIntervals, const bool & loop )
+void Histogram<T>::computeIntervals( const int & derivativesPercentage, const uint & minimumWidthOfIntervals, const bool & loop )
 {
 	_intervals.clear();
 	if ( !_maximums.isEmpty() )
 	{
 		int cursorMax, cursorMin, derivativeThreshold;
-		bool fusionLast, fusionFirst;
-		cursorMax = -1;
-		for ( int i=0 ; i<nbMaximums() ; ++i )
+		Interval<uint> cursor, last;
+		for ( uint i=0 ; i<nbMaximums() ; ++i )
 		{
+			// Detection des bornes de l'intervalle courant
 			cursorMin = _maximums[i];
 			derivativeThreshold = this->at(cursorMin)*derivativesPercentage/100.;
 			while ( this->at(cursorMin) > derivativeThreshold )
@@ -303,7 +304,7 @@ void Histogram<T>::computeIntervals( const int & derivativesPercentage, const in
 			}
 
 			cursorMax = _maximums[i]+1;
-			if ( cursorMax == this->size() ) cursorMax = 0;
+			if ( cursorMax >= this->size() ) cursorMax = 0;
 
 			while ( this->at(cursorMax) > derivativeThreshold )
 			{
@@ -318,101 +319,45 @@ void Histogram<T>::computeIntervals( const int & derivativesPercentage, const in
 			cursorMax--;
 			if ( cursorMax<0 ) cursorMax = this->size()-1;
 
-			if ( cursorMax>cursorMin && (cursorMax-cursorMin) >= minimumWidthOfIntervals )
+			cursor.setBounds(cursorMin,cursorMax);
+
+			// Ajout et fusion de l'intervalle courant
+			if ( cursor.isValid() )
 			{
-				if ( _intervals.isEmpty() || _intervals.last().max() <= static_cast<uint>(cursorMin) )
+				if ( cursor.width() >= minimumWidthOfIntervals )
 				{
-					_intervals.append(Interval<uint>(cursorMin,cursorMax));
-				}
-				else if ( _intervals.last().isValid() )
-				{
-					_intervals.last().setMin( qMin(_intervals.last().min(), static_cast<uint>(cursorMin)) );
-					_intervals.last().setMax( qMax(_intervals.last().max(), static_cast<uint>(cursorMax)) );
-					if ( _intervals.size() > 1 )
+					if ( _intervals.isEmpty() || cursor.min() > _intervals.last().max() )
 					{
-						Interval<uint> &previousOfLast = _intervals[_intervals.size()-2];
-						if ( previousOfLast.max() > _intervals.last().min() )
-						{
-							previousOfLast.setMin( qMin(previousOfLast.min(), _intervals.last().min()) );
-							previousOfLast.setMax( qMax(previousOfLast.max(), _intervals.last().max()) );
-							_intervals.pop_back();
-						}
-					}
-					cursorMin = _intervals.last().min();
-					cursorMax = _intervals.last().max();
-				}
-				else
-				{
-					_intervals.last().setMax( qMax(_intervals.last().max(), static_cast<uint>(cursorMax)) );
-					cursorMax = _intervals.last().max();
-				}
-			}
-			else if ( cursorMax<cursorMin && (this->size()-cursorMin+cursorMax) >= minimumWidthOfIntervals )
-			{
-				if ( loop )
-				{
-					if ( _intervals.isEmpty() || (_intervals.last().isValid() && _intervals.last().max() <= static_cast<uint>(cursorMin) && _intervals.first().isValid() && _intervals.first().min() >= static_cast<uint>(cursorMin)) )
-					{
-						_intervals.append(Interval<uint>(cursorMin,cursorMax));
+						_intervals.append(cursor);
 					}
 					else
 					{
-						fusionLast = false;
-						if ( _intervals.last().isValid() && _intervals.last().max() > static_cast<uint>(cursorMin) )
+						last = _intervals.last();
+						if ( cursor != last )
 						{
-							_intervals.last().setMin( qMin(_intervals.last().min(), static_cast<uint>(cursorMin)) );
-							_intervals.last().setMax(cursorMax);
-							fusionLast = true;
-						}
-						if ( !_intervals.last().isValid() )
-						{
-							_intervals.last().setMin( qMin(_intervals.last().min(), static_cast<uint>(cursorMin)) );
-							_intervals.last().setMax( qMax(_intervals.last().max(), static_cast<uint>(cursorMax)) );
-							fusionLast = true;
-						}
-						if ( !fusionLast ) _intervals.append( Interval<uint>(cursorMin, cursorMax) );
-						else
-						{
-							cursorMin = _intervals.last().min();
-							cursorMax = _intervals.last().max();
-						}
-						fusionFirst = false;
-						if ( _intervals.first().isValid() && _intervals.first().min() < _intervals.last().max() )
-						{
-							_intervals.first().setMin( _intervals.last().min() );
-							_intervals.first().setMax( qMax(_intervals.first().max(), _intervals.last().max()) );
-							fusionFirst = true;
-						}
-						if ( !_intervals.first().isValid() )
-						{
-							_intervals.first().setMin( qMin(_intervals.first().min(), _intervals.last().min()) );
-							_intervals.first().setMax( qMax(_intervals.first().max(), _intervals.last().max()) );
-							fusionFirst = true;
-						}
-						if (fusionFirst)
-						{
-							_intervals.pop_back();
-							cursorMin = _intervals.first().min();
-							cursorMax = _intervals.first().max();
+							if ( cursor.min() == last.min() )
+							{
+								cursor.setMin(last.max());
+								cursorMin = last.max();
+							}
+							else if ( cursor.max() == last.max() )
+							{
+								last.setMax(cursor.min());
+							}
 						}
 					}
 				}
-				else if ( _intervals.isEmpty() )
+			}
+			else
+			{
+				if ( loop )
 				{
-					_intervals.append(Interval<uint>(0,cursorMax));
-					cursorMin = 0;
-				}
-				else
-				{
-					_intervals.append(Interval<uint>(cursorMin,this->size()-1));
-					cursorMax = this->size()-1;
+					if ( this->size()-(cursor.min()-cursor.max()) >= minimumWidthOfIntervals )
+					{
+
+					}
 				}
 			}
-		}
-		if ( !_intervals.first().isValid() && _intervals.last().isValid() && _intervals.first().min() < _intervals.last().max() )
-		{
-			_intervals.first().setMin( qMin(_intervals.first().min(),_intervals.last().min()) );
-			_intervals.pop_back();
 		}
 	}
 }
