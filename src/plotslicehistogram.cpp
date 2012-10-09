@@ -118,11 +118,12 @@ void PlotSliceHistogram::updateIntervals( const SliceHistogram & histogram )
 		while ( begin != end )
 		{
 			min = (*begin).min();
-			max = (*begin++).max();
-			for ( i=min ; i<max ; ++i )
+			max = (*begin).max();
+			for ( i=min ; i<=max ; ++i )
 			{
 				dataIntervals.append(QwtIntervalSample(histogram[i],i,i+1));
 			}
+			begin++;
 			qDebug() << "  [ " << min << ", " << max << " ] avec largeur = " << max-min;
 		}
 	}

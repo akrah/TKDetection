@@ -826,7 +826,7 @@ void MainWindow::exportMovementsToV3D()
 	}
 }
 
-void MainWindow::selectSliceInterval( const uint &index )
+void MainWindow::selectSliceInterval( const int &index )
 {
 	selectSectorInterval(0);
 
@@ -834,7 +834,7 @@ void MainWindow::selectSliceInterval( const uint &index )
 	_ui->_comboSelectSectorInterval->addItem(tr("Aucun"));
 	_ui->_spanSliderSelectInterval->setLowerValue(0);
 	_ui->_spanSliderSelectInterval->setUpperValue(0);
-	if ( index > 0 && index <= _sliceHistogram->nbIntervals() )
+	if ( index > 0 && index <= static_cast<int>(_sliceHistogram->nbIntervals()) )
 	{
 		const Interval<uint> &sliceInterval = _sliceHistogram->interval(index-1);
 		updateSectorHistogram(sliceInterval);
@@ -862,7 +862,7 @@ void MainWindow::selectCurrentSliceInterval()
 	selectSliceInterval(_ui->_comboSelectSliceInterval->currentIndex());
 }
 
-void MainWindow::selectSectorInterval( const uint &index )
+void MainWindow::selectSectorInterval( const int &index )
 {
 	if ( _sectorBillon != 0 )
 	{
@@ -876,7 +876,7 @@ void MainWindow::selectSectorInterval( const uint &index )
 	}
 	_ui->_comboConnexComponents->clear();
 	_ui->_comboConnexComponents->addItem(tr("Toutes"));
-	if ( index > 0 && index <= _sectorHistogram->nbIntervals() && _billon->hasPith() )
+	if ( index > 0 && index <= static_cast<int>(_sectorHistogram->nbIntervals()) && _billon->hasPith() )
 	{
 		const Interval<uint> &sectorInterval = _sectorHistogram->interval(_ui->_comboSelectSectorInterval->currentIndex()-1);
 		const Interval<uint> &sliceInterval = _sliceHistogram->interval(_ui->_comboSelectSliceInterval->currentIndex()-1);

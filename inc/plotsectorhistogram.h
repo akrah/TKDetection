@@ -27,9 +27,9 @@ public:
 	void moveCursor( const uint &index );
 
 private:
-	void computeValues( const SectorHistogram &histogram, const PieChart &pieChart );
-	void computeMaximums( const SectorHistogram &histogram, const PieChart &pieChart );
-	void computeIntervals( const SectorHistogram &histogram, const PieChart &pieChart );
+	void updateDatas( const SectorHistogram &histogram, const PieChart &pieChart );
+	void updateMaximums( const SectorHistogram &histogram, const PieChart &pieChart );
+	void updateIntervals( const SectorHistogram &histogram, const PieChart &pieChart );
 
 private:
 	QwtPlotHistogram _histogramData;
