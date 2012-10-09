@@ -12,13 +12,13 @@ namespace {
 		}
 		std::cout << std::endl;
 	}
-	void coutHistogram( QVector<int>::const_iterator begin, QVector<int>::const_iterator end ) {
+	void coutHistogram( QVector<uint>::const_iterator begin, QVector<uint>::const_iterator end ) {
 		while ( begin != end ) {
 			std::cout << *begin++ <<  ' ';
 		}
 		std::cout << std::endl;
 	}
-	void coutHistogram( QVector< Interval<int> >::const_iterator begin, QVector< Interval<int> >::const_iterator end ) {
+	void coutHistogram( QVector< Interval<uint> >::const_iterator begin, QVector< Interval<uint> >::const_iterator end ) {
 		while ( begin != end ) {
 			std::cout << '[' << (*begin).min() <<  ", " << (*begin).max() << "] ";
 			begin++;

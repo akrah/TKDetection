@@ -1,8 +1,8 @@
-#include "inc/plotslicehistogram.h"
+#include "inc/plotknotareahistogram.h"
 
-#include "inc/slicehistogram.h"
+#include "inc/knotareahistogram.h"
 
-PlotSliceHistogram::PlotSliceHistogram()
+PlotKnotAreaHistogram::PlotKnotAreaHistogram()
 {
 	_histogramMaximums.setBrush(Qt::green);
 	_histogramMaximums.setPen(QPen(Qt::green));
@@ -12,11 +12,9 @@ PlotSliceHistogram::PlotSliceHistogram()
 
 	_histogramCursor.setBrush(Qt::red);
 	_histogramCursor.setPen(QPen(Qt::red));
-
-	_curvePercentage.setPen(QPen(Qt::red));
 }
 
-PlotSliceHistogram::~PlotSliceHistogram()
+PlotKnotAreaHistogram::~PlotKnotAreaHistogram()
 {
 }
 
@@ -24,7 +22,7 @@ PlotSliceHistogram::~PlotSliceHistogram()
  * Public setters
  *******************************/
 
-void PlotSliceHistogram::attach( QwtPlot * const plot )
+void PlotKnotAreaHistogram::attach( QwtPlot * const plot )
 {
 	if ( plot != 0 )
 	{
@@ -32,22 +30,19 @@ void PlotSliceHistogram::attach( QwtPlot * const plot )
 		_histogramIntervals.attach(plot);
 		_histogramMaximums.attach(plot);
 		_histogramCursor.attach(plot);
-		_curvePercentage.attach(plot);
 	}
 }
 
-void PlotSliceHistogram::clear()
+void PlotKnotAreaHistogram::clear()
 {
 	const QVector<QwtIntervalSample> emptyData(0);
 	_histogramData.setSamples(emptyData);
 	_histogramMaximums.setSamples(emptyData);
 	_histogramIntervals.setSamples(emptyData);
 	_histogramCursor.setSamples(emptyData);
-
-	_curvePercentage.setSamples(QVector<QPointF>(0));
 }
 
-void PlotSliceHistogram::moveCursor( const uint &sliceIndex )
+void PlotKnotAreaHistogram::moveCursor( const uint &sliceIndex )
 {
 	QVector<QwtIntervalSample> datasCursor(1);
 	datasCursor[0].interval.setInterval(sliceIndex,sliceIndex+1);
@@ -55,21 +50,14 @@ void PlotSliceHistogram::moveCursor( const uint &sliceIndex )
 	_histogramCursor.setSamples(datasCursor);
 }
 
-void PlotSliceHistogram::updatePercentageCurve( const uint & thresholdOfMaximums )
-{
-	const qreal x[] = { 0., _histogramData.dataSize() };
-	const qreal y[] = { thresholdOfMaximums, thresholdOfMaximums };
-	_curvePercentage.setSamples(x,y,2);
-}
-
-void PlotSliceHistogram::update( const SliceHistogram & histogram )
+void PlotKnotAreaHistogram::update( const KnotAreaHistogram & histogram )
 {
 	updateDatas( histogram );
 	updateMaximums( histogram );
 	updateIntervals( histogram );
 }
 
-void PlotSliceHistogram::updateDatas( const SliceHistogram &histogram )
+void PlotKnotAreaHistogram::updateDatas( const KnotAreaHistogram &histogram )
 {
 	QVector<QwtIntervalSample> datasHistogram(0);
 	if ( histogram.size() > 0 )
@@ -87,13 +75,13 @@ void PlotSliceHistogram::updateDatas( const SliceHistogram &histogram )
 	_histogramData.setSamples(datasHistogram);
 }
 
-void PlotSliceHistogram::updateMaximums( const SliceHistogram & histogram )
+void PlotKnotAreaHistogram::updateMaximums( const KnotAreaHistogram & histogram )
 {
 	QVector<QwtIntervalSample> datasMaximums(0);
 	if ( histogram.nbMaximums() > 0 )
 	{
 		datasMaximums.reserve(histogram.nbMaximums());
-		int slice;
+		uint slice;
 		QVector<uint>::ConstIterator begin = histogram.maximums().begin();
 		const QVector<uint>::ConstIterator end = histogram.maximums().end();
 		while ( begin != end )
@@ -105,7 +93,7 @@ void PlotSliceHistogram::updateMaximums( const SliceHistogram & histogram )
 	_histogramMaximums.setSamples(datasMaximums);
 }
 
-void PlotSliceHistogram::updateIntervals( const SliceHistogram & histogram )
+void PlotKnotAreaHistogram::updateIntervals( const KnotAreaHistogram & histogram )
 {
 	QVector<QwtIntervalSample> dataIntervals(0);
 	if ( histogram.nbIntervals() > 0 )

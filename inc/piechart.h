@@ -23,7 +23,7 @@ public:
 	void setSectorsNumber( const uint &nbSectors );
 
 	void draw( QImage &image, const iCoord2D &center, const uint &sectorIdx ) const;
-	void draw( QImage &image, const iCoord2D &center, const QVector< Interval<int> > & intervals ) const;
+	void draw( QImage &image, const iCoord2D &center, const QVector<Interval<uint> > &intervals ) const;
 
 private:
 	void updateSectors( const int &nbSectors );

@@ -9,7 +9,7 @@ template<typename T> class Interval;
 
 namespace V3DExport
 {
-	void process( const Billon &billon, const Pith *pith, const QString &fileName, const Interval<int> &interval, const int &threshold );
+	void process( const Billon &billon, const QString &fileName, const Interval<int> &interval, const int &threshold );
 }
 
 #endif // V3DEXPORT_H

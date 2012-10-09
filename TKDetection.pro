@@ -57,7 +57,8 @@ SOURCES	=	main.cpp \
 			v3dexport.cpp \
 			v3dreader.cpp \
     src/knotareahistogram.cpp \
-    src/billonalgorithms.cpp
+    src/billonalgorithms.cpp \
+    src/plotknotareahistogram.cpp
 
 HEADERS	=	billon.h \
 			connexcomponentextractor.h \
@@ -90,7 +91,8 @@ HEADERS	=	billon.h \
 			v3dexport.h \
 			v3dreader.h \
     inc/knotareahistogram.h \
-    inc/billonalgorithms.h
+    inc/billonalgorithms.h \
+    inc/plotknotareahistogram.h
 
 FORMS =	mainwindow.ui
 

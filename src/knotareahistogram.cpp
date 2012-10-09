@@ -1,60 +1,70 @@
-//#include "inc/knotareahistogram.h"
+#include "inc/knotareahistogram.h"
 
-//KnotAreaHistogram::KnotAreaHistogram() : Histogram<qreal>()
-//{
-//}
+#include "inc/billon.h"
+#include "inc/billonalgorithms.h"
+#include "inc/connexcomponentextractor.h"
 
-//KnotAreaHistogram::~KnotAreaHistogram()
-//{
-//}
+KnotAreaHistogram::KnotAreaHistogram() : Histogram<qreal>()
+{
+}
+
+KnotAreaHistogram::~KnotAreaHistogram()
+{
+}
 
 
-///**********************************
-// * Public setters
-// **********************************/
+/**********************************
+ * Public setters
+ **********************************/
 
-//void KnotAreaHistogram::construct( const Billon &billon, const Pith &pith, const Interval<int> &intensity, const Interval<int> &motionInterval, const int &borderPercentageToCut,
-//				const int & radiusAroundPith )
-//{
-//	const int nbComponents = billon->maxValue();
-//	const int depth = billon->n_slices;
+void KnotAreaHistogram::construct( const Billon &billon, const int &minimumSideSizeOfComponent )
+{
+	this->clear();
+	this->resize( billon.n_slices );
 
-//	QVector<QwtIntervalSample> histData(depth,QwtIntervalSample(0,0,0));
-//	Billon *biggestComponents;
-//	iCoord2D nearestPoint;
+	Slice *biggestComponents;
+	iCoord2D nearestPoint;
+	for ( uint i=0 ; i<billon.n_slices ; ++i )
+	{
+		biggestComponents = ConnexComponentExtractor::extractConnexComponents( billon.slice(i), qPow(minimumSideSizeOfComponent,2), billon.minValue() );
+		nearestPoint = BillonAlgorithms::findNearestPointOfThePith( *biggestComponents, billon.pithCoord(i), billon.minValue() );
+		(*this)[i] = nearestPoint.euclideanDistance( billon.pithCoord(i) );
+		delete biggestComponents;
+		biggestComponents = 0;
+	}
+}
 
-//	int minIndex;
-//	qreal minVal;
+void KnotAreaHistogram::computeMaximumsAndIntervals( const uint & comparisonShift, const qreal &comparisonValue )
+{
+	if ( !this->isEmpty() )
+	{
+		const uint histoSize = this->size();
 
-//	minIndex = 0;
-//	minVal = width;
-//	for ( i=0 ; i<depth ; ++i )
-//	{
-//		biggestComponents = ConnexComponentExtractor::extractConnexComponents( billon->slice(i), qPow(_ui->_spinMinimalSizeOf2DConnexComponents->value(),2), 0 );
-//		nearestPoint = biggestComponents->findNearestPointOfThePith( (*_pith)[firstSlice+i], 0, 0 );
-//		//nearestPoint = billon->findNearestPointOfThePith( (*_pith)[firstSlice+i], i, 0 );
-//		histData[i].value = nearestPoint.euclideanDistance((*_pith)[firstSlice+i]);
-//		histData[i].interval.setInterval(i,i+1);
-//		if ( minVal > histData[i].value )
-//		{
-//			minVal = histData[i].value;
-//			minIndex = i;
-//		}
-//		delete biggestComponents;
-//		biggestComponents = 0;
-//	}
+		// Calcul du maximum
+		uint minIndex = 0;
+		qreal minVal = (*this)[0];
+		for ( uint i=1 ; i<histoSize ; ++i )
+		{
+			if ( minVal > (*this)[i] )
+			{
+				minVal = (*this)[i];
+				minIndex = i;
+			}
+		}
 
-//	_histogramDistancePithToNearestPoint.setSamples(histData);
-//	_ui->_plotDistancePithToNearestPoint->replot();
+		_maximums.resize(1);
+		_maximums[0] = minIndex;
 
-//	int upperIndex, lowerIndex;
+		// Calcul de l'intervalle
+		uint upperIndex, lowerIndex;
 
-//	upperIndex = qMin(depth-5,minIndex);
-//	while ( upperIndex < depth-4 && (histData[upperIndex+5].value - histData[upperIndex].value > 5.) ) upperIndex++;
-//	lowerIndex = qMax(5,minIndex);
-//	while ( lowerIndex > 3 && histData[lowerIndex-5].value - histData[lowerIndex].value > 5. ) lowerIndex--;
+		upperIndex = qMin(histoSize-comparisonShift,minIndex);
+		while ( upperIndex <= histoSize-comparisonShift && ((*this)[upperIndex+comparisonShift] - (*this)[upperIndex]) > comparisonValue ) upperIndex++;
 
-//	_knotIntervalInDistancePithToNearestPointHistogram.setBounds(lowerIndex+3,upperIndex-3);
+		lowerIndex = qMax(comparisonShift,minIndex);
+		while ( lowerIndex >= comparisonShift && (*this)[lowerIndex-comparisonShift] - (*this)[lowerIndex] > comparisonValue ) lowerIndex--;
 
-//	std::cout << "Bornes du noeud : [ " << lowerIndex+1+firstSlice << ", " << upperIndex-1+firstSlice << " ]" << std::endl;
-//}
+		_intervals.resize(1);
+		_intervals[0] = Interval<uint>(lowerIndex+1,upperIndex);
+	}
+}

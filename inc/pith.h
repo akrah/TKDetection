@@ -1,25 +1,21 @@
 #ifndef MARROW_H
 #define MARROW_H
 
-#include <QList>
 #include "interval.h"
 #include "def/def_coordinate.h"
 
+#include <QVector>
+
 class QImage;
 
-class Pith : public QList<iCoord2D>
+class Pith : public QVector<iCoord2D>
 {
 public:
-	Pith();
-	Pith( const int &begin, const int &end );
+	Pith( const int size = 0 );
 	Pith( const Pith &pith );
-
-	const Interval<int> &interval() const;
+	Pith( const QVector<iCoord2D> &coordinates );
 
 	void draw( QImage &image, const int &sliceIdx ) const;
-
-private:
-	Interval<int> _interval;
 };
 
 #endif // MARROW_H

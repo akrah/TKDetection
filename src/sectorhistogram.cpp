@@ -17,11 +17,11 @@ SectorHistogram::~SectorHistogram()
  * Public setters
  *******************************/
 
-void SectorHistogram::construct( const Billon &billon, const Pith &pith, const PieChart &pieChart, const Interval<int> &slicesInterval, const Interval<int> &intensity,
+void SectorHistogram::construct( const Billon &billon, const PieChart &pieChart, const Interval<uint> &slicesInterval, const Interval<int> &intensity,
 								 const Interval<int> &motionInterval, const int &radiusAroundPith )
 {
 	clear();
-	if ( slicesInterval.isValid() && slicesInterval.width() > 0 )
+	if ( billon.hasPith() && slicesInterval.isValid() && slicesInterval.width() > 0 )
 	{
 		const int width = billon.n_cols;
 		const int height = billon.n_rows;
@@ -50,7 +50,7 @@ void SectorHistogram::construct( const Billon &billon, const Pith &pith, const P
 		{
 			const Slice &currentSlice = billon.slice(k);
 			const Slice &previousSlice = billon.previousSlice(k);
-			const iCoord2D &currentPithCoord = pith[k];
+			const iCoord2D &currentPithCoord = billon.pithCoord(k);
 			currentPos.y = currentPithCoord.y-radiusAroundPith;
 			for ( j=-radiusAroundPith ; j<radiusMax ; ++j )
 			{

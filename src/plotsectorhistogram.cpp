@@ -161,8 +161,8 @@ void PlotSectorHistogram::computeMaximums( const SectorHistogram &histogram, con
 	{
 		int sector;
 		qreal left, right, value;
-		QVector<int>::ConstIterator begin = histogram.maximums().begin();
-		const QVector<int>::ConstIterator end = histogram.maximums().end();
+		QVector<uint>::ConstIterator begin = histogram.maximums().begin();
+		const QVector<uint>::ConstIterator end = histogram.maximums().end();
 		QVector<QwtPointPolar>::Iterator beginCurve = _datasCurveMaximums->begin();
 		QVector<QwtIntervalSample>::Iterator beginHist = curveHistogramMaximumsDatas.begin();
 		while ( begin != end )
@@ -193,9 +193,9 @@ void PlotSectorHistogram::computeIntervals( const SectorHistogram &histogram, co
 	if ( histogram.nbIntervals() > 0 )
 	{
 		int min, max, i;
-		Interval<int> currentInterval;
-		QVector< Interval<int> >::ConstIterator begin = histogram.intervals().begin();
-		const QVector< Interval<int> >::ConstIterator end = histogram.intervals().end();
+		Interval<uint> currentInterval;
+		QVector< Interval<uint> >::ConstIterator begin = histogram.intervals().begin();
+		const QVector< Interval<uint> >::ConstIterator end = histogram.intervals().end();
 		const int nbSectors = histogram.nbIntervals();
 		qDebug() << "Intervalles d'angles' :";
 		while ( begin != end )

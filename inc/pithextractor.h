@@ -1,11 +1,12 @@
 #ifndef MARROWEXTRACTOR_H
 #define MARROWEXTRACTOR_H
 
+#include "def/def_billon.h"
 #include "def/def_coordinate.h"
 
 #include <armadillo>
 
-template <typename T> class QList;
+template <typename T> class QVector;
 class Pith;
 
 class PithExtractor {
@@ -14,14 +15,14 @@ public:
 	PithExtractor();
 
 	/**
-	 * \fn		QList<Coord>* process( const icube &image, const int &sliceMin, const int &sliceMax )
+	 * \fn		Pith* process( const icube &image, const int &sliceMin, const int &sliceMax )
 	 * \brief	Extrait la moelle d'une matrice sous forme d'une liste des coordonnées des voxels qui la compose
 	 * \param	image Image 2D
 	 * \param	sliceMin Première coupe à traiter
 	 * \param	sliceMax Dernière coupe à traiter
 	 * \return	la liste des coordonnées de la moelle
 	 */
-	Pith* process( const arma::icube &image, const int &sliceMin, const int &sliceMax );
+	void process( Billon &billon );
 
 	/********************************************************
 	 * Get functions
@@ -156,10 +157,10 @@ private:
 	void minSlice( const arma::imat &slice, int *minValue, int *maxValue, iCoord2D *coordMax );
 
 	/**
-	 * \fn		void corrigeMoelle(QList<Coord> *moelle, float *listMax, float seuilHough);
+	 * \fn		void corrigeMoelle(QVector<Coord> *moelle, float *listMax, float seuilHough);
 	 * \brief	Corrige les valeur erronées de la moelle
 	 */
-	void correctPith( QList<iCoord2D> &pith, float *listMax, float seuilHough );
+	void correctPith( QVector<iCoord2D> &pith, float *listMax, float seuilHough );
 
 private:
 

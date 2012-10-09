@@ -25,6 +25,8 @@ class PlotSliceHistogram;
 class SectorHistogram;
 class SliceHistogram;
 class SliceView;
+class KnotAreaHistogram;
+class PlotKnotAreaHistogram;
 
 class MainWindow : public QMainWindow
 {
@@ -94,7 +96,7 @@ private:
 	void initComponentsValues();
 	void updateUiComponentsValues();
 	void enabledComponents();
-	void updateSectorHistogram( const Interval<int> &interval );
+	void updateSectorHistogram( const Interval<uint> &interval );
 
 private:
 	Ui::MainWindow *_ui;
@@ -102,7 +104,6 @@ private:
 	Billon *_billon;
 	Billon *_sectorBillon;
 	Billon *_componentBillon;
-	Pith *_pith;
 
 	QImage _mainPix;
 	SliceZoomer _sliceZoomer;
@@ -117,13 +118,12 @@ private:
 	SectorHistogram *_sectorHistogram;
 	PlotSectorHistogram * _plotSectorHistogram;
 
-	QwtPlotHistogram _histogramDistancePithToNearestPoint;
-	QwtPlotCurve _histogramDistancePithToNearestPointCursor;
-	Interval<int> _knotIntervalInDistancePithToNearestPointHistogram;
+	KnotAreaHistogram *_knotAreaHistogram;
+	PlotKnotAreaHistogram *_plotKnotAreaHistogram;
 
-	int _currentSlice;
+	uint _currentSlice;
 	int _currentMaximum;
-	int _currentSector;
+	uint _currentSector;
 };
 
 #endif // MAINWINDOW_H

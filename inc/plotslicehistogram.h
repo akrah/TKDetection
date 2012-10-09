@@ -22,9 +22,9 @@ public:
 	void update( const SliceHistogram & histogram );
 
 private:
-	void computeValues( const SliceHistogram & histogram );
-	void computeMaximums( const SliceHistogram & histogram );
-	void computeIntervals( const SliceHistogram & histogram );
+	void updateDatas( const SliceHistogram & histogram );
+	void updateMaximums( const SliceHistogram & histogram );
+	void updateIntervals( const SliceHistogram & histogram );
 
 private:
 	QwtPlotHistogram _histogramData;

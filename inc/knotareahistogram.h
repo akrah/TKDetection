@@ -1,16 +1,19 @@
 #ifndef KNOTAREAHISTOGRAM_H
 #define KNOTAREAHISTOGRAM_H
 
-//#include "histogram.h"
+#include "def/def_billon.h"
+#include "histogram.h"
 
-//class KnotAreaHistogram : public Histogram<qreal>
-//{
-//public:
-//	KnotAreaHistogram();
-//	virtual ~KnotAreaHistogram();
+class Pith;
 
-//	void construct( const Billon &billon, const Pith &pith, const Interval<int> &intensity, const Interval<int> &motionInterval, const int &borderPercentageToCut,
-//					const int & radiusAroundPith );
-//};
+class KnotAreaHistogram : public Histogram<qreal>
+{
+public:
+	KnotAreaHistogram();
+	virtual ~KnotAreaHistogram();
+
+	void construct( const Billon &billon, const int &minimumSideSizeOfComponent );
+	void computeMaximumsAndIntervals( const uint &comparisonShift, const qreal &comparisonValue );
+};
 
 #endif // KNOTAREAHISTOGRAM_H

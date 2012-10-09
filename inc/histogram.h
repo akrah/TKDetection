@@ -17,15 +17,15 @@ public:
 	Histogram();
 	virtual ~Histogram();
 
-	const QVector<int> & maximums() const;
-	const QVector< Interval<int> > & intervals() const;
+	const QVector<uint> &maximums() const;
+	const QVector<Interval<uint> > &intervals() const;
 
 	T min() const;
 	T max() const;
 	int nbMaximums() const;
 	int maximumIndex( int i ) const;
 	int nbIntervals() const;
-	const Interval<int> &interval( int i ) const;
+	const Interval<uint> &interval( int i ) const;
 	int intervalIndex( int i ) const;
 	T thresholdOfMaximums( const int &percentage ) const;
 	T firstdDerivated( int i, bool loop ) const;
@@ -35,14 +35,14 @@ public:
 									  const int & minimumHeightPercentageOfMaximum, const int & neighborhoodOfMaximums,
 									  const int & derivativesPercentage, const int &minimumWidthOfIntervals, const bool & loop );
 
-private:
+protected:
 	void meansSmoothing( const int &smoothingRadius, const bool &loop );
 	void computeMaximums( const int &minimumHeightPercentageOfMaximum, const int &neighborhoodOfMaximums, const bool &loop );
 	void computeIntervals( const int &derivativesPercentage, const int &minimumWidthOfIntervals, const bool &loop );
 
 protected:
-	QVector<int> _maximums;
-	QVector< Interval<int> > _intervals;
+	QVector<uint> _maximums;
+	QVector< Interval<uint> > _intervals;
 };
 
 template <typename T>
@@ -73,13 +73,13 @@ template <typename T> Histogram<T>::~Histogram() {}
  **********************************/
 
 template <typename T>
-inline const QVector<int> & Histogram<T>::maximums() const
+inline const QVector<uint> & Histogram<T>::maximums() const
 {
 	return _maximums;
 }
 
 template <typename T>
-inline const QVector< Interval<int> > & Histogram<T>::intervals() const
+inline const QVector< Interval<uint> > & Histogram<T>::intervals() const
 {
 	return _intervals;
 }
@@ -128,7 +128,7 @@ inline int Histogram<T>::nbIntervals() const
 }
 
 template <typename T>
-inline const Interval<int> &Histogram<T>::interval( int i ) const
+inline const Interval<uint> &Histogram<T>::interval( int i ) const
 {
 	Q_ASSERT_X( i>=0 && i<this->nbIntervals(), "Histogram::interval", "index en dehors des bornes" );
 	return _intervals[i];
@@ -320,17 +320,17 @@ void Histogram<T>::computeIntervals( const int & derivativesPercentage, const in
 
 			if ( cursorMax>cursorMin && (cursorMax-cursorMin) >= minimumWidthOfIntervals )
 			{
-				if ( _intervals.isEmpty() || _intervals.last().max() <= cursorMin )
+				if ( _intervals.isEmpty() || _intervals.last().max() <= static_cast<uint>(cursorMin) )
 				{
-					_intervals.append(Interval<int>(cursorMin,cursorMax));
+					_intervals.append(Interval<uint>(cursorMin,cursorMax));
 				}
 				else if ( _intervals.last().isValid() )
 				{
-					_intervals.last().setMin( qMin(_intervals.last().min(), cursorMin) );
-					_intervals.last().setMax( qMax(_intervals.last().max(), cursorMax) );
+					_intervals.last().setMin( qMin(_intervals.last().min(), static_cast<uint>(cursorMin)) );
+					_intervals.last().setMax( qMax(_intervals.last().max(), static_cast<uint>(cursorMax)) );
 					if ( _intervals.size() > 1 )
 					{
-						Interval<int> &previousOfLast = _intervals[_intervals.size()-2];
+						Interval<uint> &previousOfLast = _intervals[_intervals.size()-2];
 						if ( previousOfLast.max() > _intervals.last().min() )
 						{
 							previousOfLast.setMin( qMin(previousOfLast.min(), _intervals.last().min()) );
@@ -343,7 +343,7 @@ void Histogram<T>::computeIntervals( const int & derivativesPercentage, const in
 				}
 				else
 				{
-					_intervals.last().setMax( qMax(_intervals.last().max(), cursorMax) );
+					_intervals.last().setMax( qMax(_intervals.last().max(), static_cast<uint>(cursorMax)) );
 					cursorMax = _intervals.last().max();
 				}
 			}
@@ -351,26 +351,26 @@ void Histogram<T>::computeIntervals( const int & derivativesPercentage, const in
 			{
 				if ( loop )
 				{
-					if ( _intervals.isEmpty() || (_intervals.last().isValid() && _intervals.last().max() <= cursorMin && _intervals.first().isValid() && _intervals.first().min() >= cursorMax) )
+					if ( _intervals.isEmpty() || (_intervals.last().isValid() && _intervals.last().max() <= static_cast<uint>(cursorMin) && _intervals.first().isValid() && _intervals.first().min() >= static_cast<uint>(cursorMin)) )
 					{
-						_intervals.append(Interval<int>(cursorMin,cursorMax));
+						_intervals.append(Interval<uint>(cursorMin,cursorMax));
 					}
 					else
 					{
 						fusionLast = false;
-						if ( _intervals.last().isValid() && _intervals.last().max() > cursorMin )
+						if ( _intervals.last().isValid() && _intervals.last().max() > static_cast<uint>(cursorMin) )
 						{
-							_intervals.last().setMin( qMin(_intervals.last().min(), cursorMin) );
+							_intervals.last().setMin( qMin(_intervals.last().min(), static_cast<uint>(cursorMin)) );
 							_intervals.last().setMax(cursorMax);
 							fusionLast = true;
 						}
 						if ( !_intervals.last().isValid() )
 						{
-							_intervals.last().setMin( qMin(_intervals.last().min(), cursorMin) );
-							_intervals.last().setMax( qMax(_intervals.last().max(), cursorMax) );
+							_intervals.last().setMin( qMin(_intervals.last().min(), static_cast<uint>(cursorMin)) );
+							_intervals.last().setMax( qMax(_intervals.last().max(), static_cast<uint>(cursorMax)) );
 							fusionLast = true;
 						}
-						if ( !fusionLast ) _intervals.append( Interval<int>(cursorMin, cursorMax) );
+						if ( !fusionLast ) _intervals.append( Interval<uint>(cursorMin, cursorMax) );
 						else
 						{
 							cursorMin = _intervals.last().min();
@@ -399,12 +399,12 @@ void Histogram<T>::computeIntervals( const int & derivativesPercentage, const in
 				}
 				else if ( _intervals.isEmpty() )
 				{
-					_intervals.append(Interval<int>(0,cursorMax));
+					_intervals.append(Interval<uint>(0,cursorMax));
 					cursorMin = 0;
 				}
 				else
 				{
-					_intervals.append(Interval<int>(cursorMin,this->size()-1));
+					_intervals.append(Interval<uint>(cursorMin,this->size()-1));
 					cursorMax = this->size()-1;
 				}
 			}

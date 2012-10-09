@@ -17,7 +17,7 @@ namespace V3DExport {
 		void writeTag( QXmlStreamWriter &stream, const QString &name, const QString &value );
 	}
 
-	void process( const Billon &billon, const Pith *pith, const QString &fileName, const Interval<int> &interval, const int &threshold )
+	void process( const Billon &billon, const QString &fileName, const Interval<int> &interval, const int &threshold )
 	{
 		QFile file(fileName);
 
@@ -35,7 +35,7 @@ namespace V3DExport {
 			stream.writeStartElement("image");
 				appendTags( billon, stream );
 				appendComponent( billon, interval, 1, threshold, stream );
-				if ( pith != 0 ) appendPith( *pith, stream );
+				appendPith( billon.pith(), stream );
 			stream.writeEndElement();
 
 		stream.writeEndDocument();
@@ -134,17 +134,20 @@ namespace V3DExport {
 
 		void appendPith( const Pith &pith, QXmlStreamWriter &stream )
 		{
-			stream.writeStartElement("pith");
-			for ( int k=0, sliceIdx = pith.interval().min() ; k<pith.size() ; ++k, ++sliceIdx )
+			if ( !pith.isEmpty() )
 			{
-				const iCoord2D &coord = pith[k];
-				stream.writeStartElement("coord");
+				stream.writeStartElement("pith");
+				for ( int k=0 ; k<pith.size() ; ++k )
+				{
+					const iCoord2D &coord = pith[k];
+					stream.writeStartElement("coord");
 					stream.writeTextElement("x",QString::number(coord.x));
 					stream.writeTextElement("y",QString::number(coord.y));
-					stream.writeTextElement("z",QString::number(sliceIdx));
+					stream.writeTextElement("z",QString::number(k));
+					stream.writeEndElement();
+				}
 				stream.writeEndElement();
 			}
-			stream.writeEndElement();
 		}
 
 		void writeXmlElementWithAttribute( QXmlStreamWriter &stream, const QString &elementName, const QString &attributeName, const QString &attributeValue, const QString &elementValue )

@@ -92,14 +92,14 @@ void PieChart::draw( QImage &image, const iCoord2D &center, const uint &sectorId
 	}
 }
 
-void PieChart::draw( QImage &image, const iCoord2D &center, const QVector< Interval<int> > & intervals ) const
+void PieChart::draw( QImage &image, const iCoord2D &center, const QVector< Interval<uint> > & intervals ) const
 {
 	if ( !intervals.isEmpty() )
 	{
 		// Liste qui va contenir les angles des deux côté du secteur à dessiner
 		// Permet de factoriser le code de calcul des coordonnées juste en dessous
 		QList<qreal> twoSides;
-		QVector< Interval<int> >::ConstIterator interval;
+		QVector< Interval<uint> >::ConstIterator interval;
 		for ( interval = intervals.constBegin() ; interval < intervals.constEnd() ; ++interval )
 		{
 			twoSides.append( sector((*interval).min()).orientation()-0.01 );

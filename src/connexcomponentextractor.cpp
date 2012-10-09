@@ -47,8 +47,7 @@ namespace ConnexComponentExtractor
 		delete labels;
 		delete oldSlice;
 
-		Billon* components = new Billon(width,height,depth);
-		components->setVoxelSize(billon.voxelWidth(),billon.voxelHeight(),billon.voxelDepth());
+		Billon* components = new Billon(billon);
 		components->fill(0);
 
 		QMap<int, QList<iCoord3D> >::ConstIterator iterComponents;

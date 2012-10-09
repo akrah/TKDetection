@@ -1,5 +1,6 @@
 #include "inc/pithextractor.h"
 
+#include "inc/billon.h"
 #include "inc/define.h"
 #include "inc/coordinate.h"
 #include "inc/pith.h"
@@ -17,10 +18,13 @@ PithExtractor::PithExtractor() :
  * Fonction principale d'extraction de la moelle
  ********************************************************/
 
-Pith* PithExtractor::process( const arma::icube &image, const int &sliceMin, const int &sliceMax ) {
-	const int width = image.n_cols;
-	const int height = image.n_rows;
-	const int depth = image.n_slices;
+void PithExtractor::process( Billon &billon )
+{
+	billon._pith.clear();
+
+	const int width = billon.n_cols;
+	const int height = billon.n_rows;
+	const int depth = billon.n_slices;
 
 	iCoord2D coordPrec, coordCurrent;
 	float maxStandList[depth];
@@ -30,13 +34,9 @@ Pith* PithExtractor::process( const arma::icube &image, const int &sliceMin, con
 
 	max = x = y = 0;
 
-	Pith *pith = new Pith(sliceMin,sliceMax);
-
 	//extraction de la moelle de la premiere coupe sur la totalité de la coupe
 	//nous permet d'avoir un coordonnée a laquelle appliqué la fenetre
-	transHough( image.slice(sliceMin), width, height, &x, &y, &max, &nbContourPoints );
-
-
+	transHough( billon.slice(0), width, height, &x, &y, &max, &nbContourPoints );
 
 	//calcul la coordonnée d'origine de la fenetre
 	x = x - (_windowWidth/2);
@@ -44,43 +44,39 @@ Pith* PithExtractor::process( const arma::icube &image, const int &sliceMin, con
 	y = y - (_windowHeight/2);
 	y = y < 0 ? 0 : (y > (height - _windowHeight) ? height - _windowHeight : y);
 	//extraction de la moelle de la premiere coupe sur la coupe redimensionnée
-	coordCurrent = transHough( image.slice(sliceMin), _windowWidth, _windowHeight, &x, &y, &max, &nbContourPoints );
+	coordCurrent = transHough( billon.slice(0), _windowWidth, _windowHeight, &x, &y, &max, &nbContourPoints );
 
-	for (int i = 0; i < sliceMin; ++ i) {
-		pith->append(coordCurrent);
-		maxStandList[i]=0.;
-	}
-	pith->append(coordCurrent);	// pour sliceMin
-	maxStandList[sliceMin] = ((float)max)/nbContourPoints;
+	billon._pith.append(coordCurrent);
+	maxStandList[0] = ((float)max)/nbContourPoints;
 
 	//extraction des coupes suivantes
 	std::cerr << "extractMoelle : ";
-	for(int i=sliceMin + 1; i<= sliceMax; i++) {
+	for(int i=1; i<depth; i++) {
 		//~ if(!listeCoupe->contains(i)){
 			std::cerr << " " << i;
-			coordPrec = pith->last();
+			coordPrec = billon._pith.last();
 			x = x - (_windowWidth/2);
 			x = x < 0 ? 0 : (x > (width - _windowWidth) ? width - _windowWidth : x);
 			y = y - (_windowHeight/2);
 			y = y < 0 ? 0 : (y > (height - _windowHeight) ? height - _windowHeight : y);
 			//extraction de la moelle de la coupe i
-			coordCurrent = transHough( image.slice(i), _windowWidth, _windowHeight, &x, &y, &max, &nbContourPoints );
-			pith->append(coordCurrent);
-			shift = sqrt(pow((double) (pith->last().x - coordPrec.x),(double) 2.0) + pow( (double)(pith->last().y - coordPrec.y), (double)2.0) );
+			coordCurrent = transHough( billon.slice(i), _windowWidth, _windowHeight, &x, &y, &max, &nbContourPoints );
+			billon._pith.append(coordCurrent);
+			shift = sqrt(pow((double) (billon._pith.last().x - coordPrec.x),(double) 2.0) + pow( (double)(billon._pith.last().y - coordPrec.y), (double)2.0) );
 			//si le resultat obtenu a un decalage trop important avec la coupe precedente alors on recommence l'extraction sur l'ensemble de la coupe
 			if(shift > _pithLag && width > _windowWidth && height > _windowHeight){
 				std::cerr << "*";
 				// std::cerr << "   :> decalage=" << decalage << ">" << _pithLag << "\n";
 
-				pith->removeLast();
+				billon._pith.pop_back();
 				x = y = 0;
-				transHough(image.slice(i), width, height, &x, &y, &max, &nbContourPoints );
+				transHough(billon.slice(i), width, height, &x, &y, &max, &nbContourPoints );
 				x = x - (_windowWidth/2);
 				x = x < 0 ? 0 : (x > (width - _windowWidth) ? width - _windowWidth : x);
 				y = y - (_windowHeight/2);
 				y = y < 0 ? 0 : (y > (height - _windowHeight) ? height - _windowHeight : y);
-				coordCurrent = transHough( image.slice(i), _windowWidth, _windowHeight, &x, &y, &max, &nbContourPoints );
-				pith->append(coordCurrent);
+				coordCurrent = transHough( billon.slice(i), _windowWidth, _windowHeight, &x, &y, &max, &nbContourPoints );
+				billon._pith.append(coordCurrent);
 			}
 			maxStandList[i] = ((float)max)/nbContourPoints;
 			if (i % 20 == 0) {
@@ -91,15 +87,7 @@ Pith* PithExtractor::process( const arma::icube &image, const int &sliceMin, con
 			//~ listMaxStand[i] = 0;
 		//~ }
 	}
-	std::cerr << "\n";
-
-	coordCurrent = pith->last();
-	for ( int i = sliceMax+1 ; i<depth ; i++ ) {
-		pith->append(coordCurrent);
-		maxStandList[i]=0.;
-	}
-
-	std::cerr << "nbCoupes=" << depth << " listMoelle.size()=" << pith->size() << "\n";
+	std::cerr << "\nnbCoupes=" << depth << " listMoelle.size()=" << billon._pith.size() << "\n";
 
 	//calcul du seuil a partir du quel les coupes sont considerées comme erronées
 	maxStandList2 = new float[depth];
@@ -113,9 +101,7 @@ Pith* PithExtractor::process( const arma::icube &image, const int &sliceMin, con
 	delete [] maxStandList2;
 
 	// applique la coorection a la moelle
-	correctPith(*pith, maxStandList, houghStandThreshold);
-
-	return pith;
+	correctPith(billon._pith, maxStandList, houghStandThreshold);
 }
 
 /******************************************************************
@@ -481,7 +467,7 @@ void PithExtractor::minSlice(const arma::imat &slice, int *minValue, int *maxVal
 	}
 }
 
-void PithExtractor::correctPith( QList<iCoord2D> &moelle, float *listMax, float seuilHough ) {
+void PithExtractor::correctPith( QVector<iCoord2D> &moelle, float *listMax, float seuilHough ) {
 	const int pithSize = moelle.size();
 	int startSlice, endSlice, i=0, x1, y1, x2, y2, newx, newy;
 	float ax, ay;

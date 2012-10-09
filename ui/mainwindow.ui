@@ -183,7 +183,7 @@
      <item>
       <widget class="QTabWidget" name="_tabs">
        <property name="currentIndex">
-        <number>2</number>
+        <number>3</number>
        </property>
        <widget class="QWidget" name="_tabGeneral">
         <attribute name="title">
@@ -1101,7 +1101,7 @@ maximum
             <layout class="QVBoxLayout" name="verticalLayout_8">
              <item>
               <widget class="QwtPolarPlot" name="_polarSectorHistogram">
-               <property name="plotBackground" stdset="0">
+               <property name="plotBackground">
                 <brush brushstyle="SolidPattern">
                  <color alpha="0">
                   <red>255</red>
@@ -1503,7 +1503,7 @@ maximum
           </widget>
          </item>
          <item>
-          <widget class="QwtPlot" name="_plotDistancePithToNearestPoint"/>
+          <widget class="QwtPlot" name="_plotKnotAreaHistogram"/>
          </item>
          <item>
           <widget class="QPushButton" name="_buttonExportKnotIntervalHistogram">
@@ -1966,15 +1966,15 @@ maximum
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>QxtSpanSlider</class>
-   <extends>QSlider</extends>
-   <header>QxtSpanSlider</header>
-  </customwidget>
-  <customwidget>
    <class>QwtPolarPlot</class>
    <extends>QFrame</extends>
    <header>qwt_polar_plot.h</header>
    <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>QxtSpanSlider</class>
+   <extends>QSlider</extends>
+   <header>QxtSpanSlider</header>
   </customwidget>
  </customwidgets>
  <tabstops>

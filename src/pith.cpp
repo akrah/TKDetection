@@ -4,26 +4,21 @@
 
 #include <QPainter>
 
-Pith::Pith() : QList<iCoord2D>(), _interval(0,0)
+Pith::Pith(const int size) : QVector<iCoord2D>(size)
 {
 }
 
-Pith::Pith( const int &begin, const int &end ) : QList<iCoord2D>(), _interval(begin,end)
+Pith::Pith( const Pith &pith ) : QVector<iCoord2D>(pith)
 {
 }
 
-Pith::Pith( const Pith &pith ) : QList<iCoord2D>(pith)
+Pith::Pith( const QVector<iCoord2D> &coordinates ) : QVector<iCoord2D>(coordinates)
 {
-	_interval = pith._interval;
 }
 
 /*******************************
  * Public getters
  *******************************/
-const Interval<int> &Pith::interval() const
-{
-	return _interval;
-}
 
 
 /*******************************
@@ -31,17 +26,11 @@ const Interval<int> &Pith::interval() const
  *******************************/
 void Pith::draw( QImage &image, const int &sliceIdx ) const
 {
-	if ( _interval.containsClosed(sliceIdx) )
+	if ( sliceIdx < size() )
 	{
-		const iCoord2D &coordToDraw = at(sliceIdx-_interval.min());
-
 		QPainter painter(&image);
-		QPainterPath ellipsePath;
-		ellipsePath.addEllipse(coordToDraw.x-5,coordToDraw.y-5,10,10);
-		QColor color(Qt::red);
-
-		painter.setBrush(color);
-		painter.setPen(color);
-		painter.drawPath(ellipsePath);
+		painter.setBrush(Qt::red);
+		painter.setPen(Qt::red);
+		painter.drawEllipse((*this)[sliceIdx].x-5,(*this)[sliceIdx].y-5,10,10);
 	}
 }
