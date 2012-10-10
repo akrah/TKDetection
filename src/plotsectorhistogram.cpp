@@ -102,8 +102,6 @@ void PlotSectorHistogram::moveCursor( const uint &index )
 		_datasCurveCursor->resize(0);
 	}
 	_histogramCursor.setSamples(datasCursor);
-	_curveCursor.plot()->replot();
-	_histogramCursor.plot()->replot();
 }
 
 void PlotSectorHistogram::update( const SectorHistogram & histogram, const PieChart & pieChart )
@@ -189,18 +187,17 @@ void PlotSectorHistogram::updateIntervals( const SectorHistogram &histogram, con
 {
 	_datasCurveIntervals->clear();
 	QVector<QwtIntervalSample> curveHistogramIntervalsDatas;
-
-	if ( histogram.nbIntervals() > 0 )
+	const int nbIntervals = histogram.nbIntervals();
+	if ( nbIntervals > 0 )
 	{
-		int min, max, i;
-		Interval<uint> currentInterval;
 		QVector< Interval<uint> >::ConstIterator begin = histogram.intervals().begin();
 		const QVector< Interval<uint> >::ConstIterator end = histogram.intervals().end();
-		const int nbSectors = histogram.nbIntervals();
+		const uint nbSectors = pieChart.nbSectors();
+		uint min, max, i;
 		qDebug() << "Intervalles d'angles' :";
 		while ( begin != end )
 		{
-			currentInterval = *begin++;
+			const Interval<uint> &currentInterval = *begin++;
 			min = currentInterval.min();
 			max = currentInterval.max();
 			if ( currentInterval.isValid() )
