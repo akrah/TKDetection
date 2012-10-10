@@ -110,11 +110,10 @@ namespace BillonAlgorithms
 		{
 			iCoord2D currentPos(startPoint);
 			QVector<iCoord2D> mask(8);
-			qreal orientation;
 			int interdit, j;
 
-			orientation = sliceCenter.angle(startPoint);
-			interdit = orientation*8./TWO_PI;
+			// Using Moore-Neighbor Tracing
+			interdit = sliceCenter.angle(startPoint)*8./TWO_PI;
 			interdit = (interdit+4)%8;
 			intensityThreshold++;
 			do
@@ -127,11 +126,11 @@ namespace BillonAlgorithms
 				mask[0].y = mask[4].y = currentPos.y;
 				mask[5].y = mask[6].y = mask[7].y = currentPos.y-1;
 				j = (interdit+1)%8;
-				while ( slice.at(mask[j%8].y,mask[j%8].x) < intensityThreshold && j < interdit+8 ) ++j;
+				while ( j < interdit+8 && slice.at(mask[j%8].y,mask[j%8].x) < intensityThreshold ) ++j;
 				currentPos = mask[j%8];
 				interdit = (j+4)%8;
 			}
-			while ( startPoint != currentPos );
+			while ( currentPos != startPoint || contourPoints.size() < 10 );
 		}
 
 		return contourPoints;

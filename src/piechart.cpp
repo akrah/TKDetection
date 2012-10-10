@@ -102,8 +102,8 @@ void PieChart::draw( QImage &image, const iCoord2D &center, const QVector< Inter
 		QVector< Interval<uint> >::ConstIterator interval;
 		for ( interval = intervals.constBegin() ; interval < intervals.constEnd() ; ++interval )
 		{
-			twoSides.append( sector((*interval).min()).orientation()-0.01 );
-			twoSides.append( sector((*interval).max()).orientation() );
+			twoSides.append( sector((*interval).min()).leftAngle() );
+			twoSides.append( sector((*interval).max()).rightAngle() );
 		}
 
 		// Dessin des deux côtés du secteur

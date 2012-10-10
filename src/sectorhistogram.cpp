@@ -17,59 +17,51 @@ SectorHistogram::~SectorHistogram()
  * Public setters
  *******************************/
 
-void SectorHistogram::construct( const Billon &billon, const PieChart &pieChart, const Interval<uint> &slicesInterval, const Interval<int> &intensity,
+void SectorHistogram::construct( const Billon &billon, const PieChart &pieChart, const Interval<uint> &sliceInterval, const Interval<int> &intensity,
 								 const Interval<int> &motionInterval, const int &radiusAroundPith )
 {
 	clear();
-	if ( billon.hasPith() && slicesInterval.isValid() && slicesInterval.width() > 0 )
+	if ( billon.hasPith() && sliceInterval.isValid() && sliceInterval.width() > 0 )
 	{
 		const int width = billon.n_cols;
 		const int height = billon.n_rows;
-		const int nbSectors = pieChart.nbSectors();
-		const int radiusMax = radiusAroundPith+1;
 		const qreal squareRadius = qPow(radiusAroundPith,2);
 
-		fill(0.,nbSectors);
+		fill(0.,pieChart.nbSectors());
 
 		QList<int> circleLines;
 		circleLines.reserve(2*radiusAroundPith+1);
-		for ( int lineIndex=-radiusAroundPith ; lineIndex<radiusMax ; ++lineIndex )
+		for ( int lineIndex=-radiusAroundPith ; lineIndex<=radiusAroundPith ; ++lineIndex )
 		{
 			circleLines.append(qSqrt(squareRadius-qPow(lineIndex,2)));
 		}
 
-		const uint minOfInterval = slicesInterval.min();
-		const uint maxOfInterval = slicesInterval.max();
-		int i, j, iRadius, iRadiusMax;
-		__billon_type__ currentSliceValue, previousSliceValue, diff;
+		QList<int>::ConstIterator circlesLinesIterator;
+		int iRadius;
+		__billon_type__ diff;
 		iCoord2D currentPos;
-		uint k;
 
 		// Calcul du diagramme en parcourant les tranches du billon comprises dans l'intervalle
-		for ( k=minOfInterval ; k<maxOfInterval ; ++k )
+		for ( uint k=sliceInterval.min() ; k<=sliceInterval.max() ; ++k )
 		{
 			const Slice &currentSlice = billon.slice(k);
 			const Slice &previousSlice = billon.previousSlice(k);
 			const iCoord2D &currentPithCoord = billon.pithCoord(k);
 			currentPos.y = currentPithCoord.y-radiusAroundPith;
-			for ( j=-radiusAroundPith ; j<radiusMax ; ++j )
+			for ( circlesLinesIterator = circleLines.constBegin() ; circlesLinesIterator != circleLines.constEnd() ; ++circlesLinesIterator )
 			{
-				iRadius = circleLines[j+radiusAroundPith];
-				iRadiusMax = iRadius+1;
+				iRadius = *circlesLinesIterator;
 				currentPos.x = currentPithCoord.x-iRadius;
-				for ( i=-iRadius ; i<iRadiusMax ; ++i )
+				iRadius += currentPithCoord.x;
+				while ( currentPos.x <= iRadius )
 				{
-					if ( currentPos.x < width && currentPos.y < height )
+					if ( currentPos.x < width && currentPos.y < height && intensity.containsOpen(currentSlice.at(currentPos.y,currentPos.x)) &&
+						 intensity.containsOpen(previousSlice.at(currentPos.y,currentPos.x)) )
 					{
-						currentSliceValue = currentSlice.at(currentPos.y,currentPos.x);
-						previousSliceValue = previousSlice.at(currentPos.y,currentPos.x);
-						if ( intensity.containsOpen(currentSliceValue) && intensity.containsOpen(previousSliceValue) )
+						diff = billon.zMotion(currentPos.y,currentPos.x,k);
+						if ( motionInterval.containsClosed(diff) )
 						{
-							diff = qAbs(currentSliceValue - previousSliceValue);
-							if ( motionInterval.containsClosed(diff) )
-							{
-								(*this)[pieChart.sectorIndexOfAngle( currentPithCoord.angle(currentPos) )] += (diff-motionInterval.min());
-							}
+							(*this)[pieChart.sectorIndexOfAngle( currentPithCoord.angle(currentPos) )] += (diff-motionInterval.min());
 						}
 					}
 					currentPos.x++;
@@ -79,3 +71,4 @@ void SectorHistogram::construct( const Billon &billon, const PieChart &pieChart,
 		}
 	}
 }
+

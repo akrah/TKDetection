@@ -5,12 +5,14 @@
 #include "inc/coordinate.h"
 #include "inc/pith.h"
 
-PithExtractor::PithExtractor() :
-	_falseCutPercent(FALSE_CUT_PERCENT),
-	_windowWidth(NEIGHBORHOOD_WINDOW_WIDTH),
-	_windowHeight(NEIGHBORHOOD_WINDOW_HEIGHT),
-	_binarizationThreshold(BINARIZATION_THRESHOLD),
-	_pithLag(PITH_LAG)
+PithExtractor *PithExtractor::_pithExtractor = 0;
+
+PithExtractor::PithExtractor() : _falseCutPercent(FALSE_CUT_PERCENT), _windowWidth(NEIGHBORHOOD_WINDOW_WIDTH), _windowHeight(NEIGHBORHOOD_WINDOW_HEIGHT),
+	_binarizationThreshold(BINARIZATION_THRESHOLD), _pithLag(PITH_LAG)
+{
+}
+
+PithExtractor::~PithExtractor()
 {
 }
 
@@ -18,7 +20,25 @@ PithExtractor::PithExtractor() :
  * Fonction principale d'extraction de la moelle
  ********************************************************/
 
-void PithExtractor::process( Billon &billon )
+const PithExtractor & PithExtractor::instance()
+{
+	if ( !_pithExtractor )
+	{
+		_pithExtractor =  new PithExtractor;
+	}
+	return *_pithExtractor;
+}
+
+void PithExtractor::kill()
+{
+	if ( _pithExtractor )
+	{
+		delete _pithExtractor;
+		_pithExtractor = 0;
+	}
+}
+
+void PithExtractor::process( Billon &billon ) const
 {
 	billon._pith.clear();
 
@@ -107,19 +127,20 @@ void PithExtractor::process( Billon &billon )
 /******************************************************************
  * Fonctions secondaires appelées lors de l'extraction de la moelle
  ******************************************************************/
-iCoord2D PithExtractor::transHough(const arma::imat &slice, int width, int height, int *x, int *y, int *sliceMaxValue, int *nbContourPoints) {
+iCoord2D PithExtractor::transHough(const Slice &slice, int width, int height, int *x, int *y, int *sliceMaxValue, int *nbContourPoints) const
+{
 	int x_accu, y_accu, longueur, min;
 	int *droite;
-	arma::imat *tabaccu;
+	Slice *tabaccu;
 	arma::fmat *orientation, *cont;
 	iCoord2D coordmax;
 	orientation = 0;
 	{ // bloc de limitation de vie de la variable voisinage
 		// attention x represente les colonne et y les lignes
-		const arma::imat voisinage = slice.submat( *y, *x, (uint)( (*y)+height-1 ), (uint)( (*x)+width-1 ) );
+		const Slice voisinage = slice.submat( *y, *x, (uint)( (*y)+height-1 ), (uint)( (*x)+width-1 ) );
 		cont = contour(voisinage, &orientation);
 	}
-	tabaccu = new arma::imat(width, height);
+	tabaccu = new Slice(width, height);
 	tabaccu->zeros();
 	//verifie orientation et table d'accumlation tous les points se trouvent a 0
 	*nbContourPoints = 0;
@@ -155,13 +176,14 @@ iCoord2D PithExtractor::transHough(const arma::imat &slice, int width, int heigh
 	return iCoord2D(*x, *y);
 }
 
-arma::fmat * PithExtractor::contour(const arma::imat &slice, arma::fmat **orientation) {
+arma::fmat * PithExtractor::contour(const Slice &slice, arma::fmat **orientation) const
+{
 	const uint height = slice.n_rows;
 	const uint width = slice.n_cols;
 
 	arma::fcolvec filtre1 = "1 2 1";			//filtre Sobel Gx
 	arma::frowvec filtre2 = "-1 0 1";
-	arma::imat *resultatGX, *resultatGY;
+	Slice *resultatGX, *resultatGY;
 	arma::fmat norm = arma::fmat(height, width);
 	arma::fmat *contour = new arma::fmat(height, width);
 
@@ -193,10 +215,10 @@ arma::fmat * PithExtractor::contour(const arma::imat &slice, arma::fmat **orient
 	return contour;
 }
 
-arma::imat * PithExtractor::convolution(const arma::imat &slice, arma::fcolvec verticalFilter, arma::frowvec horizontalFilter) {
+Slice * PithExtractor::convolution(const Slice &slice, arma::fcolvec verticalFilter, arma::frowvec horizontalFilter) const {
 	const uint height = slice.n_rows;
 	const uint width = slice.n_cols;
-	arma::imat *resultat = new arma::imat(height, width);
+	Slice *resultat = new Slice(height, width);
 
 	arma::fmat tmpSum;
 	arma::fvec sum = arma::fvec(width);
@@ -310,7 +332,8 @@ arma::imat * PithExtractor::convolution(const arma::imat &slice, arma::fcolvec v
 }
 
 
-int * PithExtractor::drawLine(int xOrigine, int yOrigine, float orientation_ORI, int width, int height, int *length) {
+int * PithExtractor::drawLine(int xOrigine, int yOrigine, float orientation_ORI, int width, int height, int *length) const
+{
 	float orientation = -orientation_ORI;	// orientation au sens de Fleur = - orientation_ORI
 	int x, y, k1=0, k2=0;
 	int dim = floor(sqrt(pow(width,2.0)+pow(height,2.0)));
@@ -449,7 +472,7 @@ int PithExtractor::floatCompare(const void *first, const void *second)
 	and positive if a > b */
 }
 
-void PithExtractor::minSlice(const arma::imat &slice, int *minValue, int *maxValue, iCoord2D *coordmax) {
+void PithExtractor::minSlice(const Slice &slice, int *minValue, int *maxValue, iCoord2D *coordmax) const {
 	const uint height = slice.n_rows-1;
 	const uint width = slice.n_cols-1;
 
@@ -467,7 +490,7 @@ void PithExtractor::minSlice(const arma::imat &slice, int *minValue, int *maxVal
 	}
 }
 
-void PithExtractor::correctPith( QVector<iCoord2D> &moelle, float *listMax, float seuilHough ) {
+void PithExtractor::correctPith( QVector<iCoord2D> &moelle, float *listMax, float seuilHough ) const {
 	const int pithSize = moelle.size();
 	int startSlice, endSlice, i=0, x1, y1, x2, y2, newx, newy;
 	float ax, ay;

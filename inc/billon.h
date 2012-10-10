@@ -35,6 +35,7 @@ public:
 	qreal voxelDepth() const;
 	Slice& previousSlice( const uint currentSlice );
 	const Slice& previousSlice( const uint currentSlice) const;
+	T zMotion( const uint j, const uint i, const uint sliceInex ) const;
 
 	void setMinValue( const T &value );
 	void setMaxValue( const T &value );
@@ -128,6 +129,12 @@ template< typename T >
 const Slice& BillonTpl<T>::previousSlice( const uint currentSlice) const
 {
 	return this->slice(currentSlice>0 ? currentSlice-1 : currentSlice+1);
+}
+
+template< typename T >
+T BillonTpl<T>::zMotion( const uint j, const uint i, const uint sliceInex ) const
+{
+	return qAbs( this->at(j,i,sliceInex) - previousSlice(sliceInex).at(j,i) );
 }
 
 /**********************************

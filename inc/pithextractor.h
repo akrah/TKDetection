@@ -11,8 +11,14 @@ class Pith;
 
 class PithExtractor {
 
-public:
+private:
 	PithExtractor();
+	~PithExtractor();
+
+public:
+
+	static const PithExtractor &instance ();
+	static void kill();
 
 	/**
 	 * \fn		Pith* process( const icube &image, const int &sliceMin, const int &sliceMax )
@@ -22,7 +28,7 @@ public:
 	 * \param	sliceMax Dernière coupe à traiter
 	 * \return	la liste des coordonnées de la moelle
 	 */
-	void process( Billon &billon );
+	void process( Billon &billon ) const;
 
 	/********************************************************
 	 * Get functions
@@ -96,7 +102,7 @@ public:
 
 private:
 	/**
-	 * \fn		Coord transHough(const arma::imat &slice, int width, int height, int *x, int *y, int* z, int *sliceMaxValue, int* nbContourPoints);
+	 * \fn		Coord transHough(const Slice &slice, int width, int height, int *x, int *y, int* z, int *sliceMaxValue, int* nbContourPoints);
 	 * \brief	Transformée de Hough sur une coupe
 	 * \param	slice Coupe à traiter
 	 * \param	width Largeur de la fenetre
@@ -107,26 +113,26 @@ private:
 	 * \param	nbContourPoints Nombre de points de contour
 	 * \return	les coordonnées de la moelle pour la coupe traitée
 	 */
-	iCoord2D transHough( const arma::imat &slice, int width, int height, int *x, int *y, int *sliceMaxValue, int *nbContourPoints );
+	iCoord2D transHough( const Slice &slice, int width, int height, int *x, int *y, int *sliceMaxValue, int *nbContourPoints ) const;
 
 	/**
-	 * \fn		arma::fmat * contour(const arma::imat &slice, arma::fmat **orientation);
+	 * \fn		arma::fmat * contour(const Slice &slice, arma::fmat **orientation);
 	 * \brief	Détection des contour
 	 * \param	slice Coupe à traiter
 	 * \param	orientation Matrice contenant le gradient de chaque point du contour
 	 * \return	matrice de contour
 	 */
-	arma::fmat * contour( const arma::imat &slice, arma::fmat **orientation );
+	arma::fmat * contour( const Slice &slice, arma::fmat **orientation ) const;
 
 	/**
-	 * \fn		arma::imat * convolution(const arma::imat &slice, arma::fcolvec verticalFilter, arma::frowvec horizontalFilter);
+	 * \fn		Slice * convolution(const Slice &slice, arma::fcolvec verticalFilter, arma::frowvec horizontalFilter);
 	 * \brief	Effectue le produit de convolution d'un filtre separable sur une matrice
 	 * \param	slice Coupe à traiter
 	 * \param	verticalFilter Vecteur colonne du filtre separable
 	 * \param	horizontalFilter Vecteur ligne du filtre separable
 	 * \return	matrice apres convolution
 	 */
-	arma::imat * convolution( const arma::imat &slice, arma::fcolvec verticalFilter, arma::frowvec horizontalFilter );
+	Slice * convolution( const Slice &slice, arma::fcolvec verticalFilter, arma::frowvec horizontalFilter ) const;
 
 	/**
 	 * \fn		int * drawLine(int xOrigine, int yOrigine, float orientation, int width, int height, int *length);
@@ -139,7 +145,7 @@ private:
 	 * \param	length Longueur du segment
 	* \return	un tableau d'entiers contenant l'ensemble des points du segment. Chaque valeur est un indice de la combinaison y*width+x
 	 */
-	int * drawLine( int xOrigine, int yOrigine, float orientation, int width, int height, int *length );
+	int * drawLine( int xOrigine, int yOrigine, float orientation, int width, int height, int *length ) const;
 
 	/**
 	 * \fn		static int floatCompare(const void *first, const void *second);
@@ -151,16 +157,16 @@ private:
 	static int floatCompare( const void *first, const void *second );
 
 	/**
-	 * \fn		void minSlice(const arma::imat &slice, int *minValue, int *maxValue, Coord *coordMax);
+	 * \fn		void minSlice(const Slice &slice, int *minValue, int *maxValue, Coord *coordMax);
 	 * \brief	Calcul les valeurs minimum et maximum d'une coupe ainsi que la liste des coordonnées ou apparrait la valeur maximum
 	 */
-	void minSlice( const arma::imat &slice, int *minValue, int *maxValue, iCoord2D *coordMax );
+	void minSlice( const Slice &slice, int *minValue, int *maxValue, iCoord2D *coordMax ) const;
 
 	/**
 	 * \fn		void corrigeMoelle(QVector<Coord> *moelle, float *listMax, float seuilHough);
 	 * \brief	Corrige les valeur erronées de la moelle
 	 */
-	void correctPith( QVector<iCoord2D> &pith, float *listMax, float seuilHough );
+	void correctPith( QVector<iCoord2D> &pith, float *listMax, float seuilHough ) const;
 
 private:
 
@@ -169,6 +175,8 @@ private:
 	int _windowHeight;				/*!< Hauteur de la fenêtre de voisinage */
 	float _binarizationThreshold;	/*!< Valeur du seuil de binarisation d'une image en niveau de gris */
 	int _pithLag;					/*!< Décalage maximal de la position de la moelle sur 2 coupes consécutives */
+
+	static PithExtractor *_pithExtractor;
 };
 
 

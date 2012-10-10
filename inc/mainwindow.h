@@ -2,15 +2,10 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
-#include <QButtonGroup>
 
-#include "slicezoomer.h"
-#include "interval.h"
-#include "def/def_coordinate.h"
 #include "def/def_billon.h"
-
-#include <qwt_plot_curve.h>
-#include <qwt_plot_histogram.h>
+#include "def/def_coordinate.h"
+#include "slicezoomer.h"
 
 namespace Ui
 {
@@ -18,15 +13,16 @@ namespace Ui
 }
 
 class ContourCurve;
-class Pith;
+class KnotAreaHistogram;
 class PieChart;
+class PlotKnotAreaHistogram;
 class PlotSectorHistogram;
 class PlotSliceHistogram;
 class SectorHistogram;
 class SliceHistogram;
 class SliceView;
-class KnotAreaHistogram;
-class PlotKnotAreaHistogram;
+
+template <typename T> class Interval;
 
 class MainWindow : public QMainWindow
 {
@@ -46,9 +42,7 @@ private slots:
 	void setTypeOfView( const int &type );
 	void updateSliceHistogram();
 	void updatePith();
-	void setMinimumOfSliceInterval( const int &min );
 	void setMinimumOfSliceIntervalToCurrentSlice();
-	void setMaximumOfSliceInterval( const int &max );
 	void setMaximumOfSliceIntervalToCurrentSlice();
 	void previousMaximumInSliceHistogram();
 	void nextMaximumInSliceHistogram();

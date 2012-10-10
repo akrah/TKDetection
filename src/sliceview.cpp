@@ -9,9 +9,9 @@
 #include <QPainter>
 #include <QVector2D>
 
-SliceView::SliceView() : _typeOfView(CURRENT),
+SliceView::SliceView() : _typeOfView(TKD::CURRENT),
 	_flowAlpha(FLOW_ALPHA_DEFAULT), _flowEpsilon(FLOW_EPSILON_DEFAULT), _flowMaximumIterations(FLOW_MAXIMUM_ITERATIONS),
-	_restrictedAreaResolution(100), _restrictedAreaThreshold(-900), _restrictedAreaBeginRadius(5), _typeOfEdgeDetection(SOBEL),
+	_restrictedAreaResolution(100), _restrictedAreaThreshold(-900), _restrictedAreaBeginRadius(5), _typeOfEdgeDetection(TKD::SOBEL),
 	_cannyRadiusOfGaussianMask(2), _cannySigmaOfGaussianMask(2), _cannyMinimumGradient(100.), _cannyMinimumDeviation(0.9)
 {
 }
@@ -20,9 +20,9 @@ SliceView::SliceView() : _typeOfView(CURRENT),
  * Public setters
  *******************************/
 
-void SliceView::setTypeOfView( const SliceType &type )
+void SliceView::setTypeOfView( const TKD::SliceType &type )
 {
-	if ( type > _SLICE_TYPE_MIN_ && type < _SLICE_TYPE_MAX_ )
+	if ( type > TKD::_SLICE_TYPE_MIN_ && type < TKD::_SLICE_TYPE_MAX_ )
 	{
 		_typeOfView = type;
 	}
@@ -73,9 +73,9 @@ void SliceView::setRestrictedAreaBeginRadius( const int &radius )
 	_restrictedAreaBeginRadius = radius;
 }
 
-void SliceView::setEdgeDetectionType( const EdgeDetectionType &type )
+void SliceView::setEdgeDetectionType( const TKD::EdgeDetectionType &type )
 {
-	if ( type > _EDGE_DETECTION_MIN_ && type < _EDGE_DETECTION_MAX_ )
+	if ( type > TKD::_EDGE_DETECTION_MIN_ && type < TKD::_EDGE_DETECTION_MAX_ )
 	{
 		_typeOfEdgeDetection = type;
 	}
@@ -97,31 +97,31 @@ void SliceView::setCannyMinimumDeviation( const qreal &minimumDeviation ) {
 	_cannyMinimumDeviation = minimumDeviation;
 }
 
-void SliceView::drawSlice( QImage &image, const Billon &billon, const iCoord2D &center, const int &sliceIndex, const Interval<int> &intensityInterval, const Interval<int> &motionInterval )
+void SliceView::drawSlice( QImage &image, const Billon &billon, const iCoord2D &center, const uint &sliceIndex, const Interval<int> &intensityInterval, const Interval<int> &motionInterval )
 {
-	if ( sliceIndex > -1 && sliceIndex < static_cast<int>(billon.n_slices) )
+	if ( sliceIndex < billon.n_slices )
 	{
 		switch (_typeOfView)
 		{
 			// Affichage de la coupe de mouvements
-			case MOVEMENT :
+			case TKD::MOVEMENT :
 				drawMovementSlice( image, billon, sliceIndex, intensityInterval, motionInterval );
 				break;
 			// Affichage de la coupe de détection de mouvements
-			case EDGE_DETECTION :
+			case TKD::EDGE_DETECTION :
 				drawEdgeDetectionSlice( image, billon, center, sliceIndex, intensityInterval );
 				break;
 			// Affichage de la coupe de flot optique
-			case FLOW :
+			case TKD::FLOW :
 				drawFlowSlice( image, billon, sliceIndex );
 				break;
 			// Affichage de la zone réduite
-			case RESTRICTED_AREA :
+			case TKD::RESTRICTED_AREA :
 				drawCurrentSlice( image, billon, sliceIndex, intensityInterval );
 				drawRestrictedArea( image, billon, center, sliceIndex, intensityInterval.min() );
 				break;
 			// Affichage de la coupe originale
-			case CURRENT:
+			case TKD::CURRENT:
 			default :
 				// Affichage de la coupe courante
 				drawCurrentSlice( image, billon, sliceIndex, intensityInterval );
@@ -135,13 +135,13 @@ void SliceView::drawSlice( QImage &image, const Billon &billon, const iCoord2D &
  * Private functions
  *******************************/
 
-void SliceView::drawCurrentSlice( QImage &image, const Billon &billon, const int &sliceIndex, const Interval<int> &intensityInterval )
+void SliceView::drawCurrentSlice( QImage &image, const Billon &billon, const uint &sliceIndex, const Interval<int> &intensityInterval )
 {
 	const Slice &slice = billon.slice(sliceIndex);
 	const uint width = slice.n_cols;
 	const uint height = slice.n_rows;
-	const int minValue = intensityInterval.min();
-	const int maxValue = intensityInterval.max();
+	const int minIntensity = intensityInterval.min();
+	const int maxIntensity = intensityInterval.max();
 	const qreal fact = 255.0/intensityInterval.size();
 
 	QRgb * line = (QRgb *) image.bits();
@@ -152,13 +152,13 @@ void SliceView::drawCurrentSlice( QImage &image, const Billon &billon, const int
 	{
 		for ( i=0 ; i<width ; i++)
 		{
-			color = (qMax(qMin(slice.at(j,i),maxValue),minValue)-minValue)*fact;
+			color = (qMax(qMin(slice.at(j,i),maxIntensity),minIntensity)-minIntensity)*fact;
 			*(line++) = qRgb(color,color,color);
 		}
 	}
 }
 
-void SliceView::drawMovementSlice( QImage &image, const Billon &billon, const int &sliceIndex, const Interval<int> &intensityInterval, const Interval<int> &motionInterval )
+void SliceView::drawMovementSlice( QImage &image, const Billon &billon, const uint &sliceIndex, const Interval<int> &intensityInterval, const Interval<int> &motionInterval )
 {
 	const Slice &currentSlice = billon.slice(sliceIndex);
 	const Slice &previousSlice = billon.previousSlice(sliceIndex);
@@ -177,7 +177,7 @@ void SliceView::drawMovementSlice( QImage &image, const Billon &billon, const in
 		{
 			if ( intensityInterval.containsClosed(currentSlice.at(j,i)) && intensityInterval.containsClosed(previousSlice.at(j,i)) )
 			{
-				color = qAbs(currentSlice.at(j,i) - previousSlice.at(j,i));
+				color = billon.zMotion(j,i,sliceIndex);
 				if ( motionInterval.containsClosed(color) )
 				{
 					color *= fact;
@@ -189,9 +189,9 @@ void SliceView::drawMovementSlice( QImage &image, const Billon &billon, const in
 	}
 }
 
-void SliceView::drawEdgeDetectionSlice( QImage &image, const Billon &billon, const iCoord2D &center, const int &sliceNumber, const Interval<int> &intensityInterval )
+void SliceView::drawEdgeDetectionSlice( QImage &image, const Billon &billon, const iCoord2D &center, const uint &sliceIndex, const Interval<int> &intensityInterval )
 {
-	const Slice &slice = billon.slice(sliceNumber);
+	const Slice &slice = billon.slice(sliceIndex);
 	const int width = slice.n_cols;
 	const int height = slice.n_rows;
 	const int minValue = intensityInterval.min();
@@ -217,7 +217,7 @@ void SliceView::drawEdgeDetectionSlice( QImage &image, const Billon &billon, con
 	QPainter painter;
 
 	switch (_typeOfEdgeDetection) {
-		case SOBEL :
+		case TKD::SOBEL :
 			// Gaussian filter construction
 			gaussianMask.resize(2*radius+1,2*radius+1);
 			gaussianFactor = 0;
@@ -269,7 +269,7 @@ void SliceView::drawEdgeDetectionSlice( QImage &image, const Billon &billon, con
 				line+=2;
 			}
 			break;
-		case LAPLACIAN :
+		case TKD::LAPLACIAN :
 			nbValues = intensityInterval.size()*8;
 			fact = 255./nbValues;
 			line += width + 1;
@@ -287,7 +287,7 @@ void SliceView::drawEdgeDetectionSlice( QImage &image, const Billon &billon, con
 				line+=2;
 			}
 			break;
-		case CANNY :
+		case TKD::CANNY :
 			// Gaussian filter construction
 			gaussianMask.resize(2*radius+1,2*radius+1);
 			gaussianFactor = 0;
@@ -349,10 +349,9 @@ void SliceView::drawEdgeDetectionSlice( QImage &image, const Billon &billon, con
 	}
 }
 
-void SliceView::drawFlowSlice( QImage &image, const Billon &billon, const int &sliceNumber )
+void SliceView::drawFlowSlice( QImage &image, const Billon &billon, const uint &sliceIndex )
 {
-
-	VectorsField *field = OpticalFlow::compute(billon,sliceNumber,_flowAlpha,_flowEpsilon,_flowMaximumIterations);
+	VectorsField *field = OpticalFlow::compute(billon,sliceIndex,_flowAlpha,_flowEpsilon,_flowMaximumIterations);
 
 	QRgb * line =(QRgb *) image.bits();
 	qreal angle, norme;
@@ -388,7 +387,7 @@ void SliceView::drawFlowSlice( QImage &image, const Billon &billon, const int &s
 	delete field;
 }
 
-void SliceView::drawRestrictedArea( QImage &image, const Billon &billon, const iCoord2D &center, const int &sliceIndex, const int &intensityThreshold )
+void SliceView::drawRestrictedArea( QImage &image, const Billon &billon, const iCoord2D &center, const uint &sliceIndex, const int &intensityThreshold )
 {
 	const Slice &currentSlice = billon.slice(sliceIndex);
 	const int width = billon.n_cols;

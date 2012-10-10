@@ -56,16 +56,16 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 	_ui->_plotSliceHistogram->enableAxis(QwtPlot::yLeft,false);
 	_ui->_plotSectorHistogram->enableAxis(QwtPlot::yLeft,false);
 
-	_ui->_comboSliceType->insertItem(CURRENT,tr("Coupe originale"));
-	_ui->_comboSliceType->insertItem(MOVEMENT,tr("Coupe de mouvements"));
-	_ui->_comboSliceType->insertItem(EDGE_DETECTION,tr("Coupe de détection de contours"));
-	_ui->_comboSliceType->insertItem(FLOW,tr("Coupe de flots optiques"));
-	_ui->_comboSliceType->insertItem(RESTRICTED_AREA,tr("Coupe de zone réduite"));
-	_ui->_comboSliceType->setCurrentIndex(CURRENT);
+	_ui->_comboSliceType->insertItem(TKD::CURRENT,tr("Coupe originale"));
+	_ui->_comboSliceType->insertItem(TKD::MOVEMENT,tr("Coupe de mouvements"));
+	_ui->_comboSliceType->insertItem(TKD::EDGE_DETECTION,tr("Coupe de détection de contours"));
+	_ui->_comboSliceType->insertItem(TKD::FLOW,tr("Coupe de flots optiques"));
+	_ui->_comboSliceType->insertItem(TKD::RESTRICTED_AREA,tr("Coupe de zone réduite"));
+	_ui->_comboSliceType->setCurrentIndex(TKD::CURRENT);
 
-	_ui->_comboEdgeDetectionType->insertItem(SOBEL,tr("Sobel"));
-	_ui->_comboEdgeDetectionType->insertItem(LAPLACIAN,tr("Laplacian"));
-	_ui->_comboEdgeDetectionType->insertItem(CANNY,tr("Canny"));
+	_ui->_comboEdgeDetectionType->insertItem(TKD::SOBEL,tr("Sobel"));
+	_ui->_comboEdgeDetectionType->insertItem(TKD::LAPLACIAN,tr("Laplacian"));
+	_ui->_comboEdgeDetectionType->insertItem(TKD::CANNY,tr("Canny"));
 
 	_ui->_spinFlowAlpha->setValue(_sliceView->flowAlpha());
 	_ui->_spinFlowEpsilon->setValue(_sliceView->flowEpsilon());
@@ -200,7 +200,8 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 	initComponentsValues();
 }
 
-MainWindow::~MainWindow() {
+MainWindow::~MainWindow()
+{
 	delete _contourCurve;
 	delete _plotSectorHistogram;
 	delete _sectorHistogram;
@@ -222,7 +223,7 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *event)
 {
 	if ( obj == _ui->_labelSliceView && _billon != 0 && _billon->hasPith() )
 	{
-		if ( event->type() == QEvent::MouseButtonPress )
+		if ( event->type() == QEvent::MouseButtonRelease )
 		{
 			const QMouseEvent *mouseEvent = static_cast<const QMouseEvent*>(event);
 			if ( (mouseEvent->button() == Qt::LeftButton) )
@@ -281,7 +282,7 @@ void MainWindow::drawSlice()
 {
 	if ( _billon != 0 )
 	{
-		_mainPix.fill(0xff000000);
+		_mainPix.fill(0xff0000CC);
 		_sliceView->drawSlice(_mainPix,*_billon,_billon->hasPith()?_billon->pithCoord(_currentSlice):iCoord2D(_billon->n_cols/2,_billon->n_rows/2),_currentSlice,Interval<int>(_ui->_spinMinIntensity->value(),_ui->_spinMaxIntensity->value()), Interval<int>(_ui->_spinMovementThresholdMin->value(),_ui->_spinMovementThresholdMax->value()));
 
 		const bool inDrawingArea = (_ui->_comboSelectSliceInterval->currentIndex() > 0 && _sliceHistogram->interval(_ui->_comboSelectSliceInterval->currentIndex()-1).containsClosed(_currentSlice));
@@ -410,19 +411,19 @@ void MainWindow::setSlice( const int &sliceNumber )
 void MainWindow::setTypeOfView( const int &type )
 {
 	enabledComponents();
-	_sliceView->setTypeOfView( static_cast<const SliceType>(type) );
+	_sliceView->setTypeOfView( static_cast<const TKD::SliceType>(type) );
 	switch (type)
 	{
-		case MOVEMENT:
+		case TKD::MOVEMENT:
 			_ui->_toolboxSliceParameters->setCurrentWidget(_ui->_pageMovementParameters);
 			break;
-		case EDGE_DETECTION :
+		case TKD::EDGE_DETECTION :
 			_ui->_toolboxSliceParameters->setCurrentWidget(_ui->_pageEdgeDetection);
 			break;
-		case FLOW:
+		case TKD::FLOW:
 			_ui->_toolboxSliceParameters->setCurrentWidget(_ui->_pageFlowParameters);
 			break;
-		case RESTRICTED_AREA:
+		case TKD::RESTRICTED_AREA:
 			_ui->_toolboxSliceParameters->setCurrentWidget(_ui->_pageRestrictedAreaParameters);
 			break;
 		default:
@@ -470,46 +471,21 @@ void MainWindow::updatePith()
 	_ui->_checkRadiusAroundPith->setText( QString::number(100) );
 	if ( _billon != 0 )
 	{
-		PithExtractor extractor;
-		extractor.process(*_billon);
+		PithExtractor::instance().process(*_billon);
 	}
 	_ui->_checkRadiusAroundPith->setText( QString::number(static_cast<int>(BillonAlgorithms::getRestrictedAreaMeansRadius(*_billon,20,_ui->_spinMinIntensity->value())*0.75)) );
 	drawSlice();
 	updateSliceHistogram();
 }
 
-void MainWindow::setMinimumOfSliceInterval( const int &min )
-{
-	_ui->_spinMaxSlice->setMinimum(min);
-	_ui->_spinMinSlice->setMaximum(qMax(min,_ui->_spinMinSlice->maximum()));
-	_ui->_spinMinSlice->blockSignals(true);
-		_ui->_spinMinSlice->setValue(min);
-	_ui->_spinMinSlice->blockSignals(false);
-	_ui->_spanSliderSelectInterval->blockSignals(true);
-		_ui->_spanSliderSelectInterval->setLowerValue(min);
-	_ui->_spanSliderSelectInterval->blockSignals(false);
-}
-
 void MainWindow::setMinimumOfSliceIntervalToCurrentSlice()
 {
-	setMinimumOfSliceInterval(_currentSlice);
-}
-
-void MainWindow::setMaximumOfSliceInterval(const int &max)
-{
-	_ui->_spinMinSlice->setMaximum(max);
-	_ui->_spinMaxSlice->setMinimum(qMin(max,_ui->_spinMaxSlice->minimum()));
-	_ui->_spinMaxSlice->blockSignals(true);
-		_ui->_spinMaxSlice->setValue(max);
-	_ui->_spinMaxSlice->blockSignals(false);
-	_ui->_spanSliderSelectInterval->blockSignals(true);
-		_ui->_spanSliderSelectInterval->setUpperValue(max);
-	_ui->_spanSliderSelectInterval->blockSignals(false);
+	_ui->_spinMinSlice->setValue(_currentSlice);
 }
 
 void MainWindow::setMaximumOfSliceIntervalToCurrentSlice()
 {
-	setMaximumOfSliceInterval(_currentSlice);
+	_ui->_spinMaxSlice->setValue(_currentSlice);
 }
 
 void MainWindow::previousMaximumInSliceHistogram()
@@ -605,7 +581,7 @@ void MainWindow::setRestrictedAreaBeginRadius( const int &radius )
 
 void MainWindow::setEdgeDetectionType( const int &type )
 {
-	_sliceView->setEdgeDetectionType( static_cast<const EdgeDetectionType>(type) );
+	_sliceView->setEdgeDetectionType( static_cast<const TKD::EdgeDetectionType>(type) );
 	drawSlice();
 }
 
@@ -791,12 +767,11 @@ void MainWindow::exportMovementsToV3D()
 		QString fileName = QFileDialog::getSaveFileName(this, tr("Exporter en .v3d"), "output_diag.v3d", tr("Fichiers de données (*.v3d);;Tous les fichiers (*.*)"));
 		if ( !fileName.isEmpty() )
 		{
-			const Interval<int> slicesInterval(_ui->_spinMinSlice->value(),_ui->_spinMaxSlice->value());
 			const Interval<int> intensityInterval(_ui->_spinMinIntensity->value()+1, _ui->_spinMaxIntensity->value());
 			const Interval<int> motionInterval( _ui->_spinMovementThresholdMin->value(), _ui->_spinMovementThresholdMax->value() );
 			const int width = _billon->n_cols;
 			const int height = _billon->n_rows;
-			const int depth = slicesInterval.width()+1;
+			const int depth = _billon->n_slices;
 
 			Billon billonDiag( *_billon );
 			billonDiag.setMinValue(0);
@@ -804,18 +779,16 @@ void MainWindow::exportMovementsToV3D()
 			billonDiag.fill(0);
 			int i,j,k;
 
-			for ( k=slicesInterval.min() ; k<slicesInterval.max() ; ++k )
+			for ( k=0 ; k<depth ; ++k )
 			{
-				const Slice &currentSlice = _billon->slice(k);
-				const Slice &previousSlice = _billon->previousSlice(k);
-				Slice &sliceDiag = billonDiag.slice(k-slicesInterval.min()-1);
+				Slice &sliceDiag = billonDiag.slice(k);
 				for ( j=0 ; j<height ; ++j )
 				{
 					for ( i=0 ; i<width ; ++i )
 					{
-						if ( intensityInterval.containsClosed(previousSlice.at(j,i)) && intensityInterval.containsClosed(currentSlice.at(j,i)) )
+						if ( intensityInterval.containsClosed(_billon->slice(k).at(j,i)) && intensityInterval.containsClosed(_billon->previousSlice(k).at(j,i)) )
 						{
-							sliceDiag.at(j,i) = motionInterval.containsClosed( qAbs(previousSlice.at(j,i) - currentSlice.at(j,i)) );
+							sliceDiag.at(j,i) = motionInterval.containsClosed( _billon->zMotion(j,i,k) );
 						}
 					}
 				}

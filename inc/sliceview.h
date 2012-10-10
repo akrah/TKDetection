@@ -16,7 +16,7 @@ class SliceView
 public:
 	explicit SliceView();
 
-	void setTypeOfView( const SliceType &type );
+	void setTypeOfView( const TKD::SliceType &type );
 
 	qreal flowAlpha() const;
 	qreal flowEpsilon() const;
@@ -29,23 +29,23 @@ public:
 	void setRestrictedAreaThreshold( const int &threshold );
 	void setRestrictedAreaBeginRadius( const int &radius );
 
-	void setEdgeDetectionType( const EdgeDetectionType &type );
+	void setEdgeDetectionType( const TKD::EdgeDetectionType &type );
 	void setRadiusOfGaussianMask( const int &radius );
 	void setSigmaOfGaussianMask( const qreal &sigma );
 	void setCannyMinimumGradient( const qreal &minimumGradient );
 	void setCannyMinimumDeviation( const qreal &minimumDeviation );
 
-	void drawSlice( QImage &image, const Billon &billon, const iCoord2D &center, const int &sliceNumber, const Interval<int> &intensityInterval, const Interval<int> &motionInterval );
+	void drawSlice( QImage &image, const Billon &billon, const iCoord2D &center, const uint &sliceNumber, const Interval<int> &intensityInterval, const Interval<int> &motionInterval );
 
 private :
-	void drawCurrentSlice( QImage &image, const Billon &billon, const int &sliceNumber, const Interval<int> &intensityInterval );
-	void drawMovementSlice( QImage &image, const Billon &billon, const int &sliceNumber, const Interval<int> &intensityInterval, const Interval<int> &motionInterval );
-	void drawEdgeDetectionSlice( QImage &image, const Billon &billon, const iCoord2D &center, const int &sliceNumber, const Interval<int> &intensityInterval );
-	void drawFlowSlice( QImage &image, const Billon &billon, const int &sliceNumber );
-	void drawRestrictedArea( QImage &image, const Billon &billon, const iCoord2D &center, const int &sliceNumber, const int &intensityThreshold );
+	void drawCurrentSlice( QImage &image, const Billon &billon, const uint &sliceIndex, const Interval<int> &intensityInterval );
+	void drawMovementSlice( QImage &image, const Billon &billon, const uint &sliceIndex, const Interval<int> &intensityInterval, const Interval<int> &motionInterval );
+	void drawEdgeDetectionSlice( QImage &image, const Billon &billon, const iCoord2D &center, const uint &sliceindex, const Interval<int> &intensityInterval );
+	void drawFlowSlice( QImage &image, const Billon &billon, const uint &sliceIndex );
+	void drawRestrictedArea( QImage &image, const Billon &billon, const iCoord2D &center, const uint &sliceIndex, const int &intensityThreshold );
 
 private:
-	SliceType _typeOfView;
+	TKD::SliceType _typeOfView;
 
 	qreal _flowAlpha;
 	qreal _flowEpsilon;
@@ -55,7 +55,7 @@ private:
 	int _restrictedAreaThreshold;
 	int _restrictedAreaBeginRadius;
 
-	EdgeDetectionType _typeOfEdgeDetection;
+	TKD::EdgeDetectionType _typeOfEdgeDetection;
 	int _cannyRadiusOfGaussianMask;
 	qreal _cannySigmaOfGaussianMask;
 	qreal _cannyMinimumGradient;

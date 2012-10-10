@@ -14,7 +14,7 @@ public:
 	SectorHistogram();
 	virtual ~SectorHistogram();
 
-	void construct( const Billon &billon, const PieChart &pieChart, const Interval<uint> &slicesInterval,
+	void construct( const Billon &billon, const PieChart &pieChart, const Interval<uint> &sliceInterval,
 				  const Interval<int> &intensity, const Interval<int> &motionInterval, const int &radiusAroundPith );
 };
 
