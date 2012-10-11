@@ -57,6 +57,10 @@ private slots:
 	void setCannySigmaOfGaussianMask( const double &sigma );
 	void setCannyMinimumGradient( const int &minimumGradient );
 	void setCannyMinimumDeviation( const double &minimumDeviation );
+	void selectSliceInterval( const int &index );
+	void selectCurrentSliceInterval();
+	void selectSectorInterval( const int &index );
+	void selectCurrentSectorInterval();
 	void exportToDat();
 	void exportToOfs();
 	void exportToOfsAll();
@@ -67,10 +71,6 @@ private slots:
 	void exportFlowToV3D();
 	void exportHistogramToSep();
 	void exportMovementsToV3D();
-	void selectSliceInterval( const int &index );
-	void selectCurrentSliceInterval();
-	void selectSectorInterval( const int &index );
-	void selectCurrentSectorInterval();
 	void exportSectorToPgm3D();
 	void exportConnexComponentToPgm3D();
 	void exportSliceHistogram();

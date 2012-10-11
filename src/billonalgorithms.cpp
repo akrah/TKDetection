@@ -89,11 +89,13 @@ namespace BillonAlgorithms
 			currentRadius++;
 		}
 
-		if ( edgeFind ) {
+		if ( edgeFind )
+		{
 			qDebug() << "Pixel le plus proche de la moelle : ( " << position.x << ", " << position.y << " )";
 			return position;
 		}
-		else {
+		else
+		{
 			qDebug() << "Aucun pixel et donc aucune composante connexe";
 			return iCoord2D(-1,-1);
 		}
@@ -110,12 +112,12 @@ namespace BillonAlgorithms
 		{
 			iCoord2D currentPos(startPoint);
 			QVector<iCoord2D> mask(8);
+			qreal startAngle;
 			int interdit, j;
 
 			// Using Moore-Neighbor Tracing
-			interdit = sliceCenter.angle(startPoint)*8./TWO_PI;
-			interdit = (interdit+4)%8;
-			intensityThreshold++;
+			startAngle = startPoint.angle(sliceCenter);
+			interdit = qRound(startAngle>=0 ? startAngle*4./PI : (startAngle+TWO_PI)*8./TWO_PI);
 			do
 			{
 				contourPoints.append(currentPos);
@@ -126,7 +128,7 @@ namespace BillonAlgorithms
 				mask[0].y = mask[4].y = currentPos.y;
 				mask[5].y = mask[6].y = mask[7].y = currentPos.y-1;
 				j = (interdit+1)%8;
-				while ( j < interdit+8 && slice.at(mask[j%8].y,mask[j%8].x) < intensityThreshold ) ++j;
+				while ( j < interdit+8 && slice.at(mask[j%8].y,mask[j%8].x) <= intensityThreshold ) ++j;
 				currentPos = mask[j%8];
 				interdit = (j+4)%8;
 			}

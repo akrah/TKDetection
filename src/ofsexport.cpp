@@ -15,22 +15,15 @@ namespace OfsExport
 	namespace
 	{
 		// Calcul les coordonnées des sommets du maillage de la moelle
-		void computeAllEdges( const Billon &billon, const Interval<int> &interval, const int &nbEdges,
-							  const int &radius, QTextStream &stream, bool normalized );
-
-		void computeSectorEdges( const Billon &billon, const Interval<uint> &interval, const int &nbEdges,
-								 const qreal &rightAngle, const qreal &leftAngle, QTextStream &stream,
-								 bool normalized);
-
-		void computeAllSectorInAllIntervalsEdges( const Billon &billon, const QVector<QPair<Interval<uint>, QPair<qreal, qreal> > > &intervals,
-												  const int &nbEdges, QTextStream &stream,	bool normalized = true );
-
+		void computeAllEdges( const Billon &billon, const Interval<int> &interval, const int &nbEdges, const int &radius, QTextStream &stream, int normalized );
+		void computeSectorEdges( const Billon &billon, const Interval<uint> &interval, const int &nbEdges, const qreal &rightAngle, const qreal &leftAngle, QTextStream &stream, bool normalized);
+		void computeAllSectorInAllIntervalsEdges( const Billon &billon, const QVector< QPair< Interval<uint>, QPair<qreal, qreal> > > &intervals, const int &nbEdges, QTextStream &stream, bool normalized );
 
 		//Rajout BK: Affiche les coordonnées des sommets pour l'export OFS (utile iuniquement pour le maillage de la zone réduite)
-		void displayExportedVertex( const Billon &billon, const QVector<rCoord2D> &vectVertex, const Interval<uint> &interval, const uint &resolutionCercle, QTextStream &stream, bool normalized = true,	bool displayBegEndFaces= true );
+		void displayExportedVertex( const Billon &billon, const QVector<rCoord2D> &vectVertex, const Interval<uint> &interval, const uint &resolutionCercle, QTextStream &stream, const bool &normalized, const bool &displayBegEndFaces );
 
 		// Calcul les faces du maillages de la moelle
-		void computeEgesLinks( const int &nbEdges, const int &nbSlices, QTextStream &stream, bool displayBegEndFaces=true );
+		void computeEgesLinks( const int &nbEdges, const int &nbSlices, QTextStream &stream, bool displayBegEndFaces );
 	}
 
 	void process( const Billon &billon, const Interval<int> &interval, const QString &fileName, const int &nbEdgesPerSlice, const int &radiusOfTubes, bool normalized )
@@ -41,7 +34,7 @@ namespace OfsExport
 			QTextStream stream(&file);
 			stream << "OFS MHD" << endl;
 			computeAllEdges( billon, interval, nbEdgesPerSlice, radiusOfTubes, stream, normalized );
-			computeEgesLinks( nbEdgesPerSlice, interval.width()+1, stream );
+			computeEgesLinks( nbEdgesPerSlice, interval.width()+1, stream, true );
 			file.close();
 		}
 		else
@@ -58,7 +51,7 @@ namespace OfsExport
 			QTextStream stream(&file);
 			stream << "OFS MHD" << endl;
 			computeSectorEdges( billon, interval, nbEdgesPerSlice, rightAngle, leftAngle, stream, normalized );
-			computeEgesLinks( nbEdgesPerSlice, interval.width()+1, stream );
+			computeEgesLinks( nbEdgesPerSlice, interval.width()+1, stream, true );
 			file.close();
 		}
 		else
@@ -90,7 +83,7 @@ namespace OfsExport
 				// La face de devant
 				for ( int i=1 ; i<nbEdgesPerSlice-1 ; ++i )
 				{
-					fullStream.append( QString("%1 %2 %3%4").arg(currentBase).arg(currentBase+i).arg(currentBase+i+1).arg('\n') );
+					fullStream.append( QString("%1 %2 %3\n").arg(currentBase).arg(currentBase+i).arg(currentBase+i+1) );
 				}
 				// Les autres faces
 				QList<qint32> tubes;
@@ -109,15 +102,15 @@ namespace OfsExport
 				for ( int base = 0 ; base<nbPoints ; base += nbEdgesPerSlice )
 				{
 					for ( int i=0 ; i<nbPointsFoTube ; i+=4 ) {
-						fullStream.append( QString("%1 %2 %3%4").arg(base+tubes[i]).arg(base+tubes[i+1]).arg(base+tubes[i+2]).arg('\n') );
-						fullStream.append( QString("%1 %2 %3%4").arg(base+tubes[i]).arg(base+tubes[i+2]).arg(base+tubes[i+3]).arg('\n') );
+						fullStream.append( QString("%1 %2 %3\n").arg(base+tubes[i]).arg(base+tubes[i+1]).arg(base+tubes[i+2]) );
+						fullStream.append( QString("%1 %2 %3\n").arg(base+tubes[i]).arg(base+tubes[i+2]).arg(base+tubes[i+3]) );
 					}
 				}
 				// La face de derrière
 				const int lastBase = currentBase+nbPoints;
 				for ( int i=lastBase+1 ; i<nbSlices*nbEdgesPerSlice-1 ; ++i )
 				{
-					fullStream.append( QString("%1 %2 %3%4").arg(lastBase).arg(i+1).arg(i).arg('\n') );
+					fullStream.append( QString("%1 %2 %3\n").arg(lastBase).arg(i+1).arg(i) );
 				}
 
 				currentBase += nbSlices*nbEdgesPerSlice;
@@ -130,7 +123,7 @@ namespace OfsExport
 		}
 	}
 
-	void processRestrictedMesh( const Billon &billon, const Interval<uint> & sliceInterval, const QString &fileName, const uint resolutionCercle, const int seuilContour, const bool normalized, const bool displayBegEndFaces )
+	void processRestrictedMesh( const Billon &billon, const Interval<uint> & sliceInterval, const QString &fileName, const uint & resolutionCercle, const int &seuilContour, const bool &normalized, const bool &displayBegEndFaces )
 	{
 		QVector<rCoord2D> vectVertex = BillonAlgorithms::getRestrictedAreaVertex( billon, sliceInterval, resolutionCercle,seuilContour );
 		if ( !vectVertex.isEmpty() )
@@ -150,83 +143,85 @@ namespace OfsExport
 
 	namespace
 	{
-		void computeAllEdges( const Billon &billon, const Interval<int> &interval, const int &nbEdges, const int &radius, QTextStream &stream, bool normalized )
+		void computeAllEdges( const Billon &billon, const Interval<int> &interval, const int &nbEdges, const int &radius, QTextStream &stream, int normalized )
 		{
 			const int width = billon.n_cols;
 			const int height = billon.n_rows;
 			const int nbSlices = interval.size();
-			const int firstPith = interval.min();
-			const int lastPith = qMin(firstPith + nbSlices,billon.pith().size());
-			qreal depth = firstPith;
 			const qreal depthShift = 1./(normalized? (qreal)nbSlices: 1.0);
-			int i,k;
+			const qreal angleShift = TWO_PI/(qreal)nbEdges;
+			const rCoord2D norm = normalized ? rCoord2D(width,height) : rCoord2D(1.,1.);
+			const rCoord2D ofsRadius = rCoord2D( radius, radius )/norm;
+
+			int i, k;
 
 			QVector<rCoord2D> offsets;
-			const qreal angleShift = TWO_PI/(qreal)nbEdges;
-			const qreal ofsXRadius = radius/(normalized? (qreal)width: 1.0);
-			const qreal ofsYRadius = radius/(normalized? (qreal)height: 1.0);
+			offsets.reserve(nbEdges);
 			qreal angle = 0;
+
 			while ( angle < TWO_PI )
 			{
-				offsets.append( rCoord2D( qCos(angle)*ofsXRadius, qSin(angle)*ofsYRadius ) );
+				offsets.append( ofsRadius * rCoord2D( qCos(angle), qSin(angle) ) );
 				angle += angleShift;
 			}
 
+			const rCoord2D ofsStart(normalized?0.5:width/2,normalized?0.5:height/2);
+			rCoord2D *offsetsIterator, ofs;
+			qreal depth = normalized ? -0.5 : -interval.size()/2;
+
 			stream << endl;
-			stream << nbEdges*(lastPith-firstPith+1) << endl;
-			rCoord2D *offsetsIterator = 0;
-			for ( k=firstPith ; k<=lastPith ; ++k )
+			stream << nbEdges*(interval.width()+1) << endl;
+			for ( k=interval.min() ; k<=interval.max() ; ++k )
 			{
-				const iCoord2D &coord = billon.pithCoord(k);
-				const qreal xOfs = coord.x/(normalized? (qreal)width:1.0) - 0.5;
-				const qreal yOfs = coord.y/(normalized? (qreal)height:1.0) - 0.5;
+				ofs = billon.pithCoord(k)/norm - ofsStart;
 				offsetsIterator = offsets.data();
 				for ( i=0 ; i<nbEdges ; ++i )
 				{
-					stream << xOfs+offsetsIterator->x << ' ' << yOfs+offsetsIterator->y << ' ' << depth << endl;
+					stream << ofs.x+offsetsIterator->x << ' ' << ofs.y+offsetsIterator->y << ' ' << depth << endl;
 					offsetsIterator++;
 				}
 				depth += depthShift;
 			}
 		}
 
+		// Les angles doivent être compris entre 0 et 360
 		void computeSectorEdges( const Billon &billon, const Interval<uint> &interval, const int &nbEdges, const qreal &rightAngle, const qreal &leftAngle, QTextStream &stream, bool normalized )
 		{
 			const int width = billon.n_cols;
 			const int height = billon.n_rows;
 			const int nbSlices = interval.size();
-			const int firstPith = interval.min();
-			const int lastPith = qMin(firstPith + nbSlices,billon.pith().size());
-			const qreal depthShift = 1./(normalized? (qreal)nbSlices:1.0);
+			const qreal depthShift = 1./(normalized? (qreal)nbSlices:1.);
 			const qreal angleShift = (rightAngle<leftAngle?leftAngle-rightAngle:leftAngle+(TWO_PI-rightAngle))/(qreal)(nbEdges-1);
-			int i,k;
+			int i;
+			uint k;
 
 			stream << endl;
-			stream << nbEdges*(lastPith-firstPith+1) << endl;
+			stream << nbEdges*(nbSlices+1) << endl;
 
+			const rCoord2D ofsStart(normalized?0.5:width/2,normalized?0.5:height/2);
+			const rCoord2D norm = normalized ? rCoord2D(width,height) : rCoord2D(1.,1.);
 			QVector<rCoord2D> offsets;
-			rCoord2D *offsetsIterator = 0;
-			qreal depth = -0.5;
+			rCoord2D *offsetsIterator, ofs, ofsRadius;
+			iCoord2D coord;
+			qreal depth = normalized ? -0.5 : -interval.size()/2;
 			qreal angle;
-			for ( k=firstPith ; k<=lastPith ; ++k )
+			for ( k=interval.min() ; k<=interval.max() ; ++k )
 			{
-				const iCoord2D &coord = billon.pithCoord(k);
-				const qreal xOfs = coord.x/(normalized? (qreal)width:1.0) - 0.5;
-				const qreal yOfs = coord.y/(normalized? (qreal)height:1.0) - 0.5;
-				const qreal ofsXRadius = qMin(coord.x,width-coord.x)/(normalized? (qreal)width:1.0);
-				const qreal ofsYRadius = qMin(coord.y,width-coord.y)/(normalized? (qreal)height:1.0);
+				coord = billon.pithCoord(k);
+				ofs = coord/norm - ofsStart;
+				ofsRadius = rCoord2D( qMin(coord.x,width-coord.x), qMin(coord.y,width-coord.y) )/norm;
 				angle = rightAngle<leftAngle?rightAngle:-TWO_PI+rightAngle;
 				offsets.clear();
 				while ( angle < leftAngle )
 				{
-					offsets.append( rCoord2D( qCos(angle)*ofsXRadius, qSin(angle)*ofsYRadius ) );
+					offsets.append( ofsRadius * rCoord2D( qCos(angle), qSin(angle) ) );
 					angle += angleShift;
 				}
 				offsetsIterator = offsets.data();
-				stream << xOfs << ' ' << yOfs << ' ' << depth << endl;
+				stream << ofs.x << ' ' << ofs.y << ' ' << depth << endl;
 				for ( i=0 ; i<nbEdges-1 ; ++i )
 				{
-					stream << xOfs+offsetsIterator->x << ' ' << yOfs+offsetsIterator->y << ' ' << depth << endl;
+					stream << ofs.x+offsetsIterator->x << ' ' << ofs.y+offsetsIterator->y << ' ' << depth << endl;
 					offsetsIterator++;
 				}
 				depth += depthShift;
@@ -243,42 +238,42 @@ namespace OfsExport
 			QString fullStream;
 			int sumOfnbEdges = 0;
 			QVector<rCoord2D> offsets;
-			rCoord2D *offsetsIterator;
+			rCoord2D *offsetsIterator, ofs, ofsRadius;
 			qreal depth, angle;
+			uint l;
+
+			const rCoord2D ofsStart(normalized?0.5:width/2,normalized?0.5:height/2);
+			const rCoord2D norm = normalized ? rCoord2D(width,height) : rCoord2D(1.,1.);
+
 			for ( int k = 0; k<intervals.size() ; ++k )
 			{
 				const Interval<uint> interval = intervals[k].first;
-				const int nbSlices = interval.size();
 				const qreal rightAngle = intervals[k].second.first;
 				const qreal leftAngle = intervals[k].second.second;
 
-				const int firstPith = interval.min();
-				const int lastPith = qMin(firstPith + nbSlices,billon.pith().size());
-				const qreal depthShift = 1./(normalized? (qreal)nbSlices:1.0);
+				const qreal depthShift = 1./(normalized? static_cast<qreal>(interval.size()):1.0);
 				const qreal angleShift = (rightAngle<leftAngle?leftAngle-rightAngle:leftAngle+(TWO_PI-rightAngle))/(qreal)(nbEdges-1);
 
-				sumOfnbEdges += nbEdges*(lastPith-firstPith+1);
+				sumOfnbEdges += nbEdges*(interval.size()+1);
 
-				depth = -0.5;
-				for (int l=firstPith ; l<=lastPith ; ++l )
+				depth = normalized ? -0.5 : -interval.size()/2.;
+				for ( l=interval.min() ; l<=interval.max() ; ++l )
 				{
 					const iCoord2D &coord = billon.pithCoord(l);
-					const qreal xOfs = coord.x/(normalized? (qreal)width: 1.0) - 0.5;
-					const qreal yOfs = coord.y/(normalized? (qreal)height: 1.0) - 0.5;
-					const qreal ofsXRadius = qMin(coord.x,width-coord.x)/(normalized ? (qreal)width: 1.0);
-					const qreal ofsYRadius = qMin(coord.y,width-coord.y)/(normalized ? (qreal)height: 1.0);
+					ofs = coord/norm - ofsStart;
+					ofsRadius = rCoord2D( qMin(coord.x,width-coord.x), qMin(coord.y,height-coord.y) )/norm;
 					angle = rightAngle<leftAngle?rightAngle:-TWO_PI+rightAngle;
 					offsets.clear();
 					while ( angle < leftAngle )
 					{
-						offsets.append( rCoord2D( qCos(angle)*ofsXRadius, qSin(angle)*ofsYRadius ) );
+						offsets.append( ofsRadius * rCoord2D( qCos(angle), qSin(angle) ) );
 						angle += angleShift;
 					}
 					offsetsIterator = offsets.data();
-					fullStream.append( QString("%1 %2 %3%4").arg(xOfs).arg(yOfs).arg(depth).arg('\n') );
-					for (int i=0 ; i<nbEdges-1 ; ++i )
+					fullStream.append( QString("%1 %2 %3%4").arg(ofs.x).arg(ofs.y).arg(depth).arg('\n') );
+					for ( int i=0 ; i<nbEdges-1 ; ++i )
 					{
-						fullStream.append( QString("%1 %2 %3%4").arg(xOfs+offsetsIterator->x).arg(yOfs+offsetsIterator->y).arg(depth).arg('\n') );
+						fullStream.append( QString("%1 %2 %3\n").arg(ofs.x+offsetsIterator->x).arg(ofs.y+offsetsIterator->y).arg(depth) );
 						offsetsIterator++;
 					}
 					depth += depthShift;
@@ -290,27 +285,29 @@ namespace OfsExport
 			stream << fullStream;
 		}
 
-		void displayExportedVertex( const Billon &billon, const QVector<rCoord2D> &vectVertex, const Interval<uint> &sliceInterval,const uint &resolutionCercle, QTextStream &stream, bool normalized, bool displayBegEndFaces )
+		void displayExportedVertex( const Billon &billon, const QVector<rCoord2D> &vectVertex, const Interval<uint> &sliceInterval,const uint &resolutionCercle, QTextStream &stream, const bool &normalized, const bool &displayBegEndFaces )
 		{
 			const int width = billon.n_cols;
 			const int height = billon.n_rows;
-			qreal depth = sliceInterval.min();
-			const qreal depthShift = 1./(normalized ? (qreal)sliceInterval.width() : 1.0);
+			const qreal depthShift = 1./(normalized ? (qreal)sliceInterval.width() : 1.);
 			int pos=0;
+
+			const rCoord2D ofsStart = normalized ? rCoord2D(0.5,0.5) : rCoord2D(width/2,height/2);
+			const rCoord2D norm = normalized ? rCoord2D( width, height ) : rCoord2D(1.,1.);
+			qreal depth = normalized ? -0.5 : -sliceInterval.size()/2;
+			uint i, k;
+
 			stream << endl;
 			stream << resolutionCercle*(sliceInterval.width()+1) << endl;
-			uint i, k;
 			for ( k=sliceInterval.min() ; k<=sliceInterval.max() ; ++k )
 			{
 				pos = k*resolutionCercle;
 				for ( i=0 ; i<resolutionCercle ; i++ )
 				{
-					if ( (k==sliceInterval.min()) && i==0 && displayBegEndFaces )
-						stream << (normalized? 0:(width/2.0)) << ' ' << (normalized? 0:(height/2.0)) << ' ' << -0.5 << endl;
-					else if ( (k==sliceInterval.max()) && i==0 && displayBegEndFaces )
-						stream << (normalized? 0:(width/2.0)) << ' ' << (normalized? 0:(height/2.0)) << ' ' << sliceInterval.min() << endl;
+					if ( displayBegEndFaces && i==0 && (k==sliceInterval.min() || k==sliceInterval.max()) )
+						stream << 0 << ' ' << 0 << ' ' << depth << endl;
 					else
-						stream << ((vectVertex.at(pos).x /(normalized?static_cast<qreal>(width): 1.0)) -0.5)<< ' ' << ((vectVertex.at(pos).y/(normalized? static_cast<qreal>(height):1.0)) -0.5)<< ' ' << sliceInterval.min() << endl;
+						stream << ( vectVertex.at(pos).x /norm.x - ofsStart.x ) << ' ' << ( vectVertex.at(pos).y/norm.y - ofsStart.y ) << ' ' << depth << endl;
 					pos++;
 				}
 				depth += depthShift;
@@ -323,27 +320,23 @@ namespace OfsExport
 		{
 			const int nbPoints = nbEdges*(nbSlices-1);
 			const int nbPointsFoTube = 4*nbEdges;
+			int i, base;
 
 			stream << endl;
-			if (displayBegEndFaces)
-			{
-				stream << 2*(nbEdges+nbPoints-2) << endl;
-			}
-			else
-			{
-				stream << 2*(nbPoints) << endl;
-			}
+			stream << (displayBegEndFaces ? 2*(nbEdges+nbPoints-2) : 2*(nbPoints)) << endl;
+
 			// La face de devant
-			if (displayBegEndFaces)
+			if ( displayBegEndFaces )
 			{
-				for ( int i=1 ; i<nbEdges-1 ; ++i )
+				for ( i=1 ; i<nbEdges-1 ; ++i )
 				{
 					stream << 0 << ' ' << i << ' ' << i+1 << endl;
 				}
 			}
+
 			// Les autres faces
-			QList<qint32> tubes;
-			int i;
+			QList<int> tubes;
+			tubes.reserve( 4*nbEdges );
 			for ( i=0 ; i<nbEdges-1 ; ++i )
 			{
 				tubes.append(i);
@@ -355,21 +348,21 @@ namespace OfsExport
 			tubes.append(i+nbEdges);
 			tubes.append(nbEdges);
 			tubes.append(0);
-			for ( int base = 0 ; base<nbPoints ; base += nbEdges )
+			for ( base = 0 ; base<nbPoints ; base += nbEdges )
 			{
-				for ( int i=0 ; i<nbPointsFoTube ; i+=4 )
+				for ( i=0 ; i<nbPointsFoTube ; i+=4 )
 				{
 					stream << base+tubes[i] << ' ' << base+tubes[i+1] << ' ' << base+tubes[i+2] << endl;
 					stream << base+tubes[i] << ' ' << base+tubes[i+2] << ' ' << base+tubes[i+3] << endl;
 				}
 			}
+
 			// La face de derrière
-			if ( displayBegEndFaces)
+			if ( displayBegEndFaces )
 			{
-				const int lasBase = nbPoints;
-				for ( int i=lasBase+1 ; i<nbSlices*nbEdges-1 ; ++i )
+				for ( i=nbPoints+1 ; i<nbSlices*nbEdges-1 ; ++i )
 				{
-					stream << lasBase << ' ' << i+1 << ' ' << i << endl;
+					stream << nbPoints << ' ' << i+1 << ' ' << i << endl;
 				}
 			}
 		}

@@ -107,7 +107,7 @@ void PlotKnotAreaHistogram::updateIntervals( const KnotAreaHistogram & histogram
 		{
 			min = (*begin).min();
 			max = (*begin++).max();
-			for ( i=min ; i<max ; ++i )
+			for ( i=min ; i<=max ; ++i )
 			{
 				dataIntervals.append(QwtIntervalSample(histogram[i],i,i+1));
 			}

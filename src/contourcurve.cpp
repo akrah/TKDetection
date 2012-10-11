@@ -291,7 +291,7 @@ void ContourCurve::constructCurve( const Slice &slice, const iCoord2D &sliceCent
 		{
 			for ( i = minXIndex ; i<maxXIndex ; i++ )
 			{
-				if ( slice.at(j,i) &&
+				if ( slice.at(j,i) > intensityThreshold &&
 					 ( contourPolygonBottom.containsPoint(QPoint(i,j),Qt::OddEvenFill) ||
 					   (
 						   ((daMain1Main2*i+dbMain1Main2*j <= dcMain1Main2) == supToMain1Main2) &&
@@ -333,7 +333,7 @@ void ContourCurve::constructCurve( const Slice &slice, const iCoord2D &sliceCent
 			{
 				for ( i = minXIndex ; i<maxXIndex ; i++ )
 				{
-					if ( slice.at(j,i)
+					if ( slice.at(j,i) > intensityThreshold
 						 && ((daMain1Support1*i+dbMain1Support1*j > dcMain1Support1) == rightToMain1Support1)
 						 && contourPolygonBottom.containsPoint(QPoint(i,j),Qt::OddEvenFill) )
 					{
@@ -352,7 +352,7 @@ void ContourCurve::constructCurve( const Slice &slice, const iCoord2D &sliceCent
 			{
 				for ( i = minXIndex ; i<maxXIndex ; i++ )
 				{
-					if ( slice.at(j,i)
+					if ( slice.at(j,i) > intensityThreshold
 						 && ((daMain2Support2*i+dbMain2Support2*j > dcMain2Support2) == leftToMain2Support2)
 						 && contourPolygonBottom.containsPoint(QPoint(i,j),Qt::OddEvenFill) )
 					{
@@ -368,7 +368,7 @@ void ContourCurve::constructCurve( const Slice &slice, const iCoord2D &sliceCent
 			{
 				for ( i = minXIndex ; i<maxXIndex ; i++ )
 				{
-					if ( slice.at(j,i) && contourPolygonBottom.containsPoint(QPoint(i,j),Qt::OddEvenFill) )
+					if ( slice.at(j,i) > intensityThreshold && contourPolygonBottom.containsPoint(QPoint(i,j),Qt::OddEvenFill) )
 					{
 						_component.at(j,i) = 1;
 					}
@@ -420,7 +420,7 @@ void ContourCurve::constructCurveOldMethod( const Slice &slice, const iCoord2D &
 	{
 		for ( i = minXIndex ; i<maxXIndex ; i++ )
 		{
-			if ( slice.at(j,i) && contourPolygonBottom.containsPoint(QPoint(i,j),Qt::OddEvenFill) )
+			if ( slice.at(j,i) > intensityThreshold && contourPolygonBottom.containsPoint(QPoint(i,j),Qt::OddEvenFill) )
 			{
 				_component.at(j,i) = 1;
 			}
@@ -573,7 +573,7 @@ void ContourCurve::getContourContentPoints(std::vector<iCoord3D> &vectPoints, co
 	{
 		for ( i=0 ; i< _component.n_cols ; ++i )
 		{
-			if(_component(j,i)==1)
+			if ( _component(j,i) )
 			{
 				vectPoints.push_back(iCoord3D(j,i, sliceNum));
 			}
