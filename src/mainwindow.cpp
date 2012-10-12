@@ -22,7 +22,6 @@
 #include "inc/sectorhistogram.h"
 #include "inc/slicehistogram.h"
 #include "inc/sliceview.h"
-#include "inc/v3dexport.h"
 
 #include <QFileDialog>
 #include <QMouseEvent>
@@ -154,12 +153,9 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 	QObject::connect(_ui->_spinMinimalSizeOf3DConnexComponents, SIGNAL(valueChanged(int)), _ui->_sliderMinimalSizeOf3DConnexComponents, SLOT(setValue(int)));
 	QObject::connect(_ui->_sliderMinimalSizeOf2DConnexComponents, SIGNAL(valueChanged(int)), _ui->_spinMinimalSizeOf2DConnexComponents, SLOT(setValue(int)));
 	QObject::connect(_ui->_spinMinimalSizeOf2DConnexComponents, SIGNAL(valueChanged(int)), _ui->_sliderMinimalSizeOf2DConnexComponents, SLOT(setValue(int)));
-	QObject::connect(_ui->_comboConnexComponents, SIGNAL(currentIndexChanged(int)), this, SLOT(drawSlice()));
 	QObject::connect(_ui->_buttonExportSectorToPgm3D, SIGNAL(clicked()), this, SLOT(exportSectorToPgm3D()));
-	QObject::connect(_ui->_buttonExportConnexComponentToPgm3D, SIGNAL(clicked()), this, SLOT(exportConnexComponentToPgm3D()));
 	QObject::connect(_ui->_buttonExportSectorToOfs, SIGNAL(clicked()), this, SLOT(exportSectorToOfs()));
 	QObject::connect(_ui->_buttonExportAllSectorsInAllIntervalsToOfs, SIGNAL(clicked()), this, SLOT(exportAllSectorInAllIntervalsToOfs()));
-	QObject::connect(_ui->_buttonContours, SIGNAL(clicked()), this, SLOT(exportContours()));
 	QObject::connect(_ui->_spinContourSmoothingRadius, SIGNAL(valueChanged(int)), this, SLOT(drawSlice()));
 
 	// Évènements déclenchés par la souris sur le visualiseur de coupes
@@ -177,16 +173,14 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 	QObject::connect(_ui->_buttonExportToOfsAll, SIGNAL(clicked()), this, SLOT(exportToOfsAll()));
 	QObject::connect(_ui->_buttonExportToOfs, SIGNAL(clicked()), this, SLOT(exportToOfs()));
 	QObject::connect(_ui->_buttonExportHistogramToSep, SIGNAL(clicked()), this, SLOT(exportHistogramToSep()));
-	QObject::connect(_ui->_buttonExportToV3D, SIGNAL(clicked()), this, SLOT(exportToV3D()));
-	QObject::connect(_ui->_buttonExportFlowToV3D, SIGNAL(clicked()), this, SLOT(exportFlowToV3D()));
-	QObject::connect(_ui->_buttonExportMovementsToV3D, SIGNAL(clicked()), this, SLOT(exportMovementsToV3D()));
 	QObject::connect(_ui->_buttonExportToOfsRestricted, SIGNAL(clicked()), this, SLOT(exportToOfsRestricted()));
 	QObject::connect(_ui->_buttonExportSectorsDiagramAndHistogram, SIGNAL(clicked()), this, SLOT(exportSectorDiagramAndHistogram()));
 	QObject::connect(_ui->_spinBlurredSegmentsThickness, SIGNAL(valueChanged(int)), this, SLOT(drawSlice()));
-	QObject::connect(_ui->_buttonExportContourComponentToPgm3D, SIGNAL(clicked()), this, SLOT(exportContourComponentToPgm3D()));
-	QObject::connect(_ui->_buttonExportContourComponentAllInIntervalSDP, SIGNAL(clicked()), this, SLOT(exportAllContourComponentOfVoxels()));
-	QObject::connect(_ui->_buttonExportContourComponentAllIntervalsSDP, SIGNAL(clicked()), this, SLOT(exportAllContourComponentOfVoxelsAllIntervals()));
-	QObject::connect(_ui->_buttonExportContourComponentAllIntervalsSDPOldMethod, SIGNAL(clicked()), this, SLOT(exportAllContourComponentOfVoxelsAllIntervalsOldMethod()));
+	QObject::connect(_ui->_buttonExportContourToSdp, SIGNAL(clicked()), this, SLOT(exportContourToSdp()));
+	QObject::connect(_ui->_buttonExportCurrentKnotToPgm3D, SIGNAL(clicked()), this, SLOT(exportCurrentKnotToPgm3D()));
+	QObject::connect(_ui->_buttonExportCurrentKnotToSDP, SIGNAL(clicked()), this, SLOT(exportCurrentKnotToSdp()));
+	QObject::connect(_ui->_buttonExportKnotsOfCurrentKnotAreaToSDP, SIGNAL(clicked()), this, SLOT(exportKnotsOfCurrentKnotAreaToSdp()));
+	QObject::connect(_ui->_buttonExportAllKnotsOfBillonToSDP, SIGNAL(clicked()), this, SLOT(exportAllKnotsOfBillonToSdp()));
 
 	// Raccourcis des actions du menu
 	_ui->_actionOpenDicom->setShortcut(Qt::CTRL + Qt::Key_O);
@@ -340,37 +334,18 @@ void MainWindow::drawSlice()
 
 						const Interval<uint> &sliceInterval = _sliceHistogram->interval(_ui->_comboSelectSliceInterval->currentIndex()-1);
 						const Slice * sectorSlice = ConnexComponentExtractor::extractConnexComponents( _componentBillon->slice(_currentSlice-sliceInterval.min()), qPow(_ui->_spinMinimalSizeOf2DConnexComponents->value(),2), 0 );
-						const int selectedComponents = _ui->_comboConnexComponents->currentIndex();
 
 						QPainter painter(&_mainPix);
 						int i, j, color;
-						if ( selectedComponents )
+						for ( j=0 ; j<height ; ++j )
 						{
-							for ( j=0 ; j<height ; ++j )
+							for ( i=0 ; i<width ; ++i )
 							{
-								for ( i=0 ; i<width ; ++i )
+								color = sectorSlice->at(j,i);
+								if ( color )
 								{
-									color = sectorSlice->at(j,i);
-									if ( color == selectedComponents )
-									{
-										painter.setPen(colors[color%nbColors]);
-										painter.drawPoint(i,j);
-									}
-								}
-							}
-						}
-						else
-						{
-							for ( j=0 ; j<height ; ++j )
-							{
-								for ( i=0 ; i<width ; ++i )
-								{
-									color = sectorSlice->at(j,i);
-									if ( color )
-									{
-										painter.setPen(colors[color%nbColors]);
-										painter.drawPoint(i,j);
-									}
+									painter.setPen(colors[color%nbColors]);
+									painter.drawPoint(i,j);
 								}
 							}
 						}
@@ -657,8 +632,6 @@ void MainWindow::selectSectorInterval( const int &index )
 		delete _componentBillon;
 		_componentBillon = 0;
 	}
-	_ui->_comboConnexComponents->clear();
-	_ui->_comboConnexComponents->addItem(tr("Toutes"));
 	if ( index > 0 && index <= static_cast<int>(_sectorHistogram->nbIntervals()) && _billon->hasPith() )
 	{
 		const Interval<uint> &sectorInterval = _sectorHistogram->interval(_ui->_comboSelectSectorInterval->currentIndex()-1);
@@ -694,11 +667,6 @@ void MainWindow::selectSectorInterval( const int &index )
 		if ( _ui->_checkEnableConnexComponents->isChecked() )
 		{
 			_componentBillon = ConnexComponentExtractor::extractConnexComponents(*_sectorBillon,qPow(_ui->_spinMinimalSizeOf3DConnexComponents->value(),3),intensityInterval.min());
-			const int nbComponents = _componentBillon->maxValue();
-			for ( i=1 ; i<nbComponents ; ++i )
-			{
-				_ui->_comboConnexComponents->addItem(tr("Composante %1").arg(i));
-			}
 
 			_knotAreaHistogram->construct( *_componentBillon, _ui->_spinMinimalSizeOf2DConnexComponents->value() );
 			_knotAreaHistogram->computeMaximumsAndIntervals( 5, 5. );
@@ -760,12 +728,13 @@ void MainWindow::exportToOfsRestricted()
 		QString fileName = QFileDialog::getSaveFileName(this, tr("Exporter en .ofs"), "output.ofs", tr("Fichiers de données (*.ofs);;Tous les fichiers (*.*)"));
 		if ( !fileName.isEmpty() )
 		{
-		  OfsExport::processRestrictedMesh( *_billon, Interval<uint>(_ui->_spanSliderSelectInterval->lowerValue(),_ui->_spanSliderSelectInterval->upperValue()), fileName, 100, MINIMUM_INTENSITY, false, _ui->_checkCloseBillon->isChecked() );
+			OfsExport::processRestrictedMesh( *_billon, Interval<uint>(_ui->_spanSliderSelectInterval->lowerValue(),_ui->_spanSliderSelectInterval->upperValue()), fileName, 100, MINIMUM_INTENSITY, false, _ui->_checkCloseBillon->isChecked() );
 		}
 	}
 }
 
-void MainWindow::exportSectorToOfs() {
+void MainWindow::exportSectorToOfs()
+{
 	uint index = _ui->_comboSelectSectorInterval->currentIndex();
 	if ( _billon != 0 && _billon->hasPith() && index > 0 && index <= _sectorHistogram->nbIntervals() )
 	{
@@ -779,7 +748,8 @@ void MainWindow::exportSectorToOfs() {
 	}
 }
 
-void MainWindow::exportAllSectorInAllIntervalsToOfs() {
+void MainWindow::exportAllSectorInAllIntervalsToOfs()
+{
 	if ( _billon != 0 && _billon->hasPith() && _ui->_comboSelectSectorInterval->count() > 0 )
 	{
 		QString fileName = QFileDialog::getSaveFileName(this, tr("Exporter tous les secteurs de tous les intervalles en .ofs"), "allSector.ofs", tr("Fichiers de données (*.ofs);;Tous les fichiers (*.*)"));
@@ -819,113 +789,18 @@ void MainWindow::exportHistogramToSep()
 	}
 }
 
-void MainWindow::exportToV3D()
+void MainWindow::exportSectorToPgm3D()
 {
-	if ( _billon != 0 )
+	if ( _sectorBillon != 0 )
 	{
-		QString fileName = QFileDialog::getSaveFileName(this, tr("Exporter en .v3d"), "output.v3d", tr("Fichiers de données (*.v3d);;Tous les fichiers (*.*)"));
-		if ( !fileName.isEmpty() )
-		{
-			V3DExport::process( *_billon, fileName, Interval<int>(_ui->_spanSliderSelectInterval->lowerValue(),_ui->_spanSliderSelectInterval->upperValue()), _ui->_spinExportThreshold->value() );
-		}
-	}
-}
-
-void MainWindow::exportFlowToV3D() {
-	if ( _billon != 0 ) {
-		QString fileName = QFileDialog::getSaveFileName(this, tr("Exporter en .v3d"), "output_flow.v3d", tr("Fichiers de données (*.v3d);;Tous les fichiers (*.*)"));
-		if ( !fileName.isEmpty() ) {
-			const Interval<int> slicesInterval(_ui->_spanSliderSelectInterval->lowerValue(),_ui->_spanSliderSelectInterval->upperValue());
-			const int width = _billon->n_cols;
-			const int height = _billon->n_rows;
-			const int depth = slicesInterval.width()+1;
-			Billon billonFlow( width, height, depth );
-			billonFlow.setMinValue(_billon->minValue());
-			billonFlow.setMaxValue(_billon->maxValue());
-			billonFlow.setVoxelSize(_billon->voxelWidth(),_billon->voxelHeight(),_billon->voxelDepth());
-			VectorsField *field = 0;
-			int i,j,k;
-
-			for ( k=0 ; k<depth ; ++k ) {
-				field = OpticalFlow::compute(*_billon,k+slicesInterval.min(),_ui->_spinFlowAlpha->value(),_ui->_spinFlowEpsilon->value(),_ui->_spinFlowMaximumIterations->value());
-				if ( field != 0 ) {
-					Slice &slice = billonFlow.slice(k);
-					for ( j=0 ; j<height ; ++j ) {
-						for ( i=0 ; i<width ; ++i ) {
-							slice.at(j,i) = qSqrt( qPow((*field)[j][i].x(),2) + qPow((*field)[j][i].y(),2) )*20.;
-						}
-					}
-					delete field;
-					field = 0;
-				}
-			}
-
-			V3DExport::process( billonFlow, fileName, Interval<int>(0,depth-1), _ui->_spinExportThreshold->value() );
-		}
-	}
-}
-
-void MainWindow::exportMovementsToV3D()
-{
-	if ( _billon != 0 )
-	{
-		QString fileName = QFileDialog::getSaveFileName(this, tr("Exporter en .v3d"), "output_diag.v3d", tr("Fichiers de données (*.v3d);;Tous les fichiers (*.*)"));
-		if ( !fileName.isEmpty() )
-		{
-			const Interval<int> intensityInterval(_ui->_spinMinIntensity->value()+1, _ui->_spinMaxIntensity->value());
-			const Interval<int> motionInterval( _ui->_spinMovementThresholdMin->value(), _ui->_spinMovementThresholdMax->value() );
-			const int width = _billon->n_cols;
-			const int height = _billon->n_rows;
-			const int depth = _billon->n_slices;
-
-			Billon billonDiag( *_billon );
-			billonDiag.setMinValue(0);
-			billonDiag.setMaxValue(1);
-			billonDiag.fill(0);
-			int i,j,k;
-
-			for ( k=0 ; k<depth ; ++k )
-			{
-				Slice &sliceDiag = billonDiag.slice(k);
-				for ( j=0 ; j<height ; ++j )
-				{
-					for ( i=0 ; i<width ; ++i )
-					{
-						if ( intensityInterval.containsClosed(_billon->slice(k).at(j,i)) && intensityInterval.containsClosed(_billon->previousSlice(k).at(j,i)) )
-						{
-							sliceDiag.at(j,i) = motionInterval.containsClosed( _billon->zMotion(j,i,k) );
-						}
-					}
-				}
-			}
-
-			V3DExport::process( billonDiag, fileName, Interval<int>(0,depth-2), _ui->_spinExportThreshold->value() );
-		}
-	}
-}
-
-
-void MainWindow::exportSectorToPgm3D() {
-	if ( _sectorBillon != 0 ) {
 		QString fileName = QFileDialog::getSaveFileName(this, tr("Exporter le secteur en .pgm3d"), "output.pgm3d", tr("Fichiers de données (*.pgm3d);;Tous les fichiers (*.*)"));
-		if ( !fileName.isEmpty() ) {
+		if ( !fileName.isEmpty() )
+		{
 			bool ok;
 			qreal contrastFactor = QInputDialog::getInt(this,tr("Facteur de contraste"), tr("Contraste de l'image (image originale avec contraste à 0)"), 0, -100, 100, 1, &ok);
-			if ( ok ) {
+			if ( ok )
+			{
 				Pgm3dExport::process( *_sectorBillon, fileName, (contrastFactor+100.)/100. );
-			}
-		}
-	}
-}
-
-void MainWindow::exportConnexComponentToPgm3D() {
-	if ( _componentBillon != 0 ) {
-		QString fileName = QFileDialog::getSaveFileName(this, tr("Exporter la composante connexe en .pgm3d"), "output.pgm3d", tr("Fichiers de données (*.pgm3d);;Tous les fichiers (*.*)"));
-		if ( !fileName.isEmpty() ) {
-			bool ok;
-			qreal contrastFactor = QInputDialog::getInt(this,tr("Facteur de contraste"), tr("Contraste de l'image (image originale avec contraste à 0)"), 0, -100, 100, 1, &ok);
-			if ( ok ) {
-				Pgm3dExport::process( *_componentBillon, fileName, (contrastFactor+100.)/100., _ui->_comboConnexComponents->currentIndex() );
 			}
 		}
 	}
@@ -1090,13 +965,13 @@ void MainWindow::exportKnotIntervalHistogram()
 	_ui->_plotKnotAreaHistogram->setAxisTitle(QwtPlot::yLeft,"");
 }
 
-void MainWindow::exportContours()
+void MainWindow::exportContourToSdp()
 {
-	if ( _componentBillon != 0 && _billon != 0 && _billon->hasPith() )
+	if ( _componentBillon != 0 && _componentBillon->hasPith() )
 	{
 		const Interval<uint> &sliceInterval = _sliceHistogram->interval(_ui->_comboSelectSliceInterval->currentIndex()-1);
 
-		QString fileName = QFileDialog::getSaveFileName(this, tr("Exporter le contour en .ctr"), "output.ctr", tr("Fichiers de contours (*.ctr);;Tous les fichiers (*.*)"));
+		QString fileName = QFileDialog::getSaveFileName(this, tr("Exporter le contour en .sdp"), "output.ctr", tr("Fichiers de contours (*.sdp);;Tous les fichiers (*.*)"));
 		if ( !fileName.isEmpty() )
 		{
 			QFile file(fileName);
@@ -1106,11 +981,12 @@ void MainWindow::exportContours()
 				return;
 			}
 			Slice *biggestComponent = ConnexComponentExtractor::extractConnexComponents(_componentBillon->slice(_currentSlice-sliceInterval.min()),qPow(_ui->_spinMinimalSizeOf2DConnexComponents->value(),3),0);
-			QVector<iCoord2D> contourPoints = BillonAlgorithms::extractContour( *biggestComponent, _billon->pithCoord(_currentSlice), 0);
+			QVector<iCoord2D> contourPoints = BillonAlgorithms::extractContour( *biggestComponent, _componentBillon->pithCoord(_currentSlice-sliceInterval.min()), 0);
 
 			QTextStream stream(&file);
 			stream << contourPoints.size() << endl;
-			for ( int i=0 ; i<contourPoints.size() ; ++i ) {
+			for ( int i=0 ; i<contourPoints.size() ; ++i )
+			{
 				stream << contourPoints.at(i).x << " " << contourPoints.at(i).y << endl;
 			}
 			file.close();
@@ -1119,12 +995,10 @@ void MainWindow::exportContours()
 	}
 }
 
-void MainWindow::exportContourComponentToPgm3D()
+void MainWindow::exportCurrentKnotToPgm3D()
 {
-	if ( _componentBillon != 0 && _billon != 0 && _billon->hasPith() )
+	if ( _componentBillon != 0 && _componentBillon->hasPith() )
 	{
-		const Interval<uint> &sliceInterval = _sliceHistogram->interval(_ui->_comboSelectSliceInterval->currentIndex()-1);
-
 		QString fileName = QFileDialog::getSaveFileName(this, tr("Exporter la composante délimitée par le contour en PGM3D"), "output.pgm3d", tr("Fichiers PGM3D (*.pgm3d);;Tous les fichiers (*.*)"));
 		if ( !fileName.isEmpty() )
 		{
@@ -1135,9 +1009,9 @@ void MainWindow::exportContourComponentToPgm3D()
 				return;
 			}
 
-			const int &width = _componentBillon->n_cols;
-			const int &height = _componentBillon->n_rows;
-			const int &depth = _componentBillon->n_slices;
+			const uint &width = _componentBillon->n_cols;
+			const uint &height = _componentBillon->n_rows;
+			const uint &depth = _componentBillon->n_slices;
 
 			QTextStream stream(&file);
 			stream << "P3D" << endl;
@@ -1148,10 +1022,10 @@ void MainWindow::exportContourComponentToPgm3D()
 
 			Slice *biggestComponents;
 			ContourCurve contourCurve;
-			for ( uint k=sliceInterval.min() ; k<=sliceInterval.max() ; ++k )
+			for ( uint k=0 ; k<=depth ; ++k )
 			{
 				biggestComponents = ConnexComponentExtractor::extractConnexComponents( _componentBillon->slice(k), qPow(_ui->_spinMinimalSizeOf2DConnexComponents->value(),2), 0 );
-				contourCurve.constructCurve( *biggestComponents, _billon->pithCoord(sliceInterval.min()+k), 1, _ui->_spinBlurredSegmentsThickness->value(), _ui->_spinContourSmoothingRadius->value() );
+				contourCurve.constructCurve( *biggestComponents, _componentBillon->pithCoord(k), 0, _ui->_spinBlurredSegmentsThickness->value(), _ui->_spinContourSmoothingRadius->value() );
 				contourCurve.writeContourContentInPgm3D(dstream);
 				delete biggestComponents;
 				biggestComponents = 0;
@@ -1164,168 +1038,147 @@ void MainWindow::exportContourComponentToPgm3D()
 	}
 }
 
-void MainWindow::createVoxelSetAllIntervals(std::vector<iCoord3D> &vectVoxels, bool useOldMethod)
+void MainWindow::exportCurrentKnotToSdp()
+{
+	if ( _componentBillon != 0 && _componentBillon->hasPith() )
+	{
+		QString fileName = QFileDialog::getSaveFileName(this, tr("Exporter la composante délimitée par le contour en SDP"), "output.sdp", tr("Fichiers PGM3D (*.sdp);;Tous les fichiers (*.*)"));
+		if ( !fileName.isEmpty() )
+		{
+			QFile file(fileName);
+			if( !file.open(QIODevice::WriteOnly) )
+			{
+				qDebug() << QObject::tr("ERREUR : Impossible de créer le ficher %1.").arg(fileName);
+				return;
+			}
+
+			QTextStream stream(&file);
+			stream << "#SDP (Sequence of Discrete Points)" << endl;
+
+			Slice *biggestComponents;
+			ContourCurve contourCurve;
+			for ( uint k=0 ; k<_componentBillon->n_slices ; ++k )
+			{
+				biggestComponents = ConnexComponentExtractor::extractConnexComponents( _componentBillon->slice(k), qPow(_ui->_spinMinimalSizeOf2DConnexComponents->value(),2), 0 );
+				contourCurve.constructCurve( *biggestComponents, _componentBillon->pithCoord(k), 0, _ui->_spinBlurredSegmentsThickness->value(), _ui->_spinContourSmoothingRadius->value() );
+				contourCurve.writeContourContentInSDP(stream,k);
+				delete biggestComponents;
+				biggestComponents = 0;
+			}
+
+			file.close();
+
+			QMessageBox::information(this,"Export de la composante délimitée par le contour en SDP", "Export réussi !");
+		}
+	}
+}
+
+void MainWindow::exportKnotsOfCurrentKnotAreaToSdp()
 {
 	if ( _billon != 0 && _billon->hasPith() )
 	{
-		for ( int l=1 ; l< _ui->_comboSelectSliceInterval->count() ; l++ )
+		QString fileName = QFileDialog::getSaveFileName(this, tr("Exporter des nœuds de la zonr de nœuds courante en SDP"), "output.sdp", tr("Fichiers SDP (*.sdp);;Tous les fichiers (*.*)"));
+		if ( !fileName.isEmpty() )
 		{
-			qDebug() << "-------------------------";
-			qDebug() << "processing Interval Num=" << l;
-
-			_ui->_comboSelectSliceInterval->setCurrentIndex(l);
-			selectSliceInterval(l);
-			const Interval<uint> &sliceInterval = _sliceHistogram->interval(l-1);
-			const QVector< Interval<uint> > &intervals = _sectorHistogram->intervals();
-
-			if ( !intervals.isEmpty() )
+			QFile file(fileName);
+			if( !file.open(QIODevice::WriteOnly) )
 			{
-				Slice *biggestComponents;
-				iCoord2D pithCoord;
-				ContourCurve contourCurve;
+				qDebug() << QObject::tr("ERREUR : Impossible de créer le ficher %1.").arg(fileName);
+				return;
+			}
 
-				for ( int i=0 ; i<intervals.size()-1 ; ++i )
+			QTextStream stream(&file);
+			stream << "#SDP (Sequence of Discrete Points)" << endl;
+
+			const bool useOldMethod = _ui->_checkExportOldMethod->isChecked();
+			Slice *biggestComponents;
+			ContourCurve contourCurve;
+			int sectorIndex;
+			uint k;
+
+			for ( sectorIndex=1 ; sectorIndex< _ui->_comboSelectSectorInterval->count() ; ++sectorIndex )
+			{
+				_ui->_comboSelectSectorInterval->setCurrentIndex(sectorIndex);
+				if ( _componentBillon != 0 && _componentBillon->hasPith() )
 				{
-					qDebug() << "Generating contours knot num " << i ;
-					_ui->_comboSelectSectorInterval->setCurrentIndex(i+1);
-					for ( uint k=_knotAreaHistogram->interval(0).min() ; k<=_knotAreaHistogram->interval(0).max() ; ++k )
+					for ( k=0 ; k<_componentBillon->n_slices ; ++k )
 					{
-						pithCoord = _billon->pithCoord(sliceInterval.min()+k);
 						biggestComponents = ConnexComponentExtractor::extractConnexComponents( _componentBillon->slice(k), qPow(_ui->_spinMinimalSizeOf2DConnexComponents->value(),2), 0 );
 						if ( useOldMethod )
 						{
-							contourCurve.constructCurveOldMethod( *biggestComponents, pithCoord, 0, _ui->_spinContourSmoothingRadius->value() );
+							contourCurve.constructCurveOldMethod( *biggestComponents, _componentBillon->pithCoord(k), 0, _ui->_spinContourSmoothingRadius->value() );
 						}
 						else
 						{
-							contourCurve.constructCurve( *biggestComponents, pithCoord, 0, _ui->_spinBlurredSegmentsThickness->value(), _ui->_spinContourSmoothingRadius->value() );
+							contourCurve.constructCurve( *biggestComponents, _componentBillon->pithCoord(k), 0, _ui->_spinBlurredSegmentsThickness->value(), _ui->_spinContourSmoothingRadius->value() );
 						}
-						contourCurve.getContourContentPoints(vectVoxels, sliceInterval.min()+k);
-
+						contourCurve.writeContourContentInSDP(stream,k);
 						delete biggestComponents;
 						biggestComponents = 0;
 					}
-					qDebug() << " ... [done]";
 				}
 			}
+
+			file.close();
+
+			QMessageBox::information(this,"Export des nœuds de la zonr de nœuds courante en SDP", "Export réussi !");
 		}
 	}
 }
 
-void MainWindow::createVoxelSet( std::vector<iCoord3D> &vectVoxels )
+void MainWindow::exportAllKnotsOfBillonToSdp()
 {
-	const QVector< Interval<uint> > &intervals = _sectorHistogram->intervals();
-	if ( !intervals.isEmpty() )
+	if ( _billon != 0 && _billon->hasPith() )
 	{
-		const Interval<uint> &sliceInterval = _sliceHistogram->interval(_ui->_comboSelectSliceInterval->currentIndex()-1);
-		Slice *biggestComponents;
-		iCoord2D pithCoord;
-		ContourCurve contourCurve;
-		uint k;
-
-		for ( int i=1 ; i<=intervals.size() ; ++i )
+		QString fileName = QFileDialog::getSaveFileName(this, tr("Exporter de tous les nœuds du billon en SDP"), "output.sdp", tr("Fichiers SDP (*.sdp);;Tous les fichiers (*.*)"));
+		if ( !fileName.isEmpty() )
 		{
-			qDebug() << "Generating contours knot num " << i ;
-			_ui->_comboSelectSectorInterval->setCurrentIndex(i);
-			if ( _componentBillon != 0 && _componentBillon->hasPith() )
+			QFile file(fileName);
+			if( !file.open(QIODevice::WriteOnly) )
 			{
-				for ( k=_knotAreaHistogram->interval(0).min() ; k<=_knotAreaHistogram->interval(0).max() ; ++k )
+				qDebug() << QObject::tr("ERREUR : Impossible de créer le ficher %1.").arg(fileName);
+				return;
+			}
+
+			QTextStream stream(&file);
+			stream << "#SDP (Sequence of Discrete Points)" << endl;
+
+			const bool useOldMethod = _ui->_checkExportOldMethod->isChecked();
+			Slice *biggestComponents;
+			ContourCurve contourCurve;
+			int intervalIndex, sectorIndex;
+			uint k;
+
+			for ( intervalIndex=1 ; intervalIndex< _ui->_comboSelectSliceInterval->count() ; ++intervalIndex )
+			{
+				_ui->_comboSelectSliceInterval->setCurrentIndex(intervalIndex);
+				for ( sectorIndex=1 ; sectorIndex< _ui->_comboSelectSectorInterval->count() ; ++sectorIndex )
 				{
-					pithCoord = _componentBillon->pithCoord(k);
-					biggestComponents = ConnexComponentExtractor::extractConnexComponents( _componentBillon->slice(k), qPow(_ui->_spinMinimalSizeOf2DConnexComponents->value(),2), 0 );
-					contourCurve.constructCurve( *biggestComponents, pithCoord, 0, _ui->_spinBlurredSegmentsThickness->value(), _ui->_spinContourSmoothingRadius->value() );
-					contourCurve.getContourContentPoints(vectVoxels, sliceInterval.min()+k);
-
-					delete biggestComponents;
-					biggestComponents = 0;
+					_ui->_comboSelectSectorInterval->setCurrentIndex(sectorIndex);
+					if ( _componentBillon != 0 && _componentBillon->hasPith() )
+					{
+						for ( k=0 ; k<_componentBillon->n_slices ; ++k )
+						{
+							biggestComponents = ConnexComponentExtractor::extractConnexComponents( _componentBillon->slice(k), qPow(_ui->_spinMinimalSizeOf2DConnexComponents->value(),2), 0 );
+							if ( useOldMethod )
+							{
+								contourCurve.constructCurveOldMethod( *biggestComponents, _componentBillon->pithCoord(k), 0, _ui->_spinContourSmoothingRadius->value() );
+							}
+							else
+							{
+								contourCurve.constructCurve( *biggestComponents, _componentBillon->pithCoord(k), 0, _ui->_spinBlurredSegmentsThickness->value(), _ui->_spinContourSmoothingRadius->value() );
+							}
+							contourCurve.writeContourContentInSDP(stream,k);
+							delete biggestComponents;
+							biggestComponents = 0;
+						}
+					}
 				}
-				qDebug() << " ... [done]";
-			}
-			else
-			{
-				qDebug() << " ... [fail]";
-			}
-		}
-	}
-}
-
-void MainWindow::exportAllContourComponentOfVoxels()
-{
-	if ( _componentBillon != 0 ) {
-		QString fileName = QFileDialog::getSaveFileName(this, tr("Exporter la composante délimitée par le contour en SDP"), "output.sdp", tr("Fichiers SDP (*.sdp);;Tous les fichiers (*.*)"));
-		if ( !fileName.isEmpty() )
-		{
-			QFile file(fileName);
-			if( !file.open(QIODevice::WriteOnly) )
-			{
-				qDebug() << QObject::tr("ERREUR : Impossible de créer le ficher %1.").arg(fileName);
-				return;
-			}
-			QTextStream stream(&file);
-			stream << "#SDP (Sequence of Discrete Points)" << endl;
-			std::vector<iCoord3D> voxelSet;
-			createVoxelSet(voxelSet);
-			for ( uint i=0 ; i<voxelSet.size() ; i++)
-			{
-			  // invert X/Y (due to compatibility with DGtalViewer
-				stream << voxelSet.at(i).y << " " << voxelSet.at(i).x << " " << voxelSet.at(i).z << endl;
-			}
-			QMessageBox::information(this,"Export nœuds en SDP réussie", "Export réussi !");
-		}
-	}
-}
-
-void MainWindow::exportAllContourComponentOfVoxelsAllIntervals()
-{
-		QString fileName = QFileDialog::getSaveFileName(this, tr("Exporter la composante délimitée par le contour en SDP"), "output.sdp", tr("Fichiers SDP (*.sdp);;Tous les fichiers (*.*)"));
-		if ( !fileName.isEmpty() )
-		{
-			QFile file(fileName);
-			if( !file.open(QIODevice::WriteOnly) )
-			{
-				qDebug() << QObject::tr("ERREUR : Impossible de créer le ficher %1.").arg(fileName);
-				return;
 			}
 
-			QTextStream stream(&file);
-			stream << "#SDP (Sequence of Discrete Points)" << endl;
-			std::vector<iCoord3D> voxelSet;
-			createVoxelSetAllIntervals(voxelSet);
-			for ( unsigned int i=0 ; i<voxelSet.size() ; i++ )
-			{
-			  // invert X/Y (due to compatibility with DGtalViewer
-				stream << voxelSet.at(i).y << " " << voxelSet.at(i).x << " " << voxelSet.at(i).z << endl;
-			}
+			file.close();
 
-			QMessageBox::information(this,"Export nœuds en SDP réussie", "Export réussi !");
-		}
-}
-
-void MainWindow::exportAllContourComponentOfVoxelsAllIntervalsOldMethod()
-{
-	if ( _componentBillon != 0 )
-	{
-		QString fileName = QFileDialog::getSaveFileName(this, tr("Exporter la composante délimitée par le contour en SDP"), "output.sdp", tr("Fichiers SDP (*.sdp);;Tous les fichiers (*.*)"));
-		if ( !fileName.isEmpty() )
-		{
-			QFile file(fileName);
-			if( !file.open(QIODevice::WriteOnly) )
-			{
-				qDebug() << QObject::tr("ERREUR : Impossible de créer le ficher %1.").arg(fileName);
-				return;
-			}
-
-			QTextStream stream(&file);
-			stream << "#SDP (Sequence of Discrete Points)" << endl;
-			std::vector<iCoord3D> voxelSet;
-			createVoxelSetAllIntervals(voxelSet, true);
-			for ( unsigned int i=0 ; i<voxelSet.size() ; i++ )
-			{
-			  // invert X/Y (due to compatibility with DGtalViewer
-				stream << voxelSet.at(i).y << " " << voxelSet.at(i).x << " " << voxelSet.at(i).z << endl;
-			}
-
-			QMessageBox::information(this,"Export nœuds en SDP réussie", "Export réussi !");
+			QMessageBox::information(this,"Export de tous les nœuds du billon en SDP", "Export réussi !");
 		}
 	}
 }

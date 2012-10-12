@@ -67,23 +67,16 @@ private slots:
 	void exportToOfsRestricted();
 	void exportSectorToOfs();
 	void exportAllSectorInAllIntervalsToOfs();
-	void exportToV3D();
-	void exportFlowToV3D();
 	void exportHistogramToSep();
-	void exportMovementsToV3D();
 	void exportSectorToPgm3D();
-	void exportConnexComponentToPgm3D();
 	void exportSliceHistogram();
 	void exportSectorDiagramAndHistogram();
 	void exportKnotIntervalHistogram();
-	void exportContours();
-	void exportContourComponentToPgm3D();
-		void createVoxelSetAllIntervals(std::vector<iCoord3D> &vectVoxels, bool useOldMethod=false);
-		void createVoxelSet(std::vector<iCoord3D> &vectVoxels);
-		void exportAllContourComponentOfVoxels();
-		void exportAllContourComponentOfVoxelsAllIntervals();
-		void exportAllContourComponentOfVoxelsAllIntervalsOldMethod();
-
+	void exportContourToSdp();
+	void exportCurrentKnotToPgm3D();
+	void exportCurrentKnotToSdp();
+	void exportKnotsOfCurrentKnotAreaToSdp();
+	void exportAllKnotsOfBillonToSdp();
 
 private:
 	void openNewBillon(const QString &folderName = "");

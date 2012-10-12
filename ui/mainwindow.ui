@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>789</width>
+    <width>813</width>
     <height>930</height>
    </rect>
   </property>
@@ -104,7 +104,7 @@
           <rect>
            <x>0</x>
            <y>0</y>
-           <width>256</width>
+           <width>244</width>
            <height>660</height>
           </rect>
          </property>
@@ -141,7 +141,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>789</width>
+     <width>813</width>
      <height>25</height>
     </rect>
    </property>
@@ -183,7 +183,7 @@
      <item>
       <widget class="QTabWidget" name="_tabs">
        <property name="currentIndex">
-        <number>2</number>
+        <number>3</number>
        </property>
        <widget class="QWidget" name="_tabGeneral">
         <attribute name="title">
@@ -230,8 +230,8 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>316</width>
-              <height>82</height>
+              <width>506</width>
+              <height>353</height>
              </rect>
             </property>
             <attribute name="label">
@@ -284,7 +284,7 @@
                   <enum>Qt::Horizontal</enum>
                  </property>
                  <property name="lowerValue">
-                  <number>0</number>
+                  <number>200</number>
                  </property>
                  <property name="upperValue">
                   <number>500</number>
@@ -312,19 +312,6 @@
                </item>
               </layout>
              </item>
-             <item row="1" column="1">
-              <widget class="QPushButton" name="_buttonExportMovementsToV3D">
-               <property name="font">
-                <font>
-                 <weight>50</weight>
-                 <bold>false</bold>
-                </font>
-               </property>
-               <property name="text">
-                <string>Export en .v3d</string>
-               </property>
-              </widget>
-             </item>
             </layout>
            </widget>
            <widget class="QWidget" name="_pageEdgeDetection">
@@ -332,8 +319,8 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>276</width>
-              <height>215</height>
+              <width>506</width>
+              <height>353</height>
              </rect>
             </property>
             <attribute name="label">
@@ -514,14 +501,17 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>341</width>
-              <height>177</height>
+              <width>506</width>
+              <height>353</height>
              </rect>
             </property>
             <attribute name="label">
              <string>Paramètres du flot optique</string>
             </attribute>
             <layout class="QFormLayout" name="formLayout_5">
+             <property name="fieldGrowthPolicy">
+              <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
+             </property>
              <item row="0" column="0">
               <widget class="QLabel" name="label_13">
                <property name="font">
@@ -621,6 +611,13 @@
                </property>
               </widget>
              </item>
+             <item row="3" column="0">
+              <widget class="Line" name="line">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+              </widget>
+             </item>
              <item row="3" column="1">
               <widget class="QPushButton" name="_buttonFlowApplied">
                <property name="font">
@@ -634,26 +631,6 @@
                </property>
               </widget>
              </item>
-             <item row="4" column="1">
-              <widget class="QPushButton" name="_buttonExportFlowToV3D">
-               <property name="font">
-                <font>
-                 <weight>50</weight>
-                 <bold>false</bold>
-                </font>
-               </property>
-               <property name="text">
-                <string>Export en .v3d</string>
-               </property>
-              </widget>
-             </item>
-             <item row="3" column="0">
-              <widget class="Line" name="line">
-               <property name="orientation">
-                <enum>Qt::Horizontal</enum>
-               </property>
-              </widget>
-             </item>
             </layout>
            </widget>
            <widget class="QWidget" name="_pageRestrictedAreaParameters">
@@ -661,8 +638,8 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>243</width>
-              <height>118</height>
+              <width>506</width>
+              <height>353</height>
              </rect>
             </property>
             <attribute name="label">
@@ -1261,56 +1238,13 @@ maximum
             </widget>
            </item>
            <item row="1" column="0">
-            <widget class="QLabel" name="label_32">
-             <property name="text">
-              <string>Choix de la composante</string>
-             </property>
-            </widget>
-           </item>
-           <item row="1" column="1">
-            <layout class="QHBoxLayout" name="horizontalLayout_19">
-             <item>
-              <widget class="QComboBox" name="_comboConnexComponents">
-               <property name="maxCount">
-                <number>2147483647</number>
-               </property>
-               <item>
-                <property name="text">
-                 <string>Toutes</string>
-                </property>
-               </item>
-              </widget>
-             </item>
-             <item>
-              <widget class="QPushButton" name="_buttonExportConnexComponentToPgm3D">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="text">
-                <string>PGM3D</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QPushButton" name="_buttonContours">
-               <property name="text">
-                <string>Contours</string>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </item>
-           <item row="2" column="0">
             <widget class="QLabel" name="label_33">
              <property name="text">
               <string>Seuillage</string>
              </property>
             </widget>
            </item>
-           <item row="2" column="1">
+           <item row="1" column="1">
             <layout class="QHBoxLayout" name="horizontalLayout_17">
              <item>
               <widget class="QSlider" name="_sliderSectorThresholding">
@@ -1343,7 +1277,7 @@ maximum
              </item>
             </layout>
            </item>
-           <item row="3" column="0">
+           <item row="2" column="0">
             <widget class="QLabel" name="label_34">
              <property name="text">
               <string>Taille minimum en 3D
@@ -1351,7 +1285,7 @@ maximum
              </property>
             </widget>
            </item>
-           <item row="3" column="1">
+           <item row="2" column="1">
             <layout class="QHBoxLayout" name="horizontalLayout_18">
              <item>
               <widget class="QSlider" name="_sliderMinimalSizeOf3DConnexComponents">
@@ -1378,14 +1312,15 @@ maximum
              </item>
             </layout>
            </item>
-           <item row="5" column="1">
-            <widget class="QPushButton" name="_buttonSelectSectorIntervalUpdate">
+           <item row="3" column="0">
+            <widget class="QLabel" name="label_37">
              <property name="text">
-              <string>Mettre à jour</string>
+              <string>Taille minimum en 2D
+(côté du carré)</string>
              </property>
             </widget>
            </item>
-           <item row="4" column="1">
+           <item row="3" column="1">
             <layout class="QHBoxLayout" name="horizontalLayout_5">
              <property name="bottomMargin">
               <number>0</number>
@@ -1415,11 +1350,10 @@ maximum
              </item>
             </layout>
            </item>
-           <item row="4" column="0">
-            <widget class="QLabel" name="label_37">
+           <item row="4" column="1">
+            <widget class="QPushButton" name="_buttonSelectSectorIntervalUpdate">
              <property name="text">
-              <string>Taille minimum en 2D
-(côté du carré)</string>
+              <string>Mettre à jour</string>
              </property>
             </widget>
            </item>
@@ -1471,36 +1405,57 @@ maximum
               </property>
              </widget>
             </item>
+            <item row="2" column="1">
+             <widget class="QPushButton" name="_buttonExportContourToSdp">
+              <property name="text">
+               <string>Export contour en SDP</string>
+              </property>
+             </widget>
+            </item>
            </layout>
           </widget>
          </item>
          <item>
-          <widget class="QPushButton" name="_buttonExportContourComponentToPgm3D">
+          <widget class="QPushButton" name="_buttonExportCurrentKnotToPgm3D">
            <property name="text">
-            <string>Export intérieur contours en PGM3D</string>
+            <string>Export du nœud courant en PGM3D</string>
            </property>
           </widget>
          </item>
          <item>
-          <widget class="QPushButton" name="_buttonExportContourComponentAllInIntervalSDP">
+          <widget class="QPushButton" name="_buttonExportCurrentKnotToSDP">
            <property name="text">
-            <string>Export  intérieur contours en SDP (tous ceux de l'interval)</string>
+            <string>Export du nœud courant en SDP</string>
            </property>
           </widget>
          </item>
          <item>
-          <widget class="QPushButton" name="_buttonExportContourComponentAllIntervalsSDP">
+          <widget class="QPushButton" name="_buttonExportKnotsOfCurrentKnotAreaToSDP">
            <property name="text">
-            <string>Export  intérieur contours en SDP (tous)</string>
+            <string>Export de tous les nœuds de la zone de nœuds courante en SDP</string>
            </property>
           </widget>
          </item>
          <item>
-          <widget class="QPushButton" name="_buttonExportContourComponentAllIntervalsSDPOldMethod">
-           <property name="text">
-            <string>Export  intérieur contours en SDP (tous, old simple approach) </string>
+          <layout class="QHBoxLayout" name="horizontalLayout_19">
+           <property name="bottomMargin">
+            <number>0</number>
            </property>
-          </widget>
+           <item>
+            <widget class="QPushButton" name="_buttonExportAllKnotsOfBillonToSDP">
+             <property name="text">
+              <string>Export de tous les nœuds du billon en SDP</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QCheckBox" name="_checkExportOldMethod">
+             <property name="text">
+              <string>Ancienne méthode</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
          </item>
          <item>
           <widget class="QwtPlot" name="_plotKnotAreaHistogram"/>
@@ -1671,9 +1626,42 @@ maximum
           </layout>
          </item>
          <item row="12" column="1">
-          <widget class="QPushButton" name="_buttonExportToV3D">
+          <layout class="QHBoxLayout" name="horizontalLayout_24">
+           <property name="bottomMargin">
+            <number>0</number>
+           </property>
+           <item>
+            <widget class="QComboBox" name="_comboBillonToExportInV3D">
+             <item>
+              <property name="text">
+               <string>Billon entier</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>Intervalle de coupes</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>Composante connexe</string>
+              </property>
+             </item>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="_buttonExportToV3D">
+             <property name="text">
+              <string>Export en .v3d</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+         <item row="13" column="1">
+          <widget class="QCheckBox" name="_checkCloseBillon">
            <property name="text">
-            <string>Export en .v3d</string>
+            <string>Ferme faces avant/arrière du tronc</string>
            </property>
           </widget>
          </item>
@@ -1681,13 +1669,6 @@ maximum
           <widget class="QPushButton" name="_buttonExportToOfsRestricted">
            <property name="text">
             <string>Exporter en.ofs Restricted</string>
-           </property>
-          </widget>
-         </item>
-         <item row="13" column="1">
-          <widget class="QCheckBox" name="_checkCloseBillon">
-           <property name="text">
-            <string>Ferme faces avant/arrière du tronc</string>
            </property>
           </widget>
          </item>
@@ -1991,7 +1972,6 @@ maximum
   <tabstop>_spinFlowEpsilon</tabstop>
   <tabstop>_spinFlowMaximumIterations</tabstop>
   <tabstop>_buttonFlowApplied</tabstop>
-  <tabstop>_buttonExportFlowToV3D</tabstop>
   <tabstop>_spinRestrictedAreaResolution</tabstop>
   <tabstop>_spinRestrictedAreaThreshold</tabstop>
   <tabstop>_sliderRestrictedAreaBeginRadius</tabstop>
@@ -2011,7 +1991,6 @@ maximum
   <tabstop>_spinExportRadius</tabstop>
   <tabstop>_buttonExportToOfs</tabstop>
   <tabstop>_spinExportThreshold</tabstop>
-  <tabstop>_buttonExportToV3D</tabstop>
  </tabstops>
  <resources/>
  <connections/>

@@ -26,7 +26,7 @@ public:
 	void draw( QImage &image ) const;
 	void drawRestrictedComponent( QImage &image ) const;
 	void writeContourContentInPgm3D( QDataStream &stream ) const;
-	void getContourContentPoints(std::vector<iCoord3D> &vectPoints, const uint &sliceNum) const;
+	void writeContourContentInSDP( QTextStream &stream, const uint &sliceNum ) const;
 
 private:
 	void smoothCurve( QVector<iCoord2D> &contour, int smoothingRadius = 5 ) const;

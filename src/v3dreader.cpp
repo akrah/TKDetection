@@ -3,7 +3,8 @@
 #include "inc/billon.h"
 
 namespace V3DReader {
-	Billon *read( const QString & ) {
+	Billon *read( const QString & )
+	{
 		return 0;
 	}
 }
