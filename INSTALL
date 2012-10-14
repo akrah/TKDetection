@@ -19,6 +19,7 @@ DÉPENDANCES
 	| - Qxt				|	0.6.2	|
 	| - QwtPolar		|	1.0.0	|
 	| - DGtalTools      |  current  |
+	| - ImaGene 	    |  perso 	|
 	| - DGLib           |  perso    |
 	 ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
 
@@ -153,7 +154,19 @@ PRE-REQUIS
 	> make
 	> sudo make install
 
-7) DGLib
+
+8) ImaGene
+   *****
+   DGLib utilise des fonctionalité de d'ImaGene. Il faut donc installer ImaGene par exemple à partir d'une version sans dépendance:
+   > git clone git://github.com/kerautret/ImaGeneNoDep.git
+   > mkdir ImaGeneNoDep/build
+   > cd ImaGeneNoDep/build
+   > cmake ..
+   > make -j 4
+   > sudo make install
+
+
+8) DGLib
    *****
 
 	Doit être téléchargé ici : http://www.loria.fr/~krahenbu/dgci2013/DGLib_for_TKDetection.zip
