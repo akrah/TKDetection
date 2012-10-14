@@ -1022,7 +1022,7 @@ void MainWindow::exportCurrentKnotToPgm3D()
 
 			Slice *biggestComponents;
 			ContourCurve contourCurve;
-			for ( uint k=0 ; k<=depth ; ++k )
+			for ( uint k=_knotAreaHistogram->interval(0).min() ; k<=_knotAreaHistogram->interval(0).max() ; ++k )
 			{
 				biggestComponents = ConnexComponentExtractor::extractConnexComponents( _componentBillon->slice(k), qPow(_ui->_spinMinimalSizeOf2DConnexComponents->value(),2), 0 );
 				contourCurve.constructCurve( *biggestComponents, _componentBillon->pithCoord(k), 0, _ui->_spinBlurredSegmentsThickness->value(), _ui->_spinContourSmoothingRadius->value() );
@@ -1057,7 +1057,7 @@ void MainWindow::exportCurrentKnotToSdp()
 
 			Slice *biggestComponents;
 			ContourCurve contourCurve;
-			for ( uint k=0 ; k<_componentBillon->n_slices ; ++k )
+			for ( uint k=_knotAreaHistogram->interval(0).min() ; k<=_knotAreaHistogram->interval(0).max() ; ++k )
 			{
 				biggestComponents = ConnexComponentExtractor::extractConnexComponents( _componentBillon->slice(k), qPow(_ui->_spinMinimalSizeOf2DConnexComponents->value(),2), 0 );
 				contourCurve.constructCurve( *biggestComponents, _componentBillon->pithCoord(k), 0, _ui->_spinBlurredSegmentsThickness->value(), _ui->_spinContourSmoothingRadius->value() );
@@ -1099,9 +1099,9 @@ void MainWindow::exportKnotsOfCurrentKnotAreaToSdp()
 			for ( sectorIndex=1 ; sectorIndex< _ui->_comboSelectSectorInterval->count() ; ++sectorIndex )
 			{
 				_ui->_comboSelectSectorInterval->setCurrentIndex(sectorIndex);
-				if ( _componentBillon != 0 && _componentBillon->hasPith() )
+				if ( _componentBillon != 0 && _componentBillon->hasPith() && _knotAreaHistogram->intervals().size()>0 )
 				{
-					for ( k=0 ; k<_componentBillon->n_slices ; ++k )
+					for ( uint k=_knotAreaHistogram->interval(0).min() ; k<=_knotAreaHistogram->interval(0).max() ; ++k )
 					{
 						biggestComponents = ConnexComponentExtractor::extractConnexComponents( _componentBillon->slice(k), qPow(_ui->_spinMinimalSizeOf2DConnexComponents->value(),2), 0 );
 						if ( useOldMethod )
@@ -1155,9 +1155,9 @@ void MainWindow::exportAllKnotsOfBillonToSdp()
 				for ( sectorIndex=1 ; sectorIndex< _ui->_comboSelectSectorInterval->count() ; ++sectorIndex )
 				{
 					_ui->_comboSelectSectorInterval->setCurrentIndex(sectorIndex);
-					if ( _componentBillon != 0 && _componentBillon->hasPith() )
+					if ( _componentBillon != 0 && _componentBillon->hasPith() && _knotAreaHistogram->intervals().size() > 0 )
 					{
-						for ( k=0 ; k<_componentBillon->n_slices ; ++k )
+						for ( uint k=_knotAreaHistogram->interval(0).min() ; k<=_knotAreaHistogram->interval(0).max() ; ++k )
 						{
 							biggestComponents = ConnexComponentExtractor::extractConnexComponents( _componentBillon->slice(k), qPow(_ui->_spinMinimalSizeOf2DConnexComponents->value(),2), 0 );
 							if ( useOldMethod )
