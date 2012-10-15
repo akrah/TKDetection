@@ -22,6 +22,8 @@
 #include "inc/sectorhistogram.h"
 #include "inc/slicehistogram.h"
 #include "inc/sliceview.h"
+#include "inc/v3dexport.h"
+#include "inc/v3dreader.h"
 
 #include <QFileDialog>
 #include <QMouseEvent>
@@ -177,7 +179,7 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 	QObject::connect(_ui->_buttonExportSectorsDiagramAndHistogram, SIGNAL(clicked()), this, SLOT(exportSectorDiagramAndHistogram()));
 	QObject::connect(_ui->_spinBlurredSegmentsThickness, SIGNAL(valueChanged(int)), this, SLOT(drawSlice()));
 	QObject::connect(_ui->_buttonExportContourToSdp, SIGNAL(clicked()), this, SLOT(exportContourToSdp()));
-	QObject::connect(_ui->_buttonExportCurrentKnotToPgm3D, SIGNAL(clicked()), this, SLOT(exportCurrentKnotToPgm3D()));
+	QObject::connect(_ui->_buttonExportCurrentKnot, SIGNAL(clicked()), this, SLOT(exportCurrentKnot()));
 	QObject::connect(_ui->_buttonExportCurrentKnotToSDP, SIGNAL(clicked()), this, SLOT(exportCurrentKnotToSdp()));
 	QObject::connect(_ui->_buttonExportKnotsOfCurrentKnotAreaToSDP, SIGNAL(clicked()), this, SLOT(exportKnotsOfCurrentKnotAreaToSdp()));
 	QObject::connect(_ui->_buttonExportAllKnotsOfBillonToSDP, SIGNAL(clicked()), this, SLOT(exportAllKnotsOfBillonToSdp()));
@@ -187,6 +189,8 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 	QObject::connect(_ui->_actionOpenDicom, SIGNAL(triggered()), this, SLOT(openDicom()));
 	_ui->_actionCloseImage->setShortcut(Qt::CTRL + Qt::Key_W);
 	QObject::connect(_ui->_actionCloseImage, SIGNAL(triggered()), this, SLOT(closeImage()));
+	_ui->_actionImportV3D->setShortcut(Qt::CTRL + Qt::Key_V);
+	QObject::connect(_ui->_actionImportV3D, SIGNAL(triggered()), this, SLOT(importV3D()));
 	_ui->_actionQuit->setShortcut(Qt::CTRL + Qt::Key_Q);
 	QObject::connect(_ui->_actionQuit, SIGNAL(triggered()), this, SLOT(close()));
 
@@ -243,7 +247,7 @@ void MainWindow::openDicom()
 	if ( !folderName.isEmpty() )
 	{
 		closeImage();
-		openNewBillon(folderName);
+		openNewBillon(folderName,0);
 		updateUiComponentsValues();
 		updateSliceHistogram();
 		drawSlice();
@@ -270,6 +274,20 @@ void MainWindow::closeImage()
 	updateUiComponentsValues();
 	drawSlice();
 	setWindowTitle("TKDetection");
+}
+
+void MainWindow::importV3D()
+{
+	QString fileName = QFileDialog::getOpenFileName(this, tr("Importer un fichier V3D"),QDir::homePath(), tr("Fichiers V3D (*.v3d);;Tous les fichiers (*.*)"));
+	if ( !fileName.isEmpty() )
+	{
+		closeImage();
+		openNewBillon(fileName,1);
+		updateUiComponentsValues();
+		updateSliceHistogram();
+		drawSlice();
+		setWindowTitle(QString("TKDetection - %1").arg(fileName.section(QDir::separator(),-1)));
+	}
 }
 
 void MainWindow::drawSlice()
@@ -995,45 +1013,64 @@ void MainWindow::exportContourToSdp()
 	}
 }
 
-void MainWindow::exportCurrentKnotToPgm3D()
+void MainWindow::exportCurrentKnot()
 {
 	if ( _componentBillon != 0 && _componentBillon->hasPith() )
 	{
-		QString fileName = QFileDialog::getSaveFileName(this, tr("Exporter la composante délimitée par le contour en PGM3D"), "output.pgm3d", tr("Fichiers PGM3D (*.pgm3d);;Tous les fichiers (*.*)"));
-		if ( !fileName.isEmpty() )
+		if ( _ui->_comboExportCurrentKnot->currentIndex() == 0 )
 		{
-			QFile file(fileName);
-			if( !file.open(QIODevice::WriteOnly) )
+			QString fileName = QFileDialog::getSaveFileName(this, tr("Exporter la composante délimitée par le contour en PGM3D"), "output.pgm3d", tr("Fichiers PGM3D (*.pgm3d);;Tous les fichiers (*.*)"));
+			if ( !fileName.isEmpty() )
 			{
-				qDebug() << QObject::tr("ERREUR : Impossible de créer le ficher %1.").arg(fileName);
-				return;
+				QFile file(fileName);
+				if( !file.open(QIODevice::WriteOnly) )
+				{
+					qDebug() << QObject::tr("ERREUR : Impossible de créer le ficher %1.").arg(fileName);
+					return;
+				}
+
+				const uint &width = _componentBillon->n_cols;
+				const uint &height = _componentBillon->n_rows;
+				const uint &depth = _componentBillon->n_slices;
+
+				QTextStream stream(&file);
+				stream << "P3D" << endl;
+				stream << width << " " << height << " " << depth << endl;
+				stream << 1 << endl;
+
+				QDataStream dstream(&file);
+
+				Slice *biggestComponents;
+				ContourCurve contourCurve;
+				for ( uint k=_knotAreaHistogram->interval(0).min() ; k<=_knotAreaHistogram->interval(0).max() ; ++k )
+				{
+					biggestComponents = ConnexComponentExtractor::extractConnexComponents( _componentBillon->slice(k), qPow(_ui->_spinMinimalSizeOf2DConnexComponents->value(),2), 0 );
+					contourCurve.constructCurve( *biggestComponents, _componentBillon->pithCoord(k), 0, _ui->_spinBlurredSegmentsThickness->value(), _ui->_spinContourSmoothingRadius->value() );
+					contourCurve.writeContourContentInPgm3D(dstream);
+					delete biggestComponents;
+					biggestComponents = 0;
+				}
+
+				file.close();
+				QMessageBox::information(this,"Export de la composante délimitée par le contour en PGM3D", "Export réussi !");
 			}
-
-			const uint &width = _componentBillon->n_cols;
-			const uint &height = _componentBillon->n_rows;
-			const uint &depth = _componentBillon->n_slices;
-
-			QTextStream stream(&file);
-			stream << "P3D" << endl;
-			stream << width << " " << height << " " << depth << endl;
-			stream << 1 << endl;
-
-			QDataStream dstream(&file);
-
-			Slice *biggestComponents;
-			ContourCurve contourCurve;
-			for ( uint k=_knotAreaHistogram->interval(0).min() ; k<=_knotAreaHistogram->interval(0).max() ; ++k )
+		}
+		else
+		{
+			QString fileName = QFileDialog::getSaveFileName(this, tr("Exporter la composante délimitée par le contour en V3D"), "output.v3d", tr("Fichiers V3D (*.v3d);;Tous les fichiers (*.*)"));
+			if ( !fileName.isEmpty() )
 			{
-				biggestComponents = ConnexComponentExtractor::extractConnexComponents( _componentBillon->slice(k), qPow(_ui->_spinMinimalSizeOf2DConnexComponents->value(),2), 0 );
-				contourCurve.constructCurve( *biggestComponents, _componentBillon->pithCoord(k), 0, _ui->_spinBlurredSegmentsThickness->value(), _ui->_spinContourSmoothingRadius->value() );
-				contourCurve.writeContourContentInPgm3D(dstream);
-				delete biggestComponents;
-				biggestComponents = 0;
+				QFile file(fileName);
+				if( !file.open(QIODevice::WriteOnly) )
+				{
+					qDebug() << QObject::tr("ERREUR : Impossible de créer le ficher %1.").arg(fileName);
+					return;
+				}
+
+				V3DExport::process( *_componentBillon, fileName, _ui->_spinSectorThresholding->value() );
+
+				QMessageBox::information(this,"Export de la composante délimitée par le contour en V3D", "Export réussi !");
 			}
-
-			file.close();
-
-			QMessageBox::information(this,"Export de la composante délimitée par le contour en PGM3D", "Export réussi !");
 		}
 	}
 }
@@ -1101,7 +1138,7 @@ void MainWindow::exportKnotsOfCurrentKnotAreaToSdp()
 				_ui->_comboSelectSectorInterval->setCurrentIndex(sectorIndex);
 				if ( _componentBillon != 0 && _componentBillon->hasPith() && _knotAreaHistogram->intervals().size()>0 )
 				{
-					for ( uint k=_knotAreaHistogram->interval(0).min() ; k<=_knotAreaHistogram->interval(0).max() ; ++k )
+					for ( k=_knotAreaHistogram->interval(0).min() ; k<=_knotAreaHistogram->interval(0).max() ; ++k )
 					{
 						biggestComponents = ConnexComponentExtractor::extractConnexComponents( _componentBillon->slice(k), qPow(_ui->_spinMinimalSizeOf2DConnexComponents->value(),2), 0 );
 						if ( useOldMethod )
@@ -1157,7 +1194,7 @@ void MainWindow::exportAllKnotsOfBillonToSdp()
 					_ui->_comboSelectSectorInterval->setCurrentIndex(sectorIndex);
 					if ( _componentBillon != 0 && _componentBillon->hasPith() && _knotAreaHistogram->intervals().size() > 0 )
 					{
-						for ( uint k=_knotAreaHistogram->interval(0).min() ; k<=_knotAreaHistogram->interval(0).max() ; ++k )
+						for ( k=_knotAreaHistogram->interval(0).min() ; k<=_knotAreaHistogram->interval(0).max() ; ++k )
 						{
 							biggestComponents = ConnexComponentExtractor::extractConnexComponents( _componentBillon->slice(k), qPow(_ui->_spinMinimalSizeOf2DConnexComponents->value(),2), 0 );
 							if ( useOldMethod )
@@ -1188,16 +1225,17 @@ void MainWindow::exportAllKnotsOfBillonToSdp()
  * Private functions
  *******************************/
 
-void MainWindow::openNewBillon( const QString &folderName )
+void MainWindow::openNewBillon( const QString &fileName, const int &fileType )
 {
 	if ( _billon != 0 )
 	{
 		delete _billon;
 		_billon = 0;
 	}
-	if ( !folderName.isEmpty() )
+	if ( !fileName.isEmpty() )
 	{
-		_billon = DicomReader::read(folderName);
+		if ( fileType == 0 ) _billon = DicomReader::read(fileName);
+		else if ( fileType == 1 ) _billon = V3DReader::read(fileName);
 	}
 	if ( _billon != 0 )
 	{

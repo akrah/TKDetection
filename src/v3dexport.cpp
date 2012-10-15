@@ -66,10 +66,6 @@ namespace V3DExport
 			int height = billon.n_rows;
 			int depth = billon.n_slices;
 
-			// components
-			QByteArray data;
-			QByteArray voxelValue;
-			QDataStream voxelStream(&voxelValue,QIODevice::ReadWrite);
 			int i, j, k;
 
 			stream.writeStartElement("components");
@@ -110,23 +106,20 @@ namespace V3DExport
 					stream.writeStartElement("binarydata");
 						stream.writeAttribute("encoding","16");
 						stream.writeCharacters("");
-						data.reserve(width*height*depth*2);
+						QDataStream voxelStream(stream.device());
 						for ( k=0; k<depth; ++k )
 						{
-							data.clear();
+							//data.clear();
 							const Slice &slice = billon.slice(k);
 							for ( j=0; j<height; ++j )
 							{
 								for ( i=0; i<width; ++i )
 								{
-									voxelValue.clear();
-									voxelStream << (slice.at(j,i) > threshold);
-									voxelValue = voxelValue.right(2);
-									data.append(voxelValue);
+									voxelStream << (qint16)(slice.at(j,i));
 								}
 							}
-							stream.device()->write(data.toHex());
 						}
+						voxelStream.unsetDevice();
 					stream.writeEndElement();
 
 				stream.writeEndElement();

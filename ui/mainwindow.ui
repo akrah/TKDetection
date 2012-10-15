@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>813</width>
-    <height>930</height>
+    <height>932</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -105,7 +105,7 @@
            <x>0</x>
            <y>0</y>
            <width>244</width>
-           <height>660</height>
+           <height>662</height>
           </rect>
          </property>
          <layout class="QHBoxLayout" name="horizontalLayout_8">
@@ -152,6 +152,8 @@
     <addaction name="_actionOpenDicom"/>
     <addaction name="_actionCloseImage"/>
     <addaction name="separator"/>
+    <addaction name="_actionImportV3D"/>
+    <addaction name="separator"/>
     <addaction name="_actionQuit"/>
    </widget>
    <addaction name="menuFichier"/>
@@ -183,7 +185,7 @@
      <item>
       <widget class="QTabWidget" name="_tabs">
        <property name="currentIndex">
-        <number>3</number>
+        <number>2</number>
        </property>
        <widget class="QWidget" name="_tabGeneral">
         <attribute name="title">
@@ -231,7 +233,7 @@
               <x>0</x>
               <y>0</y>
               <width>506</width>
-              <height>353</height>
+              <height>355</height>
              </rect>
             </property>
             <attribute name="label">
@@ -284,7 +286,7 @@
                   <enum>Qt::Horizontal</enum>
                  </property>
                  <property name="lowerValue">
-                  <number>200</number>
+                  <number>0</number>
                  </property>
                  <property name="upperValue">
                   <number>500</number>
@@ -319,8 +321,8 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>506</width>
-              <height>353</height>
+              <width>276</width>
+              <height>215</height>
              </rect>
             </property>
             <attribute name="label">
@@ -501,8 +503,8 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>506</width>
-              <height>353</height>
+              <width>319</width>
+              <height>144</height>
              </rect>
             </property>
             <attribute name="label">
@@ -638,8 +640,8 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>506</width>
-              <height>353</height>
+              <width>243</width>
+              <height>118</height>
              </rect>
             </property>
             <attribute name="label">
@@ -1416,11 +1418,32 @@ maximum
           </widget>
          </item>
          <item>
-          <widget class="QPushButton" name="_buttonExportCurrentKnotToPgm3D">
-           <property name="text">
-            <string>Export du nœud courant en PGM3D</string>
+          <layout class="QHBoxLayout" name="horizontalLayout_25">
+           <property name="bottomMargin">
+            <number>0</number>
            </property>
-          </widget>
+           <item>
+            <widget class="QPushButton" name="_buttonExportCurrentKnot">
+             <property name="text">
+              <string>Export du nœud courant </string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QComboBox" name="_comboExportCurrentKnot">
+             <item>
+              <property name="text">
+               <string>en PGM3D</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>en V3D</string>
+              </property>
+             </item>
+            </widget>
+           </item>
+          </layout>
          </item>
          <item>
           <widget class="QPushButton" name="_buttonExportCurrentKnotToSDP">
@@ -1935,6 +1958,11 @@ maximum
   <action name="_actionQuit">
    <property name="text">
     <string>Quitter</string>
+   </property>
+  </action>
+  <action name="_actionImportV3D">
+   <property name="text">
+    <string>Importer une image V3D</string>
    </property>
   </action>
  </widget>

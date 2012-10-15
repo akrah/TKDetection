@@ -26,8 +26,10 @@ public:
 	BillonTpl( const BillonTpl<T> &billon, const Interval<uint> &sliceInterval );
 
 	const Pith & pith() const;
+	Pith &pith();
 	bool hasPith() const;
 	const iCoord2D &pithCoord( const uint & sliceIndex ) const;
+	iCoord2D &pithCoord( const uint & sliceIndex );
 	T minValue() const;
 	T maxValue() const;
 	qreal voxelWidth() const;
@@ -78,6 +80,12 @@ const Pith & BillonTpl<T>::pith() const
 }
 
 template< typename T >
+Pith &BillonTpl<T>::pith()
+{
+	return _pith;
+}
+
+template< typename T >
 bool BillonTpl<T>::hasPith() const
 {
 	return !_pith.isEmpty();
@@ -85,6 +93,12 @@ bool BillonTpl<T>::hasPith() const
 
 template< typename T >
 const iCoord2D &BillonTpl<T>::pithCoord( const uint & sliceIndex ) const
+{
+	return _pith[sliceIndex];
+}
+
+template< typename T >
+iCoord2D &BillonTpl<T>::pithCoord( const uint & sliceIndex )
 {
 	return _pith[sliceIndex];
 }

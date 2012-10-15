@@ -7,7 +7,7 @@ class QString;
 
 namespace V3DReader
 {
-	Billon* read( const QString &repository );
+	Billon* read( const QString &filename );
 }
 
 #endif // V3DREADER_H
