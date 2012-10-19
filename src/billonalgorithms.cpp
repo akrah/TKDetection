@@ -158,8 +158,8 @@ namespace BillonAlgorithms
 			for ( int k=0 ; k<depth ; ++k )
 			{
 				const Slice &currentSlice = billon.slice(k);
-				center.x = billon.pithCoord(k).x;
-				center.y = billon.pithCoord(k).y;
+				center.x = billon.pithCoord(k).x + billon.xPos();
+				center.y = billon.pithCoord(k).y + billon.yPos();
 				orientation = 0.;
 				while (orientation < TWO_PI)
 				{
@@ -197,8 +197,8 @@ namespace BillonAlgorithms
 			for ( uint indexSlice = sliceInterval.min() ; indexSlice<=sliceInterval.max() ; ++indexSlice )
 			{
 				const Slice & currentSlice = billon.slice(indexSlice);
-				center.x = billon.pithCoord(indexSlice).x;
-				center.y = billon.pithCoord(indexSlice).y;
+				center.x = billon.pithCoord(indexSlice).x + billon.xPos();
+				center.y = billon.pithCoord(indexSlice).y + billon.yPos();
 				orientation = 0.;
 				while (orientation < TWO_PI)
 				{

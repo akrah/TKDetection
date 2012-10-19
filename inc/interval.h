@@ -15,8 +15,8 @@ public:
 	Interval( const Interval &interval );
 	virtual ~Interval();
 
-	T min() const;
-	T max() const;
+	const T &min() const;
+	const T &max() const;
 	T size() const;
 	T width() const;
 	bool containsClosed( const T & value ) const;
@@ -68,13 +68,13 @@ template <typename T> Interval<T>::~Interval() {}
  **********************************/
 
 template <typename T>
-inline T Interval<T>::min() const
+inline const T & Interval<T>::min() const
 {
 	return _min;
 }
 
 template <typename T>
-inline T Interval<T>::max() const
+inline const T & Interval<T>::max() const
 {
 	return _max;
 }

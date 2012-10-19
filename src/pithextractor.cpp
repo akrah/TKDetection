@@ -122,6 +122,13 @@ void PithExtractor::process( Billon &billon ) const
 
 	// applique la coorection a la moelle
 	correctPith(billon._pith, maxStandList, houghStandThreshold);
+
+	// Positionnement de la moelle dans l'espace global
+	iCoord2D billonPos(billon.xPos(),billon.yPos());
+	for(int i=0; i<depth; i++)
+	{
+		billon._pith[i] += billonPos;
+	}
 }
 
 /******************************************************************

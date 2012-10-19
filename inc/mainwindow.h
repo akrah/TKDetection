@@ -37,7 +37,6 @@ public:
 private slots:
 	void openDicom();
 	void closeImage();
-	void importV3D();
 	void drawSlice();
 	void setSlice( const int &sliceNumber );
 	void setTypeOfView( const int &type );
@@ -80,7 +79,7 @@ private slots:
 	void exportAllKnotsOfBillonToSdp();
 
 private:
-	void openNewBillon(const QString &fileName, const int &fileType = 0);
+	void openNewBillon(const QString &fileName);
 	void initComponentsValues();
 	void updateUiComponentsValues();
 	void enabledComponents();

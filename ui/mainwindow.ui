@@ -152,8 +152,6 @@
     <addaction name="_actionOpenDicom"/>
     <addaction name="_actionCloseImage"/>
     <addaction name="separator"/>
-    <addaction name="_actionImportV3D"/>
-    <addaction name="separator"/>
     <addaction name="_actionQuit"/>
    </widget>
    <addaction name="menuFichier"/>
@@ -232,8 +230,8 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>506</width>
-              <height>355</height>
+              <width>316</width>
+              <height>49</height>
              </rect>
             </property>
             <attribute name="label">

@@ -34,10 +34,12 @@ macx:OBJECTS_DIR	= .obj
 # Fichiers
 #---------#
 SOURCES	=	main.cpp \
+			billonalgorithms.cpp \
 			connexcomponentextractor.cpp \
 			contourcurve.cpp \
 			datexport.cpp \
 			dicomreader.cpp \
+			knotareahistogram.cpp \
 			mainwindow.cpp \
 			ofsexport.cpp \
 			opticalflow.cpp \
@@ -46,6 +48,7 @@ SOURCES	=	main.cpp \
 			piepart.cpp \
 			pith.cpp \
 			pithextractor.cpp \
+			plotknotareahistogram.cpp \
 			plotsectorhistogram.cpp \
 			plotslicehistogram.cpp \
 			pointpolarseriesdata.cpp \
@@ -55,12 +58,9 @@ SOURCES	=	main.cpp \
 			slicezoomer.cpp \
 			test_intervalshistogram.cpp \
 			v3dexport.cpp \
-			v3dreader.cpp \
-    src/knotareahistogram.cpp \
-    src/billonalgorithms.cpp \
-    src/plotknotareahistogram.cpp
 
 HEADERS	=	billon.h \
+			billonalgorithms.h \
 			connexcomponentextractor.h \
 			contourcurve.h \
 			coordinate.h \
@@ -72,6 +72,7 @@ HEADERS	=	billon.h \
 			dicomreader.h \
 			histogram.h \
 			interval.h \
+			knotareahistogram.h \
 			mainwindow.h \
 			ofsexport.h \
 			opticalflow.h \
@@ -80,6 +81,7 @@ HEADERS	=	billon.h \
 			piechart.h \
 			pith.h \
 			pithextractor.h \
+			plotknotareahistogram.h \
 			plotsectorhistogram.h \
 			plotslicehistogram.h \
 			pointpolarseriesdata.h \
@@ -89,10 +91,6 @@ HEADERS	=	billon.h \
 			slicezoomer.h \
 			test_intervalshistogram.h \
 			v3dexport.h \
-			v3dreader.h \
-    inc/knotareahistogram.h \
-    inc/billonalgorithms.h \
-    inc/plotknotareahistogram.h
 
 FORMS =	mainwindow.ui
 

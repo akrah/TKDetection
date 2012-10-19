@@ -189,8 +189,6 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 	QObject::connect(_ui->_actionOpenDicom, SIGNAL(triggered()), this, SLOT(openDicom()));
 	_ui->_actionCloseImage->setShortcut(Qt::CTRL + Qt::Key_W);
 	QObject::connect(_ui->_actionCloseImage, SIGNAL(triggered()), this, SLOT(closeImage()));
-	_ui->_actionImportV3D->setShortcut(Qt::CTRL + Qt::Key_V);
-	QObject::connect(_ui->_actionImportV3D, SIGNAL(triggered()), this, SLOT(importV3D()));
 	_ui->_actionQuit->setShortcut(Qt::CTRL + Qt::Key_Q);
 	QObject::connect(_ui->_actionQuit, SIGNAL(triggered()), this, SLOT(close()));
 
@@ -247,7 +245,7 @@ void MainWindow::openDicom()
 	if ( !folderName.isEmpty() )
 	{
 		closeImage();
-		openNewBillon(folderName,0);
+		openNewBillon(folderName);
 		updateUiComponentsValues();
 		updateSliceHistogram();
 		drawSlice();
@@ -274,20 +272,6 @@ void MainWindow::closeImage()
 	updateUiComponentsValues();
 	drawSlice();
 	setWindowTitle("TKDetection");
-}
-
-void MainWindow::importV3D()
-{
-	QString fileName = QFileDialog::getOpenFileName(this, tr("Importer un fichier V3D"),QDir::homePath(), tr("Fichiers V3D (*.v3d);;Tous les fichiers (*.*)"));
-	if ( !fileName.isEmpty() )
-	{
-		closeImage();
-		openNewBillon(fileName,1);
-		updateUiComponentsValues();
-		updateSliceHistogram();
-		drawSlice();
-		setWindowTitle(QString("TKDetection - %1").arg(fileName.section(QDir::separator(),-1)));
-	}
 }
 
 void MainWindow::drawSlice()
@@ -453,7 +437,7 @@ void MainWindow::updateSliceHistogram()
 		for ( int i=0 ; i<intervals.size() ; ++i )
 		{
 			const Interval<uint> &interval = intervals[i];
-			_ui->_comboSelectSliceInterval->addItem(tr("Interval %1 : [ %2, %3 ] (%4 coupes)").arg(i).arg(interval.min()).arg(interval.max()).arg(interval.width()));
+			_ui->_comboSelectSliceInterval->addItem(tr("Interval %1 : [ %2, %3 ] (%4 coupes)").arg(i).arg(interval.min()).arg(interval.max()).arg(interval.width()+1));
 		}
 	}
 	_ui->_comboSelectSliceInterval->setCurrentIndex(oldIntervalIndex<=intervals.size()?oldIntervalIndex:0);
@@ -604,7 +588,16 @@ void MainWindow::setCannyMinimumDeviation( const double &minimumDeviation )
 
 void MainWindow::selectSliceInterval( const int &index )
 {
-	selectSectorInterval(0);
+	if ( _sectorBillon != 0 )
+	{
+		delete _sectorBillon;
+		_sectorBillon = 0;
+	}
+	if ( _componentBillon != 0 )
+	{
+		delete _componentBillon;
+		_componentBillon = 0;
+	}
 
 	_ui->_comboSelectSectorInterval->clear();
 	_ui->_comboSelectSectorInterval->addItem(tr("Aucun"));
@@ -656,16 +649,16 @@ void MainWindow::selectSectorInterval( const int &index )
 		const Interval<uint> &sliceInterval = _sliceHistogram->interval(_ui->_comboSelectSliceInterval->currentIndex()-1);
 		const Interval<int> intensityInterval(_ui->_spinSectorThresholding->value(), _ui->_spinMaxIntensity->value());
 		const int firstSlice = sliceInterval.min();
-		const int lastSlice = sliceInterval.max()+1;
-		const int width = _billon->n_cols;
-		const int height = _billon->n_rows;
+		const int lastSlice = sliceInterval.max();
+		const int &width = _billon->n_cols;
+		const int &height = _billon->n_rows;
 
 		_sectorBillon = new Billon(*_billon,sliceInterval);
 		_sectorBillon->fill(intensityInterval.min());
 
 		int i, j, k;
 		// TODO : Utiliser la copie d'armadillo sur l'intervalle de coupe.
-		for ( k=firstSlice ; k<lastSlice ; ++k )
+		for ( k=firstSlice ; k<=lastSlice ; ++k )
 		{
 			const Slice &originalSlice = _billon->slice(k);
 			Slice &sectorSlice = _sectorBillon->slice(k-firstSlice);
@@ -1225,7 +1218,7 @@ void MainWindow::exportAllKnotsOfBillonToSdp()
  * Private functions
  *******************************/
 
-void MainWindow::openNewBillon( const QString &fileName, const int &fileType )
+void MainWindow::openNewBillon( const QString &fileName )
 {
 	if ( _billon != 0 )
 	{
@@ -1234,8 +1227,7 @@ void MainWindow::openNewBillon( const QString &fileName, const int &fileType )
 	}
 	if ( !fileName.isEmpty() )
 	{
-		if ( fileType == 0 ) _billon = DicomReader::read(fileName);
-		else if ( fileType == 1 ) _billon = V3DReader::read(fileName);
+		_billon = DicomReader::read(fileName);
 	}
 	if ( _billon != 0 )
 	{
