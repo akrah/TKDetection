@@ -9,6 +9,7 @@ namespace arma
 {
 	template<typename T> class Mat;
 }
+
 typedef arma::Mat<__billon_type__> Slice;
 
 #endif // DEF_BILLON_H

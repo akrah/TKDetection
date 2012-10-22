@@ -38,7 +38,7 @@
 #include <qwt_polar_grid.h>
 #include <qwt_round_scale_draw.h>
 
-MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::MainWindow), _billon(0), _sectorBillon(0), _componentBillon(0),
+MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::MainWindow), _billon(0), _componentBillon(0), _knotBillon(0),
 	_sliceView(new SliceView()), _contourCurve(new ContourCurve()), _sliceHistogram(new SliceHistogram()), _plotSliceHistogram(new PlotSliceHistogram()),
 	_pieChart(new PieChart(360)), _sectorHistogram(new SectorHistogram()), _plotSectorHistogram(new PlotSectorHistogram()), _knotAreaHistogram(new KnotAreaHistogram()),
 	_plotKnotAreaHistogram(new PlotKnotAreaHistogram()), _currentSlice(0), _currentMaximum(0), _currentSector(0)
@@ -299,16 +299,15 @@ void MainWindow::drawSlice()
 					_pieChart->draw(_mainPix, _billon->pithCoord(_currentSlice), _sectorHistogram->intervals());
 					_pieChart->draw(_mainPix, _billon->pithCoord(_currentSlice), _currentSector);
 				}
-				if ( _sectorBillon != 0 )
+				if ( _componentBillon != 0 )
 				{
-					if ( !_ui->_checkEnableConnexComponents->isChecked() || _componentBillon == 0 )
+					if ( !_ui->_checkEnableConnexComponents->isChecked() || _knotBillon == 0 )
 					{
-						const int width = _sectorBillon->n_cols;
-						const int height = _sectorBillon->n_rows;
+						const int width = _componentBillon->n_cols;
+						const int height = _componentBillon->n_rows;
 						const int threshold = _ui->_spinSectorThresholding->value();
 
-						const Interval<uint> &sliceInterval = _sliceHistogram->interval(_ui->_comboSelectSliceInterval->currentIndex()-1);
-						const Slice &sectorSlice = _sectorBillon->slice(_currentSlice-sliceInterval.min());
+						const Slice &sectorSlice = _componentBillon->slice(_currentSlice-_componentBillon->zPos());
 
 						QPainter painter(&_mainPix);
 						QColor color(255,0,0,127);
@@ -328,14 +327,13 @@ void MainWindow::drawSlice()
 					}
 					else
 					{
-						const int width = _componentBillon->n_cols;
-						const int height = _componentBillon->n_rows;
+						const int width = _knotBillon->n_cols;
+						const int height = _knotBillon->n_rows;
 
 						const QColor colors[] = { QColor(0,0,255,127), QColor(255,0,255,127), QColor(255,0,0,127), QColor(255,255,0,127), QColor(0,255,0,127) };
 						const int nbColors = sizeof(colors)/sizeof(QColor);
 
-						const Interval<uint> &sliceInterval = _sliceHistogram->interval(_ui->_comboSelectSliceInterval->currentIndex()-1);
-						const Slice * sectorSlice = ConnexComponentExtractor::extractConnexComponents( _componentBillon->slice(_currentSlice-sliceInterval.min()), qPow(_ui->_spinMinimalSizeOf2DConnexComponents->value(),2), 0 );
+						const Slice * sectorSlice = ConnexComponentExtractor::extractConnexComponents( _knotBillon->slice(_currentSlice-_knotBillon->zPos()), qPow(_ui->_spinMinimalSizeOf2DConnexComponents->value(),2), 0 );
 
 						QPainter painter(&_mainPix);
 						int i, j, color;
@@ -588,15 +586,15 @@ void MainWindow::setCannyMinimumDeviation( const double &minimumDeviation )
 
 void MainWindow::selectSliceInterval( const int &index )
 {
-	if ( _sectorBillon != 0 )
-	{
-		delete _sectorBillon;
-		_sectorBillon = 0;
-	}
 	if ( _componentBillon != 0 )
 	{
 		delete _componentBillon;
 		_componentBillon = 0;
+	}
+	if ( _knotBillon != 0 )
+	{
+		delete _knotBillon;
+		_knotBillon = 0;
 	}
 
 	_ui->_comboSelectSectorInterval->clear();
@@ -633,56 +631,68 @@ void MainWindow::selectCurrentSliceInterval()
 
 void MainWindow::selectSectorInterval( const int &index )
 {
-	if ( _sectorBillon != 0 )
-	{
-		delete _sectorBillon;
-		_sectorBillon = 0;
-	}
 	if ( _componentBillon != 0 )
 	{
 		delete _componentBillon;
 		_componentBillon = 0;
 	}
+	if ( _knotBillon != 0 )
+	{
+		delete _knotBillon;
+		_knotBillon = 0;
+	}
+
 	if ( index > 0 && index <= static_cast<int>(_sectorHistogram->nbIntervals()) && _billon->hasPith() )
 	{
 		const Interval<uint> &sectorInterval = _sectorHistogram->interval(_ui->_comboSelectSectorInterval->currentIndex()-1);
 		const Interval<uint> &sliceInterval = _sliceHistogram->interval(_ui->_comboSelectSliceInterval->currentIndex()-1);
 		const Interval<int> intensityInterval(_ui->_spinSectorThresholding->value(), _ui->_spinMaxIntensity->value());
-		const int firstSlice = sliceInterval.min();
-		const int lastSlice = sliceInterval.max();
+		const int &firstSlice = sliceInterval.min();
+		const int &lastSlice = sliceInterval.max();
 		const int &width = _billon->n_cols;
 		const int &height = _billon->n_rows;
-
-		_sectorBillon = new Billon(*_billon,sliceInterval);
-		_sectorBillon->fill(intensityInterval.min());
-
 		int i, j, k;
+
+		_componentBillon = new Billon(*_billon,sliceInterval);
+		_componentBillon->fill(intensityInterval.min());
+
 		// TODO : Utiliser la copie d'armadillo sur l'intervalle de coupe.
 		for ( k=firstSlice ; k<=lastSlice ; ++k )
 		{
 			const Slice &originalSlice = _billon->slice(k);
-			Slice &sectorSlice = _sectorBillon->slice(k-firstSlice);
-			const iCoord2D &pithCoord = _billon->pithCoord(k);
+			Slice &componentSlice = _componentBillon->slice(k-firstSlice);
+			const iCoord2D &pithCoord = _componentBillon->pithCoord(k-firstSlice);
 			for ( j=0 ; j<height ; ++j )
 			{
 				for ( i=0 ; i<width ; ++i )
 				{
 					if ( intensityInterval.containsOpen(originalSlice.at(j,i)) && sectorInterval.containsClosed(_pieChart->sectorIndexOfAngle(pithCoord.angle(iCoord2D(i,j)))) )
 					{
-						sectorSlice.at(j,i) = originalSlice.at(j,i);
+						componentSlice.at(j,i) = originalSlice.at(j,i);
 					}
 				}
 			}
 		}
 
+		Billon * tempBillon = ConnexComponentExtractor::extractConnexComponents(*_componentBillon,qPow(_ui->_spinMinimalSizeOf3DConnexComponents->value(),3),intensityInterval.min());
+		delete _componentBillon;
+		_componentBillon = tempBillon;
+		tempBillon = 0;
+
+		_knotAreaHistogram->construct( *_componentBillon, _ui->_spinMinimalSizeOf2DConnexComponents->value() );
+		_knotAreaHistogram->computeMaximumsAndIntervals( 5, 5. );
+		_plotKnotAreaHistogram->update( *_knotAreaHistogram );
+		_ui->_plotKnotAreaHistogram->replot();
+
 		if ( _ui->_checkEnableConnexComponents->isChecked() )
 		{
-			_componentBillon = ConnexComponentExtractor::extractConnexComponents(*_sectorBillon,qPow(_ui->_spinMinimalSizeOf3DConnexComponents->value(),3),intensityInterval.min());
+			_knotBillon = new Billon(*_componentBillon);
+//			_knotBillon = ConnexComponentExtractor::extractConnexComponents(*_componentBillon,qPow(_ui->_spinMinimalSizeOf3DConnexComponents->value(),3),intensityInterval.min());
 
-			_knotAreaHistogram->construct( *_componentBillon, _ui->_spinMinimalSizeOf2DConnexComponents->value() );
-			_knotAreaHistogram->computeMaximumsAndIntervals( 5, 5. );
-			_plotKnotAreaHistogram->update( *_knotAreaHistogram );
-			_ui->_plotKnotAreaHistogram->replot();
+//			_knotAreaHistogram->construct( *_knotBillon, _ui->_spinMinimalSizeOf2DConnexComponents->value() );
+//			_knotAreaHistogram->computeMaximumsAndIntervals( 5, 5. );
+//			_plotKnotAreaHistogram->update( *_knotAreaHistogram );
+//			_ui->_plotKnotAreaHistogram->replot();
 		}
 	}
 	drawSlice();
@@ -802,7 +812,7 @@ void MainWindow::exportHistogramToSep()
 
 void MainWindow::exportSectorToPgm3D()
 {
-	if ( _sectorBillon != 0 )
+	if ( _componentBillon != 0 )
 	{
 		QString fileName = QFileDialog::getSaveFileName(this, tr("Exporter le secteur en .pgm3d"), "output.pgm3d", tr("Fichiers de données (*.pgm3d);;Tous les fichiers (*.*)"));
 		if ( !fileName.isEmpty() )
@@ -811,7 +821,7 @@ void MainWindow::exportSectorToPgm3D()
 			qreal contrastFactor = QInputDialog::getInt(this,tr("Facteur de contraste"), tr("Contraste de l'image (image originale avec contraste à 0)"), 0, -100, 100, 1, &ok);
 			if ( ok )
 			{
-				Pgm3dExport::process( *_sectorBillon, fileName, (contrastFactor+100.)/100. );
+				Pgm3dExport::process( *_componentBillon, fileName, (contrastFactor+100.)/100. );
 			}
 		}
 	}
@@ -978,7 +988,7 @@ void MainWindow::exportKnotIntervalHistogram()
 
 void MainWindow::exportContourToSdp()
 {
-	if ( _componentBillon != 0 && _componentBillon->hasPith() )
+	if ( _knotBillon != 0 && _knotBillon->hasPith() )
 	{
 		const Interval<uint> &sliceInterval = _sliceHistogram->interval(_ui->_comboSelectSliceInterval->currentIndex()-1);
 
@@ -991,8 +1001,8 @@ void MainWindow::exportContourToSdp()
 				qDebug() << QObject::tr("ERREUR : Impossible de créer le ficher de contours %1.").arg(fileName);
 				return;
 			}
-			Slice *biggestComponent = ConnexComponentExtractor::extractConnexComponents(_componentBillon->slice(_currentSlice-sliceInterval.min()),qPow(_ui->_spinMinimalSizeOf2DConnexComponents->value(),3),0);
-			QVector<iCoord2D> contourPoints = BillonAlgorithms::extractContour( *biggestComponent, _componentBillon->pithCoord(_currentSlice-sliceInterval.min()), 0);
+			Slice *biggestComponent = ConnexComponentExtractor::extractConnexComponents(_knotBillon->slice(_currentSlice-sliceInterval.min()),qPow(_ui->_spinMinimalSizeOf2DConnexComponents->value(),3),0);
+			QVector<iCoord2D> contourPoints = BillonAlgorithms::extractContour( *biggestComponent, _knotBillon->pithCoord(_currentSlice-sliceInterval.min()), 0);
 
 			QTextStream stream(&file);
 			stream << contourPoints.size() << endl;
@@ -1008,7 +1018,7 @@ void MainWindow::exportContourToSdp()
 
 void MainWindow::exportCurrentKnot()
 {
-	if ( _componentBillon != 0 && _componentBillon->hasPith() )
+	if ( _knotBillon != 0 && _knotBillon->hasPith() )
 	{
 		if ( _ui->_comboExportCurrentKnot->currentIndex() == 0 )
 		{
@@ -1022,9 +1032,9 @@ void MainWindow::exportCurrentKnot()
 					return;
 				}
 
-				const uint &width = _componentBillon->n_cols;
-				const uint &height = _componentBillon->n_rows;
-				const uint &depth = _componentBillon->n_slices;
+				const uint &width = _knotBillon->n_cols;
+				const uint &height = _knotBillon->n_rows;
+				const uint &depth = _knotBillon->n_slices;
 
 				QTextStream stream(&file);
 				stream << "P3D" << endl;
@@ -1037,8 +1047,8 @@ void MainWindow::exportCurrentKnot()
 				ContourCurve contourCurve;
 				for ( uint k=_knotAreaHistogram->interval(0).min() ; k<=_knotAreaHistogram->interval(0).max() ; ++k )
 				{
-					biggestComponents = ConnexComponentExtractor::extractConnexComponents( _componentBillon->slice(k), qPow(_ui->_spinMinimalSizeOf2DConnexComponents->value(),2), 0 );
-					contourCurve.constructCurve( *biggestComponents, _componentBillon->pithCoord(k), 0, _ui->_spinBlurredSegmentsThickness->value(), _ui->_spinContourSmoothingRadius->value() );
+					biggestComponents = ConnexComponentExtractor::extractConnexComponents( _knotBillon->slice(k), qPow(_ui->_spinMinimalSizeOf2DConnexComponents->value(),2), 0 );
+					contourCurve.constructCurve( *biggestComponents, _knotBillon->pithCoord(k), 0, _ui->_spinBlurredSegmentsThickness->value(), _ui->_spinContourSmoothingRadius->value() );
 					contourCurve.writeContourContentInPgm3D(dstream);
 					delete biggestComponents;
 					biggestComponents = 0;
@@ -1060,7 +1070,7 @@ void MainWindow::exportCurrentKnot()
 					return;
 				}
 
-				V3DExport::process( *_componentBillon, fileName, _ui->_spinSectorThresholding->value() );
+				V3DExport::process( *_knotBillon, fileName, _ui->_spinSectorThresholding->value() );
 
 				QMessageBox::information(this,"Export de la composante délimitée par le contour en V3D", "Export réussi !");
 			}
@@ -1070,7 +1080,7 @@ void MainWindow::exportCurrentKnot()
 
 void MainWindow::exportCurrentKnotToSdp()
 {
-	if ( _componentBillon != 0 && _componentBillon->hasPith() )
+	if ( _knotBillon != 0 && _knotBillon->hasPith() )
 	{
 		QString fileName = QFileDialog::getSaveFileName(this, tr("Exporter la composante délimitée par le contour en SDP"), "output.sdp", tr("Fichiers PGM3D (*.sdp);;Tous les fichiers (*.*)"));
 		if ( !fileName.isEmpty() )
@@ -1089,8 +1099,8 @@ void MainWindow::exportCurrentKnotToSdp()
 			ContourCurve contourCurve;
 			for ( uint k=_knotAreaHistogram->interval(0).min() ; k<=_knotAreaHistogram->interval(0).max() ; ++k )
 			{
-				biggestComponents = ConnexComponentExtractor::extractConnexComponents( _componentBillon->slice(k), qPow(_ui->_spinMinimalSizeOf2DConnexComponents->value(),2), 0 );
-				contourCurve.constructCurve( *biggestComponents, _componentBillon->pithCoord(k), 0, _ui->_spinBlurredSegmentsThickness->value(), _ui->_spinContourSmoothingRadius->value() );
+				biggestComponents = ConnexComponentExtractor::extractConnexComponents( _knotBillon->slice(k), qPow(_ui->_spinMinimalSizeOf2DConnexComponents->value(),2), 0 );
+				contourCurve.constructCurve( *biggestComponents, _knotBillon->pithCoord(k), 0, _ui->_spinBlurredSegmentsThickness->value(), _ui->_spinContourSmoothingRadius->value() );
 				contourCurve.writeContourContentInSDP(stream,k);
 				delete biggestComponents;
 				biggestComponents = 0;
@@ -1129,18 +1139,18 @@ void MainWindow::exportKnotsOfCurrentKnotAreaToSdp()
 			for ( sectorIndex=1 ; sectorIndex< _ui->_comboSelectSectorInterval->count() ; ++sectorIndex )
 			{
 				_ui->_comboSelectSectorInterval->setCurrentIndex(sectorIndex);
-				if ( _componentBillon != 0 && _componentBillon->hasPith() && _knotAreaHistogram->intervals().size()>0 )
+				if ( _knotBillon != 0 && _knotBillon->hasPith() && _knotAreaHistogram->intervals().size()>0 )
 				{
 					for ( k=_knotAreaHistogram->interval(0).min() ; k<=_knotAreaHistogram->interval(0).max() ; ++k )
 					{
-						biggestComponents = ConnexComponentExtractor::extractConnexComponents( _componentBillon->slice(k), qPow(_ui->_spinMinimalSizeOf2DConnexComponents->value(),2), 0 );
+						biggestComponents = ConnexComponentExtractor::extractConnexComponents( _knotBillon->slice(k), qPow(_ui->_spinMinimalSizeOf2DConnexComponents->value(),2), 0 );
 						if ( useOldMethod )
 						{
-							contourCurve.constructCurveOldMethod( *biggestComponents, _componentBillon->pithCoord(k), 0, _ui->_spinContourSmoothingRadius->value() );
+							contourCurve.constructCurveOldMethod( *biggestComponents, _knotBillon->pithCoord(k), 0, _ui->_spinContourSmoothingRadius->value() );
 						}
 						else
 						{
-							contourCurve.constructCurve( *biggestComponents, _componentBillon->pithCoord(k), 0, _ui->_spinBlurredSegmentsThickness->value(), _ui->_spinContourSmoothingRadius->value() );
+							contourCurve.constructCurve( *biggestComponents, _knotBillon->pithCoord(k), 0, _ui->_spinBlurredSegmentsThickness->value(), _ui->_spinContourSmoothingRadius->value() );
 						}
 						contourCurve.writeContourContentInSDP(stream,k);
 						delete biggestComponents;
@@ -1185,18 +1195,18 @@ void MainWindow::exportAllKnotsOfBillonToSdp()
 				for ( sectorIndex=1 ; sectorIndex< _ui->_comboSelectSectorInterval->count() ; ++sectorIndex )
 				{
 					_ui->_comboSelectSectorInterval->setCurrentIndex(sectorIndex);
-					if ( _componentBillon != 0 && _componentBillon->hasPith() && _knotAreaHistogram->intervals().size() > 0 )
+					if ( _knotBillon != 0 && _knotBillon->hasPith() && _knotAreaHistogram->intervals().size() > 0 )
 					{
 						for ( k=_knotAreaHistogram->interval(0).min() ; k<=_knotAreaHistogram->interval(0).max() ; ++k )
 						{
-							biggestComponents = ConnexComponentExtractor::extractConnexComponents( _componentBillon->slice(k), qPow(_ui->_spinMinimalSizeOf2DConnexComponents->value(),2), 0 );
+							biggestComponents = ConnexComponentExtractor::extractConnexComponents( _knotBillon->slice(k), qPow(_ui->_spinMinimalSizeOf2DConnexComponents->value(),2), 0 );
 							if ( useOldMethod )
 							{
-								contourCurve.constructCurveOldMethod( *biggestComponents, _componentBillon->pithCoord(k), 0, _ui->_spinContourSmoothingRadius->value() );
+								contourCurve.constructCurveOldMethod( *biggestComponents, _knotBillon->pithCoord(k), 0, _ui->_spinContourSmoothingRadius->value() );
 							}
 							else
 							{
-								contourCurve.constructCurve( *biggestComponents, _componentBillon->pithCoord(k), 0, _ui->_spinBlurredSegmentsThickness->value(), _ui->_spinContourSmoothingRadius->value() );
+								contourCurve.constructCurve( *biggestComponents, _knotBillon->pithCoord(k), 0, _ui->_spinBlurredSegmentsThickness->value(), _ui->_spinContourSmoothingRadius->value() );
 							}
 							contourCurve.writeContourContentInSDP(stream,k);
 							delete biggestComponents;

@@ -122,13 +122,6 @@ void PithExtractor::process( Billon &billon ) const
 
 	// applique la coorection a la moelle
 	correctPith(billon._pith, maxStandList, houghStandThreshold);
-
-	// Positionnement de la moelle dans l'espace global
-	iCoord2D billonPos(billon.xPos(),billon.yPos());
-	for(int i=0; i<depth; i++)
-	{
-		billon._pith[i] += billonPos;
-	}
 }
 
 /******************************************************************
@@ -144,7 +137,7 @@ iCoord2D PithExtractor::transHough(const Slice &slice, int width, int height, in
 	orientation = 0;
 	{ // bloc de limitation de vie de la variable voisinage
 		// attention x represente les colonne et y les lignes
-		const Slice voisinage = slice.submat( *y, *x, (uint)( (*y)+height-1 ), (uint)( (*x)+width-1 ) );
+		const Slice &voisinage = slice.submat( *y, *x, (uint)( (*y)+height-1 ), (uint)( (*x)+width-1 ) );
 		cont = contour(voisinage, &orientation);
 	}
 	tabaccu = new Slice(width, height);

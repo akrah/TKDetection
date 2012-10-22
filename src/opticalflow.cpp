@@ -1,6 +1,6 @@
 #include "inc/opticalflow.h"
 
-#include "def/def_billon.h"
+#include "inc/billon.h"
 
 #include <QVector>
 #include <QVector2D>
@@ -11,22 +11,22 @@
 namespace OpticalFlow {
 
 	namespace {
-		void computePartialDerivatives( const arma::icube &cube, const int &k, PartialDerivatives &E );
+		void computePartialDerivatives( const Billon &billon, const int &k, PartialDerivatives &E );
 		void computeLaplacian( const VectorsField &flow, VectorsField &laplacian );
 	}
 
 	// Donne le champ de vecteurs associé (sauf la dernière ligne et la dernière colonne)
-	VectorsField * compute( const arma::icube &cube, const int &k, const qreal &alpha, const qreal &epsilon, const int &maxIter )
+	VectorsField * compute( const Billon &billon, const int &k, const qreal &alpha, const qreal &epsilon, const int &maxIter )
 	{
 		VectorsField * flow = 0;
-		if ( k>=0 && k<static_cast<int>(cube.n_slices)-1 ) {
-			const int width = cube.n_cols-1;
-			const int height = cube.n_rows-1;
+		if ( k>=0 && k<static_cast<int>(billon.n_slices)-1 ) {
+			const int width = billon.n_cols-1;
+			const int height = billon.n_rows-1;
 			if ( width>2 && height>2 ) {
 				flow = new VectorsField( height+1, QVector<QVector2D>( width+1 ) );
 
 				PartialDerivatives E( height, QVector<QVector3D>( width )  );
-				computePartialDerivatives( cube, k, E );
+				computePartialDerivatives( billon, k, E );
 
 				VectorsField laplacian( height+1, QVector<QVector2D>( width+1 ) );
 				int n = 0;
@@ -63,9 +63,9 @@ namespace OpticalFlow {
 	namespace {
 		// Donne les dérivées partielles de la tranche K saur pour la dernière ligne et la dernière colonne
 		inline
-		void computePartialDerivatives( const arma::icube &cube, const int &k, PartialDerivatives &E ) {
-			const Slice &sliceK = cube.slice(k);
-			const Slice &sliceK1 = cube.slice(k+1);
+		void computePartialDerivatives( const Billon &billon, const int &k, PartialDerivatives &E ) {
+			const Slice &sliceK = billon.slice(k);
+			const Slice &sliceK1 = billon.slice(k+1);
 			const int width = sliceK.n_cols-1;
 			const int height = sliceK.n_rows-1;
 			qreal Eijk, Eijk1, Eij1k, Eij1k1, Ei1jk, Ei1jk1, Ei1j1k, Ei1j1k1;

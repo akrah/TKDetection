@@ -19,7 +19,6 @@ public:
 	const QVector<iCoord2D> &mainDominantPoints() const;
 	int indexOfMainPoint( const int &number ) const;
 	const QVector<iCoord2D> &mainSupportPoints() const;
-	int volumeContourContent() const;
 
 	void constructCurve( const Slice &slice, const iCoord2D &sliceCenter, const int &intensityThreshold, const int &blurredSegmentThickness, const int &smoothingRadius, const iCoord2D &startPoint = iCoord2D(-1,-1) );
 	void constructCurveOldMethod( const Slice &slice, const iCoord2D &sliceCenter, const int &intensityThreshold, const int &smoothingRadius, const iCoord2D &startPoint = iCoord2D(-1,-1) );

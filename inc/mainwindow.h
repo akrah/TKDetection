@@ -89,8 +89,8 @@ private:
 	Ui::MainWindow *_ui;
 
 	Billon *_billon;
-	Billon *_sectorBillon;
 	Billon *_componentBillon;
+	Billon *_knotBillon;
 
 	QImage _mainPix;
 	SliceZoomer _sliceZoomer;

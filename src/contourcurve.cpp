@@ -40,20 +40,6 @@ const QVector<iCoord2D> &ContourCurve::mainSupportPoints() const
 	return _datasMainSupportPoints;
 }
 
-int ContourCurve::volumeContourContent() const
-{
-	uint i, j, volume;
-	volume = 0;
-	for ( j=0 ; j<_component.n_rows ; ++j )
-	{
-		for ( i=0 ; i<_component.n_cols ; ++i )
-		{
-			if (_component.at(j,i)) volume++;
-		}
-	}
-	return volume;
-}
-
 void ContourCurve::constructCurve( const Slice &slice, const iCoord2D &sliceCenter, const int &intensityThreshold, const int &blurredSegmentThickness, const int &smoothingRadius, const iCoord2D &startPoint )
 {
 	_datasOriginalContourPoints.clear();
@@ -205,7 +191,9 @@ void ContourCurve::constructCurve( const Slice &slice, const iCoord2D &sliceCent
 
 	const int width = slice.n_cols;
 	const int height = slice.n_rows;
-	_component.resize(height,width);
+
+	_component = slice;
+	//_component.resize(height,width);
 	_component.fill(0);
 
 	const iCoord2D &mainPoint1 = _datasMainDominantPoints[0];

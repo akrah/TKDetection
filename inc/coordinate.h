@@ -87,6 +87,9 @@ struct coord3d
 };
 
 template <typename T>
+inline const coord3d<T> operator +( const coord3d<T> & first, const coord3d<T> & other ) { return coord3d<T>(first.x+other.x,first.y+other.y,first.z+other.z); }
+
+template <typename T>
 std::ostream & operator<< ( std::ostream &flux , const coord3d<T> & coord )
 {
 	coord.print(flux);
