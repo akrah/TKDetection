@@ -29,6 +29,10 @@ public:
 
 private:
 	void smoothCurve( QVector<iCoord2D> &contour, int smoothingRadius = 5 ) const;
+	void extractContourPointsAndDominantPoints( const Slice &slice, const iCoord2D &sliceCenter, const int &intensityThreshold, const int &blurredSegmentThickness, const int &smoothingRadius, const iCoord2D &startPoint );
+	void computeMainDominantPoints( const iCoord2D &sliceCenter );
+	void computeContourPolygons( const Slice &slice );
+	void updateSlice( const Slice &slice, const iCoord2D &sliceCenter, const int &intensityThreshold );
 
 private:
 	QVector<iCoord2D> _datasContourPoints;
@@ -37,6 +41,9 @@ private:
 	QVector<iCoord2D> _datasMainDominantPoints;
 	QVector<int> _datasIndexMainDominantPoints;
 	QVector<iCoord2D> _datasMainSupportPoints;
+
+	QPolygon _contourPolygonBottom;
+	QPolygon _contourPolygonTop;
 
 	Slice _component;
 };
