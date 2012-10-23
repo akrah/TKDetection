@@ -5,7 +5,7 @@
 #include "inc/billon.h"
 #include "inc/billonalgorithms.h"
 #include "inc/connexcomponentextractor.h"
-#include "inc/contourcurve.h"
+#include "inc/contourcurveslice.h"
 #include "inc/datexport.h"
 #include "inc/dicomreader.h"
 #include "inc/knotareahistogram.h"
@@ -20,6 +20,7 @@
 #include "inc/plotsectorhistogram.h"
 #include "inc/plotslicehistogram.h"
 #include "inc/sectorhistogram.h"
+#include "inc/slicealgorithm.h"
 #include "inc/slicehistogram.h"
 #include "inc/sliceview.h"
 #include "inc/v3dexport.h"
@@ -39,7 +40,7 @@
 #include <qwt_round_scale_draw.h>
 
 MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::MainWindow), _billon(0), _componentBillon(0), _knotBillon(0),
-	_sliceView(new SliceView()), _contourCurve(new ContourCurve()), _sliceHistogram(new SliceHistogram()), _plotSliceHistogram(new PlotSliceHistogram()),
+	_sliceView(new SliceView()), _sliceHistogram(new SliceHistogram()), _plotSliceHistogram(new PlotSliceHistogram()),
 	_pieChart(new PieChart(360)), _sectorHistogram(new SectorHistogram()), _plotSectorHistogram(new PlotSectorHistogram()), _knotAreaHistogram(new KnotAreaHistogram()),
 	_plotKnotAreaHistogram(new PlotKnotAreaHistogram()), _currentSlice(0), _currentMaximum(0), _currentSector(0)
 {
@@ -198,7 +199,6 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 
 MainWindow::~MainWindow()
 {
-	delete _contourCurve;
 	delete _plotSectorHistogram;
 	delete _sectorHistogram;
 	delete _pieChart;
@@ -305,7 +305,8 @@ void MainWindow::drawSlice()
 					{
 						const int width = _componentBillon->n_cols;
 						const int height = _componentBillon->n_rows;
-						const int threshold = _ui->_spinSectorThresholding->value();
+						//const int threshold = _ui->_spinSectorThresholding->value();
+						const int threshold = _componentBillon->minValue();
 
 						const Slice &sectorSlice = _componentBillon->slice(_currentSlice-_componentBillon->zPos());
 
@@ -351,9 +352,11 @@ void MainWindow::drawSlice()
 						}
 						painter.end();
 
-						_contourCurve->constructCurve( *sectorSlice, _billon->pithCoord(_currentSlice), 0, _ui->_spinBlurredSegmentsThickness->value(), _ui->_spinContourSmoothingRadius->value() );
-						_contourCurve->drawRestrictedComponent(_mainPix);
-						_contourCurve->draw(_mainPix);
+						ContourCurveSlice contourCurve(*sectorSlice);
+						Slice resultSlice;
+						contourCurve.compute( resultSlice, _billon->pithCoord(_currentSlice), 0, _ui->_spinBlurredSegmentsThickness->value(), _ui->_spinContourSmoothingRadius->value() );
+						SliceAlgorithm::draw( resultSlice, _mainPix, 0 );
+						contourCurve.draw(_mainPix);
 
 						delete sectorSlice;
 					}
@@ -448,7 +451,7 @@ void MainWindow::updatePith()
 	{
 		PithExtractor::instance().process(*_billon);
 	}
-	_ui->_checkRadiusAroundPith->setText( QString::number(static_cast<int>(BillonAlgorithms::getRestrictedAreaMeansRadius(*_billon,20,_ui->_spinMinIntensity->value())*0.75)) );
+	_ui->_checkRadiusAroundPith->setText( QString::number(static_cast<int>(BillonAlgorithms::restrictedAreaMeansRadius(*_billon,20,_ui->_spinMinIntensity->value())*0.75)) );
 	drawSlice();
 	updateSliceHistogram();
 }
@@ -1043,13 +1046,13 @@ void MainWindow::exportCurrentKnot()
 
 				QDataStream dstream(&file);
 
-				Slice *biggestComponents;
-				ContourCurve contourCurve;
+				Slice *biggestComponents, resultSlice;
 				for ( uint k=_knotAreaHistogram->interval(0).min() ; k<=_knotAreaHistogram->interval(0).max() ; ++k )
 				{
 					biggestComponents = ConnexComponentExtractor::extractConnexComponents( _knotBillon->slice(k), qPow(_ui->_spinMinimalSizeOf2DConnexComponents->value(),2), 0 );
-					contourCurve.constructCurve( *biggestComponents, _knotBillon->pithCoord(k), 0, _ui->_spinBlurredSegmentsThickness->value(), _ui->_spinContourSmoothingRadius->value() );
-					contourCurve.writeContourContentInPgm3D(dstream);
+					ContourCurveSlice contourCurve(*biggestComponents);
+					contourCurve.compute( resultSlice, _knotBillon->pithCoord(k), 0, _ui->_spinBlurredSegmentsThickness->value(), _ui->_spinContourSmoothingRadius->value() );
+					SliceAlgorithm::writeInPgm3D( resultSlice, dstream );
 					delete biggestComponents;
 					biggestComponents = 0;
 				}
@@ -1095,13 +1098,13 @@ void MainWindow::exportCurrentKnotToSdp()
 			QTextStream stream(&file);
 			stream << "#SDP (Sequence of Discrete Points)" << endl;
 
-			Slice *biggestComponents;
-			ContourCurve contourCurve;
+			Slice *biggestComponents, resultSlice;
 			for ( uint k=_knotAreaHistogram->interval(0).min() ; k<=_knotAreaHistogram->interval(0).max() ; ++k )
 			{
 				biggestComponents = ConnexComponentExtractor::extractConnexComponents( _knotBillon->slice(k), qPow(_ui->_spinMinimalSizeOf2DConnexComponents->value(),2), 0 );
-				contourCurve.constructCurve( *biggestComponents, _knotBillon->pithCoord(k), 0, _ui->_spinBlurredSegmentsThickness->value(), _ui->_spinContourSmoothingRadius->value() );
-				contourCurve.writeContourContentInSDP(stream,k);
+				ContourCurveSlice contourCurve(*biggestComponents);
+				contourCurve.compute( resultSlice, _knotBillon->pithCoord(k), 0, _ui->_spinBlurredSegmentsThickness->value(), _ui->_spinContourSmoothingRadius->value() );
+				SliceAlgorithm::writeInSDP( resultSlice, stream, k, 0 );
 				delete biggestComponents;
 				biggestComponents = 0;
 			}
@@ -1131,8 +1134,7 @@ void MainWindow::exportKnotsOfCurrentKnotAreaToSdp()
 			stream << "#SDP (Sequence of Discrete Points)" << endl;
 
 			const bool useOldMethod = _ui->_checkExportOldMethod->isChecked();
-			Slice *biggestComponents;
-			ContourCurve contourCurve;
+			Slice *biggestComponents, resultSlice;
 			int sectorIndex;
 			uint k;
 
@@ -1144,15 +1146,10 @@ void MainWindow::exportKnotsOfCurrentKnotAreaToSdp()
 					for ( k=_knotAreaHistogram->interval(0).min() ; k<=_knotAreaHistogram->interval(0).max() ; ++k )
 					{
 						biggestComponents = ConnexComponentExtractor::extractConnexComponents( _knotBillon->slice(k), qPow(_ui->_spinMinimalSizeOf2DConnexComponents->value(),2), 0 );
-						if ( useOldMethod )
-						{
-							contourCurve.constructCurveOldMethod( *biggestComponents, _knotBillon->pithCoord(k), 0, _ui->_spinContourSmoothingRadius->value() );
-						}
-						else
-						{
-							contourCurve.constructCurve( *biggestComponents, _knotBillon->pithCoord(k), 0, _ui->_spinBlurredSegmentsThickness->value(), _ui->_spinContourSmoothingRadius->value() );
-						}
-						contourCurve.writeContourContentInSDP(stream,k);
+						ContourCurveSlice contourCurve(*biggestComponents);
+						if ( useOldMethod )	contourCurve.computeOldMethod( resultSlice, _knotBillon->pithCoord(k), 0, _ui->_spinContourSmoothingRadius->value() );
+						else contourCurve.compute( resultSlice, _knotBillon->pithCoord(k), 0, _ui->_spinBlurredSegmentsThickness->value(), _ui->_spinContourSmoothingRadius->value() );
+						SliceAlgorithm::writeInSDP( resultSlice, stream, k, 0 );
 						delete biggestComponents;
 						biggestComponents = 0;
 					}
@@ -1184,8 +1181,7 @@ void MainWindow::exportAllKnotsOfBillonToSdp()
 			stream << "#SDP (Sequence of Discrete Points)" << endl;
 
 			const bool useOldMethod = _ui->_checkExportOldMethod->isChecked();
-			Slice *biggestComponents;
-			ContourCurve contourCurve;
+			Slice *biggestComponents, resultSlice;
 			int intervalIndex, sectorIndex;
 			uint k;
 
@@ -1200,15 +1196,10 @@ void MainWindow::exportAllKnotsOfBillonToSdp()
 						for ( k=_knotAreaHistogram->interval(0).min() ; k<=_knotAreaHistogram->interval(0).max() ; ++k )
 						{
 							biggestComponents = ConnexComponentExtractor::extractConnexComponents( _knotBillon->slice(k), qPow(_ui->_spinMinimalSizeOf2DConnexComponents->value(),2), 0 );
-							if ( useOldMethod )
-							{
-								contourCurve.constructCurveOldMethod( *biggestComponents, _knotBillon->pithCoord(k), 0, _ui->_spinContourSmoothingRadius->value() );
-							}
-							else
-							{
-								contourCurve.constructCurve( *biggestComponents, _knotBillon->pithCoord(k), 0, _ui->_spinBlurredSegmentsThickness->value(), _ui->_spinContourSmoothingRadius->value() );
-							}
-							contourCurve.writeContourContentInSDP(stream,k);
+							ContourCurveSlice contourCurve(*biggestComponents);
+							if ( useOldMethod ) contourCurve.computeOldMethod( resultSlice, _knotBillon->pithCoord(k), 0, _ui->_spinContourSmoothingRadius->value() );
+							else contourCurve.compute( resultSlice, _knotBillon->pithCoord(k), 0, _ui->_spinBlurredSegmentsThickness->value(), _ui->_spinContourSmoothingRadius->value() );
+							SliceAlgorithm::writeInSDP( resultSlice, stream, k, 0 );
 							delete biggestComponents;
 							biggestComponents = 0;
 						}

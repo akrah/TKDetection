@@ -1,4 +1,4 @@
-#include "inc/contourcurve.h"
+#include "inc/contourcurveslice.h"
 
 #include "inc/billon.h"
 #include "inc/billonalgorithms.h"
@@ -7,11 +7,7 @@
 #include <QTemporaryFile>
 #include <QPainter>
 
-ContourCurve::ContourCurve()
-{
-}
-
-ContourCurve::~ContourCurve()
+ContourCurveSlice::ContourCurveSlice( const Slice &slice ) : _slice(slice)
 {
 }
 
@@ -19,27 +15,27 @@ ContourCurve::~ContourCurve()
  * Public getters
  **********************************/
 
-const QVector<iCoord2D> &ContourCurve::contourPoints() const
+const QVector<iCoord2D> &ContourCurveSlice::contourPoints() const
 {
 	return _datasContourPoints;
 }
 
-const QVector<iCoord2D> &ContourCurve::dominantPoints() const
+const QVector<iCoord2D> &ContourCurveSlice::dominantPoints() const
 {
 	return _datasDominantPoints;
 }
 
-const QVector<iCoord2D> &ContourCurve::mainDominantPoints() const
+const QVector<iCoord2D> &ContourCurveSlice::mainDominantPoints() const
 {
 	return _datasMainDominantPoints;
 }
 
-int ContourCurve::indexOfMainPoint( const int &number ) const
+int ContourCurveSlice::indexOfMainPoint( const uint &number ) const
 {
-	return number>-1&&number<2 ? _datasIndexMainDominantPoints[number] : -1;
+	return number<2 ? _datasIndexMainDominantPoints[number] : -1;
 }
 
-const QVector<iCoord2D> &ContourCurve::mainSupportPoints() const
+const QVector<iCoord2D> &ContourCurveSlice::mainSupportPoints() const
 {
 	return _datasMainSupportPoints;
 }
@@ -48,26 +44,26 @@ const QVector<iCoord2D> &ContourCurve::mainSupportPoints() const
  * Public setters
  **********************************/
 
-void ContourCurve::constructCurve( const Slice &slice, const iCoord2D &sliceCenter, const int &intensityThreshold, const int &blurredSegmentThickness, const int &smoothingRadius, const iCoord2D &startPoint )
+void ContourCurveSlice::compute( Slice &resultSlice, const iCoord2D &sliceCenter, const int &intensityThreshold, const int &blurredSegmentThickness, const int &smoothingRadius, const iCoord2D &startPoint )
 {
-	extractContourPointsAndDominantPoints( slice, sliceCenter, intensityThreshold, blurredSegmentThickness, smoothingRadius, startPoint );
+	extractContourPointsAndDominantPoints( sliceCenter, intensityThreshold, blurredSegmentThickness, smoothingRadius, startPoint );
 
 	if ( _datasDominantPoints.size() > 3 )
 	{
 		computeMainDominantPoints(sliceCenter);
 	}
 
-	computeContourPolygons( slice );
-	updateSlice( slice, sliceCenter, intensityThreshold );
+	computeContourPolygons();
+	updateSlice( resultSlice, sliceCenter, intensityThreshold );
 }
 
-void ContourCurve::constructCurveOldMethod( const Slice &slice, const iCoord2D &sliceCenter, const int &intensityThreshold, const int &smoothingRadius, const iCoord2D &startPoint )
+void ContourCurveSlice::computeOldMethod( Slice &resultSlice, const iCoord2D &sliceCenter, const int &intensityThreshold, const int &smoothingRadius, const iCoord2D &startPoint )
 {
 	_datasOriginalContourPoints.clear();
-	_datasOriginalContourPoints = BillonAlgorithms::extractContour( slice, sliceCenter, intensityThreshold, startPoint );
+	_datasOriginalContourPoints = BillonAlgorithms::extractContour( _slice, sliceCenter, intensityThreshold, startPoint );
 	_datasContourPoints.clear();
 	_datasContourPoints = _datasOriginalContourPoints;
-	smoothCurve(_datasContourPoints,smoothingRadius);
+	smoothCurve( smoothingRadius );
 
 	_datasDominantPoints.clear();
 
@@ -76,10 +72,10 @@ void ContourCurve::constructCurveOldMethod( const Slice &slice, const iCoord2D &
 	_datasIndexMainDominantPoints.fill(-1,2);
 	_datasMainSupportPoints.fill(iCoord2D(-1,-1),2);
 
-	const int width = slice.n_cols;
-	const int height = slice.n_rows;
-	_component.resize(height,width);
-	_component.fill(0);
+	const int width = _slice.n_cols;
+	const int height = _slice.n_rows;
+	resultSlice.resize(height,width);
+	resultSlice.fill(0);
 
 	const int nbOriginalPointsContour = _datasOriginalContourPoints.size();
 
@@ -103,15 +99,15 @@ void ContourCurve::constructCurveOldMethod( const Slice &slice, const iCoord2D &
 	{
 		for ( i = minXIndex ; i<maxXIndex ; ++i )
 		{
-			if ( slice.at(j,i) > intensityThreshold && contourPolygonBottom.containsPoint(QPoint(i,j),Qt::OddEvenFill) )
+			if ( _slice.at(j,i) > intensityThreshold && contourPolygonBottom.containsPoint(QPoint(i,j),Qt::OddEvenFill) )
 			{
-				_component.at(j,i) = 1;
+				resultSlice.at(j,i) = 1;
 			}
 		}
 	}
 }
 
-void ContourCurve::draw( QImage &image ) const
+void ContourCurveSlice::draw( QImage &image ) const
 {
 	QPainter painter(&image);
 	int i;
@@ -186,65 +182,22 @@ void ContourCurve::draw( QImage &image ) const
 	}
 }
 
-
-void ContourCurve::drawRestrictedComponent( QImage &image ) const
-{
-	QPainter painter(&image);
-	painter.setPen(QColor(255,255,255,127));
-
-	uint i, j;
-	for ( j=0 ; j<_component.n_rows ; ++j )
-	{
-		for ( i=0 ; i<_component.n_cols ; ++i )
-		{
-			if ( _component.at(j,i) ) painter.drawPoint(i,j);
-		}
-	}
-}
-
-void ContourCurve::writeContourContentInPgm3D( QDataStream &stream ) const
-{
-	uint i, j;
-	for ( j=0 ; j<_component.n_rows ; ++j )
-	{
-		for ( i=0 ; i<_component.n_cols ; ++i )
-		{
-			stream << static_cast<qint16>(_component.at(j,i));
-		}
-	}
-}
-
-void ContourCurve::writeContourContentInSDP( QTextStream &stream, const uint &sliceNum ) const
-{
-	uint i, j;
-	for ( j=0 ; j<_component.n_rows ; ++j )
-	{
-		for ( i=0 ; i<_component.n_cols ; ++i )
-		{
-			if ( _component(j,i) )
-			{
-				stream << i << ' ' << j << ' ' << sliceNum  << endl;
-			}
-		}
-	}
-}
-
 /**********************************
  * Private setters
  **********************************/
 
-void ContourCurve::smoothCurve( QVector<iCoord2D> &contour, int smoothingRadius ) const
+void ContourCurveSlice::smoothCurve( int smoothingRadius )
 {
 	if ( smoothingRadius > 0 )
 	{
-		const int nbPoints = contour.size();
+		const int nbPoints = _datasContourPoints.size();
 		smoothingRadius = qMin(smoothingRadius,nbPoints);
 		const int smoothingDiameter = 2*smoothingRadius+1;
 		if ( nbPoints > smoothingDiameter )
 		{
 			QVector<iCoord2D> datasContourForSmoothing;
 			datasContourForSmoothing.reserve(nbPoints+2*smoothingRadius);
-			datasContourForSmoothing << contour.mid(nbPoints-smoothingRadius) <<  contour << contour.mid(0,smoothingRadius);
+			datasContourForSmoothing << _datasContourPoints.mid(nbPoints-smoothingRadius) <<  _datasContourPoints << _datasContourPoints.mid(0,smoothingRadius);
 
 			int i, smoothingValueX, smoothingValueY;
 			smoothingValueX = smoothingValueY = 0;
@@ -254,28 +207,28 @@ void ContourCurve::smoothCurve( QVector<iCoord2D> &contour, int smoothingRadius 
 				smoothingValueX += datasContourForSmoothing[i].x;
 				smoothingValueY += datasContourForSmoothing[i].y;
 			}
-			contour[0].x = smoothingValueX / static_cast<qreal>(smoothingDiameter);
-			contour[0].y = smoothingValueY / static_cast<qreal>(smoothingDiameter);
+			_datasContourPoints[0].x = smoothingValueX / static_cast<qreal>(smoothingDiameter);
+			_datasContourPoints[0].y = smoothingValueY / static_cast<qreal>(smoothingDiameter);
 			for ( int i=1 ; i<nbPoints ; ++i )
 			{
 				smoothingValueX = smoothingValueX - datasContourForSmoothing[i-1].x + datasContourForSmoothing[i+smoothingDiameter-1].x;
 				smoothingValueY = smoothingValueY - datasContourForSmoothing[i-1].y + datasContourForSmoothing[i+smoothingDiameter-1].y;
-				contour[i].x = smoothingValueX / static_cast<qreal>(smoothingDiameter);
-				contour[i].y = smoothingValueY / static_cast<qreal>(smoothingDiameter);
+				_datasContourPoints[i].x = smoothingValueX / static_cast<qreal>(smoothingDiameter);
+				_datasContourPoints[i].y = smoothingValueY / static_cast<qreal>(smoothingDiameter);
 			}
 		}
 	}
 }
 
-void ContourCurve::extractContourPointsAndDominantPoints( const Slice &slice, const iCoord2D &sliceCenter, const int &intensityThreshold, const int &blurredSegmentThickness, const int &smoothingRadius, const iCoord2D &startPoint )
+void ContourCurveSlice::extractContourPointsAndDominantPoints( const iCoord2D &sliceCenter, const int &intensityThreshold, const int &blurredSegmentThickness, const int &smoothingRadius, const iCoord2D &startPoint )
 {
 	_datasOriginalContourPoints.clear();
 	_datasContourPoints.clear();
 	_datasDominantPoints.clear();
 
-	_datasOriginalContourPoints = BillonAlgorithms::extractContour( slice, sliceCenter, intensityThreshold, startPoint );
+	_datasOriginalContourPoints = BillonAlgorithms::extractContour( _slice, sliceCenter, intensityThreshold, startPoint );
 	_datasContourPoints = _datasOriginalContourPoints;
-	smoothCurve(_datasContourPoints,smoothingRadius);
+	smoothCurve( smoothingRadius );
 
 	int nbPoints = _datasContourPoints.size();
 
@@ -327,7 +280,7 @@ void ContourCurve::extractContourPointsAndDominantPoints( const Slice &slice, co
 	}
 }
 
-void ContourCurve::computeMainDominantPoints( const iCoord2D &sliceCenter )
+void ContourCurveSlice::computeMainDominantPoints( const iCoord2D &sliceCenter )
 {
 	_datasMainDominantPoints.clear();
 	_datasMainDominantPoints.fill(iCoord2D(-1,-1),2);
@@ -420,13 +373,13 @@ void ContourCurve::computeMainDominantPoints( const iCoord2D &sliceCenter )
 	_datasDominantPoints.remove(nbDominantPoints-1);
 }
 
-void ContourCurve::computeContourPolygons( const Slice &slice )
+void ContourCurveSlice::computeContourPolygons()
 {
 	_contourPolygonBottom.clear();
 	_contourPolygonTop.clear();
 
-	const int width = slice.n_cols;
-	const int height = slice.n_rows;
+	const int width = _slice.n_cols;
+	const int height = _slice.n_rows;
 	const int nbOriginalPointsContour = _datasOriginalContourPoints.size();
 
 	const iCoord2D &mainPoint1 = _datasMainDominantPoints[0];
@@ -506,14 +459,14 @@ void ContourCurve::computeContourPolygons( const Slice &slice )
 	}
 }
 
-void ContourCurve::updateSlice( const Slice &slice, const iCoord2D &sliceCenter, const int &intensityThreshold )
+void ContourCurveSlice::updateSlice( Slice &resultSlice, const iCoord2D &sliceCenter, const int &intensityThreshold )
 {
-	const int width = slice.n_cols;
-	const int height = slice.n_rows;
+	const int width = _slice.n_cols;
+	const int height = _slice.n_rows;
 	const int nbOriginalPointsContour = _datasOriginalContourPoints.size();
 
-	_component = slice;
-	_component.fill(0);
+	resultSlice = _slice;
+	resultSlice.fill(0);
 
 	const iCoord2D &mainPoint1 = _datasMainDominantPoints[0];
 	const iCoord2D &mainPoint2 = _datasMainDominantPoints[1];
@@ -548,7 +501,7 @@ void ContourCurve::updateSlice( const Slice &slice, const iCoord2D &sliceCenter,
 		{
 			for ( i=0 ; i<width ; ++i )
 			{
-				if ( slice.at(j,i) > intensityThreshold &&
+				if ( _slice.at(j,i) > intensityThreshold &&
 					 ( _contourPolygonBottom.containsPoint(QPoint(i,j),Qt::OddEvenFill) ||
 					   (
 						   ((daMain1Main2*i+dbMain1Main2*j <= dcMain1Main2) == supToMain1Main2) &&
@@ -559,7 +512,7 @@ void ContourCurve::updateSlice( const Slice &slice, const iCoord2D &sliceCenter,
 					   )
 					 )
 				{
-					_component.at(j,i) = 1;
+					resultSlice.at(j,i) = 1;
 				}
 			}
 		}
@@ -576,11 +529,11 @@ void ContourCurve::updateSlice( const Slice &slice, const iCoord2D &sliceCenter,
 			{
 				for ( i=0 ; i<width ; ++i )
 				{
-					if ( slice.at(j,i) > intensityThreshold
+					if ( _slice.at(j,i) > intensityThreshold
 						 && ((daMain1Support1*i+dbMain1Support1*j > dcMain1Support1) == rightToMain1Support1)
 						 && _contourPolygonBottom.containsPoint(QPoint(i,j),Qt::OddEvenFill) )
 					{
-						_component.at(j,i) = 1;
+						resultSlice.at(j,i) = 1;
 					}
 				}
 			}
@@ -595,11 +548,11 @@ void ContourCurve::updateSlice( const Slice &slice, const iCoord2D &sliceCenter,
 			{
 				for ( i=0 ; i<width ; ++i )
 				{
-					if ( slice.at(j,i) > intensityThreshold
+					if ( _slice.at(j,i) > intensityThreshold
 						 && ((daMain2Support2*i+dbMain2Support2*j > dcMain2Support2) == leftToMain2Support2)
 						 && _contourPolygonBottom.containsPoint(QPoint(i,j),Qt::OddEvenFill) )
 					{
-						_component.at(j,i) = 1;
+						resultSlice.at(j,i) = 1;
 					}
 				}
 			}
@@ -611,9 +564,9 @@ void ContourCurve::updateSlice( const Slice &slice, const iCoord2D &sliceCenter,
 			{
 				for ( i=0 ; i<width ; ++i )
 				{
-					if ( slice.at(j,i) > intensityThreshold && _contourPolygonBottom.containsPoint(QPoint(i,j),Qt::OddEvenFill) )
+					if ( _slice.at(j,i) > intensityThreshold && _contourPolygonBottom.containsPoint(QPoint(i,j),Qt::OddEvenFill) )
 					{
-						_component.at(j,i) = 1;
+						resultSlice.at(j,i) = 1;
 					}
 				}
 			}

@@ -4,6 +4,7 @@
 #include "pith.h"
 #include "define.h"
 #include "coordinate.h"
+#include "interval.h"
 
 #include <QDebug>
 #include <armadillo>

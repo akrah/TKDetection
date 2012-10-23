@@ -12,7 +12,6 @@ namespace Ui
 	class MainWindow;
 }
 
-class ContourCurve;
 class KnotAreaHistogram;
 class PieChart;
 class PlotKnotAreaHistogram;
@@ -96,7 +95,6 @@ private:
 	SliceZoomer _sliceZoomer;
 
 	SliceView *_sliceView;
-	ContourCurve *_contourCurve;
 
 	SliceHistogram *_sliceHistogram;
 	PlotSliceHistogram *_plotSliceHistogram;

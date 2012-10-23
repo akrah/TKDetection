@@ -101,7 +101,7 @@ namespace BillonAlgorithms
 		}
 	}
 
-	QVector<iCoord2D> extractContour( const Slice &slice, const iCoord2D & sliceCenter, int intensityThreshold, iCoord2D startPoint )
+	QVector<iCoord2D> extractContour( const Slice &slice, const iCoord2D & sliceCenter, const int &intensityThreshold, iCoord2D startPoint )
 	{
 		QVector<iCoord2D> contourPoints;
 		if ( startPoint == iCoord2D(-1,-1) )
@@ -138,7 +138,7 @@ namespace BillonAlgorithms
 		return contourPoints;
 	}
 
-	qreal getRestrictedAreaMeansRadius( const Billon &billon, const uint &nbPolygonPoints, int intensityThreshold )
+	qreal restrictedAreaMeansRadius( const Billon &billon, const uint &nbPolygonPoints, const int &intensityThreshold )
 	{
 		Q_ASSERT_X( nbPolygonPoints>0 , "BillonTpl<T>::getRestrictedAreaMeansRadius", "nbPolygonPoints arguments equals to 0 => division by zero" );
 
@@ -181,7 +181,7 @@ namespace BillonAlgorithms
 		return radius;
 	}
 
-	QVector<rCoord2D> getRestrictedAreaVertex( const Billon &billon, const Interval<uint> & sliceInterval, const uint & nbPolygonPoints, const int & intenstyThreshold )
+	QVector<rCoord2D> restrictedAreaVertex( const Billon &billon, const Interval<uint> & sliceInterval, const uint & nbPolygonPoints, const int & intenstyThreshold )
 	{
 		Q_ASSERT_X( nbPolygonPoints>0 , "BillonTpl<T>::getRestrictedAreaVertex", "nbPolygonPoints arguments equals to 0 => division by zero" );
 

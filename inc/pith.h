@@ -1,7 +1,6 @@
 #ifndef MARROW_H
 #define MARROW_H
 
-#include "interval.h"
 #include "def/def_coordinate.h"
 
 #include <QVector>

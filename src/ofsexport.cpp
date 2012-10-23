@@ -125,7 +125,7 @@ namespace OfsExport
 
 	void processRestrictedMesh( const Billon &billon, const Interval<uint> & sliceInterval, const QString &fileName, const uint & resolutionCercle, const int &seuilContour, const bool &normalized, const bool &displayBegEndFaces )
 	{
-		QVector<rCoord2D> vectVertex = BillonAlgorithms::getRestrictedAreaVertex( billon, sliceInterval, resolutionCercle,seuilContour );
+		QVector<rCoord2D> vectVertex = BillonAlgorithms::restrictedAreaVertex( billon, sliceInterval, resolutionCercle,seuilContour );
 		if ( !vectVertex.isEmpty() )
 		{
 			QFile file(fileName);

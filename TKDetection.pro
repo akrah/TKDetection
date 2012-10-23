@@ -36,7 +36,7 @@ macx:OBJECTS_DIR	= .obj
 SOURCES	=	main.cpp \
 			billonalgorithms.cpp \
 			connexcomponentextractor.cpp \
-			contourcurve.cpp \
+			contourcurveslice.cpp \
 			datexport.cpp \
 			dicomreader.cpp \
 			knotareahistogram.cpp \
@@ -58,11 +58,13 @@ SOURCES	=	main.cpp \
 			slicezoomer.cpp \
 			test_intervalshistogram.cpp \
 			v3dexport.cpp \
+    src/slicealgorithm.cpp \
+    src/contourcurvebillon.cpp
 
 HEADERS	=	billon.h \
 			billonalgorithms.h \
 			connexcomponentextractor.h \
-			contourcurve.h \
+			contourcurveslice.h \
 			coordinate.h \
 			datexport.h \
 			define.h \
@@ -91,6 +93,8 @@ HEADERS	=	billon.h \
 			slicezoomer.h \
 			test_intervalshistogram.h \
 			v3dexport.h \
+    inc/slicealgorithm.h \
+    inc/contourcurvebillon.h
 
 FORMS =	mainwindow.ui
 
