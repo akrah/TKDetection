@@ -12,7 +12,7 @@ public:
 	KnotAreaHistogram();
 	virtual ~KnotAreaHistogram();
 
-	void construct( const Billon &billon, const int &minimumSideSizeOfComponent );
+	void construct(const Billon &billon);
 	void computeMaximumsAndIntervals( const uint &comparisonShift, const qreal &comparisonValue );
 };
 

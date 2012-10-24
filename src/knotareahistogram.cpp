@@ -17,20 +17,16 @@ KnotAreaHistogram::~KnotAreaHistogram()
  * Public setters
  **********************************/
 
-void KnotAreaHistogram::construct( const Billon &billon, const int &minimumSideSizeOfComponent )
+void KnotAreaHistogram::construct( const Billon &billon )
 {
 	this->clear();
 	this->resize( billon.n_slices );
 
-	Slice *biggestComponents;
 	iCoord2D nearestPoint;
 	for ( uint i=0 ; i<billon.n_slices ; ++i )
 	{
-		biggestComponents = ConnexComponentExtractor::extractConnexComponents( billon.slice(i), qPow(minimumSideSizeOfComponent,2), billon.minValue() );
-		nearestPoint = BillonAlgorithms::findNearestPointOfThePith( *biggestComponents, billon.pithCoord(i), billon.minValue() );
+		nearestPoint = BillonAlgorithms::findNearestPointOfThePith( billon.slice(i), billon.pithCoord(i), billon.minValue() );
 		(*this)[i] = nearestPoint.euclideanDistance( billon.pithCoord(i) );
-		delete biggestComponents;
-		biggestComponents = 0;
 	}
 }
 

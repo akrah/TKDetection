@@ -11,7 +11,9 @@
 class ContourCurveSlice
 {
 public:
-	ContourCurveSlice( const Slice &slice );
+	ContourCurveSlice( const Slice * slice );
+	ContourCurveSlice( const ContourCurveSlice &contourCurveSlice );
+	~ContourCurveSlice();
 
 	const QVector<iCoord2D> &contourPoints() const;
 	const QVector<iCoord2D> &dominantPoints() const;
@@ -24,6 +26,7 @@ public:
 	void draw( QImage &image ) const;
 
 private:
+	void clear();
 	void smoothCurve( int smoothingRadius );
 	void extractContourPointsAndDominantPoints( const iCoord2D &sliceCenter, const int &intensityThreshold, const int &blurredSegmentThickness, const int &smoothingRadius, const iCoord2D &startPoint );
 	void computeMainDominantPoints( const iCoord2D &sliceCenter );
@@ -31,7 +34,7 @@ private:
 	void updateSlice( Slice &resultSlice, const iCoord2D &sliceCenter, const int &intensityThreshold );
 
 private:
-	const Slice &_slice;
+	const Slice *_slice;
 
 	QVector<iCoord2D> _datasContourPoints;
 	QVector<iCoord2D> _datasOriginalContourPoints;

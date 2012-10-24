@@ -12,6 +12,7 @@ namespace Ui
 	class MainWindow;
 }
 
+class ContourCurveBillon;
 class KnotAreaHistogram;
 class PieChart;
 class PlotKnotAreaHistogram;
@@ -89,7 +90,6 @@ private:
 
 	Billon *_billon;
 	Billon *_componentBillon;
-	Billon *_knotBillon;
 
 	QImage _mainPix;
 	SliceZoomer _sliceZoomer;
@@ -105,6 +105,8 @@ private:
 
 	KnotAreaHistogram *_knotAreaHistogram;
 	PlotKnotAreaHistogram *_plotKnotAreaHistogram;
+
+	ContourCurveBillon *_contourCurveBillon;
 
 	uint _currentSlice;
 	int _currentMaximum;

@@ -35,7 +35,7 @@ namespace ConnexComponentExtractor
 		Slice* tmp;
 
 		//On parcours les tranches 1 par 1
-		for ( unsigned int k=0 ; k<depth ; k++ )
+		for ( unsigned int k=0 ; k<depth ; ++k )
 		{
 			nbLabel = twoPassAlgorithm((*oldSlice),billon.slice(k),(*labels),connexComponentList,k,nbLabel,threshold);
 			tmp = oldSlice;
@@ -61,7 +61,7 @@ namespace ConnexComponentExtractor
 				{
 					components->at((*iterCoords).y,(*iterCoords).x,(*iterCoords).z) = counter;
 				}
-				counter++;
+				++counter;
 			}
 		}
 		qDebug() << QObject::tr("Nombre de composantes = %1").arg(counter-1);
@@ -86,9 +86,9 @@ namespace ConnexComponentExtractor
 		labels.fill(0);
 		nbLabel = 0;
 		//On parcourt une première fois la tranche
-		for ( j=1 ; j<height ; j++)
+		for ( j=1 ; j<height ; ++j)
 		{
-			for ( i=1 ; i<width-1 ; i++)
+			for ( i=1 ; i<width-1 ; ++i)
 			{
 				//Si on a un voxel
 				if ( slice.at(j,i) > threshold )
@@ -103,7 +103,7 @@ namespace ConnexComponentExtractor
 					//Si ses voisins n'ont pas d'étiquette
 					if ( voisinage.isEmpty() )
 					{
-						nbLabel++;
+						++nbLabel;
 						labels.at(j,i) = nbLabel;
 					}
 					//Si ses voisins ont une étiquette
@@ -145,9 +145,9 @@ namespace ConnexComponentExtractor
 			}
 			tableEquiv[iterTable.key()] = value;
 		}
-		for ( j=0 ; j<height ; j++ )
+		for ( j=0 ; j<height ; ++j )
 		{
-			for ( i=0 ; i<width ; i++ )
+			for ( i=0 ; i<width ; ++i )
 			{
 				label = labels.at(j,i);
 				//Si on a un voxel
@@ -177,7 +177,7 @@ namespace ConnexComponentExtractor
 				{
 					bigestComponentsInSlice->at((*iterCoords).y,(*iterCoords).x) = counter;
 				}
-				counter++;
+				++counter;
 			}
 		}
 
@@ -198,9 +198,9 @@ namespace ConnexComponentExtractor
 			bool isOld;
 			labels.fill(0);
 			//On parcourt une première fois la tranche
-			for ( j=1 ; j<height-1 ; j++)
+			for ( j=1 ; j<height-1 ; ++j)
 			{
-				for ( i=1 ; i<width-1 ; i++)
+				for ( i=1 ; i<width-1 ; ++i)
 				{
 					//Si on a un voxel
 					if ( currentSlice.at(j,i) > threshold )
@@ -226,7 +226,7 @@ namespace ConnexComponentExtractor
 						//Si ses voisins n'ont pas d'étiquette
 						if ( voisinage.isEmpty() )
 						{
-							nbLabel++;
+							++nbLabel;
 							labels.at(j,i) = nbLabel;
 						}
 						//Si ses voisins ont une étiquette
@@ -243,7 +243,7 @@ namespace ConnexComponentExtractor
 							isOld = connexComponentList.contains(mini);
 							//Mise à jour de la table d'équivalence pour la face courante
 							//et fusion des liste de sommets si un voxel fusionne des composantes connexes antérieures
-							for ( int ind=0 ; ind<oldStart ; ind++ )
+							for ( int ind=0 ; ind<oldStart ; ++ind )
 							{
 								if ( voisinage[ind] > mini )
 								{
@@ -251,13 +251,12 @@ namespace ConnexComponentExtractor
 									if (isOld && connexComponentList.contains(voisinage[ind]))
 									{
 										connexComponentList[mini].append(connexComponentList.take(voisinage[ind]));
-										//tableEquiv[voisinage[ind]] = mini; EST DEJA FAIT AU DESSUS DU IF
 									}
 								}
 							}
 							if ( isOld )
 							{
-								for ( int ind=oldStart ; ind<voisinage.size() ; ind++ )
+								for ( int ind=oldStart ; ind<voisinage.size() ; ++ind )
 								{
 									if ( voisinage[ind] != mini )
 									{
@@ -281,14 +280,6 @@ namespace ConnexComponentExtractor
 				}
 			}
 			//Résolution des chaines dans la table d'équivalence
-//			QMap<int, int>::ConstIterator iterTable;
-//			for ( iterTable = tableEquiv.constBegin() ; iterTable != tableEquiv.constEnd() ; ++iterTable )
-//			{
-//				if (tableEquiv.contains(iterTable.value()))
-//				{
-//					tableEquiv[iterTable.key()] = tableEquiv[iterTable.value()];
-//				}
-//			}
 			QMap<int, int>::ConstIterator iterTable;
 			int value;
 			for ( iterTable = tableEquiv.constBegin() ; iterTable != tableEquiv.constEnd() ; ++iterTable )
@@ -300,9 +291,9 @@ namespace ConnexComponentExtractor
 				}
 				tableEquiv[iterTable.key()] = value;
 			}
-			for ( j=0 ; j<height ; j++ )
+			for ( j=0 ; j<height ; ++j )
 			{
-				for ( i=0 ; i<width ; i++ )
+				for ( i=0 ; i<width ; ++i )
 				{
 					label = labels.at(j,i);
 					//Si on a un voxel
