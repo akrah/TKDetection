@@ -226,6 +226,8 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *event)
 			const QMouseEvent *mouseEvent = static_cast<const QMouseEvent*>(event);
 			if ( (mouseEvent->button() == Qt::LeftButton) )
 			{
+				iCoord2D pos = iCoord2D(mouseEvent->x(),mouseEvent->y())/_sliceZoomer.factor();
+				qDebug() << "Position (i,j) = " << pos.x << " , " << pos.y << " )";
 				_currentSector = _pieChart->sectorIndexOfAngle( _billon->pithCoord(_currentSlice).angle(iCoord2D(mouseEvent->x(),mouseEvent->y())/_sliceZoomer.factor()) );
 				_plotSectorHistogram->moveCursor(_currentSector);
 				_ui->_plotSectorHistogram->replot();

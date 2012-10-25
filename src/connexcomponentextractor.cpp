@@ -80,7 +80,7 @@ namespace ConnexComponentExtractor
 		QMap<int, int> tableEquiv;
 		QList<int> voisinage;
 		uint j, i;
-		int mini, nbLabel, label;
+		int mini, nbLabel, label, currentEquiv;
 
 		Slice labels(height, width);
 		labels.fill(0);
@@ -122,10 +122,52 @@ namespace ConnexComponentExtractor
 						labels.at(j,i) = mini;
 						for ( iterVoisin = voisinage.constBegin() ; iterVoisin != voisinage.constEnd() ; ++iterVoisin )
 						{
-							if ( (*iterVoisin) != mini )
+							if ( (*iterVoisin) > mini )
 							{
-								if ( mini < *iterVoisin ) tableEquiv[*iterVoisin] = mini;
-								else tableEquiv[mini] = *iterVoisin;
+								if ( tableEquiv.contains(*iterVoisin) )
+								{
+									currentEquiv = tableEquiv[*iterVoisin];
+									if ( mini > currentEquiv )
+									{
+										tableEquiv[*iterVoisin] = mini;
+										while (tableEquiv.contains(mini))
+										{
+											mini = tableEquiv[mini];
+										}
+										if ( currentEquiv < mini )
+										{
+											tableEquiv[mini] = currentEquiv;
+											labels.at(j,i) = currentEquiv;
+										}
+										else if ( currentEquiv > mini )
+										{
+											tableEquiv[currentEquiv] = mini;
+											labels.at(j,i) = mini;
+										}
+									}
+									else if ( mini < currentEquiv )
+									{
+										tableEquiv[*iterVoisin] = currentEquiv;
+										while (tableEquiv.contains(currentEquiv))
+										{
+											currentEquiv = tableEquiv[currentEquiv];
+										}
+										if ( currentEquiv > mini )
+										{
+											tableEquiv[currentEquiv] = mini;
+											labels.at(j,i) = mini;
+										}
+										else if ( currentEquiv < mini )
+										{
+											tableEquiv[mini] = currentEquiv;
+											labels.at(j,i) = currentEquiv;
+										}
+									}
+								}
+								else
+								{
+									tableEquiv[*iterVoisin] = mini;
+								}
 							}
 						}
 					}
