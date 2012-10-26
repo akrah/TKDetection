@@ -6,10 +6,11 @@
 #include "def/def_billon.h"
 
 template<typename T> class Interval;
+class QTextStream;
 
 namespace DatExport
 {
-	void process( const Billon &billon, const Interval<int> &slicesInterval, const Interval<int> &intensityIntervale, const QString &fileName, const int &resolution = 1, const qreal &contrastFactor = 1. );
+	void process( QTextStream &stream, const Billon &billon, const Interval<int> &slicesInterval, const Interval<int> &intensityIntervale, const int &resolution = 1, const qreal &contrastFactor = 1. );
 }
 
 #endif // DATEXPORT_H

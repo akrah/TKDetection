@@ -12,7 +12,6 @@ class ContourCurveSlice
 {
 public:
 	ContourCurveSlice( const Slice * slice );
-	ContourCurveSlice( const ContourCurveSlice &contourCurveSlice );
 	~ContourCurveSlice();
 
 	const QVector<iCoord2D> &contourPoints() const;

@@ -11,13 +11,6 @@ ContourCurveSlice::ContourCurveSlice( const Slice *slice ) : _slice(slice)
 {
 }
 
-ContourCurveSlice::ContourCurveSlice( const ContourCurveSlice &contourCurveSlice ) : _slice(contourCurveSlice._slice),
-	_datasContourPoints(contourCurveSlice._datasContourPoints),	_datasOriginalContourPoints(contourCurveSlice._datasOriginalContourPoints), _datasDominantPoints(contourCurveSlice._datasDominantPoints),
-	_datasMainDominantPoints(contourCurveSlice._datasMainDominantPoints), _datasIndexMainDominantPoints(contourCurveSlice._datasIndexMainDominantPoints), _datasMainSupportPoints(contourCurveSlice._datasMainSupportPoints),
-	_contourPolygonBottom(contourCurveSlice._contourPolygonBottom), _contourPolygonTop(contourCurveSlice._contourPolygonTop)
-{
-}
-
 ContourCurveSlice::~ContourCurveSlice()
 {
 }
@@ -58,18 +51,13 @@ const QVector<iCoord2D> &ContourCurveSlice::mainSupportPoints() const
 void ContourCurveSlice::compute( Slice &resultSlice, const iCoord2D &sliceCenter, const int &intensityThreshold, const int &blurredSegmentThickness, const int &smoothingRadius, const iCoord2D &startPoint )
 {
 	clear();
-//	if ( _slice != 0 )
-//	{
+	if ( _slice != 0 )
+	{
 		extractContourPointsAndDominantPoints( sliceCenter, intensityThreshold, blurredSegmentThickness, smoothingRadius, startPoint );
-
-		if ( _datasDominantPoints.size() > 3 )
-		{
-			computeMainDominantPoints(sliceCenter);
-		}
-
+		computeMainDominantPoints(sliceCenter);
 		computeContourPolygons();
 		updateSlice( resultSlice, sliceCenter, intensityThreshold );
-//	}
+	}
 }
 
 void ContourCurveSlice::computeOldMethod( Slice &resultSlice, const iCoord2D &sliceCenter, const int &intensityThreshold, const int &smoothingRadius, const iCoord2D &startPoint )
@@ -143,7 +131,6 @@ void ContourCurveSlice::draw( QImage &image ) const
 				{
 					painter.drawEllipse(_datasDominantPoints[i].x-2,_datasDominantPoints[i].y-2,4,4);
 				}
-
 
 				const iCoord2D &mainPoint1 = _datasMainDominantPoints[0];
 				const iCoord2D &mainPoint2 = _datasMainDominantPoints[1];
@@ -479,7 +466,6 @@ void ContourCurveSlice::updateSlice( Slice &resultSlice, const iCoord2D &sliceCe
 	const int height = _slice->n_rows;
 	const int nbOriginalPointsContour = _datasOriginalContourPoints.size();
 
-	resultSlice = *_slice;
 	resultSlice.fill(0);
 
 	const iCoord2D &mainPoint1 = _datasMainDominantPoints[0];

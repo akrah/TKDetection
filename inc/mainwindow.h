@@ -63,15 +63,8 @@ private slots:
 	void selectCurrentSectorInterval();
 	void exportToDat();
 	void exportToOfs();
-	void exportToOfsAll();
-	void exportToOfsRestricted();
-	void exportSectorToOfs();
-	void exportAllSectorInAllIntervalsToOfs();
-	void exportHistogramToSep();
+	void exportHistograms();
 	void exportSectorToPgm3D();
-	void exportSliceHistogram();
-	void exportSectorDiagramAndHistogram();
-	void exportKnotIntervalHistogram();
 	void exportContourToSdp();
 	void exportCurrentKnot();
 	void exportCurrentKnotToSdp();

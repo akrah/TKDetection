@@ -181,16 +181,16 @@ namespace BillonAlgorithms
 		return radius;
 	}
 
-	QVector<rCoord2D> restrictedAreaVertex( const Billon &billon, const Interval<uint> & sliceInterval, const uint & nbPolygonPoints, const int & intenstyThreshold )
+	QVector<rCoord2D> restrictedAreaVertex( const Billon &billon, const Interval<uint> & sliceInterval, const uint & nbPolygonVertex, const int & intensityThreshold )
 	{
-		Q_ASSERT_X( nbPolygonPoints>0 , "BillonTpl<T>::getRestrictedAreaVertex", "nbPolygonPoints arguments equals to 0 => division by zero" );
+		Q_ASSERT_X( nbPolygonVertex>0 , "BillonTpl<T>::getRestrictedAreaVertex", "nbPolygonVertex arguments equals to 0 => division by zero" );
 
 		QVector<rCoord2D> vectAllVertex;
 		if ( billon.hasPith() )
 		{
 			const int width = billon.n_cols;
 			const int height = billon.n_rows;
-			const qreal angleIncrement = TWO_PI/static_cast<qreal>(nbPolygonPoints);
+			const qreal angleIncrement = TWO_PI/static_cast<qreal>(nbPolygonVertex);
 			rCoord2D edge, center;
 			rVec2D direction;
 			qreal orientation;
@@ -205,7 +205,7 @@ namespace BillonAlgorithms
 					orientation += angleIncrement;
 					direction = rVec2D(qCos(orientation),qSin(orientation));
 					edge = center + direction*30;
-					while ( edge.x>0. && edge.y>0. && edge.x<width && edge.y<height && currentSlice.at(edge.y,edge.x) >= intenstyThreshold )
+					while ( edge.x>0. && edge.y>0. && edge.x<width && edge.y<height && currentSlice.at(edge.y,edge.x) >= intensityThreshold )
 					{
 						edge += direction;
 					}

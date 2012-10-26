@@ -2,7 +2,9 @@
 
 #include "def/def_opticalflow.h"
 #include "inc/billon.h"
+#include "inc/globalfunctions.h"
 #include "inc/opticalflow.h"
+#include "inc/slicealgorithm.h"
 
 #include <QColor>
 #include <QImage>
@@ -141,7 +143,6 @@ void SliceView::drawCurrentSlice( QImage &image, const Billon &billon, const uin
 	const uint width = slice.n_cols;
 	const uint height = slice.n_rows;
 	const int minIntensity = intensityInterval.min();
-	const int maxIntensity = intensityInterval.max();
 	const qreal fact = 255.0/intensityInterval.size();
 
 	QRgb * line = (QRgb *) image.bits();
@@ -152,7 +153,7 @@ void SliceView::drawCurrentSlice( QImage &image, const Billon &billon, const uin
 	{
 		for ( i=0 ; i<width ; i++)
 		{
-			color = (qMax(qMin(slice.at(j,i),maxIntensity),minIntensity)-minIntensity)*fact;
+			color = (TKD::restrictedValue(slice.at(j,i),intensityInterval)-minIntensity)*fact;
 			*(line++) = qRgb(color,color,color);
 		}
 	}

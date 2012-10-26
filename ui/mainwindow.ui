@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>813</width>
-    <height>932</height>
+    <width>892</width>
+    <height>969</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -105,7 +105,7 @@
            <x>0</x>
            <y>0</y>
            <width>244</width>
-           <height>662</height>
+           <height>699</height>
           </rect>
          </property>
          <layout class="QHBoxLayout" name="horizontalLayout_8">
@@ -141,7 +141,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>813</width>
+     <width>892</width>
      <height>25</height>
     </rect>
    </property>
@@ -183,7 +183,7 @@
      <item>
       <widget class="QTabWidget" name="_tabs">
        <property name="currentIndex">
-        <number>2</number>
+        <number>4</number>
        </property>
        <widget class="QWidget" name="_tabGeneral">
         <attribute name="title">
@@ -230,8 +230,8 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>316</width>
-              <height>49</height>
+              <width>585</width>
+              <height>392</height>
              </rect>
             </property>
             <attribute name="label">
@@ -768,7 +768,7 @@ autour de la moelle</string>
        </widget>
        <widget class="QWidget" name="_tabHistogram">
         <attribute name="title">
-         <string>Histogramme</string>
+         <string>Histogrammes</string>
         </attribute>
         <layout class="QFormLayout" name="formLayout_10">
          <property name="fieldGrowthPolicy">
@@ -1018,13 +1018,6 @@ maximum
            </item>
           </layout>
          </item>
-         <item row="8" column="1">
-          <widget class="QPushButton" name="_buttonExportHistogramToSep">
-           <property name="text">
-            <string>Export en .sep</string>
-           </property>
-          </widget>
-         </item>
         </layout>
        </widget>
        <widget class="QWidget" name="_tabSectors">
@@ -1059,7 +1052,7 @@ maximum
             <enum>QTabWidget::West</enum>
            </property>
            <property name="currentIndex">
-            <number>1</number>
+            <number>0</number>
            </property>
            <widget class="QWidget" name="tab_4">
             <attribute name="title">
@@ -1094,13 +1087,6 @@ maximum
           </widget>
          </item>
          <item>
-          <widget class="QPushButton" name="_buttonExportSectorsDiagramAndHistogram">
-           <property name="text">
-            <string>Exporter le diagramme et l'histogramme</string>
-           </property>
-          </widget>
-         </item>
-         <item>
           <layout class="QGridLayout" name="gridLayout_2">
            <item row="1" column="1">
             <layout class="QHBoxLayout" name="horizontalLayout_16">
@@ -1132,19 +1118,6 @@ maximum
                </property>
               </widget>
              </item>
-             <item>
-              <widget class="QPushButton" name="_buttonExportSectorToOfs">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="text">
-                <string>OFS</string>
-               </property>
-              </widget>
-             </item>
             </layout>
            </item>
            <item row="0" column="1">
@@ -1154,6 +1127,12 @@ maximum
              </property>
              <item>
               <widget class="QComboBox" name="_comboSelectSliceInterval">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
                <property name="maxCount">
                 <number>2147483647</number>
                </property>
@@ -1177,17 +1156,16 @@ maximum
                </property>
               </widget>
              </item>
-             <item>
-              <widget class="QPushButton" name="_buttonExportAllSectorsInAllIntervalsToOfs">
-               <property name="text">
-                <string>Export ALL in OFS</string>
-               </property>
-              </widget>
-             </item>
             </layout>
            </item>
            <item row="0" column="0">
             <widget class="QLabel" name="label_28">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
              <property name="text">
               <string>Intervalle</string>
              </property>
@@ -1195,6 +1173,12 @@ maximum
            </item>
            <item row="1" column="0">
             <widget class="QLabel" name="label_4">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
              <property name="text">
               <string>Secteur</string>
              </property>
@@ -1481,13 +1465,6 @@ maximum
          <item>
           <widget class="QwtPlot" name="_plotKnotAreaHistogram"/>
          </item>
-         <item>
-          <widget class="QPushButton" name="_buttonExportKnotIntervalHistogram">
-           <property name="text">
-            <string>Export knot interval histogram</string>
-           </property>
-          </widget>
-         </item>
         </layout>
        </widget>
        <widget class="QWidget" name="_tabExport">
@@ -1498,92 +1475,201 @@ maximum
          <property name="fieldGrowthPolicy">
           <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
          </property>
-         <item row="0" column="0">
-          <widget class="QLabel" name="label_16">
-           <property name="text">
-            <string>Résolution</string>
-           </property>
-          </widget>
-         </item>
-         <item row="0" column="1">
-          <widget class="QSpinBox" name="_spinExportResolution">
-           <property name="minimum">
-            <number>1</number>
-           </property>
-           <property name="maximum">
-            <number>8</number>
-           </property>
-          </widget>
-         </item>
-         <item row="1" column="1">
-          <widget class="QPushButton" name="_buttonExportToDat">
-           <property name="text">
+         <item row="1" column="0" colspan="2">
+          <widget class="QGroupBox" name="groupBox_3">
+           <property name="title">
             <string>Exporter en .dat</string>
            </property>
+           <layout class="QFormLayout" name="formLayout_12">
+            <item row="0" column="0">
+             <widget class="QLabel" name="label_16">
+              <property name="text">
+               <string>Résolution</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="1">
+             <widget class="QSpinBox" name="_spinDatExportResolution">
+              <property name="minimum">
+               <number>1</number>
+              </property>
+              <property name="maximum">
+               <number>8</number>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="0">
+             <widget class="QLabel" name="label_12">
+              <property name="toolTip">
+               <string/>
+              </property>
+              <property name="text">
+               <string>Contraste</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="1">
+             <layout class="QHBoxLayout" name="horizontalLayout_26">
+              <property name="bottomMargin">
+               <number>0</number>
+              </property>
+              <item>
+               <widget class="QSlider" name="_sliderDatExportContrast">
+                <property name="toolTip">
+                 <string/>
+                </property>
+                <property name="minimum">
+                 <number>-100</number>
+                </property>
+                <property name="maximum">
+                 <number>100</number>
+                </property>
+                <property name="orientation">
+                 <enum>Qt::Horizontal</enum>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QSpinBox" name="_spinDatExportContrast">
+                <property name="minimum">
+                 <number>-100</number>
+                </property>
+                <property name="maximum">
+                 <number>100</number>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item row="2" column="1">
+             <widget class="QPushButton" name="_buttonExportToDat">
+              <property name="text">
+               <string>Exporter en .dat</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
           </widget>
          </item>
-         <item row="3" column="0">
-          <widget class="QLabel" name="label_18">
-           <property name="text">
-            <string>Nombre de sommets du cercle</string>
+         <item row="6" column="0" colspan="2">
+          <widget class="QGroupBox" name="groupBox_4">
+           <property name="title">
+            <string>Exporter en .ofs</string>
            </property>
+           <layout class="QVBoxLayout" name="verticalLayout_3">
+            <item>
+             <layout class="QFormLayout" name="formLayout_13">
+              <property name="fieldGrowthPolicy">
+               <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
+              </property>
+              <property name="bottomMargin">
+               <number>0</number>
+              </property>
+              <item row="0" column="0">
+               <widget class="QLabel" name="label_18">
+                <property name="text">
+                 <string>Nombre de sommets</string>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="1">
+               <widget class="QSpinBox" name="_spinExportNbEdges">
+                <property name="minimum">
+                 <number>3</number>
+                </property>
+                <property name="maximum">
+                 <number>100</number>
+                </property>
+                <property name="value">
+                 <number>4</number>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="0">
+               <widget class="QLabel" name="label_17">
+                <property name="text">
+                 <string>Rayon autour de la moelle</string>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="1">
+               <widget class="QSpinBox" name="_spinExportRadius">
+                <property name="minimum">
+                 <number>1</number>
+                </property>
+                <property name="maximum">
+                 <number>200</number>
+                </property>
+                <property name="value">
+                 <number>10</number>
+                </property>
+               </widget>
+              </item>
+              <item row="2" column="0">
+               <widget class="QLabel" name="label_24">
+                <property name="text">
+                 <string>Fermer les faces du cylindre</string>
+                </property>
+               </widget>
+              </item>
+              <item row="2" column="1">
+               <widget class="QCheckBox" name="_checkCloseBillon">
+                <property name="text">
+                 <string/>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <layout class="QHBoxLayout" name="horizontalLayout_27">
+              <property name="bottomMargin">
+               <number>0</number>
+              </property>
+              <item>
+               <widget class="QComboBox" name="_comboOfsExportType">
+                <item>
+                 <property name="text">
+                  <string>La moelle du billon</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>La zone réduite du billon</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>Le secteur angulaire courant (zone large)</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>Tous les secteurs angulaires du billon (zone large)</string>
+                 </property>
+                </item>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="_buttonExportToOfs">
+                <property name="text">
+                 <string>Exporter en .ofs</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+           </layout>
           </widget>
          </item>
-         <item row="3" column="1">
-          <widget class="QSpinBox" name="_spinExportNbEdges">
-           <property name="minimum">
-            <number>3</number>
-           </property>
-           <property name="maximum">
-            <number>100</number>
-           </property>
-           <property name="value">
-            <number>4</number>
-           </property>
-          </widget>
-         </item>
-         <item row="4" column="0">
-          <widget class="QLabel" name="label_17">
-           <property name="text">
-            <string>Rayon autour de la moelle</string>
-           </property>
-          </widget>
-         </item>
-         <item row="4" column="1">
-          <widget class="QSpinBox" name="_spinExportRadius">
-           <property name="minimum">
-            <number>1</number>
-           </property>
-           <property name="maximum">
-            <number>200</number>
-           </property>
-           <property name="value">
-            <number>10</number>
-           </property>
-          </widget>
-         </item>
-         <item row="5" column="1">
-          <widget class="QPushButton" name="_buttonExportToOfs">
-           <property name="text">
-            <string>Exporter moelle (interval) en .ofs</string>
-           </property>
-          </widget>
-         </item>
-         <item row="7" column="1">
-          <widget class="QPushButton" name="_buttonExportToOfsAll">
-           <property name="text">
-            <string>Exporter toute la moelle en .ofs</string>
-           </property>
-          </widget>
-         </item>
-         <item row="8" column="0">
+         <item row="10" column="0">
           <widget class="QLabel" name="label_11">
            <property name="text">
             <string>Seuil de binarisation</string>
            </property>
           </widget>
          </item>
-         <item row="8" column="1">
+         <item row="10" column="1">
           <widget class="QSpinBox" name="_spinExportThreshold">
            <property name="minimum">
             <number>-900</number>
@@ -1596,14 +1682,14 @@ maximum
            </property>
           </widget>
          </item>
-         <item row="10" column="0">
+         <item row="12" column="0">
           <widget class="QLabel" name="label_40">
            <property name="text">
             <string>Dimensions des voxels</string>
            </property>
           </widget>
          </item>
-         <item row="10" column="1">
+         <item row="12" column="1">
           <layout class="QHBoxLayout" name="horizontalLayout_6">
            <property name="bottomMargin">
             <number>0</number>
@@ -1646,7 +1732,7 @@ maximum
            </item>
           </layout>
          </item>
-         <item row="12" column="1">
+         <item row="14" column="1">
           <layout class="QHBoxLayout" name="horizontalLayout_24">
            <property name="bottomMargin">
             <number>0</number>
@@ -1679,18 +1765,73 @@ maximum
            </item>
           </layout>
          </item>
-         <item row="13" column="1">
-          <widget class="QCheckBox" name="_checkCloseBillon">
-           <property name="text">
-            <string>Ferme faces avant/arrière du tronc</string>
+         <item row="0" column="0" colspan="2">
+          <widget class="QGroupBox" name="groupBox_5">
+           <property name="title">
+            <string>Exporter les histogrammes</string>
            </property>
-          </widget>
-         </item>
-         <item row="14" column="1">
-          <widget class="QPushButton" name="_buttonExportToOfsRestricted">
-           <property name="text">
-            <string>Exporter en.ofs Restricted</string>
-           </property>
+           <layout class="QVBoxLayout" name="verticalLayout_10">
+            <item>
+             <layout class="QHBoxLayout" name="horizontalLayout_28">
+              <property name="bottomMargin">
+               <number>0</number>
+              </property>
+              <item>
+               <widget class="QComboBox" name="_comboExportHistoWhichOne">
+                <item>
+                 <property name="text">
+                  <string>Histogramme de coupes</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>Histogramme/diagramme de secteurs</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>Histogramme de distances des noeuds à la moelle</string>
+                 </property>
+                </item>
+               </widget>
+              </item>
+              <item>
+               <widget class="QComboBox" name="_comboExportHistoFormat">
+                <item>
+                 <property name="text">
+                  <string>En image (.png, .jpeg, ...)</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>En .sep</string>
+                 </property>
+                </item>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <layout class="QHBoxLayout" name="horizontalLayout_29">
+              <property name="bottomMargin">
+               <number>0</number>
+              </property>
+              <item>
+               <widget class="QPushButton" name="_buttonExportHistograms">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="text">
+                 <string>Exporter</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+           </layout>
           </widget>
          </item>
         </layout>
@@ -1906,16 +2047,6 @@ maximum
         </spacer>
        </item>
        <item>
-        <widget class="QPushButton" name="_buttonExportSliceHistogram">
-         <property name="toolTip">
-          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Exporter l'histogramme.&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-style:italic;&quot;&gt;Il pêut être exporter en png, svg, pdf, ps, ...&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-         </property>
-         <property name="text">
-          <string>Exporter</string>
-         </property>
-        </widget>
-       </item>
-       <item>
         <spacer name="horizontalSpacer_4">
          <property name="orientation">
           <enum>Qt::Horizontal</enum>
@@ -2007,15 +2138,9 @@ maximum
   <tabstop>_spinMaximumsNeighborhood</tabstop>
   <tabstop>_sliderHistogramIntervalMinimumWidth</tabstop>
   <tabstop>_spinHistogramIntervalMinimumWidth</tabstop>
-  <tabstop>_buttonExportHistogramToSep</tabstop>
   <tabstop>_spinSectorsNumber</tabstop>
   <tabstop>_comboSelectSliceInterval</tabstop>
   <tabstop>_buttonSelectSliceIntervalUpdate</tabstop>
-  <tabstop>_spinExportResolution</tabstop>
-  <tabstop>_buttonExportToDat</tabstop>
-  <tabstop>_spinExportNbEdges</tabstop>
-  <tabstop>_spinExportRadius</tabstop>
-  <tabstop>_buttonExportToOfs</tabstop>
   <tabstop>_spinExportThreshold</tabstop>
  </tabstops>
  <resources/>

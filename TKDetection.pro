@@ -36,9 +36,11 @@ macx:OBJECTS_DIR	= .obj
 SOURCES	=	main.cpp \
 			billonalgorithms.cpp \
 			connexcomponentextractor.cpp \
+			contourcurvebillon.cpp \
 			contourcurveslice.cpp \
 			datexport.cpp \
 			dicomreader.cpp \
+			globalfunctions.cpp \
 			knotareahistogram.cpp \
 			mainwindow.cpp \
 			ofsexport.cpp \
@@ -53,17 +55,17 @@ SOURCES	=	main.cpp \
 			plotslicehistogram.cpp \
 			pointpolarseriesdata.cpp \
 			sectorhistogram.cpp \
+			slicealgorithm.cpp \
 			slicehistogram.cpp \
 			sliceview.cpp \
 			slicezoomer.cpp \
 			test_intervalshistogram.cpp \
 			v3dexport.cpp \
-    src/slicealgorithm.cpp \
-    src/contourcurvebillon.cpp
 
 HEADERS	=	billon.h \
 			billonalgorithms.h \
 			connexcomponentextractor.h \
+			contourcurvebillon.h \
 			contourcurveslice.h \
 			coordinate.h \
 			datexport.h \
@@ -72,6 +74,7 @@ HEADERS	=	billon.h \
 			def_coordinate.h \
 			def_opticalflow.h \
 			dicomreader.h \
+			globalfunctions.h \
 			histogram.h \
 			interval.h \
 			knotareahistogram.h \
@@ -88,13 +91,12 @@ HEADERS	=	billon.h \
 			plotslicehistogram.h \
 			pointpolarseriesdata.h \
 			sectorhistogram.h \
+			slicealgorithm.h \
 			slicehistogram.h \
 			sliceview.h \
 			slicezoomer.h \
 			test_intervalshistogram.h \
 			v3dexport.h \
-    inc/slicealgorithm.h \
-    inc/contourcurvebillon.h
 
 FORMS =	mainwindow.ui
 

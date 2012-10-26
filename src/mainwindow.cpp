@@ -8,6 +8,7 @@
 #include "inc/contourcurvebillon.h"
 #include "inc/contourcurveslice.h"
 #include "inc/datexport.h"
+#include "inc/define.h"
 #include "inc/dicomreader.h"
 #include "inc/knotareahistogram.h"
 #include "inc/pith.h"
@@ -140,8 +141,6 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 	QObject::connect(_ui->_spinHistogramIntervalMinimumWidth, SIGNAL(valueChanged(int)), _ui->_sliderHistogramIntervalMinimumWidth, SLOT(setValue(int)));
 	QObject::connect(_ui->_sliderBorderPercentageToCut, SIGNAL(valueChanged(int)), _ui->_spinBorderPercentageToCut, SLOT(setValue(int)));
 	QObject::connect(_ui->_spinBorderPercentageToCut, SIGNAL(valueChanged(int)), _ui->_sliderBorderPercentageToCut, SLOT(setValue(int)));
-	QObject::connect(_ui->_buttonExportSliceHistogram, SIGNAL(clicked()), this, SLOT(exportSliceHistogram()));
-	QObject::connect(_ui->_buttonExportKnotIntervalHistogram, SIGNAL(clicked()), this, SLOT(exportKnotIntervalHistogram()));
 
 	// Évènements déclenchés par les bouton associès à la moelle
 	QObject::connect(_ui->_buttonComputePith, SIGNAL(clicked()), this, SLOT(updatePith()));
@@ -158,8 +157,6 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 	QObject::connect(_ui->_sliderMinimalSizeOf2DConnexComponents, SIGNAL(valueChanged(int)), _ui->_spinMinimalSizeOf2DConnexComponents, SLOT(setValue(int)));
 	QObject::connect(_ui->_spinMinimalSizeOf2DConnexComponents, SIGNAL(valueChanged(int)), _ui->_sliderMinimalSizeOf2DConnexComponents, SLOT(setValue(int)));
 	QObject::connect(_ui->_buttonExportSectorToPgm3D, SIGNAL(clicked()), this, SLOT(exportSectorToPgm3D()));
-	QObject::connect(_ui->_buttonExportSectorToOfs, SIGNAL(clicked()), this, SLOT(exportSectorToOfs()));
-	QObject::connect(_ui->_buttonExportAllSectorsInAllIntervalsToOfs, SIGNAL(clicked()), this, SLOT(exportAllSectorInAllIntervalsToOfs()));
 	QObject::connect(_ui->_spinContourSmoothingRadius, SIGNAL(valueChanged(int)), this, SLOT(drawSlice()));
 
 	// Évènements déclenchés par la souris sur le visualiseur de coupes
@@ -173,14 +170,23 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 	QObject::connect(_ui->_spinMaxSlice, SIGNAL(valueChanged(int)), _ui->_spanSliderSelectInterval, SLOT(setUpperValue(int)));
 	QObject::connect(_ui->_spanSliderSelectInterval, SIGNAL(upperValueChanged(int)), _ui->_spinMaxSlice, SLOT(setValue(int)));
 	QObject::connect(_ui->_buttonMaxSlice, SIGNAL(clicked()), this, SLOT(setMaximumOfSliceIntervalToCurrentSlice()));
-	QObject::connect(_ui->_buttonExportToDat, SIGNAL(clicked()), this, SLOT(exportToDat()));
-	QObject::connect(_ui->_buttonExportToOfsAll, SIGNAL(clicked()), this, SLOT(exportToOfsAll()));
-	QObject::connect(_ui->_buttonExportToOfs, SIGNAL(clicked()), this, SLOT(exportToOfs()));
-	QObject::connect(_ui->_buttonExportHistogramToSep, SIGNAL(clicked()), this, SLOT(exportHistogramToSep()));
-	QObject::connect(_ui->_buttonExportToOfsRestricted, SIGNAL(clicked()), this, SLOT(exportToOfsRestricted()));
-	QObject::connect(_ui->_buttonExportSectorsDiagramAndHistogram, SIGNAL(clicked()), this, SLOT(exportSectorDiagramAndHistogram()));
 	QObject::connect(_ui->_spinBlurredSegmentsThickness, SIGNAL(valueChanged(int)), this, SLOT(drawSlice()));
+
+	// Export en .dat
+	QObject::connect(_ui->_sliderDatExportContrast, SIGNAL(valueChanged(int)), _ui->_spinDatExportContrast, SLOT(setValue(int)));
+	QObject::connect(_ui->_spinDatExportContrast, SIGNAL(valueChanged(int)), _ui->_sliderDatExportContrast, SLOT(setValue(int)));
+	QObject::connect(_ui->_buttonExportToDat, SIGNAL(clicked()), this, SLOT(exportToDat()));
+
+	// Export en .ofs
+	QObject::connect(_ui->_buttonExportToOfs, SIGNAL(clicked()), this, SLOT(exportToOfs()));
+
+	// Export des histogrammes
+	QObject::connect(_ui->_buttonExportHistograms, SIGNAL(clicked()), this, SLOT(exportHistograms()));
+
+	// Export du contour
 	QObject::connect(_ui->_buttonExportContourToSdp, SIGNAL(clicked()), this, SLOT(exportContourToSdp()));
+
+	// Export en .sdp
 	QObject::connect(_ui->_buttonExportCurrentKnot, SIGNAL(clicked()), this, SLOT(exportCurrentKnot()));
 	QObject::connect(_ui->_buttonExportCurrentKnotToSDP, SIGNAL(clicked()), this, SLOT(exportCurrentKnotToSdp()));
 	QObject::connect(_ui->_buttonExportKnotsOfCurrentKnotAreaToSDP, SIGNAL(clicked()), this, SLOT(exportKnotsOfCurrentKnotAreaToSdp()));
@@ -685,18 +691,23 @@ void MainWindow::selectCurrentSectorInterval()
 
 void MainWindow::exportToDat()
 {
-	if ( _billon != 0 ) {
+	if ( _billon != 0 )
+	{
 		QString fileName = QFileDialog::getSaveFileName(this, tr("Exporter en .dat"), "output.dat", tr("Fichiers de données (*.dat);;Tous les fichiers (*.*)"));
 		if ( !fileName.isEmpty() )
 		{
-			bool ok;
-			qreal contrastFactor = QInputDialog::getInt(this,tr("Facteur de contraste"), tr("Contraste de l'image (image originale avec contraste à 0)"), 0, -100, 100, 1, &ok);
-			if ( ok )
+			QFile file(fileName);
+			if ( file.open(QIODevice::WriteOnly) )
 			{
-				DatExport::process( *_billon, Interval<int>(_ui->_spinMinSlice->value(),_ui->_spinMaxSlice->value()), Interval<int>(_ui->_spinMinIntensity->value(),_ui->_spinMaxIntensity->value()), fileName, _ui->_spinExportResolution->value(), (contrastFactor+100.)/100. );
+				QTextStream stream(&file);
+				DatExport::process( stream, *_billon, Interval<int>(_ui->_spinMinSlice->value(),_ui->_spinMaxSlice->value()), Interval<int>(_ui->_spinMinIntensity->value(),_ui->_spinMaxIntensity->value()), _ui->_spinDatExportResolution->value(), (_ui->_spinDatExportContrast->value()+100.)/100. );
+				file.close();
+				QMessageBox::information(this,tr("Export en .dat"), tr("Terminé avec succés !"));
 			}
+			else QMessageBox::warning(this,tr("Export en .dat"), tr("L'export a échoué"));
 		}
 	}
+	else QMessageBox::warning(this,tr("Export en .dat"), tr("Aucun fichier de billon ouvert."));
 }
 
 void MainWindow::exportToOfs()
@@ -706,86 +717,239 @@ void MainWindow::exportToOfs()
 		QString fileName = QFileDialog::getSaveFileName(this, tr("Exporter en .ofs"), "output.ofs", tr("Fichiers de données (*.ofs);;Tous les fichiers (*.*)"));
 		if ( !fileName.isEmpty() )
 		{
-		  OfsExport::process( *_billon, Interval<int>(_ui->_spinMinSlice->value(),_ui->_spinMaxSlice->value()), fileName, _ui->_spinExportNbEdges->value(), _ui->_spinExportRadius->value(), false );
-		}
-	}
-}
-void MainWindow::exportToOfsAll()
-{
-	if ( _billon != 0 && _billon->hasPith() )
-	{
-		QString fileName = QFileDialog::getSaveFileName(this, tr("Exporter en .ofs"), "output.ofs", tr("Fichiers de données (*.ofs);;Tous les fichiers (*.*)"));
-		if ( !fileName.isEmpty() )
-		{
-			OfsExport::process( *_billon, Interval<int>(_ui->_spinMinSlice->value(),_ui->_spinMaxSlice->value()), fileName, _ui->_spinExportNbEdges->value(), _ui->_spinExportRadius->value(), false );
-		}
-	}
-}
-
-void MainWindow::exportToOfsRestricted()
-{
-	if ( _billon != 0 && _billon->hasPith() )
-	{
-		QString fileName = QFileDialog::getSaveFileName(this, tr("Exporter en .ofs"), "output.ofs", tr("Fichiers de données (*.ofs);;Tous les fichiers (*.*)"));
-		if ( !fileName.isEmpty() )
-		{
-			OfsExport::processRestrictedMesh( *_billon, Interval<uint>(_ui->_spanSliderSelectInterval->lowerValue(),_ui->_spanSliderSelectInterval->upperValue()), fileName, 100, MINIMUM_INTENSITY, false, _ui->_checkCloseBillon->isChecked() );
-		}
-	}
-}
-
-void MainWindow::exportSectorToOfs()
-{
-	uint index = _ui->_comboSelectSectorInterval->currentIndex();
-	if ( _billon != 0 && _billon->hasPith() && index > 0 && index <= _sectorHistogram->nbIntervals() )
-	{
-		QString fileName = QFileDialog::getSaveFileName(this, tr("Exporter le secteur %1 en .ofs").arg(index), QString("sector_%1.ofs").arg(index), tr("Fichiers de données (*.ofs);;Tous les fichiers (*.*)"));
-		if ( !fileName.isEmpty() )
-		{
-			const Interval<uint> &sectorInterval = _sectorHistogram->interval(_ui->_comboSelectSectorInterval->currentIndex()-1);
-			const Interval<uint> &slicesInterval = _sliceHistogram->interval(_ui->_comboSelectSliceInterval->currentIndex()-1);
-			OfsExport::processOnSector( *_billon, slicesInterval, fileName, _pieChart->sector(sectorInterval.min()).rightAngle(), _pieChart->sector(sectorInterval.max()).leftAngle(), _ui->_spinExportNbEdges->value() );
-		}
-	}
-}
-
-void MainWindow::exportAllSectorInAllIntervalsToOfs()
-{
-	if ( _billon != 0 && _billon->hasPith() && _ui->_comboSelectSectorInterval->count() > 0 )
-	{
-		QString fileName = QFileDialog::getSaveFileName(this, tr("Exporter tous les secteurs de tous les intervalles en .ofs"), "allSector.ofs", tr("Fichiers de données (*.ofs);;Tous les fichiers (*.*)"));
-		if ( !fileName.isEmpty() )
-		{
-			QVector< QPair< Interval<uint>, QPair<qreal,qreal> > > intervals;
-			for ( int i=0 ; i<_ui->_comboSelectSliceInterval->count()-1 ; i++ )
+			bool isOk = true;
+			QString message;
+			uint index;
+			switch (_ui->_comboOfsExportType->currentIndex())
 			{
-				const Interval<uint> &slicesInterval = _sliceHistogram->interval(i);
-				for ( int j=0 ; j<_ui->_comboSelectSectorInterval->count()-1 ; j++ )
+				case TKD::PITH:
+					OfsExport::process( *_billon, Interval<int>(_ui->_spinMinSlice->value(),_ui->_spinMaxSlice->value()), fileName, _ui->_spinExportNbEdges->value(), _ui->_spinExportRadius->value(), false );
+					break;
+				case TKD::BILLON_RESTRICTED_AREA:
+					isOk = _billon->hasPith();
+					message = QObject::tr("Impossible car la moelle n'est pas encore calculée.");
+					if ( isOk )
+					{
+						OfsExport::processOnRestrictedMesh( *_billon, Interval<uint>(_ui->_spinMinSlice->value(),_ui->_spinMaxSlice->value()), fileName, 100, MINIMUM_INTENSITY, false, _ui->_checkCloseBillon->isChecked() );
+					}
+					break;
+				case TKD::CURENT_ANGULAR_SECTOR_LARGE_AREA:
+					index = _ui->_comboSelectSectorInterval->currentIndex();
+					isOk = _billon->hasPith() && index > 0 && index <= _sectorHistogram->nbIntervals();
+					message = QObject::tr("Impossible car la moelle n'est pas encore calculée ou aucun secteur angulaire n'est sélectionné.");
+					if ( isOk )
+					{
+						const Interval<uint> &sectorInterval = _sectorHistogram->interval(_ui->_comboSelectSectorInterval->currentIndex()-1);
+						const Interval<uint> &slicesInterval = _sliceHistogram->interval(_ui->_comboSelectSliceInterval->currentIndex()-1);
+						OfsExport::processOnSector( *_billon, slicesInterval, fileName, _pieChart->sector(sectorInterval.min()).rightAngle(), _pieChart->sector(sectorInterval.max()).leftAngle(), _ui->_spinExportNbEdges->value() );
+					}
+					break;
+				case TKD::ALL_ANGULAR_SECTORS_ALL_SLICE_INTERVALS_LARGE_AREA:
+					isOk = _billon->hasPith() && _ui->_comboSelectSliceInterval->count() > 0;
+					message = QObject::tr("Impossible car la moelle et/ou les secteurs angulaires ne sont pas encore calculée.");
+					if ( isOk )
+					{
+						QVector< QPair< Interval<uint>, QPair<qreal,qreal> > > intervals;
+						for ( int i=0 ; i<_ui->_comboSelectSliceInterval->count()-1 ; i++ )
+						{
+							const Interval<uint> &slicesInterval = _sliceHistogram->interval(i);
+							for ( int j=0 ; j<_ui->_comboSelectSectorInterval->count()-1 ; j++ )
+							{
+								const Interval<uint> &sectorInterval = _sectorHistogram->interval(j);
+								const QPair<qreal,qreal> angles( _pieChart->sector(sectorInterval.min()).rightAngle(), _pieChart->sector(sectorInterval.max()).leftAngle() );
+								intervals.append( QPair< Interval<uint>, QPair<qreal,qreal> >( slicesInterval, angles ) );
+							}
+						}
+						OfsExport::processOnAllSectorInAllIntervals( *_billon, intervals, fileName, _ui->_spinExportNbEdges->value() );
+					}
+				default:
+					break;
+			}
+			if ( !isOk ) QMessageBox::warning(this,tr("Export en .ofs"), message);
+			else QMessageBox::information(this,tr("Export en .ofs"), tr("Terminé avec succés !"));
+		}
+	}
+	else QMessageBox::warning(this,tr("Export en .ofs"), tr("Aucun fichier de billon ouvert."));
+}
+
+void MainWindow::exportHistograms()
+{
+	QString fileName, chemin, name, message;
+	QwtPlotRenderer histoRenderer;
+	QwtPolarRenderer diagramRenderer;
+	QMessageBox::StandardButton button;
+	QLabel label1, label2;
+	QPixmap image1, image2;
+	QSize imageSize;
+	int sizeFact, whichOne;
+	bool sizeOk, abort;
+	sizeOk = abort = false;
+	whichOne = _ui->_comboExportHistoWhichOne->currentIndex();
+
+	switch (whichOne)
+	{
+		case TKD::SLICE_HISTOGRAM:
+			abort = (_sliceHistogram->size() == 0);
+			message = tr("L'histogramme de coupes n'est pas calculé.");
+			break;
+		case TKD::SECTOR_HISTOGRAM:
+			abort = (_sectorHistogram->size() == 0);
+			message = tr("L'histogramme de secteurs n'est pas calculé.");
+			break;
+		case TKD::PITH_KNOT_DISTANCE_HISTOGRAM:
+			abort = (_knotAreaHistogram->size() == 0);
+			message = tr("L'histogramme de distance moell-nœuds n'est pas calculé.");
+			break;
+		default:
+			abort = true;
+			message = tr("L'histogramme demandé n''existe pas'est pas prévu pour être exporté.");
+			break;
+	}
+	if ( abort ) QMessageBox::warning(this,tr("Export de l'histogramme"),message);
+	else
+	{
+		switch ( _ui->_comboExportHistoFormat->currentIndex() )
+		{
+			case 0:
+				while (!sizeOk && !abort)
 				{
-					const Interval<uint> &sectorInterval = _sectorHistogram->interval(j);
-					const QPair<qreal,qreal> angles( _pieChart->sector(sectorInterval.min()).rightAngle(), _pieChart->sector(sectorInterval.max()).leftAngle() );
-					intervals.append( QPair< Interval<uint>, QPair<qreal,qreal> >( slicesInterval, angles ) );
-				}
-			}
-			OfsExport::processOnAllSectorInAllIntervals( *_billon, intervals, fileName, _ui->_spinExportNbEdges->value() );
-		}
-	}
-}
+					sizeFact = QInputDialog::getInt(this,tr("Taille de l'image"), tr("Pourcentage"), 100, 10, 100, 1, &sizeOk);
+					if ( sizeOk )
+					{
+						imageSize = QSize(297*sizeFact/100,210*sizeFact/100);
 
-void MainWindow::exportHistogramToSep()
-{
-	if ( _sliceHistogram != 0 )
-	{
-		QString fileName = QFileDialog::getSaveFileName(this, tr("Exporter l'histogramme en .sep"), "output.sep", tr("Fichiers séquences de point euclidiens (*.sep);;Tous les fichiers (*.*)"));
-		if ( !fileName.isEmpty() )
-		{
-			QFile file(fileName);
-			if ( file.open(QIODevice::WriteOnly) )
-			{
-				QTextStream stream(&file);
-				stream << *_sliceHistogram;
-				file.close();
-			}
+						image1 = QPixmap( 1240*sizeFact/100 , 874*sizeFact/100 );
+						image1.fill();
+
+						switch ( whichOne )
+						{
+							case TKD::SLICE_HISTOGRAM:
+								_ui->_plotSliceHistogram->setAxisTitle(QwtPlot::xBottom,tr("Indice de la coupe"));
+								_ui->_plotSliceHistogram->enableAxis(QwtPlot::yLeft);
+								_ui->_plotSliceHistogram->setAxisTitle(QwtPlot::yLeft,tr("Cumul du z-mouvement"));
+								histoRenderer.renderTo(_ui->_plotSliceHistogram,image1);
+								break;
+							case TKD::SECTOR_HISTOGRAM:
+								image2 = QPixmap( 1240*sizeFact/100 , 874*sizeFact/100 );
+								image2.fill();
+								_ui->_plotSectorHistogram->setAxisTitle(QwtPlot::xBottom,tr("Secteur angulaire en radians"));
+								_ui->_plotSectorHistogram->enableAxis(QwtPlot::yLeft);
+								_ui->_plotSectorHistogram->setAxisTitle(QwtPlot::yLeft,tr("Cumul du z-mouvement"));
+								histoRenderer.renderTo(_ui->_plotSectorHistogram,image1);
+								diagramRenderer.renderTo(_ui->_polarSectorHistogram,image2);
+								image2 = image2.scaledToHeight(600,Qt::SmoothTransformation);
+								label2.setPixmap(image2);
+								label2.show();
+								break;
+							case TKD::PITH_KNOT_DISTANCE_HISTOGRAM:
+								_ui->_plotKnotAreaHistogram->setAxisTitle(QwtPlot::xBottom,tr("Slice index"));
+								_ui->_plotKnotAreaHistogram->setAxisTitle(QwtPlot::yLeft,tr("Distance to the pith"));
+								histoRenderer.renderTo(_ui->_plotKnotAreaHistogram,image1);
+							default:
+								break;
+						}
+
+						image1 = image1.scaledToHeight(600,Qt::SmoothTransformation);
+						label1.setPixmap(image1);
+						label1.show();
+
+						button = QMessageBox::question(&label1,tr("Taille correcte"),tr("La taille de l'image est-elle correcte ?"),QMessageBox::Abort|QMessageBox::Yes|QMessageBox::No,QMessageBox::Yes);
+						switch (button)
+						{
+							case QMessageBox::Yes:
+								fileName = QFileDialog::getSaveFileName(&label1, tr("Exporter l'histogramme"), "output.pdf", tr("Fichiers PDF (*.pdf);;Fichiers PS (*.ps);;Fichiers PNG (*.png);;Fichiers SVG (*.svg);;Tous les fichiers (*.*)"));
+								if ( !fileName.isEmpty() )
+								{
+									switch ( whichOne )
+									{
+										case TKD::SLICE_HISTOGRAM:
+											histoRenderer.renderDocument(_ui->_plotSliceHistogram,fileName,imageSize,100);
+											break;
+										case TKD::SECTOR_HISTOGRAM:
+											chemin = fileName.section(QDir::separator(),0,-2)+QDir::separator();
+											name = fileName.section(QDir::separator(),-1);
+											histoRenderer.renderDocument(_ui->_plotSectorHistogram, chemin+"histo_"+name, imageSize, 100);
+											diagramRenderer.renderDocument(_ui->_polarSectorHistogram, chemin+"diag_"+name, imageSize, 100);
+											break;
+										case TKD::PITH_KNOT_DISTANCE_HISTOGRAM:
+											histoRenderer.renderDocument(_ui->_plotKnotAreaHistogram,fileName,QSize(297*sizeFact/100,140*sizeFact/100),100);
+											break;
+										default:
+											break;
+									}
+									if ( !abort ) QMessageBox::information(this,tr("Export en format image"), tr("Terminé avec succés !"));
+								}
+								else QMessageBox::warning(this,tr("Export en format image"), tr("Impossible de créer le(s) fichier."));
+								sizeOk = true;
+								break;
+							case QMessageBox::Abort:
+								abort = true;
+								break;
+							default :
+								sizeOk = false;
+								break;
+						}
+						switch ( whichOne )
+						{
+							case TKD::SLICE_HISTOGRAM:
+								_ui->_plotSliceHistogram->setAxisTitle(QwtPlot::xBottom,"");
+								_ui->_plotSliceHistogram->setAxisTitle(QwtPlot::yLeft,"");
+								_ui->_plotSliceHistogram->enableAxis(QwtPlot::yLeft,false);
+								break;
+							case TKD::SECTOR_HISTOGRAM:
+								_ui->_plotSectorHistogram->setAxisTitle(QwtPlot::xBottom,"");
+								_ui->_plotSectorHistogram->setAxisTitle(QwtPlot::yLeft,"");
+								_ui->_plotSectorHistogram->enableAxis(QwtPlot::yLeft,false);
+								break;
+							case TKD::PITH_KNOT_DISTANCE_HISTOGRAM:
+								_ui->_plotKnotAreaHistogram->setAxisTitle(QwtPlot::xBottom,"");
+								_ui->_plotKnotAreaHistogram->setAxisTitle(QwtPlot::yLeft,"");
+								break;
+							default:
+								break;
+						}
+					}
+					else
+					{
+						sizeOk = true;
+					}
+				}
+				break;
+			case 1:
+				fileName = QFileDialog::getSaveFileName(this, tr("Exporter l'histogramme en .sep"), "output.sep", tr("Fichiers séquences de point euclidiens (*.sep);;Tous les fichiers (*.*)"));
+				if ( !fileName.isEmpty() )
+				{
+					int whichOne = _ui->_comboExportHistoWhichOne->currentIndex();
+					bool ok = whichOne == TKD::SLICE_HISTOGRAM ? _sliceHistogram != 0 : whichOne == TKD::SECTOR_HISTOGRAM ? _sectorHistogram != 0 : _knotAreaHistogram != 0;
+					if ( ok )
+					{
+						QFile file(fileName);
+						if ( file.open(QIODevice::WriteOnly) )
+						{
+							QTextStream stream(&file);
+							switch (whichOne)
+							{
+								case TKD::SLICE_HISTOGRAM:
+									stream << *_sliceHistogram;
+									break;
+								case TKD::SECTOR_HISTOGRAM:
+									stream << *_sectorHistogram;
+									break;
+								case TKD::PITH_KNOT_DISTANCE_HISTOGRAM:
+									stream << *_knotAreaHistogram;
+								default:
+									break;
+							}
+							file.close();
+							QMessageBox::information(this,tr("Export en .sep"), tr("Terminé avec succés !"));
+						}
+						else QMessageBox::warning(this,tr("L'export a échoué"),tr("Impossible de créer le fichier."));
+					}
+					else QMessageBox::warning(this,tr("L'export a échoué"),tr("L'histogramme que vous souhaitez exporté n'est pas calculé."));
+				}
+				break;
+			default:
+				break;
 		}
 	}
 }
@@ -805,165 +969,6 @@ void MainWindow::exportSectorToPgm3D()
 			}
 		}
 	}
-}
-
-void MainWindow::exportSliceHistogram() {
-	QwtPlotRenderer histoRenderer;
-	QLabel label;
-	QString fileName;
-	QMessageBox::StandardButton button;
-	int sizeFact;
-	bool sizeOk;
-	sizeOk = false;
-
-	_ui->_plotSliceHistogram->setAxisTitle(QwtPlot::xBottom,tr("Indice de la coupe"));
-	_ui->_plotSliceHistogram->enableAxis(QwtPlot::yLeft);
-	_ui->_plotSliceHistogram->setAxisTitle(QwtPlot::yLeft,tr("Cumul du z-mouvement"));
-
-	while (!sizeOk) {
-		sizeFact = QInputDialog::getInt(this,tr("Taille de l'image"), tr("Pourcentage"), 100, 10, 100, 1, &sizeOk);
-		if ( sizeOk ) {
-			QPixmap image( 1240*sizeFact/100 , 874*sizeFact/100 );
-			image.fill();
-			histoRenderer.renderTo(_ui->_plotSliceHistogram,image);
-			image = image.scaledToHeight(600,Qt::SmoothTransformation);
-			label.setPixmap(image);
-			label.show();
-			button = QMessageBox::question(&label,tr("Taille correcte"),tr("La taille de l'image est-elle correcte ?"),QMessageBox::Abort|QMessageBox::Yes|QMessageBox::No,QMessageBox::Yes);
-			switch (button) {
-				case QMessageBox::Yes:
-					fileName = QFileDialog::getSaveFileName(&label, tr("Exporter l'histogramme de coupes"), "output.pdf", tr("Fichiers PDF (*.pdf);;Fichiers PS (*.ps);;Fichiers PNG (*.png);;Fichiers SVG (*.svg);;Tous les fichiers (*.*)"));
-					if ( !fileName.isEmpty() ) {
-						histoRenderer.renderDocument(_ui->_plotSliceHistogram,fileName,QSize(297*sizeFact/100,210*sizeFact/100),100);
-					}
-					sizeOk = true;
-					break;
-				case QMessageBox::Abort:
-					sizeOk = true;
-					break;
-				default :
-					sizeOk = false;
-					break;
-			}
-		}
-		else {
-			sizeOk = true;
-		}
-	}
-
-	_ui->_plotSliceHistogram->setAxisTitle(QwtPlot::xBottom,"");
-	_ui->_plotSliceHistogram->setAxisTitle(QwtPlot::yLeft,"");
-	_ui->_plotSliceHistogram->enableAxis(QwtPlot::yLeft,false);
-}
-
-void MainWindow::exportSectorDiagramAndHistogram() {
-	QString fileName;
-	QwtPlotRenderer histoRenderer;
-	QwtPolarRenderer diagramRenderer;
-	QLabel label1, label2;
-	QMessageBox::StandardButton button;
-	int sizeFact;
-	bool sizeOk, abort;
-	sizeOk = abort = false;
-
-	_ui->_plotSectorHistogram->setAxisTitle(QwtPlot::xBottom,tr("Secteur angulaire en radians"));
-	_ui->_plotSectorHistogram->enableAxis(QwtPlot::yLeft);
-	_ui->_plotSectorHistogram->setAxisTitle(QwtPlot::yLeft,tr("Cumul du z-mouvement"));
-
-	while (!sizeOk && !abort)
-	{
-		sizeFact = QInputDialog::getInt(this,tr("Taille de l'image"), tr("Pourcentage"), 100, 10, 100, 1, &sizeOk);
-		if ( sizeOk ) {
-			QPixmap image1( 1240*sizeFact/100 , 874*sizeFact/100 );
-			QPixmap image2( 1240*sizeFact/100 , 874*sizeFact/100 );
-			image1.fill();
-			image2.fill();
-			histoRenderer.renderTo(_ui->_plotSectorHistogram,image1);
-			diagramRenderer.renderTo(_ui->_polarSectorHistogram,image2);
-			image1 = image1.scaledToHeight(600,Qt::SmoothTransformation);
-			image2 = image2.scaledToHeight(600,Qt::SmoothTransformation);
-			label1.setPixmap(image1);
-			label2.setPixmap(image2);
-			label1.show();
-			label2.show();
-			button = QMessageBox::question(&label1,tr("Taille correcte"),tr("La taille de l'image est-elle correcte ?"),QMessageBox::Abort|QMessageBox::Yes|QMessageBox::No,QMessageBox::Yes);
-			switch (button) {
-				case QMessageBox::Yes:
-					fileName = QFileDialog::getSaveFileName(&label1, tr("Exporter le diagramme et l'histogramme."), "output.pdf", tr("Fichiers PDF (*.pdf);;Fichiers PS (*.ps);;Fichiers PNG (*.png);;Fichiers SVG (*.svg);;Tous les fichiers (*.*)"));
-					if ( !fileName.isEmpty() ) {
-						QString chemin = fileName.section(QDir::separator(),0,-2)+QDir::separator();
-						QString name = fileName.section(QDir::separator(),-1);
-						histoRenderer.renderDocument(_ui->_plotSectorHistogram, chemin+"histo_"+name, QSize(297*sizeFact/100,210*sizeFact/100), 100);
-						diagramRenderer.renderDocument(_ui->_polarSectorHistogram, chemin+"diag_"+name, QSize(297*sizeFact/100,210*sizeFact/100), 100);
-					}
-					sizeOk = true;
-					break;
-				case QMessageBox::Abort:
-					abort = true;
-					break;
-				default :
-					sizeOk = false;
-					break;
-			}
-		}
-		else {
-			sizeOk = true;
-		}
-	}
-
-	_ui->_plotSectorHistogram->setAxisTitle(QwtPlot::xBottom,"");
-	_ui->_plotSectorHistogram->setAxisTitle(QwtPlot::yLeft,"");
-	_ui->_plotSectorHistogram->enableAxis(QwtPlot::yLeft,false);
-}
-
-void MainWindow::exportKnotIntervalHistogram()
-{
-	QwtPlotRenderer histoRenderer;
-	QLabel label;
-	QString fileName;
-	QMessageBox::StandardButton button;
-	int sizeFact;
-	bool sizeOk;
-	sizeOk = false;
-
-	_ui->_plotKnotAreaHistogram->setAxisTitle(QwtPlot::xBottom,tr("Slice index"));
-	_ui->_plotKnotAreaHistogram->setAxisTitle(QwtPlot::yLeft,tr("Distance to the pith"));
-
-	while (!sizeOk)
-	{
-		sizeFact = QInputDialog::getInt(this,tr("Taille de l'image"), tr("Pourcentage"), 100, 10, 100, 1, &sizeOk);
-		if ( sizeOk )
-		{
-			QPixmap image( 1240*sizeFact/100 , 874*sizeFact/100 );
-			image.fill();
-			histoRenderer.renderTo(_ui->_plotKnotAreaHistogram,image);
-			image = image.scaledToHeight(600,Qt::SmoothTransformation);
-			label.setPixmap(image);
-			label.show();
-			button = QMessageBox::question(&label,tr("Taille correcte"),tr("La taille de l'image est-elle correcte ?"),QMessageBox::Abort|QMessageBox::Yes|QMessageBox::No,QMessageBox::Yes);
-			switch (button) {
-				case QMessageBox::Yes:
-					fileName = QFileDialog::getSaveFileName(&label, tr("Exporter l'histogramme de distances"), "output.pdf", tr("Fichiers PDF (*.pdf);;Fichiers PS (*.ps);;Fichiers PNG (*.png);;Fichiers SVG (*.svg);;Tous les fichiers (*.*)"));
-					if ( !fileName.isEmpty() ) {
-						histoRenderer.renderDocument(_ui->_plotKnotAreaHistogram,fileName,QSize(297*sizeFact/100,140*sizeFact/100),100);
-					}
-					sizeOk = true;
-					break;
-				case QMessageBox::Abort:
-					sizeOk = true;
-					break;
-				default :
-					sizeOk = false;
-					break;
-			}
-		}
-		else {
-			sizeOk = true;
-		}
-	}
-
-	_ui->_plotKnotAreaHistogram->setAxisTitle(QwtPlot::xBottom,"");
-	_ui->_plotKnotAreaHistogram->setAxisTitle(QwtPlot::yLeft,"");
 }
 
 void MainWindow::exportContourToSdp()
@@ -1339,7 +1344,7 @@ void MainWindow::enabledComponents()
 	_ui->_spansliderIntensityThreshold->setEnabled(enable);
 	_ui->_buttonComputePith->setEnabled(enable);
 	_ui->_buttonUpdateSliceHistogram->setEnabled(enable);
-	_ui->_buttonExportSliceHistogram->setEnabled(enable);
+	_ui->_buttonExportHistograms->setEnabled(enable);
 	_ui->_buttonMaxSlice->setEnabled(enable);
 	_ui->_buttonMinSlice->setEnabled(enable);
 	_ui->_buttonExportToDat->setEnabled(enable);
