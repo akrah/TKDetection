@@ -48,7 +48,7 @@ private slots:
 	void nextMaximumInSliceHistogram();
 	void zoomInSliceView( const qreal &zoomFactor, const QPoint &focalPoint );
 	void dragInSliceView( const QPoint &movementVector );
-	void flowApplied();
+	void updateOpticalFlowalFlow();
 	void setRestrictedAreaResolution( const int &resolution );
 	void setRestrictedAreaThreshold( const int &threshold );
 	void setRestrictedAreaBeginRadius( const int &radius );
@@ -64,12 +64,9 @@ private slots:
 	void exportToDat();
 	void exportToOfs();
 	void exportHistograms();
-	void exportSectorToPgm3D();
-	void exportContourToSdp();
-	void exportCurrentKnot();
-	void exportCurrentKnotToSdp();
-	void exportKnotsOfCurrentKnotAreaToSdp();
-	void exportAllKnotsOfBillonToSdp();
+	void exportToPgm3D();
+	void exportToV3D();
+	void exportToSdp();
 
 private:
 	void openNewBillon(const QString &fileName);
@@ -77,6 +74,28 @@ private:
 	void updateUiComponentsValues();
 	void enabledComponents();
 	void updateSectorHistogram( const Interval<uint> &interval );
+
+	void exportPithToOfs();
+	void exportBillonRestrictedAreaToOfs();
+	void exportCurrentAngularSectorLargeAreaToOfs();
+	void exportAllAngularSectorsOfAllSliceIntervalsLargeAreaToOfs();
+
+	void exportSliceHistogramToSep();
+	void exportSectorHistogramToSep();
+	void exportKnotHistogramToSep();
+	void exportSliceHistogramToImage();
+	void exportSectorHistogramToImage();
+	void exportknotHistogramToImage();
+
+	void exportCurrentKnotAreaToPgm3d();
+	void exportCurrentSegmentedKnotToPgm3d();
+
+	void exportCurrentSegmentedKnotToV3D();
+
+	void exportContourToSdp();
+	void exportCurrentSegmentedKnotToSdp();
+	void exportSegmentedKnotsOfCurrentSliceIntervalToSdp();
+	void exportAllSegmentedKnotsOfBillonToSdp();
 
 private:
 	Ui::MainWindow *_ui;

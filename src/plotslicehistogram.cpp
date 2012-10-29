@@ -57,8 +57,8 @@ void PlotSliceHistogram::moveCursor( const uint &sliceIndex )
 
 void PlotSliceHistogram::updatePercentageCurve( const uint & thresholdOfMaximums )
 {
-	const qreal x[] = { 0., _histogramData.dataSize() };
-	const qreal y[] = { thresholdOfMaximums, thresholdOfMaximums };
+	const qreal x[] = { 0., static_cast<qreal>(_histogramData.dataSize()) };
+	const qreal y[] = { static_cast<qreal>(thresholdOfMaximums), static_cast<qreal>(thresholdOfMaximums) };
 	_curvePercentage.setSamples(x,y,2);
 }
 

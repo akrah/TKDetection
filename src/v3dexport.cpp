@@ -16,16 +16,8 @@ namespace V3DExport
 		void writeTag( QXmlStreamWriter &stream, const QString &name, const QString &value );
 	}
 
-	void process( const Billon &billon, const QString &fileName, const int &threshold )
+	void process( QFile &file, const Billon &billon, const int &threshold )
 	{
-		QFile file(fileName);
-
-		if( !file.open(QIODevice::WriteOnly) )
-		{
-			qDebug() << QObject::tr("ERREUR : Impossible de créer le ficher XML %1.").arg(fileName);
-			return;
-		}
-
 		QXmlStreamWriter stream( &file );
 		stream.setAutoFormatting(true);
 		stream.writeStartDocument("1.0");
@@ -38,8 +30,6 @@ namespace V3DExport
 			stream.writeEndElement();
 
 		stream.writeEndDocument();
-
-		file.close();
 	}
 
 	namespace
