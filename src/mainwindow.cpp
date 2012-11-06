@@ -47,10 +47,10 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 	_plotKnotAreaHistogram(new PlotKnotAreaHistogram()), _contourCurveBillon(0), _currentSlice(0), _currentMaximum(0), _currentSector(0)
 {
 	_ui->setupUi(this);
-	setCorner(Qt::TopLeftCorner,Qt::LeftDockWidgetArea);
-	setCorner(Qt::TopRightCorner,Qt::RightDockWidgetArea);
-	setCorner(Qt::BottomLeftCorner,Qt::LeftDockWidgetArea);
-	setCorner(Qt::BottomRightCorner,Qt::RightDockWidgetArea);
+//	setCorner(Qt::TopLeftCorner,Qt::LeftDockWidgetArea);
+//	setCorner(Qt::TopRightCorner,Qt::RightDockWidgetArea);
+//	setCorner(Qt::BottomLeftCorner,Qt::LeftDockWidgetArea);
+//	setCorner(Qt::BottomRightCorner,Qt::RightDockWidgetArea);
 	setWindowTitle("TKDetection");
 
 	// Paramétrisation des composant graphiques
@@ -156,7 +156,6 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 	QObject::connect(_ui->_spinMinimalSizeOf3DConnexComponents, SIGNAL(valueChanged(int)), _ui->_sliderMinimalSizeOf3DConnexComponents, SLOT(setValue(int)));
 	QObject::connect(_ui->_sliderMinimalSizeOf2DConnexComponents, SIGNAL(valueChanged(int)), _ui->_spinMinimalSizeOf2DConnexComponents, SLOT(setValue(int)));
 	QObject::connect(_ui->_spinMinimalSizeOf2DConnexComponents, SIGNAL(valueChanged(int)), _ui->_sliderMinimalSizeOf2DConnexComponents, SLOT(setValue(int)));
-	QObject::connect(_ui->_buttonExportToPgm3d, SIGNAL(clicked()), this, SLOT(exportToPgm3D()));
 	QObject::connect(_ui->_spinContourSmoothingRadius, SIGNAL(valueChanged(int)), this, SLOT(drawSlice()));
 
 	// Évènements déclenchés par la souris sur le visualiseur de coupes
@@ -172,19 +171,17 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 	QObject::connect(_ui->_buttonMaxSlice, SIGNAL(clicked()), this, SLOT(setMaximumOfSliceIntervalToCurrentSlice()));
 	QObject::connect(_ui->_spinBlurredSegmentsThickness, SIGNAL(valueChanged(int)), this, SLOT(drawSlice()));
 
-	// Export en .dat
+	// Export
 	QObject::connect(_ui->_sliderDatExportContrast, SIGNAL(valueChanged(int)), _ui->_spinDatExportContrast, SLOT(setValue(int)));
 	QObject::connect(_ui->_spinDatExportContrast, SIGNAL(valueChanged(int)), _ui->_sliderDatExportContrast, SLOT(setValue(int)));
 	QObject::connect(_ui->_buttonExportToDat, SIGNAL(clicked()), this, SLOT(exportToDat()));
-
-	// Export en .ofs
 	QObject::connect(_ui->_buttonExportToOfs, SIGNAL(clicked()), this, SLOT(exportToOfs()));
-
-	// Export des histogrammes
 	QObject::connect(_ui->_buttonExportHistograms, SIGNAL(clicked()), this, SLOT(exportHistograms()));
-
-	// Export en .sdp
 	QObject::connect(_ui->_buttonExportToSDP, SIGNAL(clicked()), this, SLOT(exportToSdp()));
+	QObject::connect(_ui->_sliderPgm3dExportContrast, SIGNAL(valueChanged(int)), _ui->_spinPgm3dExportContrast, SLOT(setValue(int)));
+	QObject::connect(_ui->_spinPgm3dExportContrast, SIGNAL(valueChanged(int)), _ui->_sliderPgm3dExportContrast, SLOT(setValue(int)));
+	QObject::connect(_ui->_buttonExportToPgm3d, SIGNAL(clicked()), this, SLOT(exportToPgm3D()));
+	QObject::connect(_ui->_buttonExportToV3D, SIGNAL(clicked()), this, SLOT(exportToV3D()));
 
 	// Raccourcis des actions du menu
 	_ui->_actionOpenDicom->setShortcut(Qt::CTRL + Qt::Key_O);
@@ -875,28 +872,27 @@ void MainWindow::initComponentsValues() {
 	_ui->_spinSectorsNumber->setValue(360);
 }
 
-void MainWindow::updateUiComponentsValues() {
+void MainWindow::updateUiComponentsValues()
+{
 	int minValue, maxValue, nbSlices;
 	const bool existBillon = (_billon != 0);
 
-	if ( existBillon ) {
+	if ( existBillon )
+	{
 		minValue = _billon->minValue();
 		maxValue = _billon->maxValue();
 		nbSlices = _billon->n_slices-1;
 		_ui->_labelSliceNumber->setNum(0);
 		_ui->_scrollSliceView->setFixedSize(_billon->n_cols,_billon->n_rows);
-		_ui->_labelXwidth->setText(tr("Larg. %1").arg(_billon->voxelWidth()));
-		_ui->_labelYwidth->setText(tr("Haut.%1").arg(_billon->voxelHeight()));
-		_ui->_labelZwidth->setText(tr("Prof. %1").arg(_billon->voxelDepth()));
+		_ui->_statusBar->showMessage( tr("Dimensions de voxels (largeur, hauteur, profondeur) : ( %1, %2, %3 )").arg(_billon->voxelWidth()).arg(_billon->voxelHeight()).arg(_billon->voxelDepth()) );
 	}
-	else {
+	else
+	{
 		minValue = maxValue = 0;
 		nbSlices = 0;
 		_ui->_labelSliceNumber->setText(tr("Aucune coupe présente."));
 		_ui->_scrollSliceView->setFixedSize(0,0);
-		_ui->_labelXwidth->setText("NaN");
-		_ui->_labelYwidth->setText("NaN");
-		_ui->_labelZwidth->setText("NaN");
+		_ui->_statusBar->clearMessage();
 	}
 
 	_ui->_spansliderIntensityThreshold->setMinimum(minValue);
@@ -1366,7 +1362,7 @@ void MainWindow::exportCurrentSegmentedKnotToV3D()
 			QFile file(fileName);
 			if( file.open(QIODevice::WriteOnly) )
 			{
-				V3DExport::process( file, _contourCurveBillon->knotBillon(), _ui->_spinSectorThresholding->value() );
+				V3DExport::process( file, _contourCurveBillon->knotBillon(), _knotAreaHistogram->interval(0), _ui->_spinSectorThresholding->value() );
 				file.close();
 
 				QMessageBox::information(this,"Exporter le nœud courant segmenté en V3D", "Export réussi !");

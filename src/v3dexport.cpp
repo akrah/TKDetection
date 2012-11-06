@@ -10,13 +10,13 @@ namespace V3DExport
 {
 	namespace
 	{
-		void appendTags( QXmlStreamWriter &stream, const Billon &billon );
-		void appendComponent( QXmlStreamWriter &stream, const Billon &billon, const int &index, const int &threshold );
-		void appendPith( QXmlStreamWriter &stream, const Billon &billon );
+		void appendTags( QXmlStreamWriter &stream, const Billon &billon, const Interval<uint> &sliceInterval );
+		void appendComponent( QXmlStreamWriter &stream, const Billon &billon, const Interval<uint> &sliceInterval, const int &index, const int &threshold );
+		void appendPith(QXmlStreamWriter &stream, const Billon &billon , const Interval<uint> &sliceInterval );
 		void writeTag( QXmlStreamWriter &stream, const QString &name, const QString &value );
 	}
 
-	void process( QFile &file, const Billon &billon, const int &threshold )
+	void process( QFile &file, const Billon &billon, const Interval<uint> &sliceInterval, const int &threshold )
 	{
 		QXmlStreamWriter stream( &file );
 		stream.setAutoFormatting(true);
@@ -24,9 +24,9 @@ namespace V3DExport
 		stream.writeDTD("<!DOCTYPE IMAGE>");
 
 			stream.writeStartElement("image");
-				appendTags( stream, billon );
-				appendComponent( stream, billon, 1, threshold );
-				appendPith( stream, billon );
+				appendTags( stream, billon, sliceInterval );
+				appendComponent( stream, billon, sliceInterval, 1, threshold );
+				appendPith( stream, billon, sliceInterval );
 			stream.writeEndElement();
 
 		stream.writeEndDocument();
@@ -34,12 +34,12 @@ namespace V3DExport
 
 	namespace
 	{
-		void appendTags( QXmlStreamWriter &stream, const Billon &billon )
+		void appendTags( QXmlStreamWriter &stream, const Billon &billon, const Interval<uint> &sliceInterval )
 		{
 			stream.writeStartElement("tags");
 				writeTag(stream,"width",QString::number(billon.n_cols));
 				writeTag(stream,"height",QString::number(billon.n_rows));
-				writeTag(stream,"depth",QString::number(billon.n_slices));
+				writeTag(stream,"depth",QString::number(sliceInterval.width()+1));
 				writeTag(stream,"xspacing",QString::number(billon.voxelWidth()));
 				writeTag(stream,"yspacing",QString::number(billon.voxelHeight()));
 				writeTag(stream,"zspacing",QString::number(billon.voxelDepth()));
@@ -49,13 +49,12 @@ namespace V3DExport
 			stream.writeEndElement();
 		}
 
-		void appendComponent( QXmlStreamWriter &stream, const Billon &billon, const int &index, const int &threshold )
+		void appendComponent(QXmlStreamWriter &stream, const Billon &billon, const Interval<uint> &sliceInterval, const int &index, const int &threshold )
 		{
-			int width = billon.n_cols;
-			int height = billon.n_rows;
-			int depth = billon.n_slices;
+			const uint &width = billon.n_cols;
+			const uint &height = billon.n_rows;
 
-			int i, j, k;
+			uint i, j, k;
 
 			stream.writeStartElement("components");
 				stream.writeStartElement("component");
@@ -68,7 +67,7 @@ namespace V3DExport
 						stream.writeAttribute("name","minimum");
 						stream.writeTextElement("x",QString::number(0));
 						stream.writeTextElement("y",QString::number(0));
-						stream.writeTextElement("z",QString::number(0));
+						stream.writeTextElement("z",QString::number(sliceInterval.min()));
 					stream.writeEndElement();
 
 					//coord maximum
@@ -76,7 +75,7 @@ namespace V3DExport
 						stream.writeAttribute("name","maximum");
 						stream.writeTextElement("x",QString::number(width-1));
 						stream.writeTextElement("y",QString::number(height-1));
-						stream.writeTextElement("z",QString::number(depth-1));
+						stream.writeTextElement("z",QString::number(sliceInterval.max()));
 					stream.writeEndElement();
 
 					//binarydata
@@ -84,7 +83,7 @@ namespace V3DExport
 						stream.writeAttribute("encoding","16");
 						stream.writeCharacters("");
 						QDataStream voxelStream(stream.device());
-						for ( k=0; k<depth; ++k )
+						for ( k=sliceInterval.min(); k<=sliceInterval.max(); ++k )
 						{
 							const Slice &slice = billon.slice(k);
 							for ( j=0; j<height; ++j )
@@ -102,14 +101,13 @@ namespace V3DExport
 			stream.writeEndElement();
 		}
 
-		void appendPith( QXmlStreamWriter &stream, const Billon &billon )
+		void appendPith( QXmlStreamWriter &stream, const Billon &billon, const Interval<uint> &sliceInterval )
 		{
 			if ( !billon.pith().isEmpty() )
 			{
 				const Pith &pith = billon.pith();
-				const int depth = billon.n_slices;
 				stream.writeStartElement("pith");
-				for ( int k=0 ; k<depth ; ++k )
+				for ( uint k=sliceInterval.min() ; k<=sliceInterval.max() ; ++k )
 				{
 					stream.writeStartElement("coord");
 						stream.writeTextElement("x",QString::number(pith[k].x));

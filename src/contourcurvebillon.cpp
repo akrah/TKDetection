@@ -15,7 +15,7 @@ const Billon &ContourCurveBillon::knotBillon() const
 	return _resultBillon;
 }
 
-const QList<ContourCurveSlice> &ContourCurveBillon::contours() const
+const QVector<ContourCurveSlice> &ContourCurveBillon::contours() const
 {
 	return _contourCurves;
 }
@@ -28,11 +28,9 @@ const ContourCurveSlice &ContourCurveBillon::contour( const uint &sliceIndex ) c
 
 void ContourCurveBillon::compute( const int &intensityThreshold, const int &blurredSegmentThickness, const int &smoothingRadius )
 {
-	_contourCurves.clear();
+	_contourCurves.resize(_initialBillon.n_slices);
 	for ( uint k=0 ; k<_initialBillon.n_slices ; ++k )
 	{
-		ContourCurveSlice contourSlice(&(_initialBillon.slice(k)));
-		contourSlice.compute( _resultBillon.slice(k), _resultBillon.pithCoord(k), intensityThreshold, blurredSegmentThickness, smoothingRadius );
-		_contourCurves += contourSlice;
+		_contourCurves[k].compute(_initialBillon.slice(k), _resultBillon.slice(k), _resultBillon.pithCoord(k), intensityThreshold, blurredSegmentThickness, smoothingRadius );
 	}
 }

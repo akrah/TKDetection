@@ -1,6 +1,7 @@
 #ifndef V3DEXPORT_H
 #define V3DEXPORT_H
 
+#include <QtGlobal>
 #include "def/def_billon.h"
 
 class QString;
@@ -10,7 +11,7 @@ template<typename T> class Interval;
 
 namespace V3DExport
 {
-	void process( QFile &file, const Billon &billon, const int &threshold );
+	void process(QFile &file, const Billon &billon, const Interval<uint> &sliceInterval, const int &threshold );
 }
 
 #endif // V3DEXPORT_H

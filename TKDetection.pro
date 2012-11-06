@@ -61,6 +61,8 @@ SOURCES	=	main.cpp \
 			slicezoomer.cpp \
 			test_intervalshistogram.cpp \
 			v3dexport.cpp \
+    src/curvaturehistogram.cpp \
+    src/plotcurvaturehistogram.cpp
 
 HEADERS	=	billon.h \
 			billonalgorithms.h \
@@ -97,6 +99,8 @@ HEADERS	=	billon.h \
 			slicezoomer.h \
 			test_intervalshistogram.h \
 			v3dexport.h \
+    inc/curvaturehistogram.h \
+    inc/plotcurvaturehistogram.h
 
 FORMS =	mainwindow.ui
 
