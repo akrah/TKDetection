@@ -17,18 +17,22 @@ public:
 	~ContourCurveSlice();
 
 	const QVector<iCoord2D> &contourPoints() const;
-	const QVector<iCoord2D> &dominantPoints() const;
-	const QVector<iCoord2D> &mainDominantPoints() const;
-	int indexOfMainPoint( const uint &number ) const;
-	const QVector<iCoord2D> &mainSupportPoints() const;
+	const iCoord2D &dominantPoint( const uint &index ) const;
+	const QVector<uint> &dominantPointIndex() const;
+	const iCoord2D &leftMainDominantPoint() const;
+	const iCoord2D &rightMainDominantPoint() const;
+	const int &leftMainDominantPointIndex() const;
+	const int &rightMainDominantPointIndex() const;
+	const rCoord2D &leftMainSupportPoint() const;
+	const rCoord2D &rightMainSupportPoint() const;
 
 	void compute( const Slice &initialSlice, Slice &resultSlice, const iCoord2D &sliceCenter, const int &intensityThreshold, const int &blurredSegmentThickness, const int &smoothingRadius, const iCoord2D &startPoint = iCoord2D(-1,-1) );
 	void computeOldMethod( const Slice &initialSlice, Slice &resultSlice, const iCoord2D &sliceCenter, const int &intensityThreshold, const int &smoothingRadius, const iCoord2D &startPoint = iCoord2D(-1,-1) );
-	void draw( QImage &image ) const;
+	void draw(QImage &image , const int &cursorPosition = -1 ) const;
 
 private:
 	void clear();
-	void smoothCurve( int smoothingRadius );
+	void smoothCurve(QVector<iCoord2D> &curve, int smoothingRadius );
 	void extractContourPointsAndDominantPoints( const Slice &initialSlice, const iCoord2D &sliceCenter, const int &intensityThreshold, const int &blurredSegmentThickness, const int &smoothingRadius, const iCoord2D &startPoint );
 	void computeMainDominantPoints( const iCoord2D &sliceCenter );
 	void computeContourPolygons();
@@ -37,13 +41,16 @@ private:
 private:
 	QVector<iCoord2D> _datasContourPoints;
 	QVector<iCoord2D> _datasOriginalContourPoints;
-	QVector<iCoord2D> _datasDominantPoints;
-	QVector<iCoord2D> _datasMainDominantPoints;
-	QVector<int> _datasIndexMainDominantPoints;
-	QVector<iCoord2D> _datasMainSupportPoints;
+	QVector<uint> _datasDominantPointsIndex;
+	int _datasLeftMainDominantPointsIndex;
+	int _datasRightMainDominantPointsIndex;
+	rCoord2D _datasLeftMainSupportPoint;
+	rCoord2D _datasRightMainSupportPoint;
 
 	QPolygon _contourPolygonBottom;
 	QPolygon _contourPolygonTop;
+
+	static iCoord2D nullICoord2D;
 };
 
 #endif // CONTOURCURVESLICE_H

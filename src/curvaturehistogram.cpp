@@ -14,9 +14,19 @@ CurvatureHistogram::~CurvatureHistogram()
 {
 }
 
+const QVector<uint> &CurvatureHistogram::dominantPoints() const
+{
+	return _dominantPointIndex;
+}
+
 /**********************************
  * Public setters
  **********************************/
+void CurvatureHistogram::clear()
+{
+	Histogram<qreal>::clear();
+	_dominantPointIndex.clear();
+}
 
 void CurvatureHistogram::construct( const ContourCurveSlice &contour, const int &curvatureWidth )
 {
@@ -28,6 +38,8 @@ void CurvatureHistogram::construct( const ContourCurveSlice &contour, const int 
 
 	if ( nbPoints > 0 )
 	{
+		_dominantPointIndex = contour.dominantPointIndex();
+
 		QTemporaryFile fileContours("TKDetection_XXXXXX.ctr");
 		if ( !fileContours.open() )
 		{
@@ -66,13 +78,11 @@ void CurvatureHistogram::construct( const ContourCurveSlice &contour, const int 
 			QTextStream streamCurvature(&fileCurvature);
 			streamCurvature.readLine();
 			int temp;
-			qreal curvature;
 
 			resize(nbPoints);
 			for ( i=0 ; i<nbPoints ; ++i )
 			{
-				streamCurvature >> temp >> temp >> curvature;
-				(*this)[i] = curvature;
+				streamCurvature >> temp >> temp >> (*this)[i];
 			}
 
 			fileCurvature.close();

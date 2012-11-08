@@ -13,8 +13,10 @@ namespace Ui
 }
 
 class ContourCurveBillon;
+class CurvatureHistogram;
 class KnotAreaHistogram;
 class PieChart;
+class PlotCurvatureHistogram;
 class PlotKnotAreaHistogram;
 class PlotSectorHistogram;
 class PlotSliceHistogram;
@@ -39,6 +41,7 @@ private slots:
 	void closeImage();
 	void drawSlice();
 	void setSlice( const int &sliceNumber );
+	void moveContourCursor( const int &position );
 	void setTypeOfView( const int &type );
 	void updateSliceHistogram();
 	void updatePith();
@@ -117,6 +120,9 @@ private:
 
 	KnotAreaHistogram *_knotAreaHistogram;
 	PlotKnotAreaHistogram *_plotKnotAreaHistogram;
+
+	CurvatureHistogram *_curvatureHistogram;
+	PlotCurvatureHistogram *_plotCurvatureHistogram;
 
 	ContourCurveBillon *_contourCurveBillon;
 

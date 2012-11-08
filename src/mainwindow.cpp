@@ -7,6 +7,7 @@
 #include "inc/connexcomponentextractor.h"
 #include "inc/contourcurvebillon.h"
 #include "inc/contourcurveslice.h"
+#include "inc/curvaturehistogram.h"
 #include "inc/datexport.h"
 #include "inc/define.h"
 #include "inc/dicomreader.h"
@@ -18,6 +19,7 @@
 #include "inc/pgm3dexport.h"
 #include "inc/piechart.h"
 #include "inc/piepart.h"
+#include "inc/plotcurvaturehistogram.h"
 #include "inc/plotknotareahistogram.h"
 #include "inc/plotsectorhistogram.h"
 #include "inc/plotslicehistogram.h"
@@ -41,10 +43,12 @@
 #include <qwt_polar_grid.h>
 #include <qwt_round_scale_draw.h>
 
-MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::MainWindow), _billon(0), _componentBillon(0),
-	_sliceView(new SliceView()), _sliceHistogram(new SliceHistogram()), _plotSliceHistogram(new PlotSliceHistogram()),
-	_pieChart(new PieChart(360)), _sectorHistogram(new SectorHistogram()), _plotSectorHistogram(new PlotSectorHistogram()), _knotAreaHistogram(new KnotAreaHistogram()),
-	_plotKnotAreaHistogram(new PlotKnotAreaHistogram()), _contourCurveBillon(0), _currentSlice(0), _currentMaximum(0), _currentSector(0)
+MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::MainWindow), _billon(0), _componentBillon(0), _sliceView(new SliceView()),
+	_sliceHistogram(new SliceHistogram()), _plotSliceHistogram(new PlotSliceHistogram()),
+	_pieChart(new PieChart(360)), _sectorHistogram(new SectorHistogram()), _plotSectorHistogram(new PlotSectorHistogram()),
+	_knotAreaHistogram(new KnotAreaHistogram()), _plotKnotAreaHistogram(new PlotKnotAreaHistogram()),
+	_curvatureHistogram(new CurvatureHistogram()), _plotCurvatureHistogram(new PlotCurvatureHistogram()),
+	_contourCurveBillon(0), _currentSlice(0), _currentMaximum(0), _currentSector(0)
 {
 	_ui->setupUi(this);
 //	setCorner(Qt::TopLeftCorner,Qt::LeftDockWidgetArea);
@@ -90,11 +94,13 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 	grid->attach(_ui->_polarSectorHistogram);
 
 	_plotKnotAreaHistogram->attach(_ui->_plotKnotAreaHistogram);
+	_plotCurvatureHistogram->attach(_ui->_plotCurvatureHistogram);
 
 	/**** Mise en place de la communication MVC ****/
 
 	// Évènements déclenchés par le slider de n° de coupe
 	QObject::connect(_ui->_sliderSelectSlice, SIGNAL(valueChanged(int)), this, SLOT(setSlice(int)));
+	QObject::connect(_ui->_sliderContour, SIGNAL(valueChanged(int)), this, SLOT(moveContourCursor(int)));
 
 	// Évènements déclenchés par les boutons de sélection de la vue
 	QObject::connect(_ui->_comboSliceType, SIGNAL(currentIndexChanged(int)), this, SLOT(setTypeOfView(int)));
@@ -157,6 +163,8 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 	QObject::connect(_ui->_sliderMinimalSizeOf2DConnexComponents, SIGNAL(valueChanged(int)), _ui->_spinMinimalSizeOf2DConnexComponents, SLOT(setValue(int)));
 	QObject::connect(_ui->_spinMinimalSizeOf2DConnexComponents, SIGNAL(valueChanged(int)), _ui->_sliderMinimalSizeOf2DConnexComponents, SLOT(setValue(int)));
 	QObject::connect(_ui->_spinContourSmoothingRadius, SIGNAL(valueChanged(int)), this, SLOT(drawSlice()));
+	QObject::connect(_ui->_sliderCurvatureWidth, SIGNAL(valueChanged(int)), _ui->_spinCurvatureWidth, SLOT(setValue(int)));
+	QObject::connect(_ui->_spinCurvatureWidth, SIGNAL(valueChanged(int)), _ui->_sliderCurvatureWidth, SLOT(setValue(int)));
 
 	// Évènements déclenchés par la souris sur le visualiseur de coupes
 	QObject::connect(&_sliceZoomer, SIGNAL(zoomFactorChanged(qreal,QPoint)), this, SLOT(zoomInSliceView(qreal,QPoint)));
@@ -198,6 +206,8 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 MainWindow::~MainWindow()
 {
 	if ( _contourCurveBillon != 0 ) delete _contourCurveBillon;
+	delete _plotCurvatureHistogram;
+	delete _curvatureHistogram;
 	delete _plotSectorHistogram;
 	delete _sectorHistogram;
 	delete _pieChart;
@@ -329,7 +339,7 @@ void MainWindow::drawSlice()
 					if ( _ui->_checkEnableConnexComponents->isChecked() && _contourCurveBillon != 0 )
 					{
 						SliceAlgorithm::draw(_contourCurveBillon->knotBillon().slice(_currentSlice-_componentBillon->zPos()), _mainPix, 0 );
-						_contourCurveBillon->contour(_currentSlice-_componentBillon->zPos()).draw( _mainPix );
+						_contourCurveBillon->contour(_currentSlice-_componentBillon->zPos()).draw( _mainPix, _ui->_sliderContour->maximum() != 0 ? _ui->_sliderContour->value() : -1 );
 					}
 				}
 			}
@@ -349,10 +359,32 @@ void MainWindow::setSlice( const int &sliceNumber )
 	_ui->_labelSliceNumber->setNum(sliceNumber);
 	_plotSliceHistogram->moveCursor(sliceNumber);
 	_ui->_plotSliceHistogram->replot();
-	if ( !_knotAreaHistogram->intervals().isEmpty() && _sliceHistogram->interval(_ui->_comboSelectSliceInterval->currentIndex()-1).containsClosed(sliceNumber) )
+	_ui->_sliderContour->setMaximum(0);
+	if ( _ui->_comboSelectSliceInterval->currentIndex()>0 && _sliceHistogram->interval(_ui->_comboSelectSliceInterval->currentIndex()-1).containsClosed(sliceNumber) )
 	{
-		_plotKnotAreaHistogram->moveCursor(sliceNumber-_sliceHistogram->interval(_ui->_comboSelectSliceInterval->currentIndex()-1).min());
-		_ui->_plotKnotAreaHistogram->replot();
+		if ( !_knotAreaHistogram->intervals().isEmpty() )
+		{
+			_plotKnotAreaHistogram->moveCursor(sliceNumber-_sliceHistogram->interval(_ui->_comboSelectSliceInterval->currentIndex()-1).min());
+			_ui->_plotKnotAreaHistogram->replot();
+		}
+		if ( _contourCurveBillon != 0 )
+		{
+			_curvatureHistogram->construct( _contourCurveBillon->contour(sliceNumber-_componentBillon->zPos()), _ui->_spinCurvatureWidth->value() );
+
+			_plotCurvatureHistogram->update(*_curvatureHistogram);
+			_ui->_sliderContour->setMaximum(_curvatureHistogram->size()-1);
+			moveContourCursor(sliceNumber-_componentBillon->zPos());
+		}
+	}
+	drawSlice();
+}
+
+void MainWindow::moveContourCursor( const int &position )
+{
+	if ( _contourCurveBillon != 0 && _sliceHistogram->interval(_ui->_comboSelectSliceInterval->currentIndex()-1).containsClosed(_currentSlice) )
+	{
+		_plotCurvatureHistogram->moveCursor(position);
+		_ui->_plotCurvatureHistogram->replot();
 	}
 	drawSlice();
 }
