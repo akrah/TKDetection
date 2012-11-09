@@ -7,7 +7,7 @@
 #include <QTemporaryFile>
 #include <QPainter>
 
-iCoord2D ContourCurveSlice::nullICoord2D = iCoord2D(-1,-1);
+iCoord2D ContourCurveSlice::invalidICoord2D = iCoord2D(-1,-1);
 
 ContourCurveSlice::ContourCurveSlice()
 {
@@ -28,7 +28,7 @@ const QVector<iCoord2D> &ContourCurveSlice::contourPoints() const
 
 const iCoord2D &ContourCurveSlice::dominantPoint( const uint &index ) const
 {
-	Q_ASSERT_X( index<static_cast<uint>(_datasDominantPointsIndex.size()), "Histogram::mainDominantPoint", "Il n'y a que 2 points domiannts principaux" );
+	Q_ASSERT_X( index<static_cast<uint>(_datasDominantPointsIndex.size()), "Histogram::mainDominantPoint", "Le point dominants demandé n'existe pas" );
 	return _datasContourPoints[_datasDominantPointsIndex[index]];
 }
 
@@ -39,12 +39,12 @@ const QVector<uint> &ContourCurveSlice::dominantPointIndex() const
 
 const iCoord2D &ContourCurveSlice::leftMainDominantPoint() const
 {
-	return _datasLeftMainDominantPointsIndex != -1 ? _datasContourPoints[_datasLeftMainDominantPointsIndex] : nullICoord2D;
+	return _datasLeftMainDominantPointsIndex != -1 ? _datasContourPoints[_datasLeftMainDominantPointsIndex] : invalidICoord2D;
 }
 
 const iCoord2D &ContourCurveSlice::rightMainDominantPoint() const
 {
-	return _datasRightMainDominantPointsIndex != -1 ? _datasContourPoints[_datasRightMainDominantPointsIndex] : nullICoord2D;
+	return _datasRightMainDominantPointsIndex != -1 ? _datasContourPoints[_datasRightMainDominantPointsIndex] : invalidICoord2D;
 }
 
 const int &ContourCurveSlice::leftMainDominantPointIndex() const
@@ -71,7 +71,7 @@ const rCoord2D &ContourCurveSlice::rightMainSupportPoint() const
  * Public setters
  **********************************/
 
-void ContourCurveSlice::compute( const Slice &initialSlice, Slice &resultSlice, const iCoord2D &sliceCenter, const int &intensityThreshold, const int &blurredSegmentThickness, const int &smoothingRadius, const iCoord2D &startPoint )
+void ContourCurveSlice::compute( Slice &resultSlice, const Slice &initialSlice, const iCoord2D &sliceCenter, const int &intensityThreshold, const int &blurredSegmentThickness, const int &smoothingRadius, const iCoord2D &startPoint )
 {
 	clear();
 	extractContourPointsAndDominantPoints( initialSlice, sliceCenter, intensityThreshold, blurredSegmentThickness, smoothingRadius, startPoint );
@@ -80,7 +80,7 @@ void ContourCurveSlice::compute( const Slice &initialSlice, Slice &resultSlice, 
 	updateSlice( initialSlice, resultSlice, sliceCenter, intensityThreshold );
 }
 
-void ContourCurveSlice::computeOldMethod( const Slice &initialSlice, Slice &resultSlice, const iCoord2D &sliceCenter, const int &intensityThreshold, const int &smoothingRadius, const iCoord2D &startPoint )
+void ContourCurveSlice::computeOldMethod( Slice &resultSlice, const Slice &initialSlice, const iCoord2D &sliceCenter, const int &intensityThreshold, const int &smoothingRadius, const iCoord2D &startPoint )
 {
 	clear();
 
@@ -243,14 +243,17 @@ void ContourCurveSlice::smoothCurve( QVector<iCoord2D> &curve, int smoothingRadi
 				smoothingValueX += datasContourForSmoothing[i].x;
 				smoothingValueY += datasContourForSmoothing[i].y;
 			}
-			curve[0].x = smoothingValueX / qSmoothingDiameter;
-			curve[0].y = smoothingValueY / qSmoothingDiameter;
+
+			curve.clear();
+			curve << iCoord2D( smoothingValueX / qSmoothingDiameter, smoothingValueY / qSmoothingDiameter );
+			iCoord2D currentCoord;
 			for ( int i=1 ; i<nbPoints ; ++i )
 			{
 				smoothingValueX = smoothingValueX - datasContourForSmoothing[i-1].x + datasContourForSmoothing[i+smoothingDiameter-1].x;
 				smoothingValueY = smoothingValueY - datasContourForSmoothing[i-1].y + datasContourForSmoothing[i+smoothingDiameter-1].y;
-				curve[i].x = smoothingValueX / qSmoothingDiameter;
-				curve[i].y = smoothingValueY / qSmoothingDiameter;
+				currentCoord.x = smoothingValueX / qSmoothingDiameter;
+				currentCoord.y = smoothingValueY / qSmoothingDiameter;
+				if ( curve.last() != currentCoord ) curve << currentCoord;
 			}
 		}
 	}
@@ -320,80 +323,84 @@ void ContourCurveSlice::computeMainDominantPoints( const iCoord2D &sliceCenter )
 	bool angleOk;
 
 	nbDominantPoints = _datasDominantPointsIndex.size();
-	if ( nbDominantPoints > 0 ) _datasDominantPointsIndex << _datasDominantPointsIndex[0];
-	nbDominantPoints++;
 
-	// Point dominant dans le sens du contour
-	index = 1;
-	distanceP0Pm1 = sliceCenter.euclideanDistance(dominantPoint(index-1));
-	distanceP0Px = sliceCenter.euclideanDistance(dominantPoint(index));
-	distanceP0Pp1 = sliceCenter.euclideanDistance(dominantPoint(index+1));
-	distanceP0Pp2 = sliceCenter.euclideanDistance(dominantPoint(index+2));
-	angleOk = (distanceP0Pp1-distanceP0Px>10) || (distanceP0Pm1<distanceP0Pp1 && (distanceP0Px<distanceP0Pp1 || distanceP0Px<distanceP0Pp2) );
-	if ( angleOk ) ++index;
-	while ( angleOk && index < nbDominantPoints-1 )
+	if ( nbDominantPoints > 3 )
 	{
-		distanceP0Pm2 = distanceP0Pm1;
-		distanceP0Pm1 = distanceP0Px;
-		distanceP0Px = distanceP0Pp1;
+		_datasDominantPointsIndex << _datasDominantPointsIndex[0];
+		nbDominantPoints++;
+
+		// Point dominant dans le sens du contour
+		index = 1;
+		distanceP0Pm1 = sliceCenter.euclideanDistance(dominantPoint(index-1));
+		distanceP0Px = sliceCenter.euclideanDistance(dominantPoint(index));
 		distanceP0Pp1 = sliceCenter.euclideanDistance(dominantPoint(index+1));
-		angleOk = (distanceP0Pp1-distanceP0Px>10) || (distanceP0Pm2<distanceP0Pm1 && distanceP0Pm1<distanceP0Pp1 && distanceP0Px<distanceP0Pp1);
+		distanceP0Pp2 = sliceCenter.euclideanDistance(dominantPoint(index+2));
+		angleOk = (distanceP0Pp1-distanceP0Px>10) || (distanceP0Pm1<distanceP0Pp1 && (distanceP0Px<distanceP0Pp1 || distanceP0Px<distanceP0Pp2) );
 		if ( angleOk ) ++index;
-	}
-	oldIndex = index;
-	// Si le point dominant trouvé est correct
-	if ( index < nbDominantPoints-1 )
-	{
-		_datasLeftMainDominantPointsIndex = _datasDominantPointsIndex[index];
-
-		// Calcul du point dominant support du point dominant principal
-		_datasLeftMainSupportPoint = rCoord2D(0.,0.);
-		while ( index >= 0 )
+		while ( angleOk && index < nbDominantPoints-1 )
 		{
-			_datasLeftMainSupportPoint.x += dominantPoint(index).x;
-			_datasLeftMainSupportPoint.y += dominantPoint(index).y;
-			index--;
+			distanceP0Pm2 = distanceP0Pm1;
+			distanceP0Pm1 = distanceP0Px;
+			distanceP0Px = distanceP0Pp1;
+			distanceP0Pp1 = sliceCenter.euclideanDistance(dominantPoint(index+1));
+			angleOk = (distanceP0Pp1-distanceP0Px>10) || (distanceP0Pm2<distanceP0Pm1 && distanceP0Pm1<distanceP0Pp1 && distanceP0Px<distanceP0Pp1);
+			if ( angleOk ) ++index;
 		}
-		_datasLeftMainSupportPoint.x /= (oldIndex + 1);
-		_datasLeftMainSupportPoint.y /= (oldIndex + 1);
-	}
-
-	// Point dominant dans le sens contraire du contour
-	index = nbDominantPoints-2;
-	distanceP0Pm1 = sliceCenter.euclideanDistance(dominantPoint(index+1));
-	distanceP0Px = sliceCenter.euclideanDistance(dominantPoint(index));
-	distanceP0Pp1 = sliceCenter.euclideanDistance(dominantPoint(index-1));
-	distanceP0Pp2 = sliceCenter.euclideanDistance(dominantPoint(index-2));
-	angleOk = (distanceP0Pp1-distanceP0Px>10) || (distanceP0Pm1<distanceP0Pp1 && (distanceP0Px<distanceP0Pp1 || distanceP0Px<distanceP0Pp2) );
-	if ( angleOk ) index--;
-	while ( angleOk && index > oldIndex )
-	{
-		distanceP0Pm2 = distanceP0Pm1;
-		distanceP0Pm1 = distanceP0Px;
-		distanceP0Px = distanceP0Pp1;
-		distanceP0Pp1 = sliceCenter.euclideanDistance(dominantPoint(index-1));
-		angleOk = (distanceP0Pp1-distanceP0Px>10) || (distanceP0Pm2<distanceP0Pm1 && distanceP0Pm1<distanceP0Pp1 && distanceP0Px<distanceP0Pp1);
-		if ( angleOk ) index--;
-	}
-	// Si le point dominant trouvé est correct
-	if ( index > oldIndex )
-	{
 		oldIndex = index;
-		_datasRightMainDominantPointsIndex = _datasDominantPointsIndex[index];
-
-		// Calcul du point dominant support du point dominant principal
-		_datasRightMainSupportPoint = rCoord2D(0.,0.);
-		while ( index != 1 )
+		// Si le point dominant trouvé est correct
+		if ( index < nbDominantPoints-1 )
 		{
-			_datasRightMainSupportPoint.x += dominantPoint(index).x;
-			_datasRightMainSupportPoint.y += dominantPoint(index).y;
-			index = (index+1)%nbDominantPoints;
-		}
-		_datasRightMainSupportPoint.x /= (nbDominantPoints - oldIndex + 1);
-		_datasRightMainSupportPoint.y /= (nbDominantPoints - oldIndex + 1);
-	}
+			_datasLeftMainDominantPointsIndex = _datasDominantPointsIndex[index];
 
-	_datasDominantPointsIndex.remove(nbDominantPoints-1);
+			// Calcul du point dominant support du point dominant principal
+			_datasLeftMainSupportPoint = rCoord2D(0.,0.);
+			while ( index >= 0 )
+			{
+				_datasLeftMainSupportPoint.x += dominantPoint(index).x;
+				_datasLeftMainSupportPoint.y += dominantPoint(index).y;
+				index--;
+			}
+			_datasLeftMainSupportPoint.x /= (oldIndex + 1);
+			_datasLeftMainSupportPoint.y /= (oldIndex + 1);
+		}
+
+		// Point dominant dans le sens contraire du contour
+		index = nbDominantPoints-2;
+		distanceP0Pm1 = sliceCenter.euclideanDistance(dominantPoint(index+1));
+		distanceP0Px = sliceCenter.euclideanDistance(dominantPoint(index));
+		distanceP0Pp1 = sliceCenter.euclideanDistance(dominantPoint(index-1));
+		distanceP0Pp2 = sliceCenter.euclideanDistance(dominantPoint(index-2));
+		angleOk = (distanceP0Pp1-distanceP0Px>10) || (distanceP0Pm1<distanceP0Pp1 && (distanceP0Px<distanceP0Pp1 || distanceP0Px<distanceP0Pp2) );
+		if ( angleOk ) index--;
+		while ( angleOk && index > oldIndex )
+		{
+			distanceP0Pm2 = distanceP0Pm1;
+			distanceP0Pm1 = distanceP0Px;
+			distanceP0Px = distanceP0Pp1;
+			distanceP0Pp1 = sliceCenter.euclideanDistance(dominantPoint(index-1));
+			angleOk = (distanceP0Pp1-distanceP0Px>10) || (distanceP0Pm2<distanceP0Pm1 && distanceP0Pm1<distanceP0Pp1 && distanceP0Px<distanceP0Pp1);
+			if ( angleOk ) index--;
+		}
+		// Si le point dominant trouvé est correct
+		if ( index > oldIndex )
+		{
+			oldIndex = index;
+			_datasRightMainDominantPointsIndex = _datasDominantPointsIndex[index];
+
+			// Calcul du point dominant support du point dominant principal
+			_datasRightMainSupportPoint = rCoord2D(0.,0.);
+			while ( index != 1 )
+			{
+				_datasRightMainSupportPoint.x += dominantPoint(index).x;
+				_datasRightMainSupportPoint.y += dominantPoint(index).y;
+				index = (index+1)%nbDominantPoints;
+			}
+			_datasRightMainSupportPoint.x /= (nbDominantPoints - oldIndex + 1);
+			_datasRightMainSupportPoint.y /= (nbDominantPoints - oldIndex + 1);
+		}
+
+		_datasDominantPointsIndex.remove(nbDominantPoints-1);
+	}
 }
 
 void ContourCurveSlice::computeContourPolygons()

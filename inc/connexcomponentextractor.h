@@ -5,7 +5,9 @@
 
 namespace ConnexComponentExtractor
 {
+	void extractConnexComponents( Billon &resultBillon, const Billon &billon, const int &minimumSize, const int &threshold );
 	Billon * extractConnexComponents( const Billon &billon, const int &minimumSize, const int &threshold );
+	void  extractConnexComponents( Slice &resulSlice, const Slice &slice, const int &minimumSize, const int &threshold );
 	Slice *  extractConnexComponents( const Slice &slice, const int &minimumSize, const int &threshold );
 }
 

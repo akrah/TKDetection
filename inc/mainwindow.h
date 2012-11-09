@@ -41,9 +41,11 @@ private slots:
 	void closeImage();
 	void drawSlice();
 	void setSlice( const int &sliceNumber );
+	void moveKnotAreaCursor( const int &position );
 	void moveContourCursor( const int &position );
 	void setTypeOfView( const int &type );
 	void updateSliceHistogram();
+	void updateCurvatureHistogram();
 	void updatePith();
 	void setMinimumOfSliceIntervalToCurrentSlice();
 	void setMaximumOfSliceIntervalToCurrentSlice();

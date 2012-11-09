@@ -21,7 +21,14 @@ namespace ConnexComponentExtractor
 		int twoPassAlgorithm( const Slice &oldSlice, const Slice &currentSlice, Slice &labels, QMap<int, QList<iCoord3D> > &connexComponentList, int k, int nbLabel, const __billon_type__ &threshold );
 	}
 
-	Billon * extractConnexComponents( const Billon & billon, const int & minimumSize, const int & threshold )
+	Billon * extractConnexComponents( const Billon &billon, const int &minimumSize, const int &threshold )
+	{
+		Billon* components = new Billon(billon);
+		extractConnexComponents(*components,billon,minimumSize,threshold);
+		return components;
+	}
+
+	void extractConnexComponents( Billon &resultBillon, const Billon & billon, const int & minimumSize, const int & threshold )
 	{
 		const uint width = billon.n_cols;
 		const uint height = billon.n_rows;
@@ -47,31 +54,34 @@ namespace ConnexComponentExtractor
 		delete labels;
 		delete oldSlice;
 
-		Billon* components = new Billon(billon);
-		components->fill(0);
-
 		QMap<int, QList<iCoord3D> >::ConstIterator iterComponents;
 		QList<iCoord3D>::ConstIterator iterCoords;
 		int counter = 1;
+		resultBillon.fill(0);
 		for ( iterComponents = connexComponentList.constBegin() ; iterComponents != connexComponentList.constEnd() ; ++iterComponents )
 		{
 			if ( iterComponents.value().size() > minimumSize )
 			{
 				for ( iterCoords = iterComponents.value().constBegin() ; iterCoords != iterComponents.value().constEnd() ; ++iterCoords )
 				{
-					components->at((*iterCoords).y,(*iterCoords).x,(*iterCoords).z) = counter;
+					resultBillon.at((*iterCoords).y,(*iterCoords).x,(*iterCoords).z) = counter;
 				}
 				++counter;
 			}
 		}
 		qDebug() << QObject::tr("Nombre de composantes = %1").arg(counter-1);
-		components->setMinValue(0);
-		components->setMaxValue(counter-1);
-
-		return components;
+		resultBillon.setMinValue(0);
+		resultBillon.setMaxValue(counter-1);
 	}
 
 	Slice * extractConnexComponents( const Slice & slice, const int & minimumSize, const int & threshold )
+	{
+		Slice *bigestComponentsInSlice = new Slice(slice.n_cols,slice.n_rows);
+		extractConnexComponents( *bigestComponentsInSlice, slice, minimumSize, threshold );
+		return bigestComponentsInSlice;
+	}
+
+	void extractConnexComponents( Slice &resultSlice, const Slice & slice, const int & minimumSize, const int & threshold )
 	{
 		const uint width = slice.n_cols;
 		const uint height = slice.n_rows;
@@ -206,24 +216,21 @@ namespace ConnexComponentExtractor
 			}
 		}
 
-		Slice *bigestComponentsInSlice = new Slice(width,height);
-		bigestComponentsInSlice->fill(0);
 		QMap<int, QList<iCoord2D> >::ConstIterator iterComponents;
 		QList<iCoord2D>::ConstIterator iterCoords;
 		int counter = 1;
+		resultSlice.fill(0);
 		for ( iterComponents = connexComponentList.constBegin() ; iterComponents != connexComponentList.constEnd() ; ++iterComponents )
 		{
 			if ( iterComponents.value().size() > minimumSize )
 			{
 				for ( iterCoords = iterComponents.value().constBegin() ; iterCoords != iterComponents.value().constEnd() ; ++ iterCoords )
 				{
-					bigestComponentsInSlice->at((*iterCoords).y,(*iterCoords).x) = counter;
+					resultSlice.at((*iterCoords).y,(*iterCoords).x) = counter;
 				}
 				++counter;
 			}
 		}
-
-		return bigestComponentsInSlice;
 	}
 
 	namespace

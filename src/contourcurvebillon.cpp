@@ -2,7 +2,7 @@
 
 #include "inc/contourcurveslice.h"
 
-ContourCurveBillon::ContourCurveBillon(const Billon &billon) : _initialBillon(billon), _resultBillon(billon)
+ContourCurveBillon::ContourCurveBillon()
 {
 }
 
@@ -26,11 +26,22 @@ const ContourCurveSlice &ContourCurveBillon::contour( const uint &sliceIndex ) c
 	return _contourCurves[sliceIndex];
 }
 
-void ContourCurveBillon::compute( const int &intensityThreshold, const int &blurredSegmentThickness, const int &smoothingRadius )
+void ContourCurveBillon::clear()
 {
-	_contourCurves.resize(_initialBillon.n_slices);
-	for ( uint k=0 ; k<_initialBillon.n_slices ; ++k )
+	_contourCurves.clear();
+}
+
+bool ContourCurveBillon::isEmpty()
+{
+	return _contourCurves.isEmpty();
+}
+
+void ContourCurveBillon::compute( const Billon &billon, const int &intensityThreshold, const int &blurredSegmentThickness, const int &smoothingRadius )
+{
+	_resultBillon = billon;
+	_contourCurves.resize(billon.n_slices);
+	for ( uint k=0 ; k<billon.n_slices ; ++k )
 	{
-		_contourCurves[k].compute(_initialBillon.slice(k), _resultBillon.slice(k), _resultBillon.pithCoord(k), intensityThreshold, blurredSegmentThickness, smoothingRadius );
+		_contourCurves[k].compute( _resultBillon.slice(k), billon.slice(k), billon.pithCoord(k), intensityThreshold, blurredSegmentThickness, smoothingRadius );
 	}
 }

@@ -26,8 +26,8 @@ public:
 	const rCoord2D &leftMainSupportPoint() const;
 	const rCoord2D &rightMainSupportPoint() const;
 
-	void compute( const Slice &initialSlice, Slice &resultSlice, const iCoord2D &sliceCenter, const int &intensityThreshold, const int &blurredSegmentThickness, const int &smoothingRadius, const iCoord2D &startPoint = iCoord2D(-1,-1) );
-	void computeOldMethod( const Slice &initialSlice, Slice &resultSlice, const iCoord2D &sliceCenter, const int &intensityThreshold, const int &smoothingRadius, const iCoord2D &startPoint = iCoord2D(-1,-1) );
+	void compute( Slice &resultSlice, const Slice &initialSlice, const iCoord2D &sliceCenter, const int &intensityThreshold, const int &blurredSegmentThickness, const int &smoothingRadius, const iCoord2D &startPoint = iCoord2D(-1,-1) );
+	void computeOldMethod( Slice &resultSlice, const Slice &initialSlice, const iCoord2D &sliceCenter, const int &intensityThreshold, const int &smoothingRadius, const iCoord2D &startPoint = iCoord2D(-1,-1) );
 	void draw(QImage &image , const int &cursorPosition = -1 ) const;
 
 private:
@@ -50,7 +50,7 @@ private:
 	QPolygon _contourPolygonBottom;
 	QPolygon _contourPolygonTop;
 
-	static iCoord2D nullICoord2D;
+	static iCoord2D invalidICoord2D;
 };
 
 #endif // CONTOURCURVESLICE_H

@@ -10,17 +10,19 @@ class ContourCurveSlice;
 class ContourCurveBillon
 {
 public:
-	ContourCurveBillon( const Billon &billon );
+	ContourCurveBillon();
 	~ContourCurveBillon();
 
 	const Billon &knotBillon() const;
 	const QVector<ContourCurveSlice> &contours() const;
 	const ContourCurveSlice &contour( const uint &sliceIndex ) const;
 
-	void compute(const int &intensityThreshold, const int &blurredSegmentThickness, const int &smoothingRadius );
+	void clear();
+	bool isEmpty();
+
+	void compute( const Billon &billon, const int &intensityThreshold, const int &blurredSegmentThickness, const int &smoothingRadius );
 
 private:
-	const Billon &_initialBillon;
 	Billon _resultBillon;
 
 	QVector<ContourCurveSlice> _contourCurves;
