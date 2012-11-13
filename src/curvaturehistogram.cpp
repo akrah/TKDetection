@@ -1,6 +1,6 @@
 #include "inc/curvaturehistogram.h"
 
-#include "inc/contourcurveslice.h"
+#include "inc/contourslice.h"
 
 #include <QTemporaryFile>
 #include <QProcess>
@@ -28,7 +28,7 @@ void CurvatureHistogram::clear()
 	_dominantPointIndex.clear();
 }
 
-void CurvatureHistogram::construct( const ContourCurveSlice &contour, const int &curvatureWidth )
+void CurvatureHistogram::construct( const ContourSlice &contour, const int &curvatureWidth )
 {
 	const QVector<iCoord2D> &contourPoints = contour.contourPoints();
 	const int nbPoints = contourPoints.size();

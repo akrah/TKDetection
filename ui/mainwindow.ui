@@ -275,7 +275,7 @@
      <item>
       <widget class="QTabWidget" name="_tabs">
        <property name="currentIndex">
-        <number>1</number>
+        <number>4</number>
        </property>
        <widget class="QWidget" name="_tabAffichage">
         <attribute name="title">
@@ -1636,15 +1636,15 @@ l'intervalle angulaire</string>
          <item>
           <widget class="QToolBox" name="toolBox">
            <property name="currentIndex">
-            <number>5</number>
+            <number>4</number>
            </property>
            <widget class="QWidget" name="page">
             <property name="geometry">
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>381</width>
-              <height>86</height>
+              <width>441</width>
+              <height>190</height>
              </rect>
             </property>
             <attribute name="label">
@@ -1715,8 +1715,8 @@ l'intervalle angulaire</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>181</width>
-              <height>123</height>
+              <width>441</width>
+              <height>190</height>
              </rect>
             </property>
             <attribute name="label">
@@ -1817,8 +1817,8 @@ l'intervalle angulaire</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>377</width>
-              <height>179</height>
+              <width>441</width>
+              <height>190</height>
              </rect>
             </property>
             <attribute name="label">
@@ -1940,8 +1940,8 @@ l'intervalle angulaire</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>214</width>
-              <height>121</height>
+              <width>441</width>
+              <height>190</height>
              </rect>
             </property>
             <attribute name="label">
@@ -2023,8 +2023,8 @@ l'intervalle angulaire</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>279</width>
-              <height>51</height>
+              <width>441</width>
+              <height>190</height>
              </rect>
             </property>
             <attribute name="label">
@@ -2032,11 +2032,34 @@ l'intervalle angulaire</string>
             </attribute>
             <layout class="QVBoxLayout" name="verticalLayout_3">
              <item>
-              <widget class="QPushButton" name="_buttonExportToV3D">
-               <property name="text">
-                <string>Exporter le nœud courant segmenté</string>
-               </property>
-              </widget>
+              <layout class="QHBoxLayout" name="horizontalLayout_16">
+               <item>
+                <widget class="QComboBox" name="_comboExportToV3DType">
+                 <item>
+                  <property name="text">
+                   <string>Le nœud courant segmenté</string>
+                  </property>
+                 </item>
+                 <item>
+                  <property name="text">
+                   <string>Les nœuds segmentés de l'intervalle de coupe courant</string>
+                  </property>
+                 </item>
+                 <item>
+                  <property name="text">
+                   <string>Les nœuds segmentés du billon</string>
+                  </property>
+                 </item>
+                </widget>
+               </item>
+               <item>
+                <widget class="QPushButton" name="_buttonExportToV3D">
+                 <property name="text">
+                  <string>Exporter</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
              </item>
              <item>
               <spacer name="verticalSpacer_2">

@@ -1,5 +1,5 @@
-#ifndef CONTOURCURVESLICE_H
-#define CONTOURCURVESLICE_H
+#ifndef CONTOURSLICE_H
+#define CONTOURSLICE_H
 
 #include "def/def_coordinate.h"
 #include "def/def_billon.h"
@@ -10,11 +10,11 @@
 
 class QImage;
 
-class ContourCurveSlice
+class ContourSlice
 {
 public:
-	ContourCurveSlice();
-	~ContourCurveSlice();
+	ContourSlice();
+	~ContourSlice();
 
 	const QVector<iCoord2D> &contourPoints() const;
 	const iCoord2D &dominantPoint( const uint &index ) const;
@@ -53,4 +53,4 @@ private:
 	static iCoord2D invalidICoord2D;
 };
 
-#endif // CONTOURCURVESLICE_H
+#endif // CONTOURSLICE_H

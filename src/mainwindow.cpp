@@ -5,8 +5,8 @@
 #include "inc/billon.h"
 #include "inc/billonalgorithms.h"
 #include "inc/connexcomponentextractor.h"
-#include "inc/contourcurvebillon.h"
-#include "inc/contourcurveslice.h"
+#include "inc/contourbillon.h"
+#include "inc/contourslice.h"
 #include "inc/curvaturehistogram.h"
 #include "inc/datexport.h"
 #include "inc/define.h"
@@ -37,6 +37,7 @@
 #include <QMessageBox>
 #include <QInputDialog>
 #include <QVector2D>
+#include <QXmlStreamWriter>
 
 #include <qwt_plot_renderer.h>
 #include <qwt_polar_renderer.h>
@@ -48,7 +49,7 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 	_pieChart(new PieChart(360)), _sectorHistogram(new SectorHistogram()), _plotSectorHistogram(new PlotSectorHistogram()),
 	_knotAreaHistogram(new KnotAreaHistogram()), _plotKnotAreaHistogram(new PlotKnotAreaHistogram()),
 	_curvatureHistogram(new CurvatureHistogram()), _plotCurvatureHistogram(new PlotCurvatureHistogram()),
-	_contourCurveBillon(new ContourCurveBillon()), _currentSlice(0), _currentMaximum(0), _currentSector(0)
+	_contourBillon(new ContourBillon()), _currentSlice(0), _currentMaximum(0), _currentSector(0)
 {
 	_ui->setupUi(this);
 //	setCorner(Qt::TopLeftCorner,Qt::LeftDockWidgetArea);
@@ -206,7 +207,7 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 
 MainWindow::~MainWindow()
 {
-	delete _contourCurveBillon;
+	delete _contourBillon;
 	delete _plotCurvatureHistogram;
 	delete _curvatureHistogram;
 	delete _plotSectorHistogram;
@@ -298,23 +299,26 @@ void MainWindow::drawSlice()
 		if ( _billon->hasPith() )
 		{
 			_billon->pith().draw(_mainPix,_currentSlice);
+
+			const iCoord2D &pithCoord = _billon->pithCoord(_currentSlice);
 			if ( _ui->_checkRadiusAroundPith->isChecked() && _ui->_checkRadiusAroundPith->text().toInt() > 0 )
 			{
 				QPainter painter(&_mainPix);
 				painter.setPen(Qt::yellow);
-				painter.drawEllipse(QPointF(_billon->pithCoord(_currentSlice).x,_billon->pithCoord(_currentSlice).y),_ui->_checkRadiusAroundPith->text().toInt(),_ui->_checkRadiusAroundPith->text().toInt());
+				painter.drawEllipse(QPointF(pithCoord.x,pithCoord.y),_ui->_checkRadiusAroundPith->text().toInt(),_ui->_checkRadiusAroundPith->text().toInt());
 			}
 
 			if ( inDrawingArea )
 			{
 				if ( !_sectorHistogram->isEmpty() )
 				{
-					_pieChart->draw(_mainPix, _billon->pithCoord(_currentSlice), _sectorHistogram->intervals());
-					_pieChart->draw(_mainPix, _billon->pithCoord(_currentSlice), _currentSector);
+					_pieChart->draw(_mainPix, pithCoord, _sectorHistogram->intervals());
+					_pieChart->draw(_mainPix, pithCoord, _currentSector);
 				}
 				if ( _componentBillon != 0 )
 				{
-					const Slice &componentSlice = _componentBillon->slice(_currentSlice-_componentBillon->zPos());
+					const uint slicePosition = _currentSlice-_componentBillon->zPos();
+					const Slice &componentSlice = _componentBillon->slice(slicePosition);
 
 					const int &width = componentSlice.n_cols;
 					const int &height = componentSlice.n_rows;
@@ -338,10 +342,10 @@ void MainWindow::drawSlice()
 					}
 					painter.end();
 
-					if ( _ui->_checkEnableConnexComponents->isChecked() && !_contourCurveBillon->isEmpty() )
+					if ( _ui->_checkEnableConnexComponents->isChecked() && !_contourBillon->isEmpty() )
 					{
-						SliceAlgorithm::draw(_contourCurveBillon->knotBillon().slice(_currentSlice-_componentBillon->zPos()), _mainPix, 0 );
-						_contourCurveBillon->contour(_currentSlice-_componentBillon->zPos()).draw( _mainPix, _ui->_sliderContour->maximum() != 0 ? _ui->_sliderContour->value() : -1 );
+						SliceAlgorithm::draw(_contourBillon->knotBillon().slice(slicePosition), _mainPix, 0 );
+						_contourBillon->contour(slicePosition).draw( _mainPix, _ui->_sliderContour->maximum() != 0 ? _ui->_sliderContour->value() : -1 );
 					}
 				}
 			}
@@ -384,7 +388,7 @@ void MainWindow::moveKnotAreaCursor( const int &position )
 
 void MainWindow::moveContourCursor( const int &position )
 {
-	if ( !_contourCurveBillon->isEmpty() && _sliceHistogram->interval(_ui->_comboSelectSliceInterval->currentIndex()-1).containsClosed(_currentSlice) )
+	if ( !_contourBillon->isEmpty() && _sliceHistogram->interval(_ui->_comboSelectSliceInterval->currentIndex()-1).containsClosed(_currentSlice) )
 	{
 		_plotCurvatureHistogram->moveCursor(position);
 		_ui->_plotCurvatureHistogram->replot();
@@ -457,9 +461,9 @@ void MainWindow::updateCurvatureHistogram()
 	_ui->_sliderContour->setValue(0);
 	_ui->_sliderContour->setMaximum(0);
 
-	if ( !_contourCurveBillon->isEmpty() > 0 && !_sliceHistogram->intervals().isEmpty() && _sliceHistogram->interval(_ui->_comboSelectSliceInterval->currentIndex()-1).containsClosed(_currentSlice) )
+	if ( !_contourBillon->isEmpty() > 0 && !_sliceHistogram->intervals().isEmpty() && _sliceHistogram->interval(_ui->_comboSelectSliceInterval->currentIndex()-1).containsClosed(_currentSlice) )
 	{
-		_curvatureHistogram->construct( _contourCurveBillon->contour(_currentSlice-_contourCurveBillon->knotBillon().zPos()), _ui->_spinCurvatureWidth->value() );
+		_curvatureHistogram->construct( _contourBillon->contour(_currentSlice-_contourBillon->knotBillon().zPos()), _ui->_spinCurvatureWidth->value() );
 		_plotCurvatureHistogram->update(*_curvatureHistogram);
 		_ui->_sliderContour->setMaximum(_curvatureHistogram->size()-1);
 		moveContourCursor(_currentSlice-_componentBillon->zPos());
@@ -618,7 +622,7 @@ void MainWindow::selectSliceInterval( const int &index )
 		_componentBillon = 0;
 	}
 
-	_contourCurveBillon->clear();
+	_contourBillon->clear();
 
 	_ui->_comboSelectSectorInterval->clear();
 	_ui->_comboSelectSectorInterval->addItem(tr("Aucun"));
@@ -652,7 +656,7 @@ void MainWindow::selectCurrentSliceInterval()
 	selectSliceInterval(_ui->_comboSelectSliceInterval->currentIndex());
 }
 
-void MainWindow::selectSectorInterval( const int &index )
+void MainWindow::selectSectorInterval(const int &index, const bool &draw )
 {
 	if ( _componentBillon != 0 )
 	{
@@ -660,11 +664,11 @@ void MainWindow::selectSectorInterval( const int &index )
 		_componentBillon = 0;
 	}
 
-	_contourCurveBillon->clear();
+	_contourBillon->clear();
 
 	if ( index > 0 && index <= static_cast<int>(_sectorHistogram->nbIntervals()) && _billon->hasPith() )
 	{
-		const Interval<uint> &sectorInterval = _sectorHistogram->interval(_ui->_comboSelectSectorInterval->currentIndex()-1);
+		const Interval<uint> &sectorInterval = _sectorHistogram->interval(index-1);
 		const Interval<uint> &sliceInterval = _sliceHistogram->interval(_ui->_comboSelectSliceInterval->currentIndex()-1);
 		const Interval<int> intensityInterval(_ui->_spinSectorThresholding->value(), _ui->_spinMaxIntensity->value());
 		const uint &firstSlice = sliceInterval.min();
@@ -708,10 +712,10 @@ void MainWindow::selectSectorInterval( const int &index )
 
 		if ( _ui->_checkEnableConnexComponents->isChecked() )
 		{
-			_contourCurveBillon->compute( *_componentBillon, 0, _ui->_spinBlurredSegmentsThickness->value(), _ui->_spinContourSmoothingRadius->value() );
+			_contourBillon->compute( *_componentBillon, 0, _ui->_spinBlurredSegmentsThickness->value(), _ui->_spinContourSmoothingRadius->value() );
 		}
 	}
-	drawSlice();
+	if (draw) drawSlice();
 }
 
 void MainWindow::selectCurrentSectorInterval()
@@ -814,7 +818,14 @@ void MainWindow::exportToPgm3D()
 
 void MainWindow::exportToV3D()
 {
-	exportCurrentSegmentedKnotToV3D();
+	int type = _ui->_comboExportToV3DType->currentIndex();
+	switch (type)
+	{
+		case 0: exportCurrentSegmentedKnotToV3D();	break;
+		case 1: exportSegmentedKnotsOfCurrentSliceIntervalToV3D();	break;
+		case 2: exportAllSegmentedKnotsOfBillonToV3D(); break;
+		default: break;
+	}
 }
 
 void MainWindow::exportToSdp()
@@ -1362,9 +1373,9 @@ void MainWindow::exportCurrentKnotAreaToPgm3d()
 
 void MainWindow::exportCurrentSegmentedKnotToPgm3d()
 {
-	if ( !_contourCurveBillon->isEmpty() )
+	if ( !_contourBillon->isEmpty() )
 	{
-		const Billon &resultBillon = _contourCurveBillon->knotBillon();
+		const Billon &resultBillon = _contourBillon->knotBillon();
 		QString fileName = QFileDialog::getSaveFileName(this, tr("Exporter le nœud courant segmenté en PGM3D"), "output.pgm3d", tr("Fichiers PGM3D (*.pgm3d);;Tous les fichiers (*.*)"));
 		if ( !fileName.isEmpty() )
 		{
@@ -1393,7 +1404,7 @@ void MainWindow::exportCurrentSegmentedKnotToPgm3d()
 
 void MainWindow::exportCurrentSegmentedKnotToV3D()
 {
-	if ( !_contourCurveBillon->isEmpty() )
+	if ( !_contourBillon->isEmpty() )
 	{
 		QString fileName = QFileDialog::getSaveFileName(this, tr("Exporter le nœud courant segmenté en V3D"), "output.v3d", tr("Fichiers V3D (*.v3d);;Tous les fichiers (*.*)"));
 		if ( !fileName.isEmpty() )
@@ -1401,7 +1412,7 @@ void MainWindow::exportCurrentSegmentedKnotToV3D()
 			QFile file(fileName);
 			if( file.open(QIODevice::WriteOnly) )
 			{
-				V3DExport::process( file, _contourCurveBillon->knotBillon(), _knotAreaHistogram->interval(0), _ui->_spinSectorThresholding->value() );
+				V3DExport::process( file, _contourBillon->knotBillon(), _knotAreaHistogram->interval(0), _ui->_spinSectorThresholding->value() );
 				file.close();
 
 				QMessageBox::information(this,"Exporter le nœud courant segmenté en V3D", "Export réussi !");
@@ -1412,9 +1423,95 @@ void MainWindow::exportCurrentSegmentedKnotToV3D()
 	else QMessageBox::warning(this,tr("Exporter le nœud courant segmenté en V3D"),tr("L'export a échoué : le nœud n'est pas segmenté."));
 }
 
+void MainWindow::exportSegmentedKnotsOfCurrentSliceIntervalToV3D()
+{
+	if ( _billon != 0 && _billon->hasPith() && _ui->_comboSelectSliceInterval->currentIndex() > 0 )
+	{
+		QString fileName = QFileDialog::getSaveFileName(this, tr("Exporter les nœuds segmentés de l'intervalle de coupe courant en V3D"), "output.v3d", tr("Fichiers V3D (*.v3d);;Tous les fichiers (*.*)"));
+		if ( !fileName.isEmpty() )
+		{
+			QFile file(fileName);
+			if ( file.open(QIODevice::WriteOnly) )
+			{
+				QXmlStreamWriter stream(&file);
+				V3DExport::init(file,stream);
+
+				V3DExport::appendTags(stream,*_billon );
+				V3DExport::appendPith(stream,*_billon );
+
+				int sectorIndex;
+
+				V3DExport::startComponents(stream);
+				for ( sectorIndex=1 ; sectorIndex< _ui->_comboSelectSectorInterval->count() ; ++sectorIndex )
+				{
+					selectSectorInterval(sectorIndex,false);
+					if ( !_contourBillon->isEmpty() && _knotAreaHistogram->intervals().size()>0 )
+					{
+						V3DExport::appendComponent(stream, _contourBillon->knotBillon(), _knotAreaHistogram->interval(0), sectorIndex, _ui->_spinSectorThresholding->value());
+					}
+				}
+				V3DExport::endComponents(stream);
+
+				V3DExport::close(stream);
+
+				file.close();
+
+				QMessageBox::information(this,"Exporter les nœuds segmentés de l'intervalle de coupe courant en V3D", "Export réussi !");
+			}
+			else QMessageBox::warning(this,tr("Exporter les nœuds segmentés de l'intervalle de coupe courant en V3D"),tr("L'export a échoué : impossible de créer le ficher %1.").arg(fileName));
+		}
+	}
+	else QMessageBox::warning(this,tr("Exporter les nœuds segmentés de l'intervalle de coupe courant en V3D"),tr("L'export a échoué : aucun intervalle de coupes sélectionné."));
+}
+
+void MainWindow::exportAllSegmentedKnotsOfBillonToV3D()
+{
+	if ( _billon != 0 && _billon->hasPith() )
+	{
+		QString fileName = QFileDialog::getSaveFileName(this, tr("Exporter tous les nœuds segmentés du billon en V3D"), "output.v3d", tr("Fichiers V3D (*.v3d);;Tous les fichiers (*.*)"));
+		if ( !fileName.isEmpty() )
+		{
+			QFile file(fileName);
+			if ( file.open(QIODevice::WriteOnly) )
+			{
+				QXmlStreamWriter stream(&file);
+				V3DExport::init(file,stream);
+
+				V3DExport::appendTags(stream,*_billon );
+				V3DExport::appendPith(stream,*_billon );
+
+				int intervalIndex, sectorIndex;
+
+				V3DExport::startComponents(stream);
+				for ( intervalIndex=1 ; intervalIndex< _ui->_comboSelectSliceInterval->count() ; ++intervalIndex )
+				{
+					_ui->_comboSelectSliceInterval->setCurrentIndex(intervalIndex);
+					for ( sectorIndex=1 ; sectorIndex< _ui->_comboSelectSectorInterval->count() ; ++sectorIndex )
+					{
+						selectSectorInterval(sectorIndex,false);
+						if ( !_contourBillon->isEmpty() && _knotAreaHistogram->intervals().size()>0 )
+						{
+							V3DExport::appendComponent(stream, _contourBillon->knotBillon(), _knotAreaHistogram->interval(0), sectorIndex, _ui->_spinSectorThresholding->value());
+						}
+					}
+				}
+				V3DExport::endComponents(stream);
+
+				V3DExport::close(stream);
+
+				file.close();
+
+				QMessageBox::information(this,"Exporter tous les nœuds segmentés du billon en V3D", "Export réussi !");
+			}
+			else QMessageBox::warning(this,tr("Exporter tous les nœuds segmentés du billon en V3D"),tr("L'export a échoué : impossible de créer le ficher %1.").arg(fileName));
+		}
+	}
+	else QMessageBox::warning(this,tr("Exporter tous les nœuds segmentés du billon en V3D"),tr("L'export a échoué : la moelle n'est pas calculée."));
+}
+
 void MainWindow::exportContourToSdp()
 {
-	if ( !_contourCurveBillon->isEmpty() )
+	if ( !_contourBillon->isEmpty() )
 	{
 		const Interval<uint> &sliceInterval = _sliceHistogram->interval(_ui->_comboSelectSliceInterval->currentIndex()-1);
 
@@ -1424,7 +1521,7 @@ void MainWindow::exportContourToSdp()
 			QFile file(fileName);
 			if ( file.open(QIODevice::WriteOnly) )
 			{
-				const QVector<iCoord2D> &contourPoints = _contourCurveBillon->contour(_currentSlice-sliceInterval.min()).contourPoints();
+				const QVector<iCoord2D> &contourPoints = _contourBillon->contour(_currentSlice-sliceInterval.min()).contourPoints();
 
 				QTextStream stream(&file);
 				stream << contourPoints.size() << endl;
@@ -1444,7 +1541,7 @@ void MainWindow::exportContourToSdp()
 
 void MainWindow::exportCurrentSegmentedKnotToSdp()
 {
-	if ( !_contourCurveBillon->isEmpty() )
+	if ( !_contourBillon->isEmpty() )
 	{
 		QString fileName = QFileDialog::getSaveFileName(this, tr("Exporter le nœud courant segmenté en SDP"), "output.sdp", tr("Fichiers PGM3D (*.sdp);;Tous les fichiers (*.*)"));
 		if ( !fileName.isEmpty() )
@@ -1455,7 +1552,7 @@ void MainWindow::exportCurrentSegmentedKnotToSdp()
 				QTextStream stream(&file);
 				stream << "#SDP (Sequence of Discrete Points)" << endl;
 
-				const Billon &resultBillon = _contourCurveBillon->knotBillon();
+				const Billon &resultBillon = _contourBillon->knotBillon();
 				for ( uint k=_knotAreaHistogram->interval(0).min() ; k<=_knotAreaHistogram->interval(0).max() ; ++k )
 				{
 					SliceAlgorithm::writeInSDP( resultBillon.slice(k) , stream, k, 0 );
@@ -1491,9 +1588,9 @@ void MainWindow::exportSegmentedKnotsOfCurrentSliceIntervalToSdp()
 				for ( sectorIndex=1 ; sectorIndex< _ui->_comboSelectSectorInterval->count() ; ++sectorIndex )
 				{
 					_ui->_comboSelectSectorInterval->setCurrentIndex(sectorIndex);
-					if ( !_contourCurveBillon->isEmpty() && _knotAreaHistogram->intervals().size()>0 )
+					if ( !_contourBillon->isEmpty() && _knotAreaHistogram->intervals().size()>0 )
 					{
-						const Billon &resultBillon = _contourCurveBillon->knotBillon();
+						const Billon &resultBillon = _contourBillon->knotBillon();
 						for ( k=_knotAreaHistogram->interval(0).min() ; k<=_knotAreaHistogram->interval(0).max() ; ++k )
 						{
 							SliceAlgorithm::writeInSDP( useOldMethod?_componentBillon->slice(k):resultBillon.slice(k) , stream, k, 0 );
@@ -1534,9 +1631,9 @@ void MainWindow::exportAllSegmentedKnotsOfBillonToSdp()
 					for ( sectorIndex=1 ; sectorIndex< _ui->_comboSelectSectorInterval->count() ; ++sectorIndex )
 					{
 						_ui->_comboSelectSectorInterval->setCurrentIndex(sectorIndex);
-						if ( !_contourCurveBillon->isEmpty() && _knotAreaHistogram->intervals().size() > 0 )
+						if ( !_contourBillon->isEmpty() && _knotAreaHistogram->intervals().size() > 0 )
 						{
-							const Billon &resultBillon = _contourCurveBillon->knotBillon();
+							const Billon &resultBillon = _contourBillon->knotBillon();
 							for ( k=_knotAreaHistogram->interval(0).min() ; k<=_knotAreaHistogram->interval(0).max() ; ++k )
 							{
 								SliceAlgorithm::writeInSDP( useOldMethod?_componentBillon->slice(k):resultBillon.slice(k) , stream, k, 0 );

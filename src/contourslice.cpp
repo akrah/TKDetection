@@ -1,4 +1,4 @@
-#include "inc/contourcurveslice.h"
+#include "inc/contourslice.h"
 
 #include "inc/billon.h"
 #include "inc/billonalgorithms.h"
@@ -7,13 +7,13 @@
 #include <QTemporaryFile>
 #include <QPainter>
 
-iCoord2D ContourCurveSlice::invalidICoord2D = iCoord2D(-1,-1);
+iCoord2D ContourSlice::invalidICoord2D = iCoord2D(-1,-1);
 
-ContourCurveSlice::ContourCurveSlice()
+ContourSlice::ContourSlice()
 {
 }
 
-ContourCurveSlice::~ContourCurveSlice()
+ContourSlice::~ContourSlice()
 {
 }
 
@@ -21,48 +21,48 @@ ContourCurveSlice::~ContourCurveSlice()
  * Public getters
  **********************************/
 
-const QVector<iCoord2D> &ContourCurveSlice::contourPoints() const
+const QVector<iCoord2D> &ContourSlice::contourPoints() const
 {
 	return _datasContourPoints;
 }
 
-const iCoord2D &ContourCurveSlice::dominantPoint( const uint &index ) const
+const iCoord2D &ContourSlice::dominantPoint( const uint &index ) const
 {
 	Q_ASSERT_X( index<static_cast<uint>(_datasDominantPointsIndex.size()), "Histogram::mainDominantPoint", "Le point dominants demandé n'existe pas" );
 	return _datasContourPoints[_datasDominantPointsIndex[index]];
 }
 
-const QVector<uint> &ContourCurveSlice::dominantPointIndex() const
+const QVector<uint> &ContourSlice::dominantPointIndex() const
 {
 	return _datasDominantPointsIndex;
 }
 
-const iCoord2D &ContourCurveSlice::leftMainDominantPoint() const
+const iCoord2D &ContourSlice::leftMainDominantPoint() const
 {
 	return _datasLeftMainDominantPointsIndex != -1 ? _datasContourPoints[_datasLeftMainDominantPointsIndex] : invalidICoord2D;
 }
 
-const iCoord2D &ContourCurveSlice::rightMainDominantPoint() const
+const iCoord2D &ContourSlice::rightMainDominantPoint() const
 {
 	return _datasRightMainDominantPointsIndex != -1 ? _datasContourPoints[_datasRightMainDominantPointsIndex] : invalidICoord2D;
 }
 
-const int &ContourCurveSlice::leftMainDominantPointIndex() const
+const int &ContourSlice::leftMainDominantPointIndex() const
 {
 	return _datasLeftMainDominantPointsIndex;
 }
 
-const int &ContourCurveSlice::rightMainDominantPointIndex() const
+const int &ContourSlice::rightMainDominantPointIndex() const
 {
 	return _datasRightMainDominantPointsIndex;
 }
 
-const rCoord2D &ContourCurveSlice::leftMainSupportPoint() const
+const rCoord2D &ContourSlice::leftMainSupportPoint() const
 {
 	return _datasLeftMainSupportPoint;
 }
 
-const rCoord2D &ContourCurveSlice::rightMainSupportPoint() const
+const rCoord2D &ContourSlice::rightMainSupportPoint() const
 {
 	return _datasRightMainSupportPoint;
 }
@@ -71,7 +71,7 @@ const rCoord2D &ContourCurveSlice::rightMainSupportPoint() const
  * Public setters
  **********************************/
 
-void ContourCurveSlice::compute( Slice &resultSlice, const Slice &initialSlice, const iCoord2D &sliceCenter, const int &intensityThreshold, const int &blurredSegmentThickness, const int &smoothingRadius, const iCoord2D &startPoint )
+void ContourSlice::compute( Slice &resultSlice, const Slice &initialSlice, const iCoord2D &sliceCenter, const int &intensityThreshold, const int &blurredSegmentThickness, const int &smoothingRadius, const iCoord2D &startPoint )
 {
 	clear();
 	extractContourPointsAndDominantPoints( initialSlice, sliceCenter, intensityThreshold, blurredSegmentThickness, smoothingRadius, startPoint );
@@ -80,7 +80,7 @@ void ContourCurveSlice::compute( Slice &resultSlice, const Slice &initialSlice, 
 	updateSlice( initialSlice, resultSlice, sliceCenter, intensityThreshold );
 }
 
-void ContourCurveSlice::computeOldMethod( Slice &resultSlice, const Slice &initialSlice, const iCoord2D &sliceCenter, const int &intensityThreshold, const int &smoothingRadius, const iCoord2D &startPoint )
+void ContourSlice::computeOldMethod( Slice &resultSlice, const Slice &initialSlice, const iCoord2D &sliceCenter, const int &intensityThreshold, const int &smoothingRadius, const iCoord2D &startPoint )
 {
 	clear();
 
@@ -123,7 +123,7 @@ void ContourCurveSlice::computeOldMethod( Slice &resultSlice, const Slice &initi
 	}
 }
 
-void ContourCurveSlice::draw( QImage &image, const int &cursorPosition ) const
+void ContourSlice::draw( QImage &image, const int &cursorPosition ) const
 {
 	QPainter painter(&image);
 	int i;
@@ -209,10 +209,10 @@ void ContourCurveSlice::draw( QImage &image, const int &cursorPosition ) const
  * Private setters
  **********************************/
 
-void ContourCurveSlice::clear()
+void ContourSlice::clear()
 {
-	_datasOriginalContourPoints.clear();
 	_datasContourPoints.clear();
+	_datasOriginalContourPoints.clear();
 	_datasDominantPointsIndex.clear();
 	_datasLeftMainDominantPointsIndex = _datasRightMainDominantPointsIndex = -1;
 	_datasLeftMainSupportPoint = _datasRightMainSupportPoint = rCoord2D(-1,-1);
@@ -221,7 +221,7 @@ void ContourCurveSlice::clear()
 	_contourPolygonTop.clear();
 }
 
-void ContourCurveSlice::smoothCurve( QVector<iCoord2D> &curve, int smoothingRadius )
+void ContourSlice::smoothCurve( QVector<iCoord2D> &curve, int smoothingRadius )
 {
 	if ( smoothingRadius > 0 )
 	{
@@ -259,7 +259,7 @@ void ContourCurveSlice::smoothCurve( QVector<iCoord2D> &curve, int smoothingRadi
 	}
 }
 
-void ContourCurveSlice::extractContourPointsAndDominantPoints( const Slice &initialSlice, const iCoord2D &sliceCenter, const int &intensityThreshold, const int &blurredSegmentThickness, const int &smoothingRadius, const iCoord2D &startPoint )
+void ContourSlice::extractContourPointsAndDominantPoints( const Slice &initialSlice, const iCoord2D &sliceCenter, const int &intensityThreshold, const int &blurredSegmentThickness, const int &smoothingRadius, const iCoord2D &startPoint )
 {
 	_datasOriginalContourPoints = BillonAlgorithms::extractContour( initialSlice, sliceCenter, intensityThreshold, startPoint );
 	_datasContourPoints = _datasOriginalContourPoints;
@@ -314,7 +314,7 @@ void ContourCurveSlice::extractContourPointsAndDominantPoints( const Slice &init
 	}
 }
 
-void ContourCurveSlice::computeMainDominantPoints( const iCoord2D &sliceCenter )
+void ContourSlice::computeMainDominantPoints( const iCoord2D &sliceCenter )
 {
 	// On détermine les points dominants principaux en comparant la distance à la moelle d'un point dominant
 	// à la distance à la moelle des deux points dominants précdents et du point dominant suivant.
@@ -403,7 +403,7 @@ void ContourCurveSlice::computeMainDominantPoints( const iCoord2D &sliceCenter )
 	}
 }
 
-void ContourCurveSlice::computeContourPolygons()
+void ContourSlice::computeContourPolygons()
 {
 	const int nbOriginalPointsContour = _datasOriginalContourPoints.size();
 
@@ -485,7 +485,7 @@ void ContourCurveSlice::computeContourPolygons()
 	}
 }
 
-void ContourCurveSlice::updateSlice( const Slice &initialSlice, Slice &resultSlice, const iCoord2D &sliceCenter, const int &intensityThreshold )
+void ContourSlice::updateSlice( const Slice &initialSlice, Slice &resultSlice, const iCoord2D &sliceCenter, const int &intensityThreshold )
 {
 	const int width = initialSlice.n_cols;
 	const int height = initialSlice.n_rows;

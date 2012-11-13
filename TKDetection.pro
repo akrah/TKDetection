@@ -36,8 +36,9 @@ macx:OBJECTS_DIR	= .obj
 SOURCES	=	main.cpp \
 			billonalgorithms.cpp \
 			connexcomponentextractor.cpp \
-			contourcurvebillon.cpp \
-			contourcurveslice.cpp \
+			contourbillon.cpp \
+			contourslice.cpp \
+			curvaturehistogram.cpp \
 			datexport.cpp \
 			dicomreader.cpp \
 			globalfunctions.cpp \
@@ -50,6 +51,7 @@ SOURCES	=	main.cpp \
 			piepart.cpp \
 			pith.cpp \
 			pithextractor.cpp \
+			plotcurvaturehistogram.cpp \
 			plotknotareahistogram.cpp \
 			plotsectorhistogram.cpp \
 			plotslicehistogram.cpp \
@@ -61,15 +63,14 @@ SOURCES	=	main.cpp \
 			slicezoomer.cpp \
 			test_intervalshistogram.cpp \
 			v3dexport.cpp \
-    src/curvaturehistogram.cpp \
-    src/plotcurvaturehistogram.cpp
 
 HEADERS	=	billon.h \
 			billonalgorithms.h \
 			connexcomponentextractor.h \
-			contourcurvebillon.h \
-			contourcurveslice.h \
+			contourbillon.h \
+			contourslice.h \
 			coordinate.h \
+			curvaturehistogram.h \
 			datexport.h \
 			define.h \
 			def_billon.h \
@@ -88,6 +89,7 @@ HEADERS	=	billon.h \
 			piechart.h \
 			pith.h \
 			pithextractor.h \
+			plotcurvaturehistogram.h \
 			plotknotareahistogram.h \
 			plotsectorhistogram.h \
 			plotslicehistogram.h \
@@ -99,8 +101,6 @@ HEADERS	=	billon.h \
 			slicezoomer.h \
 			test_intervalshistogram.h \
 			v3dexport.h \
-    inc/curvaturehistogram.h \
-    inc/plotcurvaturehistogram.h
 
 FORMS =	mainwindow.ui
 

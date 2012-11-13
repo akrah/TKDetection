@@ -12,7 +12,7 @@ namespace Ui
 	class MainWindow;
 }
 
-class ContourCurveBillon;
+class ContourBillon;
 class CurvatureHistogram;
 class KnotAreaHistogram;
 class PieChart;
@@ -64,7 +64,7 @@ private slots:
 	void setCannyMinimumDeviation( const double &minimumDeviation );
 	void selectSliceInterval( const int &index );
 	void selectCurrentSliceInterval();
-	void selectSectorInterval( const int &index );
+	void selectSectorInterval( const int &index, const bool &draw = true );
 	void selectCurrentSectorInterval();
 	void exportToDat();
 	void exportToOfs();
@@ -96,6 +96,8 @@ private:
 	void exportCurrentSegmentedKnotToPgm3d();
 
 	void exportCurrentSegmentedKnotToV3D();
+	void exportSegmentedKnotsOfCurrentSliceIntervalToV3D();
+	void exportAllSegmentedKnotsOfBillonToV3D();
 
 	void exportContourToSdp();
 	void exportCurrentSegmentedKnotToSdp();
@@ -126,7 +128,7 @@ private:
 	CurvatureHistogram *_curvatureHistogram;
 	PlotCurvatureHistogram *_plotCurvatureHistogram;
 
-	ContourCurveBillon *_contourCurveBillon;
+	ContourBillon *_contourBillon;
 
 	uint _currentSlice;
 	int _currentMaximum;
