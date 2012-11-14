@@ -14,19 +14,16 @@ public:
 	ContourBillon();
 	~ContourBillon();
 
-	const Billon &knotBillon() const;
-	const QVector<ContourSlice> &contours() const;
-	const ContourSlice &contour( const uint &sliceIndex ) const;
+	const QVector<ContourSlice> &contourSlices() const;
+	const ContourSlice &contourSlice( const uint &sliceIndex ) const;
 
 	void clear();
 	bool isEmpty();
 
-	void compute( const Billon &billon, const int &intensityThreshold, const int &blurredSegmentThickness, const int &smoothingRadius );
+	void compute( Billon &resultBillon, const Billon &billon, const int &intensityThreshold, const int &blurredSegmentThickness, const int &smoothingRadius, const int &curvatureWidth );
 
 private:
-	Billon _resultBillon;
-
-	QVector<ContourSlice> _contourCurves;
+	QVector<ContourSlice> _contourSlices;
 };
 
 #endif // CONTOURBILLON_H

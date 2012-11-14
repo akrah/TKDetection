@@ -10,7 +10,8 @@ struct coord2d
 	T x, y;
 	coord2d() : x((T)0), y((T)0) {}
 	coord2d( T x, T y ) : x(x), y(y) {}
-	coord2d( const coord2d<T> & other ) : x(other.x), y(other.y) {}
+	template<typename U>
+	coord2d( const coord2d<U> & other ) : x(other.x), y(other.y) {}
 	coord2d( const vec2d<T> & other ) : x(other.x), y(other.y) {}
 	inline bool operator ==( const coord2d<T> & other ) const { return other.x == x && other.y == y; }
 	inline bool operator !=( const coord2d<T> & other ) const { return other.x != x || other.y != y; }

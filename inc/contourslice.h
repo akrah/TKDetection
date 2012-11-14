@@ -4,12 +4,13 @@
 #include "def/def_coordinate.h"
 #include "def/def_billon.h"
 #include "inc/coordinate.h"
+#include "inc/contour.h"
+#include "inc/curvaturehistogram.h"
 
 #include <QVector>
 #include <QPolygon>
 
 class QImage;
-class CurvatureHistogram;
 
 class ContourSlice
 {
@@ -17,7 +18,8 @@ public:
 	ContourSlice();
 	~ContourSlice();
 
-	const QVector<iCoord2D> &contourPoints() const;
+	const Contour &contour() const;
+	const CurvatureHistogram &curvatureHistogram() const;
 	const iCoord2D &dominantPoint( const uint &index ) const;
 	const QVector<uint> &dominantPointIndex() const;
 	const iCoord2D &leftMainDominantPoint() const;
@@ -27,28 +29,28 @@ public:
 	const rCoord2D &leftMainSupportPoint() const;
 	const rCoord2D &rightMainSupportPoint() const;
 
-	void compute( Slice &resultSlice, const Slice &initialSlice, const iCoord2D &sliceCenter, const int &intensityThreshold, const int &blurredSegmentThickness, const int &smoothingRadius, const iCoord2D &startPoint = iCoord2D(-1,-1) );
-	void compute( Slice &resultSlice, const Slice &initialSlice, const CurvatureHistogram &curvatureHistogram, const iCoord2D &sliceCenter, const int &intensityThreshold, const int &blurredSegmentThickness, const int &smoothingRadius, const iCoord2D &startPoint = iCoord2D(-1,-1) );
-	void computeOldMethod( Slice &resultSlice, const Slice &initialSlice, const iCoord2D &sliceCenter, const int &intensityThreshold, const int &smoothingRadius, const iCoord2D &startPoint = iCoord2D(-1,-1) );
-	void draw(QImage &image , const int &cursorPosition = -1 ) const;
+	void compute( Slice &resultSlice, const Slice &initialSlice, const iCoord2D &sliceCenter, const int &intensityThreshold, const int &blurredSegmentThickness, const int &smoothingRadius, const int &curvatureWidth, const iCoord2D &startPoint = iCoord2D(-1,-1) );
+	void computeOldMethod( Slice &resultSlice, const Slice &initialSlice, const iCoord2D &sliceCenter, const int &intensityThreshold, const int &smoothingRadius, const int &curvatureWidth, const iCoord2D &startPoint = iCoord2D(-1,-1) );
+	void draw( QImage &image , const int &cursorPosition = -1 ) const;
 
 private:
-	void clear();
-	void smoothCurve(QVector<iCoord2D> &curve, int smoothingRadius );
-	void extractContourPointsAndDominantPoints( const Slice &initialSlice, const iCoord2D &sliceCenter, const int &intensityThreshold, const int &blurredSegmentThickness, const int &smoothingRadius, const iCoord2D &startPoint = iCoord2D(-1,-1) );
-	void computeMainDominantPoints( const iCoord2D &sliceCenter );
-	void computeMainDominantPoints2( const CurvatureHistogram &curvatureHistogram );
+	void computeDominantPoints(const int &blurredSegmentThickness);
+	void computeMainDominantPoints();
+	void computeSupportsOfMainDominantPoints();
 	void computeContourPolygons();
 	void updateSlice( const Slice &initialSlice, Slice &resultSlice, const iCoord2D &sliceCenter, const int &intensityThreshold );
 
 private:
-	QVector<iCoord2D> _datasContourPoints;
-	QVector<iCoord2D> _datasOriginalContourPoints;
-	QVector<uint> _datasDominantPointsIndex;
-	int _datasLeftMainDominantPointsIndex;
-	int _datasRightMainDominantPointsIndex;
-	rCoord2D _datasLeftMainSupportPoint;
-	rCoord2D _datasRightMainSupportPoint;
+	Contour _contour;
+	Contour _originalContour;
+
+	CurvatureHistogram _curvatureHistogram;
+
+	QVector<uint> _dominantPointsIndex;
+	int _leftMainDominantPointsIndex;
+	int _rightMainDominantPointsIndex;
+	rCoord2D _leftMainSupportPoint;
+	rCoord2D _rightMainSupportPoint;
 
 	QPolygon _contourPolygonBottom;
 	QPolygon _contourPolygonTop;

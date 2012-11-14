@@ -1,7 +1,7 @@
 #include "inc/knotareahistogram.h"
 
 #include "inc/billon.h"
-#include "inc/billonalgorithms.h"
+#include "inc/slicealgorithm.h"
 #include "inc/connexcomponentextractor.h"
 
 KnotAreaHistogram::KnotAreaHistogram() : Histogram<qreal>()
@@ -25,7 +25,7 @@ void KnotAreaHistogram::construct( const Billon &billon )
 	iCoord2D nearestPoint;
 	for ( uint i=0 ; i<billon.n_slices ; ++i )
 	{
-		nearestPoint = BillonAlgorithms::findNearestPointOfThePith( billon.slice(i), billon.pithCoord(i), billon.minValue() );
+		nearestPoint = SliceAlgorithm::findNearestPointOfThePith( billon.slice(i), billon.pithCoord(i), billon.minValue() );
 		(*this)[i] = nearestPoint.euclideanDistance( billon.pithCoord(i) );
 	}
 }

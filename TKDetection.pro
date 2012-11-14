@@ -63,6 +63,7 @@ SOURCES	=	main.cpp \
 			slicezoomer.cpp \
 			test_intervalshistogram.cpp \
 			v3dexport.cpp \
+    src/contour.cpp
 
 HEADERS	=	billon.h \
 			billonalgorithms.h \
@@ -101,6 +102,7 @@ HEADERS	=	billon.h \
 			slicezoomer.h \
 			test_intervalshistogram.h \
 			v3dexport.h \
+    inc/contour.h
 
 FORMS =	mainwindow.ui
 

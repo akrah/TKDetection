@@ -45,7 +45,7 @@ private slots:
 	void moveContourCursor( const int &position );
 	void setTypeOfView( const int &type );
 	void updateSliceHistogram();
-	void updateCurvatureHistogram();
+	void updateCurvatureHistogram( const int &histogramIndex );
 	void updatePith();
 	void setMinimumOfSliceIntervalToCurrentSlice();
 	void setMaximumOfSliceIntervalToCurrentSlice();
@@ -109,6 +109,7 @@ private:
 
 	Billon *_billon;
 	Billon *_componentBillon;
+	Billon *_knotBillon;
 
 	QImage _mainPix;
 	SliceZoomer _sliceZoomer;
@@ -125,7 +126,6 @@ private:
 	KnotAreaHistogram *_knotAreaHistogram;
 	PlotKnotAreaHistogram *_plotKnotAreaHistogram;
 
-	CurvatureHistogram *_curvatureHistogram;
 	PlotCurvatureHistogram *_plotCurvatureHistogram;
 
 	ContourBillon *_contourBillon;

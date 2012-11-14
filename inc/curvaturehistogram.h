@@ -3,7 +3,7 @@
 
 #include "inc/histogram.h"
 
-class ContourSlice;
+class Contour;
 
 class CurvatureHistogram  : public Histogram<qreal>
 {
@@ -11,13 +11,7 @@ public:
 	CurvatureHistogram();
 	virtual ~CurvatureHistogram();
 
-	const QVector<uint> &dominantPoints() const;
-
-	void clear();
-	void construct(const ContourSlice &contour , const int &curvatureWidth );
-
-private:
-	QVector<uint> _dominantPointIndex;
+	void construct( const Contour &contour , const int &curvatureWidth );
 };
 
 #endif // CURVATUREHISTOGRAM_H

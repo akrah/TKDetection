@@ -44,12 +44,11 @@
 #include <qwt_polar_grid.h>
 #include <qwt_round_scale_draw.h>
 
-MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::MainWindow), _billon(0), _componentBillon(0), _sliceView(new SliceView()),
-	_sliceHistogram(new SliceHistogram()), _plotSliceHistogram(new PlotSliceHistogram()),
+MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::MainWindow), _billon(0), _componentBillon(0), _knotBillon(0),
+	_sliceView(new SliceView()), _sliceHistogram(new SliceHistogram()), _plotSliceHistogram(new PlotSliceHistogram()),
 	_pieChart(new PieChart(360)), _sectorHistogram(new SectorHistogram()), _plotSectorHistogram(new PlotSectorHistogram()),
 	_knotAreaHistogram(new KnotAreaHistogram()), _plotKnotAreaHistogram(new PlotKnotAreaHistogram()),
-	_curvatureHistogram(new CurvatureHistogram()), _plotCurvatureHistogram(new PlotCurvatureHistogram()),
-	_contourBillon(new ContourBillon()), _currentSlice(0), _currentMaximum(0), _currentSector(0)
+	_plotCurvatureHistogram(new PlotCurvatureHistogram()), _contourBillon(new ContourBillon()), _currentSlice(0), _currentMaximum(0), _currentSector(0)
 {
 	_ui->setupUi(this);
 //	setCorner(Qt::TopLeftCorner,Qt::LeftDockWidgetArea);
@@ -166,7 +165,7 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 	QObject::connect(_ui->_spinContourSmoothingRadius, SIGNAL(valueChanged(int)), this, SLOT(drawSlice()));
 	QObject::connect(_ui->_sliderCurvatureWidth, SIGNAL(valueChanged(int)), _ui->_spinCurvatureWidth, SLOT(setValue(int)));
 	QObject::connect(_ui->_spinCurvatureWidth, SIGNAL(valueChanged(int)), _ui->_sliderCurvatureWidth, SLOT(setValue(int)));
-	QObject::connect(_ui->_spinCurvatureWidth, SIGNAL(valueChanged(int)), this, SLOT(updateCurvatureHistogram()));
+	QObject::connect(_ui->_spinCurvatureWidth, SIGNAL(valueChanged(int)), this, SLOT(updateCurvatureHistogram(int)));
 
 	// Évènements déclenchés par la souris sur le visualiseur de coupes
 	QObject::connect(&_sliceZoomer, SIGNAL(zoomFactorChanged(qreal,QPoint)), this, SLOT(zoomInSliceView(qreal,QPoint)));
@@ -342,10 +341,10 @@ void MainWindow::drawSlice()
 					}
 					painter.end();
 
-					if ( _ui->_checkEnableConnexComponents->isChecked() && !_contourBillon->isEmpty() )
+					if ( _ui->_checkEnableConnexComponents->isChecked() && _knotBillon != 0 )
 					{
-						SliceAlgorithm::draw(_contourBillon->knotBillon().slice(slicePosition), _mainPix, 0 );
-						_contourBillon->contour(slicePosition).draw( _mainPix, _ui->_sliderContour->maximum() != 0 ? _ui->_sliderContour->value() : -1 );
+						SliceAlgorithm::draw(_knotBillon->slice(slicePosition), _mainPix, 0 );
+						_contourBillon->contourSlice(slicePosition).draw( _mainPix, _ui->_sliderContour->value() );
 					}
 				}
 			}
@@ -454,19 +453,17 @@ void MainWindow::updateSliceHistogram()
 	_ui->_comboSelectSliceInterval->setCurrentIndex(oldIntervalIndex<=intervals.size()?oldIntervalIndex:0);
 }
 
-void MainWindow::updateCurvatureHistogram()
+void MainWindow::updateCurvatureHistogram( const int &histogramIndex )
 {
-	_curvatureHistogram->clear();
-
 	_ui->_sliderContour->setValue(0);
 	_ui->_sliderContour->setMaximum(0);
-
-	if ( !_contourBillon->isEmpty() > 0 && !_sliceHistogram->intervals().isEmpty() && _sliceHistogram->interval(_ui->_comboSelectSliceInterval->currentIndex()-1).containsClosed(_currentSlice) )
+	_plotCurvatureHistogram->clear();
+	if ( _knotBillon != 0 && _sliceHistogram->interval(_ui->_comboSelectSliceInterval->currentIndex()-1).containsClosed(_currentSlice) )
 	{
-		_curvatureHistogram->construct( _contourBillon->contour(_currentSlice-_contourBillon->knotBillon().zPos()), _ui->_spinCurvatureWidth->value() );
-		_plotCurvatureHistogram->update(*_curvatureHistogram);
-		_ui->_sliderContour->setMaximum(_curvatureHistogram->size()-1);
-		moveContourCursor(_currentSlice-_componentBillon->zPos());
+		const CurvatureHistogram &curvatureHistogram = _contourBillon->contourSlice(_currentSlice-_knotBillon->zPos()).curvatureHistogram();
+		_plotCurvatureHistogram->update(curvatureHistogram);
+		_ui->_sliderContour->setMaximum(curvatureHistogram->size()-1);
+		moveContourCursor(histogramIndex);
 	}
 	_ui->_plotCurvatureHistogram->replot();
 }
