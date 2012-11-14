@@ -2,6 +2,7 @@
 
 #include "inc/billon.h"
 #include "inc/billonalgorithms.h"
+#include "inc/curvaturehistogram.h"
 
 #include <QProcess>
 #include <QTemporaryFile>
@@ -76,6 +77,15 @@ void ContourSlice::compute( Slice &resultSlice, const Slice &initialSlice, const
 	clear();
 	extractContourPointsAndDominantPoints( initialSlice, sliceCenter, intensityThreshold, blurredSegmentThickness, smoothingRadius, startPoint );
 	computeMainDominantPoints(sliceCenter);
+	computeContourPolygons();
+	updateSlice( initialSlice, resultSlice, sliceCenter, intensityThreshold );
+}
+
+void ContourSlice::compute( Slice &resultSlice, const Slice &initialSlice, const CurvatureHistogram &curvatureHistogram, const iCoord2D &sliceCenter, const int &intensityThreshold, const int &blurredSegmentThickness, const int &smoothingRadius, const iCoord2D &startPoint )
+{
+	clear();
+	extractContourPointsAndDominantPoints( initialSlice, sliceCenter, intensityThreshold, blurredSegmentThickness, smoothingRadius, startPoint );
+	computeMainDominantPoints2(curvatureHistogram);
 	computeContourPolygons();
 	updateSlice( initialSlice, resultSlice, sliceCenter, intensityThreshold );
 }
@@ -400,6 +410,59 @@ void ContourSlice::computeMainDominantPoints( const iCoord2D &sliceCenter )
 		}
 
 		_datasDominantPointsIndex.remove(nbDominantPoints-1);
+	}
+}
+
+void ContourSlice::computeMainDominantPoints2( const CurvatureHistogram &curvatureHistogram )
+{
+	int nbDominantPoints, index, oldIndex;
+
+	nbDominantPoints = _datasDominantPointsIndex.size();
+	if ( nbDominantPoints > 0 && curvatureHistogram.size() == _datasContourPoints.size() )
+	{
+		// Point dominant dans le sens du contour
+		index = 0;
+		while ( index<nbDominantPoints && curvatureHistogram[_datasDominantPointsIndex[index]] > 0 ) ++index;
+		oldIndex = index;
+		// Si le point dominant trouvé est correct
+		if ( index<nbDominantPoints )
+		{
+			_datasLeftMainDominantPointsIndex = _datasDominantPointsIndex[index];
+
+			// Calcul du point dominant support du point dominant principal
+			_datasLeftMainSupportPoint = rCoord2D(0.,0.);
+			while ( index >= 0 )
+			{
+				_datasLeftMainSupportPoint.x += dominantPoint(index).x;
+				_datasLeftMainSupportPoint.y += dominantPoint(index).y;
+				--index;
+			}
+			_datasLeftMainSupportPoint.x /= (oldIndex + 1);
+			_datasLeftMainSupportPoint.y /= (oldIndex + 1);
+		}
+
+		// Point dominant dans le sens contraire du contour
+		index = nbDominantPoints-1;
+		while ( index>oldIndex && curvatureHistogram[_datasDominantPointsIndex[index]] > 0 ) --index;
+		// Si le point dominant trouvé est correct
+		if ( index>oldIndex )
+		{
+			oldIndex = index;
+			_datasRightMainDominantPointsIndex = _datasDominantPointsIndex[index];
+
+			// Calcul du point dominant support du point dominant principal
+			_datasRightMainSupportPoint = rCoord2D(0.,0.);
+			while ( index < nbDominantPoints )
+			{
+				_datasRightMainSupportPoint.x += dominantPoint(index).x;
+				_datasRightMainSupportPoint.y += dominantPoint(index).y;
+				++index;
+			}
+			_datasRightMainSupportPoint.x += dominantPoint(0).x;
+			_datasRightMainSupportPoint.y += dominantPoint(0).y;
+			_datasRightMainSupportPoint.x /= (nbDominantPoints - oldIndex + 1);
+			_datasRightMainSupportPoint.y /= (nbDominantPoints - oldIndex + 1);
+		}
 	}
 }
 

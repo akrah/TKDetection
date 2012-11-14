@@ -1,6 +1,7 @@
 #include "inc/contourbillon.h"
 
 #include "inc/contourslice.h"
+#include "inc/curvaturehistogram.h"
 
 ContourBillon::ContourBillon()
 {

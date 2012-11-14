@@ -6,6 +6,7 @@
 
 template <typename T> class QVector;
 class ContourSlice;
+class CurvatureHistogram;
 
 class ContourBillon
 {

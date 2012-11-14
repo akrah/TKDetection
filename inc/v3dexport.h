@@ -22,7 +22,7 @@ namespace V3DExport
 	void startComponents( QXmlStreamWriter &stream );
 	void appendComponent( QXmlStreamWriter &stream, const Billon &billon, const Interval<uint> &sliceInterval, const int &index, const int &threshold );
 	void endComponents( QXmlStreamWriter &stream );
-	void appendPith( QXmlStreamWriter &stream, const Billon &billon );
+	void appendPith(QXmlStreamWriter &stream, const Billon &billon );
 }
 
 #endif // V3DEXPORT_H

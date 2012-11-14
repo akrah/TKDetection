@@ -1480,9 +1480,10 @@ void MainWindow::exportAllSegmentedKnotsOfBillonToV3D()
 				V3DExport::appendTags(stream,*_billon );
 				V3DExport::appendPith(stream,*_billon );
 
-				int intervalIndex, sectorIndex;
+				int intervalIndex, sectorIndex, counter;
 
 				V3DExport::startComponents(stream);
+				counter = 1;
 				for ( intervalIndex=1 ; intervalIndex< _ui->_comboSelectSliceInterval->count() ; ++intervalIndex )
 				{
 					_ui->_comboSelectSliceInterval->setCurrentIndex(intervalIndex);
@@ -1491,7 +1492,7 @@ void MainWindow::exportAllSegmentedKnotsOfBillonToV3D()
 						selectSectorInterval(sectorIndex,false);
 						if ( !_contourBillon->isEmpty() && _knotAreaHistogram->intervals().size()>0 )
 						{
-							V3DExport::appendComponent(stream, _contourBillon->knotBillon(), _knotAreaHistogram->interval(0), sectorIndex, _ui->_spinSectorThresholding->value());
+							V3DExport::appendComponent(stream, _contourBillon->knotBillon(), _knotAreaHistogram->interval(0), counter++, _ui->_spinSectorThresholding->value());
 						}
 					}
 				}

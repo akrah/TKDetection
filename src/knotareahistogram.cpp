@@ -62,5 +62,7 @@ void KnotAreaHistogram::computeMaximumsAndIntervals( const uint & comparisonShif
 
 		_intervals.resize(1);
 		_intervals[0] = Interval<uint>(lowerIndex+1,upperIndex-1);
+
+		if ( _intervals[0].min() >= _intervals[0].max() ) _intervals.clear();
 	}
 }

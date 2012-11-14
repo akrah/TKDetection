@@ -78,7 +78,7 @@ namespace V3DExport
 		stream.writeAttribute("name","minimum");
 		stream.writeTextElement("x",QString::number(0));
 		stream.writeTextElement("y",QString::number(0));
-		stream.writeTextElement("z",QString::number(sliceInterval.min()));
+		stream.writeTextElement("z",QString::number(billon.zPos()+sliceInterval.min()));
 		stream.writeEndElement();
 
 		//coord maximum
@@ -86,7 +86,7 @@ namespace V3DExport
 		stream.writeAttribute("name","maximum");
 		stream.writeTextElement("x",QString::number(width-1));
 		stream.writeTextElement("y",QString::number(height-1));
-		stream.writeTextElement("z",QString::number(sliceInterval.max()));
+		stream.writeTextElement("z",QString::number(billon.zPos()+sliceInterval.max()));
 		stream.writeEndElement();
 
 		//binarydata
@@ -120,13 +120,14 @@ namespace V3DExport
 		if ( !billon.pith().isEmpty() )
 		{
 			const Pith &pith = billon.pith();
+			int zPos = billon.zPos();
 			stream.writeStartElement("pith");
 			for ( uint k=0 ; k<pith.size() ; ++k )
 			{
 				stream.writeStartElement("coord");
 				stream.writeTextElement("x",QString::number(pith[k].x));
 				stream.writeTextElement("y",QString::number(pith[k].y));
-				stream.writeTextElement("z",QString::number(k));
+				stream.writeTextElement("z",QString::number(zPos++));
 				stream.writeEndElement();
 			}
 			stream.writeEndElement();

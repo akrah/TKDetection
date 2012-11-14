@@ -15,6 +15,8 @@ class Histogram : public QVector<T>
 {
 public:
 	Histogram();
+	Histogram( const QVector<T> &vector );
+	Histogram( const Histogram<T> &histogram );
 	virtual ~Histogram();
 
 	const QVector<uint> &maximums() const;
@@ -65,6 +67,8 @@ QTextStream & operator <<( QTextStream & stream, const Histogram<T> & histogram 
  **********************************/
 
 template <typename T> Histogram<T>::Histogram() : QVector<T>() {}
+template <typename T> Histogram<T>::Histogram( const QVector<T> &vector ) : QVector<T>(vector) {}
+template <typename T> Histogram<T>::Histogram( const Histogram<T> &histogram ) : QVector<T>(histogram), _maximums(histogram._maximums), _intervals(histogram._intervals) {}
 template <typename T> Histogram<T>::~Histogram() {}
 
 
