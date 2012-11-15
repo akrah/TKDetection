@@ -21,7 +21,7 @@ public:
 	const Contour &contour() const;
 	const CurvatureHistogram &curvatureHistogram() const;
 	const iCoord2D &dominantPoint( const uint &index ) const;
-	const QVector<uint> &dominantPointIndex() const;
+	const QVector<int> &dominantPointIndex() const;
 	const iCoord2D &leftMainDominantPoint() const;
 	const iCoord2D &rightMainDominantPoint() const;
 	const int &leftMainDominantPointIndex() const;
@@ -31,7 +31,7 @@ public:
 
 	void compute( Slice &resultSlice, const Slice &initialSlice, const iCoord2D &sliceCenter, const int &intensityThreshold, const int &blurredSegmentThickness, const int &smoothingRadius, const int &curvatureWidth, const iCoord2D &startPoint = iCoord2D(-1,-1) );
 	void computeOldMethod( Slice &resultSlice, const Slice &initialSlice, const iCoord2D &sliceCenter, const int &intensityThreshold, const int &smoothingRadius, const int &curvatureWidth, const iCoord2D &startPoint = iCoord2D(-1,-1) );
-	void draw( QImage &image , const int &cursorPosition = -1 ) const;
+	void draw( QPainter &painter , const int &cursorPosition = -1 ) const;
 
 private:
 	void computeDominantPoints(const int &blurredSegmentThickness);
@@ -46,7 +46,7 @@ private:
 
 	CurvatureHistogram _curvatureHistogram;
 
-	QVector<uint> _dominantPointsIndex;
+	QVector<int> _dominantPointsIndex;
 	int _leftMainDominantPointsIndex;
 	int _rightMainDominantPointsIndex;
 	rCoord2D _leftMainSupportPoint;

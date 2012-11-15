@@ -4,7 +4,6 @@
 #include "inc/slicealgorithm.h"
 #include "inc/define.h"
 
-#include <QImage>
 #include <QPainter>
 
 Contour::Contour() : QVector<iCoord2D>(0)
@@ -96,13 +95,13 @@ void Contour::smooth( int smoothingRadius )
 	}
 }
 
-void Contour::draw( QImage &image, const int &cursorPosition ) const
+void Contour::draw( QPainter &painter, const int &cursorPosition ) const
 {
 
 	const int nbPoints = this->size();
 	if ( nbPoints > 0 )
 	{
-		QPainter painter(&image);
+		painter.save();
 		painter.setPen(Qt::blue);
 		for ( int i=0 ; i<nbPoints ; ++i )
 		{
@@ -115,5 +114,7 @@ void Contour::draw( QImage &image, const int &cursorPosition ) const
 			painter.setPen(Qt::cyan);
 			painter.drawEllipse((*this)[cursorPosition].x-1,(*this)[cursorPosition].y-1,2,2);
 		}
+		painter.restore();
 	}
+
 }

@@ -14,10 +14,10 @@ namespace Ui
 
 class ContourBillon;
 class CurvatureHistogram;
-class KnotAreaHistogram;
+class NearestPointsHistogram;
 class PieChart;
 class PlotCurvatureHistogram;
-class PlotKnotAreaHistogram;
+class PlotNearestPointsHistogram;
 class PlotSectorHistogram;
 class PlotSliceHistogram;
 class SectorHistogram;
@@ -41,7 +41,7 @@ private slots:
 	void closeImage();
 	void drawSlice();
 	void setSlice( const int &sliceNumber );
-	void moveKnotAreaCursor( const int &position );
+	void moveNearestPointsCursor( const int &position );
 	void moveContourCursor( const int &position );
 	void setTypeOfView( const int &type );
 	void updateSliceHistogram();
@@ -53,7 +53,7 @@ private slots:
 	void nextMaximumInSliceHistogram();
 	void zoomInSliceView( const qreal &zoomFactor, const QPoint &focalPoint );
 	void dragInSliceView( const QPoint &movementVector );
-	void updateOpticalFlowalFlow();
+	void updateOpticalFlow();
 	void setRestrictedAreaResolution( const int &resolution );
 	void setRestrictedAreaThreshold( const int &threshold );
 	void setRestrictedAreaBeginRadius( const int &radius );
@@ -123,8 +123,8 @@ private:
 	SectorHistogram *_sectorHistogram;
 	PlotSectorHistogram * _plotSectorHistogram;
 
-	KnotAreaHistogram *_knotAreaHistogram;
-	PlotKnotAreaHistogram *_plotKnotAreaHistogram;
+	NearestPointsHistogram *_nearestPointsHistogram;
+	PlotNearestPointsHistogram *_plotNearestPointsHistogram;
 
 	PlotCurvatureHistogram *_plotCurvatureHistogram;
 

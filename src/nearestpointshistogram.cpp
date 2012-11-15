@@ -1,14 +1,14 @@
-#include "inc/knotareahistogram.h"
+#include "inc/nearestpointshistogram.h"
 
 #include "inc/billon.h"
 #include "inc/slicealgorithm.h"
 #include "inc/connexcomponentextractor.h"
 
-KnotAreaHistogram::KnotAreaHistogram() : Histogram<qreal>()
+NearestPointsHistogram::NearestPointsHistogram() : Histogram<qreal>()
 {
 }
 
-KnotAreaHistogram::~KnotAreaHistogram()
+NearestPointsHistogram::~NearestPointsHistogram()
 {
 }
 
@@ -17,7 +17,7 @@ KnotAreaHistogram::~KnotAreaHistogram()
  * Public setters
  **********************************/
 
-void KnotAreaHistogram::construct( const Billon &billon )
+void NearestPointsHistogram::construct( const Billon &billon )
 {
 	this->clear();
 	this->resize( billon.n_slices );
@@ -30,7 +30,7 @@ void KnotAreaHistogram::construct( const Billon &billon )
 	}
 }
 
-void KnotAreaHistogram::computeMaximumsAndIntervals( const uint & comparisonShift, const qreal &comparisonValue )
+void NearestPointsHistogram::computeMaximumsAndIntervals( const uint & comparisonShift, const qreal &comparisonValue )
 {
 	if ( !this->isEmpty() )
 	{

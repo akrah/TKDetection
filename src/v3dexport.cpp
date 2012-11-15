@@ -122,7 +122,7 @@ namespace V3DExport
 			const Pith &pith = billon.pith();
 			int zPos = billon.zPos();
 			stream.writeStartElement("pith");
-			for ( uint k=0 ; k<pith.size() ; ++k )
+			for ( int k=0 ; k<pith.size() ; ++k )
 			{
 				stream.writeStartElement("coord");
 				stream.writeTextElement("x",QString::number(pith[k].x));

@@ -103,9 +103,9 @@ namespace SliceAlgorithm
 		}
 	}
 
-	void draw( const Slice &slice, QImage &image, const int &intensityThreshold )
+	void draw( QPainter &painter, const Slice &slice, const int &intensityThreshold )
 	{
-		QPainter painter(&image);
+		painter.save();
 		painter.setPen(QColor(255,255,255,127));
 
 		uint i, j;
@@ -116,6 +116,7 @@ namespace SliceAlgorithm
 				if ( slice.at(j,i) > intensityThreshold ) painter.drawPoint(i,j);
 			}
 		}
+		painter.restore();
 	}
 
 	void writeInPgm3D( const Slice &slice, QDataStream &stream )

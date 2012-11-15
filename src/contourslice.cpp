@@ -38,29 +38,29 @@ const iCoord2D &ContourSlice::dominantPoint( const uint &index ) const
 	return _contour[_dominantPointsIndex[index]];
 }
 
-const QVector<uint> &ContourSlice::dominantPointIndex() const
+const QVector<int> &ContourSlice::dominantPointIndex() const
 {
 	return _dominantPointsIndex;
 }
 
 const iCoord2D &ContourSlice::leftMainDominantPoint() const
 {
-	return _leftMainDominantPointsIndex != -1 ? _contour[_leftMainDominantPointsIndex] : invalidICoord2D;
+	return _leftMainDominantPointsIndex != -1 ? dominantPoint(_leftMainDominantPointsIndex) : invalidICoord2D;
 }
 
 const iCoord2D &ContourSlice::rightMainDominantPoint() const
 {
-	return _rightMainDominantPointsIndex != -1 ? _contour[_rightMainDominantPointsIndex] : invalidICoord2D;
+	return _rightMainDominantPointsIndex != -1 ? dominantPoint(_rightMainDominantPointsIndex) : invalidICoord2D;
 }
 
 const int &ContourSlice::leftMainDominantPointIndex() const
 {
-	return _leftMainDominantPointsIndex;
+	return _leftMainDominantPointsIndex != -1 ? _dominantPointsIndex[_leftMainDominantPointsIndex] : _leftMainDominantPointsIndex;
 }
 
 const int &ContourSlice::rightMainDominantPointIndex() const
 {
-	return _rightMainDominantPointsIndex;
+	return _rightMainDominantPointsIndex != -1 ? _dominantPointsIndex[_rightMainDominantPointsIndex] : _rightMainDominantPointsIndex;
 }
 
 const rCoord2D &ContourSlice::leftMainSupportPoint() const
@@ -133,15 +133,15 @@ void ContourSlice::computeOldMethod( Slice &resultSlice, const Slice &initialSli
 	}
 }
 
-void ContourSlice::draw( QImage &image, const int &cursorPosition ) const
+void ContourSlice::draw( QPainter &painter, const int &cursorPosition ) const
 {
-	QPainter painter(&image);
 	int i;
 
 	const int nbContourPoints = _contour.size();
 	if ( nbContourPoints > 0 )
 	{
-		_contour.draw(image,cursorPosition);
+		painter.save();
+		_contour.draw(painter,cursorPosition);
 
 		const int nbDominantPoints = _dominantPointsIndex.size();
 		if ( nbDominantPoints > 0 )
@@ -165,16 +165,18 @@ void ContourSlice::draw( QImage &image, const int &cursorPosition ) const
 			const rCoord2D &leftSupportPoint = leftMainSupportPoint();
 			const rCoord2D &rightSupportPoint = rightMainSupportPoint();
 
+			const int width = painter.window().width();
+
 			painter.setPen(Qt::gray);
 			qreal a, b;
 			if ( leftSupportPoint.x != -1 || leftSupportPoint.y != -1 )
 			{
 				a = ( leftMainPoint.y - leftSupportPoint.y ) / static_cast<qreal>( leftMainPoint.x - leftSupportPoint.x );
 				b = ( leftMainPoint.y * leftSupportPoint.x - leftMainPoint.x * leftSupportPoint.y ) / static_cast<qreal>( leftSupportPoint.x - leftMainPoint.x );
-				//				painter.drawLine(0, b, image.width(), a * image.width() + b );
+				//				painter.drawLine(0, b, width, a * width + b );
 				if ( leftSupportPoint.x < leftMainPoint.x )
 				{
-					painter.drawLine(leftMainPoint.x, leftMainPoint.y, image.width(), a * image.width() + b );
+					painter.drawLine(leftMainPoint.x, leftMainPoint.y, width, a * width + b );
 				}
 				else
 				{
@@ -185,10 +187,10 @@ void ContourSlice::draw( QImage &image, const int &cursorPosition ) const
 			{
 				a = ( rightMainPoint.y - rightSupportPoint.y ) / static_cast<qreal>( rightMainPoint.x - rightSupportPoint.x );
 				b = ( rightMainPoint.y * rightSupportPoint.x - rightMainPoint.x * rightSupportPoint.y ) / static_cast<qreal>( rightSupportPoint.x - rightMainPoint.x );
-				//				painter.drawLine(0, b, image.width(), a * image.width() + b );
+				//				painter.drawLine(0, b, width, a * width + b );
 				if ( rightSupportPoint.x < rightMainPoint.x )
 				{
-					painter.drawLine(rightMainPoint.x, rightMainPoint.y, image.width(), a * image.width() + b );
+					painter.drawLine(rightMainPoint.x, rightMainPoint.y, width, a * width + b );
 				}
 				else
 				{
@@ -200,6 +202,8 @@ void ContourSlice::draw( QImage &image, const int &cursorPosition ) const
 		// Dessin du point de contour initial (également point dominant initial)
 		painter.setPen(Qt::red);
 		painter.drawEllipse(_contour[0].x-1,_contour[0].y-1,2,2);
+
+		painter.restore();
 	}
 }
 
@@ -277,13 +281,13 @@ void ContourSlice::computeMainDominantPoints()
 		while ( index<nbDominantPoints && _curvatureHistogram[_dominantPointsIndex[index]] > 0 ) ++index;
 		firstIndex = index;
 		// Si le point dominant trouvé est correct
-		if ( index<nbDominantPoints ) _leftMainDominantPointsIndex = _dominantPointsIndex[index];
+		if ( index<nbDominantPoints ) _leftMainDominantPointsIndex = index;
 
 		// Point dominant dans le sens contraire du contour
 		index = nbDominantPoints-1;
 		while ( index>firstIndex && _curvatureHistogram[_dominantPointsIndex[index]] > 0 ) --index;
 		// Si le point dominant trouvé est correct
-		if ( index>firstIndex ) _rightMainDominantPointsIndex = _dominantPointsIndex[index];
+		if ( index>firstIndex ) _rightMainDominantPointsIndex = index;
 	}
 }
 

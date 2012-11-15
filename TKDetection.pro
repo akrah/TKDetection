@@ -36,13 +36,14 @@ macx:OBJECTS_DIR	= .obj
 SOURCES	=	main.cpp \
 			billonalgorithms.cpp \
 			connexcomponentextractor.cpp \
+			contour.cpp \
 			contourbillon.cpp \
 			contourslice.cpp \
 			curvaturehistogram.cpp \
 			datexport.cpp \
 			dicomreader.cpp \
 			globalfunctions.cpp \
-			knotareahistogram.cpp \
+			nearestpointshistogram.cpp \
 			mainwindow.cpp \
 			ofsexport.cpp \
 			opticalflow.cpp \
@@ -52,7 +53,7 @@ SOURCES	=	main.cpp \
 			pith.cpp \
 			pithextractor.cpp \
 			plotcurvaturehistogram.cpp \
-			plotknotareahistogram.cpp \
+			plotnearestpointshistogram.cpp \
 			plotsectorhistogram.cpp \
 			plotslicehistogram.cpp \
 			pointpolarseriesdata.cpp \
@@ -63,11 +64,11 @@ SOURCES	=	main.cpp \
 			slicezoomer.cpp \
 			test_intervalshistogram.cpp \
 			v3dexport.cpp \
-    src/contour.cpp
 
 HEADERS	=	billon.h \
 			billonalgorithms.h \
 			connexcomponentextractor.h \
+			contour.h \
 			contourbillon.h \
 			contourslice.h \
 			coordinate.h \
@@ -81,7 +82,7 @@ HEADERS	=	billon.h \
 			globalfunctions.h \
 			histogram.h \
 			interval.h \
-			knotareahistogram.h \
+			nearestpointshistogram.h \
 			mainwindow.h \
 			ofsexport.h \
 			opticalflow.h \
@@ -91,7 +92,7 @@ HEADERS	=	billon.h \
 			pith.h \
 			pithextractor.h \
 			plotcurvaturehistogram.h \
-			plotknotareahistogram.h \
+			plotnearestpointshistogram.h \
 			plotsectorhistogram.h \
 			plotslicehistogram.h \
 			pointpolarseriesdata.h \
@@ -102,7 +103,6 @@ HEADERS	=	billon.h \
 			slicezoomer.h \
 			test_intervalshistogram.h \
 			v3dexport.h \
-    inc/contour.h
 
 FORMS =	mainwindow.ui
 

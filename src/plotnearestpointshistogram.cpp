@@ -1,8 +1,8 @@
-#include "inc/plotknotareahistogram.h"
+#include "inc/plotnearestpointshistogram.h"
 
-#include "inc/knotareahistogram.h"
+#include "inc/nearestpointshistogram.h"
 
-PlotKnotAreaHistogram::PlotKnotAreaHistogram()
+PlotNearestPointsHistogram::PlotNearestPointsHistogram()
 {
 	_histogramMaximums.setBrush(Qt::green);
 	_histogramMaximums.setPen(QPen(Qt::green));
@@ -14,7 +14,7 @@ PlotKnotAreaHistogram::PlotKnotAreaHistogram()
 	_histogramCursor.setPen(QPen(Qt::red));
 }
 
-PlotKnotAreaHistogram::~PlotKnotAreaHistogram()
+PlotNearestPointsHistogram::~PlotNearestPointsHistogram()
 {
 }
 
@@ -22,7 +22,7 @@ PlotKnotAreaHistogram::~PlotKnotAreaHistogram()
  * Public setters
  *******************************/
 
-void PlotKnotAreaHistogram::attach( QwtPlot * const plot )
+void PlotNearestPointsHistogram::attach( QwtPlot * const plot )
 {
 	if ( plot != 0 )
 	{
@@ -33,7 +33,7 @@ void PlotKnotAreaHistogram::attach( QwtPlot * const plot )
 	}
 }
 
-void PlotKnotAreaHistogram::clear()
+void PlotNearestPointsHistogram::clear()
 {
 	const QVector<QwtIntervalSample> emptyData(0);
 	_histogramData.setSamples(emptyData);
@@ -42,7 +42,7 @@ void PlotKnotAreaHistogram::clear()
 	_histogramCursor.setSamples(emptyData);
 }
 
-void PlotKnotAreaHistogram::moveCursor( const uint &sliceIndex )
+void PlotNearestPointsHistogram::moveCursor( const uint &sliceIndex )
 {
 	QVector<QwtIntervalSample> datasCursor(1);
 	datasCursor[0].interval.setInterval(sliceIndex,sliceIndex+1);
@@ -50,14 +50,14 @@ void PlotKnotAreaHistogram::moveCursor( const uint &sliceIndex )
 	_histogramCursor.setSamples(datasCursor);
 }
 
-void PlotKnotAreaHistogram::update( const KnotAreaHistogram & histogram )
+void PlotNearestPointsHistogram::update( const NearestPointsHistogram & histogram )
 {
 	updateDatas( histogram );
 	updateMaximums( histogram );
 	updateIntervals( histogram );
 }
 
-void PlotKnotAreaHistogram::updateDatas( const KnotAreaHistogram &histogram )
+void PlotNearestPointsHistogram::updateDatas( const NearestPointsHistogram &histogram )
 {
 	QVector<QwtIntervalSample> datasHistogram(0);
 	if ( histogram.size() > 0 )
@@ -75,7 +75,7 @@ void PlotKnotAreaHistogram::updateDatas( const KnotAreaHistogram &histogram )
 	_histogramData.setSamples(datasHistogram);
 }
 
-void PlotKnotAreaHistogram::updateMaximums( const KnotAreaHistogram & histogram )
+void PlotNearestPointsHistogram::updateMaximums( const NearestPointsHistogram & histogram )
 {
 	QVector<QwtIntervalSample> datasMaximums(0);
 	if ( histogram.nbMaximums() > 0 )
@@ -93,7 +93,7 @@ void PlotKnotAreaHistogram::updateMaximums( const KnotAreaHistogram & histogram 
 	_histogramMaximums.setSamples(datasMaximums);
 }
 
-void PlotKnotAreaHistogram::updateIntervals( const KnotAreaHistogram & histogram )
+void PlotNearestPointsHistogram::updateIntervals( const NearestPointsHistogram & histogram )
 {
 	QVector<QwtIntervalSample> dataIntervals(0);
 	if ( histogram.nbIntervals() > 0 )

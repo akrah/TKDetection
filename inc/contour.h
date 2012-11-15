@@ -7,7 +7,7 @@
 
 #include <QVector>
 
-class QImage;
+class QPainter;
 
 class Contour : public QVector<iCoord2D>
 {
@@ -20,7 +20,7 @@ public:
 	void compute( const Slice &slice, const iCoord2D &sliceCenter, const int &intensityThreshold, iCoord2D startPoint = iCoord2D(-1,-1) );
 	void smooth( int smoothingRadius );
 
-	void draw( QImage &image, const int &cursorPosition ) const;
+	void draw( QPainter &painter, const int &cursorPosition ) const;
 };
 
 #endif // CONTOUR_H
