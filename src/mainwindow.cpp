@@ -7,7 +7,6 @@
 #include "inc/connexcomponentextractor.h"
 #include "inc/contourbillon.h"
 #include "inc/contourslice.h"
-#include "inc/curvaturehistogram.h"
 #include "inc/datexport.h"
 #include "inc/define.h"
 #include "inc/dicomreader.h"
@@ -19,6 +18,7 @@
 #include "inc/pgm3dexport.h"
 #include "inc/piechart.h"
 #include "inc/piepart.h"
+#include "inc/plotcontourdistanceshistogram.h"
 #include "inc/plotcurvaturehistogram.h"
 #include "inc/plotnearestpointshistogram.h"
 #include "inc/plotsectorhistogram.h"
@@ -48,7 +48,8 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 	_sliceView(new SliceView()), _sliceHistogram(new SliceHistogram()), _plotSliceHistogram(new PlotSliceHistogram()),
 	_pieChart(new PieChart(360)), _sectorHistogram(new SectorHistogram()), _plotSectorHistogram(new PlotSectorHistogram()),
 	_nearestPointsHistogram(new NearestPointsHistogram()), _plotNearestPointsHistogram(new PlotNearestPointsHistogram()),
-	_plotCurvatureHistogram(new PlotCurvatureHistogram()), _contourBillon(new ContourBillon()), _currentSlice(0), _currentMaximum(0), _currentSector(0)
+	_plotCurvatureHistogram(new PlotCurvatureHistogram()), _plotContourDistancesHistogram(new PlotContourDistancesHistogram()),
+	_contourBillon(new ContourBillon()), _currentSlice(0), _currentMaximum(0), _currentSector(0)
 {
 	_ui->setupUi(this);
 //	setCorner(Qt::TopLeftCorner,Qt::LeftDockWidgetArea);
@@ -95,6 +96,7 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 
 	_plotNearestPointsHistogram->attach(_ui->_plotNearestPointsHistogram);
 	_plotCurvatureHistogram->attach(_ui->_plotCurvatureHistogram);
+	_plotContourDistancesHistogram->attach(_ui->_plotContourDistancesHistogram);
 
 	/**** Mise en place de la communication MVC ****/
 
@@ -206,15 +208,18 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 MainWindow::~MainWindow()
 {
 	delete _contourBillon;
+	delete _plotContourDistancesHistogram;
 	delete _plotCurvatureHistogram;
+	delete _plotNearestPointsHistogram;
+	delete _nearestPointsHistogram;
 	delete _plotSectorHistogram;
 	delete _sectorHistogram;
 	delete _pieChart;
 	delete _plotSliceHistogram;
-	delete _nearestPointsHistogram;
-	delete _plotNearestPointsHistogram;
 	delete _sliceHistogram;
 	delete _sliceView;
+	if ( _knotBillon != 0 ) delete _knotBillon;
+	if ( _componentBillon != 0 ) delete _componentBillon;
 	if ( _billon != 0 ) delete _billon;
 }
 
@@ -286,7 +291,7 @@ void MainWindow::closeImage()
 	_mainPix = QImage(0,0,QImage::Format_ARGB32);
 	_ui->_checkRadiusAroundPith->setText( QString::number(100) );
 	updateSliceHistogram();
-	updateCurvatureHistogram(0);
+	updateContourHistograms(0);
 
 	_sectorHistogram->clear();
 	_plotSectorHistogram->update(*_sectorHistogram,*_pieChart);
@@ -379,7 +384,7 @@ void MainWindow::setSlice( const int &sliceNumber )
 
 	moveNearestPointsCursor(sliceNumber);
 
-	updateCurvatureHistogram(sliceNumber);
+	updateContourHistograms(sliceNumber);
 
 	drawSlice();
 }
@@ -402,6 +407,8 @@ void MainWindow::moveContourCursor( const int &position )
 	{
 		_plotCurvatureHistogram->moveCursor(position);
 		_ui->_plotCurvatureHistogram->replot();
+		_plotContourDistancesHistogram->moveCursor(position);
+		_ui->_plotContourDistancesHistogram->replot();
 		drawSlice();
 	}
 }
@@ -464,11 +471,12 @@ void MainWindow::updateSliceHistogram()
 	_ui->_comboSelectSliceInterval->setCurrentIndex(oldIntervalIndex<=intervals.size()?oldIntervalIndex:0);
 }
 
-void MainWindow::updateCurvatureHistogram( const int &sliceNumber )
+void MainWindow::updateContourHistograms( const int &sliceNumber )
 {
 	_ui->_sliderContour->setValue(0);
 	_ui->_sliderContour->setMaximum(0);
 	_plotCurvatureHistogram->clear();
+	_plotContourDistancesHistogram->clear();
 	const int sliceIntervalIndex = _ui->_comboSelectSliceInterval->currentIndex();
 	if ( sliceIntervalIndex > 0 )
 	{
@@ -477,11 +485,13 @@ void MainWindow::updateCurvatureHistogram( const int &sliceNumber )
 		{
 			const ContourSlice &contourSlice = _contourBillon->contourSlice(sliceNumber-sliceInterval.min());
 			_plotCurvatureHistogram->update(contourSlice.curvatureHistogram(),contourSlice.dominantPointIndex());
+			_plotContourDistancesHistogram->update(contourSlice.contourDistancesHistogram(),contourSlice.dominantPointIndex());
 			_ui->_sliderContour->setMaximum(contourSlice.curvatureHistogram().size()-1);
 			moveContourCursor(0);
 		}
 	}
 	_ui->_plotCurvatureHistogram->replot();
+	_ui->_plotContourDistancesHistogram->replot();
 }
 
 void MainWindow::updatePith()

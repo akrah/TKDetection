@@ -27,6 +27,11 @@ const Contour &ContourSlice::contour() const
 	return _contour;
 }
 
+const ContourDistancesHistogram &ContourSlice::contourDistancesHistogram() const
+{
+	return _contourDistancesHistogram;
+}
+
 const CurvatureHistogram &ContourSlice::curvatureHistogram() const
 {
 	return _curvatureHistogram;
@@ -84,6 +89,7 @@ void ContourSlice::compute( Slice &resultSlice, const Slice &initialSlice, const
 	_originalContour = _contour;
 	_contour.smooth(smoothingRadius);
 
+	_contourDistancesHistogram.construct( _contour, sliceCenter );
 	_curvatureHistogram.construct( _contour, curvatureWidth  );
 
 	computeDominantPoints( blurredSegmentThickness );
@@ -97,6 +103,7 @@ void ContourSlice::computeOldMethod( Slice &resultSlice, const Slice &initialSli
 {
 	_contour.clear();
 	_originalContour.clear();
+	_contourDistancesHistogram.clear();
 	_curvatureHistogram.clear();
 	_dominantPointsIndex.clear();
 	_leftMainDominantPointsIndex = _rightMainDominantPointsIndex = -1;
@@ -108,6 +115,7 @@ void ContourSlice::computeOldMethod( Slice &resultSlice, const Slice &initialSli
 	_originalContour = _contour;
 	_contour.smooth(smoothingRadius);
 
+	_contourDistancesHistogram.construct( _contour, sliceCenter );
 	_curvatureHistogram.construct( _contour, curvatureWidth );
 
 	const int width = initialSlice.n_cols;

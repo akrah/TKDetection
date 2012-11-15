@@ -6,6 +6,7 @@
 #include "inc/coordinate.h"
 #include "inc/contour.h"
 #include "inc/curvaturehistogram.h"
+#include "inc/contourdistanceshistogram.h"
 
 #include <QVector>
 #include <QPolygon>
@@ -19,6 +20,7 @@ public:
 	~ContourSlice();
 
 	const Contour &contour() const;
+	const ContourDistancesHistogram &contourDistancesHistogram() const;
 	const CurvatureHistogram &curvatureHistogram() const;
 	const iCoord2D &dominantPoint( const uint &index ) const;
 	const QVector<int> &dominantPointIndex() const;
@@ -44,6 +46,7 @@ private:
 	Contour _contour;
 	Contour _originalContour;
 
+	ContourDistancesHistogram _contourDistancesHistogram;
 	CurvatureHistogram _curvatureHistogram;
 
 	QVector<int> _dominantPointsIndex;

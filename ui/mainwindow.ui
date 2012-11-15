@@ -105,7 +105,7 @@
            <x>0</x>
            <y>0</y>
            <width>289</width>
-           <height>336</height>
+           <height>298</height>
           </rect>
          </property>
          <layout class="QHBoxLayout" name="horizontalLayout_8">
@@ -2169,7 +2169,7 @@ l'intervalle angulaire</string>
         <enum>QTabWidget::South</enum>
        </property>
        <property name="currentIndex">
-        <number>2</number>
+        <number>3</number>
        </property>
        <widget class="QWidget" name="_tabSliceHistogram">
         <attribute name="title">
@@ -2256,7 +2256,7 @@ l'intervalle angulaire</string>
            </item>
            <item>
             <widget class="QwtPolarPlot" name="_polarSectorHistogram">
-             <property name="plotBackground">
+             <property name="plotBackground" stdset="0">
               <brush brushstyle="SolidPattern">
                <color alpha="0">
                 <red>255</red>
@@ -2283,11 +2283,14 @@ l'intervalle angulaire</string>
        </widget>
        <widget class="QWidget" name="tab">
         <attribute name="title">
-         <string>4. Histogramme de courbure</string>
+         <string>4. Histogrammes de contours</string>
         </attribute>
         <layout class="QVBoxLayout" name="verticalLayout_19">
          <item>
           <widget class="QwtPlot" name="_plotCurvatureHistogram"/>
+         </item>
+         <item>
+          <widget class="QwtPlot" name="_plotContourDistancesHistogram"/>
          </item>
          <item>
           <widget class="QSlider" name="_sliderContour">
@@ -2336,15 +2339,15 @@ l'intervalle angulaire</string>
    <container>1</container>
   </customwidget>
   <customwidget>
+   <class>QxtSpanSlider</class>
+   <extends>QSlider</extends>
+   <header>QxtSpanSlider</header>
+  </customwidget>
+  <customwidget>
    <class>QwtPolarPlot</class>
    <extends>QFrame</extends>
    <header>qwt_polar_plot.h</header>
    <container>1</container>
-  </customwidget>
-  <customwidget>
-   <class>QxtSpanSlider</class>
-   <extends>QSlider</extends>
-   <header>QxtSpanSlider</header>
   </customwidget>
  </customwidgets>
  <tabstops>

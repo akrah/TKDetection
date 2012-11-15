@@ -38,6 +38,7 @@ SOURCES	=	main.cpp \
 			connexcomponentextractor.cpp \
 			contour.cpp \
 			contourbillon.cpp \
+			contourdistanceshistogram.cpp \
 			contourslice.cpp \
 			curvaturehistogram.cpp \
 			datexport.cpp \
@@ -64,12 +65,14 @@ SOURCES	=	main.cpp \
 			slicezoomer.cpp \
 			test_intervalshistogram.cpp \
 			v3dexport.cpp \
+    src/plotcontourdistanceshistogram.cpp
 
 HEADERS	=	billon.h \
 			billonalgorithms.h \
 			connexcomponentextractor.h \
 			contour.h \
 			contourbillon.h \
+			contourdistanceshistogram.h \
 			contourslice.h \
 			coordinate.h \
 			curvaturehistogram.h \
@@ -103,6 +106,7 @@ HEADERS	=	billon.h \
 			slicezoomer.h \
 			test_intervalshistogram.h \
 			v3dexport.h \
+    inc/plotcontourdistanceshistogram.h
 
 FORMS =	mainwindow.ui
 

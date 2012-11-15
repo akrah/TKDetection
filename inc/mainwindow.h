@@ -16,6 +16,7 @@ class ContourBillon;
 class CurvatureHistogram;
 class NearestPointsHistogram;
 class PieChart;
+class PlotContourDistancesHistogram;
 class PlotCurvatureHistogram;
 class PlotNearestPointsHistogram;
 class PlotSectorHistogram;
@@ -45,7 +46,7 @@ private slots:
 	void moveContourCursor( const int &position );
 	void setTypeOfView( const int &type );
 	void updateSliceHistogram();
-	void updateCurvatureHistogram( const int &histogramIndex );
+	void updateContourHistograms( const int &histogramIndex );
 	void updatePith();
 	void setMinimumOfSliceIntervalToCurrentSlice();
 	void setMaximumOfSliceIntervalToCurrentSlice();
@@ -127,6 +128,7 @@ private:
 	PlotNearestPointsHistogram *_plotNearestPointsHistogram;
 
 	PlotCurvatureHistogram *_plotCurvatureHistogram;
+	PlotContourDistancesHistogram *_plotContourDistancesHistogram;
 
 	ContourBillon *_contourBillon;
 
