@@ -23,6 +23,7 @@ public:
 	const ContourDistancesHistogram &contourDistancesHistogram() const;
 	const CurvatureHistogram &curvatureHistogram() const;
 	const iCoord2D &dominantPoint( const uint &index ) const;
+	const iCoord2D &dominantPoint2( const uint &index ) const;
 	const QVector<int> &dominantPointIndex() const;
 	const iCoord2D &leftMainDominantPoint() const;
 	const iCoord2D &rightMainDominantPoint() const;
@@ -50,6 +51,7 @@ private:
 	CurvatureHistogram _curvatureHistogram;
 
 	QVector<int> _dominantPointsIndex;
+	QVector<int> _dominantPointsIndex2;
 	int _leftMainDominantPointsIndex;
 	int _rightMainDominantPointsIndex;
 	rCoord2D _leftMainSupportPoint;

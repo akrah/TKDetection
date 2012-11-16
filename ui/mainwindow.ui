@@ -6,17 +6,14 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>826</width>
-    <height>684</height>
+    <width>867</width>
+    <height>720</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>MainWindow</string>
   </property>
   <widget class="QWidget" name="centralWidget">
-   <property name="layoutDirection">
-    <enum>Qt::LeftToRight</enum>
-   </property>
    <layout class="QVBoxLayout" name="verticalLayout_5">
     <item>
      <layout class="QHBoxLayout" name="horizontalLayout_3">
@@ -72,76 +69,60 @@
      </layout>
     </item>
     <item>
-     <layout class="QHBoxLayout" name="horizontalLayout_7">
-      <property name="spacing">
+     <widget class="QScrollArea" name="_scrollSliceView">
+      <property name="frameShape">
+       <enum>QFrame::NoFrame</enum>
+      </property>
+      <property name="frameShadow">
+       <enum>QFrame::Plain</enum>
+      </property>
+      <property name="lineWidth">
        <number>0</number>
       </property>
-      <item>
-       <widget class="QScrollArea" name="_scrollSliceView">
-        <property name="frameShape">
-         <enum>QFrame::NoFrame</enum>
-        </property>
-        <property name="frameShadow">
-         <enum>QFrame::Plain</enum>
-        </property>
-        <property name="lineWidth">
+      <property name="verticalScrollBarPolicy">
+       <enum>Qt::ScrollBarAlwaysOff</enum>
+      </property>
+      <property name="horizontalScrollBarPolicy">
+       <enum>Qt::ScrollBarAlwaysOff</enum>
+      </property>
+      <property name="widgetResizable">
+       <bool>true</bool>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignCenter</set>
+      </property>
+      <widget class="QWidget" name="scrollAreaWidgetContents">
+       <property name="geometry">
+        <rect>
+         <x>0</x>
+         <y>0</y>
+         <width>471</width>
+         <height>537</height>
+        </rect>
+       </property>
+       <layout class="QGridLayout" name="gridLayout">
+        <property name="margin">
          <number>0</number>
         </property>
-        <property name="verticalScrollBarPolicy">
-         <enum>Qt::ScrollBarAlwaysOff</enum>
-        </property>
-        <property name="horizontalScrollBarPolicy">
-         <enum>Qt::ScrollBarAlwaysOff</enum>
-        </property>
-        <property name="widgetResizable">
-         <bool>true</bool>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignCenter</set>
-        </property>
-        <widget class="QWidget" name="scrollAreaWidgetContents">
-         <property name="geometry">
-          <rect>
-           <x>0</x>
-           <y>0</y>
-           <width>289</width>
-           <height>298</height>
-          </rect>
-         </property>
-         <layout class="QHBoxLayout" name="horizontalLayout_8">
-          <property name="spacing">
+        <item row="0" column="0">
+         <widget class="QLabel" name="_labelSliceView">
+          <property name="lineWidth">
            <number>0</number>
           </property>
-          <property name="margin">
-           <number>0</number>
+          <property name="text">
+           <string/>
           </property>
-          <item>
-           <widget class="QLabel" name="_labelSliceView">
-            <property name="lineWidth">
-             <number>0</number>
-            </property>
-            <property name="text">
-             <string/>
-            </property>
-            <property name="alignment">
-             <set>Qt::AlignCenter</set>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </widget>
-       </widget>
-      </item>
-     </layout>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+     </widget>
     </item>
     <item>
      <widget class="QSlider" name="_sliderSelectSlice">
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="MinimumExpanding" vsizetype="Maximum">
-        <horstretch>0</horstretch>
-        <verstretch>0</verstretch>
-       </sizepolicy>
-      </property>
       <property name="maximum">
        <number>0</number>
       </property>
@@ -187,12 +168,6 @@
       </item>
       <item>
        <widget class="QxtSpanSlider" name="_spanSliderSelectInterval">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
         <property name="maximum">
          <number>0</number>
         </property>
@@ -236,7 +211,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>826</width>
+     <width>867</width>
      <height>25</height>
     </rect>
    </property>
@@ -252,9 +227,6 @@
    <addaction name="menuFichier"/>
   </widget>
   <widget class="QToolBar" name="_toolBar">
-   <property name="toolButtonStyle">
-    <enum>Qt::ToolButtonTextUnderIcon</enum>
-   </property>
    <attribute name="toolBarArea">
     <enum>TopToolBarArea</enum>
    </attribute>
@@ -268,11 +240,11 @@
     <number>2</number>
    </attribute>
    <widget class="QWidget" name="dockWidgetContents_2">
-    <layout class="QVBoxLayout" name="verticalLayout_4">
+    <layout class="QGridLayout" name="gridLayout_3">
      <property name="topMargin">
       <number>0</number>
      </property>
-     <item>
+     <item row="0" column="0">
       <widget class="QTabWidget" name="_tabs">
        <property name="currentIndex">
         <number>3</number>
@@ -283,21 +255,21 @@
         </attribute>
         <layout class="QVBoxLayout" name="verticalLayout_6">
          <item>
-          <layout class="QHBoxLayout" name="horizontalLayout_21">
+          <layout class="QFormLayout" name="formLayout_12">
            <property name="bottomMargin">
             <number>0</number>
            </property>
-           <item>
+           <item row="0" column="0">
             <widget class="QLabel" name="label_23">
              <property name="text">
               <string>Type d'affichage</string>
              </property>
             </widget>
            </item>
-           <item>
+           <item row="0" column="1">
             <widget class="QComboBox" name="_comboSliceType">
              <property name="sizePolicy">
-              <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+              <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
                <horstretch>0</horstretch>
                <verstretch>0</verstretch>
               </sizepolicy>
@@ -322,8 +294,8 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>327</width>
-              <height>129</height>
+              <width>335</width>
+              <height>142</height>
              </rect>
             </property>
             <attribute name="label">
@@ -1552,7 +1524,7 @@ l'intervalle angulaire</string>
                <number>20</number>
               </property>
               <property name="value">
-               <number>3</number>
+               <number>10</number>
               </property>
              </widget>
             </item>
@@ -1572,7 +1544,7 @@ l'intervalle angulaire</string>
                <number>20</number>
               </property>
               <property name="value">
-               <number>3</number>
+               <number>5</number>
               </property>
              </widget>
             </item>
@@ -1587,7 +1559,7 @@ l'intervalle angulaire</string>
                  <number>20</number>
                 </property>
                 <property name="value">
-                 <number>3</number>
+                 <number>2</number>
                 </property>
                 <property name="orientation">
                  <enum>Qt::Horizontal</enum>
@@ -1603,7 +1575,7 @@ l'intervalle angulaire</string>
                  <number>20</number>
                 </property>
                 <property name="value">
-                 <number>3</number>
+                 <number>2</number>
                 </property>
                </widget>
               </item>
@@ -1642,7 +1614,7 @@ l'intervalle angulaire</string>
          <item>
           <widget class="QToolBox" name="toolBox">
            <property name="currentIndex">
-            <number>4</number>
+            <number>5</number>
            </property>
            <widget class="QWidget" name="page">
             <property name="geometry">
@@ -2088,7 +2060,7 @@ l'intervalle angulaire</string>
               <x>0</x>
               <y>0</y>
               <width>441</width>
-              <height>112</height>
+              <height>135</height>
              </rect>
             </property>
             <attribute name="label">
@@ -2159,11 +2131,11 @@ l'intervalle angulaire</string>
   </widget>
   <widget class="QDockWidget" name="dockWidget">
    <attribute name="dockWidgetArea">
-    <number>8</number>
+    <number>2</number>
    </attribute>
    <widget class="QWidget" name="dockWidgetContents">
-    <layout class="QVBoxLayout" name="verticalLayout_9">
-     <item>
+    <layout class="QGridLayout" name="gridLayout_4">
+     <item row="0" column="0">
       <widget class="QTabWidget" name="tabWidget_2">
        <property name="tabPosition">
         <enum>QTabWidget::South</enum>
@@ -2245,29 +2217,22 @@ l'intervalle angulaire</string>
         <attribute name="title">
          <string>2. Histogramme de secteurs angulaires</string>
         </attribute>
-        <layout class="QVBoxLayout" name="verticalLayout_18">
+        <layout class="QHBoxLayout" name="horizontalLayout_7">
          <item>
-          <layout class="QHBoxLayout" name="horizontalLayout">
-           <property name="bottomMargin">
-            <number>0</number>
+          <widget class="QwtPlot" name="_plotSectorHistogram"/>
+         </item>
+         <item>
+          <widget class="QwtPolarPlot" name="_polarSectorHistogram">
+           <property name="plotBackground">
+            <brush brushstyle="SolidPattern">
+             <color alpha="0">
+              <red>255</red>
+              <green>255</green>
+              <blue>255</blue>
+             </color>
+            </brush>
            </property>
-           <item>
-            <widget class="QwtPlot" name="_plotSectorHistogram"/>
-           </item>
-           <item>
-            <widget class="QwtPolarPlot" name="_polarSectorHistogram">
-             <property name="plotBackground" stdset="0">
-              <brush brushstyle="SolidPattern">
-               <color alpha="0">
-                <red>255</red>
-                <green>255</green>
-                <blue>255</blue>
-               </color>
-              </brush>
-             </property>
-            </widget>
-           </item>
-          </layout>
+          </widget>
          </item>
         </layout>
        </widget>
@@ -2275,8 +2240,8 @@ l'intervalle angulaire</string>
         <attribute name="title">
          <string>3. Histogramme de distance moelle/nœud</string>
         </attribute>
-        <layout class="QVBoxLayout" name="verticalLayout_8">
-         <item>
+        <layout class="QGridLayout" name="gridLayout_5">
+         <item row="0" column="0">
           <widget class="QwtPlot" name="_plotNearestPointsHistogram"/>
          </item>
         </layout>
@@ -2330,7 +2295,7 @@ l'intervalle angulaire</string>
    </property>
   </action>
  </widget>
- <layoutdefault spacing="6" margin="11"/>
+ <layoutdefault spacing="6" margin="6"/>
  <customwidgets>
   <customwidget>
    <class>QwtPlot</class>
@@ -2339,38 +2304,102 @@ l'intervalle angulaire</string>
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>QxtSpanSlider</class>
-   <extends>QSlider</extends>
-   <header>QxtSpanSlider</header>
-  </customwidget>
-  <customwidget>
    <class>QwtPolarPlot</class>
    <extends>QFrame</extends>
    <header>qwt_polar_plot.h</header>
    <container>1</container>
   </customwidget>
+  <customwidget>
+   <class>QxtSpanSlider</class>
+   <extends>QSlider</extends>
+   <header>QxtSpanSlider</header>
+  </customwidget>
  </customwidgets>
  <tabstops>
-  <tabstop>_scrollSliceView</tabstop>
   <tabstop>_tabs</tabstop>
+  <tabstop>_comboSliceType</tabstop>
   <tabstop>_spinMinIntensity</tabstop>
   <tabstop>_spansliderIntensityThreshold</tabstop>
   <tabstop>_spinMaxIntensity</tabstop>
-  <tabstop>_buttonPreviousMaximum</tabstop>
-  <tabstop>_buttonUpdateSliceHistogram</tabstop>
-  <tabstop>_buttonNextMaximum</tabstop>
+  <tabstop>_checkRadiusAroundPith</tabstop>
+  <tabstop>_checkEnableConnexComponents</tabstop>
+  <tabstop>_spinMovementThresholdMin</tabstop>
+  <tabstop>_sliderMovementThresholdInterval</tabstop>
+  <tabstop>_spinMovementThresholdMax</tabstop>
+  <tabstop>_comboEdgeDetectionType</tabstop>
+  <tabstop>_spinCannyRadiusOfGaussianMask</tabstop>
+  <tabstop>_spinCannySigmaOfGaussianMask</tabstop>
+  <tabstop>_spinCannyMinimumGradient</tabstop>
+  <tabstop>_spinCannyMinimumDeviation</tabstop>
+  <tabstop>_spinFlowAlpha</tabstop>
+  <tabstop>_spinFlowEpsilon</tabstop>
+  <tabstop>_spinFlowMaximumIterations</tabstop>
   <tabstop>_buttonFlowUpdate</tabstop>
   <tabstop>_spinRestrictedAreaResolution</tabstop>
   <tabstop>_spinRestrictedAreaThreshold</tabstop>
   <tabstop>_sliderRestrictedAreaBeginRadius</tabstop>
   <tabstop>_spinRestrictedAreaBeginRadius</tabstop>
+  <tabstop>_sliderSmoothingRadiusOfHistogram</tabstop>
+  <tabstop>_spinSmoothingRadiusOfHistogram</tabstop>
+  <tabstop>_sliderBorderPercentageToCut</tabstop>
+  <tabstop>_spinBorderPercentageToCut</tabstop>
+  <tabstop>_sliderMinimumHeightofMaximum</tabstop>
+  <tabstop>_spinMinimumHeightofMaximum</tabstop>
   <tabstop>_sliderMaximumsNeighborhood</tabstop>
   <tabstop>_spinMaximumsNeighborhood</tabstop>
+  <tabstop>_sliderDerivativePercentage</tabstop>
+  <tabstop>_spinDerivativePercentage</tabstop>
   <tabstop>_sliderHistogramIntervalMinimumWidth</tabstop>
   <tabstop>_spinHistogramIntervalMinimumWidth</tabstop>
-  <tabstop>_spinSectorsNumber</tabstop>
+  <tabstop>_buttonComputePith</tabstop>
   <tabstop>_comboSelectSliceInterval</tabstop>
   <tabstop>_buttonSelectSliceIntervalUpdate</tabstop>
+  <tabstop>_comboSelectSectorInterval</tabstop>
+  <tabstop>_buttonSelectSectorIntervalUpdate</tabstop>
+  <tabstop>_spinSectorsNumber</tabstop>
+  <tabstop>_sliderSectorThresholding</tabstop>
+  <tabstop>_spinSectorThresholding</tabstop>
+  <tabstop>_sliderMinimalSizeOf3DConnexComponents</tabstop>
+  <tabstop>_spinMinimalSizeOf3DConnexComponents</tabstop>
+  <tabstop>_sliderMinimalSizeOf2DConnexComponents</tabstop>
+  <tabstop>_spinMinimalSizeOf2DConnexComponents</tabstop>
+  <tabstop>_spinBlurredSegmentsThickness</tabstop>
+  <tabstop>_spinContourSmoothingRadius</tabstop>
+  <tabstop>_sliderCurvatureWidth</tabstop>
+  <tabstop>_spinCurvatureWidth</tabstop>
+  <tabstop>_comboExportHistoType</tabstop>
+  <tabstop>_buttonExportHistograms</tabstop>
+  <tabstop>_comboExportHistoFormat</tabstop>
+  <tabstop>_spinDatExportResolution</tabstop>
+  <tabstop>_sliderDatExportContrast</tabstop>
+  <tabstop>_spinDatExportContrast</tabstop>
+  <tabstop>_buttonExportToDat</tabstop>
+  <tabstop>_comboOfsExportType</tabstop>
+  <tabstop>_spinExportNbEdges</tabstop>
+  <tabstop>_spinExportRadius</tabstop>
+  <tabstop>_checkCloseBillon</tabstop>
+  <tabstop>_buttonExportToOfs</tabstop>
+  <tabstop>_comboExportPgm3dType</tabstop>
+  <tabstop>_sliderPgm3dExportContrast</tabstop>
+  <tabstop>_spinPgm3dExportContrast</tabstop>
+  <tabstop>_buttonExportToPgm3d</tabstop>
+  <tabstop>_comboExportToV3DType</tabstop>
+  <tabstop>_comboExportToSdpType</tabstop>
+  <tabstop>_checkExportSdpOldMethod</tabstop>
+  <tabstop>_buttonExportToSDP</tabstop>
+  <tabstop>tabWidget_2</tabstop>
+  <tabstop>_buttonPreviousMaximum</tabstop>
+  <tabstop>_buttonUpdateSliceHistogram</tabstop>
+  <tabstop>_buttonNextMaximum</tabstop>
+  <tabstop>_sliderContour</tabstop>
+  <tabstop>_scrollSliceView</tabstop>
+  <tabstop>_sliderSelectSlice</tabstop>
+  <tabstop>_spanSliderSelectInterval</tabstop>
+  <tabstop>_buttonMinSlice</tabstop>
+  <tabstop>_spinMinSlice</tabstop>
+  <tabstop>_spinMaxSlice</tabstop>
+  <tabstop>_buttonMaxSlice</tabstop>
+  <tabstop>_buttonExportToV3D</tabstop>
  </tabstops>
  <resources/>
  <connections/>

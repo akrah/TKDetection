@@ -43,6 +43,12 @@ const iCoord2D &ContourSlice::dominantPoint( const uint &index ) const
 	return _contour[_dominantPointsIndex[index]];
 }
 
+const iCoord2D &ContourSlice::dominantPoint2( const uint &index ) const
+{
+	Q_ASSERT_X( index<static_cast<uint>(_dominantPointsIndex2.size()), "Histogram::mainDominantPoint", "Le point dominants demandé n'existe pas" );
+	return _contour[_contour.size()-_dominantPointsIndex2[index]-1];
+}
+
 const QVector<int> &ContourSlice::dominantPointIndex() const
 {
 	return _dominantPointsIndex;
@@ -50,22 +56,26 @@ const QVector<int> &ContourSlice::dominantPointIndex() const
 
 const iCoord2D &ContourSlice::leftMainDominantPoint() const
 {
-	return _leftMainDominantPointsIndex != -1 ? dominantPoint(_leftMainDominantPointsIndex) : invalidICoord2D;
+//	return _leftMainDominantPointsIndex != -1 ? dominantPoint(_leftMainDominantPointsIndex) : invalidICoord2D;
+	return _leftMainDominantPointsIndex != -1 ? _contour[_leftMainDominantPointsIndex] : invalidICoord2D;
 }
 
 const iCoord2D &ContourSlice::rightMainDominantPoint() const
 {
-	return _rightMainDominantPointsIndex != -1 ? dominantPoint(_rightMainDominantPointsIndex) : invalidICoord2D;
+//	return _rightMainDominantPointsIndex != -1 ? dominantPoint(_rightMainDominantPointsIndex) : invalidICoord2D;
+	return _rightMainDominantPointsIndex != -1 ? _contour[_rightMainDominantPointsIndex] : invalidICoord2D;
 }
 
 const int &ContourSlice::leftMainDominantPointIndex() const
 {
-	return _leftMainDominantPointsIndex != -1 ? _dominantPointsIndex[_leftMainDominantPointsIndex] : _leftMainDominantPointsIndex;
+//	return _leftMainDominantPointsIndex != -1 ? _dominantPointsIndex[_leftMainDominantPointsIndex] : _leftMainDominantPointsIndex;
+	return _leftMainDominantPointsIndex;
 }
 
 const int &ContourSlice::rightMainDominantPointIndex() const
 {
-	return _rightMainDominantPointsIndex != -1 ? _dominantPointsIndex[_rightMainDominantPointsIndex] : _rightMainDominantPointsIndex;
+//	return _rightMainDominantPointsIndex != -1 ? _dominantPointsIndex[_rightMainDominantPointsIndex] : _rightMainDominantPointsIndex;
+	return _rightMainDominantPointsIndex;
 }
 
 const rCoord2D &ContourSlice::leftMainSupportPoint() const
@@ -151,6 +161,14 @@ void ContourSlice::draw( QPainter &painter, const int &cursorPosition ) const
 		painter.save();
 		_contour.draw(painter,cursorPosition);
 
+		const int nbDominantPoints2 = _dominantPointsIndex2.size();
+		// Dessin des points dominants
+		painter.setPen(Qt::yellow);
+		for ( i=0 ; i<nbDominantPoints2 ; ++i )
+		{
+			painter.drawEllipse(_contour[nbContourPoints-_dominantPointsIndex2[i]-1].x-3,_contour[nbContourPoints-_dominantPointsIndex2[i]-3].y-3,6,6);
+		}
+
 		const int nbDominantPoints = _dominantPointsIndex.size();
 		if ( nbDominantPoints > 0 )
 		{
@@ -233,13 +251,24 @@ void ContourSlice::computeDominantPoints( const int &blurredSegmentThickness )
 			qDebug() << QObject::tr("ERREUR : Impossible de créer le ficher de contours %1.").arg(fileContours.fileName());
 			return;
 		}
+		QTemporaryFile fileContours2("TKDetection_XXXXXX_inverse.ctr");
+		if ( !fileContours2.open() )
+		{
+			qDebug() << QObject::tr("ERREUR : Impossible de créer le ficher de contours %1.").arg(fileContours2.fileName());
+			return;
+		}
 
 		QTextStream streamContours(&fileContours);
+		QTextStream streamContours2(&fileContours2);
+		streamContours2 << _contour[0].x << " " << _contour[0].y << endl;
 		for ( int i=0 ; i<nbPoints ; ++i )
 		{
 			streamContours << _contour[i].x << " " << _contour[i].y << endl;
+			streamContours2 << _contour[nbPoints-i-1].x << " " << _contour[nbPoints-i-1].y << endl;
 		}
+		streamContours << _contour[0].x << " " << _contour[0].y << endl;
 		fileContours.close();
+		fileContours2.close();
 
 		// Extraction des points dominants à partir des points de contour
 		QTemporaryFile fileDominantPoint("TKDetection_XXXXXX.dp");
@@ -272,30 +301,98 @@ void ContourSlice::computeDominantPoints( const int &blurredSegmentThickness )
 
 			fileDominantPoint.close();
 		}
+
+		// Extraction des points dominants à partir des points de contour
+		QTemporaryFile fileDominantPoint2("TKDetection_XXXXXX_inverse.dp");
+		if( !fileDominantPoint2.open() )
+		{
+			qDebug() << QObject::tr("ERREUR : Impossible de créer le ficher de points dominants %1.").arg(fileDominantPoint2.fileName());
+			return;
+		}
+		fileDominantPoint2.close();
+
+		QProcess dominantPointExtraction2;
+		dominantPointExtraction2.setStandardInputFile(fileContours2.fileName());
+		dominantPointExtraction2.start(QString("cornerdetection -epais %1 -pointFile %2").arg(blurredSegmentThickness).arg(fileDominantPoint2.fileName()));
+
+		if ( dominantPointExtraction2.waitForFinished(3000) )
+		{
+			if( !fileDominantPoint2.open() )
+			{
+				qDebug() << QObject::tr("ERREUR : Impossible de lire le ficher de points dominants %1.").arg(fileDominantPoint2.fileName());
+				return;
+			}
+
+			QTextStream streamDominantPoints2(&fileDominantPoint2);
+			streamDominantPoints2 >> nbPoints;
+			_dominantPointsIndex2.resize(nbPoints);
+			for ( int i=0 ; i<nbPoints ; ++i )
+			{
+				streamDominantPoints2 >> _dominantPointsIndex2[i];
+			}
+
+			fileDominantPoint2.close();
+		}
 	}
 }
 
 void ContourSlice::computeMainDominantPoints()
 {
+//	_leftMainDominantPointsIndex = _rightMainDominantPointsIndex = -1;
+
+//	int nbDominantPoints, index, firstIndex;
+
+//	nbDominantPoints = _dominantPointsIndex.size();
+//	if ( nbDominantPoints > 0 && _curvatureHistogram.size() == _contour.size() )
+//	{
+//		// Point dominant dans le sens du contour
+//		index = 0;
+//		while ( index<nbDominantPoints && _curvatureHistogram[_dominantPointsIndex[index]] > 0 ) ++index;
+//		firstIndex = index;
+//		// Si le point dominant trouvé est correct
+//		if ( index<nbDominantPoints ) _leftMainDominantPointsIndex = index;
+
+//		// Point dominant dans le sens contraire du contour
+//		index = nbDominantPoints-1;
+//		while ( index>firstIndex && _curvatureHistogram[_dominantPointsIndex[index]] > 0 ) --index;
+//		// Si le point dominant trouvé est correct
+//		if ( index>firstIndex ) _rightMainDominantPointsIndex = index;
+//	}
+
 	_leftMainDominantPointsIndex = _rightMainDominantPointsIndex = -1;
 
-	int nbDominantPoints, index, firstIndex;
+	int nbDominantPoints, nbDominantPoints2, nbPoints, index;
+	qreal currentDistance, previousDistance;
 
 	nbDominantPoints = _dominantPointsIndex.size();
-	if ( nbDominantPoints > 0 && _curvatureHistogram.size() == _contour.size() )
-	{
-		// Point dominant dans le sens du contour
-		index = 0;
-		while ( index<nbDominantPoints && _curvatureHistogram[_dominantPointsIndex[index]] > 0 ) ++index;
-		firstIndex = index;
-		// Si le point dominant trouvé est correct
-		if ( index<nbDominantPoints ) _leftMainDominantPointsIndex = index;
+	nbDominantPoints2 = _dominantPointsIndex2.size();
+	nbPoints = _contour.size();
 
-		// Point dominant dans le sens contraire du contour
-		index = nbDominantPoints-1;
-		while ( index>firstIndex && _curvatureHistogram[_dominantPointsIndex[index]] > 0 ) --index;
-		// Si le point dominant trouvé est correct
-		if ( index>firstIndex ) _rightMainDominantPointsIndex = index;
+	if ( nbDominantPoints > 2 && nbDominantPoints2 > 2 && _contourDistancesHistogram.size() == nbPoints )
+	{
+		//index = _dominantPointsIndex[1];
+		index = _contourDistancesHistogram[_dominantPointsIndex[1]] > _contourDistancesHistogram[_dominantPointsIndex2[nbDominantPoints2-1]] ? _dominantPointsIndex[1] : _dominantPointsIndex2[nbDominantPoints2-1];
+		currentDistance = _contourDistancesHistogram[index--];
+		previousDistance = _contourDistancesHistogram[index];
+		while ( index>0 && previousDistance>currentDistance )
+		{
+			currentDistance = previousDistance;
+			index--;
+			previousDistance = _contourDistancesHistogram[index];
+		}
+		_leftMainDominantPointsIndex = index;
+
+		//index = _dominantPointsIndex[nbDominantPoints-1];
+		index = _contourDistancesHistogram[_dominantPointsIndex[nbDominantPoints-1]] > _contourDistancesHistogram[_dominantPointsIndex2[1]] ? _dominantPointsIndex[nbDominantPoints-1] : _dominantPointsIndex2[1];
+		currentDistance = _contourDistancesHistogram[index++];
+		previousDistance = _contourDistancesHistogram[index];
+		while ( index<nbPoints-1 && previousDistance>currentDistance )
+		{
+			currentDistance = previousDistance;
+			index++;
+			previousDistance = _contourDistancesHistogram[index];
+		}
+		_rightMainDominantPointsIndex = index;
 	}
 }
 
@@ -303,37 +400,53 @@ void ContourSlice::computeSupportsOfMainDominantPoints()
 {
 	_leftMainSupportPoint = _rightMainSupportPoint = rCoord2D(-1,-1);
 
-	int index;
+	int index, counter;
 
 	// Support du MDP gauche
 	index = _leftMainDominantPointsIndex;
 	if ( index != -1 )
 	{
 		_leftMainSupportPoint.x = _leftMainSupportPoint.y = 0.;
+		counter = 0;
 		while ( index >= 0 )
 		{
-			_leftMainSupportPoint.x += dominantPoint(index).x;
-			_leftMainSupportPoint.y += dominantPoint(index).y;
-			--index;
+//			_leftMainSupportPoint.x += dominantPoint(index).x;
+//			_leftMainSupportPoint.y += dominantPoint(index).y;
+//			--index;
+			_leftMainSupportPoint.x += _contour[index].x;
+			_leftMainSupportPoint.y += _contour[index].y;
+			index -= 5;
+			++counter;
 		}
-		_leftMainSupportPoint.x /= (_leftMainDominantPointsIndex + 1);
-		_leftMainSupportPoint.y /= (_leftMainDominantPointsIndex + 1);
+//		_leftMainSupportPoint.x /= (_leftMainDominantPointsIndex + 1);
+//		_leftMainSupportPoint.y /= (_leftMainDominantPointsIndex + 1);
+		_leftMainSupportPoint.x /= counter;
+		_leftMainSupportPoint.y /= counter;
 	}
 
 	// Support du MDP droit
 	index = _rightMainDominantPointsIndex;
 	if ( index != -1 )
 	{
-		_rightMainSupportPoint = dominantPoint(0);
-		int nbDominantPoints = _dominantPointsIndex.size();
-		while ( index < nbDominantPoints )
+		//_rightMainSupportPoint = dominantPoint(0);
+		//int nbDominantPoints = _dominantPointsIndex.size();
+		int nbPoints = _contour.size();
+		counter = 0;
+		//while ( index < nbDominantPoints )
+		while ( index < nbPoints )
 		{
-			_rightMainSupportPoint.x += dominantPoint(index).x;
-			_rightMainSupportPoint.y += dominantPoint(index).y;
-			++index;
+//			_rightMainSupportPoint.x += dominantPoint(index).x;
+//			_rightMainSupportPoint.y += dominantPoint(index).y;
+//			++index;
+			_rightMainSupportPoint.x += _contour[index].x;
+			_rightMainSupportPoint.y += _contour[index].y;
+			index += 5;
+			++counter;
 		}
-		_rightMainSupportPoint.x /= (nbDominantPoints - _rightMainDominantPointsIndex + 1);
-		_rightMainSupportPoint.y /= (nbDominantPoints - _rightMainDominantPointsIndex + 1);
+//		_rightMainSupportPoint.x /= (nbDominantPoints - _rightMainDominantPointsIndex + 1);
+//		_rightMainSupportPoint.y /= (nbDominantPoints - _rightMainDominantPointsIndex + 1);
+		_rightMainSupportPoint.x /= counter;
+		_rightMainSupportPoint.y /= counter;
 	}
 }
 

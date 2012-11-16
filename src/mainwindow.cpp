@@ -84,6 +84,7 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 	_plotSliceHistogram->attach(_ui->_plotSliceHistogram);
 
 	_ui->_plotSectorHistogram->enableAxis(QwtPlot::yLeft,false);
+	_ui->_plotSectorHistogram->setAxisScale(QwtPlot::xBottom,0,TWO_PI);
 	_ui->_polarSectorHistogram->setScale( QwtPolar::Azimuth, TWO_PI, 0.0 );
 	_plotSectorHistogram->attach(_ui->_polarSectorHistogram);
 	_plotSectorHistogram->attach(_ui->_plotSectorHistogram);
@@ -484,8 +485,13 @@ void MainWindow::updateContourHistograms( const int &sliceNumber )
 		if ( !_contourBillon->isEmpty() && sliceInterval.containsClosed(_currentSlice) )
 		{
 			const ContourSlice &contourSlice = _contourBillon->contourSlice(sliceNumber-sliceInterval.min());
+
 			_plotCurvatureHistogram->update(contourSlice.curvatureHistogram(),contourSlice.dominantPointIndex());
+			_ui->_plotCurvatureHistogram->setAxisScale(QwtPlot::xBottom,0,contourSlice.curvatureHistogram().size());
+
 			_plotContourDistancesHistogram->update(contourSlice.contourDistancesHistogram(),contourSlice.dominantPointIndex());
+			_ui->_plotContourDistancesHistogram->setAxisScale(QwtPlot::xBottom,0,contourSlice.contourDistancesHistogram().size());
+
 			_ui->_sliderContour->setMaximum(contourSlice.curvatureHistogram().size()-1);
 			moveContourCursor(0);
 		}
@@ -743,6 +749,7 @@ void MainWindow::selectSectorInterval(const int &index, const bool &draw )
 		_nearestPointsHistogram->construct( *_componentBillon );
 		_nearestPointsHistogram->computeMaximumsAndIntervals( 5, 5. );
 		_plotNearestPointsHistogram->update( *_nearestPointsHistogram );
+		_ui->_plotNearestPointsHistogram->setAxisScale(QwtPlot::xBottom,0,_nearestPointsHistogram->size());
 		_ui->_plotNearestPointsHistogram->replot();
 
 		if ( _ui->_checkEnableConnexComponents->isChecked() )
