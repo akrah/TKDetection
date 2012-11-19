@@ -135,6 +135,7 @@ private:
 	uint _currentSlice;
 	int _currentMaximum;
 	uint _currentSector;
+	qreal _treeRadius;
 };
 
 #endif // MAINWINDOW_H

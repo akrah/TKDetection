@@ -49,7 +49,7 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 	_pieChart(new PieChart(360)), _sectorHistogram(new SectorHistogram()), _plotSectorHistogram(new PlotSectorHistogram()),
 	_nearestPointsHistogram(new NearestPointsHistogram()), _plotNearestPointsHistogram(new PlotNearestPointsHistogram()),
 	_plotCurvatureHistogram(new PlotCurvatureHistogram()), _plotContourDistancesHistogram(new PlotContourDistancesHistogram()),
-	_contourBillon(new ContourBillon()), _currentSlice(0), _currentMaximum(0), _currentSector(0)
+	_contourBillon(new ContourBillon()), _currentSlice(0), _currentMaximum(0), _currentSector(0), _treeRadius(0)
 {
 	_ui->setupUi(this);
 //	setCorner(Qt::TopLeftCorner,Qt::LeftDockWidgetArea);
@@ -290,7 +290,8 @@ void MainWindow::closeImage()
 	_contourBillon->clear();
 
 	_mainPix = QImage(0,0,QImage::Format_ARGB32);
-	_ui->_checkRadiusAroundPith->setText( QString::number(100) );
+	_treeRadius = 133.33;
+	_ui->_checkRadiusAroundPith->setText( QString::number(_treeRadius) );
 	updateSliceHistogram();
 	updateContourHistograms(0);
 
@@ -317,11 +318,11 @@ void MainWindow::drawSlice()
 			_billon->pith().draw(_mainPix,_currentSlice);
 
 			const iCoord2D &pithCoord = _billon->pithCoord(_currentSlice);
-			if ( _ui->_checkRadiusAroundPith->isChecked() && _ui->_checkRadiusAroundPith->text().toInt() > 0 )
+			if ( _ui->_checkRadiusAroundPith->isChecked() && _treeRadius > 0 )
 			{
 				QPainter painter(&_mainPix);
 				painter.setPen(Qt::yellow);
-				painter.drawEllipse(QPointF(pithCoord.x,pithCoord.y),_ui->_checkRadiusAroundPith->text().toInt(),_ui->_checkRadiusAroundPith->text().toInt());
+				painter.drawEllipse(QPointF(pithCoord.x,pithCoord.y),_treeRadius*0.75,_treeRadius*0.75);
 			}
 
 			if ( inDrawingArea )
@@ -446,7 +447,7 @@ void MainWindow::updateSliceHistogram()
 	{
 		_sliceHistogram->construct(*_billon, Interval<int>(_ui->_spinMinIntensity->value(),_ui->_spinMaxIntensity->value()),
 								   Interval<int>(_ui->_spinMovementThresholdMin->value(),_ui->_spinMovementThresholdMax->value()),
-								   _ui->_spinBorderPercentageToCut->value(), _ui->_checkRadiusAroundPith->text().toInt());
+								   _ui->_spinBorderPercentageToCut->value(), _treeRadius*0.75);
 		_sliceHistogram->computeMaximumsAndIntervals( _ui->_spinSmoothingRadiusOfHistogram->value(), _ui->_spinMinimumHeightofMaximum->value(),
 													  _ui->_spinMaximumsNeighborhood->value(), _ui->_spinDerivativePercentage->value(),
 													  _ui->_spinHistogramIntervalMinimumWidth->value(), false);
@@ -502,12 +503,12 @@ void MainWindow::updateContourHistograms( const int &sliceNumber )
 
 void MainWindow::updatePith()
 {
-	_ui->_checkRadiusAroundPith->setText( QString::number(100) );
 	if ( _billon != 0 )
 	{
 		PithExtractor::instance().process(*_billon);
 	}
-	_ui->_checkRadiusAroundPith->setText( QString::number(static_cast<int>(BillonAlgorithms::restrictedAreaMeansRadius(*_billon,20,_ui->_spinMinIntensity->value())*0.75)) );
+	_treeRadius = BillonAlgorithms::restrictedAreaMeansRadius(*_billon,20,_ui->_spinMinIntensity->value());
+	_ui->_checkRadiusAroundPith->setText( QString::number(_treeRadius) );
 	drawSlice();
 	updateSliceHistogram();
 }
@@ -1017,7 +1018,7 @@ void MainWindow::updateUiComponentsValues()
 	_ui->_sliderSelectSlice->setValue(0);
 	_ui->_sliderSelectSlice->setRange(0,nbSlices);
 
-	_ui->_checkRadiusAroundPith->setText( QString::number(100) );
+	_ui->_checkRadiusAroundPith->setText( QString::number(_treeRadius) );
 
 	enabledComponents();
 }
@@ -1047,7 +1048,7 @@ void MainWindow::updateSectorHistogram( const Interval<uint> &interval )
 	if ( _billon != 0 )
 	{
 		_sectorHistogram->construct( *_billon, *_pieChart, interval, Interval<int>(_ui->_spinMinIntensity->value(),_ui->_spinMaxIntensity->value()),
-									 Interval<int>(_ui->_spinMovementThresholdMin->value(),_ui->_spinMovementThresholdMax->value()), _ui->_checkRadiusAroundPith->text().toInt());
+									 Interval<int>(_ui->_spinMovementThresholdMin->value(),_ui->_spinMovementThresholdMax->value()), _treeRadius*0.75);
 		_sectorHistogram->computeMaximumsAndIntervals( _ui->_spinSmoothingRadiusOfHistogram->value(), _ui->_spinMinimumHeightofMaximum->value(),
 													   _ui->_spinMaximumsNeighborhood->value(), _ui->_spinDerivativePercentage->value(),
 													   _ui->_spinHistogramIntervalMinimumWidth->value(), true );

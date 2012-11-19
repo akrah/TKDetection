@@ -2,6 +2,7 @@
 
 #include "inc/contourslice.h"
 #include "inc/curvaturehistogram.h"
+#include "inc/nearestpointshistogram.h"
 
 ContourBillon::ContourBillon()
 {
@@ -39,6 +40,7 @@ void ContourBillon::compute( Billon &resultBillon, const Billon &billon, const i
 	_contourSlices.resize(nbSlices);
 	for ( uint k=0 ; k<nbSlices ; ++k )
 	{
+		qDebug() << QString("Calcul de la coupe de contour : %1/%2").arg(k+1).arg(nbSlices);
 		_contourSlices[k].compute( resultBillon.slice(k), billon.slice(k), billon.pithCoord(k), intensityThreshold, blurredSegmentThickness, smoothingRadius, curvatureWidth );
 	}
 }

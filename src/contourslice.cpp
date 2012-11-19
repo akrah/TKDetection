@@ -46,7 +46,7 @@ const iCoord2D &ContourSlice::dominantPoint( const uint &index ) const
 const iCoord2D &ContourSlice::dominantPoint2( const uint &index ) const
 {
 	Q_ASSERT_X( index<static_cast<uint>(_dominantPointsIndex2.size()), "Histogram::mainDominantPoint", "Le point dominants demandé n'existe pas" );
-	return _contour[_contour.size()-_dominantPointsIndex2[index]-1];
+	return _contour[_dominantPointsIndex2[index]];
 }
 
 const QVector<int> &ContourSlice::dominantPointIndex() const
@@ -56,25 +56,21 @@ const QVector<int> &ContourSlice::dominantPointIndex() const
 
 const iCoord2D &ContourSlice::leftMainDominantPoint() const
 {
-//	return _leftMainDominantPointsIndex != -1 ? dominantPoint(_leftMainDominantPointsIndex) : invalidICoord2D;
 	return _leftMainDominantPointsIndex != -1 ? _contour[_leftMainDominantPointsIndex] : invalidICoord2D;
 }
 
 const iCoord2D &ContourSlice::rightMainDominantPoint() const
 {
-//	return _rightMainDominantPointsIndex != -1 ? dominantPoint(_rightMainDominantPointsIndex) : invalidICoord2D;
 	return _rightMainDominantPointsIndex != -1 ? _contour[_rightMainDominantPointsIndex] : invalidICoord2D;
 }
 
 const int &ContourSlice::leftMainDominantPointIndex() const
 {
-//	return _leftMainDominantPointsIndex != -1 ? _dominantPointsIndex[_leftMainDominantPointsIndex] : _leftMainDominantPointsIndex;
 	return _leftMainDominantPointsIndex;
 }
 
 const int &ContourSlice::rightMainDominantPointIndex() const
 {
-//	return _rightMainDominantPointsIndex != -1 ? _dominantPointsIndex[_rightMainDominantPointsIndex] : _rightMainDominantPointsIndex;
 	return _rightMainDominantPointsIndex;
 }
 
@@ -166,7 +162,7 @@ void ContourSlice::draw( QPainter &painter, const int &cursorPosition ) const
 		painter.setPen(Qt::yellow);
 		for ( i=0 ; i<nbDominantPoints2 ; ++i )
 		{
-			painter.drawEllipse(_contour[nbContourPoints-_dominantPointsIndex2[i]-1].x-3,_contour[nbContourPoints-_dominantPointsIndex2[i]-3].y-3,6,6);
+			painter.drawEllipse(dominantPoint2(i).x-3,dominantPoint2(i).y-3,6,6);
 		}
 
 		const int nbDominantPoints = _dominantPointsIndex.size();
@@ -176,7 +172,7 @@ void ContourSlice::draw( QPainter &painter, const int &cursorPosition ) const
 			painter.setPen(Qt::green);
 			for ( i=0 ; i<nbDominantPoints ; ++i )
 			{
-				painter.drawEllipse(_contour[_dominantPointsIndex[i]].x-2,_contour[_dominantPointsIndex[i]].y-2,4,4);
+				painter.drawEllipse(dominantPoint(i).x-2,dominantPoint(i).y-2,4,4);
 			}
 
 			// Dessin des points dominants principaux
@@ -241,7 +237,8 @@ void ContourSlice::computeDominantPoints( const int &blurredSegmentThickness )
 {
 	_dominantPointsIndex.clear();
 
-	int nbPoints = _contour.size();
+	int nbPoints, nbDominantPoints;
+	nbPoints = _contour.size();
 	if ( nbPoints > 0 )
 	{
 		// Ecriture des données de points de contours
@@ -292,9 +289,9 @@ void ContourSlice::computeDominantPoints( const int &blurredSegmentThickness )
 			}
 
 			QTextStream streamDominantPoints(&fileDominantPoint);
-			streamDominantPoints >> nbPoints;
-			_dominantPointsIndex.resize(nbPoints);
-			for ( int i=0 ; i<nbPoints ; ++i )
+			streamDominantPoints >> nbDominantPoints;
+			_dominantPointsIndex.resize(nbDominantPoints);
+			for ( int i=0 ; i<nbDominantPoints ; ++i )
 			{
 				streamDominantPoints >> _dominantPointsIndex[i];
 			}
@@ -324,11 +321,13 @@ void ContourSlice::computeDominantPoints( const int &blurredSegmentThickness )
 			}
 
 			QTextStream streamDominantPoints2(&fileDominantPoint2);
-			streamDominantPoints2 >> nbPoints;
-			_dominantPointsIndex2.resize(nbPoints);
-			for ( int i=0 ; i<nbPoints ; ++i )
+			streamDominantPoints2 >> nbDominantPoints;
+			_dominantPointsIndex2.resize(nbDominantPoints);
+			int index;
+			for ( int i=0 ; i<nbDominantPoints ; ++i )
 			{
-				streamDominantPoints2 >> _dominantPointsIndex2[i];
+				streamDominantPoints2 >> index;
+				_dominantPointsIndex2[i] = nbPoints-1 - index;
 			}
 
 			fileDominantPoint2.close();
@@ -361,38 +360,57 @@ void ContourSlice::computeMainDominantPoints()
 
 	_leftMainDominantPointsIndex = _rightMainDominantPointsIndex = -1;
 
-	int nbDominantPoints, nbDominantPoints2, nbPoints, index;
+	int nbDominantPoints, nbDominantPoints2, minNbDominantPoints, nbPoints, index, increment;
 	qreal currentDistance, previousDistance;
 
 	nbDominantPoints = _dominantPointsIndex.size();
 	nbDominantPoints2 = _dominantPointsIndex2.size();
+	minNbDominantPoints = qMin(nbDominantPoints,nbDominantPoints2)-1;
 	nbPoints = _contour.size();
 
 	if ( nbDominantPoints > 2 && nbDominantPoints2 > 2 && _contourDistancesHistogram.size() == nbPoints )
 	{
-		//index = _dominantPointsIndex[1];
-		index = _contourDistancesHistogram[_dominantPointsIndex[1]] > _contourDistancesHistogram[_dominantPointsIndex2[nbDominantPoints2-1]] ? _dominantPointsIndex[1] : _dominantPointsIndex2[nbDominantPoints2-1];
-		currentDistance = _contourDistancesHistogram[index--];
-		previousDistance = _contourDistancesHistogram[index];
-		while ( index>0 && previousDistance>currentDistance )
+		increment = 0;
+		do
 		{
-			currentDistance = previousDistance;
-			index--;
-			previousDistance = _contourDistancesHistogram[index];
+			++increment;
+			index = _contourDistancesHistogram[_dominantPointsIndex[increment]] > _contourDistancesHistogram[_dominantPointsIndex2[nbDominantPoints2-increment]] ? _dominantPointsIndex[increment] : _dominantPointsIndex2[nbDominantPoints2-increment];
 		}
-		_leftMainDominantPointsIndex = index;
+		while ( _contourDistancesHistogram[index] - _contourDistancesHistogram[0] < 20 && increment<minNbDominantPoints );
 
-		//index = _dominantPointsIndex[nbDominantPoints-1];
-		index = _contourDistancesHistogram[_dominantPointsIndex[nbDominantPoints-1]] > _contourDistancesHistogram[_dominantPointsIndex2[1]] ? _dominantPointsIndex[nbDominantPoints-1] : _dominantPointsIndex2[1];
-		currentDistance = _contourDistancesHistogram[index++];
-		previousDistance = _contourDistancesHistogram[index];
-		while ( index<nbPoints-1 && previousDistance>currentDistance )
+		if ( increment<=minNbDominantPoints )
 		{
-			currentDistance = previousDistance;
-			index++;
+			currentDistance = _contourDistancesHistogram[index--];
 			previousDistance = _contourDistancesHistogram[index];
+			while ( index>0 && previousDistance>currentDistance )
+			{
+				currentDistance = previousDistance;
+				index--;
+				previousDistance = _contourDistancesHistogram[index];
+			}
+			_leftMainDominantPointsIndex = index;
 		}
-		_rightMainDominantPointsIndex = index;
+
+		increment = 0;
+		do
+		{
+			++increment;
+			index = _contourDistancesHistogram[_dominantPointsIndex[nbDominantPoints-increment]] > _contourDistancesHistogram[_dominantPointsIndex2[increment]] ? _dominantPointsIndex[nbDominantPoints-increment] : _dominantPointsIndex2[increment];
+		}
+		while ( _contourDistancesHistogram[index] - _contourDistancesHistogram[0] < 20 && increment < minNbDominantPoints );
+
+		if ( increment<=minNbDominantPoints )
+		{
+			currentDistance = _contourDistancesHistogram[index++];
+			previousDistance = _contourDistancesHistogram[index];
+			while ( index<nbPoints-1 && previousDistance>currentDistance )
+			{
+				currentDistance = previousDistance;
+				index++;
+				previousDistance = _contourDistancesHistogram[index];
+			}
+			_rightMainDominantPointsIndex = index;
+		}
 	}
 }
 

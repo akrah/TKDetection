@@ -93,7 +93,7 @@ namespace SliceAlgorithm
 
 		if ( edgeFind )
 		{
-			qDebug() << "Pixel le plus proche de la moelle : ( " << position.x << ", " << position.y << " )";
+			//qDebug() << "Pixel le plus proche de la moelle : ( " << position.x << ", " << position.y << " )";
 			return position;
 		}
 		else
@@ -101,6 +101,38 @@ namespace SliceAlgorithm
 			qDebug() << "Aucun pixel et donc aucune composante connexe";
 			return iCoord2D(-1,-1);
 		}
+	}
+
+	qreal restrictedAreaRadius( const Slice &slice, const iCoord2D &pithCoord, const uint &nbPolygonPoints, const int &intensityThreshold )
+	{
+		Q_ASSERT_X( nbPolygonPoints>0 , "BillonTpl<T>::getRestrictedAreaMeansRadius", "nbPolygonPoints arguments equals to 0 => division by zero" );
+
+		const int width = slice.n_cols;
+		const int height = slice.n_rows;
+		const qreal angleIncrement = TWO_PI/static_cast<qreal>(nbPolygonPoints);
+
+		rCoord2D center, edge;
+		rVec2D direction;
+		qreal orientation, radius;
+
+		radius = 0.;
+		center.x = pithCoord.x;
+		center.y = pithCoord.y;
+		orientation = 0.;
+		while (orientation < TWO_PI)
+		{
+			orientation += angleIncrement;
+			direction.x = qCos(orientation);
+			direction.y = qSin(orientation);
+			edge = center + direction*30;
+			while ( edge.x>0 && edge.y>0 && edge.x<width && edge.y<height && slice.at(edge.y,edge.x) > intensityThreshold )
+			{
+				edge += direction;
+			}
+			edge -= center;
+			radius += rVec2D(edge).norm()/nbPolygonPoints;
+		}
+		return radius;
 	}
 
 	void draw( QPainter &painter, const Slice &slice, const int &intensityThreshold )

@@ -7,6 +7,7 @@
 template <typename T> class QVector;
 class ContourSlice;
 class CurvatureHistogram;
+class NearestPointsHistogram;
 
 class ContourBillon
 {
@@ -20,7 +21,7 @@ public:
 	void clear();
 	bool isEmpty();
 
-	void compute( Billon &resultBillon, const Billon &billon, const int &intensityThreshold, const int &blurredSegmentThickness, const int &smoothingRadius, const int &curvatureWidth );
+	void compute(Billon &resultBillon, const Billon &billon, const int &intensityThreshold, const int &blurredSegmentThickness, const int &smoothingRadius, const int &curvatureWidth );
 
 private:
 	QVector<ContourSlice> _contourSlices;

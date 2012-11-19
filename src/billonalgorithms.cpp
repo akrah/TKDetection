@@ -8,7 +8,7 @@ namespace BillonAlgorithms
 	{
 		Q_ASSERT_X( nbPolygonPoints>0 , "BillonTpl<T>::getRestrictedAreaMeansRadius", "nbPolygonPoints arguments equals to 0 => division by zero" );
 
-		qreal radius = 100;
+		qreal radius = 133.33;
 		if ( billon.hasPith() )
 		{
 			const int width = billon.n_cols;
