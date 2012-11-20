@@ -360,12 +360,11 @@ void ContourSlice::computeMainDominantPoints()
 
 	_leftMainDominantPointsIndex = _rightMainDominantPointsIndex = -1;
 
-	int nbDominantPoints, nbDominantPoints2, minNbDominantPoints, nbPoints, index, increment;
+	int nbDominantPoints, nbDominantPoints2, nbPoints, index, increment;
 	qreal currentDistance, previousDistance;
 
 	nbDominantPoints = _dominantPointsIndex.size();
 	nbDominantPoints2 = _dominantPointsIndex2.size();
-	minNbDominantPoints = qMin(nbDominantPoints,nbDominantPoints2)-1;
 	nbPoints = _contour.size();
 
 	if ( nbDominantPoints > 2 && nbDominantPoints2 > 2 && _contourDistancesHistogram.size() == nbPoints )
@@ -373,20 +372,19 @@ void ContourSlice::computeMainDominantPoints()
 		increment = 0;
 		do
 		{
-			++increment;
-			index = _contourDistancesHistogram[_dominantPointsIndex[increment]] > _contourDistancesHistogram[_dominantPointsIndex2[nbDominantPoints2-increment]] ? _dominantPointsIndex[increment] : _dominantPointsIndex2[nbDominantPoints2-increment];
+			index = _dominantPointsIndex[++increment];
 		}
-		while ( _contourDistancesHistogram[index] - _contourDistancesHistogram[0] < 20 && increment<minNbDominantPoints );
+		while ( (_contourDistancesHistogram[index]-_contourDistancesHistogram[0] < 20) && (increment < nbDominantPoints-1) );
 
-		if ( increment<=minNbDominantPoints )
+		if ( increment<nbDominantPoints-1 )
 		{
 			currentDistance = _contourDistancesHistogram[index--];
-			previousDistance = _contourDistancesHistogram[index];
-			while ( index>0 && previousDistance>currentDistance )
+			previousDistance = _contourDistancesHistogram[index-1];
+			while ( index>1 && previousDistance>currentDistance )
 			{
 				currentDistance = previousDistance;
 				index--;
-				previousDistance = _contourDistancesHistogram[index];
+				previousDistance = _contourDistancesHistogram[index-1];
 			}
 			_leftMainDominantPointsIndex = index;
 		}
@@ -395,19 +393,19 @@ void ContourSlice::computeMainDominantPoints()
 		do
 		{
 			++increment;
-			index = _contourDistancesHistogram[_dominantPointsIndex[nbDominantPoints-increment]] > _contourDistancesHistogram[_dominantPointsIndex2[increment]] ? _dominantPointsIndex[nbDominantPoints-increment] : _dominantPointsIndex2[increment];
+			index = _dominantPointsIndex2[increment];
 		}
-		while ( _contourDistancesHistogram[index] - _contourDistancesHistogram[0] < 20 && increment < minNbDominantPoints );
+		while ( (_contourDistancesHistogram[index]-_contourDistancesHistogram[0] < 20) && (increment < nbDominantPoints2-1) );
 
-		if ( increment<=minNbDominantPoints )
+		if ( increment<nbDominantPoints2-1 )
 		{
 			currentDistance = _contourDistancesHistogram[index++];
-			previousDistance = _contourDistancesHistogram[index];
-			while ( index<nbPoints-1 && previousDistance>currentDistance )
+			previousDistance = _contourDistancesHistogram[index+1];
+			while ( index<nbPoints-2 && previousDistance>currentDistance )
 			{
 				currentDistance = previousDistance;
 				index++;
-				previousDistance = _contourDistancesHistogram[index];
+				previousDistance = _contourDistancesHistogram[index+1];
 			}
 			_rightMainDominantPointsIndex = index;
 		}

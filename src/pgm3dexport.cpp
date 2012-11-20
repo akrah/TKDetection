@@ -29,6 +29,7 @@ namespace Pgm3dExport
 		QTextStream stream(&file);
 
 		stream << "P3D" << endl;
+		stream << "#!VoxelDim " << billon.voxelWidth() << ' ' << billon.voxelHeight() << ' ' << billon.voxelDepth() << endl;
 		stream << width << " " << height << " " << depth << endl;
 		stream << (oneComponent?1:(maxValue-minValue)) << endl;
 

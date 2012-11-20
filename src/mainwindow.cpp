@@ -854,7 +854,7 @@ void MainWindow::exportToPgm3D()
 	int type = _ui->_comboExportPgm3dType->currentIndex();
 	switch (type)
 	{
-		case 0: exportCurrentKnotAreaToPgm3d();	break;
+		case 0: exportSegmentedKnotsOfCurrentSliceIntervalToPgm3d();	break;
 		case 1: exportCurrentSegmentedKnotToPgm3d();	break;
 		default: break;
 	}
@@ -1401,20 +1401,6 @@ void MainWindow::exportknotHistogramToImage()
 	else QMessageBox::warning(this,tr("Export de l'histogramme de zone de nœuds en image"),tr("L'export a échoué : l'histogramme de zone de nœuds n'est pas calculé."));
 }
 
-void MainWindow::exportCurrentKnotAreaToPgm3d()
-{
-	if ( _componentBillon != 0 )
-	{
-		QString fileName = QFileDialog::getSaveFileName(this, tr("Exporter la zone de nœuds courante en PGM3D"), "output.pgm3d", tr("Fichiers de données (*.pgm3d);;Tous les fichiers (*.*)"));
-		if ( !fileName.isEmpty() )
-		{
-			Pgm3dExport::process( *_componentBillon, fileName, (_ui->_spinPgm3dExportContrast->value()+100.)/100. );
-			QMessageBox::information(this,"Exporter la zone de nœuds courante en PGM3D", "Export réussi !");
-		}
-	}
-	else QMessageBox::warning(this,tr("Exporter de la zone de nœuds courante en PGM3D"),tr("L'export a échoué : aucun intervalle angulaire sélectionné."));
-}
-
 void MainWindow::exportCurrentSegmentedKnotToPgm3d()
 {
 	if ( _knotBillon )
@@ -1427,6 +1413,7 @@ void MainWindow::exportCurrentSegmentedKnotToPgm3d()
 			{
 				QTextStream stream(&file);
 				stream << "P3D" << endl;
+				stream << "#!VoxelDim " << _knotBillon->voxelWidth() << ' ' << _knotBillon->voxelHeight() << ' ' << _knotBillon->voxelDepth() << endl;
 				stream << _knotBillon->n_cols << " " << _knotBillon->n_rows << " " << _knotBillon->n_slices << endl;
 				stream << 1 << endl;
 
@@ -1443,6 +1430,20 @@ void MainWindow::exportCurrentSegmentedKnotToPgm3d()
 		}
 	}
 	else QMessageBox::warning(this,tr("Exporter le nœud courant segmenté en PGM3D"),tr("L'export a échoué : le contour n'est pas calculé."));
+}
+
+void MainWindow::exportSegmentedKnotsOfCurrentSliceIntervalToPgm3d()
+{
+	if ( _componentBillon != 0 )
+	{
+		QString fileName = QFileDialog::getSaveFileName(this, tr("Exporter la zone de nœuds courante en PGM3D"), "output.pgm3d", tr("Fichiers de données (*.pgm3d);;Tous les fichiers (*.*)"));
+		if ( !fileName.isEmpty() )
+		{
+			Pgm3dExport::process( *_componentBillon, fileName, (_ui->_spinPgm3dExportContrast->value()+100.)/100. );
+			QMessageBox::information(this,"Exporter la zone de nœuds courante en PGM3D", "Export réussi !");
+		}
+	}
+	else QMessageBox::warning(this,tr("Exporter de la zone de nœuds courante en PGM3D"),tr("L'export a échoué : aucun intervalle angulaire sélectionné."));
 }
 
 void MainWindow::exportCurrentSegmentedKnotToV3D()
