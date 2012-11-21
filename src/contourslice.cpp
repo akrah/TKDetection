@@ -337,27 +337,6 @@ void ContourSlice::computeDominantPoints( const int &blurredSegmentThickness )
 
 void ContourSlice::computeMainDominantPoints()
 {
-//	_leftMainDominantPointsIndex = _rightMainDominantPointsIndex = -1;
-
-//	int nbDominantPoints, index, firstIndex;
-
-//	nbDominantPoints = _dominantPointsIndex.size();
-//	if ( nbDominantPoints > 0 && _curvatureHistogram.size() == _contour.size() )
-//	{
-//		// Point dominant dans le sens du contour
-//		index = 0;
-//		while ( index<nbDominantPoints && _curvatureHistogram[_dominantPointsIndex[index]] > 0 ) ++index;
-//		firstIndex = index;
-//		// Si le point dominant trouvé est correct
-//		if ( index<nbDominantPoints ) _leftMainDominantPointsIndex = index;
-
-//		// Point dominant dans le sens contraire du contour
-//		index = nbDominantPoints-1;
-//		while ( index>firstIndex && _curvatureHistogram[_dominantPointsIndex[index]] > 0 ) --index;
-//		// Si le point dominant trouvé est correct
-//		if ( index>firstIndex ) _rightMainDominantPointsIndex = index;
-//	}
-
 	_leftMainDominantPointsIndex = _rightMainDominantPointsIndex = -1;
 
 	int nbDominantPoints, nbDominantPoints2, nbPoints, index, increment;
@@ -378,13 +357,13 @@ void ContourSlice::computeMainDominantPoints()
 
 		if ( increment<nbDominantPoints-1 )
 		{
-			currentDistance = _contourDistancesHistogram[index--];
-			previousDistance = _contourDistancesHistogram[index-1];
+			currentDistance = _contourDistancesHistogram[index];
+			previousDistance = _contourDistancesHistogram[index-2];
 			while ( index>1 && previousDistance>currentDistance )
 			{
-				currentDistance = previousDistance;
 				index--;
-				previousDistance = _contourDistancesHistogram[index-1];
+				currentDistance = _contourDistancesHistogram[index];
+				previousDistance = _contourDistancesHistogram[index-2];
 			}
 			_leftMainDominantPointsIndex = index;
 		}
@@ -399,13 +378,13 @@ void ContourSlice::computeMainDominantPoints()
 
 		if ( increment<nbDominantPoints2-1 )
 		{
-			currentDistance = _contourDistancesHistogram[index++];
-			previousDistance = _contourDistancesHistogram[index+1];
+			currentDistance = _contourDistancesHistogram[index];
+			previousDistance = _contourDistancesHistogram[index+2];
 			while ( index<nbPoints-2 && previousDistance>currentDistance )
 			{
-				currentDistance = previousDistance;
 				index++;
-				previousDistance = _contourDistancesHistogram[index+1];
+				currentDistance = _contourDistancesHistogram[index];
+				previousDistance = _contourDistancesHistogram[index+2];
 			}
 			_rightMainDominantPointsIndex = index;
 		}
@@ -426,16 +405,11 @@ void ContourSlice::computeSupportsOfMainDominantPoints()
 		counter = 0;
 		while ( index >= 0 )
 		{
-//			_leftMainSupportPoint.x += dominantPoint(index).x;
-//			_leftMainSupportPoint.y += dominantPoint(index).y;
-//			--index;
 			_leftMainSupportPoint.x += _contour[index].x;
 			_leftMainSupportPoint.y += _contour[index].y;
 			index -= 5;
 			++counter;
 		}
-//		_leftMainSupportPoint.x /= (_leftMainDominantPointsIndex + 1);
-//		_leftMainSupportPoint.y /= (_leftMainDominantPointsIndex + 1);
 		_leftMainSupportPoint.x /= counter;
 		_leftMainSupportPoint.y /= counter;
 	}
@@ -444,23 +418,15 @@ void ContourSlice::computeSupportsOfMainDominantPoints()
 	index = _rightMainDominantPointsIndex;
 	if ( index != -1 )
 	{
-		//_rightMainSupportPoint = dominantPoint(0);
-		//int nbDominantPoints = _dominantPointsIndex.size();
 		int nbPoints = _contour.size();
 		counter = 0;
-		//while ( index < nbDominantPoints )
 		while ( index < nbPoints )
 		{
-//			_rightMainSupportPoint.x += dominantPoint(index).x;
-//			_rightMainSupportPoint.y += dominantPoint(index).y;
-//			++index;
 			_rightMainSupportPoint.x += _contour[index].x;
 			_rightMainSupportPoint.y += _contour[index].y;
 			index += 5;
 			++counter;
 		}
-//		_rightMainSupportPoint.x /= (nbDominantPoints - _rightMainDominantPointsIndex + 1);
-//		_rightMainSupportPoint.y /= (nbDominantPoints - _rightMainDominantPointsIndex + 1);
 		_rightMainSupportPoint.x /= counter;
 		_rightMainSupportPoint.y /= counter;
 	}

@@ -13,14 +13,14 @@ namespace V3DExport
 		void writeTag( QXmlStreamWriter &stream, const QString &name, const QString &value );
 	}
 
-	void process( QFile &file, const Billon &billon, const Interval<uint> &sliceInterval, const int &threshold )
+	void process( QFile &file, const Billon &billon, const Interval<uint> &sliceInterval )
 	{
 		QXmlStreamWriter stream;
 		init(file,stream);
 		appendTags( stream, billon );
 		appendPith( stream, billon );
 		startComponents(stream);
-		appendComponent( stream, billon, sliceInterval, 1, threshold );
+		appendComponent( stream, billon, sliceInterval, 1 );
 		endComponents(stream);
 		close(stream);
 	}
@@ -61,7 +61,7 @@ namespace V3DExport
 		stream.writeStartElement("components");
 	}
 
-	void appendComponent( QXmlStreamWriter &stream, const Billon &billon, const Interval<uint> &sliceInterval, const int &index, const int &threshold )
+	void appendComponent( QXmlStreamWriter &stream, const Billon &billon, const Interval<uint> &sliceInterval, const int &index )
 	{
 		const uint &width = billon.n_cols;
 		const uint &height = billon.n_rows;

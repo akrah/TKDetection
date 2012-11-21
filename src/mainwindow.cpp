@@ -676,7 +676,7 @@ void MainWindow::selectSliceInterval( const int &index )
 			qreal rightAngle, leftAngle;
 			for ( int i=0 ; i<angularIntervals.size() ; ++i )
 			{
-				const Interval<uint> currentAngularInterval = angularIntervals[i];
+				const Interval<uint> &currentAngularInterval = angularIntervals[i];
 				rightAngle = _pieChart->sector(currentAngularInterval.min()).rightAngle()*RAD_TO_DEG_FACT;
 				leftAngle = _pieChart->sector(currentAngularInterval.max()).leftAngle()*RAD_TO_DEG_FACT;
 				_ui->_comboSelectSectorInterval->addItem(tr("Secteur %1 : [ %2, %3 ] (%4 degres)").arg(i).arg(rightAngle).arg(leftAngle).arg(currentAngularInterval.isValid()?leftAngle-rightAngle:leftAngle-rightAngle+360.));
@@ -1434,13 +1434,62 @@ void MainWindow::exportCurrentSegmentedKnotToPgm3d()
 
 void MainWindow::exportSegmentedKnotsOfCurrentSliceIntervalToPgm3d()
 {
-	if ( _componentBillon != 0 )
+	if ( _billon != 0 && _billon->hasPith() && _ui->_comboSelectSliceInterval->currentIndex() > 0 )
 	{
 		QString fileName = QFileDialog::getSaveFileName(this, tr("Exporter la zone de nœuds courante en PGM3D"), "output.pgm3d", tr("Fichiers de données (*.pgm3d);;Tous les fichiers (*.*)"));
 		if ( !fileName.isEmpty() )
 		{
-			Pgm3dExport::process( *_componentBillon, fileName, (_ui->_spinPgm3dExportContrast->value()+100.)/100. );
-			QMessageBox::information(this,"Exporter la zone de nœuds courante en PGM3D", "Export réussi !");
+			QFile file(fileName);
+			if( file.open(QIODevice::WriteOnly) )
+			{
+				Billon billonToWrite( _billon->n_cols, _billon->n_rows, _sliceHistogram->interval(_ui->_comboSelectSliceInterval->currentIndex()-1).size()+1 );
+				billonToWrite.fill(0);
+
+				QTextStream stream(&file);
+				stream << "P3D" << endl;
+				stream << "#!VoxelDim " << _billon->voxelWidth() << ' ' << _billon->voxelHeight() << ' ' << _billon->voxelDepth() << endl;
+				stream << billonToWrite.n_cols << " " << billonToWrite.n_rows << " " << billonToWrite.n_slices << endl;
+				stream << _sectorHistogram->size() << endl;
+
+				uint i, j, k;
+				for ( int sectorIndex=1 ; sectorIndex< _ui->_comboSelectSectorInterval->count() ; ++sectorIndex )
+				{
+					selectSectorInterval(sectorIndex,false);
+					if ( _knotBillon && _nearestPointsHistogram->intervals().size()>0 )
+					{
+						for ( k=_nearestPointsHistogram->interval(0).min() ; k<=_nearestPointsHistogram->interval(0).max() ; ++k )
+						{
+							const Slice &knotSlice = _knotBillon->slice(k);
+							Slice &slice = billonToWrite.slice(k);
+							for ( j=0 ; j<slice.n_rows ; ++j )
+							{
+								for ( i=0 ; i<slice.n_cols ; ++i )
+								{
+									if (knotSlice.at(j,i)) slice.at(j,i) = sectorIndex;
+								}
+							}
+						}
+
+					}
+				}
+
+				QDataStream dstream(&file);
+				for ( k=0 ; k<billonToWrite.n_slices ; ++k )
+				{
+					Slice &slice = billonToWrite.slice(k);
+					for ( j=0 ; j<slice.n_rows ; ++j )
+					{
+						for ( i=0 ; i<slice.n_cols ; ++i )
+						{
+							dstream << (qint16)(slice.at(j,i));
+						}
+					}
+				}
+
+				file.close();
+				QMessageBox::information(this,"Exporter la zone de nœuds courante en PGM3D", "Export réussi !");
+			}
+			else QMessageBox::warning(this,tr("Exporter le nœud courant segmenté en PGM3D"),tr("L'export a échoué : impossible de créer le ficher %1.").arg(fileName));
 		}
 	}
 	else QMessageBox::warning(this,tr("Exporter de la zone de nœuds courante en PGM3D"),tr("L'export a échoué : aucun intervalle angulaire sélectionné."));
@@ -1456,7 +1505,7 @@ void MainWindow::exportCurrentSegmentedKnotToV3D()
 			QFile file(fileName);
 			if( file.open(QIODevice::WriteOnly) )
 			{
-				V3DExport::process( file, *_knotBillon, _nearestPointsHistogram->interval(0), _ui->_spinSectorThresholding->value() );
+				V3DExport::process( file, *_knotBillon, _nearestPointsHistogram->interval(0) );
 				file.close();
 
 				QMessageBox::information(this,"Exporter le nœud courant segmenté en V3D", "Export réussi !");
@@ -1491,7 +1540,7 @@ void MainWindow::exportSegmentedKnotsOfCurrentSliceIntervalToV3D()
 					selectSectorInterval(sectorIndex,false);
 					if ( _knotBillon && _nearestPointsHistogram->intervals().size()>0 )
 					{
-						V3DExport::appendComponent(stream, *_knotBillon, _nearestPointsHistogram->interval(0), sectorIndex, _ui->_spinSectorThresholding->value());
+						V3DExport::appendComponent( stream, *_knotBillon, _nearestPointsHistogram->interval(0), sectorIndex );
 					}
 				}
 				V3DExport::endComponents(stream);
@@ -1536,7 +1585,7 @@ void MainWindow::exportAllSegmentedKnotsOfBillonToV3D()
 						selectSectorInterval(sectorIndex,false);
 						if ( _knotBillon && _nearestPointsHistogram->intervals().size()>0 )
 						{
-							V3DExport::appendComponent(stream, *_knotBillon, _nearestPointsHistogram->interval(0), counter++, _ui->_spinSectorThresholding->value());
+							V3DExport::appendComponent( stream, *_knotBillon, _nearestPointsHistogram->interval(0), counter++ );
 						}
 					}
 				}

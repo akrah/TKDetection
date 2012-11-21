@@ -72,3 +72,17 @@ void SectorHistogram::construct( const Billon &billon, const PieChart &pieChart,
 	}
 }
 
+void SectorHistogram::computeIntervals( const int &derivativesPercentage, const uint &minimumWidthOfIntervals, const bool &loop )
+{
+	Histogram<qreal>::computeIntervals( derivativesPercentage, minimumWidthOfIntervals, loop );
+	uint min, max;
+	for ( int i=0 ; i<_intervals.size() ; ++i )
+	{
+		Interval<uint> &interval = _intervals[i];
+		min = interval.min();
+		max = interval.max();
+		interval.setMin(min<5?359+min-5:min-5);
+		// TODO : Faire de PieChart un singleton
+		interval.setMax(max>354?max+5-359:max+5);
+	}
+}

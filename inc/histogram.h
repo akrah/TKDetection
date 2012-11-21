@@ -38,9 +38,9 @@ public:
 									  const int & derivativesPercentage, const int &minimumWidthOfIntervals, const bool & loop );
 
 protected:
-	void meansSmoothing( const int &smoothingRadius, const bool &loop );
-	void computeMaximums( const int &minimumHeightPercentageOfMaximum, const int &neighborhoodOfMaximums, const bool &loop );
-	void computeIntervals( const int &derivativesPercentage, const uint &minimumWidthOfIntervals, const bool &loop );
+	virtual void meansSmoothing( const int &smoothingRadius, const bool &loop );
+	virtual void computeMaximums( const int &minimumHeightPercentageOfMaximum, const int &neighborhoodOfMaximums, const bool &loop );
+	virtual void computeIntervals( const int &derivativesPercentage, const uint &minimumWidthOfIntervals, const bool &loop );
 
 protected:
 	QVector<uint> _maximums;
