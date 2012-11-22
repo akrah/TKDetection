@@ -295,7 +295,7 @@
               <x>0</x>
               <y>0</y>
               <width>439</width>
-              <height>182</height>
+              <height>212</height>
              </rect>
             </property>
             <attribute name="label">
@@ -1592,17 +1592,31 @@ l'intervalle angulaire</string>
           </widget>
          </item>
          <item>
-          <spacer name="verticalSpacer_10">
-           <property name="orientation">
-            <enum>Qt::Vertical</enum>
+          <widget class="QGroupBox" name="groupBox_4">
+           <property name="title">
+            <string>Points dominants principaux</string>
            </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>20</width>
-             <height>40</height>
-            </size>
-           </property>
-          </spacer>
+           <layout class="QFormLayout" name="formLayout_14">
+            <item row="0" column="0">
+             <widget class="QLabel" name="label_41">
+              <property name="text">
+               <string>Distance minimum à
+l'origine du contour</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="1">
+             <widget class="QSpinBox" name="_spinMinimumOriginDistance">
+              <property name="maximum">
+               <number>100</number>
+              </property>
+              <property name="value">
+               <number>20</number>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </widget>
          </item>
         </layout>
        </widget>
@@ -2060,7 +2074,7 @@ l'intervalle angulaire</string>
               <x>0</x>
               <y>0</y>
               <width>441</width>
-              <height>188</height>
+              <height>218</height>
              </rect>
             </property>
             <attribute name="label">

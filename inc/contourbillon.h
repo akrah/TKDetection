@@ -21,7 +21,8 @@ public:
 	void clear();
 	bool isEmpty();
 
-	void compute(Billon &resultBillon, const Billon &billon, const int &intensityThreshold, const int &blurredSegmentThickness, const int &smoothingRadius, const int &curvatureWidth );
+	void compute(Billon &resultBillon, const Billon &billon, const int &intensityThreshold, const int &blurredSegmentThickness,
+				 const int &smoothingRadius, const int &curvatureWidth, const int &minimumOriginDistance );
 
 private:
 	QVector<ContourSlice> _contourSlices;

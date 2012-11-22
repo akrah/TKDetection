@@ -310,7 +310,9 @@ void MainWindow::drawSlice()
 	if ( _billon != 0 )
 	{
 		_mainPix.fill(0xff0000CC);
-		_sliceView->drawSlice(_mainPix,*_billon,_billon->hasPith()?_billon->pithCoord(_currentSlice):iCoord2D(_billon->n_cols/2,_billon->n_rows/2),_currentSlice,Interval<int>(_ui->_spinMinIntensity->value(),_ui->_spinMaxIntensity->value()), Interval<int>(_ui->_spinMovementThresholdMin->value(),_ui->_spinMovementThresholdMax->value()));
+		_sliceView->drawSlice(_mainPix,*_billon,_billon->hasPith()?_billon->pithCoord(_currentSlice):iCoord2D(_billon->n_cols/2,_billon->n_rows/2),
+							  _currentSlice,Interval<int>(_ui->_spinMinIntensity->value(),_ui->_spinMaxIntensity->value()),
+							  Interval<int>(_ui->_spinMovementThresholdMin->value(),_ui->_spinMovementThresholdMax->value()));
 
 		const bool inDrawingArea = (_ui->_comboSelectSliceInterval->currentIndex() > 0 && _sliceHistogram->interval(_ui->_comboSelectSliceInterval->currentIndex()-1).containsClosed(_currentSlice));
 		if ( _billon->hasPith() )
@@ -679,7 +681,8 @@ void MainWindow::selectSliceInterval( const int &index )
 				const Interval<uint> &currentAngularInterval = angularIntervals[i];
 				rightAngle = _pieChart->sector(currentAngularInterval.min()).rightAngle()*RAD_TO_DEG_FACT;
 				leftAngle = _pieChart->sector(currentAngularInterval.max()).leftAngle()*RAD_TO_DEG_FACT;
-				_ui->_comboSelectSectorInterval->addItem(tr("Secteur %1 : [ %2, %3 ] (%4 degres)").arg(i).arg(rightAngle).arg(leftAngle).arg(currentAngularInterval.isValid()?leftAngle-rightAngle:leftAngle-rightAngle+360.));
+				_ui->_comboSelectSectorInterval->addItem(tr("Secteur %1 : [ %2, %3 ] (%4 degres)").arg(i).arg(rightAngle).arg(leftAngle)
+														 .arg(currentAngularInterval.isValid()?leftAngle-rightAngle:leftAngle-rightAngle+360.));
 			}
 		}
 		_ui->_spanSliderSelectInterval->setUpperValue(sliceInterval.max());
@@ -756,7 +759,8 @@ void MainWindow::selectSectorInterval(const int &index, const bool &draw )
 		if ( _ui->_checkEnableConnexComponents->isChecked() )
 		{
 			_knotBillon = new Billon(*_componentBillon);
-			_contourBillon->compute( *_knotBillon, *_componentBillon, 0, _ui->_spinBlurredSegmentsThickness->value(), _ui->_spinContourSmoothingRadius->value(), _ui->_spinCurvatureWidth->value() );
+			_contourBillon->compute( *_knotBillon, *_componentBillon, 0, _ui->_spinBlurredSegmentsThickness->value(), _ui->_spinContourSmoothingRadius->value(),
+									 _ui->_spinCurvatureWidth->value(), _ui->_spinMinimumOriginDistance->value() );
 		}
 	}
 	if (draw) drawSlice();
@@ -778,7 +782,9 @@ void MainWindow::exportToDat()
 			if ( file.open(QIODevice::WriteOnly) )
 			{
 				QTextStream stream(&file);
-				DatExport::process( stream, *_billon, Interval<int>(_ui->_spinMinSlice->value(),_ui->_spinMaxSlice->value()), Interval<int>(_ui->_spinMinIntensity->value(),_ui->_spinMaxIntensity->value()), _ui->_spinDatExportResolution->value(), (_ui->_spinDatExportContrast->value()+100.)/100. );
+				DatExport::process( stream, *_billon, Interval<int>(_ui->_spinMinSlice->value(),_ui->_spinMaxSlice->value()),
+									Interval<int>(_ui->_spinMinIntensity->value(),_ui->_spinMaxIntensity->value()), _ui->_spinDatExportResolution->value(),
+									(_ui->_spinDatExportContrast->value()+100.)/100. );
 				file.close();
 				QMessageBox::information(this,tr("Export en .dat"), tr("Terminé avec succés !"));
 			}
@@ -1077,7 +1083,8 @@ void MainWindow::exportBillonRestrictedAreaToOfs()
 		QString fileName = QFileDialog::getSaveFileName(this, tr("Exporter en .ofs"), "output.ofs", tr("Fichiers de données (*.ofs);;Tous les fichiers (*.*)"));
 		if ( !fileName.isEmpty() )
 		{
-			OfsExport::processOnRestrictedMesh( *_billon, Interval<uint>(_ui->_spinMinSlice->value(),_ui->_spinMaxSlice->value()), fileName, 100, MINIMUM_INTENSITY, false, _ui->_checkCloseBillon->isChecked() );
+			OfsExport::processOnRestrictedMesh( *_billon, Interval<uint>(_ui->_spinMinSlice->value(),_ui->_spinMaxSlice->value()),
+												fileName, 100, MINIMUM_INTENSITY, false, _ui->_checkCloseBillon->isChecked() );
 			QMessageBox::information( this, tr("Export en .ofs"), tr("Terminé avec succés !"));
 		}
 	}
@@ -1094,7 +1101,8 @@ void MainWindow::exportCurrentAngularSectorLargeAreaToOfs()
 		{
 			const Interval<uint> &sectorInterval = _sectorHistogram->interval(_ui->_comboSelectSectorInterval->currentIndex()-1);
 			const Interval<uint> &slicesInterval = _sliceHistogram->interval(_ui->_comboSelectSliceInterval->currentIndex()-1);
-			OfsExport::processOnSector( *_billon, slicesInterval, fileName, _pieChart->sector(sectorInterval.min()).rightAngle(), _pieChart->sector(sectorInterval.max()).leftAngle(), _ui->_spinExportNbEdges->value() );
+			OfsExport::processOnSector( *_billon, slicesInterval, fileName, _pieChart->sector(sectorInterval.min()).rightAngle(),
+										_pieChart->sector(sectorInterval.max()).leftAngle(), _ui->_spinExportNbEdges->value() );
 			QMessageBox::information(this,tr("Export en .ofs"), tr("Terminé avec succés !"));
 		}
 	}
@@ -1151,7 +1159,8 @@ void MainWindow::exportSectorHistogramToSep()
 {
 	if ( _sectorHistogram->size() != 0 )
 	{
-		QString fileName = QFileDialog::getSaveFileName(this, tr("Exporter l'histogramme de secteurs en .sep"), "output.sep", tr("Fichiers séquences de point euclidiens (*.sep);;Tous les fichiers (*.*)"));
+		QString fileName = QFileDialog::getSaveFileName(this, tr("Exporter l'histogramme de secteurs en .sep"), "output.sep",
+														tr("Fichiers séquences de point euclidiens (*.sep);;Tous les fichiers (*.*)"));
 		if ( !fileName.isEmpty() )
 		{
 			QFile file(fileName);
@@ -1172,7 +1181,8 @@ void MainWindow::exportKnotHistogramToSep()
 {
 	if ( _nearestPointsHistogram->size() != 0 )
 	{
-		QString fileName = QFileDialog::getSaveFileName(this, tr("Exporter l'histogramme de la zone de nœuds en .sep"), "output.sep", tr("Fichiers séquences de point euclidiens (*.sep);;Tous les fichiers (*.*)"));
+		QString fileName = QFileDialog::getSaveFileName(this, tr("Exporter l'histogramme de la zone de nœuds en .sep"), "output.sep",
+														tr("Fichiers séquences de point euclidiens (*.sep);;Tous les fichiers (*.*)"));
 		if ( !fileName.isEmpty() )
 		{
 			QFile file(fileName);
@@ -1224,7 +1234,8 @@ void MainWindow::exportSliceHistogramToImage()
 				switch ( button )
 				{
 					case QMessageBox::Yes:
-						fileName = QFileDialog::getSaveFileName(&label1, tr("Export de l'histogramme de coupes en image"), "output.pdf", tr("Fichiers PDF (*.pdf);;Fichiers PS (*.ps);;Fichiers PNG (*.png);;Fichiers SVG (*.svg);;Tous les fichiers (*.*)"));
+						fileName = QFileDialog::getSaveFileName(&label1, tr("Export de l'histogramme de coupes en image"), "output.pdf",
+																tr("Fichiers PDF (*.pdf);;Fichiers PS (*.ps);;Fichiers PNG (*.png);;Fichiers SVG (*.svg);;Tous les fichiers (*.*)"));
 						if ( !fileName.isEmpty() )
 						{
 							histoRenderer.renderDocument(_ui->_plotSliceHistogram,fileName,QSize(297*sizeFact/100,210*sizeFact/100),100);
@@ -1300,7 +1311,8 @@ void MainWindow::exportSectorHistogramToImage()
 				switch ( button )
 				{
 					case QMessageBox::Yes:
-						fileName = QFileDialog::getSaveFileName(&label1, tr("Export de l'histogramme de secteurs en image"), "output.pdf", tr("Fichiers PDF (*.pdf);;Fichiers PS (*.ps);;Fichiers PNG (*.png);;Fichiers SVG (*.svg);;Tous les fichiers (*.*)"));
+						fileName = QFileDialog::getSaveFileName(&label1, tr("Export de l'histogramme de secteurs en image"), "output.pdf",
+																tr("Fichiers PDF (*.pdf);;Fichiers PS (*.ps);;Fichiers PNG (*.png);;Fichiers SVG (*.svg);;Tous les fichiers (*.*)"));
 						if ( !fileName.isEmpty() )
 						{
 							chemin = fileName.section(QDir::separator(),0,-2)+QDir::separator();
@@ -1369,7 +1381,8 @@ void MainWindow::exportknotHistogramToImage()
 				switch ( button )
 				{
 					case QMessageBox::Yes:
-						fileName = QFileDialog::getSaveFileName(&label1, tr("Export de l'histogramme de zone de nœuds en image"), "output.pdf", tr("Fichiers PDF (*.pdf);;Fichiers PS (*.ps);;Fichiers PNG (*.png);;Fichiers SVG (*.svg);;Tous les fichiers (*.*)"));
+						fileName = QFileDialog::getSaveFileName(&label1, tr("Export de l'histogramme de zone de nœuds en image"), "output.pdf",
+																tr("Fichiers PDF (*.pdf);;Fichiers PS (*.ps);;Fichiers PNG (*.png);;Fichiers SVG (*.svg);;Tous les fichiers (*.*)"));
 						if ( !fileName.isEmpty() )
 						{
 							histoRenderer.renderDocument(_ui->_plotNearestPointsHistogram,fileName,QSize(297*sizeFact/100,140*sizeFact/100),100);
@@ -1520,7 +1533,8 @@ void MainWindow::exportSegmentedKnotsOfCurrentSliceIntervalToV3D()
 {
 	if ( _billon != 0 && _billon->hasPith() && _ui->_comboSelectSliceInterval->currentIndex() > 0 )
 	{
-		QString fileName = QFileDialog::getSaveFileName(this, tr("Exporter les nœuds segmentés de l'intervalle de coupe courant en V3D"), "output.v3d", tr("Fichiers V3D (*.v3d);;Tous les fichiers (*.*)"));
+		QString fileName = QFileDialog::getSaveFileName(this, tr("Exporter les nœuds segmentés de l'intervalle de coupe courant en V3D"), "output.v3d",
+														tr("Fichiers V3D (*.v3d);;Tous les fichiers (*.*)"));
 		if ( !fileName.isEmpty() )
 		{
 			QFile file(fileName);
@@ -1665,7 +1679,8 @@ void MainWindow::exportSegmentedKnotsOfCurrentSliceIntervalToSdp()
 {
 	if ( _billon != 0 && _billon->hasPith() )
 	{
-		QString fileName = QFileDialog::getSaveFileName(this, tr("Exporter les nœuds segmentés de l'intervalle de coupe courant en SDP"), "output.sdp", tr("Fichiers SDP (*.sdp);;Tous les fichiers (*.*)"));
+		QString fileName = QFileDialog::getSaveFileName(this, tr("Exporter les nœuds segmentés de l'intervalle de coupe courant en SDP"), "output.sdp",
+														tr("Fichiers SDP (*.sdp);;Tous les fichiers (*.*)"));
 		if ( !fileName.isEmpty() )
 		{
 			QFile file(fileName);
