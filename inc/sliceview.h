@@ -35,17 +35,17 @@ public:
 	void setCannyMinimumGradient( const qreal &minimumGradient );
 	void setCannyMinimumDeviation( const qreal &minimumDeviation );
 
-	void drawSlice( QImage &image, const Billon &billon, const iCoord2D &center, const uint &sliceNumber, const Interval<int> &intensityInterval, const Interval<int> &motionInterval );
+	void drawSlice( QImage &image, const Billon &billon, const iCoord2D &center, const uint &sliceNumber, const Interval<int> &intensityInterval, const Interval<int> &motionInterval, const TKD::ViewType &axe = TKD::Z_VIEW );
 
 private :
-	void drawCurrentSlice( QImage &image, const Billon &billon, const uint &sliceIndex, const Interval<int> &intensityInterval );
+	void drawCurrentSlice(QImage &image, const Billon &billon, const uint &sliceIndex, const Interval<int> &intensityInterval , const TKD::ViewType &axe = TKD::Z_VIEW );
 	void drawMovementSlice( QImage &image, const Billon &billon, const uint &sliceIndex, const Interval<int> &intensityInterval, const Interval<int> &motionInterval );
 	void drawEdgeDetectionSlice( QImage &image, const Billon &billon, const iCoord2D &center, const uint &sliceindex, const Interval<int> &intensityInterval );
 	void drawFlowSlice( QImage &image, const Billon &billon, const uint &sliceIndex );
 	void drawRestrictedArea( QImage &image, const Billon &billon, const iCoord2D &center, const uint &sliceIndex, const int &intensityThreshold );
 
 private:
-	TKD::SliceType _typeOfView;
+	TKD::SliceType _sliceType;
 
 	qreal _flowAlpha;
 	qreal _flowEpsilon;

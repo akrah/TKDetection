@@ -103,6 +103,8 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 
 	// Évènements déclenchés par le slider de n° de coupe
 	QObject::connect(_ui->_sliderSelectSlice, SIGNAL(valueChanged(int)), this, SLOT(setSlice(int)));
+	QObject::connect(_ui->_sliderSelectXSlice, SIGNAL(valueChanged(int)), this, SLOT(drawSlice()));
+	QObject::connect(_ui->_sliderSelectYSlice, SIGNAL(valueChanged(int)), this, SLOT(drawSlice()));
 	QObject::connect(_ui->_sliderContour, SIGNAL(valueChanged(int)), this, SLOT(moveContourCursor(int)));
 
 	// Évènements déclenchés par les boutons de sélection de la vue
@@ -945,6 +947,12 @@ void MainWindow::initComponentsValues() {
 	_ui->_sliderSelectSlice->setValue(0);
 	_ui->_sliderSelectSlice->setRange(0,0);
 
+	_ui->_sliderSelectXSlice->setValue(0);
+	_ui->_sliderSelectXSlice->setRange(0,0);
+
+	_ui->_sliderSelectYSlice->setValue(0);
+	_ui->_sliderSelectYSlice->setRange(0,0);
+
 	_ui->_sliderMovementThresholdInterval->setMinimum(0);
 	_ui->_sliderMovementThresholdInterval->setMaximum(1000);
 	_ui->_sliderMovementThresholdInterval->setLowerValue(0);
@@ -974,7 +982,7 @@ void MainWindow::initComponentsValues() {
 
 void MainWindow::updateUiComponentsValues()
 {
-	int minValue, maxValue, nbSlices;
+	int minValue, maxValue, nbSlices, width, height;
 	const bool existBillon = (_billon != 0);
 
 	if ( existBillon )
@@ -982,6 +990,8 @@ void MainWindow::updateUiComponentsValues()
 		minValue = _billon->minValue();
 		maxValue = _billon->maxValue();
 		nbSlices = _billon->n_slices-1;
+		width = _billon->n_cols;
+		height = _billon->n_rows;
 		_ui->_labelSliceNumber->setNum(0);
 		_ui->_scrollSliceView->setFixedSize(_billon->n_cols,_billon->n_rows);
 		_ui->_statusBar->showMessage( tr("Dimensions de voxels (largeur, hauteur, profondeur) : ( %1, %2, %3 )").arg(_billon->voxelWidth()).arg(_billon->voxelHeight()).arg(_billon->voxelDepth()) );
@@ -989,7 +999,7 @@ void MainWindow::updateUiComponentsValues()
 	else
 	{
 		minValue = maxValue = 0;
-		nbSlices = 0;
+		nbSlices = width = height = 0;
 		_ui->_labelSliceNumber->setText(tr("Aucune coupe présente."));
 		_ui->_scrollSliceView->setFixedSize(0,0);
 		_ui->_statusBar->clearMessage();
@@ -1024,6 +1034,12 @@ void MainWindow::updateUiComponentsValues()
 	_ui->_sliderSelectSlice->setValue(0);
 	_ui->_sliderSelectSlice->setRange(0,nbSlices);
 
+	_ui->_sliderSelectXSlice->setValue(0);
+	_ui->_sliderSelectXSlice->setRange(0,width);
+
+	_ui->_sliderSelectYSlice->setValue(0);
+	_ui->_sliderSelectYSlice->setRange(0,height);
+
 	_ui->_checkRadiusAroundPith->setText( QString::number(_treeRadius) );
 
 	enabledComponents();
@@ -1033,6 +1049,8 @@ void MainWindow::enabledComponents()
 {
 	const bool enable = (_billon != 0);
 	_ui->_sliderSelectSlice->setEnabled(enable);
+	_ui->_sliderSelectXSlice->setEnabled(enable);
+	_ui->_sliderSelectYSlice->setEnabled(enable);
 	_ui->_spansliderIntensityThreshold->setEnabled(enable);
 	_ui->_buttonComputePith->setEnabled(enable);
 	_ui->_buttonUpdateSliceHistogram->setEnabled(enable);

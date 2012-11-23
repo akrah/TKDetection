@@ -95,6 +95,16 @@ namespace TKD
 		PITH_KNOT_DISTANCE_HISTOGRAM,
 		_HISTOGRAM_TYPE_MAX_
 	};
+
+	// Type de vue
+	enum ViewType
+	{
+		_VIEW_TYPE_MIN_ = -1,
+		X_VIEW,
+		Y_VIEW,
+		Z_VIEW,
+		_VIEW_TYPE_MAX_
+	};
 }
 
 #endif // DEFINE_H

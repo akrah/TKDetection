@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>867</width>
-    <height>720</height>
+    <height>750</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -69,6 +69,19 @@
      </layout>
     </item>
     <item>
+     <widget class="QSlider" name="_sliderSelectXSlice">
+      <property name="maximum">
+       <number>0</number>
+      </property>
+      <property name="orientation">
+       <enum>Qt::Horizontal</enum>
+      </property>
+      <property name="tickPosition">
+       <enum>QSlider::TicksBelow</enum>
+      </property>
+     </widget>
+    </item>
+    <item>
      <widget class="QScrollArea" name="_scrollSliceView">
       <property name="frameShape">
        <enum>QFrame::NoFrame</enum>
@@ -97,14 +110,14 @@
          <x>0</x>
          <y>0</y>
          <width>367</width>
-         <height>537</height>
+         <height>527</height>
         </rect>
        </property>
        <layout class="QGridLayout" name="gridLayout">
         <property name="margin">
          <number>0</number>
         </property>
-        <item row="0" column="0">
+        <item row="1" column="1">
          <widget class="QLabel" name="_labelSliceView">
           <property name="lineWidth">
            <number>0</number>
@@ -114,6 +127,19 @@
           </property>
           <property name="alignment">
            <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="0">
+         <widget class="QSlider" name="_sliderSelectYSlice">
+          <property name="maximum">
+           <number>0</number>
+          </property>
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+          <property name="tickPosition">
+           <enum>QSlider::TicksBelow</enum>
           </property>
          </widget>
         </item>
@@ -247,7 +273,7 @@
      <item row="0" column="0">
       <widget class="QTabWidget" name="_tabs">
        <property name="currentIndex">
-        <number>3</number>
+        <number>0</number>
        </property>
        <widget class="QWidget" name="_tabAffichage">
         <attribute name="title">
@@ -302,7 +328,7 @@
              <string>Paramètres de l'affichage original</string>
             </attribute>
             <layout class="QFormLayout" name="formLayout_2">
-             <item row="0" column="0">
+             <item row="1" column="0">
               <widget class="QLabel" name="label_6">
                <property name="font">
                 <font>
@@ -315,7 +341,7 @@
                </property>
               </widget>
              </item>
-             <item row="0" column="1">
+             <item row="1" column="1">
               <layout class="QHBoxLayout" name="horizontalLayout_2">
                <item>
                 <widget class="QSpinBox" name="_spinMinIntensity">
@@ -358,7 +384,7 @@
                </item>
               </layout>
              </item>
-             <item row="1" column="0">
+             <item row="2" column="0">
               <widget class="QLabel" name="label_20">
                <property name="font">
                 <font>
@@ -372,7 +398,7 @@ zone restreinte</string>
                </property>
               </widget>
              </item>
-             <item row="1" column="1">
+             <item row="2" column="1">
               <widget class="QCheckBox" name="_checkRadiusAroundPith">
                <property name="font">
                 <font>
@@ -388,7 +414,7 @@ zone restreinte</string>
                </property>
               </widget>
              </item>
-             <item row="2" column="0">
+             <item row="3" column="0">
               <widget class="QLabel" name="label_31">
                <property name="font">
                 <font>
@@ -402,7 +428,7 @@ composantes connexes</string>
                </property>
               </widget>
              </item>
-             <item row="2" column="1">
+             <item row="3" column="1">
               <widget class="QCheckBox" name="_checkEnableConnexComponents">
                <property name="sizePolicy">
                 <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
@@ -424,6 +450,65 @@ composantes connexes</string>
                </property>
               </widget>
              </item>
+             <item row="0" column="0">
+              <widget class="QLabel" name="label_42">
+               <property name="font">
+                <font>
+                 <weight>50</weight>
+                 <bold>false</bold>
+                </font>
+               </property>
+               <property name="text">
+                <string>Axe de coupe</string>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="1">
+              <layout class="QHBoxLayout" name="horizontalLayout">
+               <item>
+                <widget class="QRadioButton" name="_radioXView">
+                 <property name="font">
+                  <font>
+                   <weight>50</weight>
+                   <bold>false</bold>
+                  </font>
+                 </property>
+                 <property name="text">
+                  <string>x</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QRadioButton" name="_radioYView">
+                 <property name="font">
+                  <font>
+                   <weight>50</weight>
+                   <bold>false</bold>
+                  </font>
+                 </property>
+                 <property name="text">
+                  <string>y</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QRadioButton" name="_radioZView">
+                 <property name="font">
+                  <font>
+                   <weight>50</weight>
+                   <bold>false</bold>
+                  </font>
+                 </property>
+                 <property name="text">
+                  <string>z</string>
+                 </property>
+                 <property name="checked">
+                  <bool>true</bool>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
             </layout>
            </widget>
            <widget class="QWidget" name="_pageMovementParameters">
@@ -431,8 +516,8 @@ composantes connexes</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>316</width>
-              <height>49</height>
+              <width>439</width>
+              <height>212</height>
              </rect>
             </property>
             <attribute name="label">
@@ -520,7 +605,7 @@ composantes connexes</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>276</width>
+              <width>426</width>
               <height>221</height>
              </rect>
             </property>
@@ -718,8 +803,8 @@ composantes connexes</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>321</width>
-              <height>152</height>
+              <width>439</width>
+              <height>212</height>
              </rect>
             </property>
             <attribute name="label">
@@ -862,8 +947,8 @@ composantes connexes</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>243</width>
-              <height>118</height>
+              <width>439</width>
+              <height>212</height>
              </rect>
             </property>
             <attribute name="label">
