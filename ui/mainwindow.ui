@@ -82,70 +82,77 @@
      </widget>
     </item>
     <item>
-     <widget class="QScrollArea" name="_scrollSliceView">
-      <property name="frameShape">
-       <enum>QFrame::NoFrame</enum>
-      </property>
-      <property name="frameShadow">
-       <enum>QFrame::Plain</enum>
-      </property>
-      <property name="lineWidth">
-       <number>0</number>
-      </property>
-      <property name="verticalScrollBarPolicy">
-       <enum>Qt::ScrollBarAlwaysOff</enum>
-      </property>
-      <property name="horizontalScrollBarPolicy">
-       <enum>Qt::ScrollBarAlwaysOff</enum>
-      </property>
-      <property name="widgetResizable">
-       <bool>true</bool>
-      </property>
-      <property name="alignment">
-       <set>Qt::AlignCenter</set>
-      </property>
-      <widget class="QWidget" name="scrollAreaWidgetContents">
-       <property name="geometry">
-        <rect>
-         <x>0</x>
-         <y>0</y>
-         <width>367</width>
-         <height>527</height>
-        </rect>
-       </property>
-       <layout class="QGridLayout" name="gridLayout">
-        <property name="margin">
+     <layout class="QHBoxLayout" name="horizontalLayout_8">
+      <item>
+       <widget class="QSlider" name="_sliderSelectYSlice">
+        <property name="maximum">
          <number>0</number>
         </property>
-        <item row="1" column="1">
-         <widget class="QLabel" name="_labelSliceView">
-          <property name="lineWidth">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+        <property name="tickPosition">
+         <enum>QSlider::TicksBelow</enum>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QScrollArea" name="_scrollSliceView">
+        <property name="frameShape">
+         <enum>QFrame::NoFrame</enum>
+        </property>
+        <property name="frameShadow">
+         <enum>QFrame::Plain</enum>
+        </property>
+        <property name="lineWidth">
+         <number>0</number>
+        </property>
+        <property name="verticalScrollBarPolicy">
+         <enum>Qt::ScrollBarAlwaysOff</enum>
+        </property>
+        <property name="horizontalScrollBarPolicy">
+         <enum>Qt::ScrollBarAlwaysOff</enum>
+        </property>
+        <property name="widgetResizable">
+         <bool>true</bool>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
+        </property>
+        <widget class="QWidget" name="scrollAreaWidgetContents">
+         <property name="geometry">
+          <rect>
+           <x>0</x>
+           <y>0</y>
+           <width>325</width>
+           <height>525</height>
+          </rect>
+         </property>
+         <layout class="QHBoxLayout" name="horizontalLayout_21">
+          <property name="margin">
            <number>0</number>
           </property>
-          <property name="text">
-           <string/>
-          </property>
-          <property name="alignment">
-           <set>Qt::AlignCenter</set>
-          </property>
-         </widget>
-        </item>
-        <item row="1" column="0">
-         <widget class="QSlider" name="_sliderSelectYSlice">
-          <property name="maximum">
-           <number>0</number>
-          </property>
-          <property name="orientation">
-           <enum>Qt::Vertical</enum>
-          </property>
-          <property name="tickPosition">
-           <enum>QSlider::TicksBelow</enum>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </widget>
-     </widget>
+          <item>
+           <widget class="QLabel" name="_labelSliceView">
+            <property name="lineWidth">
+             <number>0</number>
+            </property>
+            <property name="text">
+             <string/>
+            </property>
+            <property name="scaledContents">
+             <bool>true</bool>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignCenter</set>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </widget>
+      </item>
+     </layout>
     </item>
     <item>
      <widget class="QSlider" name="_sliderSelectSlice">
@@ -2322,7 +2329,7 @@ l'origine du contour</string>
          </item>
          <item>
           <widget class="QwtPolarPlot" name="_polarSectorHistogram">
-           <property name="plotBackground">
+           <property name="plotBackground" stdset="0">
             <brush brushstyle="SolidPattern">
              <color alpha="0">
               <red>255</red>
@@ -2403,15 +2410,15 @@ l'origine du contour</string>
    <container>1</container>
   </customwidget>
   <customwidget>
+   <class>QxtSpanSlider</class>
+   <extends>QSlider</extends>
+   <header>QxtSpanSlider</header>
+  </customwidget>
+  <customwidget>
    <class>QwtPolarPlot</class>
    <extends>QFrame</extends>
    <header>qwt_polar_plot.h</header>
    <container>1</container>
-  </customwidget>
-  <customwidget>
-   <class>QxtSpanSlider</class>
-   <extends>QSlider</extends>
-   <header>QxtSpanSlider</header>
   </customwidget>
  </customwidgets>
  <tabstops>
@@ -2491,7 +2498,6 @@ l'origine du contour</string>
   <tabstop>_buttonUpdateSliceHistogram</tabstop>
   <tabstop>_buttonNextMaximum</tabstop>
   <tabstop>_sliderContour</tabstop>
-  <tabstop>_scrollSliceView</tabstop>
   <tabstop>_sliderSelectSlice</tabstop>
   <tabstop>_spanSliderSelectInterval</tabstop>
   <tabstop>_buttonMinSlice</tabstop>

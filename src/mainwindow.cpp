@@ -49,7 +49,7 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 	_pieChart(new PieChart(360)), _sectorHistogram(new SectorHistogram()), _plotSectorHistogram(new PlotSectorHistogram()),
 	_nearestPointsHistogram(new NearestPointsHistogram()), _plotNearestPointsHistogram(new PlotNearestPointsHistogram()),
 	_plotCurvatureHistogram(new PlotCurvatureHistogram()), _plotContourDistancesHistogram(new PlotContourDistancesHistogram()),
-	_contourBillon(new ContourBillon()), _currentSlice(0), _currentMaximum(0), _currentSector(0), _treeRadius(0)
+	_contourBillon(new ContourBillon()), _currentSlice(0), _currentXSlice(0), _currentYSlice(0), _currentMaximum(0), _currentSector(0), _treeRadius(0)
 {
 	_ui->setupUi(this);
 //	setCorner(Qt::TopLeftCorner,Qt::LeftDockWidgetArea);
@@ -103,8 +103,11 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 
 	// Évènements déclenchés par le slider de n° de coupe
 	QObject::connect(_ui->_sliderSelectSlice, SIGNAL(valueChanged(int)), this, SLOT(setSlice(int)));
-	QObject::connect(_ui->_sliderSelectXSlice, SIGNAL(valueChanged(int)), this, SLOT(drawSlice()));
-	QObject::connect(_ui->_sliderSelectYSlice, SIGNAL(valueChanged(int)), this, SLOT(drawSlice()));
+	QObject::connect(_ui->_sliderSelectXSlice, SIGNAL(valueChanged(int)), this, SLOT(setXSlice(int)));
+	QObject::connect(_ui->_sliderSelectYSlice, SIGNAL(valueChanged(int)), this, SLOT(setYSlice(int)));
+	QObject::connect(_ui->_radioXView, SIGNAL(clicked()), this, SLOT(drawSlice()));
+	QObject::connect(_ui->_radioYView, SIGNAL(clicked()), this, SLOT(drawSlice()));
+	QObject::connect(_ui->_radioZView, SIGNAL(clicked()), this, SLOT(drawSlice()));
 	QObject::connect(_ui->_sliderContour, SIGNAL(valueChanged(int)), this, SLOT(moveContourCursor(int)));
 
 	// Évènements déclenchés par les boutons de sélection de la vue
@@ -311,13 +314,27 @@ void MainWindow::drawSlice()
 {
 	if ( _billon != 0 )
 	{
-		_mainPix.fill(0xff0000CC);
-		_sliceView->drawSlice(_mainPix,*_billon,_billon->hasPith()?_billon->pithCoord(_currentSlice):iCoord2D(_billon->n_cols/2,_billon->n_rows/2),
-							  _currentSlice,Interval<int>(_ui->_spinMinIntensity->value(),_ui->_spinMaxIntensity->value()),
-							  Interval<int>(_ui->_spinMovementThresholdMin->value(),_ui->_spinMovementThresholdMax->value()));
+		const TKD::ViewType selectedAxe =  _ui->_radioXView->isChecked()?TKD::X_VIEW:_ui->_radioYView->isChecked()?TKD::Y_VIEW:TKD::Z_VIEW;
+		const uint currentSlice = _ui->_radioXView->isChecked()?_currentXSlice:_ui->_radioYView->isChecked()?_currentYSlice:_currentSlice;
+		uint width, height;
 
-		const bool inDrawingArea = (_ui->_comboSelectSliceInterval->currentIndex() > 0 && _sliceHistogram->interval(_ui->_comboSelectSliceInterval->currentIndex()-1).containsClosed(_currentSlice));
-		if ( _billon->hasPith() )
+		switch (selectedAxe)
+		{
+			case TKD::X_VIEW : width = _billon->n_slices; height = _billon->n_rows; break;
+			case TKD::Y_VIEW : width = _billon->n_slices; height = _billon->n_cols; break;
+			case TKD::Z_VIEW : width = _billon->n_cols; height = _billon->n_rows; break;
+			default : break;
+		}
+
+		_ui->_scrollSliceView->setFixedSize(width,height);
+
+		_mainPix = QImage(width,height,QImage::Format_ARGB32);
+		_mainPix.fill(0xff000000);
+		_sliceView->drawSlice(_mainPix,*_billon,_billon->hasPith()?_billon->pithCoord(_currentSlice):iCoord2D(_billon->n_cols/2,_billon->n_rows/2),
+							  currentSlice,Interval<int>(_ui->_spinMinIntensity->value(),_ui->_spinMaxIntensity->value()),
+							  Interval<int>(_ui->_spinMovementThresholdMin->value(),_ui->_spinMovementThresholdMax->value()), selectedAxe);
+
+		if ( selectedAxe == TKD::Z_VIEW && _billon->hasPith() )
 		{
 			_billon->pith().draw(_mainPix,_currentSlice);
 
@@ -329,6 +346,7 @@ void MainWindow::drawSlice()
 				painter.drawEllipse(QPointF(pithCoord.x,pithCoord.y),_treeRadius*0.75,_treeRadius*0.75);
 			}
 
+			const bool inDrawingArea = (_ui->_comboSelectSliceInterval->currentIndex() > 0 && _sliceHistogram->interval(_ui->_comboSelectSliceInterval->currentIndex()-1).containsClosed(_currentSlice));
 			if ( inDrawingArea )
 			{
 				if ( !_sectorHistogram->isEmpty() )
@@ -392,6 +410,18 @@ void MainWindow::setSlice( const int &sliceNumber )
 
 	updateContourHistograms(sliceNumber);
 
+	drawSlice();
+}
+
+void MainWindow::setXSlice( const int &xPosition )
+{
+	_currentXSlice = xPosition;
+	drawSlice();
+}
+
+void MainWindow::setYSlice( const int &yPosition )
+{
+	_currentYSlice = yPosition;
 	drawSlice();
 }
 

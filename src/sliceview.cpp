@@ -164,9 +164,9 @@ void SliceView::drawCurrentSlice( QImage &image, const Billon &billon, const uin
 	switch (axe)
 	{
 		case TKD::X_VIEW:
-			for ( k=0 ; k<depth ; ++k)
+			for ( j=0 ; j<height ; ++j)
 			{
-				for ( j=0 ; j<height ; ++j)
+				for ( k=0 ; k<depth ; ++k)
 				{
 					color = (TKD::restrictedValue(billon.at(j,sliceIndex,k),intensityInterval)-minIntensity)*fact;
 					*(line++) = qRgb(color,color,color);
@@ -174,9 +174,9 @@ void SliceView::drawCurrentSlice( QImage &image, const Billon &billon, const uin
 			}
 			break;
 		case TKD::Y_VIEW:
-			for ( k=0 ; k<depth ; ++k)
+			for ( i=0 ; i<height ; ++i)
 			{
-				for ( i=0 ; i<height ; ++i)
+				for ( k=0 ; k<depth ; ++k)
 				{
 					color = (TKD::restrictedValue(billon.at(sliceIndex,i,k),intensityInterval)-minIntensity)*fact;
 					*(line++) = qRgb(color,color,color);

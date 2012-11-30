@@ -42,6 +42,8 @@ private slots:
 	void closeImage();
 	void drawSlice();
 	void setSlice( const int &sliceNumber );
+	void setXSlice( const int &xPosition );
+	void setYSlice( const int &yPosition );
 	void moveNearestPointsCursor( const int &position );
 	void moveContourCursor( const int &position );
 	void setTypeOfView( const int &type );
@@ -133,6 +135,8 @@ private:
 	ContourBillon *_contourBillon;
 
 	uint _currentSlice;
+	uint _currentXSlice;
+	uint _currentYSlice;
 	int _currentMaximum;
 	uint _currentSector;
 	qreal _treeRadius;
