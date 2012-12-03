@@ -55,7 +55,7 @@ void NearestPointsHistogram::computeMaximumsAndIntervals( const uint & compariso
 		uint upperIndex, lowerIndex;
 
 		upperIndex = qMin(histoSize-comparisonShift,minIndex);
-		while ( upperIndex <= histoSize-comparisonShift && ((*this)[upperIndex+comparisonShift] - (*this)[upperIndex]) > comparisonValue ) upperIndex++;
+		while ( upperIndex < histoSize-comparisonShift && ((*this)[upperIndex+comparisonShift] - (*this)[upperIndex]) > comparisonValue ) upperIndex++;
 
 		lowerIndex = qMax(comparisonShift,minIndex);
 		while ( lowerIndex >= comparisonShift && (*this)[lowerIndex-comparisonShift] - (*this)[lowerIndex] > comparisonValue ) lowerIndex--;

@@ -100,7 +100,6 @@ namespace TKD
 	enum ViewType
 	{
 		_VIEW_TYPE_MIN_ = -1,
-		X_VIEW,
 		Y_VIEW,
 		Z_VIEW,
 		_VIEW_TYPE_MAX_

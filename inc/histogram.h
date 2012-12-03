@@ -330,13 +330,13 @@ void Histogram<T>::computeIntervals( const int & derivativesPercentage, const ui
 			{
 				if ( cursor.width() >= minimumWidthOfIntervals )
 				{
-					if ( _intervals.isEmpty() || cursor.min() > _intervals.last().max() )
+					last = _intervals.last();
+					if ( _intervals.isEmpty() || cursor.min() > last.max() )
 					{
 						_intervals.append(cursor);
 					}
 					else
 					{
-						last = _intervals.last();
 						if ( cursor != last )
 						{
 							if ( cursor.min() == last.min() )

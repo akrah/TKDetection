@@ -99,13 +99,21 @@ void SliceView::setCannyMinimumDeviation( const qreal &minimumDeviation ) {
 	_cannyMinimumDeviation = minimumDeviation;
 }
 
-void SliceView::drawSlice( QImage &image, const Billon &billon, const iCoord2D &center, const uint &sliceIndex, const Interval<int> &intensityInterval, const Interval<int> &motionInterval, const TKD::ViewType &axe )
+void SliceView::drawSlice( QImage &image, const Billon &billon, const iCoord2D &center, const uint &sliceIndex, const Interval<int> &intensityInterval,
+						   const Interval<int> &motionInterval, const TKD::ViewType &axe )
 {
 	switch (axe)
 	{
-		case TKD::X_VIEW:
 		case TKD::Y_VIEW:
-			drawCurrentSlice( image, billon, sliceIndex, intensityInterval, axe );
+			switch (_sliceType)
+			{
+				case TKD::MOVEMENT :
+					drawMovementSlice( image, billon, sliceIndex, intensityInterval, motionInterval, axe );
+					break;
+				default:
+					drawCurrentSlice( image, billon, sliceIndex, intensityInterval, axe );
+					break;
+			}
 			break;
 		case TKD::Z_VIEW:
 			if ( sliceIndex < billon.n_slices )
@@ -150,10 +158,7 @@ void SliceView::drawSlice( QImage &image, const Billon &billon, const iCoord2D &
 
 void SliceView::drawCurrentSlice( QImage &image, const Billon &billon, const uint &sliceIndex, const Interval<int> &intensityInterval, const TKD::ViewType &axe )
 {
-	const Slice &slice = billon.slice(sliceIndex);
-	const uint &width = slice.n_cols;
-	const uint &height = slice.n_rows;
-	const uint &depth = billon.n_slices;
+	const uint &width = billon.n_cols;
 	const int &minIntensity = intensityInterval.min();
 	const qreal fact = 255.0/intensityInterval.size();
 
@@ -161,70 +166,82 @@ void SliceView::drawCurrentSlice( QImage &image, const Billon &billon, const uin
 	int color;
 	uint i,j,k;
 
-	switch (axe)
+	if ( axe == TKD::Y_VIEW )
 	{
-		case TKD::X_VIEW:
-			for ( j=0 ; j<height ; ++j)
+		const uint &depth = billon.n_slices;
+		for ( k=0 ; k<depth ; ++k)
+		{
+			for ( i=0 ; i<width ; ++i)
 			{
-				for ( k=0 ; k<depth ; ++k)
-				{
-					color = (TKD::restrictedValue(billon.at(j,sliceIndex,k),intensityInterval)-minIntensity)*fact;
-					*(line++) = qRgb(color,color,color);
-				}
+				color = (TKD::restrictedValue(billon.at(sliceIndex,i,k),intensityInterval)-minIntensity)*fact;
+				*(line++) = qRgb(color,color,color);
 			}
-			break;
-		case TKD::Y_VIEW:
-			for ( i=0 ; i<height ; ++i)
+		}
+	}
+	else if ( axe == TKD::Z_VIEW )
+	{
+		const Slice &slice = billon.slice(sliceIndex);
+		const uint &height = billon.n_rows;
+		for ( j=0 ; j<height ; ++j)
+		{
+			for ( i=0 ; i<width ; ++i)
 			{
-				for ( k=0 ; k<depth ; ++k)
-				{
-					color = (TKD::restrictedValue(billon.at(sliceIndex,i,k),intensityInterval)-minIntensity)*fact;
-					*(line++) = qRgb(color,color,color);
-				}
+				color = (TKD::restrictedValue(slice.at(j,i),intensityInterval)-minIntensity)*fact;
+				*(line++) = qRgb(color,color,color);
 			}
-			break;
-		case TKD::Z_VIEW:
-			for ( j=0 ; j<height ; ++j)
-			{
-				for ( i=0 ; i<width ; ++i)
-				{
-					color = (TKD::restrictedValue(slice.at(j,i),intensityInterval)-minIntensity)*fact;
-					*(line++) = qRgb(color,color,color);
-				}
-			}
-			break;
-		default:
-			break;
+		}
 	}
 }
 
-void SliceView::drawMovementSlice( QImage &image, const Billon &billon, const uint &sliceIndex, const Interval<int> &intensityInterval, const Interval<int> &motionInterval )
+void SliceView::drawMovementSlice( QImage &image, const Billon &billon, const uint &sliceIndex, const Interval<int> &intensityInterval, const Interval<int> &motionInterval, const TKD::ViewType &axe )
 {
-	const Slice &currentSlice = billon.slice(sliceIndex);
-	const Slice &previousSlice = billon.previousSlice(sliceIndex);
-	const uint width = previousSlice.n_cols;
-	const uint height = previousSlice.n_rows;
+	const uint &width = billon.n_cols;
 	const qreal fact = 255./motionInterval.width();
 
-	image.fill(0xff000000);
 	QRgb * line = (QRgb *) image.bits();
 	int color;
-	uint i,j;
+	uint i,j,k;
 
-	for ( j=0 ; j<height ; j++)
+	if ( axe == TKD::Y_VIEW )
 	{
-		for ( i=0 ; i<width ; i++)
+		const uint &depth = billon.n_slices;
+		for ( k=0 ; k<depth ; ++k )
 		{
-			if ( intensityInterval.containsClosed(currentSlice.at(j,i)) && intensityInterval.containsClosed(previousSlice.at(j,i)) )
+			for ( i=0 ; i<width ; ++i )
 			{
-				color = billon.zMotion(j,i,sliceIndex);
-				if ( motionInterval.containsClosed(color) )
+				if ( intensityInterval.containsClosed(billon.at(sliceIndex,i,k)) && intensityInterval.containsClosed(billon.at(sliceIndex>0 ? sliceIndex-1 : sliceIndex+1,i,k)) )
 				{
-					color *= fact;
-					*line = qRgb(color,color,color);
+					color = qAbs( billon.at(sliceIndex,i,k) - billon.at(sliceIndex>0 ? sliceIndex-1 : sliceIndex+1,i,k));
+					if ( motionInterval.containsClosed(color) )
+					{
+						color *= fact;
+						*line = qRgb(color,color,color);
+					}
 				}
+				++line;
 			}
-			++line;
+		}
+	}
+	else if ( axe == TKD::Z_VIEW )
+	{
+		const Slice &currentSlice = billon.slice(sliceIndex);
+		const Slice &previousSlice = billon.previousSlice(sliceIndex);
+		const uint &height = billon.n_rows;
+		for ( j=0 ; j<height ; ++j )
+		{
+			for ( i=0 ; i<width ; ++i )
+			{
+				if ( intensityInterval.containsClosed(currentSlice.at(j,i)) && intensityInterval.containsClosed(previousSlice.at(j,i)) )
+				{
+					color = billon.zMotion(j,i,sliceIndex);
+					if ( motionInterval.containsClosed(color) )
+					{
+						color *= fact;
+						*line = qRgb(color,color,color);
+					}
+				}
+				++line;
+			}
 		}
 	}
 }

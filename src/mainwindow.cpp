@@ -49,7 +49,7 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 	_pieChart(new PieChart(360)), _sectorHistogram(new SectorHistogram()), _plotSectorHistogram(new PlotSectorHistogram()),
 	_nearestPointsHistogram(new NearestPointsHistogram()), _plotNearestPointsHistogram(new PlotNearestPointsHistogram()),
 	_plotCurvatureHistogram(new PlotCurvatureHistogram()), _plotContourDistancesHistogram(new PlotContourDistancesHistogram()),
-	_contourBillon(new ContourBillon()), _currentSlice(0), _currentXSlice(0), _currentYSlice(0), _currentMaximum(0), _currentSector(0), _treeRadius(0)
+	_contourBillon(new ContourBillon()), _currentSlice(0), _currentYSlice(0), _currentMaximum(0), _currentSector(0), _treeRadius(0)
 {
 	_ui->setupUi(this);
 //	setCorner(Qt::TopLeftCorner,Qt::LeftDockWidgetArea);
@@ -103,9 +103,7 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 
 	// Évènements déclenchés par le slider de n° de coupe
 	QObject::connect(_ui->_sliderSelectSlice, SIGNAL(valueChanged(int)), this, SLOT(setSlice(int)));
-	QObject::connect(_ui->_sliderSelectXSlice, SIGNAL(valueChanged(int)), this, SLOT(setXSlice(int)));
 	QObject::connect(_ui->_sliderSelectYSlice, SIGNAL(valueChanged(int)), this, SLOT(setYSlice(int)));
-	QObject::connect(_ui->_radioXView, SIGNAL(clicked()), this, SLOT(drawSlice()));
 	QObject::connect(_ui->_radioYView, SIGNAL(clicked()), this, SLOT(drawSlice()));
 	QObject::connect(_ui->_radioZView, SIGNAL(clicked()), this, SLOT(drawSlice()));
 	QObject::connect(_ui->_sliderContour, SIGNAL(valueChanged(int)), this, SLOT(moveContourCursor(int)));
@@ -314,14 +312,13 @@ void MainWindow::drawSlice()
 {
 	if ( _billon != 0 )
 	{
-		const TKD::ViewType selectedAxe =  _ui->_radioXView->isChecked()?TKD::X_VIEW:_ui->_radioYView->isChecked()?TKD::Y_VIEW:TKD::Z_VIEW;
-		const uint currentSlice = _ui->_radioXView->isChecked()?_currentXSlice:_ui->_radioYView->isChecked()?_currentYSlice:_currentSlice;
+		const TKD::ViewType selectedAxe = _ui->_radioYView->isChecked()?TKD::Y_VIEW:TKD::Z_VIEW;
+		const uint &currentSlice = _ui->_radioYView->isChecked()?_currentYSlice:_currentSlice;
 		uint width, height;
 
 		switch (selectedAxe)
 		{
-			case TKD::X_VIEW : width = _billon->n_slices; height = _billon->n_rows; break;
-			case TKD::Y_VIEW : width = _billon->n_slices; height = _billon->n_cols; break;
+			case TKD::Y_VIEW : width = _billon->n_cols; height = _billon->n_slices; break;
 			case TKD::Z_VIEW : width = _billon->n_cols; height = _billon->n_rows; break;
 			default : break;
 		}
@@ -410,12 +407,6 @@ void MainWindow::setSlice( const int &sliceNumber )
 
 	updateContourHistograms(sliceNumber);
 
-	drawSlice();
-}
-
-void MainWindow::setXSlice( const int &xPosition )
-{
-	_currentXSlice = xPosition;
 	drawSlice();
 }
 
@@ -783,7 +774,7 @@ void MainWindow::selectSectorInterval(const int &index, const bool &draw )
 		}
 
 		_nearestPointsHistogram->construct( *_componentBillon );
-		_nearestPointsHistogram->computeMaximumsAndIntervals( 5, 5. );
+		_nearestPointsHistogram->computeMaximumsAndIntervals( _ui->_spinNearestHistogramNeighborhood->value(), _ui->_spinNearestHistogramDifference->value() );
 		_plotNearestPointsHistogram->update( *_nearestPointsHistogram );
 		_ui->_plotNearestPointsHistogram->setAxisScale(QwtPlot::xBottom,0,_nearestPointsHistogram->size());
 		_ui->_plotNearestPointsHistogram->replot();
@@ -977,9 +968,6 @@ void MainWindow::initComponentsValues() {
 	_ui->_sliderSelectSlice->setValue(0);
 	_ui->_sliderSelectSlice->setRange(0,0);
 
-	_ui->_sliderSelectXSlice->setValue(0);
-	_ui->_sliderSelectXSlice->setRange(0,0);
-
 	_ui->_sliderSelectYSlice->setValue(0);
 	_ui->_sliderSelectYSlice->setRange(0,0);
 
@@ -1012,7 +1000,7 @@ void MainWindow::initComponentsValues() {
 
 void MainWindow::updateUiComponentsValues()
 {
-	int minValue, maxValue, nbSlices, width, height;
+	int minValue, maxValue, nbSlices, height;
 	const bool existBillon = (_billon != 0);
 
 	if ( existBillon )
@@ -1020,8 +1008,7 @@ void MainWindow::updateUiComponentsValues()
 		minValue = _billon->minValue();
 		maxValue = _billon->maxValue();
 		nbSlices = _billon->n_slices-1;
-		width = _billon->n_cols;
-		height = _billon->n_rows;
+		height = _billon->n_rows-1;
 		_ui->_labelSliceNumber->setNum(0);
 		_ui->_scrollSliceView->setFixedSize(_billon->n_cols,_billon->n_rows);
 		_ui->_statusBar->showMessage( tr("Dimensions de voxels (largeur, hauteur, profondeur) : ( %1, %2, %3 )").arg(_billon->voxelWidth()).arg(_billon->voxelHeight()).arg(_billon->voxelDepth()) );
@@ -1029,7 +1016,7 @@ void MainWindow::updateUiComponentsValues()
 	else
 	{
 		minValue = maxValue = 0;
-		nbSlices = width = height = 0;
+		nbSlices = height = 0;
 		_ui->_labelSliceNumber->setText(tr("Aucune coupe présente."));
 		_ui->_scrollSliceView->setFixedSize(0,0);
 		_ui->_statusBar->clearMessage();
@@ -1064,9 +1051,6 @@ void MainWindow::updateUiComponentsValues()
 	_ui->_sliderSelectSlice->setValue(0);
 	_ui->_sliderSelectSlice->setRange(0,nbSlices);
 
-	_ui->_sliderSelectXSlice->setValue(0);
-	_ui->_sliderSelectXSlice->setRange(0,width);
-
 	_ui->_sliderSelectYSlice->setValue(0);
 	_ui->_sliderSelectYSlice->setRange(0,height);
 
@@ -1079,7 +1063,6 @@ void MainWindow::enabledComponents()
 {
 	const bool enable = (_billon != 0);
 	_ui->_sliderSelectSlice->setEnabled(enable);
-	_ui->_sliderSelectXSlice->setEnabled(enable);
 	_ui->_sliderSelectYSlice->setEnabled(enable);
 	_ui->_spansliderIntensityThreshold->setEnabled(enable);
 	_ui->_buttonComputePith->setEnabled(enable);
