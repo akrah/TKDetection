@@ -16,11 +16,11 @@ public:
 
 	void moveCursor( const uint & sliceIndex );
 
-	void update( const CurvatureHistogram & histogram );
+	void update( const CurvatureHistogram & histogram, const QVector<int> dominantPointsIndex );
 
 private:
 	void updateDatas( const CurvatureHistogram & histogram );
-	void updateDominantPoints( const CurvatureHistogram & histogram );
+	void updateDominantPoints(const CurvatureHistogram & histogram, const QVector<int> dominantPointsIndex );
 
 private:
 	QwtPlotHistogram _histogramData;

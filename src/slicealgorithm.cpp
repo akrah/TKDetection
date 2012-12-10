@@ -6,9 +6,138 @@
 
 namespace SliceAlgorithm
 {
-	void draw( const Slice &slice, QImage &image, const int &intensityThreshold )
+	iCoord2D findNearestPointOfThePith( const Slice &slice, const iCoord2D &sliceCenter, const int &intensityThreshold )
 	{
-		QPainter painter(&image);
+		// Find the pixel closest to the pith
+		const int width = slice.n_cols;
+		const int height = slice.n_rows;
+		const int radiusMax = qMin( qMin(sliceCenter.x,width-sliceCenter.x), qMin(sliceCenter.y,height-sliceCenter.y) );
+
+		iCoord2D position, circlePoint;
+		bool edgeFind = false;
+		int currentRadius, d;
+
+		currentRadius = 1;
+		// Using Andres circle algorithm
+		while ( !edgeFind && currentRadius < radiusMax )
+		{
+			circlePoint.x = 0;
+			circlePoint.y = currentRadius;
+			d = currentRadius - 1;
+			while ( circlePoint.y>=circlePoint.x && !edgeFind )
+			{
+				edgeFind = true;
+				if ( slice.at( sliceCenter.y+circlePoint.y, sliceCenter.x+circlePoint.x ) > intensityThreshold )
+				{
+					position.x = sliceCenter.x+circlePoint.x;
+					position.y = sliceCenter.y+circlePoint.y;
+				}
+				else if ( slice.at( sliceCenter.y+circlePoint.y, sliceCenter.x-circlePoint.x ) > intensityThreshold )
+				{
+					position.x = sliceCenter.x-circlePoint.x;
+					position.y = sliceCenter.y+circlePoint.y;
+				}
+				else if ( slice.at( sliceCenter.y+circlePoint.x, sliceCenter.x+circlePoint.y ) > intensityThreshold )
+				{
+					position.x = sliceCenter.x+circlePoint.y;
+					position.y = sliceCenter.y+circlePoint.x;
+				}
+				else if ( slice.at( sliceCenter.y+circlePoint.x, sliceCenter.x-circlePoint.y ) > intensityThreshold )
+				{
+					position.x = sliceCenter.x-circlePoint.y;
+					position.y = sliceCenter.y+circlePoint.x;
+				}
+				else if ( slice.at( sliceCenter.y-circlePoint.y, sliceCenter.x+circlePoint.x ) > intensityThreshold )
+				{
+					position.x = sliceCenter.x+circlePoint.x;
+					position.y = sliceCenter.y-circlePoint.y;
+				}
+				else if ( slice.at( sliceCenter.y-circlePoint.y, sliceCenter.x-circlePoint.x ) > intensityThreshold )
+				{
+					position.x = sliceCenter.x-circlePoint.x;
+					position.y = sliceCenter.y-circlePoint.y;
+				}
+				else if ( slice.at( sliceCenter.y-circlePoint.x, sliceCenter.x+circlePoint.y ) > intensityThreshold )
+				{
+					position.x = sliceCenter.x+circlePoint.y;
+					position.y = sliceCenter.y-circlePoint.x;
+				}
+				else if ( slice.at( sliceCenter.y-circlePoint.x, sliceCenter.x-circlePoint.y ) > intensityThreshold )
+				{
+					position.x = sliceCenter.x-circlePoint.y;
+					position.y = sliceCenter.y-circlePoint.x;
+				}
+				else
+				{
+					edgeFind = false;
+					if ( d >= 2*circlePoint.x )
+					{
+						d -= 2*circlePoint.x;
+						circlePoint.x++;
+					}
+					else if ( d <= 2*(currentRadius-circlePoint.y) )
+					{
+						d += 2*circlePoint.y;
+						circlePoint.y--;
+					}
+					else
+					{
+						d += 2*(circlePoint.y-circlePoint.x);
+						circlePoint.y--;
+						circlePoint.x++;
+					}
+				}
+			}
+			currentRadius++;
+		}
+
+		if ( edgeFind )
+		{
+			//qDebug() << "Pixel le plus proche de la moelle : ( " << position.x << ", " << position.y << " )";
+			return position;
+		}
+		else
+		{
+			qDebug() << "Aucun pixel et donc aucune composante connexe";
+			return iCoord2D(-1,-1);
+		}
+	}
+
+	qreal restrictedAreaRadius( const Slice &slice, const iCoord2D &pithCoord, const uint &nbPolygonPoints, const int &intensityThreshold )
+	{
+		Q_ASSERT_X( nbPolygonPoints>0 , "BillonTpl<T>::getRestrictedAreaMeansRadius", "nbPolygonPoints arguments equals to 0 => division by zero" );
+
+		const int width = slice.n_cols;
+		const int height = slice.n_rows;
+		const qreal angleIncrement = TWO_PI/static_cast<qreal>(nbPolygonPoints);
+
+		rCoord2D center, edge;
+		rVec2D direction;
+		qreal orientation, radius;
+
+		radius = 0.;
+		center.x = pithCoord.x;
+		center.y = pithCoord.y;
+		orientation = 0.;
+		while (orientation < TWO_PI)
+		{
+			orientation += angleIncrement;
+			direction.x = qCos(orientation);
+			direction.y = qSin(orientation);
+			edge = center + direction*30;
+			while ( edge.x>0 && edge.y>0 && edge.x<width && edge.y<height && slice.at(edge.y,edge.x) > intensityThreshold )
+			{
+				edge += direction;
+			}
+			edge -= center;
+			radius += rVec2D(edge).norm()/nbPolygonPoints;
+		}
+		return radius;
+	}
+
+	void draw( QPainter &painter, const Slice &slice, const int &intensityThreshold )
+	{
+		painter.save();
 		painter.setPen(QColor(255,255,255,127));
 
 		uint i, j;
@@ -19,6 +148,7 @@ namespace SliceAlgorithm
 				if ( slice.at(j,i) > intensityThreshold ) painter.drawPoint(i,j);
 			}
 		}
+		painter.restore();
 	}
 
 	void writeInPgm3D( const Slice &slice, QDataStream &stream )

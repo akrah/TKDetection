@@ -1,8 +1,8 @@
-#include "inc/plotcurvaturehistogram.h"
+#include "inc/plotcontourdistanceshistogram.h"
 
-#include "inc/curvaturehistogram.h"
+#include "inc/contourdistanceshistogram.h"
 
-PlotCurvatureHistogram::PlotCurvatureHistogram()
+PlotContourDistancesHistogram::PlotContourDistancesHistogram()
 {
 	_histogramCursor.setBrush(Qt::red);
 	_histogramCursor.setPen(QPen(Qt::red));
@@ -11,11 +11,11 @@ PlotCurvatureHistogram::PlotCurvatureHistogram()
 	_histogramDominantPoints.setPen(QPen(Qt::green));
 }
 
-PlotCurvatureHistogram::~PlotCurvatureHistogram()
+PlotContourDistancesHistogram::~PlotContourDistancesHistogram()
 {
 }
 
-void PlotCurvatureHistogram::attach( QwtPlot * const plot )
+void PlotContourDistancesHistogram::attach( QwtPlot * const plot )
 {
 	if ( plot != 0 )
 	{
@@ -25,7 +25,7 @@ void PlotCurvatureHistogram::attach( QwtPlot * const plot )
 	}
 }
 
-void PlotCurvatureHistogram::clear()
+void PlotContourDistancesHistogram::clear()
 {
 	const QVector<QwtIntervalSample> emptyData(0);
 	_histogramData.setSamples(emptyData);
@@ -33,7 +33,7 @@ void PlotCurvatureHistogram::clear()
 	_histogramCursor.setSamples(emptyData);
 }
 
-void PlotCurvatureHistogram::moveCursor( const uint &sliceIndex )
+void PlotContourDistancesHistogram::moveCursor( const uint &sliceIndex )
 {
 	QVector<QwtIntervalSample> datasCursor(1);
 	datasCursor[0].interval.setInterval(sliceIndex,sliceIndex+1);
@@ -41,13 +41,13 @@ void PlotCurvatureHistogram::moveCursor( const uint &sliceIndex )
 	_histogramCursor.setSamples(datasCursor);
 }
 
-void PlotCurvatureHistogram::update( const CurvatureHistogram & histogram, const QVector<int> dominantPointsIndex )
+void PlotContourDistancesHistogram::update( const ContourDistancesHistogram & histogram, const QVector<int> dominantPointsIndex )
 {
 	updateDatas( histogram );
 	updateDominantPoints( histogram, dominantPointsIndex );
 }
 
-void PlotCurvatureHistogram::updateDatas( const CurvatureHistogram &histogram )
+void PlotContourDistancesHistogram::updateDatas( const ContourDistancesHistogram &histogram )
 {
 	QVector<QwtIntervalSample> datasHistogram(0);
 	if ( histogram.size() > 0 )
@@ -66,7 +66,7 @@ void PlotCurvatureHistogram::updateDatas( const CurvatureHistogram &histogram )
 }
 
 
-void PlotCurvatureHistogram::updateDominantPoints( const CurvatureHistogram &histogram, const QVector<int> dominantPointsIndex )
+void PlotContourDistancesHistogram::updateDominantPoints( const ContourDistancesHistogram &histogram, const QVector<int> dominantPointsIndex )
 {
 	QVector<QwtIntervalSample> dominantPointHistogram(0);
 	if ( histogram.size() > 0 && dominantPointsIndex.size() > 0 )

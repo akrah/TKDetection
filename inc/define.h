@@ -61,7 +61,6 @@ namespace TKD
 		MOVEMENT,
 		EDGE_DETECTION,
 		FLOW,
-		RESTRICTED_AREA,
 		_SLICE_TYPE_MAX_
 	};
 
@@ -94,6 +93,15 @@ namespace TKD
 		SECTOR_HISTOGRAM,
 		PITH_KNOT_DISTANCE_HISTOGRAM,
 		_HISTOGRAM_TYPE_MAX_
+	};
+
+	// Type de vue
+	enum ViewType
+	{
+		_VIEW_TYPE_MIN_ = -1,
+		Y_VIEW,
+		Z_VIEW,
+		_VIEW_TYPE_MAX_
 	};
 }
 

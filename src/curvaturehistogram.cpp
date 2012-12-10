@@ -1,6 +1,6 @@
 #include "inc/curvaturehistogram.h"
 
-#include "inc/contourslice.h"
+#include "inc/contour.h"
 
 #include <QTemporaryFile>
 #include <QProcess>
@@ -14,32 +14,19 @@ CurvatureHistogram::~CurvatureHistogram()
 {
 }
 
-const QVector<uint> &CurvatureHistogram::dominantPoints() const
-{
-	return _dominantPointIndex;
-}
-
 /**********************************
  * Public setters
  **********************************/
-void CurvatureHistogram::clear()
-{
-	Histogram<qreal>::clear();
-	_dominantPointIndex.clear();
-}
 
-void CurvatureHistogram::construct( const ContourSlice &contour, const int &curvatureWidth )
+void CurvatureHistogram::construct( const Contour &contour, const int &curvatureWidth )
 {
-	const QVector<iCoord2D> &contourPoints = contour.contourPoints();
-	const int nbPoints = contourPoints.size();
-	int i;
-
 	clear();
+
+	const int nbPoints = contour.size();
+	int i, streamTrash;
 
 	if ( nbPoints > 0 )
 	{
-		_dominantPointIndex = contour.dominantPointIndex();
-
 		QTemporaryFile fileContours("TKDetection_XXXXXX.ctr");
 		if ( !fileContours.open() )
 		{
@@ -50,7 +37,7 @@ void CurvatureHistogram::construct( const ContourSlice &contour, const int &curv
 		QTextStream streamContours(&fileContours);
 		for ( i=0 ; i<nbPoints ; ++i )
 		{
-			streamContours << contourPoints[i].x << " " << contourPoints[i].y << endl;
+			streamContours << contour[i].x << " " << contour[i].y << endl;
 		}
 		fileContours.close();
 
@@ -77,12 +64,11 @@ void CurvatureHistogram::construct( const ContourSlice &contour, const int &curv
 
 			QTextStream streamCurvature(&fileCurvature);
 			streamCurvature.readLine();
-			int temp;
 
 			resize(nbPoints);
 			for ( i=0 ; i<nbPoints ; ++i )
 			{
-				streamCurvature >> temp >> temp >> (*this)[i];
+				streamCurvature >> streamTrash >> streamTrash >> (*this)[i];
 			}
 
 			fileCurvature.close();

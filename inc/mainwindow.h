@@ -14,10 +14,11 @@ namespace Ui
 
 class ContourBillon;
 class CurvatureHistogram;
-class KnotAreaHistogram;
+class NearestPointsHistogram;
 class PieChart;
+class PlotContourDistancesHistogram;
 class PlotCurvatureHistogram;
-class PlotKnotAreaHistogram;
+class PlotNearestPointsHistogram;
 class PlotSectorHistogram;
 class PlotSliceHistogram;
 class SectorHistogram;
@@ -41,11 +42,12 @@ private slots:
 	void closeImage();
 	void drawSlice();
 	void setSlice( const int &sliceNumber );
-	void moveKnotAreaCursor( const int &position );
+	void setYSlice( const int &yPosition );
+	void moveNearestPointsCursor( const int &position );
 	void moveContourCursor( const int &position );
 	void setTypeOfView( const int &type );
 	void updateSliceHistogram();
-	void updateCurvatureHistogram();
+	void updateContourHistograms( const int &histogramIndex );
 	void updatePith();
 	void setMinimumOfSliceIntervalToCurrentSlice();
 	void setMaximumOfSliceIntervalToCurrentSlice();
@@ -53,10 +55,7 @@ private slots:
 	void nextMaximumInSliceHistogram();
 	void zoomInSliceView( const qreal &zoomFactor, const QPoint &focalPoint );
 	void dragInSliceView( const QPoint &movementVector );
-	void updateOpticalFlowalFlow();
-	void setRestrictedAreaResolution( const int &resolution );
-	void setRestrictedAreaThreshold( const int &threshold );
-	void setRestrictedAreaBeginRadius( const int &radius );
+	void updateOpticalFlow();
 	void setEdgeDetectionType( const int &type );
 	void setCannyRadiusOfGaussianMask( const int &radius );
 	void setCannySigmaOfGaussianMask( const double &sigma );
@@ -92,8 +91,8 @@ private:
 	void exportSectorHistogramToImage();
 	void exportknotHistogramToImage();
 
-	void exportCurrentKnotAreaToPgm3d();
 	void exportCurrentSegmentedKnotToPgm3d();
+	void exportSegmentedKnotsOfCurrentSliceIntervalToPgm3d();
 
 	void exportCurrentSegmentedKnotToV3D();
 	void exportSegmentedKnotsOfCurrentSliceIntervalToV3D();
@@ -109,6 +108,7 @@ private:
 
 	Billon *_billon;
 	Billon *_componentBillon;
+	Billon *_knotBillon;
 
 	QImage _mainPix;
 	SliceZoomer _sliceZoomer;
@@ -122,17 +122,19 @@ private:
 	SectorHistogram *_sectorHistogram;
 	PlotSectorHistogram * _plotSectorHistogram;
 
-	KnotAreaHistogram *_knotAreaHistogram;
-	PlotKnotAreaHistogram *_plotKnotAreaHistogram;
+	NearestPointsHistogram *_nearestPointsHistogram;
+	PlotNearestPointsHistogram *_plotNearestPointsHistogram;
 
-	CurvatureHistogram *_curvatureHistogram;
 	PlotCurvatureHistogram *_plotCurvatureHistogram;
+	PlotContourDistancesHistogram *_plotContourDistancesHistogram;
 
 	ContourBillon *_contourBillon;
 
 	uint _currentSlice;
+	uint _currentYSlice;
 	int _currentMaximum;
 	uint _currentSector;
+	qreal _treeRadius;
 };
 
 #endif // MAINWINDOW_H

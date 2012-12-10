@@ -13,16 +13,16 @@ class QXmlStreamWriter;
 
 namespace V3DExport
 {
-	void process( QFile &file, const Billon &billon, const Interval<uint> &sliceInterval, const int &threshold );
+	void process( QFile &file, const Billon &billon, const Interval<uint> &sliceInterval );
 
 	void init( QFile &file, QXmlStreamWriter &stream );
 	void close( QXmlStreamWriter &stream );
 
-	void appendTags(QXmlStreamWriter &stream, const Billon &billon );
+	void appendTags( QXmlStreamWriter &stream, const Billon &billon );
 	void startComponents( QXmlStreamWriter &stream );
-	void appendComponent( QXmlStreamWriter &stream, const Billon &billon, const Interval<uint> &sliceInterval, const int &index, const int &threshold );
+	void appendComponent( QXmlStreamWriter &stream, const Billon &billon, const Interval<uint> &sliceInterval, const int &index );
 	void endComponents( QXmlStreamWriter &stream );
-	void appendPith(QXmlStreamWriter &stream, const Billon &billon );
+	void appendPith( QXmlStreamWriter &stream, const Billon &billon );
 }
 
 #endif // V3DEXPORT_H
