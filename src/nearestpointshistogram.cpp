@@ -54,11 +54,17 @@ void NearestPointsHistogram::computeMaximumsAndIntervals( const uint & compariso
 		// Calcul de l'intervalle
 		uint upperIndex, lowerIndex;
 
-		upperIndex = qMin(histoSize-comparisonShift,minIndex);
-		while ( upperIndex < histoSize-comparisonShift && ((*this)[upperIndex+comparisonShift] - (*this)[upperIndex]) > comparisonValue ) upperIndex++;
+//		upperIndex = qMin(histoSize-comparisonShift,minIndex);
+//		while ( upperIndex < histoSize-comparisonShift && ((*this)[upperIndex+comparisonShift] - (*this)[upperIndex]) > comparisonValue ) upperIndex++;
 
-		lowerIndex = qMax(comparisonShift,minIndex);
-		while ( lowerIndex >= comparisonShift && (*this)[lowerIndex-comparisonShift] - (*this)[lowerIndex] > comparisonValue ) lowerIndex--;
+		upperIndex = minIndex;
+		while ( upperIndex < histoSize-1 && ((*this)[qMin(upperIndex+comparisonShift,histoSize)] - (*this)[upperIndex]) > comparisonValue ) upperIndex++;
+
+//		lowerIndex = qMax(comparisonShift,minIndex);
+//		while ( lowerIndex >= comparisonShift && (*this)[lowerIndex-comparisonShift] - (*this)[lowerIndex] > comparisonValue ) lowerIndex--;
+
+		lowerIndex = minIndex;
+		while ( lowerIndex > 0 && (*this)[qMin(lowerIndex-comparisonShift,static_cast<uint>(0))] - (*this)[lowerIndex] > comparisonValue ) lowerIndex--;
 
 		_intervals.resize(1);
 		_intervals[0] = Interval<uint>(lowerIndex+1,upperIndex-1);

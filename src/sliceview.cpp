@@ -13,8 +13,7 @@
 
 SliceView::SliceView() : _sliceType(TKD::CURRENT),
 	_flowAlpha(FLOW_ALPHA_DEFAULT), _flowEpsilon(FLOW_EPSILON_DEFAULT), _flowMaximumIterations(FLOW_MAXIMUM_ITERATIONS),
-	_restrictedAreaResolution(100), _restrictedAreaThreshold(-900), _restrictedAreaBeginRadius(5), _typeOfEdgeDetection(TKD::SOBEL),
-	_cannyRadiusOfGaussianMask(2), _cannySigmaOfGaussianMask(2), _cannyMinimumGradient(100.), _cannyMinimumDeviation(0.9)
+	_typeOfEdgeDetection(TKD::SOBEL), _cannyRadiusOfGaussianMask(2), _cannySigmaOfGaussianMask(2), _cannyMinimumGradient(100.), _cannyMinimumDeviation(0.9)
 {
 }
 
@@ -58,21 +57,6 @@ void SliceView::setFlowEpsilon( const qreal &epsilon )
 void SliceView::setFlowMaximumIterations( const int &maxIter )
 {
 	_flowMaximumIterations = maxIter;
-}
-
-void SliceView::setRestrictedAreaResolution( const int &resolution )
-{
-	_restrictedAreaResolution = resolution;
-}
-
-void SliceView::setRestrictedAreaThreshold( const int &threshold )
-{
-	_restrictedAreaThreshold = threshold;
-}
-
-void SliceView::setRestrictedAreaBeginRadius( const int &radius )
-{
-	_restrictedAreaBeginRadius = radius;
 }
 
 void SliceView::setEdgeDetectionType( const TKD::EdgeDetectionType &type )
@@ -131,11 +115,6 @@ void SliceView::drawSlice( QImage &image, const Billon &billon, const iCoord2D &
 						// Affichage de la coupe de flot optique
 					case TKD::FLOW :
 						drawFlowSlice( image, billon, sliceIndex );
-						break;
-						// Affichage de la zone réduite
-					case TKD::RESTRICTED_AREA :
-						drawCurrentSlice( image, billon, sliceIndex, intensityInterval );
-						drawRestrictedArea( image, billon, center, sliceIndex, intensityInterval.min() );
 						break;
 						// Affichage de la coupe originale
 					case TKD::CURRENT:
@@ -442,43 +421,4 @@ void SliceView::drawFlowSlice( QImage &image, const Billon &billon, const uint &
 //	}
 
 	delete field;
-}
-
-void SliceView::drawRestrictedArea( QImage &image, const Billon &billon, const iCoord2D &center, const uint &sliceIndex, const int &intensityThreshold )
-{
-	const Slice &currentSlice = billon.slice(sliceIndex);
-	const int width = billon.n_cols;
-	const int height = billon.n_rows;
-
-	QPolygon polygon(_restrictedAreaResolution);
-	int polygonPoints[2*_restrictedAreaResolution+2];
-
-	rCoord2D edge, rCenter;
-	rVec2D direction;
-	qreal orientation;
-	int k;
-	orientation = 0.;
-	k = 0;
-	rCenter.x = center.x;
-	rCenter.y = center.y;
-	while (orientation < TWO_PI)
-	{
-		orientation += (TWO_PI/static_cast<qreal>(_restrictedAreaResolution));
-		direction = rVec2D(qCos(orientation),-qSin(orientation));
-		edge = rCenter + direction*_restrictedAreaBeginRadius;
-		while ( edge.x>0 && edge.y>0 && edge.x<width && edge.y<height && currentSlice.at(edge.y,edge.x) > intensityThreshold )
-		{
-			edge += direction;
-		}
-		polygonPoints[k++] = edge.x;
-		polygonPoints[k++] = edge.y;
-	}
-	polygonPoints[k++] = polygonPoints[0];
-	polygonPoints[k] = polygonPoints[1];
-
-	polygon.setPoints(_restrictedAreaResolution+1,polygonPoints);
-
-	QPainter painter(&image);
-	painter.setPen(Qt::green);
-	painter.drawPolygon(polygon);
 }

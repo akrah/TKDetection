@@ -69,7 +69,6 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 	_ui->_comboSliceType->insertItem(TKD::MOVEMENT,tr("Coupe de mouvements"));
 	_ui->_comboSliceType->insertItem(TKD::EDGE_DETECTION,tr("Coupe de détection de contours"));
 	_ui->_comboSliceType->insertItem(TKD::FLOW,tr("Coupe de flots optiques"));
-	_ui->_comboSliceType->insertItem(TKD::RESTRICTED_AREA,tr("Coupe de zone réduite"));
 	_ui->_comboSliceType->setCurrentIndex(TKD::CURRENT);
 
 	_ui->_comboEdgeDetectionType->insertItem(TKD::SOBEL,tr("Sobel"));
@@ -116,17 +115,14 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 	QObject::connect(_ui->_sliderMovementThresholdInterval, SIGNAL(upperValueChanged(int)), _ui->_spinMovementThresholdMax, SLOT(setValue(int)));
 	QObject::connect(_ui->_spinMovementThresholdMax, SIGNAL(valueChanged(int)), _ui->_sliderMovementThresholdInterval, SLOT(setUpperValue(int)));
 	QObject::connect(_ui->_spinMovementThresholdMax, SIGNAL(valueChanged(int)), this, SLOT(drawSlice()));
-
 	QObject::connect(_ui->_buttonFlowUpdate, SIGNAL(clicked()), this, SLOT(updateOpticalFlow()));
-	QObject::connect(_ui->_spinRestrictedAreaResolution, SIGNAL(valueChanged(int)), this, SLOT(setRestrictedAreaResolution(int)));
-	QObject::connect(_ui->_spinRestrictedAreaThreshold, SIGNAL(valueChanged(int)), this, SLOT(setRestrictedAreaThreshold(int)));
-	QObject::connect(_ui->_sliderRestrictedAreaBeginRadius, SIGNAL(valueChanged(int)), this, SLOT(setRestrictedAreaBeginRadius(int)));
-	QObject::connect(_ui->_spinRestrictedAreaBeginRadius, SIGNAL(valueChanged(int)), this, SLOT(setRestrictedAreaBeginRadius(int)));
 	QObject::connect(_ui->_comboEdgeDetectionType, SIGNAL(currentIndexChanged(int)), this, SLOT(setEdgeDetectionType(int)));
 	QObject::connect(_ui->_spinCannyRadiusOfGaussianMask, SIGNAL(valueChanged(int)), this, SLOT(setCannyRadiusOfGaussianMask(int)));
 	QObject::connect(_ui->_spinCannySigmaOfGaussianMask, SIGNAL(valueChanged(double)), this, SLOT(setCannySigmaOfGaussianMask(double)));
 	QObject::connect(_ui->_spinCannyMinimumGradient, SIGNAL(valueChanged(int)), this, SLOT(setCannyMinimumGradient(int)));
 	QObject::connect(_ui->_spinCannyMinimumDeviation, SIGNAL(valueChanged(double)), this, SLOT(setCannyMinimumDeviation(double)));
+	QObject::connect(_ui->_sliderRestrictedAreaPercentage, SIGNAL(valueChanged(int)), _ui->_spinRestrictedAreaPercentage, SLOT(setValue(int)));
+	QObject::connect(_ui->_spinRestrictedAreaPercentage, SIGNAL(valueChanged(int)), _ui->_sliderRestrictedAreaPercentage, SLOT(setValue(int)));
 
 	// Évènements déclenchés par le slider de seuillage
 	QObject::connect(_ui->_spansliderIntensityThreshold, SIGNAL(lowerValueChanged(int)), _ui->_spinMinIntensity, SLOT(setValue(int)));
@@ -340,7 +336,7 @@ void MainWindow::drawSlice()
 			{
 				QPainter painter(&_mainPix);
 				painter.setPen(Qt::yellow);
-				painter.drawEllipse(QPointF(pithCoord.x,pithCoord.y),_treeRadius*0.75,_treeRadius*0.75);
+				painter.drawEllipse(QPointF(pithCoord.x,pithCoord.y),_treeRadius*_ui->_spinRestrictedAreaPercentage->value()/100.,_treeRadius*_ui->_spinRestrictedAreaPercentage->value()/100.);
 			}
 
 			const bool inDrawingArea = (_ui->_comboSelectSliceInterval->currentIndex() > 0 && _sliceHistogram->interval(_ui->_comboSelectSliceInterval->currentIndex()-1).containsClosed(_currentSlice));
@@ -455,9 +451,6 @@ void MainWindow::setTypeOfView( const int &type )
 		case TKD::FLOW:
 			_ui->_toolboxSliceParameters->setCurrentWidget(_ui->_pageFlowParameters);
 			break;
-		case TKD::RESTRICTED_AREA:
-			_ui->_toolboxSliceParameters->setCurrentWidget(_ui->_pageRestrictedAreaParameters);
-			break;
 		default:
 			break;
 	}
@@ -472,7 +465,7 @@ void MainWindow::updateSliceHistogram()
 	{
 		_sliceHistogram->construct(*_billon, Interval<int>(_ui->_spinMinIntensity->value(),_ui->_spinMaxIntensity->value()),
 								   Interval<int>(_ui->_spinMovementThresholdMin->value(),_ui->_spinMovementThresholdMax->value()),
-								   _ui->_spinBorderPercentageToCut->value(), _treeRadius*0.75);
+								   _ui->_spinBorderPercentageToCut->value(), _treeRadius*_ui->_spinRestrictedAreaPercentage->value()/100.);
 		_sliceHistogram->computeMaximumsAndIntervals( _ui->_spinSmoothingRadiusOfHistogram->value(), _ui->_spinMinimumHeightofMaximum->value(),
 													  _ui->_spinMaximumsNeighborhood->value(), _ui->_spinDerivativePercentage->value(),
 													  _ui->_spinHistogramIntervalMinimumWidth->value(), false);
@@ -532,7 +525,7 @@ void MainWindow::updatePith()
 	{
 		PithExtractor::instance().process(*_billon);
 	}
-	_treeRadius = BillonAlgorithms::restrictedAreaMeansRadius(*_billon,20,_ui->_spinMinIntensity->value());
+	_treeRadius = BillonAlgorithms::restrictedAreaMeansRadius(*_billon,_ui->_spinRestrictedAreaResolution->value(),_ui->_spinRestrictedAreaThreshold->value());
 	_ui->_checkRadiusAroundPith->setText( QString::number(_treeRadius) );
 	drawSlice();
 	updateSliceHistogram();
@@ -610,33 +603,6 @@ void MainWindow::updateOpticalFlow()
 	}
 
 	if ( hasModification ) drawSlice();
-}
-
-void MainWindow::setRestrictedAreaResolution( const int &resolution )
-{
-	_sliceView->setRestrictedAreaResolution(resolution);
-	drawSlice();
-}
-
-void MainWindow::setRestrictedAreaThreshold( const int &threshold )
-{
-	_sliceView->setRestrictedAreaThreshold(threshold);
-	drawSlice();
-}
-
-void MainWindow::setRestrictedAreaBeginRadius( const int &radius )
-{
-	_sliceView->setRestrictedAreaBeginRadius( radius );
-
-	_ui->_sliderRestrictedAreaBeginRadius->blockSignals(true);
-		_ui->_sliderRestrictedAreaBeginRadius->setValue(radius);
-	_ui->_sliderRestrictedAreaBeginRadius->blockSignals(false);
-
-	_ui->_spinRestrictedAreaBeginRadius->blockSignals(true);
-		_ui->_spinRestrictedAreaBeginRadius->setValue(radius);
-	_ui->_spinRestrictedAreaBeginRadius->blockSignals(false);
-
-	drawSlice();
 }
 
 void MainWindow::setEdgeDetectionType( const int &type )
@@ -1085,7 +1051,7 @@ void MainWindow::updateSectorHistogram( const Interval<uint> &interval )
 	if ( _billon != 0 )
 	{
 		_sectorHistogram->construct( *_billon, *_pieChart, interval, Interval<int>(_ui->_spinMinIntensity->value(),_ui->_spinMaxIntensity->value()),
-									 Interval<int>(_ui->_spinMovementThresholdMin->value(),_ui->_spinMovementThresholdMax->value()), _treeRadius*0.75);
+									 Interval<int>(_ui->_spinMovementThresholdMin->value(),_ui->_spinMovementThresholdMax->value()), _treeRadius*_ui->_spinRestrictedAreaPercentage->value()/100.);
 		_sectorHistogram->computeMaximumsAndIntervals( _ui->_spinSmoothingRadiusOfHistogram->value(), _ui->_spinMinimumHeightofMaximum->value(),
 													   _ui->_spinMaximumsNeighborhood->value(), _ui->_spinDerivativePercentage->value(),
 													   _ui->_spinHistogramIntervalMinimumWidth->value(), true );
@@ -1115,7 +1081,7 @@ void MainWindow::exportBillonRestrictedAreaToOfs()
 		if ( !fileName.isEmpty() )
 		{
 			OfsExport::processOnRestrictedMesh( *_billon, Interval<uint>(_ui->_spinMinSlice->value(),_ui->_spinMaxSlice->value()),
-												fileName, 100, MINIMUM_INTENSITY, false, _ui->_checkCloseBillon->isChecked() );
+												fileName, _ui->_spinRestrictedAreaResolution->value(), _ui->_spinRestrictedAreaThreshold->value(), false, _ui->_checkCloseBillon->isChecked() );
 			QMessageBox::information( this, tr("Export en .ofs"), tr("Terminé avec succés !"));
 		}
 	}

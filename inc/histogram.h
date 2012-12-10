@@ -290,7 +290,7 @@ void Histogram<T>::computeIntervals( const int & derivativesPercentage, const ui
 	if ( !_maximums.isEmpty() )
 	{
 		int cursorMax, cursorMin, derivativeThreshold;
-		Interval<uint> cursor, last, first;
+		Interval<uint> cursor;
 		for ( uint i=0 ; i<nbMaximums() ; ++i )
 		{
 			// Detection des bornes de l'intervalle courant
@@ -330,13 +330,13 @@ void Histogram<T>::computeIntervals( const int & derivativesPercentage, const ui
 			{
 				if ( cursor.width() >= minimumWidthOfIntervals )
 				{
-					last = _intervals.last();
-					if ( _intervals.isEmpty() || cursor.min() > last.max() )
+					if ( _intervals.isEmpty() || cursor.min() > _intervals.last().max() )
 					{
 						_intervals.append(cursor);
 					}
 					else
 					{
+						Interval<uint> &last = _intervals.last();
 						if ( cursor != last )
 						{
 							if ( cursor.min() == last.min() )
@@ -365,8 +365,8 @@ void Histogram<T>::computeIntervals( const int & derivativesPercentage, const ui
 						}
 						else
 						{
-							last = _intervals.last();
-							first = _intervals.first();
+							Interval<uint> &last = _intervals.last();
+							const Interval<uint> &first = _intervals.first();
 							if ( cursor != last && cursor != first )
 							{
 								if ( cursor.intersect(last) )
@@ -410,7 +410,7 @@ void Histogram<T>::computeIntervals( const int & derivativesPercentage, const ui
 					{
 						cursor.setMax(this->size()-1);
 						cursorMax = cursor.max();
-						last = _intervals.last();
+						Interval<uint> &last = _intervals.last();
 						if ( cursor != last )
 						{
 							if ( cursor.min() == last.min() )

@@ -56,9 +56,6 @@ private slots:
 	void zoomInSliceView( const qreal &zoomFactor, const QPoint &focalPoint );
 	void dragInSliceView( const QPoint &movementVector );
 	void updateOpticalFlow();
-	void setRestrictedAreaResolution( const int &resolution );
-	void setRestrictedAreaThreshold( const int &threshold );
-	void setRestrictedAreaBeginRadius( const int &radius );
 	void setEdgeDetectionType( const int &type );
 	void setCannyRadiusOfGaussianMask( const int &radius );
 	void setCannySigmaOfGaussianMask( const double &sigma );

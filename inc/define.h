@@ -61,7 +61,6 @@ namespace TKD
 		MOVEMENT,
 		EDGE_DETECTION,
 		FLOW,
-		RESTRICTED_AREA,
 		_SLICE_TYPE_MAX_
 	};
 

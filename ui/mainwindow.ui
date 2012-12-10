@@ -2,14 +2,6 @@
 <ui version="4.0">
  <class>MainWindow</class>
  <widget class="QMainWindow" name="MainWindow">
-  <property name="geometry">
-   <rect>
-    <x>0</x>
-    <y>0</y>
-    <width>867</width>
-    <height>750</height>
-   </rect>
-  </property>
   <property name="windowTitle">
    <string>MainWindow</string>
   </property>
@@ -111,8 +103,8 @@
           <rect>
            <x>0</x>
            <y>0</y>
-           <width>325</width>
-           <height>565</height>
+           <width>317</width>
+           <height>659</height>
           </rect>
          </property>
          <layout class="QHBoxLayout" name="horizontalLayout_21">
@@ -237,7 +229,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>867</width>
+     <width>755</width>
      <height>25</height>
     </rect>
    </property>
@@ -273,7 +265,7 @@
      <item row="0" column="0">
       <widget class="QTabWidget" name="_tabs">
        <property name="currentIndex">
-        <number>1</number>
+        <number>3</number>
        </property>
        <widget class="QWidget" name="_tabAffichage">
         <attribute name="title">
@@ -383,36 +375,6 @@
                 </widget>
                </item>
               </layout>
-             </item>
-             <item row="2" column="0">
-              <widget class="QLabel" name="label_20">
-               <property name="font">
-                <font>
-                 <weight>50</weight>
-                 <bold>false</bold>
-                </font>
-               </property>
-               <property name="text">
-                <string>Afficher la
-zone restreinte</string>
-               </property>
-              </widget>
-             </item>
-             <item row="2" column="1">
-              <widget class="QCheckBox" name="_checkRadiusAroundPith">
-               <property name="font">
-                <font>
-                 <weight>50</weight>
-                 <bold>false</bold>
-                </font>
-               </property>
-               <property name="layoutDirection">
-                <enum>Qt::LeftToRight</enum>
-               </property>
-               <property name="text">
-                <string>100</string>
-               </property>
-              </widget>
              </item>
              <item row="3" column="0">
               <widget class="QLabel" name="label_31">
@@ -934,12 +896,12 @@ composantes connexes</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>243</width>
-              <height>118</height>
+              <width>335</width>
+              <height>306</height>
              </rect>
             </property>
             <attribute name="label">
-             <string>Paramètres de la zone réduite</string>
+             <string>Paramètres de la zone restreinte</string>
             </attribute>
             <layout class="QFormLayout" name="formLayout_8">
              <property name="fieldGrowthPolicy">
@@ -1024,20 +986,26 @@ composantes connexes</string>
                 </font>
                </property>
                <property name="text">
-                <string>Rayon à éviter
-autour de la moelle</string>
+                <string>Pourcentage du
+rayon moyen</string>
                </property>
               </widget>
              </item>
              <item row="2" column="1">
               <layout class="QHBoxLayout" name="horizontalLayout_11">
                <item>
-                <widget class="QSlider" name="_sliderRestrictedAreaBeginRadius">
+                <widget class="QSlider" name="_sliderRestrictedAreaPercentage">
                  <property name="font">
                   <font>
                    <weight>50</weight>
                    <bold>false</bold>
                   </font>
+                 </property>
+                 <property name="maximum">
+                  <number>100</number>
+                 </property>
+                 <property name="value">
+                  <number>75</number>
                  </property>
                  <property name="orientation">
                   <enum>Qt::Horizontal</enum>
@@ -1045,16 +1013,49 @@ autour de la moelle</string>
                 </widget>
                </item>
                <item>
-                <widget class="QSpinBox" name="_spinRestrictedAreaBeginRadius">
+                <widget class="QSpinBox" name="_spinRestrictedAreaPercentage">
                  <property name="font">
                   <font>
                    <weight>50</weight>
                    <bold>false</bold>
                   </font>
                  </property>
+                 <property name="maximum">
+                  <number>100</number>
+                 </property>
+                 <property name="value">
+                  <number>75</number>
+                 </property>
                 </widget>
                </item>
               </layout>
+             </item>
+             <item row="3" column="0">
+              <widget class="QLabel" name="label_20">
+               <property name="font">
+                <font>
+                 <weight>50</weight>
+                 <bold>false</bold>
+                </font>
+               </property>
+               <property name="text">
+                <string>Afficher la
+zone restreinte</string>
+               </property>
+              </widget>
+             </item>
+             <item row="3" column="1">
+              <widget class="QCheckBox" name="_checkRadiusAroundPith">
+               <property name="font">
+                <font>
+                 <weight>50</weight>
+                 <bold>false</bold>
+                </font>
+               </property>
+               <property name="text">
+                <string>100</string>
+               </property>
+              </widget>
              </item>
             </layout>
            </widget>
@@ -1611,26 +1612,6 @@ l'intervalle angulaire</string>
             <string>Contours</string>
            </property>
            <layout class="QFormLayout" name="formLayout_11">
-            <item row="0" column="0">
-             <widget class="QLabel" name="label_35">
-              <property name="text">
-               <string>Epaisseur segment flou</string>
-              </property>
-             </widget>
-            </item>
-            <item row="0" column="1">
-             <widget class="QSpinBox" name="_spinBlurredSegmentsThickness">
-              <property name="minimum">
-               <number>1</number>
-              </property>
-              <property name="maximum">
-               <number>20</number>
-              </property>
-              <property name="value">
-               <number>10</number>
-              </property>
-             </widget>
-            </item>
             <item row="1" column="0">
              <widget class="QLabel" name="label_36">
               <property name="text">
@@ -1651,7 +1632,79 @@ l'intervalle angulaire</string>
               </property>
              </widget>
             </item>
-            <item row="2" column="1">
+           </layout>
+          </widget>
+         </item>
+         <item>
+          <widget class="QGroupBox" name="groupBox_6">
+           <property name="title">
+            <string>Points dominants</string>
+           </property>
+           <layout class="QFormLayout" name="formLayout_16">
+            <item row="0" column="0">
+             <widget class="QLabel" name="label_35">
+              <property name="text">
+               <string>Epaisseur des segments flous</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="1">
+             <widget class="QSpinBox" name="_spinBlurredSegmentsThickness">
+              <property name="minimum">
+               <number>1</number>
+              </property>
+              <property name="maximum">
+               <number>20</number>
+              </property>
+              <property name="value">
+               <number>10</number>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </widget>
+         </item>
+         <item>
+          <widget class="QGroupBox" name="groupBox_4">
+           <property name="title">
+            <string>Points dominants principaux</string>
+           </property>
+           <layout class="QFormLayout" name="formLayout_14">
+            <item row="0" column="0">
+             <widget class="QLabel" name="label_41">
+              <property name="text">
+               <string>Distance minimum à
+l'origine du contour</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="1">
+             <widget class="QSpinBox" name="_spinMinimumOriginDistance">
+              <property name="maximum">
+               <number>100</number>
+              </property>
+              <property name="value">
+               <number>20</number>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </widget>
+         </item>
+         <item>
+          <widget class="QGroupBox" name="groupBox_7">
+           <property name="title">
+            <string>Courbure</string>
+           </property>
+           <layout class="QFormLayout" name="formLayout_17">
+            <item row="0" column="0">
+             <widget class="QLabel" name="label_40">
+              <property name="text">
+               <string>Épaisseur des segments flous</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="1">
              <layout class="QHBoxLayout" name="horizontalLayout_6">
               <item>
                <widget class="QSlider" name="_sliderCurvatureWidth">
@@ -1683,40 +1736,6 @@ l'intervalle angulaire</string>
                </widget>
               </item>
              </layout>
-            </item>
-            <item row="2" column="0">
-             <widget class="QLabel" name="label_40">
-              <property name="text">
-               <string>Largeur de courbure</string>
-              </property>
-             </widget>
-            </item>
-           </layout>
-          </widget>
-         </item>
-         <item>
-          <widget class="QGroupBox" name="groupBox_4">
-           <property name="title">
-            <string>Points dominants principaux</string>
-           </property>
-           <layout class="QFormLayout" name="formLayout_14">
-            <item row="0" column="0">
-             <widget class="QLabel" name="label_41">
-              <property name="text">
-               <string>Distance minimum à
-l'origine du contour</string>
-              </property>
-             </widget>
-            </item>
-            <item row="0" column="1">
-             <widget class="QSpinBox" name="_spinMinimumOriginDistance">
-              <property name="maximum">
-               <number>100</number>
-              </property>
-              <property name="value">
-               <number>20</number>
-              </property>
-             </widget>
             </item>
            </layout>
           </widget>
@@ -2177,7 +2196,7 @@ l'origine du contour</string>
               <x>0</x>
               <y>0</y>
               <width>441</width>
-              <height>218</height>
+              <height>299</height>
              </rect>
             </property>
             <attribute name="label">
@@ -2438,7 +2457,6 @@ l'origine du contour</string>
   <tabstop>_spinMinIntensity</tabstop>
   <tabstop>_spansliderIntensityThreshold</tabstop>
   <tabstop>_spinMaxIntensity</tabstop>
-  <tabstop>_checkRadiusAroundPith</tabstop>
   <tabstop>_checkEnableConnexComponents</tabstop>
   <tabstop>_spinMovementThresholdMin</tabstop>
   <tabstop>_sliderMovementThresholdInterval</tabstop>
@@ -2454,8 +2472,8 @@ l'origine du contour</string>
   <tabstop>_buttonFlowUpdate</tabstop>
   <tabstop>_spinRestrictedAreaResolution</tabstop>
   <tabstop>_spinRestrictedAreaThreshold</tabstop>
-  <tabstop>_sliderRestrictedAreaBeginRadius</tabstop>
-  <tabstop>_spinRestrictedAreaBeginRadius</tabstop>
+  <tabstop>_sliderRestrictedAreaPercentage</tabstop>
+  <tabstop>_spinRestrictedAreaPercentage</tabstop>
   <tabstop>_sliderSmoothingRadiusOfHistogram</tabstop>
   <tabstop>_spinSmoothingRadiusOfHistogram</tabstop>
   <tabstop>_sliderBorderPercentageToCut</tabstop>
@@ -2479,7 +2497,6 @@ l'origine du contour</string>
   <tabstop>_spinMinimalSizeOf3DConnexComponents</tabstop>
   <tabstop>_sliderMinimalSizeOf2DConnexComponents</tabstop>
   <tabstop>_spinMinimalSizeOf2DConnexComponents</tabstop>
-  <tabstop>_spinBlurredSegmentsThickness</tabstop>
   <tabstop>_spinContourSmoothingRadius</tabstop>
   <tabstop>_sliderCurvatureWidth</tabstop>
   <tabstop>_spinCurvatureWidth</tabstop>
