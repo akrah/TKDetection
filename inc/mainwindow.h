@@ -14,16 +14,20 @@ namespace Ui
 
 class ContourBillon;
 class CurvatureHistogram;
+class IntensityDistributionHistogram;
 class NearestPointsHistogram;
 class PieChart;
 class PlotContourDistancesHistogram;
 class PlotCurvatureHistogram;
+class PlotIntensityDistributionHistogram;
 class PlotNearestPointsHistogram;
 class PlotSectorHistogram;
 class PlotSliceHistogram;
+class PlotZMotionDistributionHistogram;
 class SectorHistogram;
 class SliceHistogram;
 class SliceView;
+class ZMotionDistributionHistogram;
 
 template <typename T> class Interval;
 
@@ -48,6 +52,8 @@ private slots:
 	void setTypeOfView( const int &type );
 	void updateSliceHistogram();
 	void updateContourHistograms( const int &histogramIndex );
+	void updateIntensityDistributionHistogram();
+	void updateZMotionDistributionHistogram();
 	void updatePith();
 	void setMinimumOfSliceIntervalToCurrentSlice();
 	void setMaximumOfSliceIntervalToCurrentSlice();
@@ -127,6 +133,12 @@ private:
 
 	PlotCurvatureHistogram *_plotCurvatureHistogram;
 	PlotContourDistancesHistogram *_plotContourDistancesHistogram;
+
+	IntensityDistributionHistogram *_intensityDistributionHistogram;
+	PlotIntensityDistributionHistogram *_plotIntensityDistributionHistogram;
+
+	ZMotionDistributionHistogram *_zMotionDistributionHistogram;
+	PlotZMotionDistributionHistogram * _plotZMotionDistributionHistogram;
 
 	ContourBillon *_contourBillon;
 

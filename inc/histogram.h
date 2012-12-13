@@ -33,12 +33,12 @@ public:
 	T firstdDerivated( int i, bool loop ) const;
 
 	void clear();
-	void computeMaximumsAndIntervals( const int & smoothingRadius,
+	void computeMaximumsAndIntervals( const uint &smoothingRadius,
 									  const int & minimumHeightPercentageOfMaximum, const int & neighborhoodOfMaximums,
 									  const int & derivativesPercentage, const int &minimumWidthOfIntervals, const bool & loop );
 
 protected:
-	virtual void meansSmoothing( const int &smoothingRadius, const bool &loop );
+	virtual void meansSmoothing( const uint &smoothingRadius, const bool &loop );
 	virtual void computeMaximums( const int &minimumHeightPercentageOfMaximum, const int &neighborhoodOfMaximums, const bool &loop );
 	virtual void computeIntervals( const int &derivativesPercentage, const uint &minimumWidthOfIntervals, const bool &loop );
 
@@ -157,7 +157,6 @@ template <typename T>
 T Histogram<T>::firstdDerivated( int i, bool loop ) const
 {
 	Q_ASSERT_X( i>=0 && i<this->size(), "Histogram::firstDerivated", "index en dehors des bornes de l'histogramme" );
-	//return i>1 ? (*this)[i] - (*this)[i-2] : loop && this->size()>1 ? (*this)[i] - (*this)[this->size()-2+i] : T();
 	return i>0 ? (*this)[i] - (*this)[i-1] : loop ? (*this)[0] - (*this)[this->size()-1] : T();
 }
 
@@ -173,7 +172,7 @@ void Histogram<T>::clear()
 }
 
 template <typename T>
-void Histogram<T>::computeMaximumsAndIntervals( const int & smoothingRadius,
+void Histogram<T>::computeMaximumsAndIntervals( const uint & smoothingRadius,
 												const int & minimumHeightPercentageOfMaximum, const int & neighborhoodOfMaximums,
 												const int & derivativesPercentage, const int &minimumWidthOfIntervals, const bool & loop )
 {
@@ -186,37 +185,41 @@ void Histogram<T>::computeMaximumsAndIntervals( const int & smoothingRadius,
  * Private setters
  **********************************/
 template <typename T>
-void Histogram<T>::meansSmoothing( const int & smoothingRadius, const bool & loop )
+void Histogram<T>::meansSmoothing( const uint & smoothingRadius, const bool & loop )
 {
-	if ( this->size() > 0 )
+	const uint histoSize = this->size();
+	if ( histoSize > 0 )
 	{
-		const int maskWidth = 2*smoothingRadius+1;
-		int i;
+		const T maskWidth = 2*smoothingRadius+1;
+		uint i;
 
 		QVector<T> copy;
-		copy.reserve( this->size() + 2*smoothingRadius );
+		copy.reserve( histoSize + 2*smoothingRadius );
 		if ( loop )
 		{
-			for ( i=this->size()-smoothingRadius ; i<this->size() ; ++i ) copy << this->at(i);
+			for ( i=histoSize-smoothingRadius ; i<histoSize ; ++i ) copy << this->at(i);
 			copy << (*this);
 			for ( i=0 ; i<smoothingRadius ; ++i ) copy << this->at(i);
 		}
 		else
 		{
-			for ( i=this->size()-smoothingRadius ; i<this->size() ; ++i ) copy << this->at(0);
+			for ( i=0 ; i<smoothingRadius ; ++i ) copy << this->at(0);
 			copy << (*this);
-			for ( i=this->size()-smoothingRadius ; i<this->size() ; ++i ) copy << this->at(this->size()-1);
+			for ( i=0 ; i<smoothingRadius ; ++i ) copy << this->at(histoSize-1);
 		}
 
-		typename QVector<T>::const_iterator copyIterBegin = copy.begin();
-		typename QVector<T>::const_iterator copyIterEnd = copyIterBegin+(2*smoothingRadius+1);
+		typename QVector<T>::ConstIterator copyIterBegin = copy.constBegin();
+		typename QVector<T>::ConstIterator copyIterEnd = copy.constBegin() + static_cast<int>(maskWidth);
 
-		typename QVector<T>::iterator histIter = this->begin();
-		const typename QVector<T>::const_iterator histEnd = this->end();
+		typename QVector<T>::Iterator histIter = this->begin();
+		const typename QVector<T>::ConstIterator histEnd = this->constEnd();
 
+		T currentValue = std::accumulate( copyIterBegin, copyIterEnd, T() );
+		*histIter++ = currentValue/maskWidth;
 		while ( histIter != histEnd )
 		{
-			*histIter++ = std::accumulate( copyIterBegin++, copyIterEnd++, T() )/static_cast<T>(maskWidth);
+			currentValue += (*copyIterEnd++ - *copyIterBegin++);
+			*histIter++ = currentValue/maskWidth;
 		}
 	}
 }

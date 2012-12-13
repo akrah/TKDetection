@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>687</width>
+    <width>867</width>
     <height>828</height>
    </rect>
   </property>
@@ -111,7 +111,7 @@
           <rect>
            <x>0</x>
            <y>0</y>
-           <width>249</width>
+           <width>325</width>
            <height>643</height>
           </rect>
          </property>
@@ -122,7 +122,7 @@
           <item>
            <widget class="QLabel" name="_labelSliceView">
             <property name="sizePolicy">
-             <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+             <sizepolicy hsizetype="Ignored" vsizetype="Ignored">
               <horstretch>0</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
@@ -132,9 +132,6 @@
             </property>
             <property name="text">
              <string/>
-            </property>
-            <property name="scaledContents">
-             <bool>true</bool>
             </property>
             <property name="alignment">
              <set>Qt::AlignCenter</set>
@@ -237,7 +234,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>687</width>
+     <width>867</width>
      <height>25</height>
     </rect>
    </property>
@@ -320,7 +317,7 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>335</width>
+              <width>439</width>
               <height>321</height>
              </rect>
             </property>
@@ -402,7 +399,7 @@
                   </widget>
                  </item>
                  <item>
-                  <widget class="QxtSpanSlider" name="_spansliderIntensityThreshold">
+                  <widget class="QxtSpanSlider" name="_spanSliderIntensityThreshold">
                    <property name="font">
                     <font>
                      <weight>50</weight>
@@ -501,13 +498,13 @@ composantes connexes</string>
                    <number>3</number>
                   </property>
                   <property name="maximum">
-                   <number>10000</number>
+                   <number>1000</number>
                   </property>
                   <property name="singleStep">
                    <number>10</number>
                   </property>
                   <property name="value">
-                   <number>100</number>
+                   <number>20</number>
                   </property>
                  </widget>
                 </item>
@@ -636,7 +633,7 @@ zone restreinte</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>335</width>
+              <width>439</width>
               <height>321</height>
              </rect>
             </property>
@@ -666,7 +663,7 @@ zone restreinte</string>
                 <number>0</number>
                </property>
                <item>
-                <widget class="QSpinBox" name="_spinMovementThresholdMin">
+                <widget class="QSpinBox" name="_spinMinZMotion">
                  <property name="font">
                   <font>
                    <weight>50</weight>
@@ -682,7 +679,7 @@ zone restreinte</string>
                 </widget>
                </item>
                <item>
-                <widget class="QxtSpanSlider" name="_sliderMovementThresholdInterval">
+                <widget class="QxtSpanSlider" name="_spanSliderZMotionThreshold">
                  <property name="maximum">
                   <number>1000</number>
                  </property>
@@ -701,7 +698,7 @@ zone restreinte</string>
                 </widget>
                </item>
                <item>
-                <widget class="QSpinBox" name="_spinMovementThresholdMax">
+                <widget class="QSpinBox" name="_spinMaxZMotion">
                  <property name="font">
                   <font>
                    <weight>50</weight>
@@ -725,7 +722,7 @@ zone restreinte</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>335</width>
+              <width>439</width>
               <height>321</height>
              </rect>
             </property>
@@ -923,7 +920,7 @@ zone restreinte</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>335</width>
+              <width>439</width>
               <height>321</height>
              </rect>
             </property>
@@ -1299,11 +1296,40 @@ maximum
           </layout>
          </item>
          <item>
+          <widget class="QGroupBox" name="groupBox_9">
+           <property name="title">
+            <string>Histogramme de secteurs</string>
+           </property>
+           <layout class="QFormLayout" name="formLayout_8">
+            <item row="0" column="0">
+             <widget class="QLabel" name="label_45">
+              <property name="text">
+               <string>Écart ajouté aux intervalles</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="1">
+             <widget class="QSpinBox" name="_spinSectorHistogramIntervalGap">
+              <property name="maximum">
+               <number>50</number>
+              </property>
+              <property name="value">
+               <number>5</number>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </widget>
+         </item>
+         <item>
           <widget class="QGroupBox" name="groupBox_5">
            <property name="title">
             <string>Histogramme de distance à la moelle</string>
            </property>
            <layout class="QFormLayout" name="formLayout_15">
+            <property name="fieldGrowthPolicy">
+             <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
+            </property>
             <item row="0" column="0">
              <widget class="QLabel" name="label_43">
               <property name="text">
@@ -1315,6 +1341,9 @@ maximum
              <widget class="QSpinBox" name="_spinNearestHistogramNeighborhood">
               <property name="minimum">
                <number>1</number>
+              </property>
+              <property name="value">
+               <number>3</number>
               </property>
              </widget>
             </item>
@@ -1329,6 +1358,9 @@ maximum
              <widget class="QSpinBox" name="_spinNearestHistogramDifference">
               <property name="minimum">
                <number>1</number>
+              </property>
+              <property name="value">
+               <number>5</number>
               </property>
              </widget>
             </item>
@@ -2199,7 +2231,7 @@ l'origine du contour</string>
               <x>0</x>
               <y>0</y>
               <width>441</width>
-              <height>283</height>
+              <height>296</height>
              </rect>
             </property>
             <attribute name="label">
@@ -2280,7 +2312,7 @@ l'origine du contour</string>
         <enum>QTabWidget::South</enum>
        </property>
        <property name="currentIndex">
-        <number>0</number>
+        <number>4</number>
        </property>
        <widget class="QWidget" name="_tabSliceHistogram">
         <attribute name="title">
@@ -2362,7 +2394,7 @@ l'origine du contour</string>
          </item>
          <item>
           <widget class="QwtPolarPlot" name="_polarSectorHistogram">
-           <property name="plotBackground" stdset="0">
+           <property name="plotBackground">
             <brush brushstyle="SolidPattern">
              <color alpha="0">
               <red>255</red>
@@ -2408,6 +2440,80 @@ l'origine du contour</string>
          </item>
         </layout>
        </widget>
+       <widget class="QWidget" name="tab_2">
+        <attribute name="title">
+         <string>5. Histogramme de répartition de l'intensité et du z-mouvement</string>
+        </attribute>
+        <layout class="QVBoxLayout" name="verticalLayout_9">
+         <item>
+          <layout class="QHBoxLayout" name="horizontalLayout_25">
+           <item>
+            <widget class="QwtPlot" name="_plotIntensityDistributionHistogram"/>
+           </item>
+           <item>
+            <widget class="QwtPlot" name="_plotZMotionDistributionHistogram"/>
+           </item>
+          </layout>
+         </item>
+         <item>
+          <layout class="QHBoxLayout" name="horizontalLayout_24">
+           <item>
+            <spacer name="horizontalSpacer_5">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>40</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item>
+            <widget class="QPushButton" name="_buttonUpdateIntensityDistributionHistogram">
+             <property name="text">
+              <string>Mettre à jour</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <spacer name="horizontalSpacer_6">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>40</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item>
+            <widget class="QPushButton" name="_buttonUpdateZMotionDistributionHistogram">
+             <property name="text">
+              <string>Mettre à jour</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <spacer name="horizontalSpacer_7">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>40</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+          </layout>
+         </item>
+        </layout>
+       </widget>
       </widget>
      </item>
     </layout>
@@ -2443,26 +2549,26 @@ l'origine du contour</string>
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>QxtSpanSlider</class>
-   <extends>QSlider</extends>
-   <header>QxtSpanSlider</header>
-  </customwidget>
-  <customwidget>
    <class>QwtPolarPlot</class>
    <extends>QFrame</extends>
    <header>qwt_polar_plot.h</header>
    <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>QxtSpanSlider</class>
+   <extends>QSlider</extends>
+   <header>QxtSpanSlider</header>
   </customwidget>
  </customwidgets>
  <tabstops>
   <tabstop>_tabs</tabstop>
   <tabstop>_comboSliceType</tabstop>
   <tabstop>_spinMinIntensity</tabstop>
-  <tabstop>_spansliderIntensityThreshold</tabstop>
+  <tabstop>_spanSliderIntensityThreshold</tabstop>
   <tabstop>_spinMaxIntensity</tabstop>
-  <tabstop>_spinMovementThresholdMin</tabstop>
-  <tabstop>_sliderMovementThresholdInterval</tabstop>
-  <tabstop>_spinMovementThresholdMax</tabstop>
+  <tabstop>_spinMinZMotion</tabstop>
+  <tabstop>_spanSliderZMotionThreshold</tabstop>
+  <tabstop>_spinMaxZMotion</tabstop>
   <tabstop>_comboEdgeDetectionType</tabstop>
   <tabstop>_spinCannyRadiusOfGaussianMask</tabstop>
   <tabstop>_spinCannySigmaOfGaussianMask</tabstop>

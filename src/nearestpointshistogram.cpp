@@ -34,12 +34,13 @@ void NearestPointsHistogram::computeMaximumsAndIntervals( const uint & compariso
 {
 	if ( !this->isEmpty() )
 	{
-		const uint histoSize = this->size();
+		const int histoSize = this->size();
+		const int iComparisonShift = comparisonShift;
 
 		// Calcul du maximum
 		uint minIndex = 0;
 		qreal minVal = (*this)[0];
-		for ( uint i=1 ; i<histoSize ; ++i )
+		for ( int i=1 ; i<histoSize ; ++i )
 		{
 			if ( minVal > (*this)[i] )
 			{
@@ -52,19 +53,13 @@ void NearestPointsHistogram::computeMaximumsAndIntervals( const uint & compariso
 		_maximums[0] = minIndex;
 
 		// Calcul de l'intervalle
-		uint upperIndex, lowerIndex;
-
-//		upperIndex = qMin(histoSize-comparisonShift,minIndex);
-//		while ( upperIndex < histoSize-comparisonShift && ((*this)[upperIndex+comparisonShift] - (*this)[upperIndex]) > comparisonValue ) upperIndex++;
+		int upperIndex, lowerIndex;
 
 		upperIndex = minIndex;
-		while ( upperIndex < histoSize-1 && ((*this)[qMin(upperIndex+comparisonShift,histoSize)] - (*this)[upperIndex]) > comparisonValue ) upperIndex++;
-
-//		lowerIndex = qMax(comparisonShift,minIndex);
-//		while ( lowerIndex >= comparisonShift && (*this)[lowerIndex-comparisonShift] - (*this)[lowerIndex] > comparisonValue ) lowerIndex--;
+		while ( upperIndex < histoSize-1 && ((*this)[qMin(upperIndex+iComparisonShift,histoSize)] - (*this)[upperIndex]) > comparisonValue ) upperIndex++;
 
 		lowerIndex = minIndex;
-		while ( lowerIndex > 0 && (*this)[qMin(lowerIndex-comparisonShift,static_cast<uint>(0))] - (*this)[lowerIndex] > comparisonValue ) lowerIndex--;
+		while ( lowerIndex > 0 && (*this)[qMax(lowerIndex-iComparisonShift,0)] - (*this)[lowerIndex] > comparisonValue ) lowerIndex--;
 
 		_intervals.resize(1);
 		_intervals[0] = Interval<uint>(lowerIndex+1,upperIndex-1);

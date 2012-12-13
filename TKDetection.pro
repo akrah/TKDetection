@@ -65,7 +65,11 @@ SOURCES	=	main.cpp \
 			slicezoomer.cpp \
 			test_intervalshistogram.cpp \
 			v3dexport.cpp \
-    src/plotcontourdistanceshistogram.cpp
+    src/plotcontourdistanceshistogram.cpp \
+    src/intensitydistributionhistogram.cpp \
+    src/plotintensitydistributionhistogram.cpp \
+    src/zmotiondistributionhistogram.cpp \
+    src/plotzmotiondistributionhistogram.cpp
 
 HEADERS	=	billon.h \
 			billonalgorithms.h \
@@ -106,7 +110,11 @@ HEADERS	=	billon.h \
 			slicezoomer.h \
 			test_intervalshistogram.h \
 			v3dexport.h \
-    inc/plotcontourdistanceshistogram.h
+    inc/plotcontourdistanceshistogram.h \
+    inc/intensitydistributionhistogram.h \
+    inc/plotintensitydistributionhistogram.h \
+    inc/zmotiondistributionhistogram.h \
+    inc/plotzmotiondistributionhistogram.h
 
 FORMS =	mainwindow.ui
 

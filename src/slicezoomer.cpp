@@ -45,7 +45,8 @@ bool SliceZoomer::eventFilter(QObject *, QEvent *event)
 				const int wheelDelta = wheelEvent->delta();
 				if ( wheelDelta != 0 )
 				{
-					_zoomFactor += wheelDelta>0 ? _zoomFactor*0.20 : -_zoomFactor*0.20;
+					_zoomFactor += wheelDelta>0 ? 0.10 : -0.10;
+					if ( _zoomFactor<=0 ) _zoomFactor = 0.10;
 					emit zoomFactorChanged(_zoomFactor,wheelEvent->globalPos());
 				}
 			}
