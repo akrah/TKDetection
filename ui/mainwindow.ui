@@ -69,8 +69,40 @@
      </layout>
     </item>
     <item>
-     <layout class="QHBoxLayout" name="horizontalLayout_8">
-      <item>
+     <layout class="QGridLayout" name="gridLayout">
+      <item row="0" column="1">
+       <widget class="QScrollArea" name="_scrollSliceView">
+        <property name="frameShape">
+         <enum>QFrame::NoFrame</enum>
+        </property>
+        <property name="frameShadow">
+         <enum>QFrame::Plain</enum>
+        </property>
+        <property name="lineWidth">
+         <number>0</number>
+        </property>
+        <property name="verticalScrollBarPolicy">
+         <enum>Qt::ScrollBarAlwaysOn</enum>
+        </property>
+        <property name="horizontalScrollBarPolicy">
+         <enum>Qt::ScrollBarAlwaysOn</enum>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
+        </property>
+        <widget class="QWidget" name="scrollAreaWidgetContents">
+         <property name="geometry">
+          <rect>
+           <x>154</x>
+           <y>313</y>
+           <width>0</width>
+           <height>0</height>
+          </rect>
+         </property>
+        </widget>
+       </widget>
+      </item>
+      <item row="0" column="0">
        <widget class="QSlider" name="_sliderSelectYSlice">
         <property name="maximum">
          <number>0</number>
@@ -83,79 +115,20 @@
         </property>
        </widget>
       </item>
-      <item>
-       <widget class="QScrollArea" name="_scrollSliceView">
-        <property name="frameShape">
-         <enum>QFrame::NoFrame</enum>
-        </property>
-        <property name="frameShadow">
-         <enum>QFrame::Plain</enum>
-        </property>
-        <property name="lineWidth">
+      <item row="1" column="1">
+       <widget class="QSlider" name="_sliderSelectSlice">
+        <property name="maximum">
          <number>0</number>
         </property>
-        <property name="verticalScrollBarPolicy">
-         <enum>Qt::ScrollBarAlwaysOff</enum>
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
         </property>
-        <property name="horizontalScrollBarPolicy">
-         <enum>Qt::ScrollBarAlwaysOff</enum>
+        <property name="tickPosition">
+         <enum>QSlider::TicksAbove</enum>
         </property>
-        <property name="widgetResizable">
-         <bool>true</bool>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignCenter</set>
-        </property>
-        <widget class="QWidget" name="scrollAreaWidgetContents">
-         <property name="geometry">
-          <rect>
-           <x>0</x>
-           <y>0</y>
-           <width>325</width>
-           <height>643</height>
-          </rect>
-         </property>
-         <layout class="QHBoxLayout" name="horizontalLayout_21">
-          <property name="margin">
-           <number>0</number>
-          </property>
-          <item>
-           <widget class="QLabel" name="_labelSliceView">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Ignored" vsizetype="Ignored">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="lineWidth">
-             <number>0</number>
-            </property>
-            <property name="text">
-             <string/>
-            </property>
-            <property name="alignment">
-             <set>Qt::AlignCenter</set>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </widget>
        </widget>
       </item>
      </layout>
-    </item>
-    <item>
-     <widget class="QSlider" name="_sliderSelectSlice">
-      <property name="maximum">
-       <number>0</number>
-      </property>
-      <property name="orientation">
-       <enum>Qt::Horizontal</enum>
-      </property>
-      <property name="tickPosition">
-       <enum>QSlider::TicksAbove</enum>
-      </property>
-     </widget>
     </item>
     <item>
      <layout class="QHBoxLayout" name="horizontalLayout_10">
@@ -2631,7 +2604,6 @@ l'origine du contour</string>
   <tabstop>_buttonUpdateSliceHistogram</tabstop>
   <tabstop>_buttonNextMaximum</tabstop>
   <tabstop>_sliderContour</tabstop>
-  <tabstop>_sliderSelectSlice</tabstop>
   <tabstop>_spanSliderSelectInterval</tabstop>
   <tabstop>_buttonMinSlice</tabstop>
   <tabstop>_spinMinSlice</tabstop>

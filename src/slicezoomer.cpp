@@ -6,11 +6,17 @@
 SliceZoomer::SliceZoomer(QObject *parent) : QObject(parent), _isDraging(false), _zoomFactor(1), _pointStartDrag(-1,-1) {
 }
 
-qreal SliceZoomer::factor() const {
+qreal SliceZoomer::factor() const
+{
 	return _zoomFactor;
 }
 
-bool SliceZoomer::eventFilter(QObject *, QEvent *event)
+qreal SliceZoomer::coefficient() const
+{
+	return _zoomCoefficient;
+}
+
+bool SliceZoomer::eventFilter(QObject *obj, QEvent *event)
 {
 	switch ( event->type() )
 	{
@@ -43,16 +49,16 @@ bool SliceZoomer::eventFilter(QObject *, QEvent *event)
 			{
 				const QWheelEvent *wheelEvent = static_cast<const QWheelEvent*>(event);
 				const int wheelDelta = wheelEvent->delta();
-				if ( wheelDelta != 0 )
+				if ( _zoomFactor > 0.1 && wheelDelta != 0 )
 				{
-					_zoomFactor += wheelDelta>0 ? 0.10 : -0.10;
-					if ( _zoomFactor<=0 ) _zoomFactor = 0.10;
-					emit zoomFactorChanged(_zoomFactor,wheelEvent->globalPos());
+					_zoomFactor *= wheelDelta>0 ? ZOOM_COEF_IN : ZOOM_COEF_OUT;
+					_zoomCoefficient = wheelDelta>0 ? ZOOM_COEF_IN : ZOOM_COEF_OUT;
+					emit zoomFactorChanged(_zoomFactor,_zoomCoefficient);
 				}
 			}
 			break;
 		default :
 			break;
 	}
-	return false;
+	return QObject::eventFilter(obj,event);
 }

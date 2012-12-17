@@ -12,6 +12,8 @@ namespace Ui
 	class MainWindow;
 }
 
+class QLabel;
+
 class ContourBillon;
 class CurvatureHistogram;
 class IntensityDistributionHistogram;
@@ -59,7 +61,7 @@ private slots:
 	void setMaximumOfSliceIntervalToCurrentSlice();
 	void previousMaximumInSliceHistogram();
 	void nextMaximumInSliceHistogram();
-	void zoomInSliceView( const qreal &zoomFactor, const QPoint &focalPoint );
+	void zoomInSliceView( const qreal &zoomFactor, const qreal &zoomCoefficient );
 	void dragInSliceView( const QPoint &movementVector );
 	void updateOpticalFlow();
 	void setEdgeDetectionType( const int &type );
@@ -111,6 +113,7 @@ private:
 
 private:
 	Ui::MainWindow *_ui;
+	QLabel *_labelSliceView;
 
 	Billon *_billon;
 	Billon *_componentBillon;

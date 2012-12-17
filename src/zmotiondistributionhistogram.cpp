@@ -11,32 +11,52 @@ ZMotionDistributionHistogram::~ZMotionDistributionHistogram()
 {
 }
 
-void ZMotionDistributionHistogram::construct( const Billon &billon, const Interval<int> &intensityInterval, const Interval<uint> &zMotionInterval, const uint &smoothingRadius )
+void ZMotionDistributionHistogram::construct( const Billon &billon, const Interval<int> &intensityInterval,
+											  const Interval<uint> &zMotionInterval, const uint &smoothingRadius, const int &radiusAroundPith )
 {
-	const uint &width = billon.n_cols;
-	const uint &height = billon.n_rows;
-	const uint &depth = billon.n_slices;
+	const int &width = billon.n_cols;
+	const int &height = billon.n_rows;
+	const int &depth = billon.n_slices;
 	const int &minVal = zMotionInterval.min();
+	const int radiusMax = radiusAroundPith+1;
+	const qreal squareRadius = qPow(radiusAroundPith,2);
 
-	uint i, j, k;
+	int i, j, k, iRadius, iRadiusMax;
 	__billon_type__ zMotion;
+	iCoord2D currentPos;
 
 	clear();
 	resize(zMotionInterval.size()+1);
 
+	QList<int> circleLines;
+	circleLines.reserve(2*radiusAroundPith+1);
+	for ( int lineIndex=-radiusAroundPith ; lineIndex<radiusMax ; ++lineIndex )
+	{
+		circleLines.append(qSqrt(squareRadius-qPow(lineIndex,2)));
+	}
+
 	for ( k=1 ; k<depth ; ++k )
 	{
-		for ( j=0 ; j<height ; ++j )
+		currentPos.y = billon.pithCoord(k).y-radiusAroundPith;
+		for ( j=-radiusAroundPith ; j<radiusMax ; ++j )
 		{
-			for ( i=0 ; i<width ; ++i )
+			iRadius = circleLines[j+radiusAroundPith];
+			iRadiusMax = iRadius+1;
+			currentPos.x = billon.pithCoord(k).x-iRadius;
+			for ( i=-iRadius ; i<iRadiusMax ; ++i )
 			{
-				zMotion = billon.zMotion(j,i,k);
-				if ( intensityInterval.containsClosed(billon.at(j,i,k))
-					 && intensityInterval.containsClosed(billon.at(j,i,k-1))
-					 && zMotionInterval.containsClosed(zMotion)
-				   )
-					++((*this)[zMotion-minVal]);
+				if ( currentPos.x < width && currentPos.y < height )
+				{
+					zMotion = billon.zMotion(currentPos.y,currentPos.x,k);
+					if ( intensityInterval.containsClosed(billon.at(currentPos.y,currentPos.x,k))
+						 && intensityInterval.containsClosed(billon.at(currentPos.y,currentPos.x,k-1))
+						 && zMotionInterval.containsClosed(zMotion)
+						 )
+						++((*this)[zMotion-minVal]);
+				}
+				currentPos.x++;
 			}
+			currentPos.y++;
 		}
 	}
 

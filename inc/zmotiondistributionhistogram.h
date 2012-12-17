@@ -11,7 +11,8 @@ public:
 	virtual ~ZMotionDistributionHistogram();
 
 
-	void construct(const Billon &billon, const Interval<int> &intensityInterval, const Interval<uint> &zMotionInterval, const uint &smoothingRadius );
+	void construct(const Billon &billon, const Interval<int> &intensityInterval,
+				   const Interval<uint> &zMotionInterval, const uint &smoothingRadius, const int &radiusAroundPith );
 };
 
 #endif // ZMOTIONDISTRIBUTIONHISTOGRAM_H

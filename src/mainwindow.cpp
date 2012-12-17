@@ -34,6 +34,7 @@
 #include "inc/v3dreader.h"
 #include "inc/zmotiondistributionhistogram.h"
 
+#include <QLabel>
 #include <QFileDialog>
 #include <QMouseEvent>
 #include <QPainter>
@@ -46,7 +47,7 @@
 #include <qwt_polar_renderer.h>
 #include <qwt_polar_grid.h>
 
-MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::MainWindow), _billon(0), _componentBillon(0), _knotBillon(0),
+MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::MainWindow), _labelSliceView(new QLabel), _billon(0), _componentBillon(0), _knotBillon(0),
 	_sliceView(new SliceView()), _sliceHistogram(new SliceHistogram()), _plotSliceHistogram(new PlotSliceHistogram()),
 	_pieChart(new PieChart(360)), _sectorHistogram(new SectorHistogram()), _plotSectorHistogram(new PlotSectorHistogram()),
 	_nearestPointsHistogram(new NearestPointsHistogram()), _plotNearestPointsHistogram(new PlotNearestPointsHistogram()),
@@ -63,8 +64,13 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 	setWindowTitle("TKDetection");
 
 	// Paramétrisation des composant graphiques
-	_ui->_labelSliceView->installEventFilter(this);
-	_ui->_labelSliceView->installEventFilter(&_sliceZoomer);
+	_labelSliceView->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
+	_labelSliceView->setScaledContents(true);
+	_labelSliceView->installEventFilter(&_sliceZoomer);
+	_labelSliceView->installEventFilter(this);
+
+	_ui->_scrollSliceView->setBackgroundRole(QPalette::Dark);
+	_ui->_scrollSliceView->setWidget(_labelSliceView);
 
 	_ui->_plotSliceHistogram->enableAxis(QwtPlot::yLeft,false);
 	_ui->_plotSectorHistogram->enableAxis(QwtPlot::yLeft,false);
@@ -177,7 +183,7 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 	QObject::connect(_ui->_spinCurvatureWidth, SIGNAL(valueChanged(int)), _ui->_sliderCurvatureWidth, SLOT(setValue(int)));
 
 	// Évènements déclenchés par la souris sur le visualiseur de coupes
-	QObject::connect(&_sliceZoomer, SIGNAL(zoomFactorChanged(qreal,QPoint)), this, SLOT(zoomInSliceView(qreal,QPoint)));
+	QObject::connect(&_sliceZoomer, SIGNAL(zoomFactorChanged(qreal,qreal)), this, SLOT(zoomInSliceView(qreal,qreal)));
 	QObject::connect(&_sliceZoomer, SIGNAL(isMovedFrom(QPoint)), this, SLOT(dragInSliceView(QPoint)));
 
 	// Évènements déclenchés par les boutons relatifs aux intervalles de coupes
@@ -240,7 +246,7 @@ MainWindow::~MainWindow()
 
 bool MainWindow::eventFilter(QObject *obj, QEvent *event)
 {
-	if ( obj == _ui->_labelSliceView && _billon != 0 && _billon->hasPith() )
+	if ( obj == _labelSliceView && _billon != 0 && _billon->hasPith() )
 	{
 		if ( event->type() == QEvent::MouseButtonRelease )
 		{
@@ -327,9 +333,10 @@ void MainWindow::drawSlice()
 		switch (selectedAxe)
 		{
 			case TKD::Y_VIEW : width = _billon->n_cols; height = _billon->n_slices; break;
-			case TKD::Z_VIEW : width = _billon->n_cols; height = _billon->n_rows; break;
-			default : break;
+			case TKD::Z_VIEW :
+			default : width = _billon->n_cols; height = _billon->n_rows; break;
 		}
+
 
 		_mainPix = QImage(width,height,QImage::Format_ARGB32);
 		_mainPix.fill(0xff000000);
@@ -401,7 +408,8 @@ void MainWindow::drawSlice()
 		_mainPix = QImage(1,1,QImage::Format_ARGB32);
 	}
 
-	_ui->_labelSliceView->setPixmap( QPixmap::fromImage(_mainPix).scaled(_sliceZoomer.factor()*_mainPix.size(),Qt::KeepAspectRatio) );
+	_labelSliceView->setPixmap( QPixmap::fromImage(_mainPix) );
+	zoomInSliceView(_sliceZoomer.factor(),_sliceZoomer.coefficient());
 }
 
 void MainWindow::setSlice( const int &sliceNumber )
@@ -552,7 +560,8 @@ void MainWindow::updateZMotionDistributionHistogram()
 	if ( _billon != 0 )
 	{
 		_zMotionDistributionHistogram->construct(*_billon,Interval<int>(_ui->_spinMinIntensity->value(),_ui->_spinMaxIntensity->value()),
-												 Interval<uint>(_ui->_spinMinZMotion->value(),_ui->_spinMaxZMotion->value()),_ui->_spinSmoothingRadiusOfHistogram->value());
+												 Interval<uint>(_ui->_spinMinZMotion->value(),_ui->_spinMaxZMotion->value()),_ui->_spinSmoothingRadiusOfHistogram->value(),
+												 _treeRadius);
 	}
 
 	_plotZMotionDistributionHistogram->update(*_zMotionDistributionHistogram,Interval<uint>(_ui->_spinMinZMotion->value(),_ui->_spinMaxZMotion->value()));
@@ -603,10 +612,13 @@ void MainWindow::nextMaximumInSliceHistogram()
 	}
 }
 
-void MainWindow::zoomInSliceView( const qreal &zoomFactor, const QPoint & /*focalPoint*/ )
+void MainWindow::zoomInSliceView( const qreal &zoomFactor, const qreal &zoomCoefficient )
 {
-	_ui->_labelSliceView->setPixmap(_billon != 0 ? QPixmap::fromImage(_mainPix).scaled(_mainPix.width()*zoomFactor,_mainPix.height()*zoomFactor,Qt::KeepAspectRatio) :
-												   QPixmap::fromImage(_mainPix));
+	_labelSliceView->resize(zoomFactor * _mainPix.size());
+	QScrollBar *hBar = _ui->_scrollSliceView->horizontalScrollBar();
+	hBar->setValue(int(zoomCoefficient * hBar->value() + ((zoomCoefficient - 1) * hBar->pageStep()/2)));
+	QScrollBar *vBar = _ui->_scrollSliceView->verticalScrollBar();
+	vBar->setValue(int(zoomCoefficient * vBar->value() + ((zoomCoefficient - 1) * vBar->pageStep()/2)));
 }
 
 void MainWindow::dragInSliceView( const QPoint &movementVector )
@@ -1017,7 +1029,6 @@ void MainWindow::updateUiComponentsValues()
 		nbSlices = _billon->n_slices-1;
 		height = _billon->n_rows-1;
 		_ui->_labelSliceNumber->setNum(0);
-		_ui->_labelSliceView->resize(_billon->n_cols,_billon->n_rows);
 		_ui->_statusBar->showMessage( tr("Dimensions de voxels (largeur, hauteur, profondeur) : ( %1, %2, %3 )").arg(_billon->voxelWidth()).arg(_billon->voxelHeight())
 									  .arg(_billon->voxelDepth()) );
 	}
@@ -1026,7 +1037,6 @@ void MainWindow::updateUiComponentsValues()
 		minValue = maxValue = 0;
 		nbSlices = height = 0;
 		_ui->_labelSliceNumber->setText(tr("Aucune coupe présente."));
-		_ui->_labelSliceView->resize(0,0);
 		_ui->_statusBar->clearMessage();
 	}
 
