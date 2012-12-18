@@ -62,3 +62,11 @@ bool SliceZoomer::eventFilter(QObject *obj, QEvent *event)
 	}
 	return QObject::eventFilter(obj,event);
 }
+
+void SliceZoomer::resetZoom()
+{
+	_isDraging = false;
+	_zoomCoefficient = _zoomFactor<1. ? ZOOM_COEF_IN*(1./(ZOOM_COEF_IN*_zoomFactor)) : ZOOM_COEF_OUT*(1./(ZOOM_COEF_IN*_zoomFactor));
+	_zoomFactor = 1.;
+	emit zoomFactorChanged(_zoomFactor,_zoomCoefficient);
+}

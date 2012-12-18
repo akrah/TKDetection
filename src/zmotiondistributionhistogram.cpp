@@ -14,6 +14,10 @@ ZMotionDistributionHistogram::~ZMotionDistributionHistogram()
 void ZMotionDistributionHistogram::construct( const Billon &billon, const Interval<int> &intensityInterval,
 											  const Interval<uint> &zMotionInterval, const uint &smoothingRadius, const int &radiusAroundPith )
 {
+	clear();
+
+	if ( !billon.hasPith() ) return;
+
 	const int &width = billon.n_cols;
 	const int &height = billon.n_rows;
 	const int &depth = billon.n_slices;
@@ -25,7 +29,6 @@ void ZMotionDistributionHistogram::construct( const Billon &billon, const Interv
 	__billon_type__ zMotion;
 	iCoord2D currentPos;
 
-	clear();
 	resize(zMotionInterval.size()+1);
 
 	QList<int> circleLines;

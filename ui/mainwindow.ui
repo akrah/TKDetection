@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>867</width>
+    <width>977</width>
     <height>828</height>
    </rect>
   </property>
@@ -17,9 +17,6 @@
    <layout class="QVBoxLayout" name="verticalLayout_5">
     <item>
      <layout class="QHBoxLayout" name="horizontalLayout_3">
-      <property name="topMargin">
-       <number>0</number>
-      </property>
       <item>
        <spacer name="horizontalSpacer">
         <property name="orientation">
@@ -72,6 +69,12 @@
      <layout class="QGridLayout" name="gridLayout">
       <item row="0" column="1">
        <widget class="QScrollArea" name="_scrollSliceView">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Ignored" vsizetype="Ignored">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
         <property name="frameShape">
          <enum>QFrame::NoFrame</enum>
         </property>
@@ -93,7 +96,7 @@
         <widget class="QWidget" name="scrollAreaWidgetContents">
          <property name="geometry">
           <rect>
-           <x>154</x>
+           <x>209</x>
            <y>313</y>
            <width>0</width>
            <height>0</height>
@@ -128,6 +131,16 @@
         </property>
        </widget>
       </item>
+      <item row="1" column="0">
+       <widget class="QToolButton" name="_buttonZoomInitial">
+        <property name="text">
+         <string>+</string>
+        </property>
+        <property name="toolButtonStyle">
+         <enum>Qt::ToolButtonTextOnly</enum>
+        </property>
+       </widget>
+      </item>
      </layout>
     </item>
     <item>
@@ -141,12 +154,6 @@
       </item>
       <item>
        <widget class="QPushButton" name="_buttonMinSlice">
-        <property name="maximumSize">
-         <size>
-          <width>30</width>
-          <height>16777215</height>
-         </size>
-        </property>
         <property name="toolTip">
          <string>Coupe courante</string>
         </property>
@@ -184,12 +191,6 @@
       </item>
       <item>
        <widget class="QPushButton" name="_buttonMaxSlice">
-        <property name="maximumSize">
-         <size>
-          <width>30</width>
-          <height>16777215</height>
-         </size>
-        </property>
         <property name="toolTip">
          <string>Coupe courante</string>
         </property>
@@ -207,7 +208,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>867</width>
+     <width>977</width>
      <height>25</height>
     </rect>
    </property>
@@ -243,7 +244,7 @@
      <item row="0" column="0">
       <widget class="QTabWidget" name="_tabs">
        <property name="currentIndex">
-        <number>0</number>
+        <number>3</number>
        </property>
        <widget class="QWidget" name="_tabAffichage">
         <attribute name="title">
@@ -252,9 +253,6 @@
         <layout class="QVBoxLayout" name="verticalLayout_6">
          <item>
           <layout class="QFormLayout" name="formLayout_12">
-           <property name="bottomMargin">
-            <number>0</number>
-           </property>
            <item row="0" column="0">
             <widget class="QLabel" name="label_23">
              <property name="text">
@@ -632,9 +630,6 @@ zone restreinte</string>
              </item>
              <item row="0" column="1">
               <layout class="QHBoxLayout" name="horizontalLayout_22">
-               <property name="bottomMargin">
-                <number>0</number>
-               </property>
                <item>
                 <widget class="QSpinBox" name="_spinMinZMotion">
                  <property name="font">
@@ -707,9 +702,6 @@ zone restreinte</string>
               <layout class="QFormLayout" name="formLayout_3">
                <property name="fieldGrowthPolicy">
                 <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
-               </property>
-               <property name="bottomMargin">
-                <number>0</number>
                </property>
                <item row="0" column="0">
                 <widget class="QLabel" name="label_8">
@@ -1093,9 +1085,6 @@ au début et à la fin</string>
            </item>
            <item row="1" column="1">
             <layout class="QHBoxLayout" name="horizontalLayout_23">
-             <property name="bottomMargin">
-              <number>0</number>
-             </property>
              <item>
               <widget class="QSlider" name="_sliderBorderPercentageToCut">
                <property name="maximum">
@@ -1342,13 +1331,41 @@ maximum
          </item>
         </layout>
        </widget>
-       <widget class="QWidget" name="_tabProcessus">
+       <widget class="QWidget" name="widget">
         <attribute name="title">
          <string>Processus</string>
         </attribute>
         <layout class="QVBoxLayout" name="verticalLayout_7">
          <item>
-          <layout class="QGridLayout" name="gridLayout_2">
+          <layout class="QFormLayout" name="formLayout_19">
+           <item row="0" column="0">
+            <widget class="QLabel" name="label_11">
+             <property name="text">
+              <string>1. Moelle</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="1">
+            <widget class="QPushButton" name="_buttonComputePith">
+             <property name="text">
+              <string>Calculer la moelle</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="0">
+            <widget class="QLabel" name="label_28">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="text">
+              <string>2. Sélection de
+l'intervalle de coupes</string>
+             </property>
+            </widget>
+           </item>
            <item row="1" column="1">
             <layout class="QHBoxLayout" name="horizontalLayout_15">
              <item>
@@ -1375,39 +1392,11 @@ maximum
              </item>
             </layout>
            </item>
-           <item row="1" column="0">
-            <widget class="QLabel" name="label_28">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="text">
-              <string>2. Sélection de
-l'intervalle de coupes</string>
-             </property>
-            </widget>
-           </item>
            <item row="2" column="0">
             <widget class="QLabel" name="label_4">
              <property name="text">
               <string>3. Sélection de
 l'intervalle angulaire</string>
-             </property>
-            </widget>
-           </item>
-           <item row="0" column="1">
-            <widget class="QPushButton" name="_buttonComputePith">
-             <property name="text">
-              <string>Calculer la moelle</string>
-             </property>
-            </widget>
-           </item>
-           <item row="0" column="0">
-            <widget class="QLabel" name="label_11">
-             <property name="text">
-              <string>1. Moelle</string>
              </property>
             </widget>
            </item>
@@ -1467,9 +1456,6 @@ l'intervalle angulaire</string>
         <layout class="QVBoxLayout" name="verticalLayout_2">
          <item>
           <layout class="QFormLayout" name="formLayout_4">
-           <property name="fieldGrowthPolicy">
-            <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
-           </property>
            <item row="0" column="0">
             <widget class="QLabel" name="label_3">
              <property name="text">
@@ -1583,9 +1569,6 @@ l'intervalle angulaire</string>
             </item>
             <item row="3" column="1">
              <layout class="QHBoxLayout" name="horizontalLayout_5">
-              <property name="bottomMargin">
-               <number>0</number>
-              </property>
               <item>
                <widget class="QSlider" name="_sliderMinimalSizeOf2DConnexComponents">
                 <property name="maximum">
@@ -1847,9 +1830,6 @@ l'origine du contour</string>
             <layout class="QVBoxLayout" name="verticalLayout_15">
              <item>
               <layout class="QFormLayout" name="formLayout_6">
-               <property name="bottomMargin">
-                <number>0</number>
-               </property>
                <item row="0" column="0">
                 <widget class="QLabel" name="label_16">
                  <property name="text">
@@ -1879,9 +1859,6 @@ l'origine du contour</string>
                </item>
                <item row="1" column="1">
                 <layout class="QHBoxLayout" name="horizontalLayout_26">
-                 <property name="bottomMargin">
-                  <number>0</number>
-                 </property>
                  <item>
                   <widget class="QSlider" name="_sliderDatExportContrast">
                    <property name="toolTip">
@@ -1973,12 +1950,6 @@ l'origine du contour</string>
              </item>
              <item>
               <layout class="QFormLayout" name="formLayout_13">
-               <property name="fieldGrowthPolicy">
-                <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
-               </property>
-               <property name="bottomMargin">
-                <number>0</number>
-               </property>
                <item row="0" column="0">
                 <widget class="QLabel" name="label_18">
                  <property name="text">
@@ -2274,6 +2245,9 @@ l'origine du contour</string>
    </widget>
   </widget>
   <widget class="QDockWidget" name="dockWidget">
+   <property name="windowTitle">
+    <string>Histogrammes</string>
+   </property>
    <attribute name="dockWidgetArea">
     <number>2</number>
    </attribute>
@@ -2285,11 +2259,85 @@ l'origine du contour</string>
         <enum>QTabWidget::South</enum>
        </property>
        <property name="currentIndex">
-        <number>4</number>
+        <number>0</number>
        </property>
+       <widget class="QWidget" name="tab_2">
+        <attribute name="title">
+         <string>0. Intensité et Z-mouvement</string>
+        </attribute>
+        <layout class="QVBoxLayout" name="verticalLayout_9">
+         <item>
+          <layout class="QHBoxLayout" name="horizontalLayout_25">
+           <item>
+            <widget class="QwtPlot" name="_plotIntensityDistributionHistogram"/>
+           </item>
+           <item>
+            <widget class="QwtPlot" name="_plotZMotionDistributionHistogram"/>
+           </item>
+          </layout>
+         </item>
+         <item>
+          <layout class="QHBoxLayout" name="horizontalLayout_24">
+           <item>
+            <spacer name="horizontalSpacer_5">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>40</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item>
+            <widget class="QPushButton" name="_buttonUpdateIntensityDistributionHistogram">
+             <property name="text">
+              <string>Mettre à jour</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <spacer name="horizontalSpacer_6">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>40</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item>
+            <widget class="QPushButton" name="_buttonUpdateZMotionDistributionHistogram">
+             <property name="text">
+              <string>Mettre à jour</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <spacer name="horizontalSpacer_7">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>40</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+          </layout>
+         </item>
+        </layout>
+       </widget>
        <widget class="QWidget" name="_tabSliceHistogram">
         <attribute name="title">
-         <string>1. Histogramme de coupes</string>
+         <string>1. Coupes</string>
         </attribute>
         <layout class="QVBoxLayout" name="verticalLayout_17">
          <item>
@@ -2359,7 +2407,7 @@ l'origine du contour</string>
        </widget>
        <widget class="QWidget" name="_tabSectorHistogram">
         <attribute name="title">
-         <string>2. Histogramme de secteurs angulaires</string>
+         <string>2. Secteurs angulaires</string>
         </attribute>
         <layout class="QHBoxLayout" name="horizontalLayout_7">
          <item>
@@ -2382,7 +2430,7 @@ l'origine du contour</string>
        </widget>
        <widget class="QWidget" name="_tabPithDistanceHistogram">
         <attribute name="title">
-         <string>3. Histogramme de distance moelle/nœud</string>
+         <string>3. Distance moelle/nœud</string>
         </attribute>
         <layout class="QGridLayout" name="gridLayout_5">
          <item row="0" column="0">
@@ -2392,7 +2440,7 @@ l'origine du contour</string>
        </widget>
        <widget class="QWidget" name="tab">
         <attribute name="title">
-         <string>4. Histogrammes de contours</string>
+         <string>4. Contours</string>
         </attribute>
         <layout class="QVBoxLayout" name="verticalLayout_19">
          <item>
@@ -2410,80 +2458,6 @@ l'origine du contour</string>
             <enum>Qt::Horizontal</enum>
            </property>
           </widget>
-         </item>
-        </layout>
-       </widget>
-       <widget class="QWidget" name="tab_2">
-        <attribute name="title">
-         <string>5. Histogramme de répartition de l'intensité et du z-mouvement</string>
-        </attribute>
-        <layout class="QVBoxLayout" name="verticalLayout_9">
-         <item>
-          <layout class="QHBoxLayout" name="horizontalLayout_25">
-           <item>
-            <widget class="QwtPlot" name="_plotIntensityDistributionHistogram"/>
-           </item>
-           <item>
-            <widget class="QwtPlot" name="_plotZMotionDistributionHistogram"/>
-           </item>
-          </layout>
-         </item>
-         <item>
-          <layout class="QHBoxLayout" name="horizontalLayout_24">
-           <item>
-            <spacer name="horizontalSpacer_5">
-             <property name="orientation">
-              <enum>Qt::Horizontal</enum>
-             </property>
-             <property name="sizeHint" stdset="0">
-              <size>
-               <width>40</width>
-               <height>20</height>
-              </size>
-             </property>
-            </spacer>
-           </item>
-           <item>
-            <widget class="QPushButton" name="_buttonUpdateIntensityDistributionHistogram">
-             <property name="text">
-              <string>Mettre à jour</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <spacer name="horizontalSpacer_6">
-             <property name="orientation">
-              <enum>Qt::Horizontal</enum>
-             </property>
-             <property name="sizeHint" stdset="0">
-              <size>
-               <width>40</width>
-               <height>20</height>
-              </size>
-             </property>
-            </spacer>
-           </item>
-           <item>
-            <widget class="QPushButton" name="_buttonUpdateZMotionDistributionHistogram">
-             <property name="text">
-              <string>Mettre à jour</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <spacer name="horizontalSpacer_7">
-             <property name="orientation">
-              <enum>Qt::Horizontal</enum>
-             </property>
-             <property name="sizeHint" stdset="0">
-              <size>
-               <width>40</width>
-               <height>20</height>
-              </size>
-             </property>
-            </spacer>
-           </item>
-          </layout>
          </item>
         </layout>
        </widget>
@@ -2599,7 +2573,6 @@ l'origine du contour</string>
   <tabstop>_comboExportToSdpType</tabstop>
   <tabstop>_checkExportSdpOldMethod</tabstop>
   <tabstop>_buttonExportToSDP</tabstop>
-  <tabstop>tabWidget_2</tabstop>
   <tabstop>_buttonPreviousMaximum</tabstop>
   <tabstop>_buttonUpdateSliceHistogram</tabstop>
   <tabstop>_buttonNextMaximum</tabstop>

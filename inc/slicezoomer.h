@@ -20,6 +20,9 @@ public:
 protected:
 	bool eventFilter(QObject *, QEvent *event);
 
+public slots:
+	void resetZoom();
+
 signals:
 	void isMovedFrom( const QPoint &movementVector );
 	void zoomFactorChanged( const qreal &newZoomFactor, const qreal &newZoomCoefficient );

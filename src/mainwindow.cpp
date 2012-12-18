@@ -72,9 +72,6 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 	_ui->_scrollSliceView->setBackgroundRole(QPalette::Dark);
 	_ui->_scrollSliceView->setWidget(_labelSliceView);
 
-	_ui->_plotSliceHistogram->enableAxis(QwtPlot::yLeft,false);
-	_ui->_plotSectorHistogram->enableAxis(QwtPlot::yLeft,false);
-
 	_ui->_comboSliceType->insertItem(TKD::CURRENT,tr("Coupe originale"));
 	_ui->_comboSliceType->insertItem(TKD::MOVEMENT,tr("Coupe de mouvements"));
 	_ui->_comboSliceType->insertItem(TKD::EDGE_DETECTION,tr("Coupe de détection de contours"));
@@ -92,14 +89,13 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 	// Histogrammes
 	_plotSliceHistogram->attach(_ui->_plotSliceHistogram);
 
-	_ui->_plotSectorHistogram->enableAxis(QwtPlot::yLeft,false);
 	_ui->_plotSectorHistogram->setAxisScale(QwtPlot::xBottom,0,TWO_PI);
 	_ui->_polarSectorHistogram->setScale( QwtPolar::Azimuth, TWO_PI, 0.0 );
 	_plotSectorHistogram->attach(_ui->_polarSectorHistogram);
 	_plotSectorHistogram->attach(_ui->_plotSectorHistogram);
 
 	QwtPolarGrid *grid = new QwtPolarGrid();
-	grid->showAxis(QwtPolar::AxisRight,false);
+	//grid->showAxis(QwtPolar::AxisRight,false);
 	grid->showAxis(QwtPolar::AxisBottom,false);
 	grid->setMajorGridPen(QPen(Qt::lightGray));
 	grid->attach(_ui->_polarSectorHistogram);
@@ -112,45 +108,58 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 
 	/**** Mise en place de la communication MVC ****/
 
-	// Évènements déclenchés par le slider de n° de coupe
+	/**********************************
+	 * Évènements sur le widget central
+	 **********************************/
 	QObject::connect(_ui->_sliderSelectSlice, SIGNAL(valueChanged(int)), this, SLOT(setSlice(int)));
 	QObject::connect(_ui->_sliderSelectYSlice, SIGNAL(valueChanged(int)), this, SLOT(setYSlice(int)));
+	QObject::connect(_ui->_buttonZoomInitial, SIGNAL(clicked()), &_sliceZoomer, SLOT(resetZoom()));
+	QObject::connect(_ui->_spinMinSlice, SIGNAL(valueChanged(int)), _ui->_spanSliderSelectInterval, SLOT(setLowerValue(int)));
+	QObject::connect(_ui->_spanSliderSelectInterval, SIGNAL(lowerValueChanged(int)), _ui->_spinMinSlice, SLOT(setValue(int)));
+	QObject::connect(_ui->_buttonMinSlice, SIGNAL(clicked()), this, SLOT(setMinimumOfSliceIntervalToCurrentSlice()));
+	QObject::connect(_ui->_spinMaxSlice, SIGNAL(valueChanged(int)), _ui->_spanSliderSelectInterval, SLOT(setUpperValue(int)));
+	QObject::connect(_ui->_spanSliderSelectInterval, SIGNAL(upperValueChanged(int)), _ui->_spinMaxSlice, SLOT(setValue(int)));
+	QObject::connect(_ui->_buttonMaxSlice, SIGNAL(clicked()), this, SLOT(setMaximumOfSliceIntervalToCurrentSlice()));
+
+	/***********************************
+	* Évènements de l'onglet "Affichage"
+	 ***********************************/
+	QObject::connect(_ui->_comboSliceType, SIGNAL(currentIndexChanged(int)), this, SLOT(setTypeOfView(int)));
+	// Onglet "Paramètres de l'affichage original"
 	QObject::connect(_ui->_radioYView, SIGNAL(clicked()), this, SLOT(drawSlice()));
 	QObject::connect(_ui->_radioZView, SIGNAL(clicked()), this, SLOT(drawSlice()));
-	QObject::connect(_ui->_sliderContour, SIGNAL(valueChanged(int)), this, SLOT(moveContourCursor(int)));
-
-	// Évènements déclenchés par les boutons de sélection de la vue
-	QObject::connect(_ui->_comboSliceType, SIGNAL(currentIndexChanged(int)), this, SLOT(setTypeOfView(int)));
-	QObject::connect(_ui->_spanSliderZMotionThreshold, SIGNAL(lowerValueChanged(int)), _ui->_spinMinZMotion, SLOT(setValue(int)));
-	QObject::connect(_ui->_spinMinZMotion, SIGNAL(valueChanged(int)), _ui->_spanSliderZMotionThreshold, SLOT(setLowerValue(int)));
-	QObject::connect(_ui->_spinMinZMotion, SIGNAL(valueChanged(int)), this, SLOT(drawSlice()));
-	QObject::connect(_ui->_spanSliderZMotionThreshold, SIGNAL(upperValueChanged(int)), _ui->_spinMaxZMotion, SLOT(setValue(int)));
-	QObject::connect(_ui->_spinMaxZMotion, SIGNAL(valueChanged(int)), _ui->_spanSliderZMotionThreshold, SLOT(setUpperValue(int)));
-	QObject::connect(_ui->_spinMaxZMotion, SIGNAL(valueChanged(int)), this, SLOT(drawSlice()));
-	QObject::connect(_ui->_buttonFlowUpdate, SIGNAL(clicked()), this, SLOT(updateOpticalFlow()));
-	QObject::connect(_ui->_comboEdgeDetectionType, SIGNAL(currentIndexChanged(int)), this, SLOT(setEdgeDetectionType(int)));
-	QObject::connect(_ui->_spinCannyRadiusOfGaussianMask, SIGNAL(valueChanged(int)), this, SLOT(setCannyRadiusOfGaussianMask(int)));
-	QObject::connect(_ui->_spinCannySigmaOfGaussianMask, SIGNAL(valueChanged(double)), this, SLOT(setCannySigmaOfGaussianMask(double)));
-	QObject::connect(_ui->_spinCannyMinimumGradient, SIGNAL(valueChanged(int)), this, SLOT(setCannyMinimumGradient(int)));
-	QObject::connect(_ui->_spinCannyMinimumDeviation, SIGNAL(valueChanged(double)), this, SLOT(setCannyMinimumDeviation(double)));
-	QObject::connect(_ui->_sliderRestrictedAreaPercentage, SIGNAL(valueChanged(int)), _ui->_spinRestrictedAreaPercentage, SLOT(setValue(int)));
-	QObject::connect(_ui->_spinRestrictedAreaPercentage, SIGNAL(valueChanged(int)), _ui->_sliderRestrictedAreaPercentage, SLOT(setValue(int)));
-
-	// Évènements déclenchés par le slider de seuillage
 	QObject::connect(_ui->_spanSliderIntensityThreshold, SIGNAL(lowerValueChanged(int)), _ui->_spinMinIntensity, SLOT(setValue(int)));
 	QObject::connect(_ui->_spinMinIntensity, SIGNAL(valueChanged(int)), _ui->_spanSliderIntensityThreshold, SLOT(setLowerValue(int)));
 	QObject::connect(_ui->_spanSliderIntensityThreshold, SIGNAL(upperValueChanged(int)), _ui->_spinMaxIntensity , SLOT(setValue(int)));
 	QObject::connect(_ui->_spinMaxIntensity, SIGNAL(valueChanged(int)), _ui->_spanSliderIntensityThreshold, SLOT(setUpperValue(int)));
 	QObject::connect(_ui->_spinMinIntensity, SIGNAL(valueChanged(int)), this, SLOT(drawSlice()));
 	QObject::connect(_ui->_spinMaxIntensity, SIGNAL(valueChanged(int)), this, SLOT(drawSlice()));
-
-	// Évènements déclenchés par les boutons relatifs à l'histogramme de cumul des intensités
-	QObject::connect(_ui->_buttonUpdateSliceHistogram, SIGNAL(clicked()), this, SLOT(updateSliceHistogram()));
-	QObject::connect(_ui->_buttonPreviousMaximum, SIGNAL(clicked()), this, SLOT(previousMaximumInSliceHistogram()));
-	QObject::connect(_ui->_buttonNextMaximum, SIGNAL(clicked()), this, SLOT(nextMaximumInSliceHistogram()));
+	QObject::connect(_ui->_sliderRestrictedAreaPercentage, SIGNAL(valueChanged(int)), _ui->_spinRestrictedAreaPercentage, SLOT(setValue(int)));
+	QObject::connect(_ui->_spinRestrictedAreaPercentage, SIGNAL(valueChanged(int)), _ui->_sliderRestrictedAreaPercentage, SLOT(setValue(int)));
 	QObject::connect(_ui->_checkRadiusAroundPith, SIGNAL(clicked()), this, SLOT(drawSlice()));
+	// Onglet "Paramètres du mouvement"
+	QObject::connect(_ui->_spanSliderZMotionThreshold, SIGNAL(lowerValueChanged(int)), _ui->_spinMinZMotion, SLOT(setValue(int)));
+	QObject::connect(_ui->_spinMinZMotion, SIGNAL(valueChanged(int)), _ui->_spanSliderZMotionThreshold, SLOT(setLowerValue(int)));
+	QObject::connect(_ui->_spinMinZMotion, SIGNAL(valueChanged(int)), this, SLOT(drawSlice()));
+	QObject::connect(_ui->_spanSliderZMotionThreshold, SIGNAL(upperValueChanged(int)), _ui->_spinMaxZMotion, SLOT(setValue(int)));
+	QObject::connect(_ui->_spinMaxZMotion, SIGNAL(valueChanged(int)), _ui->_spanSliderZMotionThreshold, SLOT(setUpperValue(int)));
+	QObject::connect(_ui->_spinMaxZMotion, SIGNAL(valueChanged(int)), this, SLOT(drawSlice()));
+	// Onglet "Paramètres de détection de contours"
+	QObject::connect(_ui->_comboEdgeDetectionType, SIGNAL(currentIndexChanged(int)), this, SLOT(setEdgeDetectionType(int)));
+	QObject::connect(_ui->_spinCannyRadiusOfGaussianMask, SIGNAL(valueChanged(int)), this, SLOT(setCannyRadiusOfGaussianMask(int)));
+	QObject::connect(_ui->_spinCannySigmaOfGaussianMask, SIGNAL(valueChanged(double)), this, SLOT(setCannySigmaOfGaussianMask(double)));
+	QObject::connect(_ui->_spinCannyMinimumGradient, SIGNAL(valueChanged(int)), this, SLOT(setCannyMinimumGradient(int)));
+	QObject::connect(_ui->_spinCannyMinimumDeviation, SIGNAL(valueChanged(double)), this, SLOT(setCannyMinimumDeviation(double)));
+	// Onglet "Paramètres du flot optique"
+	QObject::connect(_ui->_buttonFlowUpdate, SIGNAL(clicked()), this, SLOT(updateOpticalFlow()));
+
+	/**************************************
+	* Évènements de l'onglet "Histogrammes"
+	***************************************/
 	QObject::connect(_ui->_sliderSmoothingRadiusOfHistogram, SIGNAL(valueChanged(int)), _ui->_spinSmoothingRadiusOfHistogram, SLOT(setValue(int)));
 	QObject::connect(_ui->_spinSmoothingRadiusOfHistogram, SIGNAL(valueChanged(int)), _ui->_sliderSmoothingRadiusOfHistogram, SLOT(setValue(int)));
+	QObject::connect(_ui->_sliderBorderPercentageToCut, SIGNAL(valueChanged(int)), _ui->_spinBorderPercentageToCut, SLOT(setValue(int)));
+	QObject::connect(_ui->_spinBorderPercentageToCut, SIGNAL(valueChanged(int)), _ui->_sliderBorderPercentageToCut, SLOT(setValue(int)));
 	QObject::connect(_ui->_sliderMinimumHeightofMaximum, SIGNAL(valueChanged(int)), _ui->_spinMinimumHeightofMaximum, SLOT(setValue(int)));
 	QObject::connect(_ui->_spinMinimumHeightofMaximum, SIGNAL(valueChanged(int)), _ui->_sliderMinimumHeightofMaximum, SLOT(setValue(int)));
 	QObject::connect(_ui->_sliderMaximumsNeighborhood, SIGNAL(valueChanged(int)), _ui->_spinMaximumsNeighborhood, SLOT(setValue(int)));
@@ -159,19 +168,19 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 	QObject::connect(_ui->_spinDerivativePercentage, SIGNAL(valueChanged(int)), _ui->_sliderDerivativePercentage, SLOT(setValue(int)));
 	QObject::connect(_ui->_sliderHistogramIntervalMinimumWidth, SIGNAL(valueChanged(int)), _ui->_spinHistogramIntervalMinimumWidth, SLOT(setValue(int)));
 	QObject::connect(_ui->_spinHistogramIntervalMinimumWidth, SIGNAL(valueChanged(int)), _ui->_sliderHistogramIntervalMinimumWidth, SLOT(setValue(int)));
-	QObject::connect(_ui->_sliderBorderPercentageToCut, SIGNAL(valueChanged(int)), _ui->_spinBorderPercentageToCut, SLOT(setValue(int)));
-	QObject::connect(_ui->_spinBorderPercentageToCut, SIGNAL(valueChanged(int)), _ui->_sliderBorderPercentageToCut, SLOT(setValue(int)));
-	QObject::connect(_ui->_buttonUpdateIntensityDistributionHistogram, SIGNAL(clicked()), this, SLOT(updateIntensityDistributionHistogram()));
-	QObject::connect(_ui->_buttonUpdateZMotionDistributionHistogram, SIGNAL(clicked()), this, SLOT(updateZMotionDistributionHistogram()));
 
-	// Évènements déclenchés par les bouton associès à la moelle
+	/***********************************
+	* Évènements de l'onglet "Processus"
+	************************************/
 	QObject::connect(_ui->_buttonComputePith, SIGNAL(clicked()), this, SLOT(updatePith()));
-
-	// Évènements déclenchés par les bouton associès aux histogrammes de secteurs
 	QObject::connect(_ui->_comboSelectSliceInterval, SIGNAL(currentIndexChanged(int)), this, SLOT(selectSliceInterval(int)));
 	QObject::connect(_ui->_buttonSelectSliceIntervalUpdate, SIGNAL(clicked()), this, SLOT(selectCurrentSliceInterval()));
 	QObject::connect(_ui->_comboSelectSectorInterval, SIGNAL(currentIndexChanged(int)), this, SLOT(selectSectorInterval(int)));
 	QObject::connect(_ui->_buttonSelectSectorIntervalUpdate, SIGNAL(clicked()), this, SLOT(selectCurrentSectorInterval()));
+
+	/**************************************
+	* Évènements de l'onglet "Segmentation"
+	***************************************/
 	QObject::connect(_ui->_sliderSectorThresholding, SIGNAL(valueChanged(int)), _ui->_spinSectorThresholding, SLOT(setValue(int)));
 	QObject::connect(_ui->_spinSectorThresholding, SIGNAL(valueChanged(int)), _ui->_sliderSectorThresholding, SLOT(setValue(int)));
 	QObject::connect(_ui->_sliderMinimalSizeOf3DConnexComponents, SIGNAL(valueChanged(int)), _ui->_spinMinimalSizeOf3DConnexComponents, SLOT(setValue(int)));
@@ -179,33 +188,43 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 	QObject::connect(_ui->_sliderMinimalSizeOf2DConnexComponents, SIGNAL(valueChanged(int)), _ui->_spinMinimalSizeOf2DConnexComponents, SLOT(setValue(int)));
 	QObject::connect(_ui->_spinMinimalSizeOf2DConnexComponents, SIGNAL(valueChanged(int)), _ui->_sliderMinimalSizeOf2DConnexComponents, SLOT(setValue(int)));
 	QObject::connect(_ui->_spinContourSmoothingRadius, SIGNAL(valueChanged(int)), this, SLOT(drawSlice()));
+	QObject::connect(_ui->_spinBlurredSegmentsThickness, SIGNAL(valueChanged(int)), this, SLOT(drawSlice()));
 	QObject::connect(_ui->_sliderCurvatureWidth, SIGNAL(valueChanged(int)), _ui->_spinCurvatureWidth, SLOT(setValue(int)));
 	QObject::connect(_ui->_spinCurvatureWidth, SIGNAL(valueChanged(int)), _ui->_sliderCurvatureWidth, SLOT(setValue(int)));
 
-	// Évènements déclenchés par la souris sur le visualiseur de coupes
-	QObject::connect(&_sliceZoomer, SIGNAL(zoomFactorChanged(qreal,qreal)), this, SLOT(zoomInSliceView(qreal,qreal)));
-	QObject::connect(&_sliceZoomer, SIGNAL(isMovedFrom(QPoint)), this, SLOT(dragInSliceView(QPoint)));
-
-	// Évènements déclenchés par les boutons relatifs aux intervalles de coupes
-	QObject::connect(_ui->_spinMinSlice, SIGNAL(valueChanged(int)), _ui->_spanSliderSelectInterval, SLOT(setLowerValue(int)));
-	QObject::connect(_ui->_spanSliderSelectInterval, SIGNAL(lowerValueChanged(int)), _ui->_spinMinSlice, SLOT(setValue(int)));
-	QObject::connect(_ui->_buttonMinSlice, SIGNAL(clicked()), this, SLOT(setMinimumOfSliceIntervalToCurrentSlice()));
-	QObject::connect(_ui->_spinMaxSlice, SIGNAL(valueChanged(int)), _ui->_spanSliderSelectInterval, SLOT(setUpperValue(int)));
-	QObject::connect(_ui->_spanSliderSelectInterval, SIGNAL(upperValueChanged(int)), _ui->_spinMaxSlice, SLOT(setValue(int)));
-	QObject::connect(_ui->_buttonMaxSlice, SIGNAL(clicked()), this, SLOT(setMaximumOfSliceIntervalToCurrentSlice()));
-	QObject::connect(_ui->_spinBlurredSegmentsThickness, SIGNAL(valueChanged(int)), this, SLOT(drawSlice()));
-
-	// Export
+	/********************************
+	* Évènements de l'onglet "Export"
+	*********************************/
+	QObject::connect(_ui->_buttonExportHistograms, SIGNAL(clicked()), this, SLOT(exportHistograms()));
 	QObject::connect(_ui->_sliderDatExportContrast, SIGNAL(valueChanged(int)), _ui->_spinDatExportContrast, SLOT(setValue(int)));
 	QObject::connect(_ui->_spinDatExportContrast, SIGNAL(valueChanged(int)), _ui->_sliderDatExportContrast, SLOT(setValue(int)));
 	QObject::connect(_ui->_buttonExportToDat, SIGNAL(clicked()), this, SLOT(exportToDat()));
 	QObject::connect(_ui->_buttonExportToOfs, SIGNAL(clicked()), this, SLOT(exportToOfs()));
-	QObject::connect(_ui->_buttonExportHistograms, SIGNAL(clicked()), this, SLOT(exportHistograms()));
-	QObject::connect(_ui->_buttonExportToSDP, SIGNAL(clicked()), this, SLOT(exportToSdp()));
 	QObject::connect(_ui->_sliderPgm3dExportContrast, SIGNAL(valueChanged(int)), _ui->_spinPgm3dExportContrast, SLOT(setValue(int)));
 	QObject::connect(_ui->_spinPgm3dExportContrast, SIGNAL(valueChanged(int)), _ui->_sliderPgm3dExportContrast, SLOT(setValue(int)));
 	QObject::connect(_ui->_buttonExportToPgm3d, SIGNAL(clicked()), this, SLOT(exportToPgm3D()));
 	QObject::connect(_ui->_buttonExportToV3D, SIGNAL(clicked()), this, SLOT(exportToV3D()));
+	QObject::connect(_ui->_buttonExportToSDP, SIGNAL(clicked()), this, SLOT(exportToSdp()));
+
+	/*************************************
+	* Évènements du panneau "Histogrammes"
+	**************************************/
+	// Onglet "0. Intensité et z-mouvement"
+	QObject::connect(_ui->_buttonUpdateIntensityDistributionHistogram, SIGNAL(clicked()), this, SLOT(updateIntensityDistributionHistogram()));
+	QObject::connect(_ui->_buttonUpdateZMotionDistributionHistogram, SIGNAL(clicked()), this, SLOT(updateZMotionDistributionHistogram()));
+	// Onglet "1. Coupes"
+	QObject::connect(_ui->_buttonPreviousMaximum, SIGNAL(clicked()), this, SLOT(previousMaximumInSliceHistogram()));
+	QObject::connect(_ui->_buttonNextMaximum, SIGNAL(clicked()), this, SLOT(nextMaximumInSliceHistogram()));
+	QObject::connect(_ui->_buttonUpdateSliceHistogram, SIGNAL(clicked()), this, SLOT(updateSliceHistogram()));
+	// Onglet "4. Contours"
+	QObject::connect(_ui->_sliderContour, SIGNAL(valueChanged(int)), this, SLOT(moveContourCursor(int)));
+
+	/*******************
+	* Évènements du zoom
+	********************/
+	QObject::connect(&_sliceZoomer, SIGNAL(zoomFactorChanged(qreal,qreal)), this, SLOT(zoomInSliceView(qreal,qreal)));
+	QObject::connect(&_sliceZoomer, SIGNAL(isMovedFrom(QPoint)), this, SLOT(dragInSliceView(QPoint)));
+
 
 	// Raccourcis des actions du menu
 	_ui->_actionOpenDicom->setShortcut(Qt::CTRL + Qt::Key_O);
@@ -276,13 +295,15 @@ void MainWindow::openDicom()
 	if ( !folderName.isEmpty() )
 	{
 		closeImage();
-		openNewBillon(folderName);
+
+		_billon = DicomReader::read(folderName);
+		_mainPix = _billon != 0 ? QImage(_billon->n_cols, _billon->n_rows,QImage::Format_ARGB32) : QImage(0,0,QImage::Format_ARGB32);
 		updateUiComponentsValues();
-		updateSliceHistogram();
-		//updateIntensityDistributionHistogram();
-		//updateZMotionDistributionHistogram();
-		drawSlice();
+		enabledComponents();
+
 		setWindowTitle(QString("TKDetection - %1").arg(folderName.section(QDir::separator(),-1)));
+
+		drawSlice();
 	}
 }
 
@@ -316,8 +337,15 @@ void MainWindow::closeImage()
 	_plotSectorHistogram->update(*_sectorHistogram,*_pieChart);
 	_ui->_plotSectorHistogram->replot();
 	_ui->_polarSectorHistogram->replot();
+
+	_nearestPointsHistogram->clear();
+	_plotNearestPointsHistogram->update(*_nearestPointsHistogram);
+	_ui->_plotNearestPointsHistogram->replot();
+
 	selectSectorInterval(0);
 	updateUiComponentsValues();
+	enabledComponents();
+
 	drawSlice();
 	setWindowTitle("TKDetection");
 }
@@ -1020,17 +1048,16 @@ void MainWindow::initComponentsValues() {
 void MainWindow::updateUiComponentsValues()
 {
 	int minValue, maxValue, nbSlices, height;
-	const bool existBillon = (_billon != 0);
 
-	if ( existBillon )
+	if ( _billon )
 	{
 		minValue = _billon->minValue();
 		maxValue = _billon->maxValue();
 		nbSlices = _billon->n_slices-1;
 		height = _billon->n_rows-1;
 		_ui->_labelSliceNumber->setNum(0);
-		_ui->_statusBar->showMessage( tr("Dimensions de voxels (largeur, hauteur, profondeur) : ( %1, %2, %3 )").arg(_billon->voxelWidth()).arg(_billon->voxelHeight())
-									  .arg(_billon->voxelDepth()) );
+		_ui->_statusBar->showMessage( tr("Dimensions de voxels (largeur, hauteur, profondeur) : ( %1, %2, %3 )")
+									  .arg(_billon->voxelWidth()).arg(_billon->voxelHeight()).arg(_billon->voxelDepth()) );
 	}
 	else
 	{
@@ -1040,18 +1067,11 @@ void MainWindow::updateUiComponentsValues()
 		_ui->_statusBar->clearMessage();
 	}
 
-	_ui->_spanSliderIntensityThreshold->setMinimum(minValue);
-	_ui->_spanSliderIntensityThreshold->setLowerValue(MINIMUM_INTENSITY);
-	_ui->_spanSliderIntensityThreshold->setMaximum(maxValue);
-	_ui->_spanSliderIntensityThreshold->setUpperValue(MAXIMUM_INTENSITY);
+	_ui->_sliderSelectSlice->setValue(0);
+	_ui->_sliderSelectSlice->setRange(0,nbSlices);
 
-	_ui->_spinMinIntensity->setMinimum(minValue);
-	_ui->_spinMinIntensity->setMaximum(maxValue);
-	_ui->_spinMinIntensity->setValue(MINIMUM_INTENSITY);
-
-	_ui->_spinMaxIntensity->setMinimum(minValue);
-	_ui->_spinMaxIntensity->setMaximum(maxValue);
-	_ui->_spinMaxIntensity->setValue(MAXIMUM_INTENSITY);
+	_ui->_sliderSelectYSlice->setValue(0);
+	_ui->_sliderSelectYSlice->setRange(0,height);
 
 	_ui->_spinMinSlice->setMinimum(0);
 	_ui->_spinMinSlice->setMaximum(nbSlices);
@@ -1066,15 +1086,20 @@ void MainWindow::updateUiComponentsValues()
 	_ui->_spanSliderSelectInterval->setLowerValue(0);
 	_ui->_spanSliderSelectInterval->setUpperValue(nbSlices);
 
-	_ui->_sliderSelectSlice->setValue(0);
-	_ui->_sliderSelectSlice->setRange(0,nbSlices);
+	_ui->_spinMinIntensity->setMinimum(minValue);
+	_ui->_spinMinIntensity->setMaximum(maxValue);
+	_ui->_spinMinIntensity->setValue(MINIMUM_INTENSITY);
 
-	_ui->_sliderSelectYSlice->setValue(0);
-	_ui->_sliderSelectYSlice->setRange(0,height);
+	_ui->_spinMaxIntensity->setMinimum(minValue);
+	_ui->_spinMaxIntensity->setMaximum(maxValue);
+	_ui->_spinMaxIntensity->setValue(MAXIMUM_INTENSITY);
+
+	_ui->_spanSliderIntensityThreshold->setMinimum(minValue);
+	_ui->_spanSliderIntensityThreshold->setLowerValue(MINIMUM_INTENSITY);
+	_ui->_spanSliderIntensityThreshold->setMaximum(maxValue);
+	_ui->_spanSliderIntensityThreshold->setUpperValue(MAXIMUM_INTENSITY);
 
 	_ui->_checkRadiusAroundPith->setText( QString::number(_treeRadius) );
-
-	enabledComponents();
 }
 
 void MainWindow::enabledComponents()
