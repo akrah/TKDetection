@@ -285,10 +285,11 @@ void MainWindow::openDicom()
 	QString folderName = QFileDialog::getExistingDirectory(0,tr("Sélection du répertoire DICOM"),QDir::homePath(),QFileDialog::ShowDirsOnly);
 	if ( !folderName.isEmpty() )
 	{
-		closeImage();
+		Billon *billon = DicomReader::read(folderName);
+		if ( billon == 0 ) return;
 
-		_billon = DicomReader::read(folderName);
-		_mainPix = _billon != 0 ? QImage(_billon->n_cols, _billon->n_rows,QImage::Format_ARGB32) : QImage(0,0,QImage::Format_ARGB32);
+		closeImage();
+		_billon = billon;
 		updateUiComponentsValues();
 		enabledComponents();
 

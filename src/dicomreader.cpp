@@ -23,14 +23,8 @@ namespace DicomReader
 
 	Billon* read( const QString &repository )
 	{
-
 		Billon* cube = makeBillonFromDicomWithITK( repository );
-
-		if ( cube == 0 )
-		{
-			qWarning() << QObject::tr("ERREUR : Impossible de lire le contenu du répertoire.");
-		}
-
+		if ( !cube ) qWarning() << QObject::tr("ERREUR : Impossible de lire le contenu du répertoire.");
 		return cube;
 	}
 
