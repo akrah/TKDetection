@@ -63,12 +63,6 @@ private slots:
 	void nextMaximumInSliceHistogram();
 	void zoomInSliceView( const qreal &zoomFactor, const qreal &zoomCoefficient );
 	void dragInSliceView( const QPoint &movementVector );
-	void updateOpticalFlow();
-	void setEdgeDetectionType( const int &type );
-	void setCannyRadiusOfGaussianMask( const int &radius );
-	void setCannySigmaOfGaussianMask( const double &sigma );
-	void setCannyMinimumGradient( const int &minimumGradient );
-	void setCannyMinimumDeviation( const double &minimumDeviation );
 	void selectSliceInterval( const int &index );
 	void selectCurrentSliceInterval();
 	void selectSectorInterval( const int &index, const bool &draw = true );

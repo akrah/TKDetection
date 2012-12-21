@@ -11,9 +11,7 @@
 #include <QPainter>
 #include <QVector2D>
 
-SliceView::SliceView() : _sliceType(TKD::CURRENT),
-	_flowAlpha(FLOW_ALPHA_DEFAULT), _flowEpsilon(FLOW_EPSILON_DEFAULT), _flowMaximumIterations(FLOW_MAXIMUM_ITERATIONS),
-	_typeOfEdgeDetection(TKD::SOBEL), _cannyRadiusOfGaussianMask(2), _cannySigmaOfGaussianMask(2), _cannyMinimumGradient(100.), _cannyMinimumDeviation(0.9)
+SliceView::SliceView()
 {
 }
 
@@ -21,75 +19,14 @@ SliceView::SliceView() : _sliceType(TKD::CURRENT),
  * Public setters
  *******************************/
 
-void SliceView::setTypeOfView( const TKD::SliceType &type )
-{
-	if ( type > TKD::_SLICE_TYPE_MIN_ && type < TKD::_SLICE_TYPE_MAX_ )
-	{
-		_sliceType = type;
-	}
-}
-
-qreal SliceView::flowAlpha() const
-{
-	return _flowAlpha;
-}
-
-qreal SliceView::flowEpsilon() const
-{
-	return _flowEpsilon;
-}
-
-int SliceView::flowMaximumIterations() const
-{
-	return _flowMaximumIterations;
-}
-
-void SliceView::setFlowAlpha( const qreal &alpha )
-{
-	_flowAlpha = alpha;
-}
-
-void SliceView::setFlowEpsilon( const qreal &epsilon )
-{
-	_flowEpsilon = epsilon;
-}
-
-void SliceView::setFlowMaximumIterations( const int &maxIter )
-{
-	_flowMaximumIterations = maxIter;
-}
-
-void SliceView::setEdgeDetectionType( const TKD::EdgeDetectionType &type )
-{
-	if ( type > TKD::_EDGE_DETECTION_MIN_ && type < TKD::_EDGE_DETECTION_MAX_ )
-	{
-		_typeOfEdgeDetection = type;
-	}
-}
-
-void SliceView::setRadiusOfGaussianMask( const int &radius ) {
-	_cannyRadiusOfGaussianMask = radius;
-}
-
-void SliceView::setSigmaOfGaussianMask( const qreal &sigma ) {
-	_cannySigmaOfGaussianMask = sigma;
-}
-
-void SliceView::setCannyMinimumGradient( const qreal &minimumGradient ) {
-	_cannyMinimumGradient = minimumGradient;
-}
-
-void SliceView::setCannyMinimumDeviation( const qreal &minimumDeviation ) {
-	_cannyMinimumDeviation = minimumDeviation;
-}
-
-void SliceView::drawSlice( QImage &image, const Billon &billon, const iCoord2D &center, const uint &sliceIndex, const Interval<int> &intensityInterval,
-						   const Interval<int> &motionInterval, const TKD::ViewType &axe )
+void SliceView::drawSlice(QImage &image, const Billon &billon, const TKD::SliceType &sliceType, const iCoord2D &center, const uint &sliceIndex, const Interval<int> &intensityInterval,
+						   const Interval<int> &motionInterval, const TKD::ViewType &axe, const TKD::OpticalFlowParameters &opticalFlowParameters,
+						  const TKD::EdgeDetectionParameters &edgeDetectionParameters )
 {
 	switch (axe)
 	{
 		case TKD::Y_VIEW:
-			switch (_sliceType)
+			switch (sliceType)
 			{
 				case TKD::MOVEMENT :
 					drawMovementSlice( image, billon, sliceIndex, intensityInterval, motionInterval, axe );
@@ -102,7 +39,7 @@ void SliceView::drawSlice( QImage &image, const Billon &billon, const iCoord2D &
 		case TKD::Z_VIEW:
 			if ( sliceIndex < billon.n_slices )
 			{
-				switch (_sliceType)
+				switch (sliceType)
 				{
 					// Affichage de la coupe de mouvements
 					case TKD::MOVEMENT :
@@ -110,11 +47,11 @@ void SliceView::drawSlice( QImage &image, const Billon &billon, const iCoord2D &
 						break;
 						// Affichage de la coupe de détection de mouvements
 					case TKD::EDGE_DETECTION :
-						drawEdgeDetectionSlice( image, billon, center, sliceIndex, intensityInterval );
+						drawEdgeDetectionSlice( image, billon, center, sliceIndex, intensityInterval, edgeDetectionParameters );
 						break;
 						// Affichage de la coupe de flot optique
 					case TKD::FLOW :
-						drawFlowSlice( image, billon, sliceIndex );
+						drawFlowSlice( image, billon, sliceIndex, opticalFlowParameters );
 						break;
 						// Affichage de la coupe originale
 					case TKD::CURRENT:
@@ -172,7 +109,8 @@ void SliceView::drawCurrentSlice( QImage &image, const Billon &billon, const uin
 	}
 }
 
-void SliceView::drawMovementSlice( QImage &image, const Billon &billon, const uint &sliceIndex, const Interval<int> &intensityInterval, const Interval<int> &motionInterval, const TKD::ViewType &axe )
+void SliceView::drawMovementSlice( QImage &image, const Billon &billon, const uint &sliceIndex, const Interval<int> &intensityInterval,
+								   const Interval<int> &motionInterval, const TKD::ViewType &axe )
 {
 	const uint &width = billon.n_cols;
 	const qreal fact = 255./motionInterval.width();
@@ -225,7 +163,8 @@ void SliceView::drawMovementSlice( QImage &image, const Billon &billon, const ui
 	}
 }
 
-void SliceView::drawEdgeDetectionSlice( QImage &image, const Billon &billon, const iCoord2D &center, const uint &sliceIndex, const Interval<int> &intensityInterval )
+void SliceView::drawEdgeDetectionSlice(QImage &image, const Billon &billon, const iCoord2D &center, const uint &sliceIndex,
+									   const Interval<int> &intensityInterval , const TKD::EdgeDetectionParameters &edgeDetectionParameters)
 {
 	const Slice &slice = billon.slice(sliceIndex);
 	const int width = slice.n_cols;
@@ -245,14 +184,14 @@ void SliceView::drawEdgeDetectionSlice( QImage &image, const Billon &billon, con
 	gradientMat.fill(0);
 	arma::Mat<qreal> directionMat(billon.n_rows,billon.n_cols);
 	directionMat.fill(0);
-	const qreal radius = _cannyRadiusOfGaussianMask;
+	const qreal radius = edgeDetectionParameters.radiusOfGaussianMask;
 	const qreal diameter = 2*radius+1;
-	const qreal sigma = _cannySigmaOfGaussianMask;
+	const qreal sigma = edgeDetectionParameters.sigmaOfGaussianMask;
 	const qreal sigmaDiv = 2*sigma*sigma;
 	qreal gaussianFactor, e, cannyValue, gx, gy, grad, distX, distY;
 	QPainter painter;
 
-	switch (_typeOfEdgeDetection) {
+	switch (edgeDetectionParameters.type) {
 		case TKD::SOBEL :
 			// Gaussian filter construction
 			gaussianMask.resize(2*radius+1,2*radius+1);
@@ -296,8 +235,10 @@ void SliceView::drawEdgeDetectionSlice( QImage &image, const Billon &billon, con
 				for ( i=1 ; i<width-1 ; i++)
 				{
 					gx = gy = qMax(qMin(gaussianMat.at(j-1,i-1),maxValue),minValue) - qMax(qMin(gaussianMat.at(j+1,i+1),maxValue),minValue);
-					gx += 2.*qMax(qMin(gaussianMat.at(j,i-1),maxValue),minValue) + qMax(qMin(gaussianMat.at(j+1,i-1),maxValue),minValue) - qMax(qMin(gaussianMat.at(j-1,i+1),maxValue),minValue) - 2.*qMax(qMin(gaussianMat.at(j,i+1),maxValue),minValue);
-					gy += 2.*qMax(qMin(gaussianMat.at(j-1,i),maxValue),minValue) + qMax(qMin(gaussianMat.at(j-1,i+1),maxValue),minValue) - qMax(qMin(gaussianMat.at(j+1,i-1),maxValue),minValue) - 2.*qMax(qMin(gaussianMat.at(j+1,i),maxValue),minValue);
+					gx += 2.*qMax(qMin(gaussianMat.at(j,i-1),maxValue),minValue) + qMax(qMin(gaussianMat.at(j+1,i-1),maxValue),minValue)
+						  - qMax(qMin(gaussianMat.at(j-1,i+1),maxValue),minValue) - 2.*qMax(qMin(gaussianMat.at(j,i+1),maxValue),minValue);
+					gy += 2.*qMax(qMin(gaussianMat.at(j-1,i),maxValue),minValue) + qMax(qMin(gaussianMat.at(j-1,i+1),maxValue),minValue)
+						  - qMax(qMin(gaussianMat.at(j+1,i-1),maxValue),minValue) - 2.*qMax(qMin(gaussianMat.at(j+1,i),maxValue),minValue);
 					gNorme = qSqrt(gx*gx+gy*gy);
 					color = qBound(0.,gNorme*fact,255.);
 					*(line++) = qRgb(color,color,color);
@@ -314,9 +255,11 @@ void SliceView::drawEdgeDetectionSlice( QImage &image, const Billon &billon, con
 				for ( i=1 ; i<width-1 ; i++)
 				{
 					color = qBound(0,
-								   static_cast<int>(-6*qMax(qMin(slice.at(j,i),maxValue),minValue) + qMax(qMin(slice.at(j-1,i),maxValue),minValue) + qMax(qMin(slice.at(j+1,i),maxValue),minValue) +
+								   static_cast<int>(-6*qMax(qMin(slice.at(j,i),maxValue),minValue) + qMax(qMin(slice.at(j-1,i),maxValue),minValue)
+													+ qMax(qMin(slice.at(j+1,i),maxValue),minValue) +
 								   qMax(qMin(slice.at(j,i-1),maxValue),minValue) + qMax(qMin(slice.at(j,i+1),maxValue),minValue) + 0.5*qMax(qMin(slice.at(j+1,i+1),maxValue),minValue) +
-								   0.5*qMax(qMin(slice.at(j+1,i-1),maxValue),minValue) + 0.5*qMax(qMin(slice.at(j-1,i+1),maxValue),minValue) + 0.5*qMax(qMin(slice.at(j-1,i-1),maxValue),minValue)),
+								   0.5*qMax(qMin(slice.at(j+1,i-1),maxValue),minValue) + 0.5*qMax(qMin(slice.at(j-1,i+1),maxValue),minValue)
+													+ 0.5*qMax(qMin(slice.at(j-1,i-1),maxValue),minValue)),
 								   255);
 					*(line++) = qRgb(color,color,color);
 				}
@@ -373,7 +316,9 @@ void SliceView::drawEdgeDetectionSlice( QImage &image, const Billon &billon, con
 					grad = gradientMat.at(j,i);
 					distX = qCos(directionMat.at(j,i));
 					distY = qSin(directionMat.at(j,i));
-					if ( grad > _cannyMinimumGradient && qAbs(qSqrt((center.x-i)*(center.x-i) + (center.y-j)*(center.y-j)) - qSqrt((center.x-i-distX)*(center.x-i-distX) + (center.y-j-distY)*(center.y-j-distY))) > _cannyMinimumDeviation ) {
+					if ( grad > edgeDetectionParameters.minimumGradient &&
+						 qAbs(qSqrt((center.x-i)*(center.x-i) + (center.y-j)*(center.y-j)) -
+							  qSqrt((center.x-i-distX)*(center.x-i-distX) + (center.y-j-distY)*(center.y-j-distY))) > edgeDetectionParameters.minimumDeviation ) {
 						//painter.drawLine(i,j,i+distX,j+distY);
 						painter.drawPoint(i,j);
 					}
@@ -385,9 +330,9 @@ void SliceView::drawEdgeDetectionSlice( QImage &image, const Billon &billon, con
 	}
 }
 
-void SliceView::drawFlowSlice( QImage &image, const Billon &billon, const uint &sliceIndex )
+void SliceView::drawFlowSlice( QImage &image, const Billon &billon, const uint &sliceIndex, const TKD::OpticalFlowParameters &opticalFlowParameters )
 {
-	VectorsField *field = OpticalFlow::compute(billon,sliceIndex,_flowAlpha,_flowEpsilon,_flowMaximumIterations);
+	VectorsField *field = OpticalFlow::compute(billon,sliceIndex,opticalFlowParameters.alpha,opticalFlowParameters.epsilon,opticalFlowParameters.maximumIterations);
 
 	QRgb * line =(QRgb *) image.bits();
 	qreal angle, norme;

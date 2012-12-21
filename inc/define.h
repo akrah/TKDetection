@@ -1,6 +1,8 @@
 #ifndef DEFINE_H
 #define DEFINE_H
 
+#include <QtGlobal>
+
 namespace TKD
 {
 /*************************************
@@ -103,6 +105,32 @@ namespace TKD
 		Z_VIEW,
 		_VIEW_TYPE_MAX_
 	};
+
+/*************************************
+ * Enumerations
+ *************************************/
+
+	struct OpticalFlowParameters
+	{
+		qreal alpha;
+		qreal epsilon;
+		int maximumIterations;
+		OpticalFlowParameters( const qreal &alpha, const qreal &epsilon, const qreal &maximumIterations ) :
+			alpha(alpha), epsilon(epsilon), maximumIterations(maximumIterations) {}
+	};
+
+	struct EdgeDetectionParameters
+	{
+		EdgeDetectionType type;
+		int radiusOfGaussianMask;
+		qreal sigmaOfGaussianMask;
+		qreal minimumGradient;
+		qreal minimumDeviation;
+		EdgeDetectionParameters( const EdgeDetectionType &type,  const int &radiusOfGaussianMask,  const qreal &sigmaOfGaussianMask,
+								 const qreal &minimumGradient,  const qreal &minimumDeviation ) :
+			type(type), radiusOfGaussianMask(radiusOfGaussianMask),	sigmaOfGaussianMask(sigmaOfGaussianMask), minimumGradient(minimumGradient), minimumDeviation(minimumDeviation) {}
+	};
+
 }
 
 #endif // DEFINE_H

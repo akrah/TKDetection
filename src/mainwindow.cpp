@@ -57,10 +57,6 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 	_contourBillon(new ContourBillon()), _currentSlice(0), _currentYSlice(0), _currentMaximum(0), _currentSector(0), _treeRadius(0)
 {
 	_ui->setupUi(this);
-//	setCorner(Qt::TopLeftCorner,Qt::LeftDockWidgetArea);
-//	setCorner(Qt::TopRightCorner,Qt::RightDockWidgetArea);
-//	setCorner(Qt::BottomLeftCorner,Qt::LeftDockWidgetArea);
-//	setCorner(Qt::BottomRightCorner,Qt::RightDockWidgetArea);
 	setWindowTitle("TKDetection");
 
 	// Paramétrisation des composant graphiques
@@ -72,19 +68,15 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 	_ui->_scrollSliceView->setBackgroundRole(QPalette::Dark);
 	_ui->_scrollSliceView->setWidget(_labelSliceView);
 
-	_ui->_comboSliceType->insertItem(TKD::CURRENT,tr("Coupe originale"));
-	_ui->_comboSliceType->insertItem(TKD::MOVEMENT,tr("Coupe de mouvements"));
-	_ui->_comboSliceType->insertItem(TKD::EDGE_DETECTION,tr("Coupe de détection de contours"));
-	_ui->_comboSliceType->insertItem(TKD::FLOW,tr("Coupe de flots optiques"));
+	_ui->_comboSliceType->insertItem(TKD::CURRENT,tr("Originale"));
+	_ui->_comboSliceType->insertItem(TKD::MOVEMENT,tr("Z-mouvements"));
+	_ui->_comboSliceType->insertItem(TKD::EDGE_DETECTION,tr("Détection de contours"));
+	_ui->_comboSliceType->insertItem(TKD::FLOW,tr("Flots optiques"));
 	_ui->_comboSliceType->setCurrentIndex(TKD::CURRENT);
 
 	_ui->_comboEdgeDetectionType->insertItem(TKD::SOBEL,tr("Sobel"));
 	_ui->_comboEdgeDetectionType->insertItem(TKD::LAPLACIAN,tr("Laplacian"));
 	_ui->_comboEdgeDetectionType->insertItem(TKD::CANNY,tr("Canny"));
-
-	_ui->_spinFlowAlpha->setValue(_sliceView->flowAlpha());
-	_ui->_spinFlowEpsilon->setValue(_sliceView->flowEpsilon());
-	_ui->_spinFlowMaximumIterations->setValue(_sliceView->flowMaximumIterations());
 
 	// Histogrammes
 	_plotSliceHistogram->attach(_ui->_plotSliceHistogram);
@@ -95,7 +87,6 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 	_plotSectorHistogram->attach(_ui->_plotSectorHistogram);
 
 	QwtPolarGrid *grid = new QwtPolarGrid();
-	//grid->showAxis(QwtPolar::AxisRight,false);
 	grid->showAxis(QwtPolar::AxisBottom,false);
 	grid->setMajorGridPen(QPen(Qt::lightGray));
 	grid->attach(_ui->_polarSectorHistogram);
@@ -145,13 +136,13 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 	QObject::connect(_ui->_spinMaxZMotion, SIGNAL(valueChanged(int)), _ui->_spanSliderZMotionThreshold, SLOT(setUpperValue(int)));
 	QObject::connect(_ui->_spinMaxZMotion, SIGNAL(valueChanged(int)), this, SLOT(drawSlice()));
 	// Onglet "Paramètres de détection de contours"
-	QObject::connect(_ui->_comboEdgeDetectionType, SIGNAL(currentIndexChanged(int)), this, SLOT(setEdgeDetectionType(int)));
-	QObject::connect(_ui->_spinCannyRadiusOfGaussianMask, SIGNAL(valueChanged(int)), this, SLOT(setCannyRadiusOfGaussianMask(int)));
-	QObject::connect(_ui->_spinCannySigmaOfGaussianMask, SIGNAL(valueChanged(double)), this, SLOT(setCannySigmaOfGaussianMask(double)));
-	QObject::connect(_ui->_spinCannyMinimumGradient, SIGNAL(valueChanged(int)), this, SLOT(setCannyMinimumGradient(int)));
-	QObject::connect(_ui->_spinCannyMinimumDeviation, SIGNAL(valueChanged(double)), this, SLOT(setCannyMinimumDeviation(double)));
+	QObject::connect(_ui->_comboEdgeDetectionType, SIGNAL(currentIndexChanged(int)), this, SLOT(drawSlice()));
+	QObject::connect(_ui->_spinCannyRadiusOfGaussianMask, SIGNAL(valueChanged(int)), this, SLOT(drawSlice()));
+	QObject::connect(_ui->_spinCannySigmaOfGaussianMask, SIGNAL(valueChanged(double)), this, SLOT(drawSlice()));
+	QObject::connect(_ui->_spinCannyMinimumGradient, SIGNAL(valueChanged(int)), this, SLOT(drawSlice()));
+	QObject::connect(_ui->_spinCannyMinimumDeviation, SIGNAL(valueChanged(double)), this, SLOT(drawSlice()));
 	// Onglet "Paramètres du flot optique"
-	QObject::connect(_ui->_buttonFlowUpdate, SIGNAL(clicked()), this, SLOT(updateOpticalFlow()));
+	QObject::connect(_ui->_buttonFlowUpdate, SIGNAL(clicked()), this, SLOT(drawSlice()));
 
 	/**************************************
 	* Évènements de l'onglet "Histogrammes"
@@ -354,6 +345,7 @@ void MainWindow::drawSlice()
 {
 	if ( _billon != 0 )
 	{
+		const TKD::SliceType sliceType = static_cast<const TKD::SliceType>(_ui->_comboSliceType->currentIndex());
 		const TKD::ViewType selectedAxe = _ui->_radioYView->isChecked()?TKD::Y_VIEW:TKD::Z_VIEW;
 		const uint &currentSlice = _ui->_radioYView->isChecked()?_currentYSlice:_currentSlice;
 		uint width, height;
@@ -369,9 +361,12 @@ void MainWindow::drawSlice()
 		_mainPix = QImage(width,height,QImage::Format_ARGB32);
 		_mainPix.fill(0xff000000);
 
-		_sliceView->drawSlice(_mainPix,*_billon,_billon->hasPith()?_billon->pithCoord(_currentSlice):iCoord2D(_billon->n_cols/2,_billon->n_rows/2),
-							  currentSlice,Interval<int>(_ui->_spinMinIntensity->value(),_ui->_spinMaxIntensity->value()),
-							  Interval<int>(_ui->_spinMinZMotion->value(),_ui->_spinMaxZMotion->value()), selectedAxe);
+		_sliceView->drawSlice(_mainPix, *_billon, sliceType, _billon->hasPith()?_billon->pithCoord(_currentSlice):iCoord2D(_billon->n_cols/2,_billon->n_rows/2),
+							  currentSlice, Interval<int>(_ui->_spinMinIntensity->value(), _ui->_spinMaxIntensity->value()),
+							  Interval<int>(_ui->_spinMinZMotion->value(), _ui->_spinMaxZMotion->value()), selectedAxe,
+							  TKD::OpticalFlowParameters(_ui->_spinFlowAlpha->value(),_ui->_spinFlowEpsilon->value(),_ui->_spinFlowMaximumIterations->value()),
+							  TKD::EdgeDetectionParameters(static_cast<const TKD::EdgeDetectionType>(_ui->_comboEdgeDetectionType->currentIndex()),_ui->_spinCannyRadiusOfGaussianMask->value(),
+														   _ui->_spinCannySigmaOfGaussianMask->value(), _ui->_spinCannyMinimumGradient->value(), _ui->_spinCannyMinimumDeviation->value()));
 
 		if ( selectedAxe == TKD::Z_VIEW && _billon->hasPith() )
 		{
@@ -488,7 +483,6 @@ void MainWindow::moveContourCursor( const int &position )
 void MainWindow::setTypeOfView( const int &type )
 {
 	enabledComponents();
-	_sliceView->setTypeOfView( static_cast<const TKD::SliceType>(type) );
 	switch (type)
 	{
 		case TKD::MOVEMENT:
@@ -501,6 +495,7 @@ void MainWindow::setTypeOfView( const int &type )
 			_ui->_toolboxSliceParameters->setCurrentWidget(_ui->_pageFlowParameters);
 			break;
 		default:
+			_ui->_toolboxSliceParameters->setCurrentWidget(_ui->_pageOriginalDisplaying);
 			break;
 	}
 	drawSlice();
@@ -654,66 +649,6 @@ void MainWindow::dragInSliceView( const QPoint &movementVector )
 	QScrollArea &scrollArea = *(_ui->_scrollSliceView);
 	if ( movementVector.x() != 0 ) scrollArea.horizontalScrollBar()->setValue(scrollArea.horizontalScrollBar()->value()-movementVector.x());
 	if ( movementVector.y() != 0 ) scrollArea.verticalScrollBar()->setValue(scrollArea.verticalScrollBar()->value()-movementVector.y());
-}
-
-void MainWindow::updateOpticalFlow()
-{
-	const qreal currentAlpha = _sliceView->flowAlpha();
-	const qreal currentEpsilon = _sliceView->flowEpsilon();
-	const qreal currentMaxIter = _sliceView->flowMaximumIterations();
-
-	const qreal newAlpha = _ui->_spinFlowAlpha->value();
-	const qreal newEpsilon = _ui->_spinFlowEpsilon->value();
-	const qreal newMaxIter = _ui->_spinFlowMaximumIterations->value();
-
-	bool hasModification = false;
-	if ( currentAlpha != newAlpha )
-	{
-		_sliceView->setFlowAlpha(newAlpha);
-		hasModification = true;
-	}
-	if ( currentEpsilon != newEpsilon )
-	{
-		_sliceView->setFlowEpsilon(newEpsilon);
-		hasModification = true;
-	}
-	if ( currentMaxIter != newMaxIter )
-	{
-		_sliceView->setFlowMaximumIterations(newMaxIter);
-		hasModification = true;
-	}
-
-	if ( hasModification ) drawSlice();
-}
-
-void MainWindow::setEdgeDetectionType( const int &type )
-{
-	_sliceView->setEdgeDetectionType( static_cast<const TKD::EdgeDetectionType>(type) );
-	drawSlice();
-}
-
-void MainWindow::setCannyRadiusOfGaussianMask( const int &radius )
-{
-	_sliceView->setRadiusOfGaussianMask(radius);
-	drawSlice();
-}
-
-void MainWindow::setCannySigmaOfGaussianMask( const double &sigma )
-{
-	_sliceView->setSigmaOfGaussianMask(sigma);
-	drawSlice();
-}
-
-void MainWindow::setCannyMinimumGradient( const int &minimumGradient )
-{
-	_sliceView->setCannyMinimumGradient(minimumGradient);
-	drawSlice();
-}
-
-void MainWindow::setCannyMinimumDeviation( const double &minimumDeviation )
-{
-	_sliceView->setCannyMinimumDeviation(minimumDeviation);
-	drawSlice();
 }
 
 void MainWindow::selectSliceInterval( const int &index )
