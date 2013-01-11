@@ -509,7 +509,7 @@ void ContourSlice::computeContourPolygons()
 		{
 			_contourPolygonBottom << QPoint(_originalContour[i].x,_originalContour[i].y);
 		}
-		_contourPolygonBottom << QPoint(_originalContour[0].x,_originalContour[0].y);
+		if ( nbOriginalPointsContour ) _contourPolygonBottom << QPoint(_originalContour[0].x,_originalContour[0].y);
 	}
 }
 
