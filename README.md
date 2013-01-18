@@ -1,7 +1,8 @@
 TKDetection
 ===========
 
-A software to detect and segment wood knot
+TKDetection is a software to detect and segment wood knots.
+
 
 Dépendances
 -----------
