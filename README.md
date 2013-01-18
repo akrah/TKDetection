@@ -1,24 +1,22 @@
 TKDetection
 ===========
+
 A software to detect and segment wood knot
 
 Dépendances
 -----------
 
-|            Bibliothèques            |  Version  |
-|:-----------------------------------:|:----------|
-| [Qt](#1-qt)                         |   4.7     |
-| [Armadillo](#2-armadillo)           |   2.4.2   |
-| [InsightToolkit](#3-insighttoolkit) |   4.0.0   |
-| [Qwt](#4-qwt)                       |   6.0.0   |
-| [Qxt](#5-qxt)                       |   0.6.2   |
-| [QwtPolar](#6-qwtpolar)             |   1.0.0   |
-| [DGtalTools](#7-dgtaltools)         |  current  |
-| [ImaGene](#8-imagene)               |  perso    |
-| [DGLib](#9-dglib)                   |  perso    |
+|   |            Bibliothèques            |  Version testée  |   |      Bibliothèques      |  Version testée  |   |        Bibliothèques        |  Version testée  |
+|:-:|:-----------------------------------:|:----------------:|---|:-----------------------:|:----------------:|---|:---------------------------:|:----------------:|
+| 1 | [Qt](#1-qt)                         |       4.8        | 4 | [Qwt](#4-qwt)           |       6.0.0      | 7 | [DGtalTools](#7-dgtaltools) |      dépôt       |
+| 2 | [Armadillo](#2-armadillo)           |       3.6.1      | 5 | [Qxt](#5-qxt)           |       0.6.2      | 8 | [DGLib](#9-dglib)           |     en ligne     |
+| 3 | [InsightToolkit](#3-insighttoolkit) |       4.1        | 6 | [QwtPolar](#6-qwtpolar) |       1.0.1      | 9 | [ImaGene](#8-imagene)       |      dépôt       |
 
-Pré-requis
-----------
+
+Installation sur Ubuntu
+-----------------------
+
+### Pré-requis
 
 Installez les paquets "build-essential" et "cmake".
 
@@ -30,7 +28,8 @@ Installez les paquets "build-essential" et "cmake".
 ### 1. QT
 [Top](#dépendances)
 
-Installation du packet qtcreator dans le dépôt UNIVERSE qui installe les librairies de Qt par dépendance.
+Installez le packet *qtcreator* disponible dans le dépôt *Universe*.
+C'est un méta-packet qui installe l'ensemble des dépendances de Qt.
 
 ~~~
   sudo apt-get install qtcreator
@@ -40,17 +39,20 @@ Installation du packet qtcreator dans le dépôt UNIVERSE qui installe les libra
 ### 2. Armadillo
 [Top](#dépendances)
 
-Utilisation de la dernière version disponible sur le site http://arma.sourceforge.net.
+Téléchargez de la dernière version disponible sur le site http://arma.sourceforge.net.
 
-Il est recommandé d'installer LAPACK, BLAS, ATLAS et Boost pour améliorer les performances, particulièrement des additions et multiplication de matrices.
+Il est recommandé d'installer les bibliothèques LAPACK, BLAS, ATLAS et Boost pour améliorer les performances, particulièrement les additions et les multiplications de matrices.
 
 ~~~
   sudo apt-get install liblapack-dev libblas-dev libatlas-dev libboost-dev
 ~~~
+
+Installez ensuite Armadillo en remplaçant *x-x-x* par le numéro de la version téléchargée :
+
 ~~~
-  tar xvf armadillo-2.4.2.tar.gz
-  cd armadillo-2.4.2/
-  cmake .
+  tar xvf armadillo-x.x.x.tar.gz
+  cd armadillo-x.x.x/
+  ./configure
   make
   sudo make install
 ~~~
@@ -59,11 +61,12 @@ Il est recommandé d'installer LAPACK, BLAS, ATLAS et Boost pour améliorer les 
 ### 3. InsightToolkit
 [Top](#dépendances)
 
-Utilisation de la version disponible sur le site http://www.itk.org/ITK/resources/software.html.
+Téléchargez la version disponible sur le site http://www.itk.org/ITK/resources/software.html.
+Installez-la en remplaçant *x-x-x* par le numéro de la version téléchargée :
 
 ~~~
-  tar xvf InsightToolkit-4.0.0.tar.gz
-  cd InsightToolkit-4.0.0/
+  tar xvf InsightToolkit-x.x.x.tar.gz
+  cd InsightToolkit-x.x.x/
   mkdir binary
   cd binary
   cmake ..
@@ -75,7 +78,7 @@ Utilisation de la version disponible sur le site http://www.itk.org/ITK/resource
 ### 4. Qwt
 [Top](#dépendances)
 
-Utilisation de la version disponible dans le dépôt main.
+Utilisez de la version disponible dans le dépôt *main*.
 
 ~~~
   sudo apt-get install libqwt-dev
@@ -85,12 +88,14 @@ Utilisation de la version disponible dans le dépôt main.
 ### 5. Qxt
 [Top](#dépendances)
 
-Utilisation de la version disponible sur le site http://www.libqxt.org.
-La version des dépôts est 0.6.1 mais n'installe pas les fichiers de configuration (qxt.prf et qxtvars.prf) nécaissaires à TKDetection.pro.
+Téléchargez la version disponible sur le site http://www.libqxt.org.
+La version disponible via les dépôts n'installe pas les fichiers de configuration *qxt.prf* et *qxtvars.prf* nécaissaires à TKDetection.pro.
+
+Remplacez *xxxxxxxxx* par le numéro attribué au téléchargement.
 
 ~~~
-  tar xvf libqxt-libqxt-af08f520f71c.tar.bz2
-  cd libqxt-libqxt-af08f520f71c/
+  tar xvf libqxt-libqxt-xxxxxxxxx.tar.bz2
+  cd libqxt-libqxt-xxxxxxxxx/
   ./configure
   make
   sudo make install
@@ -109,11 +114,12 @@ Relancez QtDesigner.
 ### 6. QwtPolar
 [Top](#dépendances)
 
-Utilisation de la version disponible sur le site http://sourceforge.net/projects/qwtpolar.
+Utilisez la version disponible sur le site http://sourceforge.net/projects/qwtpolar.
+Installez-la en remplaçant *x-x-x* par le numéro de la version téléchargée :
 
 ~~~
-  unzip qwtpolar-1.0.0.zip
-  cd qwtpolar-1.0.0/
+  unzip qwtpolar-x-x-x.zip
+  cd qwtpolar-x-x-x/
   qmake
   make
   sudo make install
@@ -127,47 +133,49 @@ Utilisation de la version disponible sur le site http://sourceforge.net/projects
 
   S'ils n'existent pas :
   ~~~
-      sudo ln -s /usr/local/qwtpolar-1.0.0/features/qwtpolar.prf /usr/share/qt4/mkspecs/features/
-      sudo ln -s /usr/local/qwtpolar-1.0.0/features/qwtpolarconfig.pri /usr/share/qt4/mkspecs/features/
+      sudo ln -s /usr/local/qwtpolar-x.x.x/features/qwtpolar.prf /usr/share/qt4/mkspecs/features/
+      sudo ln -s /usr/local/qwtpolar-x.x.x/features/qwtpolarconfig.pri /usr/share/qt4/mkspecs/features/
   ~~~
 
 2.  Si 1. n'a pas résolu le problème :
 
   ~~~
-      sudo ln -s usr/local/qwtpolar-1.0.0/lib/libqwtpolar.so       /usr/lib/
-      sudo ln -s usr/local/qwtpolar-1.0.0/lib/libqwtpolar.so.1     /usr/lib/
-      sudo ln -s usr/local/qwtpolar-1.0.0/lib/libqwtpolar.so.1.0   /usr/lib/
-      sudo ln -s usr/local/qwtpolar-1.0.0/lib/libqwtpolar.so.1.0.0 /usr/lib/
+      sudo ln -s usr/local/qwtpolar-x.x.x/lib/libqwtpolar.so       /usr/lib/
+      sudo ln -s usr/local/qwtpolar-x.x.x/lib/libqwtpolar.so.1     /usr/lib/
+      sudo ln -s usr/local/qwtpolar-x.x.x/lib/libqwtpolar.so.1.0   /usr/lib/
+      sudo ln -s usr/local/qwtpolar-x.x.x/lib/libqwtpolar.so.1.0.0 /usr/lib/
   ~~~
 
-##### Si le widget QwtPolarPlot n'apparait pas dans la liste des widgets de QtDesigner :
+##### Si le widget QwtPolarPlot n'apparait pas dans la liste des widgets de QtDesigner
+
+N'oubliez pas de remplacer x.x.x par le numéro de la version téléchargée :
 
 ~~~
-  cd /usr/local/qwtpolar-1.0.0/plugins/designer/
-  sudo ln -s libqwt_polar_designer_plugin.so /usr/lib/x86_64-linux-gnu/qt4/plugins/designer/
+  sudo cp /usr/local/qwtpolar-x.x.x/plugins/designer/libqwt_polar_designer_plugin.so /usr/lib/x86_64-linux-gnu/qt4/plugins/designer/
 ~~~
 
 
 ### 7. DGtalTools
 [Top](#dépendances)
 
-Nécessite l'installation de DGtal :
+Nécessite l'installation de DGtal.
+Faites-le par exemple en clonant le dépôt :
 
 ~~~
   git checkout git://github.com/DGtal-team/DGtal.git DGtal
-  mkdir DGtal/build
-  cd DGtal/build
+  cd DGtal
+  mkdir build && cd build
   cmake .. -DWITH_GMP=true -DWITH_ITK=true -DWITH_QGLVIEWER=true
   make
   sudo make install
 ~~~
 
-On peut ensuite installer DGtalTools :
+Installez ensuite DGtalTools :
 
 ~~~
   git checkout git://github.com/DGtal-team/DGtalTools.git DGtalTools
-  mkdir DGtalTools/build
-  cd DGTalTools/build
+  cd DGtalTools
+  mkdir build && cd build
   cmake .. -DWITH_VISU3D_QGLVIEWER=true
   make
   sudo make install
@@ -177,12 +185,13 @@ On peut ensuite installer DGtalTools :
 ### 8. ImaGene
 [Top](#dépendances)
 
-DGLib utilise des fonctionalité de d'ImaGene. Il faut donc installer ImaGene par exemple à partir d'une version sans dépendance:
+DGLib utilise des fonctionalité de d'ImaGene.
+Installez ImaGene, par exemple à partir d'une version sans dépendance :
 
 ~~~
   git clone git://github.com/kerautret/ImaGeneNoDep.git
-  mkdir ImaGeneNoDep/build
-  cd ImaGeneNoDep/build
+  cd ImaGeneNoDep
+  mkdir build && cd build
   cmake ..
   make
   sudo make install
@@ -196,8 +205,8 @@ Doit être téléchargé ici : http://www.loria.fr/~krahenbu/dgci2013/DGLib_for_
 
 ~~~
   unzip DGLib_for_TKDetection
-  mkdir DGLib_for_TKDetection/build
-  cd DGLib_for_TKDetection/build
+  cd DGLib_for_TKDetection
+  mkdir build && cd build
   cmake ..
   make
   sudo make install
