@@ -51,6 +51,11 @@ namespace TKD
 #define FLOW_EPSILON_DEFAULT 0.001f
 #define FLOW_MAXIMUM_ITERATIONS 100
 
+// Paramètres de la zone restreinte autour de la moelle
+#define RESTRICTED_AREA_DEFAULT_RESOLUTION 100
+#define RESTRICTED_AREA_DEFAULT_THRESHOLD -900
+#define RESTRICTED_AREA_DEFAULT_RADIUS 133.33
+
 /*************************************
  * Enumerations
  *************************************/

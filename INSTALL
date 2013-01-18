@@ -10,16 +10,16 @@
 DÉPENDANCES
 ***********
 	 _______________________________
-	|    librairies		|	version	|
+	|    librairies     |  version  |
 	|-------------------------------|
-	| - Qt				|	4.7		|
-	| - Armadillo		|	2.4.2	|
-	| - InsightToolkit	|	4.0.0	|
-	| - Qwt				|	6.0.0	|
-	| - Qxt				|	0.6.2	|
-	| - QwtPolar		|	1.0.0	|
+	| - Qt              |   4.7     |
+	| - Armadillo       |   2.4.2   |
+	| - InsightToolkit  |   4.0.0   |
+	| - Qwt             |   6.0.0   |
+	| - Qxt             |   0.6.2   |
+	| - QwtPolar        |   1.0.0   |
 	| - DGtalTools      |  current  |
-	| - ImaGene 	    |  perso 	|
+	| - ImaGene         |  perso    |
 	| - DGLib           |  perso    |
 	 ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
 

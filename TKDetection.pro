@@ -69,7 +69,8 @@ SOURCES	=	main.cpp \
     src/intensitydistributionhistogram.cpp \
     src/plotintensitydistributionhistogram.cpp \
     src/zmotiondistributionhistogram.cpp \
-    src/plotzmotiondistributionhistogram.cpp
+    src/plotzmotiondistributionhistogram.cpp \
+    src/mainmodel.cpp
 
 HEADERS	=	billon.h \
 			billonalgorithms.h \
@@ -114,7 +115,8 @@ HEADERS	=	billon.h \
     inc/intensitydistributionhistogram.h \
     inc/plotintensitydistributionhistogram.h \
     inc/zmotiondistributionhistogram.h \
-    inc/plotzmotiondistributionhistogram.h
+    inc/plotzmotiondistributionhistogram.h \
+    inc/mainmodel.h
 
 FORMS =	mainwindow.ui
 

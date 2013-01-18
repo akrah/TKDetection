@@ -54,7 +54,7 @@ void SliceHistogram::construct( const Billon &billon, const Interval<int> &inten
 			currentPos.x = billon.pithCoord(k).x-iRadius;
 			for ( i=-iRadius ; i<iRadiusMax ; ++i )
 			{
-				if ( currentPos.x < width && currentPos.y < height )
+				if ( currentPos.x >= 0 && currentPos.y >= 0 && currentPos.x < width && currentPos.y < height )
 				{
 					currentSliceValue = currentSlice.at(currentPos.y,currentPos.x);
 					previousSliceValue = previousSlice.at(currentPos.y,currentPos.x);
