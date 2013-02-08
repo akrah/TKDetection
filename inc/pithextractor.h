@@ -113,7 +113,7 @@ private:
 	 * \param	nbContourPoints Nombre de points de contour
 	 * \return	les coordonnées de la moelle pour la coupe traitée
 	 */
-	iCoord2D transHough( const Slice &slice, int width, int height, int *x, int *y, int *sliceMaxValue, int *nbContourPoints ) const;
+	uiCoord2D transHough( const Slice &slice, int width, int height, int *x, int *y, int *sliceMaxValue, int *nbContourPoints ) const;
 
 	/**
 	 * \fn		arma::fmat * contour(const Slice &slice, arma::fmat **orientation);
@@ -160,13 +160,13 @@ private:
 	 * \fn		void minSlice(const Slice &slice, int *minValue, int *maxValue, Coord *coordMax);
 	 * \brief	Calcul les valeurs minimum et maximum d'une coupe ainsi que la liste des coordonnées ou apparrait la valeur maximum
 	 */
-	void minSlice( const Slice &slice, int *minValue, int *maxValue, iCoord2D *coordMax ) const;
+	void minSlice(const Slice &slice, int *minValue, int *maxValue, uiCoord2D *coordMax ) const;
 
 	/**
 	 * \fn		void corrigeMoelle(QVector<Coord> *moelle, float *listMax, float seuilHough);
 	 * \brief	Corrige les valeur erronées de la moelle
 	 */
-	void correctPith( QVector<iCoord2D> &pith, float *listMax, float seuilHough ) const;
+	void correctPith(QVector<uiCoord2D> &pith, float *listMax, float seuilHough ) const;
 
 private:
 

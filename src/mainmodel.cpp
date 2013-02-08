@@ -11,6 +11,7 @@
 #include "inc/contourbillon.h"
 
 #include "inc/billonalgorithms.h"
+#include "inc/dicomreader.h"
 
 MainModel::MainModel() : _billon(0), _componentBillon(0), _knotBillon(0),
 	_pieChart(new PieChart(360)), _sliceHistogram(new SliceHistogram()), _sectorHistogram(new SectorHistogram()),
@@ -35,6 +36,15 @@ MainModel::~MainModel()
 /*******************************
  * Public fonctions
  *******************************/
+
+void MainModel::readBillon( const QString &folderName )
+{
+	if ( folderName.isEmpty() ) return;
+	Billon *billon = DicomReader::read(folderName);
+	if ( billon == 0 ) return;
+	cleanAll();
+	setBillon(billon);
+}
 
 void MainModel::setBillon( Billon *billon )
 {

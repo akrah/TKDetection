@@ -95,24 +95,52 @@ void Contour::smooth( int smoothingRadius )
 	}
 }
 
-void Contour::draw( QPainter &painter, const int &cursorPosition ) const
+void Contour::draw( QPainter &painter, const int &cursorPosition, const iCoord2D &sliceCenter, const TKD::ViewType &viewType ) const
 {
-
 	const int nbPoints = this->size();
 	if ( nbPoints > 0 )
 	{
+		const qreal angularFactor = painter.window().width()/TWO_PI;
+		int i, j, k, x, y;
+
 		painter.save();
 		painter.setPen(Qt::blue);
-		for ( int i=0 ; i<nbPoints ; ++i )
+		if ( viewType == TKD::Z_VIEW )
 		{
-			painter.drawPoint((*this)[i].x,(*this)[i].y);
+			for ( int i=0 ; i<nbPoints ; ++i )
+			{
+				painter.drawPoint((*this)[i].x,(*this)[i].y);
+			}
+
+		}
+		else if ( viewType == TKD::CARTESIAN_VIEW )
+		{
+			for ( k=0 ; k<nbPoints ; ++k )
+			{
+				i = (*this)[k].x - sliceCenter.x;
+				j = (*this)[k].y - sliceCenter.y;
+				y = qSqrt(qPow(i,2) + qPow(j,2));
+				x = 2. * qAtan( j / (qreal)(i + y) ) * angularFactor;
+				painter.drawPoint(x,y);
+			}
 		}
 
 		// Dessin du curseur
 		if ( cursorPosition >= 0 )
 		{
 			painter.setPen(Qt::cyan);
-			painter.drawEllipse((*this)[cursorPosition].x-1,(*this)[cursorPosition].y-1,2,2);
+			if ( viewType == TKD::Z_VIEW )
+			{
+				painter.drawEllipse((*this)[cursorPosition].x-1,(*this)[cursorPosition].y-1,2,2);
+			}
+			else if ( viewType == TKD::CARTESIAN_VIEW )
+			{
+				i = sliceCenter.x - (*this)[cursorPosition].x;
+				j = sliceCenter.y - (*this)[cursorPosition].y;
+				y = qSqrt(qPow(i,2) + qPow(j,2));
+				x = 2. * qAtan( j / (i + y ) );
+				painter.drawEllipse(x-1,y-1,2,2);
+			}
 		}
 		painter.restore();
 	}

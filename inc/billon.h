@@ -39,7 +39,7 @@ public:
 
 	const Pith & pith() const;
 	bool hasPith() const;
-	const iCoord2D &pithCoord( const uint & sliceIndex ) const;
+	const uiCoord2D &pithCoord( const uint & sliceIndex ) const;
 
 	void setMinValue( const T &value );
 	void setMaxValue( const T &value );
@@ -157,7 +157,7 @@ bool BillonTpl<T>::hasPith() const
 }
 
 template< typename T >
-const iCoord2D &BillonTpl<T>::pithCoord( const uint & sliceIndex ) const
+const uiCoord2D &BillonTpl<T>::pithCoord( const uint & sliceIndex ) const
 {
 	return _pith[sliceIndex];
 }

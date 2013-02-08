@@ -4,6 +4,7 @@
 #include "def/def_billon.h"
 #include "def/def_coordinate.h"
 #include "inc/coordinate.h"
+#include "define.h"
 
 #include <QVector>
 
@@ -20,7 +21,7 @@ public:
 	void compute( const Slice &slice, const iCoord2D &sliceCenter, const int &intensityThreshold, iCoord2D startPoint = iCoord2D(-1,-1) );
 	void smooth( int smoothingRadius );
 
-	void draw( QPainter &painter, const int &cursorPosition ) const;
+	void draw( QPainter &painter, const int &cursorPosition, const iCoord2D &sliceCenter, const TKD::ViewType &viewType ) const;
 };
 
 #endif // CONTOUR_H

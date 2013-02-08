@@ -108,6 +108,7 @@ namespace TKD
 		_VIEW_TYPE_MIN_ = -1,
 		Y_VIEW,
 		Z_VIEW,
+		CARTESIAN_VIEW,
 		_VIEW_TYPE_MAX_
 	};
 
@@ -136,6 +137,15 @@ namespace TKD
 			type(type), radiusOfGaussianMask(radiusOfGaussianMask),	sigmaOfGaussianMask(sigmaOfGaussianMask), minimumGradient(minimumGradient), minimumDeviation(minimumDeviation) {}
 	};
 
+	struct HistogramParameters
+	{
+		uint smoothingRadius;
+		uint minimumHeightPercentageOfMaximum;
+		uint neighborhoodOfMaximums;
+		uint derivativesPercentage;
+		uint minimumWidthOfIntervals;
+		bool loop;
+	};
 }
 
 #endif // DEFINE_H
