@@ -290,66 +290,109 @@ template <typename T>
 void Histogram<T>::computeIntervals( const int & derivativesPercentage, const uint & minimumWidthOfIntervals, const bool & loop )
 {
 	_intervals.clear();
-	if ( !_maximums.isEmpty() )
+	if ( _maximums.isEmpty() ) return;
+
+	int cursorMax, cursorMin, derivativeThreshold;
+	Interval<uint> cursor;
+	for ( uint i=0 ; i<nbMaximums() ; ++i )
 	{
-		int cursorMax, cursorMin, derivativeThreshold;
-		Interval<uint> cursor;
-		for ( uint i=0 ; i<nbMaximums() ; ++i )
+		// Detection des bornes de l'intervalle courant
+		cursorMin = _maximums[i];
+		derivativeThreshold = this->at(cursorMin)*derivativesPercentage/100.;
+		while ( this->at(cursorMin) > derivativeThreshold )
 		{
-			// Detection des bornes de l'intervalle courant
-			cursorMin = _maximums[i];
-			derivativeThreshold = this->at(cursorMin)*derivativesPercentage/100.;
-			while ( this->at(cursorMin) > derivativeThreshold )
-			{
-				cursorMin--;
-				if ( cursorMin < 0 ) cursorMin = this->size()-1;
-			}
-			while ( firstdDerivated(cursorMin,loop) > 0. )
-			{
-				cursorMin--;
-				if ( cursorMin < 0 ) cursorMin = this->size()-1;
-			}
+			if ( cursorMin ) cursorMin--;
+			else cursorMin = this->size()-1;
+		}
+		while ( firstdDerivated(cursorMin,loop) > 0. )
+		{
+			if ( cursorMin ) cursorMin--;
+			else cursorMin = this->size()-1;
+		}
 
-			cursorMax = _maximums[i]+1;
-			if ( cursorMax >= this->size() ) cursorMax = 0;
+		cursorMax = _maximums[i]+1;
+		if ( cursorMax == this->size() ) cursorMax = 0;
 
-			while ( this->at(cursorMax) > derivativeThreshold )
-			{
-				cursorMax++;
-				if ( cursorMax == this->size() ) cursorMax = 0;
-			}
-			while ( firstdDerivated(cursorMax,loop) < 0. )
-			{
-				cursorMax++;
-				if ( cursorMax == this->size() ) cursorMax = 0;
-			}
-			cursorMax--;
-			if ( cursorMax<0 ) cursorMax = this->size()-1;
+		while ( this->at(cursorMax) > derivativeThreshold )
+		{
+			cursorMax++;
+			if ( cursorMax == this->size() ) cursorMax = 0;
+		}
+		while ( firstdDerivated(cursorMax,loop) < 0. )
+		{
+			cursorMax++;
+			if ( cursorMax == this->size() ) cursorMax = 0;
+		}
+		if ( cursorMax ) cursorMax--;
+		else cursorMax = this->size()-1;
 
-			cursor.setBounds(cursorMin,cursorMax);
+		cursor.setBounds(cursorMin,cursorMax);
 
-			// Ajout et fusion de l'intervalle courant
-			if ( cursor.isValid() )
+		// Ajout et fusion de l'intervalle courant
+		if ( cursor.isValid() )
+		{
+			if ( cursor.width() >= minimumWidthOfIntervals )
 			{
-				if ( cursor.width() >= minimumWidthOfIntervals )
+				if ( _intervals.isEmpty() || cursor.min() >= _intervals.last().max() )
 				{
-					if ( _intervals.isEmpty() || cursor.min() > _intervals.last().max() )
+					_intervals.append(cursor);
+				}
+				else
+				{
+					Interval<uint> &last = _intervals.last();
+					if ( cursorMin < last.max() )
+					{
+						if ( cursorMin < _maximums[i-1] )
+						{
+							cursor.setMin(last.max());
+							cursorMin = last.max();
+						}
+						else last.setMax(cursorMin);
+						if ( cursor.width() > minimumWidthOfIntervals ) _intervals.append(cursor);
+						cursorMin = last.min();
+					}
+				}
+			}
+		}
+		else
+		{
+			if ( loop )
+			{
+				if ( this->size()-(cursor.min()-cursor.max()) >= minimumWidthOfIntervals )
+				{
+					if ( _intervals.isEmpty()  )
 					{
 						_intervals.append(cursor);
 					}
 					else
 					{
 						Interval<uint> &last = _intervals.last();
-						if ( cursor != last )
+						const Interval<uint> &first = _intervals.first();
+						if ( cursor != last && cursor != first )
 						{
-							if ( cursor.min() == last.min() )
+							if ( cursor.intersect(last) )
 							{
-								cursor.setMin(last.max());
-								cursorMin = last.max();
+								if ( cursor.min() == last.min() )
+								{
+									cursor.setMin(last.max());
+									cursorMin = last.max();
+								}
+								else if ( cursor.max() == last.max() )
+								{
+									last.setMax(cursor.min());
+								}
 							}
-							else if ( cursor.max() == last.max() )
+							if ( cursor.intersect(first) )
 							{
-								last.setMax(cursor.min());
+								if ( cursor.min() == first.min() )
+								{
+									cursor.setMin(first.max());
+									cursorMin = first.max();
+								}
+								else if ( cursor.max() == first.max() )
+								{
+									last.setMax(cursor.min());
+								}
 							}
 							_intervals.append(cursor);
 						}
@@ -358,75 +401,29 @@ void Histogram<T>::computeIntervals( const int & derivativesPercentage, const ui
 			}
 			else
 			{
-				if ( loop )
+				if ( _intervals.isEmpty()  )
 				{
-					if ( this->size()-(cursor.min()-cursor.max()) >= minimumWidthOfIntervals )
-					{
-						if ( _intervals.isEmpty()  )
-						{
-							_intervals.append(cursor);
-						}
-						else
-						{
-							Interval<uint> &last = _intervals.last();
-							const Interval<uint> &first = _intervals.first();
-							if ( cursor != last && cursor != first )
-							{
-								if ( cursor.intersect(last) )
-								{
-									if ( cursor.min() == last.min() )
-									{
-										cursor.setMin(last.max());
-										cursorMin = last.max();
-									}
-									else if ( cursor.max() == last.max() )
-									{
-										last.setMax(cursor.min());
-									}
-								}
-								if ( cursor.intersect(first) )
-								{
-									if ( cursor.min() == first.min() )
-									{
-										cursor.setMin(first.max());
-										cursorMin = first.max();
-									}
-									else if ( cursor.max() == first.max() )
-									{
-										last.setMax(cursor.min());
-									}
-								}
-								_intervals.append(cursor);
-							}
-						}
-					}
+					cursor.setMin(0);
+					cursorMin = 0;
+					_intervals.append(cursor);
 				}
 				else
 				{
-					if ( _intervals.isEmpty()  )
+					cursor.setMax(this->size()-1);
+					cursorMax = cursor.max();
+					Interval<uint> &last = _intervals.last();
+					if ( cursor != last )
 					{
-						cursor.setMin(0);
-						cursorMin = 0;
-						_intervals.append(cursor);
-					}
-					else
-					{
-						cursor.setMax(this->size()-1);
-						cursorMax = cursor.max();
-						Interval<uint> &last = _intervals.last();
-						if ( cursor != last )
+						if ( cursor.min() == last.min() )
 						{
-							if ( cursor.min() == last.min() )
-							{
-								cursor.setMin(last.max());
-								cursorMin = last.max();
-							}
-							else if ( cursor.max() == last.max() )
-							{
-								last.setMax(cursor.min());
-							}
-							_intervals.append(cursor);
+							cursor.setMin(last.max());
+							cursorMin = last.max();
 						}
+						else if ( cursor.max() == last.max() )
+						{
+							last.setMax(cursor.min());
+						}
+						_intervals.append(cursor);
 					}
 				}
 			}

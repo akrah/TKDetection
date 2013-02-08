@@ -132,10 +132,10 @@ bool Interval<T>::intersect( const Interval &interval ) const
 {
 	if ( this->isValid() )
 	{
-		if ( interval.isValid() ) return !( (interval._max < _min) || (interval._min > _max) );
+		if ( interval.isValid() ) return !((interval._max < _min) || (interval._min > _max));
 		return (interval._min <= _max) || (interval._max >= _min);
 	}
-	return !interval.isValid() || (interval._max >= _min) || (interval._min <= _max);
+	return !interval.isValid() || (_min <= interval._max) || (_max >= interval._min);
 }
 
 template <typename T>

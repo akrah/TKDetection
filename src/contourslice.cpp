@@ -88,7 +88,7 @@ const rCoord2D &ContourSlice::rightMainSupportPoint() const
  * Public setters
  **********************************/
 
-void ContourSlice::compute( Slice &resultSlice, const Slice &initialSlice, const iCoord2D &sliceCenter, const int &intensityThreshold,
+void ContourSlice::compute( Slice &resultSlice, const Slice &initialSlice, const uiCoord2D &sliceCenter, const int &intensityThreshold,
 							const int &blurredSegmentThickness, const int &smoothingRadius, const int &curvatureWidth,
 							const int &minimumOriginDistance, const iCoord2D &startPoint )
 {
@@ -99,6 +99,8 @@ void ContourSlice::compute( Slice &resultSlice, const Slice &initialSlice, const
 	_contourDistancesHistogram.construct( _contour, sliceCenter );
 	//_curvatureHistogram.construct( _contour, curvatureWidth  );
 
+	_sliceCenter = sliceCenter;
+
 	computeDominantPoints( blurredSegmentThickness );
 	computeMainDominantPoints( minimumOriginDistance );
 	computeSupportsOfMainDominantPoints();
@@ -106,7 +108,7 @@ void ContourSlice::compute( Slice &resultSlice, const Slice &initialSlice, const
 	updateSlice( initialSlice, resultSlice, sliceCenter, intensityThreshold );
 }
 
-void ContourSlice::computeOldMethod( Slice &resultSlice, const Slice &initialSlice, const iCoord2D &sliceCenter, const int &intensityThreshold, const int &smoothingRadius, const int &curvatureWidth, const iCoord2D &startPoint )
+void ContourSlice::computeOldMethod( Slice &resultSlice, const Slice &initialSlice, const uiCoord2D &sliceCenter, const int &intensityThreshold, const int &smoothingRadius, const int &curvatureWidth, const iCoord2D &startPoint )
 {
 	_contour.clear();
 	_originalContour.clear();
@@ -148,31 +150,62 @@ void ContourSlice::computeOldMethod( Slice &resultSlice, const Slice &initialSli
 	}
 }
 
-void ContourSlice::draw( QPainter &painter, const int &cursorPosition ) const
+void ContourSlice::draw( QPainter &painter, const int &cursorPosition, const TKD::ViewType &viewType ) const
 {
 	const int nbContourPoints = _contour.size();
-	const int width = painter.window().width();
+	const uint width = painter.window().width();
+	const qreal angularFactor = width/TWO_PI;
 
 	if ( nbContourPoints > 0 )
 	{
 		painter.save();
-		_contour.draw(painter,cursorPosition);
+		_contour.draw(painter,cursorPosition,_sliceCenter,viewType);
 
 		const int nbDominantPoints = _dominantPointsIndex.size();
 		const int nbDominantPoints2 = _dominantPointsIndex2.size();
 		if ( nbDominantPoints > 0 && nbDominantPoints2 > 0 )
 		{
 			// Dessin des points dominants
-			int i;
+
+			int i, j, k, x, y, i2, j2, x2, y2;
 			painter.setPen(Qt::green);
-			for ( i=0 ; i<nbDominantPoints ; ++i )
+			if ( viewType == TKD::Z_VIEW )
 			{
-				painter.drawEllipse(dominantPoint(i).x-2,dominantPoint(i).y-2,4,4);
+				for ( i=0 ; i<nbDominantPoints ; ++i )
+				{
+					painter.drawEllipse(dominantPoint(i).x-2,dominantPoint(i).y-2,4,4);
+				}
 			}
-			painter.setPen(Qt::yellow);
-			for ( i=0 ; i<nbDominantPoints2 ; ++i )
+			else if ( viewType == TKD::CARTESIAN_VIEW )
 			{
-				painter.drawEllipse(dominantPoint2(i).x-3,dominantPoint2(i).y-3,6,6);
+				for ( k=0 ; k<nbDominantPoints ; ++k )
+				{
+					i = dominantPoint(k).x - _sliceCenter.x;
+					j = dominantPoint(k).y - _sliceCenter.y;
+					y = qSqrt(qPow(i,2) + qPow(j,2));
+					x = 2. * qAtan( j / (qreal)(i + y) ) * angularFactor;
+					painter.drawEllipse(x-2,y-2,4,4);
+				}
+			}
+
+			painter.setPen(Qt::yellow);
+			if ( viewType == TKD::Z_VIEW )
+			{
+				for ( i=0 ; i<nbDominantPoints2 ; ++i )
+				{
+					painter.drawEllipse(dominantPoint2(i).x-3,dominantPoint2(i).y-3,6,6);
+				}
+			}
+			else if ( viewType == TKD::CARTESIAN_VIEW )
+			{
+				for ( k=0 ; k<nbDominantPoints2 ; ++k )
+				{
+					i = dominantPoint2(k).x - _sliceCenter.x;
+					j = dominantPoint2(k).y - _sliceCenter.y;
+					y = qSqrt(qPow(i,2) + qPow(j,2));
+					x = 2. * qAtan( j / (qreal)(i + y) ) * angularFactor;
+					painter.drawEllipse(x-3,y-3,6,6);
+				}
 			}
 
 			// Dessins des points dominants principaux
@@ -183,8 +216,21 @@ void ContourSlice::draw( QPainter &painter, const int &cursorPosition ) const
 				const iCoord2D &leftMainPoint = leftMainDominantPoint();
 
 				painter.setPen(Qt::red);
-				painter.drawLine(leftMainPoint.x-2,leftMainPoint.y-2,leftMainPoint.x+2,leftMainPoint.y+2);
-				painter.drawLine(leftMainPoint.x-2,leftMainPoint.y+2,leftMainPoint.x+2,leftMainPoint.y-2);
+
+				if ( viewType == TKD::Z_VIEW )
+				{
+					painter.drawLine(leftMainPoint.x-2,leftMainPoint.y-2,leftMainPoint.x+2,leftMainPoint.y+2);
+					painter.drawLine(leftMainPoint.x-2,leftMainPoint.y+2,leftMainPoint.x+2,leftMainPoint.y-2);
+				}
+				else if ( viewType == TKD::CARTESIAN_VIEW )
+				{
+					i = leftMainPoint.x - _sliceCenter.x;
+					j = leftMainPoint.y - _sliceCenter.y;
+					y = qSqrt(qPow(i,2) + qPow(j,2));
+					x = 2. * qAtan( j / (qreal)(i + y) ) * angularFactor;
+					painter.drawLine(x-2,y-2,x+2,y+2);
+					painter.drawLine(x-2,y+2,x+2,y-2);
+				}
 
 				// Dessins de la droite de coupe issue du point de dominant principal gauche
 				const rCoord2D &leftSupportPoint = leftMainSupportPoint();
@@ -193,14 +239,43 @@ void ContourSlice::draw( QPainter &painter, const int &cursorPosition ) const
 					painter.setPen(Qt::gray);
 					a = ( leftMainPoint.y - leftSupportPoint.y ) / static_cast<qreal>( leftMainPoint.x - leftSupportPoint.x );
 					b = ( leftMainPoint.y * leftSupportPoint.x - leftMainPoint.x * leftSupportPoint.y ) / static_cast<qreal>( leftSupportPoint.x - leftMainPoint.x );
-					//				painter.drawLine(0, b, width, a * width + b );
 					if ( leftSupportPoint.x < leftMainPoint.x )
 					{
-						painter.drawLine(leftMainPoint.x, leftMainPoint.y, width, a * width + b );
+						if ( viewType == TKD::Z_VIEW )
+						{
+							painter.drawLine(leftMainPoint.x, leftMainPoint.y, width, a * width + b );
+						}
+						else if ( viewType == TKD::CARTESIAN_VIEW )
+						{
+							i = leftMainPoint.x - _sliceCenter.x;
+							j = leftMainPoint.y - _sliceCenter.y;
+							y = qSqrt(qPow(i,2) + qPow(j,2));
+							x = 2. * qAtan( j / (qreal)(i + y) ) * angularFactor;
+							i2 = width - _sliceCenter.x;
+							j2 = a * width + b - _sliceCenter.y;
+							y2 = qSqrt(qPow(i2,2) + qPow(j2,2));
+							x2 = 2. * qAtan( j2 / (qreal)(i2 + y2) ) * angularFactor;
+							painter.drawLine( x, y, x2, y2 );
+						}
 					}
 					else
 					{
-						painter.drawLine(leftMainPoint.x, leftMainPoint.y, 0., b );
+						if ( viewType == TKD::Z_VIEW )
+						{
+							painter.drawLine(leftMainPoint.x, leftMainPoint.y, 0., b );
+						}
+						else if ( viewType == TKD::CARTESIAN_VIEW )
+						{
+							i = leftMainPoint.x - _sliceCenter.x;
+							j = leftMainPoint.y - _sliceCenter.y;
+							y = qSqrt(qPow(i,2) + qPow(j,2));
+							x = 2. * qAtan( j / (qreal)(i + y) ) * angularFactor;
+							i2 = -_sliceCenter.x;
+							j2 = b - _sliceCenter.y;
+							y2 = qSqrt(qPow(i2,2) + qPow(j2,2));
+							x2 = 2. * qAtan( j2 / (qreal)(i2 + y2) ) * angularFactor;
+							painter.drawLine( x, y, x2, y2 );
+						}
 					}
 				}
 			}
@@ -210,8 +285,20 @@ void ContourSlice::draw( QPainter &painter, const int &cursorPosition ) const
 				const iCoord2D &rightMainPoint = rightMainDominantPoint();
 
 				painter.setPen(Qt::red);
-				painter.drawLine(rightMainPoint.x-2,rightMainPoint.y-2,rightMainPoint.x+2,rightMainPoint.y+2);
-				painter.drawLine(rightMainPoint.x-2,rightMainPoint.y+2,rightMainPoint.x+2,rightMainPoint.y-2);
+				if ( viewType == TKD::Z_VIEW )
+				{
+					painter.drawLine(rightMainPoint.x-2,rightMainPoint.y-2,rightMainPoint.x+2,rightMainPoint.y+2);
+					painter.drawLine(rightMainPoint.x-2,rightMainPoint.y+2,rightMainPoint.x+2,rightMainPoint.y-2);
+				}
+				else if ( viewType == TKD::CARTESIAN_VIEW )
+				{
+					i = rightMainPoint.x - _sliceCenter.x;
+					j = rightMainPoint.y - _sliceCenter.y;
+					y = qSqrt(qPow(i,2) + qPow(j,2));
+					x = 2. * qAtan( j / (qreal)(i + y) ) * angularFactor;
+					painter.drawLine(x-2,y-2,x+2,y+2);
+					painter.drawLine(x-2,y+2,x+2,y-2);
+				}
 
 				// Dessins de la droite de coupe issue du point de dominant principal droit
 				const rCoord2D &rightSupportPoint = rightMainSupportPoint();
@@ -220,21 +307,61 @@ void ContourSlice::draw( QPainter &painter, const int &cursorPosition ) const
 					painter.setPen(Qt::gray);
 					a = ( rightMainPoint.y - rightSupportPoint.y ) / static_cast<qreal>( rightMainPoint.x - rightSupportPoint.x );
 					b = ( rightMainPoint.y * rightSupportPoint.x - rightMainPoint.x * rightSupportPoint.y ) / static_cast<qreal>( rightSupportPoint.x - rightMainPoint.x );
-					//				painter.drawLine(0, b, width, a * width + b );
 					if ( rightSupportPoint.x < rightMainPoint.x )
 					{
-						painter.drawLine(rightMainPoint.x, rightMainPoint.y, width, a * width + b );
+						if ( viewType == TKD::Z_VIEW )
+						{
+							painter.drawLine(rightMainPoint.x, rightMainPoint.y, width, a * width + b );
+						}
+						else if ( viewType == TKD::CARTESIAN_VIEW )
+						{
+							i = rightMainPoint.x - _sliceCenter.x;
+							j = rightMainPoint.y - _sliceCenter.y;
+							y = qSqrt(qPow(i,2) + qPow(j,2));
+							x = 2. * qAtan( j / (qreal)(i + y) ) * angularFactor;
+							i2 = width - _sliceCenter.x;
+							j2 = a * width + b - _sliceCenter.y;
+							y2 = qSqrt(qPow(i2,2) + qPow(j2,2));
+							x2 = 2. * qAtan( j2 / (qreal)(i2 + y2) ) * angularFactor;
+							painter.drawLine( x, y, x2, y2 );
+						}
 					}
 					else
 					{
-						painter.drawLine(rightMainPoint.x, rightMainPoint.y, 0., b );
+						if ( viewType == TKD::Z_VIEW )
+						{
+							painter.drawLine(rightMainPoint.x, rightMainPoint.y, 0., b );
+						}
+						else if ( viewType == TKD::CARTESIAN_VIEW )
+						{
+							i = rightMainPoint.x - _sliceCenter.x;
+							j = rightMainPoint.y - _sliceCenter.y;
+							y = qSqrt(qPow(i,2) + qPow(j,2));
+							x = 2. * qAtan( j / (qreal)(i + y) ) * angularFactor;
+							i2 = -_sliceCenter.x;
+							j2 = b - _sliceCenter.y;
+							y2 = qSqrt(qPow(i2,2) + qPow(j2,2));
+							x2 = 2. * qAtan( j2 / (qreal)(i2 + y2) ) * angularFactor;
+							painter.drawLine( x, y, x2, y2 );
+						}
 					}
 				}
 			}
 
 			// Dessin du point de contour initial (également point dominant initial)
 			painter.setPen(Qt::red);
-			painter.drawEllipse(_contour[0].x-1,_contour[0].y-1,2,2);
+			if ( viewType == TKD::Z_VIEW )
+			{
+				painter.drawEllipse(_contour[0].x-1,_contour[0].y-1,2,2);
+			}
+			else if ( viewType == TKD::CARTESIAN_VIEW )
+			{
+				i = _contour[0].x - _sliceCenter.x;
+				j = _contour[0].y - _sliceCenter.y;
+				y = qSqrt(qPow(i,2) + qPow(j,2));
+				x = 2. * qAtan( j / (qreal)(i + y) ) * angularFactor;
+				painter.drawEllipse(x-1,y-1,2,2);
+			}
 		}
 
 		painter.restore();
@@ -513,7 +640,7 @@ void ContourSlice::computeContourPolygons()
 	}
 }
 
-void ContourSlice::updateSlice( const Slice &initialSlice, Slice &resultSlice, const iCoord2D &sliceCenter, const int &intensityThreshold )
+void ContourSlice::updateSlice( const Slice &initialSlice, Slice &resultSlice, const uiCoord2D &sliceCenter, const int &intensityThreshold )
 {
 	const int width = initialSlice.n_cols;
 	const int height = initialSlice.n_rows;

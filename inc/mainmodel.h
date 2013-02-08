@@ -20,6 +20,7 @@ public:
 	~MainModel();
 
 public:
+	void readBillon( const QString &folderName );
 	void setBillon( Billon *billon );
 	void cleanAll();
 
@@ -27,7 +28,9 @@ public:
 	void setCurrentYSlice( const uint &sliceIndex );
 	void setCurrentMaximum( const uint &index );
 	void setCurrentSector( const uint &index );
-	void updateTreeRadius(const uint &resolution, const int &threshold );
+	void updateTreeRadius( const uint &resolution, const int &threshold );
+
+
 
 private:
 	Billon *_billon;

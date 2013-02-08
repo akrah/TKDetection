@@ -2,6 +2,7 @@
 #define PIECHART_H
 
 #include "def/def_coordinate.h"
+#include "define.h"
 
 #include <QVector>
 
@@ -22,8 +23,8 @@ public:
 
 	void setSectorsNumber( const uint &nbSectors );
 
-	void draw( QImage &image, const iCoord2D &center, const uint &sectorIdx ) const;
-	void draw( QImage &image, const iCoord2D &center, const QVector<Interval<uint> > &intervals ) const;
+	void draw( QImage &image, const uiCoord2D &center, const uint &sectorIdx, const TKD::ViewType &viewType ) const;
+	void draw( QImage &image, const uiCoord2D &center, const QVector<Interval<uint> > &intervals, const TKD::ViewType &viewType ) const;
 
 private:
 	void updateSectors( const int &nbSectors );

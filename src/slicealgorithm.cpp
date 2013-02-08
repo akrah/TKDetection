@@ -135,19 +135,41 @@ namespace SliceAlgorithm
 		return radius;
 	}
 
-	void draw( QPainter &painter, const Slice &slice, const int &intensityThreshold )
+	void draw( QPainter &painter, const Slice &slice, const uiCoord2D &pithCoord, const int &intensityThreshold, const TKD::ViewType &view )
 	{
 		painter.save();
 		painter.setPen(QColor(255,255,255,127));
 
-		uint i, j;
-		for ( j=0 ; j<slice.n_rows ; ++j )
+		const uint width = painter.window().width();
+		const uint height = painter.window().height();
+
+		const qreal angularIncrement = TWO_PI/(qreal)(width);
+
+		uint i, j, x, y;
+
+		if ( view == TKD::Z_VIEW )
 		{
-			for ( i=0 ; i<slice.n_cols ; ++i )
+			for ( j=0 ; j<height ; ++j )
 			{
-				if ( slice.at(j,i) > intensityThreshold ) painter.drawPoint(i,j);
+				for ( i=0 ; i<width ; ++i )
+				{
+					if ( slice.at(j,i) > intensityThreshold ) painter.drawPoint(i,j);
+				}
 			}
 		}
+		else if ( view == TKD::CARTESIAN_VIEW )
+		{
+			for ( j=0 ; j<height ; ++j )
+			{
+				for ( i=0 ; i<width ; ++i )
+				{
+					x = pithCoord.x + j * qCos(i*angularIncrement);
+					y = pithCoord.y + j * qSin(i*angularIncrement);
+					if ( slice.at(y,x) > intensityThreshold ) painter.drawPoint(i,j);
+				}
+			}
+		}
+
 		painter.restore();
 	}
 

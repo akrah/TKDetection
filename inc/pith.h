@@ -7,12 +7,12 @@
 
 class QImage;
 
-class Pith : public QVector<iCoord2D>
+class Pith : public QVector<uiCoord2D>
 {
 public:
 	Pith( const int size = 0 );
 	Pith( const Pith &pith );
-	Pith( const QVector<iCoord2D> &coordinates );
+	Pith( const QVector<uiCoord2D> &coordinates );
 
 	void draw( QImage &image, const int &sliceIdx ) const;
 };

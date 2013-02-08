@@ -54,7 +54,7 @@ void PieChart::setSectorsNumber( const uint &nbSectors )
 	updateSectors(nbSectors);
 }
 
-void PieChart::draw( QImage &image, const iCoord2D &center, const uint &sectorIdx ) const
+void PieChart::draw( QImage &image, const uiCoord2D &center, const uint &sectorIdx, const TKD::ViewType &viewType ) const
 {
 	Q_ASSERT_X( sectorIdx<nbSectors() , "draw", "sector index greater than sector number" );
 
@@ -73,26 +73,38 @@ void PieChart::draw( QImage &image, const iCoord2D &center, const uint &sectorId
 	QPainter painter(&image);
 	painter.setPen(Qt::red);
 	QList<qreal>::const_iterator side;
-	for ( side = twoSides.constBegin() ; side < twoSides.constEnd() ; ++side )
+	if ( viewType == TKD::Z_VIEW )
 	{
-		// Calcul des coordonnées du segment à tracer
-		angle = *side;
-		end = center;
-		if ( qFuzzyCompare(angle,PI_ON_TWO) ) end.y = height;
-		else if ( qFuzzyCompare(angle,THREE_PI_ON_TWO) ) end.y = 0;
-		else
+		for ( side = twoSides.constBegin() ; side < twoSides.constEnd() ; ++side )
 		{
-			const qreal a = qTan(angle);
-			const qreal b = center.y - (a*center.x);
-			if ( angle < PI_ON_TWO || angle > THREE_PI_ON_TWO ) end = iCoord2D(width,a*width+b);
-			else end = iCoord2D(0,b);
+			// Calcul des coordonnées du segment à tracer
+			angle = *side;
+			end = center;
+			if ( qFuzzyCompare(angle,PI_ON_TWO) ) end.y = height;
+			else if ( qFuzzyCompare(angle,THREE_PI_ON_TWO) ) end.y = 0;
+			else
+			{
+				const qreal a = qTan(angle);
+				const qreal b = center.y - (a*center.x);
+				if ( angle < PI_ON_TWO || angle > THREE_PI_ON_TWO ) end = iCoord2D(width,a*width+b);
+				else end = iCoord2D(0,b);
+			}
+			// Tracé du segment
+			painter.drawLine(center.x,center.y,end.x,end.y);
 		}
-		// Tracé du segment
-		painter.drawLine(center.x,center.y,end.x,end.y);
+	}
+	else if ( viewType == TKD::CARTESIAN_VIEW )
+	{
+		for ( side = twoSides.constBegin() ; side < twoSides.constEnd() ; ++side )
+		{
+			angle = (*side)*width/TWO_PI;
+			// Tracé du segment
+			painter.drawLine(angle,0,angle,height);
+		}
 	}
 }
 
-void PieChart::draw( QImage &image, const iCoord2D &center, const QVector< Interval<uint> > & intervals ) const
+void PieChart::draw(QImage &image, const uiCoord2D &center, const QVector< Interval<uint> > & intervals, const TKD::ViewType &viewType ) const
 {
 	if ( !intervals.isEmpty() )
 	{
@@ -112,28 +124,45 @@ void PieChart::draw( QImage &image, const iCoord2D &center, const QVector< Inter
 		const QColor colors[] = { Qt::blue, Qt::cyan, Qt::magenta };
 		QColor color;
 		iCoord2D end;
+		qreal angle;
 		int colorIndex = 0;
 
 		QPainter painter(&image);
-		QList<qreal>::ConstIterator angle;
-		for ( angle = twoSides.constBegin() ; angle < twoSides.constEnd() ; ++angle )
+		QList<qreal>::ConstIterator side;
+		if ( viewType == TKD::Z_VIEW )
 		{
-			// Calcul des coordonnées du segment à tracer
-			color = colors[(colorIndex++/2)%3];
-			painter.setPen(color);
-			painter.setBrush(color);
-			end = center;
-			if ( qFuzzyCompare(*angle,PI_ON_TWO) ) end.y = height;
-			else if ( qFuzzyCompare(*angle,THREE_PI_ON_TWO) ) end.y = 0;
-			else
+			for ( side = twoSides.constBegin() ; side < twoSides.constEnd() ; ++side )
 			{
-				const qreal a = qTan(*angle);
-				const qreal b = center.y - (a*center.x);
-				if ( (*angle) < PI_ON_TWO || (*angle) > THREE_PI_ON_TWO ) end = iCoord2D(width,a*width+b);
-				else end = iCoord2D(0,b);
+				// Calcul des coordonnées du segment à tracer
+				color = colors[(colorIndex++/2)%3];
+				painter.setPen(color);
+				painter.setBrush(color);
+				angle = *side;
+				end = center;
+				if ( qFuzzyCompare(angle,PI_ON_TWO) ) end.y = height;
+				else if ( qFuzzyCompare(angle,THREE_PI_ON_TWO) ) end.y = 0;
+				else
+				{
+					const qreal a = qTan(angle);
+					const qreal b = center.y - (a*center.x);
+					if ( (angle) < PI_ON_TWO || (angle) > THREE_PI_ON_TWO ) end = iCoord2D(width,a*width+b);
+					else end = iCoord2D(0,b);
+				}
+				// Tracé du segment
+				painter.drawLine(center.x,center.y,end.x,end.y);
 			}
-			// Tracé du segment
-			painter.drawLine(center.x,center.y,end.x,end.y);
+		}
+		else if ( viewType == TKD::CARTESIAN_VIEW )
+		{
+			for ( side = twoSides.constBegin() ; side < twoSides.constEnd() ; ++side )
+			{
+				color = colors[(colorIndex++/2)%3];
+				painter.setPen(color);
+				painter.setBrush(color);
+				angle = (*side)*width/TWO_PI;
+				// Tracé du segment
+				painter.drawLine(angle,0,angle,height);
+			}
 		}
 	}
 }

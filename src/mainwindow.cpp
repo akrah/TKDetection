@@ -119,6 +119,7 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 	// Onglet "Paramètres de l'affichage original"
 	QObject::connect(_ui->_radioYView, SIGNAL(clicked()), this, SLOT(drawSlice()));
 	QObject::connect(_ui->_radioZView, SIGNAL(clicked()), this, SLOT(drawSlice()));
+	QObject::connect(_ui->_radioCartesianView, SIGNAL(clicked()), this, SLOT(drawSlice()));
 	QObject::connect(_ui->_spanSliderIntensityThreshold, SIGNAL(lowerValueChanged(int)), _ui->_spinMinIntensity, SLOT(setValue(int)));
 	QObject::connect(_ui->_spinMinIntensity, SIGNAL(valueChanged(int)), _ui->_spanSliderIntensityThreshold, SLOT(setLowerValue(int)));
 	QObject::connect(_ui->_spanSliderIntensityThreshold, SIGNAL(upperValueChanged(int)), _ui->_spinMaxIntensity , SLOT(setValue(int)));
@@ -128,6 +129,9 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 	QObject::connect(_ui->_sliderRestrictedAreaPercentage, SIGNAL(valueChanged(int)), _ui->_spinRestrictedAreaPercentage, SLOT(setValue(int)));
 	QObject::connect(_ui->_spinRestrictedAreaPercentage, SIGNAL(valueChanged(int)), _ui->_sliderRestrictedAreaPercentage, SLOT(setValue(int)));
 	QObject::connect(_ui->_checkRadiusAroundPith, SIGNAL(clicked()), this, SLOT(drawSlice()));
+	QObject::connect(_ui->_sliderAngularResolution, SIGNAL(valueChanged(int)), _ui->_spinAngularResolution, SLOT(setValue(int)));
+	QObject::connect(_ui->_spinAngularResolution, SIGNAL(valueChanged(int)), _ui->_sliderAngularResolution, SLOT(setValue(int)));
+	QObject::connect(_ui->_spinAngularResolution, SIGNAL(valueChanged(int)), this, SLOT(drawSlice()));
 	// Onglet "Paramètres du mouvement"
 	QObject::connect(_ui->_spanSliderZMotionThreshold, SIGNAL(lowerValueChanged(int)), _ui->_spinMinZMotion, SLOT(setValue(int)));
 	QObject::connect(_ui->_spinMinZMotion, SIGNAL(valueChanged(int)), _ui->_spanSliderZMotionThreshold, SLOT(setLowerValue(int)));
@@ -347,38 +351,49 @@ void MainWindow::drawSlice()
 	if ( _billon != 0 )
 	{
 		const TKD::SliceType sliceType = static_cast<const TKD::SliceType>(_ui->_comboSliceType->currentIndex());
-		const TKD::ViewType selectedAxe = _ui->_radioYView->isChecked()?TKD::Y_VIEW:TKD::Z_VIEW;
+		const TKD::ViewType viewType = _ui->_radioYView->isChecked()?TKD::Y_VIEW:_ui->_radioZView->isChecked()?TKD::Z_VIEW:TKD::CARTESIAN_VIEW;
 		const uint &currentSlice = _ui->_radioYView->isChecked()?_currentYSlice:_currentSlice;
+		const uiCoord2D &pithCoord = _billon->hasPith()?_billon->pithCoord(_currentSlice):uiCoord2D(_billon->n_cols/2,_billon->n_rows/2);
 		uint width, height;
 
-		switch (selectedAxe)
+		switch (viewType)
 		{
+			case TKD::CARTESIAN_VIEW :
+				if (_billon->hasPith() ) {
+					height = qMin(qMin(pithCoord.x,_billon->n_cols-pithCoord.x),qMin(pithCoord.y,_billon->n_rows-pithCoord.y));
+				}
+				else {
+					height = qMin(_billon->n_cols/2,_billon->n_rows/2);
+				}
+				width = _ui->_spinAngularResolution->value();
+				break;
 			case TKD::Y_VIEW : width = _billon->n_cols; height = _billon->n_slices; break;
 			case TKD::Z_VIEW :
 			default : width = _billon->n_cols; height = _billon->n_rows; break;
 		}
 
-
 		_mainPix = QImage(width,height,QImage::Format_ARGB32);
 		_mainPix.fill(0xff000000);
 
-		_sliceView->drawSlice(_mainPix, *_billon, sliceType, _billon->hasPith()?_billon->pithCoord(_currentSlice):iCoord2D(_billon->n_cols/2,_billon->n_rows/2),
-							  currentSlice, Interval<int>(_ui->_spinMinIntensity->value(), _ui->_spinMaxIntensity->value()),
-							  Interval<int>(_ui->_spinMinZMotion->value(), _ui->_spinMaxZMotion->value()), selectedAxe,
+		_sliceView->drawSlice(_mainPix, *_billon, sliceType, pithCoord, currentSlice, Interval<int>(_ui->_spinMinIntensity->value(), _ui->_spinMaxIntensity->value()),
+							  Interval<int>(_ui->_spinMinZMotion->value(), _ui->_spinMaxZMotion->value()), _ui->_spinAngularResolution->value(), viewType,
 							  TKD::OpticalFlowParameters(_ui->_spinFlowAlpha->value(),_ui->_spinFlowEpsilon->value(),_ui->_spinFlowMaximumIterations->value()),
 							  TKD::EdgeDetectionParameters(static_cast<const TKD::EdgeDetectionType>(_ui->_comboEdgeDetectionType->currentIndex()),_ui->_spinCannyRadiusOfGaussianMask->value(),
 														   _ui->_spinCannySigmaOfGaussianMask->value(), _ui->_spinCannyMinimumGradient->value(), _ui->_spinCannyMinimumDeviation->value()));
 
-		if ( selectedAxe == TKD::Z_VIEW && _billon->hasPith() )
+		if ( (viewType == TKD::Z_VIEW || viewType == TKD::CARTESIAN_VIEW) && _billon->hasPith() )
 		{
 			_billon->pith().draw(_mainPix,_currentSlice);
 
-			const iCoord2D &pithCoord = _billon->pithCoord(_currentSlice);
 			if ( _ui->_checkRadiusAroundPith->isChecked() && _treeRadius > 0 )
 			{
+				const qreal restrictedRadius = _treeRadius*_ui->_spinRestrictedAreaPercentage->value()/100.;
 				QPainter painter(&_mainPix);
 				painter.setPen(Qt::yellow);
-				painter.drawEllipse(QPointF(pithCoord.x,pithCoord.y),_treeRadius*_ui->_spinRestrictedAreaPercentage->value()/100.,_treeRadius*_ui->_spinRestrictedAreaPercentage->value()/100.);
+				if ( viewType == TKD::Z_VIEW )
+					painter.drawEllipse(QPointF(pithCoord.x,pithCoord.y),restrictedRadius,restrictedRadius);
+				else
+					painter.drawLine(0,restrictedRadius,width,restrictedRadius);
 			}
 
 			const bool inDrawingArea = (_ui->_comboSelectSliceInterval->currentIndex() > 0 &&
@@ -387,39 +402,59 @@ void MainWindow::drawSlice()
 			{
 				if ( !_sectorHistogram->isEmpty() )
 				{
-					_pieChart->draw(_mainPix, pithCoord, _sectorHistogram->intervals());
-					_pieChart->draw(_mainPix, pithCoord, _currentSector);
+					_pieChart->draw(_mainPix, pithCoord, _sectorHistogram->intervals(), viewType);
+					_pieChart->draw(_mainPix, pithCoord, _currentSector, viewType);
 				}
-				if ( _componentBillon != 0 )
+				if ( _componentBillon != 0  )
 				{
 					const uint slicePosition = _currentSlice-_componentBillon->zPos();
 					const Slice &componentSlice = _componentBillon->slice(slicePosition);
-
-					const int &width = componentSlice.n_cols;
-					const int &height = componentSlice.n_rows;
 
 					const QColor colors[] = { QColor(0,0,255,127), QColor(255,0,255,127), QColor(255,0,0,127), QColor(255,255,0,127), QColor(0,255,0,127) };
 					const int nbColors = sizeof(colors)/sizeof(QColor);
 
 					QPainter painter(&_mainPix);
-					int i, j, color;
-					for ( j=0 ; j<height ; ++j )
+					uint i, j, color;
+
+					if ( viewType == TKD::Z_VIEW )
 					{
-						for ( i=0 ; i<width ; ++i )
+						for ( j=0 ; j<height ; ++j )
 						{
-							color = componentSlice.at(j,i);
-							if ( color )
+							for ( i=0 ; i<width ; ++i )
 							{
-								painter.setPen(colors[color%nbColors]);
-								painter.drawPoint(i,j);
+								color = componentSlice.at(j,i);
+								if ( color )
+								{
+									painter.setPen(colors[color%nbColors]);
+									painter.drawPoint(i,j);
+								}
+							}
+						}
+					}
+					else if ( viewType == TKD::CARTESIAN_VIEW )
+					{
+						const qreal angularIncrement = TWO_PI/(qreal)(width);
+						int x, y;
+						for ( j=0 ; j<height ; ++j )
+						{
+							for ( i=0 ; i<width ; ++i )
+							{
+								x = pithCoord.x + j * qCos(i*angularIncrement);
+								y = pithCoord.y + j * qSin(i*angularIncrement);
+								color = componentSlice.at(y,x);
+								if ( color )
+								{
+									painter.setPen(colors[color%nbColors]);
+									painter.drawPoint(i,j);
+								}
 							}
 						}
 					}
 
 					if ( _ui->_checkEnableConnexComponents->isChecked() && _knotBillon != 0 )
 					{
-						SliceAlgorithm::draw( painter, _knotBillon->slice(slicePosition), 0 );
-						_contourBillon->contourSlice(slicePosition).draw( painter, _ui->_sliderContour->value() );
+						SliceAlgorithm::draw( painter, _knotBillon->slice(slicePosition), pithCoord, 0, viewType );
+						_contourBillon->contourSlice(slicePosition).draw( painter, _ui->_sliderContour->value(), viewType );
 					}
 					painter.end();
 				}
@@ -433,7 +468,7 @@ void MainWindow::drawSlice()
 	}
 
 	_labelSliceView->setPixmap( QPixmap::fromImage(_mainPix) );
-	zoomInSliceView(_sliceZoomer.factor(),_sliceZoomer.coefficient());
+	_labelSliceView->resize(_sliceZoomer.factor() * _mainPix.size());
 }
 
 void MainWindow::setSlice( const int &sliceNumber )
@@ -983,7 +1018,7 @@ void MainWindow::initComponentsValues() {
 
 void MainWindow::updateUiComponentsValues()
 {
-	int minValue, maxValue, nbSlices, height;
+	int minValue, maxValue, nbSlices, height, angularResolution;
 
 	if ( _billon )
 	{
@@ -991,6 +1026,7 @@ void MainWindow::updateUiComponentsValues()
 		maxValue = _billon->maxValue();
 		nbSlices = _billon->n_slices-1;
 		height = _billon->n_rows-1;
+		angularResolution = (height+_billon->n_cols)*2;
 		_ui->_labelSliceNumber->setNum(0);
 		_ui->_statusBar->showMessage( tr("Dimensions de voxels (largeur, hauteur, profondeur) : ( %1, %2, %3 )")
 									  .arg(_billon->voxelWidth()).arg(_billon->voxelHeight()).arg(_billon->voxelDepth()) );
@@ -999,6 +1035,7 @@ void MainWindow::updateUiComponentsValues()
 	{
 		minValue = maxValue = 0;
 		nbSlices = height = 0;
+		angularResolution = 360;
 		_ui->_labelSliceNumber->setText(tr("Aucune coupe présente."));
 		_ui->_statusBar->clearMessage();
 	}
@@ -1036,6 +1073,9 @@ void MainWindow::updateUiComponentsValues()
 	_ui->_spanSliderIntensityThreshold->setUpperValue(MAXIMUM_INTENSITY);
 
 	_ui->_checkRadiusAroundPith->setText( QString::number(_treeRadius) );
+
+	_ui->_spinAngularResolution->setMaximum(angularResolution);
+	_ui->_sliderAngularResolution->setMaximum(angularResolution);
 }
 
 void MainWindow::enabledComponents()

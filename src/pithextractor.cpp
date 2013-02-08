@@ -46,7 +46,7 @@ void PithExtractor::process( Billon &billon ) const
 	const int height = billon.n_rows;
 	const int depth = billon.n_slices;
 
-	iCoord2D coordPrec, coordCurrent;
+	uiCoord2D coordPrec, coordCurrent;
 	float maxStandList[depth];
 	float *maxStandList2 = 0;
 	float shift,houghStandThreshold;
@@ -82,7 +82,7 @@ void PithExtractor::process( Billon &billon ) const
 			//extraction de la moelle de la coupe i
 			coordCurrent = transHough( billon.slice(i), _windowWidth, _windowHeight, &x, &y, &max, &nbContourPoints );
 			billon._pith.append(coordCurrent);
-			shift = sqrt(pow((double) (billon._pith.last().x - coordPrec.x),(double) 2.0) + pow( (double)(billon._pith.last().y - coordPrec.y), (double)2.0) );
+			shift = sqrt(pow((double) ((int)(billon._pith.last().x) - (int)(coordPrec.x)),(double) 2.0) + pow( (double)((int)(billon._pith.last().y) - (int)(coordPrec.y)), (double)2.0) );
 			//si le resultat obtenu a un decalage trop important avec la coupe precedente alors on recommence l'extraction sur l'ensemble de la coupe
 			if(shift > _pithLag && width > _windowWidth && height > _windowHeight){
 				std::cerr << "*";
@@ -127,13 +127,13 @@ void PithExtractor::process( Billon &billon ) const
 /******************************************************************
  * Fonctions secondaires appelées lors de l'extraction de la moelle
  ******************************************************************/
-iCoord2D PithExtractor::transHough(const Slice &slice, int width, int height, int *x, int *y, int *sliceMaxValue, int *nbContourPoints) const
+uiCoord2D PithExtractor::transHough(const Slice &slice, int width, int height, int *x, int *y, int *sliceMaxValue, int *nbContourPoints) const
 {
 	int x_accu, y_accu, longueur, min;
 	int *droite;
 	Slice *tabaccu;
 	arma::fmat *orientation, *cont;
-	iCoord2D coordmax;
+	uiCoord2D coordmax;
 	orientation = 0;
 	{ // bloc de limitation de vie de la variable voisinage
 		// attention x represente les colonne et y les lignes
@@ -173,7 +173,7 @@ iCoord2D PithExtractor::transHough(const Slice &slice, int width, int height, in
 	*x += coordmax.x;
 	*y += coordmax.y;
 
-	return iCoord2D(*x, *y);
+	return uiCoord2D(*x, *y);
 }
 
 arma::fmat * PithExtractor::contour(const Slice &slice, arma::fmat **orientation) const
@@ -472,7 +472,7 @@ int PithExtractor::floatCompare(const void *first, const void *second)
 	and positive if a > b */
 }
 
-void PithExtractor::minSlice(const Slice &slice, int *minValue, int *maxValue, iCoord2D *coordmax) const {
+void PithExtractor::minSlice(const Slice &slice, int *minValue, int *maxValue, uiCoord2D *coordmax) const {
 	const uint height = slice.n_rows-1;
 	const uint width = slice.n_cols-1;
 
@@ -484,13 +484,13 @@ void PithExtractor::minSlice(const Slice &slice, int *minValue, int *maxValue, i
 			}
 			else if ( value > *maxValue ) {
 				*maxValue = value;
-				*coordmax = iCoord2D(j,i);
+				*coordmax = uiCoord2D(j,i);
 			}
 		}
 	}
 }
 
-void PithExtractor::correctPith( QVector<iCoord2D> &moelle, float *listMax, float seuilHough ) const {
+void PithExtractor::correctPith( QVector<uiCoord2D> &moelle, float *listMax, float seuilHough ) const {
 	const int pithSize = moelle.size();
 	int startSlice, endSlice, i=0, x1, y1, x2, y2, newx, newy;
 	float ax, ay;
@@ -545,7 +545,7 @@ void PithExtractor::correctPith( QVector<iCoord2D> &moelle, float *listMax, floa
 				}else{
 					newy = y1;
 				}
-				moelle.replace(j, iCoord2D(newx, newy));
+				moelle.replace(j, uiCoord2D(newx, newy));
 			}
 		}
 		i++;
