@@ -292,8 +292,11 @@ void Histogram<T>::computeIntervals( const int & derivativesPercentage, const ui
 	_intervals.clear();
 	if ( _maximums.isEmpty() ) return;
 
-	int cursorMax, cursorMin, derivativeThreshold;
+	uint cursorMax, cursorMin, derivativeThreshold;
 	Interval<uint> cursor;
+	const uint histoSize = this->size();
+	const uint histoSizeMinusOne = histoSize - 1;
+
 	for ( uint i=0 ; i<nbMaximums() ; ++i )
 	{
 		// Detection des bornes de l'intervalle courant
@@ -302,29 +305,29 @@ void Histogram<T>::computeIntervals( const int & derivativesPercentage, const ui
 		while ( this->at(cursorMin) > derivativeThreshold )
 		{
 			if ( cursorMin ) cursorMin--;
-			else cursorMin = this->size()-1;
+			else cursorMin = histoSize-1;
 		}
 		while ( firstdDerivated(cursorMin,loop) > 0. )
 		{
 			if ( cursorMin ) cursorMin--;
-			else cursorMin = this->size()-1;
+			else cursorMin = histoSizeMinusOne;
 		}
 
 		cursorMax = _maximums[i]+1;
-		if ( cursorMax == this->size() ) cursorMax = 0;
+		if ( cursorMax == histoSize ) cursorMax = 0;
 
 		while ( this->at(cursorMax) > derivativeThreshold )
 		{
 			cursorMax++;
-			if ( cursorMax == this->size() ) cursorMax = 0;
+			if ( cursorMax == histoSize ) cursorMax = 0;
 		}
 		while ( firstdDerivated(cursorMax,loop) < 0. )
 		{
 			cursorMax++;
-			if ( cursorMax == this->size() ) cursorMax = 0;
+			if ( cursorMax == histoSize ) cursorMax = 0;
 		}
 		if ( cursorMax ) cursorMax--;
-		else cursorMax = this->size()-1;
+		else cursorMax = histoSizeMinusOne;
 
 		cursor.setBounds(cursorMin,cursorMax);
 
@@ -339,18 +342,13 @@ void Histogram<T>::computeIntervals( const int & derivativesPercentage, const ui
 				}
 				else
 				{
-					Interval<uint> &last = _intervals.last();
-					if ( cursorMin < last.max() )
+					cursorMin = _intervals.last().max();
+					if ( cursorMax > cursorMin )
 					{
-						if ( cursorMin < _maximums[i-1] )
-						{
-							cursor.setMin(last.max());
-							cursorMin = last.max();
-						}
-						else last.setMax(cursorMin);
+						cursor.setMin(cursorMin);
 						if ( cursor.width() > minimumWidthOfIntervals ) _intervals.append(cursor);
-						cursorMin = last.min();
 					}
+					cursorMin = _intervals.last().min();
 				}
 			}
 		}
@@ -358,7 +356,7 @@ void Histogram<T>::computeIntervals( const int & derivativesPercentage, const ui
 		{
 			if ( loop )
 			{
-				if ( this->size()-(cursor.min()-cursor.max()) >= minimumWidthOfIntervals )
+				if ( histoSize-(cursor.min()-cursor.max()) >= minimumWidthOfIntervals )
 				{
 					if ( _intervals.isEmpty()  )
 					{
@@ -366,36 +364,19 @@ void Histogram<T>::computeIntervals( const int & derivativesPercentage, const ui
 					}
 					else
 					{
-						Interval<uint> &last = _intervals.last();
-						const Interval<uint> &first = _intervals.first();
-						if ( cursor != last && cursor != first )
+						const uint &lastMax = _intervals.last().max();
+						const uint &firstMin = _intervals.first().min();
+						if ( cursorMin < lastMax )
 						{
-							if ( cursor.intersect(last) )
-							{
-								if ( cursor.min() == last.min() )
-								{
-									cursor.setMin(last.max());
-									cursorMin = last.max();
-								}
-								else if ( cursor.max() == last.max() )
-								{
-									last.setMax(cursor.min());
-								}
-							}
-							if ( cursor.intersect(first) )
-							{
-								if ( cursor.min() == first.min() )
-								{
-									cursor.setMin(first.max());
-									cursorMin = first.max();
-								}
-								else if ( cursor.max() == first.max() )
-								{
-									last.setMax(cursor.min());
-								}
-							}
-							_intervals.append(cursor);
+							cursorMin = lastMax;
+							cursor.setMin(lastMax);
 						}
+						if ( cursorMax > firstMin )
+						{
+							cursorMax = firstMin;
+							cursor.setMax(firstMin);
+						}
+						if ( histoSize-(cursor.min()-cursor.max()) >= minimumWidthOfIntervals ) _intervals.append(cursor);
 					}
 				}
 			}
@@ -405,26 +386,18 @@ void Histogram<T>::computeIntervals( const int & derivativesPercentage, const ui
 				{
 					cursor.setMin(0);
 					cursorMin = 0;
-					_intervals.append(cursor);
+					if ( cursor.width() > minimumWidthOfIntervals ) _intervals.append(cursor);
 				}
 				else
 				{
-					cursor.setMax(this->size()-1);
-					cursorMax = cursor.max();
-					Interval<uint> &last = _intervals.last();
-					if ( cursor != last )
+					cursorMax = histoSizeMinusOne;
+					cursor.setMax(cursorMax);
+					if ( _intervals.last().max() > cursorMin )
 					{
-						if ( cursor.min() == last.min() )
-						{
-							cursor.setMin(last.max());
-							cursorMin = last.max();
-						}
-						else if ( cursor.max() == last.max() )
-						{
-							last.setMax(cursor.min());
-						}
-						_intervals.append(cursor);
+						cursorMin = _intervals.last().max();
+						cursor.setMin(cursorMin);
 					}
+					if ( cursor.width() > minimumWidthOfIntervals )	_intervals.append(cursor);
 				}
 			}
 		}
