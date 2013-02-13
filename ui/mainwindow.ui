@@ -217,6 +217,7 @@
      <string>Fichier</string>
     </property>
     <addaction name="_actionOpenDicom"/>
+    <addaction name="_actionOpenTiff"/>
     <addaction name="_actionCloseImage"/>
     <addaction name="separator"/>
     <addaction name="_actionQuit"/>
@@ -675,8 +676,8 @@ zone restreinte</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>439</width>
-              <height>321</height>
+              <width>316</width>
+              <height>49</height>
              </rect>
             </property>
             <attribute name="label">
@@ -761,8 +762,8 @@ zone restreinte</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>439</width>
-              <height>321</height>
+              <width>276</width>
+              <height>221</height>
              </rect>
             </property>
             <attribute name="label">
@@ -956,8 +957,8 @@ zone restreinte</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>439</width>
-              <height>321</height>
+              <width>321</width>
+              <height>152</height>
              </rect>
             </property>
             <attribute name="label">
@@ -2255,7 +2256,7 @@ l'origine du contour</string>
               <x>0</x>
               <y>0</y>
               <width>441</width>
-              <height>296</height>
+              <height>112</height>
              </rect>
             </property>
             <attribute name="label">
@@ -2564,6 +2565,11 @@ l'origine du contour</string>
   <action name="_actionImportV3D">
    <property name="text">
     <string>Importer une image V3D</string>
+   </property>
+  </action>
+  <action name="_actionOpenTiff">
+   <property name="text">
+    <string>Ouvrir un fichier Tiff</string>
    </property>
   </action>
  </widget>

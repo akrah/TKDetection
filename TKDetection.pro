@@ -44,7 +44,9 @@ SOURCES	=	main.cpp \
 			datexport.cpp \
 			dicomreader.cpp \
 			globalfunctions.cpp \
+			intensitydistributionhistogram.cpp \
 			nearestpointshistogram.cpp \
+			mainmodel.cpp \
 			mainwindow.cpp \
 			ofsexport.cpp \
 			opticalflow.cpp \
@@ -53,10 +55,13 @@ SOURCES	=	main.cpp \
 			piepart.cpp \
 			pith.cpp \
 			pithextractor.cpp \
+			plotcontourdistanceshistogram.cpp \
 			plotcurvaturehistogram.cpp \
+			plotintensitydistributionhistogram.cpp \
 			plotnearestpointshistogram.cpp \
 			plotsectorhistogram.cpp \
 			plotslicehistogram.cpp \
+			plotzmotiondistributionhistogram.cpp \
 			pointpolarseriesdata.cpp \
 			sectorhistogram.cpp \
 			slicealgorithm.cpp \
@@ -64,13 +69,9 @@ SOURCES	=	main.cpp \
 			sliceview.cpp \
 			slicezoomer.cpp \
 			test_intervalshistogram.cpp \
+			tifreader.cpp \
 			v3dexport.cpp \
-    src/plotcontourdistanceshistogram.cpp \
-    src/intensitydistributionhistogram.cpp \
-    src/plotintensitydistributionhistogram.cpp \
-    src/zmotiondistributionhistogram.cpp \
-    src/plotzmotiondistributionhistogram.cpp \
-    src/mainmodel.cpp
+			zmotiondistributionhistogram.cpp
 
 HEADERS	=	billon.h \
 			billonalgorithms.h \
@@ -89,8 +90,10 @@ HEADERS	=	billon.h \
 			dicomreader.h \
 			globalfunctions.h \
 			histogram.h \
+			intensitydistributionhistogram.h \
 			interval.h \
 			nearestpointshistogram.h \
+			mainmodel.h \
 			mainwindow.h \
 			ofsexport.h \
 			opticalflow.h \
@@ -99,10 +102,13 @@ HEADERS	=	billon.h \
 			piechart.h \
 			pith.h \
 			pithextractor.h \
+			plotcontourdistanceshistogram.h \
 			plotcurvaturehistogram.h \
+			plotintensitydistributionhistogram.h \
 			plotnearestpointshistogram.h \
 			plotsectorhistogram.h \
 			plotslicehistogram.h \
+			plotzmotiondistributionhistogram.h \
 			pointpolarseriesdata.h \
 			sectorhistogram.h \
 			slicealgorithm.h \
@@ -110,13 +116,9 @@ HEADERS	=	billon.h \
 			sliceview.h \
 			slicezoomer.h \
 			test_intervalshistogram.h \
+			tifreader.h \
 			v3dexport.h \
-    inc/plotcontourdistanceshistogram.h \
-    inc/intensitydistributionhistogram.h \
-    inc/plotintensitydistributionhistogram.h \
-    inc/zmotiondistributionhistogram.h \
-    inc/plotzmotiondistributionhistogram.h \
-    inc/mainmodel.h
+			zmotiondistributionhistogram.h
 
 FORMS =	mainwindow.ui
 
@@ -134,7 +136,7 @@ INCLUDEPATH *=	/usr/include/ \
 
 QMAKE_LIBDIR *=	/usr/local/lib/
 
-LIBS *= -lblas -llapack -larmadillo
+LIBS *= -lblas -llapack -larmadillo -ltiff
 
 # ITK
 #----#

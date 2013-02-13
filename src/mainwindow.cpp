@@ -32,6 +32,7 @@
 #include "inc/sliceview.h"
 #include "inc/v3dexport.h"
 #include "inc/v3dreader.h"
+#include "inc/tifreader.h"
 #include "inc/zmotiondistributionhistogram.h"
 
 #include <QLabel>
@@ -224,6 +225,8 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 	// Raccourcis des actions du menu
 	_ui->_actionOpenDicom->setShortcut(Qt::CTRL + Qt::Key_O);
 	QObject::connect(_ui->_actionOpenDicom, SIGNAL(triggered()), this, SLOT(openDicom()));
+	_ui->_actionOpenTiff->setShortcut(Qt::CTRL + Qt::Key_T);
+	QObject::connect(_ui->_actionOpenTiff, SIGNAL(triggered()), this, SLOT(openTif()));
 	_ui->_actionCloseImage->setShortcut(Qt::CTRL + Qt::Key_W);
 	QObject::connect(_ui->_actionCloseImage, SIGNAL(triggered()), this, SLOT(closeImage()));
 	_ui->_actionQuit->setShortcut(Qt::CTRL + Qt::Key_Q);
@@ -300,6 +303,26 @@ void MainWindow::openDicom()
 		setWindowTitle(QString("TKDetection - %1").arg(folderName.section(QDir::separator(),-1)));
 
 		drawSlice();
+	}
+}
+
+void MainWindow::openTif()
+{
+	QString fileName = QFileDialog::getOpenFileName(0,tr("Sélection du fichier TIF"),QDir::homePath(),tr("Images TIFF (*.tiff *.tif)"));
+	if ( !fileName.isEmpty() )
+	{
+		TifReader::read(fileName);
+//		Billon *billon = TifReader::read(fileName);
+//		if ( billon == 0 ) return;
+
+//		closeImage();
+//		_billon = billon;
+//		updateUiComponentsValues();
+//		enabledComponents();
+
+//		setWindowTitle(QString("TKDetection - %1").arg(fileName.section(QDir::separator(),-1)));
+
+//		drawSlice();
 	}
 }
 

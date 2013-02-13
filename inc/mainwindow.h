@@ -45,6 +45,7 @@ public:
 
 private slots:
 	void openDicom();
+	void openTif();
 	void closeImage();
 	void drawSlice();
 	void setSlice( const int &sliceNumber );
