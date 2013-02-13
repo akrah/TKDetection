@@ -3,9 +3,9 @@ TKDetection
 
 TKDetection is a software to detect and segment wood knots.
 
-1. [Dépendances](#dépendances)
-2. [Installation des dépendances sur Ubuntu](#installation-des-dépendances-sur-ubuntu)
-3. [Installation de TKDetection](#installation-de-TKDetection)
+1. [Dépendances](#dpendances)
+2. [Installation des dépendances sur Ubuntu](#installation-des-dpendances-sur-ubuntu)
+3. [Installation de TKDetection](#installation-de-tkdetection)
 
 
 Dépendances
@@ -31,7 +31,7 @@ Installez les paquets "build-essential" et "cmake".
 
 
 ### 1. QT
-[Top](#dépendances)
+[Top](#tkdetection)
 
 Installez le packet *qtcreator* disponible dans le dépôt *Universe*.
 C'est un méta-packet qui installe l'ensemble des dépendances de Qt.
@@ -42,7 +42,7 @@ C'est un méta-packet qui installe l'ensemble des dépendances de Qt.
 
 
 ### 2. Armadillo
-[Top](#dépendances)
+[Top](#tkdetection)
 
 Téléchargez de la dernière version disponible sur le site http://arma.sourceforge.net.
 
@@ -64,7 +64,7 @@ Installez ensuite Armadillo en remplaçant *x-x-x* par le numéro de la version 
 
 
 ### 3. InsightToolkit
-[Top](#dépendances)
+[Top](#tkdetection)
 
 Téléchargez la version disponible sur le site http://www.itk.org/ITK/resources/software.html.
 Installez-la en remplaçant *x-x-x* par le numéro de la version téléchargée :
@@ -81,7 +81,7 @@ Installez-la en remplaçant *x-x-x* par le numéro de la version téléchargée 
 
 
 ### 4. Qwt
-[Top](#dépendances)
+[Top](#tkdetection)
 
 Utilisez de la version disponible dans le dépôt *main*.
 
@@ -91,7 +91,7 @@ Utilisez de la version disponible dans le dépôt *main*.
 
 
 ### 5. Qxt
-[Top](#dépendances)
+[Top](#tkdetection)
 
 Téléchargez la version disponible sur le site http://www.libqxt.org.
 La version disponible via les dépôts n'installe pas les fichiers de configuration *qxt.prf* et *qxtvars.prf* nécaissaires à TKDetection.pro.
@@ -117,7 +117,7 @@ Relancez QtDesigner.
 
 
 ### 6. QwtPolar
-[Top](#dépendances)
+[Top](#tkdetection)
 
 Utilisez la version disponible sur le site http://sourceforge.net/projects/qwtpolar.
 Installez-la en remplaçant *x-x-x* par le numéro de la version téléchargée :
@@ -161,7 +161,7 @@ N'oubliez pas de remplacer x.x.x par le numéro de la version téléchargée :
 
 
 ### 7. DGtalTools
-[Top](#dépendances)
+[Top](#tkdetection)
 
 Nécessite l'installation de DGtal.
 Faites-le par exemple en clonant le dépôt :
@@ -188,7 +188,7 @@ Installez ensuite DGtalTools :
 
 
 ### 8. ImaGene
-[Top](#dépendances)
+[Top](#tkdetection)
 
 DGLib utilise des fonctionalité de d'ImaGene.
 Installez ImaGene, par exemple à partir d'une version sans dépendance :
@@ -204,7 +204,7 @@ Installez ImaGene, par exemple à partir d'une version sans dépendance :
 
 
 ### 9. DGLib
-[Top](#dépendances)
+[Top](#tkdetection)
 
 Doit être téléchargé ici : http://www.loria.fr/~krahenbu/dgci2013/DGLib_for_TKDetection.zip
 
@@ -219,7 +219,7 @@ Doit être téléchargé ici : http://www.loria.fr/~krahenbu/dgci2013/DGLib_for_
 
 Installation de TKDetection
 ---------------------------
-[Top](#dépendances)
+[Top](#tkdetection)
 
 ~~~
   git clone https://github.com/adrien057/TKDetection.git
