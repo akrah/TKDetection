@@ -3,6 +3,10 @@ TKDetection
 
 TKDetection is a software to detect and segment wood knots.
 
+1. [Dépendances](#dépendances)
+2. [Installation des dépendances sur Ubuntu](#installation-des-dépendances-sur-ubuntu)
+3. [Installation de TKDetection](#installation-de-TKDetection)
+
 
 Dépendances
 -----------
@@ -14,8 +18,8 @@ Dépendances
 | 3 | [InsightToolkit](#3-insighttoolkit) |       4.1        | 6 | [QwtPolar](#6-qwtpolar) |       1.0.1      | 9 | [ImaGene](#8-imagene)       |      dépôt       |
 
 
-Installation sur Ubuntu
------------------------
+Installation des dépendances sur Ubuntu
+---------------------------------------
 
 ### Pré-requis
 
@@ -163,7 +167,7 @@ Nécessite l'installation de DGtal.
 Faites-le par exemple en clonant le dépôt :
 
 ~~~
-  git checkout git://github.com/DGtal-team/DGtal.git DGtal
+  git clone git://github.com/DGtal-team/DGtal.git DGtal
   cd DGtal
   mkdir build && cd build
   cmake .. -DWITH_GMP=true -DWITH_ITK=true -DWITH_QGLVIEWER=true
@@ -174,7 +178,7 @@ Faites-le par exemple en clonant le dépôt :
 Installez ensuite DGtalTools :
 
 ~~~
-  git checkout git://github.com/DGtal-team/DGtalTools.git DGtalTools
+  git clone git://github.com/DGtal-team/DGtalTools.git DGtalTools
   cd DGtalTools
   mkdir build && cd build
   cmake .. -DWITH_VISU3D_QGLVIEWER=true
@@ -212,3 +216,17 @@ Doit être téléchargé ici : http://www.loria.fr/~krahenbu/dgci2013/DGLib_for_
   make
   sudo make install
 ~~~
+
+Installation de TKDetection
+---------------------------
+[Top](#dépendances)
+
+~~~
+  git clone https://github.com/adrien057/TKDetection.git
+  cd TKDetection
+  mkdir build && cd build
+  qmake ..
+  make
+~~~
+
+L'exécutable **TKDetection** se trouve alors dans le répertoire TKDetection.
