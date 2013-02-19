@@ -311,18 +311,17 @@ void MainWindow::openTif()
 	QString fileName = QFileDialog::getOpenFileName(0,tr("Sélection du fichier TIF"),QDir::homePath(),tr("Images TIFF (*.tiff *.tif)"));
 	if ( !fileName.isEmpty() )
 	{
-		TifReader::read(fileName);
-//		Billon *billon = TifReader::read(fileName);
-//		if ( billon == 0 ) return;
+		Billon *billon = TifReader::read(fileName);
+		if ( billon == 0 ) return;
 
-//		closeImage();
-//		_billon = billon;
-//		updateUiComponentsValues();
-//		enabledComponents();
+		closeImage();
+		_billon = billon;
+		updateUiComponentsValues();
+		enabledComponents();
 
-//		setWindowTitle(QString("TKDetection - %1").arg(fileName.section(QDir::separator(),-1)));
+		setWindowTitle(QString("TKDetection - %1").arg(fileName.section(QDir::separator(),-1)));
 
-//		drawSlice();
+		drawSlice();
 	}
 }
 

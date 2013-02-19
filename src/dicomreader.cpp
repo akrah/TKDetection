@@ -12,14 +12,12 @@
 
 namespace DicomReader
 {
-
 	// Déclaration de fonctions privées
 	namespace
 	{
 		Billon* makeBillonFromDicomWithITK( const QString &repository );
 		QString getTag( const QString &entryId, const itk::MetaDataDictionary &dictionary );
 	}
-
 
 	Billon* read( const QString &repository )
 	{
@@ -31,7 +29,6 @@ namespace DicomReader
 	// Implémentation des fonction privées
 	namespace
 	{
-		inline
 		Billon* makeBillonFromDicomWithITK( const QString &repository )
 		{
 			// Définition des type de l'image
@@ -115,7 +112,6 @@ namespace DicomReader
 			return billon;
 		}
 
-		inline
 		QString getTag( const QString &entryId, const itk::MetaDataDictionary &dictionary )
 		{
 			QString value = QObject::tr("indéfinie");
@@ -134,6 +130,5 @@ namespace DicomReader
 			return value;
 		}
 	}
-
 }
 

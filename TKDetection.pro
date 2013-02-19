@@ -136,7 +136,7 @@ INCLUDEPATH *=	/usr/include/ \
 
 QMAKE_LIBDIR *=	/usr/local/lib/
 
-LIBS *= -lblas -llapack -larmadillo -ltiff
+LIBS *= -lblas -llapack -larmadillo
 
 # ITK
 #----#
@@ -178,7 +178,7 @@ else:itk4 {
 	ITK_PATH	 =	/usr/local/include/ITK-$${ITK_NUMBER}/
 	INCLUDEPATH	*=	$${ITK_PATH}/
 
-	LIBS *=	-lITKIOGDCM-$${ITK_NUMBER} \
+	LIBS *= -lITKIOGDCM-$${ITK_NUMBER} \
 				-litkgdcmDICT-$${ITK_NUMBER} \
 				-litkgdcmMSFF-$${ITK_NUMBER} \
 					-litkgdcmIOD-$${ITK_NUMBER} \
@@ -195,6 +195,9 @@ else:itk4 {
 						-litksys-$${ITK_NUMBER} \
 						-litkvnl_algo-$${ITK_NUMBER} \
 						-litkv3p_netlib-$${ITK_NUMBER} \
-						-litkvnl-$${ITK_NUMBER}
+						-litkvnl-$${ITK_NUMBER} \
+				-lITKIOTIFF-$${ITK_NUMBER} \
+					-litktiff-$${ITK_NUMBER} \
+					-litkjpeg-$${ITK_NUMBER} \
 
 }

@@ -67,11 +67,11 @@ protected:
 
 template< typename T >
 BillonTpl<T>::BillonTpl() :
-	arma::Cube<T>(), _pith(0), _minValue(T(0)), _maxValue(T(0)), _voxelWidth(0.), _voxelHeight(0.), _voxelDepth(0.), _zPos(0) {}
+	arma::Cube<T>(), _pith(0), _minValue(T(0)), _maxValue(T(0)), _voxelWidth(1.), _voxelHeight(1.), _voxelDepth(1.), _zPos(0) {}
 
 template< typename T >
 BillonTpl<T>::BillonTpl( const int & width, const int & height, const int & depth ) :
-	arma::Cube<T>(height,width,depth), _pith(0), _minValue(T(0)), _maxValue(T(0)), _voxelWidth(0.), _voxelHeight(0.), _voxelDepth(0.), _zPos(0) {}
+	arma::Cube<T>(height,width,depth), _pith(0), _minValue(T(0)), _maxValue(T(0)), _voxelWidth(1.), _voxelHeight(1.), _voxelDepth(1.), _zPos(0) {}
 
 template< typename T >
 BillonTpl<T>::BillonTpl( const BillonTpl<T> & billon ) :
