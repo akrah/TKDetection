@@ -34,7 +34,7 @@ void SliceHistogram::construct( const Billon &billon, const Interval<int> &inten
 	}
 
 	const uint minOfInterval = borderPercentageToCut*depth/100.;
-	const uint maxOfInterval = depth-minOfInterval;
+	const uint maxOfInterval = qMin(depth-minOfInterval,static_cast<uint>(this->size()-1));
 	int i, j, iRadius, iRadiusMax;
 	__billon_type__ currentSliceValue, previousSliceValue, diff;
 	iCoord2D currentPos;

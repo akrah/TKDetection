@@ -33,8 +33,7 @@ public:
 	T firstdDerivated( int i, bool loop ) const;
 
 	void clear();
-	void computeMaximumsAndIntervals( const uint &smoothingRadius,
-									  const int & minimumHeightPercentageOfMaximum, const int & neighborhoodOfMaximums,
+	void computeMaximumsAndIntervals(const uint &smoothingRadius, const int & minimumHeightPercentageOfMaximum,
 									  const int & derivativesPercentage, const int &minimumWidthOfIntervals, const bool & loop );
 
 protected:
@@ -172,12 +171,11 @@ void Histogram<T>::clear()
 }
 
 template <typename T>
-void Histogram<T>::computeMaximumsAndIntervals( const uint & smoothingRadius,
-												const int & minimumHeightPercentageOfMaximum, const int & neighborhoodOfMaximums,
+void Histogram<T>::computeMaximumsAndIntervals( const uint & smoothingRadius, const int & minimumHeightPercentageOfMaximum,
 												const int & derivativesPercentage, const int &minimumWidthOfIntervals, const bool & loop )
 {
 	meansSmoothing( smoothingRadius, loop );
-	computeMaximums( minimumHeightPercentageOfMaximum, neighborhoodOfMaximums, loop );
+	computeMaximums( minimumHeightPercentageOfMaximum, minimumWidthOfIntervals/2, loop );
 	computeIntervals( derivativesPercentage, minimumWidthOfIntervals, loop );
 }
 
@@ -292,7 +290,7 @@ void Histogram<T>::computeIntervals( const int & derivativesPercentage, const ui
 	_intervals.clear();
 	if ( _maximums.isEmpty() ) return;
 
-	uint cursorMax, cursorMin, derivativeThreshold;
+	uint cursorMax, cursorMin, cursorStart, derivativeThreshold;
 	Interval<uint> cursor;
 	const uint histoSize = this->size();
 	const uint histoSizeMinusOne = histoSize - 1;
@@ -301,8 +299,10 @@ void Histogram<T>::computeIntervals( const int & derivativesPercentage, const ui
 	{
 		// Detection des bornes de l'intervalle courant
 		cursorMin = _maximums[i];
+		cursorStart = cursorMin+1;
+		if ( cursorStart == histoSize ) cursorStart = 0;
 		derivativeThreshold = this->at(cursorMin)*derivativesPercentage/100.;
-		while ( this->at(cursorMin) > derivativeThreshold )
+		while ( cursorMin != cursorStart && this->at(cursorMin) > derivativeThreshold )
 		{
 			if ( cursorMin ) cursorMin--;
 			else cursorMin = histoSize-1;
@@ -313,10 +313,10 @@ void Histogram<T>::computeIntervals( const int & derivativesPercentage, const ui
 			else cursorMin = histoSizeMinusOne;
 		}
 
-		cursorMax = _maximums[i]+1;
-		if ( cursorMax == histoSize ) cursorMax = 0;
-
-		while ( this->at(cursorMax) > derivativeThreshold )
+		cursorMax = cursorStart;
+		if ( cursorStart ) cursorStart--;
+		else cursorStart = histoSize-1;
+		while ( cursorMax != cursorStart && this->at(cursorMax) > derivativeThreshold )
 		{
 			cursorMax++;
 			if ( cursorMax == histoSize ) cursorMax = 0;

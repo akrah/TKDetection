@@ -1,4 +1,4 @@
-#include "inc/tifreader.h"
+#include "inc/tiffreader.h"
 
 #include "inc/billon.h"
 
@@ -10,13 +10,12 @@
 #include <itkTIFFImageIO.h>
 #include <itkNumericSeriesFileNames.h>
 
-namespace TifReader
+namespace TiffReader
 {
 	// Déclaration de fonctions privées
 	namespace
 	{
 		Billon* makeBillonFromTiffWithITK( const QString &filename );
-		QString getTag( const QString &entryId, const itk::MetaDataDictionary &dictionary );
 	}
 
 	Billon *read( const QString &filename )
@@ -89,24 +88,6 @@ namespace TifReader
 			billon->setVoxelSize(spacing[0],spacing[1],spacing[2]);
 
 			return billon;
-		}
-
-		QString getTag( const QString &entryId, const itk::MetaDataDictionary &dictionary )
-		{
-			QString value = QObject::tr("indéfinie");
-
-			itk::MetaDataObject<std::string>::ConstPointer entryValue = 0;
-			const itk::MetaDataDictionary::ConstIterator tagItr = dictionary.Find(entryId.toStdString());
-
-			if( tagItr != dictionary.End ())
-			{
-				entryValue = dynamic_cast<itk::MetaDataObject<std::string> *> (tagItr->second.GetPointer());
-				if ( entryValue )
-				{
-					value = QString::fromStdString(entryValue->GetMetaDataObjectValue());
-				}
-			}
-			return value;
 		}
 	}
 }

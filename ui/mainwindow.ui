@@ -96,7 +96,7 @@
         <widget class="QWidget" name="scrollAreaWidgetContents">
          <property name="geometry">
           <rect>
-           <x>209</x>
+           <x>187</x>
            <y>313</y>
            <width>0</width>
            <height>0</height>
@@ -245,7 +245,7 @@
      <item row="0" column="0">
       <widget class="QTabWidget" name="_tabs">
        <property name="currentIndex">
-        <number>0</number>
+        <number>1</number>
        </property>
        <widget class="QWidget" name="_tabAffichage">
         <attribute name="title">
@@ -289,7 +289,7 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>426</width>
+              <width>470</width>
               <height>346</height>
              </rect>
             </property>
@@ -1126,9 +1126,9 @@ zone restreinte</string>
            <item row="0" column="1">
             <layout class="QHBoxLayout" name="horizontalLayout_12">
              <item>
-              <widget class="QSlider" name="_sliderSmoothingRadiusOfHistogram">
+              <widget class="QSlider" name="_sliderHistogramSmoothingRadius">
                <property name="minimum">
-                <number>1</number>
+                <number>0</number>
                </property>
                <property name="maximum">
                 <number>15</number>
@@ -1145,7 +1145,7 @@ zone restreinte</string>
               </widget>
              </item>
              <item>
-              <widget class="QSpinBox" name="_spinSmoothingRadiusOfHistogram">
+              <widget class="QSpinBox" name="_spinHistogramSmoothingRadius">
                <property name="maximum">
                 <number>15</number>
                </property>
@@ -1167,7 +1167,7 @@ au début et à la fin</string>
            <item row="1" column="1">
             <layout class="QHBoxLayout" name="horizontalLayout_23">
              <item>
-              <widget class="QSlider" name="_sliderBorderPercentageToCut">
+              <widget class="QSlider" name="_sliderHistogramBorderPercentageToCut">
                <property name="maximum">
                 <number>100</number>
                </property>
@@ -1180,7 +1180,7 @@ au début et à la fin</string>
               </widget>
              </item>
              <item>
-              <widget class="QSpinBox" name="_spinBorderPercentageToCut">
+              <widget class="QSpinBox" name="_spinHistogramBorderPercentageToCut">
                <property name="maximum">
                 <number>100</number>
                </property>
@@ -1203,7 +1203,7 @@ maximum
            <item row="2" column="1">
             <layout class="QHBoxLayout" name="horizontalLayout_9">
              <item>
-              <widget class="QSlider" name="_sliderMinimumHeightofMaximum">
+              <widget class="QSlider" name="_sliderHistogramMinimumHeightOfMaximum">
                <property name="maximum">
                 <number>100</number>
                </property>
@@ -1216,7 +1216,7 @@ maximum
               </widget>
              </item>
              <item>
-              <widget class="QSpinBox" name="_spinMinimumHeightofMaximum">
+              <widget class="QSpinBox" name="_spinHistogramMinimumHeightOfMaximum">
                <property name="maximum">
                 <number>100</number>
                </property>
@@ -1228,21 +1228,18 @@ maximum
             </layout>
            </item>
            <item row="3" column="0">
-            <widget class="QLabel" name="label_27">
+            <widget class="QLabel" name="label_5">
              <property name="text">
-              <string>Voisinage minimum des maximums</string>
+              <string>Largeur minimum des intervalles</string>
              </property>
             </widget>
            </item>
            <item row="3" column="1">
-            <layout class="QHBoxLayout" name="horizontalLayout_14">
+            <layout class="QHBoxLayout" name="horizontalLayout_13">
              <item>
-              <widget class="QSlider" name="_sliderMaximumsNeighborhood">
-               <property name="minimum">
-                <number>1</number>
-               </property>
+              <widget class="QSlider" name="_sliderHistogramMinimumWidthOfInterval">
                <property name="maximum">
-                <number>30</number>
+                <number>50</number>
                </property>
                <property name="value">
                 <number>10</number>
@@ -1253,12 +1250,9 @@ maximum
               </widget>
              </item>
              <item>
-              <widget class="QSpinBox" name="_spinMaximumsNeighborhood">
-               <property name="minimum">
-                <number>1</number>
-               </property>
+              <widget class="QSpinBox" name="_spinHistogramMinimumWidthOfInterval">
                <property name="maximum">
-                <number>30</number>
+                <number>50</number>
                </property>
                <property name="value">
                 <number>10</number>
@@ -1278,7 +1272,7 @@ maximum
            <item row="4" column="1">
             <layout class="QHBoxLayout" name="horizontalLayout_20">
              <item>
-              <widget class="QSlider" name="_sliderDerivativePercentage">
+              <widget class="QSlider" name="_sliderHistogramDerivativeSearchPercentage">
                <property name="maximum">
                 <number>100</number>
                </property>
@@ -1291,7 +1285,7 @@ maximum
               </widget>
              </item>
              <item>
-              <widget class="QSpinBox" name="_spinDerivativePercentage">
+              <widget class="QSpinBox" name="_spinHistogramDerivativeSearchPercentage">
                <property name="maximum">
                 <number>100</number>
                </property>
@@ -1302,39 +1296,37 @@ maximum
              </item>
             </layout>
            </item>
-           <item row="5" column="0">
-            <widget class="QLabel" name="label_5">
+           <item row="6" column="0">
+            <widget class="QLabel" name="label_27">
              <property name="text">
-              <string>Largeur minimum des intervalles</string>
+              <string>Valeurs par défaut</string>
              </property>
             </widget>
            </item>
-           <item row="5" column="1">
-            <layout class="QHBoxLayout" name="horizontalLayout_13">
+           <item row="6" column="1">
+            <layout class="QHBoxLayout" name="horizontalLayout_14">
              <item>
-              <widget class="QSlider" name="_sliderHistogramIntervalMinimumWidth">
-               <property name="maximum">
-                <number>50</number>
-               </property>
-               <property name="value">
-                <number>10</number>
-               </property>
-               <property name="orientation">
-                <enum>Qt::Horizontal</enum>
+              <widget class="QPushButton" name="_buttonHistogramResetDefaultValuesZMotion">
+               <property name="text">
+                <string>Z-Motion</string>
                </property>
               </widget>
              </item>
              <item>
-              <widget class="QSpinBox" name="_spinHistogramIntervalMinimumWidth">
-               <property name="maximum">
-                <number>50</number>
-               </property>
-               <property name="value">
-                <number>10</number>
+              <widget class="QPushButton" name="_buttonHistogramResetDefaultValuesPithDistance">
+               <property name="text">
+                <string>Distance à la moelle</string>
                </property>
               </widget>
              </item>
             </layout>
+           </item>
+           <item row="5" column="1">
+            <widget class="Line" name="line">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+            </widget>
            </item>
           </layout>
          </item>
@@ -2255,8 +2247,8 @@ l'origine du contour</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>441</width>
-              <height>112</height>
+              <width>485</width>
+              <height>296</height>
              </rect>
             </property>
             <attribute name="label">
@@ -2613,17 +2605,15 @@ l'origine du contour</string>
   <tabstop>_buttonFlowUpdate</tabstop>
   <tabstop>_sliderRestrictedAreaPercentage</tabstop>
   <tabstop>_spinRestrictedAreaPercentage</tabstop>
-  <tabstop>_sliderSmoothingRadiusOfHistogram</tabstop>
-  <tabstop>_spinSmoothingRadiusOfHistogram</tabstop>
-  <tabstop>_sliderBorderPercentageToCut</tabstop>
-  <tabstop>_spinBorderPercentageToCut</tabstop>
-  <tabstop>_sliderMinimumHeightofMaximum</tabstop>
-  <tabstop>_spinMinimumHeightofMaximum</tabstop>
-  <tabstop>_sliderMaximumsNeighborhood</tabstop>
-  <tabstop>_spinMaximumsNeighborhood</tabstop>
-  <tabstop>_sliderDerivativePercentage</tabstop>
-  <tabstop>_sliderHistogramIntervalMinimumWidth</tabstop>
-  <tabstop>_spinHistogramIntervalMinimumWidth</tabstop>
+  <tabstop>_sliderHistogramSmoothingRadius</tabstop>
+  <tabstop>_spinHistogramSmoothingRadius</tabstop>
+  <tabstop>_sliderHistogramBorderPercentageToCut</tabstop>
+  <tabstop>_spinHistogramBorderPercentageToCut</tabstop>
+  <tabstop>_sliderHistogramMinimumHeightOfMaximum</tabstop>
+  <tabstop>_spinHistogramMinimumHeightOfMaximum</tabstop>
+  <tabstop>_sliderHistogramDerivativeSearchPercentage</tabstop>
+  <tabstop>_sliderHistogramMinimumWidthOfInterval</tabstop>
+  <tabstop>_spinHistogramMinimumWidthOfInterval</tabstop>
   <tabstop>_buttonComputePith</tabstop>
   <tabstop>_comboSelectSliceInterval</tabstop>
   <tabstop>_buttonSelectSliceIntervalUpdate</tabstop>

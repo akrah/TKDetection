@@ -1,14 +1,11 @@
 #include "inc/pithextractor.h"
 
 #include "inc/billon.h"
-#include "inc/define.h"
 #include "inc/coordinate.h"
 #include "inc/pith.h"
 
-PithExtractor *PithExtractor::_pithExtractor = 0;
-
-PithExtractor::PithExtractor() : _falseCutPercent(FALSE_CUT_PERCENT), _windowWidth(NEIGHBORHOOD_WINDOW_WIDTH), _windowHeight(NEIGHBORHOOD_WINDOW_HEIGHT),
-	_binarizationThreshold(BINARIZATION_THRESHOLD), _pithLag(PITH_LAG)
+PithExtractor::PithExtractor( const int &falseCutPercent, const int &windowWidth, const int &windowHeight, const int &binarizationThreshold, const int &pithLag ) :
+	_falseCutPercent(falseCutPercent), _windowWidth(windowWidth), _windowHeight(windowHeight), _binarizationThreshold(binarizationThreshold), _pithLag(pithLag)
 {
 }
 
@@ -19,24 +16,6 @@ PithExtractor::~PithExtractor()
 /********************************************************
  * Fonction principale d'extraction de la moelle
  ********************************************************/
-
-const PithExtractor & PithExtractor::instance()
-{
-	if ( !_pithExtractor )
-	{
-		_pithExtractor =  new PithExtractor;
-	}
-	return *_pithExtractor;
-}
-
-void PithExtractor::kill()
-{
-	if ( _pithExtractor )
-	{
-		delete _pithExtractor;
-		_pithExtractor = 0;
-	}
-}
 
 void PithExtractor::process( Billon &billon ) const
 {

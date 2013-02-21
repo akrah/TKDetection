@@ -69,7 +69,7 @@ SOURCES	=	main.cpp \
 			sliceview.cpp \
 			slicezoomer.cpp \
 			test_intervalshistogram.cpp \
-			tifreader.cpp \
+			tiffreader.cpp \
 			v3dexport.cpp \
 			zmotiondistributionhistogram.cpp
 
@@ -116,7 +116,7 @@ HEADERS	=	billon.h \
 			sliceview.h \
 			slicezoomer.h \
 			test_intervalshistogram.h \
-			tifreader.h \
+			tiffreader.h \
 			v3dexport.h \
 			zmotiondistributionhistogram.h
 

@@ -5,7 +5,7 @@
 
 class QString;
 
-namespace TifReader
+namespace TiffReader
 {
 	Billon* read( const QString &filename );
 }

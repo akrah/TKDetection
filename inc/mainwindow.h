@@ -45,7 +45,7 @@ public:
 
 private slots:
 	void openDicom();
-	void openTif();
+	void openTiff();
 	void closeImage();
 	void drawSlice();
 	void setSlice( const int &sliceNumber );
@@ -53,6 +53,8 @@ private slots:
 	void moveNearestPointsCursor( const int &position );
 	void moveContourCursor( const int &position );
 	void setTypeOfView( const int &type );
+	void resetHistogramDefaultValuesZMotion();
+	void resetHistogramDefaultValuesPithDistance();
 	void updateSliceHistogram();
 	void updateContourHistograms( const int &histogramIndex );
 	void updateIntensityDistributionHistogram();

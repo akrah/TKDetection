@@ -32,7 +32,7 @@
 #include "inc/sliceview.h"
 #include "inc/v3dexport.h"
 #include "inc/v3dreader.h"
-#include "inc/tifreader.h"
+#include "inc/tiffreader.h"
 #include "inc/zmotiondistributionhistogram.h"
 
 #include <QLabel>
@@ -152,18 +152,18 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 	/**************************************
 	* Évènements de l'onglet "Histogrammes"
 	***************************************/
-	QObject::connect(_ui->_sliderSmoothingRadiusOfHistogram, SIGNAL(valueChanged(int)), _ui->_spinSmoothingRadiusOfHistogram, SLOT(setValue(int)));
-	QObject::connect(_ui->_spinSmoothingRadiusOfHistogram, SIGNAL(valueChanged(int)), _ui->_sliderSmoothingRadiusOfHistogram, SLOT(setValue(int)));
-	QObject::connect(_ui->_sliderBorderPercentageToCut, SIGNAL(valueChanged(int)), _ui->_spinBorderPercentageToCut, SLOT(setValue(int)));
-	QObject::connect(_ui->_spinBorderPercentageToCut, SIGNAL(valueChanged(int)), _ui->_sliderBorderPercentageToCut, SLOT(setValue(int)));
-	QObject::connect(_ui->_sliderMinimumHeightofMaximum, SIGNAL(valueChanged(int)), _ui->_spinMinimumHeightofMaximum, SLOT(setValue(int)));
-	QObject::connect(_ui->_spinMinimumHeightofMaximum, SIGNAL(valueChanged(int)), _ui->_sliderMinimumHeightofMaximum, SLOT(setValue(int)));
-	QObject::connect(_ui->_sliderMaximumsNeighborhood, SIGNAL(valueChanged(int)), _ui->_spinMaximumsNeighborhood, SLOT(setValue(int)));
-	QObject::connect(_ui->_spinMaximumsNeighborhood, SIGNAL(valueChanged(int)), _ui->_sliderMaximumsNeighborhood, SLOT(setValue(int)));
-	QObject::connect(_ui->_sliderDerivativePercentage, SIGNAL(valueChanged(int)), _ui->_spinDerivativePercentage, SLOT(setValue(int)));
-	QObject::connect(_ui->_spinDerivativePercentage, SIGNAL(valueChanged(int)), _ui->_sliderDerivativePercentage, SLOT(setValue(int)));
-	QObject::connect(_ui->_sliderHistogramIntervalMinimumWidth, SIGNAL(valueChanged(int)), _ui->_spinHistogramIntervalMinimumWidth, SLOT(setValue(int)));
-	QObject::connect(_ui->_spinHistogramIntervalMinimumWidth, SIGNAL(valueChanged(int)), _ui->_sliderHistogramIntervalMinimumWidth, SLOT(setValue(int)));
+	QObject::connect(_ui->_sliderHistogramSmoothingRadius, SIGNAL(valueChanged(int)), _ui->_spinHistogramSmoothingRadius, SLOT(setValue(int)));
+	QObject::connect(_ui->_spinHistogramSmoothingRadius, SIGNAL(valueChanged(int)), _ui->_sliderHistogramSmoothingRadius, SLOT(setValue(int)));
+	QObject::connect(_ui->_sliderHistogramBorderPercentageToCut, SIGNAL(valueChanged(int)), _ui->_spinHistogramBorderPercentageToCut, SLOT(setValue(int)));
+	QObject::connect(_ui->_spinHistogramBorderPercentageToCut, SIGNAL(valueChanged(int)), _ui->_sliderHistogramBorderPercentageToCut, SLOT(setValue(int)));
+	QObject::connect(_ui->_sliderHistogramMinimumHeightOfMaximum, SIGNAL(valueChanged(int)), _ui->_spinHistogramMinimumHeightOfMaximum, SLOT(setValue(int)));
+	QObject::connect(_ui->_spinHistogramMinimumHeightOfMaximum, SIGNAL(valueChanged(int)), _ui->_sliderHistogramMinimumHeightOfMaximum, SLOT(setValue(int)));
+	QObject::connect(_ui->_sliderHistogramDerivativeSearchPercentage, SIGNAL(valueChanged(int)), _ui->_spinHistogramDerivativeSearchPercentage, SLOT(setValue(int)));
+	QObject::connect(_ui->_spinHistogramDerivativeSearchPercentage, SIGNAL(valueChanged(int)), _ui->_sliderHistogramDerivativeSearchPercentage, SLOT(setValue(int)));
+	QObject::connect(_ui->_sliderHistogramMinimumWidthOfInterval, SIGNAL(valueChanged(int)), _ui->_spinHistogramMinimumWidthOfInterval, SLOT(setValue(int)));
+	QObject::connect(_ui->_spinHistogramMinimumWidthOfInterval, SIGNAL(valueChanged(int)), _ui->_sliderHistogramMinimumWidthOfInterval, SLOT(setValue(int)));
+	QObject::connect(_ui->_buttonHistogramResetDefaultValuesZMotion, SIGNAL(clicked()), this, SLOT(resetHistogramDefaultValuesZMotion()));
+	QObject::connect(_ui->_buttonHistogramResetDefaultValuesPithDistance, SIGNAL(clicked()), this, SLOT(resetHistogramDefaultValuesPithDistance()));
 
 	/***********************************
 	* Évènements de l'onglet "Processus"
@@ -226,7 +226,7 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 	_ui->_actionOpenDicom->setShortcut(Qt::CTRL + Qt::Key_O);
 	QObject::connect(_ui->_actionOpenDicom, SIGNAL(triggered()), this, SLOT(openDicom()));
 	_ui->_actionOpenTiff->setShortcut(Qt::CTRL + Qt::Key_T);
-	QObject::connect(_ui->_actionOpenTiff, SIGNAL(triggered()), this, SLOT(openTif()));
+	QObject::connect(_ui->_actionOpenTiff, SIGNAL(triggered()), this, SLOT(openTiff()));
 	_ui->_actionCloseImage->setShortcut(Qt::CTRL + Qt::Key_W);
 	QObject::connect(_ui->_actionCloseImage, SIGNAL(triggered()), this, SLOT(closeImage()));
 	_ui->_actionQuit->setShortcut(Qt::CTRL + Qt::Key_Q);
@@ -306,12 +306,12 @@ void MainWindow::openDicom()
 	}
 }
 
-void MainWindow::openTif()
+void MainWindow::openTiff()
 {
 	QString fileName = QFileDialog::getOpenFileName(0,tr("Sélection du fichier TIF"),QDir::homePath(),tr("Images TIFF (*.tiff *.tif)"));
 	if ( !fileName.isEmpty() )
 	{
-		Billon *billon = TifReader::read(fileName);
+		Billon *billon = TiffReader::read(fileName);
 		if ( billon == 0 ) return;
 
 		closeImage();
@@ -559,6 +559,24 @@ void MainWindow::setTypeOfView( const int &type )
 	drawSlice();
 }
 
+void MainWindow::resetHistogramDefaultValuesZMotion()
+{
+	_ui->_spinHistogramSmoothingRadius->setValue(HISTOGRAM_SMOOTHING_RADIUS);
+	_ui->_spinHistogramBorderPercentageToCut->setValue(HISTOGRAM_BORDER_PERCENTAGE_TO_CUT);
+	_ui->_spinHistogramMinimumHeightOfMaximum->setValue(HISTOGRAM_PERCENTAGE_OF_MINIMUM_HEIGHT_OF_MAXIMUM);
+	_ui->_spinHistogramMinimumWidthOfInterval->setValue(HISTOGRAM_MINIMUM_WIDTH_OF_INTERVALS);
+	_ui->_spinHistogramDerivativeSearchPercentage->setValue(HISTOGRAM_DERIVATIVE_SEARCH_PERCENTAGE);
+}
+
+void MainWindow::resetHistogramDefaultValuesPithDistance()
+{
+	_ui->_spinHistogramSmoothingRadius->setValue(HISTOGRAM_DISTANCE_SMOOTHING_RADIUS);
+	_ui->_spinHistogramBorderPercentageToCut->setValue(HISTOGRAM_DISTANCE_BORDER_PERCENTAGE_TO_CUT);
+	_ui->_spinHistogramMinimumHeightOfMaximum->setValue(HISTOGRAM_DISTANCE_PERCENTAGE_OF_MINIMUM_HEIGHT_OF_MAXIMUM);
+	_ui->_spinHistogramMinimumWidthOfInterval->setValue(HISTOGRAM_DISTANCE_MINIMUM_WIDTH_OF_INTERVALS);
+	_ui->_spinHistogramDerivativeSearchPercentage->setValue(HISTOGRAM_DISTANCE_DERIVATIVE_SEARCH_PERCENTAGE);
+}
+
 void MainWindow::updateSliceHistogram()
 {
 	_sliceHistogram->clear();
@@ -567,14 +585,13 @@ void MainWindow::updateSliceHistogram()
 	{
 		_sliceHistogram->construct(*_billon, Interval<int>(_ui->_spinMinIntensity->value(),_ui->_spinMaxIntensity->value()),
 								   Interval<int>(_ui->_spinMinZMotion->value(),_ui->_spinMaxZMotion->value()),
-								   _ui->_spinBorderPercentageToCut->value(), _treeRadius*_ui->_spinRestrictedAreaPercentage->value()/100.);
-		_sliceHistogram->computeMaximumsAndIntervals( _ui->_spinSmoothingRadiusOfHistogram->value(), _ui->_spinMinimumHeightofMaximum->value(),
-													  _ui->_spinMaximumsNeighborhood->value(), _ui->_spinDerivativePercentage->value(),
-													  _ui->_spinHistogramIntervalMinimumWidth->value(), false);
+								   _ui->_spinHistogramBorderPercentageToCut->value(), _treeRadius*_ui->_spinRestrictedAreaPercentage->value()/100.);
+		_sliceHistogram->computeMaximumsAndIntervals( _ui->_spinHistogramSmoothingRadius->value(), _ui->_spinHistogramMinimumHeightOfMaximum->value(),
+													  _ui->_spinHistogramDerivativeSearchPercentage->value(), _ui->_spinHistogramMinimumWidthOfInterval->value(), false);
 	}
 	_plotSliceHistogram->update( *_sliceHistogram );
 	_plotSliceHistogram->moveCursor( _currentSlice );
-	_plotSliceHistogram->updatePercentageCurve( _sliceHistogram->thresholdOfMaximums( _ui->_spinMinimumHeightofMaximum->value() ) );
+	_plotSliceHistogram->updatePercentageCurve( _sliceHistogram->thresholdOfMaximums( _ui->_spinHistogramMinimumHeightOfMaximum->value() ) );
 	_ui->_plotSliceHistogram->setAxisScale(QwtPlot::xBottom,0,_sliceHistogram->size());
 	_ui->_plotSliceHistogram->replot();
 
@@ -627,7 +644,7 @@ void MainWindow::updateIntensityDistributionHistogram()
 
 	if ( _billon != 0 )
 	{
-		_intensityDistributionHistogram->construct(*_billon,Interval<int>(_ui->_spinMinIntensity->value(),_ui->_spinMaxIntensity->value()),_ui->_spinSmoothingRadiusOfHistogram->value());
+		_intensityDistributionHistogram->construct(*_billon,Interval<int>(_ui->_spinMinIntensity->value(),_ui->_spinMaxIntensity->value()),_ui->_spinHistogramSmoothingRadius->value());
 	}
 
 	_plotIntensityDistributionHistogram->update(*_intensityDistributionHistogram,Interval<int>(_ui->_spinMinIntensity->value(),_ui->_spinMaxIntensity->value()));
@@ -641,7 +658,7 @@ void MainWindow::updateZMotionDistributionHistogram()
 	if ( _billon != 0 )
 	{
 		_zMotionDistributionHistogram->construct(*_billon,Interval<int>(_ui->_spinMinIntensity->value(),_ui->_spinMaxIntensity->value()),
-												 Interval<uint>(_ui->_spinMinZMotion->value(),_ui->_spinMaxZMotion->value()),_ui->_spinSmoothingRadiusOfHistogram->value(),
+												 Interval<uint>(_ui->_spinMinZMotion->value(),_ui->_spinMaxZMotion->value()),_ui->_spinHistogramSmoothingRadius->value(),
 												 _treeRadius);
 	}
 
@@ -653,7 +670,8 @@ void MainWindow::updatePith()
 {
 	if ( _billon != 0 )
 	{
-		PithExtractor::instance().process(*_billon);
+		PithExtractor pithExtractor;
+		pithExtractor.process(*_billon);
 	}
 	_treeRadius = BillonAlgorithms::restrictedAreaMeansRadius(*_billon,_ui->_spinRestrictedAreaResolution->value(),_ui->_spinRestrictedAreaThreshold->value());
 	_ui->_checkRadiusAroundPith->setText( QString::number(_treeRadius) );
@@ -813,8 +831,9 @@ void MainWindow::selectSectorInterval(const int &index, const bool &draw )
 			ConnexComponentExtractor::extractConnexComponents( _componentBillon->slice(k), _componentBillon->slice(k), qPow(_ui->_spinMinimalSizeOf2DConnexComponents->value(),2), 0 );
 		}
 
-		_nearestPointsHistogram->construct( *_componentBillon );
-		_nearestPointsHistogram->computeMaximumsAndIntervals( _ui->_spinNearestHistogramNeighborhood->value(), _ui->_spinNearestHistogramDifference->value() );
+		_nearestPointsHistogram->construct( *_componentBillon, _treeRadius );
+		_nearestPointsHistogram->computeMaximumsAndIntervals( _ui->_spinHistogramSmoothingRadius->value(), _ui->_spinHistogramMinimumHeightOfMaximum->value(),
+															  _ui->_spinHistogramDerivativeSearchPercentage->value(), _ui->_spinHistogramMinimumWidthOfInterval->value(), false );
 		_plotNearestPointsHistogram->update( *_nearestPointsHistogram );
 		_ui->_plotNearestPointsHistogram->setAxisScale(QwtPlot::xBottom,0,_nearestPointsHistogram->size());
 		_ui->_plotNearestPointsHistogram->replot();
@@ -1017,21 +1036,13 @@ void MainWindow::initComponentsValues() {
 	_ui->_spanSliderZMotionThreshold->setUpperValue(MAXIMUM_Z_MOTION);
 	_ui->_spanSliderZMotionThreshold->setLowerValue(MINIMUM_Z_MOTION);
 
-	_ui->_sliderMaximumsNeighborhood->setMinimum(0);
-	_ui->_sliderMaximumsNeighborhood->setMaximum(50);
-	_ui->_sliderMaximumsNeighborhood->setValue(DEFAULT_MINIMUM_WIDTH_OF_NEIGHBORHOOD);
+	_ui->_sliderHistogramMinimumWidthOfInterval->setMinimum(0);
+	_ui->_sliderHistogramMinimumWidthOfInterval->setMaximum(50);
+	_ui->_sliderHistogramMinimumWidthOfInterval->setValue(HISTOGRAM_MINIMUM_WIDTH_OF_INTERVALS);
 
-	_ui->_spinMaximumsNeighborhood->setMinimum(0);
-	_ui->_spinMaximumsNeighborhood->setMaximum(50);
-	_ui->_spinMaximumsNeighborhood->setValue(DEFAULT_MINIMUM_WIDTH_OF_NEIGHBORHOOD);
-
-	_ui->_sliderHistogramIntervalMinimumWidth->setMinimum(0);
-	_ui->_sliderHistogramIntervalMinimumWidth->setMaximum(50);
-	_ui->_sliderHistogramIntervalMinimumWidth->setValue(DEFAULT_MINIMUM_WIDTH_OF_INTERVALS);
-
-	_ui->_spinHistogramIntervalMinimumWidth->setMinimum(0);
-	_ui->_spinHistogramIntervalMinimumWidth->setMaximum(50);
-	_ui->_spinHistogramIntervalMinimumWidth->setValue(DEFAULT_MINIMUM_WIDTH_OF_INTERVALS);
+	_ui->_spinHistogramMinimumWidthOfInterval->setMinimum(0);
+	_ui->_spinHistogramMinimumWidthOfInterval->setMaximum(50);
+	_ui->_spinHistogramMinimumWidthOfInterval->setValue(HISTOGRAM_MINIMUM_WIDTH_OF_INTERVALS);
 
 	_ui->_spinSectorsNumber->setMinimum(0);
 	_ui->_spinSectorsNumber->setMaximum(500);
@@ -1128,9 +1139,8 @@ void MainWindow::updateSectorHistogram( const Interval<uint> &interval )
 		_sectorHistogram->construct( *_billon, *_pieChart, interval, Interval<int>(_ui->_spinMinIntensity->value(),_ui->_spinMaxIntensity->value()),
 									 Interval<int>(_ui->_spinMinZMotion->value(),_ui->_spinMaxZMotion->value()),
 									 _treeRadius*_ui->_spinRestrictedAreaPercentage->value()/100., _ui->_spinSectorHistogramIntervalGap->value());
-		_sectorHistogram->computeMaximumsAndIntervals( _ui->_spinSmoothingRadiusOfHistogram->value(), _ui->_spinMinimumHeightofMaximum->value(),
-													   _ui->_spinMaximumsNeighborhood->value(), _ui->_spinDerivativePercentage->value(),
-													   _ui->_spinHistogramIntervalMinimumWidth->value(), true );
+		_sectorHistogram->computeMaximumsAndIntervals( _ui->_spinHistogramSmoothingRadius->value(), _ui->_spinHistogramMinimumHeightOfMaximum->value(),
+													   _ui->_spinHistogramDerivativeSearchPercentage->value(), _ui->_spinHistogramMinimumWidthOfInterval->value(), true );
 	}
 
 	_plotSectorHistogram->update(*_sectorHistogram, *_pieChart);

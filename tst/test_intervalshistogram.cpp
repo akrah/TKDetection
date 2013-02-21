@@ -114,10 +114,10 @@ namespace Test_IntervalsHistogram {
 	void routineCommune( Histogram<qreal> &hist, bool /*loop*/ ) {
 		std::cout << "Avant : ";
 		coutHistogram( hist.begin(), hist.end() );
-		//hist.meansSmoothing(DEFAULT_MASK_RADIUS,loop);
+		//hist.meansSmoothing(HISTOGRAM_SMOOTHING_RADIUS,loop);
 		std::cout << "Après : ";
 		coutHistogram( hist.begin(), hist.end() );
-		//hist.computeMaximums( DEFAULT_PERCENTAGE_FOR_MAXIMUM_CANDIDATE, DEFAULT_MINIMUM_WIDTH_OF_NEIGHBORHOOD, loop );
+		//hist.computeMaximums( HISTOGRAM_PERCENTAGE_FOR_MAXIMUM_CANDIDATE, HISTOGRAM_MINIMUM_WIDTH_OF_NEIGHBORHOOD, loop );
 		std::cout << "Maximums : ";
 		coutHistogram(hist.maximums().begin(),hist.maximums().end());
 	}

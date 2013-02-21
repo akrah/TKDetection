@@ -3,6 +3,7 @@
 
 #include "def/def_billon.h"
 #include "def/def_coordinate.h"
+#include "inc/define.h"
 
 #include <armadillo>
 
@@ -11,14 +12,13 @@ class Pith;
 
 class PithExtractor {
 
-private:
-	PithExtractor();
-	~PithExtractor();
-
 public:
 
-	static const PithExtractor &instance ();
-	static void kill();
+	PithExtractor( const int &falseCutPercent = FALSE_CUT_PERCENT, const int &windowWidth = NEIGHBORHOOD_WINDOW_WIDTH,
+				   const int &windowHeight = NEIGHBORHOOD_WINDOW_HEIGHT, const int &binarizationThreshold = BINARIZATION_THRESHOLD,
+				   const int &pithLag = PITH_LAG );
+	~PithExtractor();
+
 
 	/**
 	 * \fn		Pith* process( const icube &image, const int &sliceMin, const int &sliceMax )
@@ -175,8 +175,6 @@ private:
 	int _windowHeight;				/*!< Hauteur de la fenêtre de voisinage */
 	float _binarizationThreshold;	/*!< Valeur du seuil de binarisation d'une image en niveau de gris */
 	int _pithLag;					/*!< Décalage maximal de la position de la moelle sur 2 coupes consécutives */
-
-	static PithExtractor *_pithExtractor;
 };
 
 
