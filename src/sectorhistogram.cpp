@@ -25,8 +25,9 @@ void SectorHistogram::construct(const Billon &billon, const PieChart &pieChart, 
 
 	if ( billon.hasPith() && sliceInterval.isValid() && sliceInterval.width() > 0 )
 	{
-		const int width = billon.n_cols;
-		const int height = billon.n_rows;
+		const int &width = billon.n_cols;
+		const int &height = billon.n_rows;
+		const int zMotionMin = motionInterval.min();
 		const qreal squareRadius = qPow(radiusAroundPith,2);
 
 		fill(0.,pieChart.nbSectors());
@@ -60,10 +61,11 @@ void SectorHistogram::construct(const Billon &billon, const PieChart &pieChart, 
 					if ( currentPos.x < width && currentPos.y < height && intensity.containsOpen(currentSlice.at(currentPos.y,currentPos.x)) &&
 						 intensity.containsOpen(previousSlice.at(currentPos.y,currentPos.x)) )
 					{
-						diff = billon.zMotion(currentPos.y,currentPos.x,k);
-						if ( motionInterval.containsClosed(diff) )
+						diff = billon.zMotion(currentPos.x,currentPos.y,k);
+						//if ( motionInterval.containsClosed(diff) )
+						if ( diff >= zMotionMin )
 						{
-							(*this)[pieChart.sectorIndexOfAngle( currentPithCoord.angle(currentPos) )] += (diff-motionInterval.min());
+							(*this)[pieChart.sectorIndexOfAngle( currentPithCoord.angle(currentPos) )] += (diff-zMotionMin);
 						}
 					}
 					currentPos.x++;

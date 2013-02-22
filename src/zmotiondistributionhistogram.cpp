@@ -40,6 +40,8 @@ void ZMotionDistributionHistogram::construct( const Billon &billon, const Interv
 
 	for ( k=1 ; k<depth ; ++k )
 	{
+		const Slice &currentSlice = billon.slice(k);
+		const Slice &previousSlice = billon.previousSlice(k);
 		currentPos.y = billon.pithCoord(k).y-radiusAroundPith;
 		for ( j=-radiusAroundPith ; j<radiusMax ; ++j )
 		{
@@ -48,13 +50,13 @@ void ZMotionDistributionHistogram::construct( const Billon &billon, const Interv
 			currentPos.x = billon.pithCoord(k).x-iRadius;
 			for ( i=-iRadius ; i<iRadiusMax ; ++i )
 			{
-				if ( currentPos.x < width && currentPos.y < height )
+				if ( currentPos.x < width && currentPos.y < height
+					 && intensityInterval.containsClosed(currentSlice.at(currentPos.y,currentPos.x))
+					 && intensityInterval.containsClosed(previousSlice.at(currentPos.y,currentPos.x)))
 				{
-					zMotion = billon.zMotion(currentPos.y,currentPos.x,k);
-					if ( intensityInterval.containsClosed(billon.at(currentPos.y,currentPos.x,k))
-						 && intensityInterval.containsClosed(billon.at(currentPos.y,currentPos.x,k-1))
-						 && zMotionInterval.containsClosed(zMotion)
-						 )
+					zMotion = billon.zMotion(currentPos.x,currentPos.y,k);
+//					if ( zMotionInterval.containsClosed(zMotion) )
+					if ( zMotion>=minVal )
 						++((*this)[zMotion-minVal]);
 				}
 				currentPos.x++;

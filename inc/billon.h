@@ -35,7 +35,7 @@ public:
 
 	const Slice& previousSlice( const uint currentSlice) const;
 	Slice& previousSlice( const uint currentSlice );
-	T zMotion( const uint j, const uint i, const uint sliceInex ) const;
+	T zMotion( const uint i, const uint j, const uint sliceIndex ) const;
 
 	const Pith & pith() const;
 	bool hasPith() const;
@@ -139,9 +139,9 @@ Slice& BillonTpl<T>::previousSlice( const uint currentSlice )
 }
 
 template< typename T >
-T BillonTpl<T>::zMotion( const uint j, const uint i, const uint sliceInex ) const
+T BillonTpl<T>::zMotion( const uint i, const uint j, const uint sliceIndex ) const
 {
-	return qAbs( this->at(j,i,sliceInex) - previousSlice(sliceInex).at(j,i) );
+	return qAbs( this->at(j,i,sliceIndex) - previousSlice(sliceIndex).at(j,i) );
 }
 
 template< typename T >

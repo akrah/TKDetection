@@ -138,6 +138,7 @@ void SliceView::drawMovementSlice( QImage &image, const Billon &billon, const ui
 
 	const uint &width = billon.n_cols;
 	const uint &height = billon.n_rows;
+	const int zMotionMin = motionInterval.min()-1;
 	const qreal fact = 255./motionInterval.width();
 
 	QRgb * line = (QRgb *) image.bits();
@@ -172,10 +173,12 @@ void SliceView::drawMovementSlice( QImage &image, const Billon &billon, const ui
 			{
 				if ( intensityInterval.containsClosed(currentSlice.at(j,i)) && intensityInterval.containsClosed(previousSlice.at(j,i)) )
 				{
-					color = billon.zMotion(j,i,sliceIndex);
-					if ( motionInterval.containsClosed(color) )
+					color = billon.zMotion(i,j,sliceIndex);
+//					if ( motionInterval.containsClosed(color) )
+					if ( color > zMotionMin )
 					{
-						color *= fact;
+//						color *= fact;
+						color = qMin(255.,color*fact);
 						*line = qRgb(color,color,color);
 					}
 				}
@@ -198,10 +201,12 @@ void SliceView::drawMovementSlice( QImage &image, const Billon &billon, const ui
 				y = pithCoord.y + j * qSin(i*angularIncrement);
 				if ( intensityInterval.containsClosed(currentSlice.at(y,x)) && intensityInterval.containsClosed(previousSlice.at(y,x)) )
 				{
-					color = billon.zMotion(y,x,sliceIndex);
-					if ( motionInterval.containsClosed(color) )
+					color = billon.zMotion(x,y,sliceIndex);
+//					if ( motionInterval.containsClosed(color) )
+					if ( color > zMotionMin )
 					{
-						color *= fact;
+//						color *= fact;
+						color = qMin(255.,color*fact);
 						*line = qRgb(color,color,color);
 					}
 				}
