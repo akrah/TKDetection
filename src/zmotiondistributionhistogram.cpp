@@ -26,10 +26,10 @@ void ZMotionDistributionHistogram::construct( const Billon &billon, const Interv
 	const qreal squareRadius = qPow(radiusAroundPith,2);
 
 	int i, j, k, iRadius, iRadiusMax;
-	__billon_type__ zMotion;
+	__billon_type__ zMotion, zMotionMax;
 	iCoord2D currentPos;
 
-	resize(zMotionInterval.size()+1);
+	resize(intensityInterval.size()+1);
 
 	QList<int> circleLines;
 	circleLines.reserve(2*radiusAroundPith+1);
@@ -38,6 +38,7 @@ void ZMotionDistributionHistogram::construct( const Billon &billon, const Interv
 		circleLines.append(qSqrt(squareRadius-qPow(lineIndex,2)));
 	}
 
+	zMotionMax = minVal;
 	for ( k=1 ; k<depth ; ++k )
 	{
 		const Slice &currentSlice = billon.slice(k);
@@ -52,18 +53,23 @@ void ZMotionDistributionHistogram::construct( const Billon &billon, const Interv
 			{
 				if ( currentPos.x < width && currentPos.y < height
 					 && intensityInterval.containsClosed(currentSlice.at(currentPos.y,currentPos.x))
-					 && intensityInterval.containsClosed(previousSlice.at(currentPos.y,currentPos.x)))
+					 && intensityInterval.containsClosed(previousSlice.at(currentPos.y,currentPos.x)) )
 				{
 					zMotion = billon.zMotion(currentPos.x,currentPos.y,k);
 //					if ( zMotionInterval.containsClosed(zMotion) )
 					if ( zMotion>=minVal )
+					{
+						zMotionMax = qMax(zMotionMax,zMotion);
 						++((*this)[zMotion-minVal]);
+					}
 				}
 				currentPos.x++;
 			}
 			currentPos.y++;
 		}
 	}
+
+	resize(zMotionMax+1);
 
 	meansSmoothing(smoothingRadius,false);
 }

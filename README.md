@@ -125,7 +125,8 @@ Installez-la en remplaçant *x-x-x* par le numéro de la version téléchargée 
 ~~~
   unzip qwtpolar-x-x-x.zip
   cd qwtpolar-x-x-x/
-  qmake
+  mkdir build && cd build
+  qmake ..
   make
   sudo make install
 ~~~
@@ -145,10 +146,10 @@ Installez-la en remplaçant *x-x-x* par le numéro de la version téléchargée 
 2.  Si 1. n'a pas résolu le problème :
 
   ~~~
-      sudo ln -s usr/local/qwtpolar-x.x.x/lib/libqwtpolar.so       /usr/lib/
-      sudo ln -s usr/local/qwtpolar-x.x.x/lib/libqwtpolar.so.1     /usr/lib/
-      sudo ln -s usr/local/qwtpolar-x.x.x/lib/libqwtpolar.so.1.0   /usr/lib/
-      sudo ln -s usr/local/qwtpolar-x.x.x/lib/libqwtpolar.so.1.0.0 /usr/lib/
+      sudo ln -s /usr/local/qwtpolar-x.x.x/lib/libqwtpolar.so       /usr/lib/
+      sudo ln -s /usr/local/qwtpolar-x.x.x/lib/libqwtpolar.so.1     /usr/lib/
+      sudo ln -s /usr/local/qwtpolar-x.x.x/lib/libqwtpolar.so.1.0   /usr/lib/
+      sudo ln -s /usr/local/qwtpolar-x.x.x/lib/libqwtpolar.so.1.0.0 /usr/lib/
   ~~~
 
 ##### Si le widget QwtPolarPlot n'apparait pas dans la liste des widgets de QtDesigner
