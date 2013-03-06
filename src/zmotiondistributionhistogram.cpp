@@ -31,7 +31,7 @@ void ZMotionDistributionHistogram::construct( const Billon &billon, const Interv
 
 	resize(intensityInterval.size()+1);
 
-	QList<int> circleLines;
+	QVector<int> circleLines;
 	circleLines.reserve(2*radiusAroundPith+1);
 	for ( int lineIndex=-radiusAroundPith ; lineIndex<radiusMax ; ++lineIndex )
 	{

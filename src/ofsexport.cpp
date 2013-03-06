@@ -344,7 +344,7 @@ namespace OfsExport
 			}
 
 			// Les autres faces
-			QList<int> tubes;
+			QVector<int> tubes;
 			tubes.reserve( 4*nbEdges );
 			for ( i=0 ; i<nbEdges-1 ; ++i )
 			{

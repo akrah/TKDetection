@@ -40,7 +40,7 @@ void NearestPointsHistogram::construct( const Billon &billon, const int &treeRad
 void NearestPointsHistogram::computeMaximumsAndIntervals( const uint &smoothingRadius, const int & minimumHeightPercentageOfMaximum,
 														  const int & derivativesPercentage, const int &minimumWidthOfIntervals, const bool & loop )
 {
-	Histogram::computeMaximumsAndIntervals( smoothingRadius, minimumHeightPercentageOfMaximum,
+	Histogram<qreal>::computeMaximumsAndIntervals( smoothingRadius, minimumHeightPercentageOfMaximum,
 											derivativesPercentage, minimumWidthOfIntervals , loop );
 
 

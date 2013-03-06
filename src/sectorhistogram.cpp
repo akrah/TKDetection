@@ -32,14 +32,14 @@ void SectorHistogram::construct(const Billon &billon, const PieChart &pieChart, 
 
 		fill(0.,pieChart.nbSectors());
 
-		QList<int> circleLines;
+		QVector<int> circleLines;
 		circleLines.reserve(2*radiusAroundPith+1);
 		for ( int lineIndex=-radiusAroundPith ; lineIndex<=radiusAroundPith ; ++lineIndex )
 		{
 			circleLines.append(qSqrt(squareRadius-qPow(lineIndex,2)));
 		}
 
-		QList<int>::ConstIterator circlesLinesIterator;
+		QVector<int>::ConstIterator circlesLinesIterator;
 		int iRadius;
 		__billon_type__ diff;
 		iCoord2D currentPos;

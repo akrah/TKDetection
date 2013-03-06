@@ -26,7 +26,7 @@ void SliceHistogram::construct( const Billon &billon, const Interval<int> &inten
 	clear();
 	resize(depth-1);
 
-	QList<int> circleLines;
+	QVector<int> circleLines;
 	circleLines.reserve(2*radiusAroundPith+1);
 	for ( int lineIndex=-radiusAroundPith ; lineIndex<radiusMax ; ++lineIndex )
 	{
