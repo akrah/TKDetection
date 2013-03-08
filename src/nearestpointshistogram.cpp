@@ -48,8 +48,8 @@ void NearestPointsHistogram::computeMaximumsAndIntervals( const uint &smoothingR
 	while ( intervalsIter != _intervals.end() )
 	{
 		Interval<uint> &currentInterval = *intervalsIter++;
-		currentInterval.setMin( currentInterval.min() + smoothingRadius );
-		currentInterval.setMax( currentInterval.max() - smoothingRadius );
+		currentInterval.setMin( currentInterval.min() + smoothingRadius + 1 );
+		currentInterval.setMax( currentInterval.max() - smoothingRadius - 1 );
 	}
 }
 
