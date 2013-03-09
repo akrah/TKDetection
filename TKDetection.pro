@@ -31,6 +31,10 @@ DEPENDPATH			= ./src/ ./inc/ ./ui/ ./tst/ ./def/
 macx:MOC_DIR		= .moc
 macx:OBJECTS_DIR	= .obj
 
+# Traductions
+#------------#
+TRANSLATIONS = TKDetection_en.ts
+
 # Fichiers
 #---------#
 SOURCES	=	main.cpp \

@@ -6,12 +6,12 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>977</width>
+    <width>980</width>
     <height>828</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>MainWindow</string>
+   <string>TKDetection</string>
   </property>
   <widget class="QWidget" name="centralWidget">
    <layout class="QVBoxLayout" name="verticalLayout_5">
@@ -96,7 +96,7 @@
         <widget class="QWidget" name="scrollAreaWidgetContents">
          <property name="geometry">
           <rect>
-           <x>187</x>
+           <x>171</x>
            <y>313</y>
            <width>0</width>
            <height>0</height>
@@ -208,7 +208,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>977</width>
+     <width>980</width>
      <height>25</height>
     </rect>
    </property>
@@ -289,7 +289,7 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>470</width>
+              <width>384</width>
               <height>346</height>
              </rect>
             </property>
@@ -308,7 +308,7 @@
                   </font>
                  </property>
                  <property name="text">
-                  <string>Axe de coupe</string>
+                  <string>Projection</string>
                  </property>
                 </widget>
                </item>
@@ -352,7 +352,7 @@
                     </font>
                    </property>
                    <property name="text">
-                    <string>Cartesian</string>
+                    <string>Cartésienne</string>
                    </property>
                   </widget>
                  </item>
@@ -459,7 +459,7 @@ composantes connexes</string>
                   </font>
                  </property>
                  <property name="text">
-                  <string>Resolution angulaire</string>
+                  <string>Résolution angulaire</string>
                  </property>
                 </widget>
                </item>
@@ -676,12 +676,12 @@ zone restreinte</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>316</width>
+              <width>327</width>
               <height>49</height>
              </rect>
             </property>
             <attribute name="label">
-             <string>Paramètres du mouvement</string>
+             <string>Paramètres du z-mouvement</string>
             </attribute>
             <layout class="QFormLayout" name="formLayout_7">
              <property name="fieldGrowthPolicy">
@@ -696,7 +696,7 @@ zone restreinte</string>
                 </font>
                </property>
                <property name="text">
-                <string>Seuil de mouvement</string>
+                <string>Seuil de z-mouvement</string>
                </property>
               </widget>
              </item>
@@ -762,12 +762,12 @@ zone restreinte</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>276</width>
+              <width>297</width>
               <height>221</height>
              </rect>
             </property>
             <attribute name="label">
-             <string>Paramètres de détection de contours</string>
+             <string>Paramètres de la détection de contours</string>
             </attribute>
             <layout class="QVBoxLayout" name="verticalLayout">
              <item>
@@ -818,7 +818,7 @@ zone restreinte</string>
                    </font>
                   </property>
                   <property name="text">
-                   <string>Rayon masque gaussien</string>
+                   <string>Rayon du masque gaussien</string>
                   </property>
                  </widget>
                 </item>
@@ -847,7 +847,7 @@ zone restreinte</string>
                    </font>
                   </property>
                   <property name="text">
-                   <string>Sigma masque gaussien</string>
+                   <string>Sigma du masque gaussien</string>
                   </property>
                  </widget>
                 </item>
@@ -962,7 +962,7 @@ zone restreinte</string>
              </rect>
             </property>
             <attribute name="label">
-             <string>Paramètres du flot optique</string>
+             <string>Paramètres des flots optiques</string>
             </attribute>
             <layout class="QVBoxLayout" name="verticalLayout_16">
              <item>
@@ -1159,7 +1159,7 @@ zone restreinte</string>
            <item row="1" column="0">
             <widget class="QLabel" name="label_39">
              <property name="text">
-              <string>Porcentage de coupes à supprimer
+              <string>Pourcentage de coupes à supprimer
 au début et à la fin</string>
              </property>
             </widget>
@@ -1194,8 +1194,7 @@ au début et à la fin</string>
            <item row="2" column="0">
             <widget class="QLabel" name="label_26">
              <property name="text">
-              <string>Seuil de hauteur minimum d'un
-maximum
+              <string>Hauteur minimum d'un maximum
 (en % du maximum global)</string>
              </property>
             </widget>
@@ -1264,7 +1263,7 @@ maximum
            <item row="4" column="0">
             <widget class="QLabel" name="label_2">
              <property name="text">
-              <string>Seuil de recherche des dérivées
+              <string>Hauteur de recherche des dérivées
 (en % du maximum courant)</string>
              </property>
             </widget>
@@ -1308,7 +1307,7 @@ maximum
              <item>
               <widget class="QPushButton" name="_buttonHistogramResetDefaultValuesZMotion">
                <property name="text">
-                <string>Z-Motion</string>
+                <string>Z-Mouvement</string>
                </property>
               </widget>
              </item>
@@ -2247,8 +2246,8 @@ l'origine du contour</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>485</width>
-              <height>296</height>
+              <width>441</width>
+              <height>112</height>
              </rect>
             </property>
             <attribute name="label">
@@ -2488,7 +2487,7 @@ l'origine du contour</string>
          </item>
          <item>
           <widget class="QwtPolarPlot" name="_polarSectorHistogram">
-           <property name="plotBackground">
+           <property name="plotBackground" stdset="0">
             <brush brushstyle="SolidPattern">
              <color alpha="0">
               <red>255</red>
@@ -2574,15 +2573,15 @@ l'origine du contour</string>
    <container>1</container>
   </customwidget>
   <customwidget>
+   <class>QxtSpanSlider</class>
+   <extends>QSlider</extends>
+   <header>QxtSpanSlider</header>
+  </customwidget>
+  <customwidget>
    <class>QwtPolarPlot</class>
    <extends>QFrame</extends>
    <header>qwt_polar_plot.h</header>
    <container>1</container>
-  </customwidget>
-  <customwidget>
-   <class>QxtSpanSlider</class>
-   <extends>QSlider</extends>
-   <header>QxtSpanSlider</header>
   </customwidget>
  </customwidgets>
  <tabstops>

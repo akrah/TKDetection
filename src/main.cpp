@@ -1,5 +1,6 @@
 #include <QApplication>
 #include <QTextCodec>
+#include <QTranslator>
 
 #include "inc/mainwindow.h"
 #include <cstdio>
@@ -26,10 +27,15 @@ int main(int argc, char *argv[])
 	QTextCodec::setCodecForTr(QTextCodec::codecForName("UTF-8"));
 	QTextCodec::setCodecForCStrings(QTextCodec::codecForName("UTF-8"));
 
-	QApplication a(argc, argv);
+	QApplication app(argc, argv);
+
+	QTranslator translator;
+	translator.load("TKDetection_en");
+	app.installTranslator(&translator);
+
 	MainWindow w;
 	w.show();
-	return a.exec();
+	return app.exec();
 
 //	Test_IntervalsHistogram::allTests();
 //	return 0;

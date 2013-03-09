@@ -76,7 +76,7 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 	_ui->_comboSliceType->setCurrentIndex(TKD::CURRENT);
 
 	_ui->_comboEdgeDetectionType->insertItem(TKD::SOBEL,tr("Sobel"));
-	_ui->_comboEdgeDetectionType->insertItem(TKD::LAPLACIAN,tr("Laplacian"));
+	_ui->_comboEdgeDetectionType->insertItem(TKD::LAPLACIAN,tr("Laplacien"));
 	_ui->_comboEdgeDetectionType->insertItem(TKD::CANNY,tr("Canny"));
 
 	// Histogrammes
