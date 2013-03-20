@@ -3,9 +3,9 @@ TKDetection
 
 TKDetection is a software to detect and segment wood knots.
 
-1. [Dependencies list](#dpendances)
-2. [Dependencies installation on Ubuntu](#installation-des-dpendances-sur-ubuntu)
-3. [TKDetection installation](#installation-de-tkdetection)
+1. [Dependencies list](#dependancies)
+2. [Dependencies installation on Ubuntu](#dependencies-installation-on-ubuntu)
+3. [TKDetection installation](#tkdetection-installation)
 
 
 Dependencies
