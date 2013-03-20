@@ -810,12 +810,12 @@ to the contour origin</translation>
     <message>
         <location filename="src/mainwindow.cpp" line="1193"/>
         <source>Impossible  d&apos;exporter car la moelle n&apos;est pas calculÃ©e ou aucun secteur angulaire n&apos;est sÃ©lectionnÃ©.</source>
-        <translation type="unfinished"></translation>
+        <translation>Export unvailable : pith not computed or any angular sector selected.</translation>
     </message>
     <message>
         <location filename="src/mainwindow.cpp" line="1218"/>
         <source>Impossible car la moelle et/ou les interalles de coupes ne sont pas calculÃ©s.</source>
-        <translation type="unfinished"></translation>
+        <translation>Export unvailable : pith and/or slice intervals no computed.</translation>
     </message>
     <message>
         <location filename="src/mainwindow.cpp" line="1225"/>
@@ -823,27 +823,27 @@ to the contour origin</translation>
         <location filename="src/mainwindow.cpp" line="1237"/>
         <location filename="src/mainwindow.cpp" line="1240"/>
         <source>Exporter l&apos;histogramme de coupes en .sep</source>
-        <translation type="unfinished"></translation>
+        <translation>Histogram export to sep</translation>
     </message>
     <message>
         <location filename="src/mainwindow.cpp" line="1226"/>
         <location filename="src/mainwindow.cpp" line="1248"/>
         <location filename="src/mainwindow.cpp" line="1270"/>
         <source>Fichiers sÃ©quences de point euclidiens (*.sep);;Tous les fichiers (*.*)</source>
-        <translation type="unfinished"></translation>
+        <translation>File of euclidean point sequences (*.sep);;All files (*.*)</translation>
     </message>
     <message>
         <location filename="src/mainwindow.cpp" line="1237"/>
         <location filename="src/mainwindow.cpp" line="1259"/>
         <location filename="src/mainwindow.cpp" line="1281"/>
         <source>L&apos;export a Ã©chouÃ© : impossible de crÃ©er le fichier.</source>
-        <translation type="unfinished"></translation>
+        <translation>Export failed : impossible to create file.</translation>
     </message>
     <message>
         <location filename="src/mainwindow.cpp" line="1240"/>
         <location filename="src/mainwindow.cpp" line="1352"/>
         <source>L&apos;export a Ã©chouÃ© : l&apos;histogramme de coupes n&apos;est pas calculÃ©.</source>
-        <translation type="unfinished"></translation>
+        <translation>Export failed : slice histogram not computed.</translation>
     </message>
     <message>
         <location filename="src/mainwindow.cpp" line="1247"/>
@@ -851,13 +851,13 @@ to the contour origin</translation>
         <location filename="src/mainwindow.cpp" line="1259"/>
         <location filename="src/mainwindow.cpp" line="1262"/>
         <source>Exporter l&apos;histogramme de secteurs en .sep</source>
-        <translation type="unfinished"></translation>
+        <translation>Export of slice histogram to sep</translation>
     </message>
     <message>
         <location filename="src/mainwindow.cpp" line="1262"/>
         <location filename="src/mainwindow.cpp" line="1432"/>
         <source>L&apos;export a Ã©chouÃ© : l&apos;histogramme de secteurs n&apos;est pas calculÃ©.</source>
-        <translation type="unfinished"></translation>
+        <translation>Export failed : sector histogram not computed.</translation>
     </message>
     <message>
         <location filename="src/mainwindow.cpp" line="1269"/>
@@ -865,51 +865,51 @@ to the contour origin</translation>
         <location filename="src/mainwindow.cpp" line="1281"/>
         <location filename="src/mainwindow.cpp" line="1284"/>
         <source>Exporter l&apos;histogramme de la zone de nÅuds en .sep</source>
-        <translation type="unfinished"></translation>
+        <translation>Export of knot area histogram to sep</translation>
     </message>
     <message>
         <location filename="src/mainwindow.cpp" line="1284"/>
         <source>L&apos;export a Ã©chouÃ© : l&apos;histogramme de la zone de nÅuds n&apos;est pas calculÃ©.</source>
-        <translation type="unfinished"></translation>
+        <translation>Export failed : knot area histogram not computed.</translation>
     </message>
     <message>
         <location filename="src/mainwindow.cpp" line="1302"/>
         <location filename="src/mainwindow.cpp" line="1372"/>
         <location filename="src/mainwindow.cpp" line="1450"/>
         <source>Taille de l&apos;image</source>
-        <translation type="unfinished"></translation>
+        <translation>Size of image</translation>
     </message>
     <message>
         <location filename="src/mainwindow.cpp" line="1302"/>
         <location filename="src/mainwindow.cpp" line="1372"/>
         <location filename="src/mainwindow.cpp" line="1450"/>
         <source>Pourcentage</source>
-        <translation type="unfinished"></translation>
+        <translation>Percentage</translation>
     </message>
     <message>
         <location filename="src/mainwindow.cpp" line="1308"/>
         <source>Indice de la coupe</source>
-        <translation type="unfinished"></translation>
+        <translation>Slice index</translation>
     </message>
     <message>
         <location filename="src/mainwindow.cpp" line="1310"/>
         <location filename="src/mainwindow.cpp" line="1383"/>
         <source>Cumul du z-mouvement</source>
-        <translation type="unfinished"></translation>
+        <translation>Sum of z-motion</translation>
     </message>
     <message>
         <location filename="src/mainwindow.cpp" line="1318"/>
         <location filename="src/mainwindow.cpp" line="1395"/>
         <location filename="src/mainwindow.cpp" line="1465"/>
         <source>Taille correcte</source>
-        <translation type="unfinished"></translation>
+        <translation>Valid size</translation>
     </message>
     <message>
         <location filename="src/mainwindow.cpp" line="1318"/>
         <location filename="src/mainwindow.cpp" line="1395"/>
         <location filename="src/mainwindow.cpp" line="1465"/>
         <source>La taille de l&apos;image est-elle correcte ?</source>
-        <translation type="unfinished"></translation>
+        <translation>Correct size for the image ?</translation>
     </message>
     <message>
         <location filename="src/mainwindow.cpp" line="1322"/>
@@ -918,32 +918,32 @@ to the contour origin</translation>
         <location filename="src/mainwindow.cpp" line="1348"/>
         <location filename="src/mainwindow.cpp" line="1352"/>
         <source>Export de l&apos;histogramme de coupes en image</source>
-        <translation type="unfinished"></translation>
+        <translation>Export of slice histogram to image format</translation>
     </message>
     <message>
         <location filename="src/mainwindow.cpp" line="1323"/>
         <location filename="src/mainwindow.cpp" line="1400"/>
         <location filename="src/mainwindow.cpp" line="1470"/>
         <source>Fichiers PDF (*.pdf);;Fichiers PS (*.ps);;Fichiers PNG (*.png);;Fichiers SVG (*.svg);;Tous les fichiers (*.*)</source>
-        <translation type="unfinished"></translation>
+        <translation>PDF files (*.pdf);;PS files (*.ps);;PNG files (*.png);;SVG files (*.svg);;All files (*.*)</translation>
     </message>
     <message>
         <location filename="src/mainwindow.cpp" line="1329"/>
         <location filename="src/mainwindow.cpp" line="1476"/>
         <source>Impossible de crÃ©er le fichier.</source>
-        <translation type="unfinished"></translation>
+        <translation>Impossible to create file.</translation>
     </message>
     <message>
         <location filename="src/mainwindow.cpp" line="1348"/>
         <location filename="src/mainwindow.cpp" line="1428"/>
         <location filename="src/mainwindow.cpp" line="1495"/>
         <source>Erreur lors de la saisie de la taille de l&apos;image.</source>
-        <translation type="unfinished"></translation>
+        <translation>Wrong image size.</translation>
     </message>
     <message>
         <location filename="src/mainwindow.cpp" line="1381"/>
         <source>Secteur angulaire en radians</source>
-        <translation type="unfinished"></translation>
+        <translation>Angular sectors in radians</translation>
     </message>
     <message>
         <location filename="src/mainwindow.cpp" line="1399"/>
@@ -952,22 +952,22 @@ to the contour origin</translation>
         <location filename="src/mainwindow.cpp" line="1428"/>
         <location filename="src/mainwindow.cpp" line="1432"/>
         <source>Export de l&apos;histogramme de secteurs en image</source>
-        <translation type="unfinished"></translation>
+        <translation>Export of sector histogram to image format</translation>
     </message>
     <message>
         <location filename="src/mainwindow.cpp" line="1409"/>
         <source>Impossible de crÃ©er les fichiers.</source>
-        <translation type="unfinished"></translation>
+        <translation>Impossible to create files.</translation>
     </message>
     <message>
         <location filename="src/mainwindow.cpp" line="1456"/>
         <source>Slice index</source>
-        <translation type="unfinished"></translation>
+        <translation>Slice index</translation>
     </message>
     <message>
         <location filename="src/mainwindow.cpp" line="1457"/>
         <source>Distance to the pith</source>
-        <translation type="unfinished"></translation>
+        <translation>Distance to the pith</translation>
     </message>
     <message>
         <location filename="src/mainwindow.cpp" line="1469"/>
@@ -976,12 +976,12 @@ to the contour origin</translation>
         <location filename="src/mainwindow.cpp" line="1495"/>
         <location filename="src/mainwindow.cpp" line="1499"/>
         <source>Export de l&apos;histogramme de zone de nÅuds en image</source>
-        <translation type="unfinished"></translation>
+        <translation>Export of knot area histogram to image format</translation>
     </message>
     <message>
         <location filename="src/mainwindow.cpp" line="1499"/>
         <source>L&apos;export a Ã©chouÃ© : l&apos;histogramme de zone de nÅuds n&apos;est pas calculÃ©.</source>
-        <translation type="unfinished"></translation>
+        <translation>Export failed : knot area histogram not computed.</translation>
     </message>
     <message>
         <location filename="src/mainwindow.cpp" line="1506"/>
@@ -989,12 +989,12 @@ to the contour origin</translation>
         <location filename="src/mainwindow.cpp" line="1530"/>
         <location filename="src/mainwindow.cpp" line="1590"/>
         <source>Exporter le nÅud courant segmentÃ© en PGM3D</source>
-        <translation type="unfinished"></translation>
+        <translation>Export of the current knot to PGM3D</translation>
     </message>
     <message>
         <location filename="src/mainwindow.cpp" line="1506"/>
         <source>Fichiers PGM3D (*.pgm3d);;Tous les fichiers (*.*)</source>
-        <translation type="unfinished"></translation>
+        <translation>PGM3D files (*.pgm3d);;All files (*.*)</translation>
     </message>
     <message>
         <location filename="src/mainwindow.cpp" line="1527"/>
@@ -1007,123 +1007,123 @@ to the contour origin</translation>
         <location filename="src/mainwindow.cpp" line="1797"/>
         <location filename="src/mainwindow.cpp" line="1840"/>
         <source>L&apos;export a Ã©chouÃ© : impossible de crÃ©er le ficher %1.</source>
-        <translation type="unfinished"></translation>
+        <translation>Export failed : impossible to create the %1 file.</translation>
     </message>
     <message>
         <location filename="src/mainwindow.cpp" line="1530"/>
         <location filename="src/mainwindow.cpp" line="1732"/>
         <source>L&apos;export a Ã©chouÃ© : le contour n&apos;est pas calculÃ©.</source>
-        <translation type="unfinished"></translation>
+        <translation>Export failed : contour not computed.</translation>
     </message>
     <message>
         <location filename="src/mainwindow.cpp" line="1537"/>
         <source>Exporter la zone de nÅuds courante en PGM3D</source>
-        <translation type="unfinished"></translation>
+        <translation>Export current knot area to PGM3D</translation>
     </message>
     <message>
         <location filename="src/mainwindow.cpp" line="1537"/>
         <source>Fichiers de donnÃ©es (*.pgm3d);;Tous les fichiers (*.*)</source>
-        <translation type="unfinished"></translation>
+        <translation>PGM3D files (*.pgm3d);;All files (*.*)</translation>
     </message>
     <message>
         <location filename="src/mainwindow.cpp" line="1593"/>
         <source>Exporter de la zone de nÅuds courante en PGM3D</source>
-        <translation type="unfinished"></translation>
+        <translation>Export of current knot area to PGM3D</translation>
     </message>
     <message>
         <location filename="src/mainwindow.cpp" line="1593"/>
         <source>L&apos;export a Ã©chouÃ© : aucun intervalle angulaire sÃ©lectionnÃ©.</source>
-        <translation type="unfinished"></translation>
+        <translation>Export failed : no angular interval selected.</translation>
     </message>
     <message>
         <location filename="src/mainwindow.cpp" line="1600"/>
         <location filename="src/mainwindow.cpp" line="1611"/>
         <location filename="src/mainwindow.cpp" line="1614"/>
         <source>Exporter le nÅud courant segmentÃ© en V3D</source>
-        <translation type="unfinished"></translation>
+        <translation>Export of the current segmented knot to V3D</translation>
     </message>
     <message>
         <location filename="src/mainwindow.cpp" line="1600"/>
         <location filename="src/mainwindow.cpp" line="1622"/>
         <location filename="src/mainwindow.cpp" line="1663"/>
         <source>Fichiers V3D (*.v3d);;Tous les fichiers (*.*)</source>
-        <translation type="unfinished"></translation>
+        <translation>V3D files (*.v3d);;All files (*.*)</translation>
     </message>
     <message>
         <location filename="src/mainwindow.cpp" line="1614"/>
         <location filename="src/mainwindow.cpp" line="1760"/>
         <location filename="src/mainwindow.cpp" line="1800"/>
         <source>L&apos;export a Ã©chouÃ© : le nÅud n&apos;est pas segmentÃ©.</source>
-        <translation type="unfinished"></translation>
+        <translation>Export failed : the knot is not segmented.</translation>
     </message>
     <message>
         <location filename="src/mainwindow.cpp" line="1621"/>
         <location filename="src/mainwindow.cpp" line="1653"/>
         <location filename="src/mainwindow.cpp" line="1656"/>
         <source>Exporter les nÅuds segmentÃ©s de l&apos;intervalle de coupe courant en V3D</source>
-        <translation type="unfinished"></translation>
+        <translation>Export of segmented knots of the current slice interval to V3D</translation>
     </message>
     <message>
         <location filename="src/mainwindow.cpp" line="1656"/>
         <source>L&apos;export a Ã©chouÃ© : aucun intervalle de coupes sÃ©lectionnÃ©.</source>
-        <translation type="unfinished"></translation>
+        <translation>Export failed : no slice interval selected.</translation>
     </message>
     <message>
         <location filename="src/mainwindow.cpp" line="1663"/>
         <location filename="src/mainwindow.cpp" line="1699"/>
         <location filename="src/mainwindow.cpp" line="1702"/>
         <source>Exporter tous les nÅuds segmentÃ©s du billon en V3D</source>
-        <translation type="unfinished"></translation>
+        <translation>Export af all segmented knot of the billon to V3D</translation>
     </message>
     <message>
         <location filename="src/mainwindow.cpp" line="1702"/>
         <location filename="src/mainwindow.cpp" line="1843"/>
         <source>L&apos;export a Ã©chouÃ© : la moelle n&apos;est pas calculÃ©e.</source>
-        <translation type="unfinished"></translation>
+        <translation>Export failed : the pith is not computed.</translation>
     </message>
     <message>
         <location filename="src/mainwindow.cpp" line="1711"/>
         <location filename="src/mainwindow.cpp" line="1729"/>
         <location filename="src/mainwindow.cpp" line="1732"/>
         <source>Exporter le contour de la coupe courante en SDP</source>
-        <translation type="unfinished"></translation>
+        <translation>Export contour of current slice to SDP</translation>
     </message>
     <message>
         <location filename="src/mainwindow.cpp" line="1711"/>
         <source>Fichiers de contours (*.sdp);;Tous les fichiers (*.*)</source>
-        <translation type="unfinished"></translation>
+        <translation>Contour files (*.sdp);;All files (*.*)</translation>
     </message>
     <message>
         <location filename="src/mainwindow.cpp" line="1739"/>
         <location filename="src/mainwindow.cpp" line="1757"/>
         <location filename="src/mainwindow.cpp" line="1760"/>
         <source>Exporter le nÅud courant segmentÃ© en SDP</source>
-        <translation type="unfinished"></translation>
+        <translation>Export of the current segmented knot to SDP</translation>
     </message>
     <message>
         <location filename="src/mainwindow.cpp" line="1739"/>
         <source>Fichiers PGM3D (*.sdp);;Tous les fichiers (*.*)</source>
-        <translation type="unfinished"></translation>
+        <translation>PGM3D files (*.sdp);;All files (*.*)</translation>
     </message>
     <message>
         <location filename="src/mainwindow.cpp" line="1767"/>
         <location filename="src/mainwindow.cpp" line="1797"/>
         <location filename="src/mainwindow.cpp" line="1800"/>
         <source>Exporter les nÅuds segmentÃ©s de l&apos;intervalle de coupe courant en SDP</source>
-        <translation type="unfinished"></translation>
+        <translation>Export segmented knots of the current slice interval to SDP</translation>
     </message>
     <message>
         <location filename="src/mainwindow.cpp" line="1768"/>
         <location filename="src/mainwindow.cpp" line="1807"/>
         <source>Fichiers SDP (*.sdp);;Tous les fichiers (*.*)</source>
-        <translation type="unfinished"></translation>
+        <translation>SDP files (*.sdp);;All files (*.*)</translation>
     </message>
     <message>
         <location filename="src/mainwindow.cpp" line="1807"/>
         <location filename="src/mainwindow.cpp" line="1840"/>
         <location filename="src/mainwindow.cpp" line="1843"/>
         <source>Exporter tous les nÅuds segmentÃ©s du billon en SDP</source>
-        <translation type="unfinished"></translation>
+        <translation>Export all segmented knots of billon to SDP</translation>
     </message>
 </context>
 <context>
@@ -1131,57 +1131,57 @@ to the contour origin</translation>
     <message>
         <location filename="src/connexcomponentextractor.cpp" line="72"/>
         <source>Nombre de composantes = %1</source>
-        <translation type="unfinished"></translation>
+        <translation>Number of components = %1</translation>
     </message>
     <message>
         <location filename="src/contourslice.cpp" line="387"/>
         <location filename="src/contourslice.cpp" line="393"/>
         <location filename="src/curvaturehistogram.cpp" line="33"/>
         <source>ERREUR : Impossible de crÃ©er le ficher de contours %1.</source>
-        <translation type="unfinished"></translation>
+        <translation>ERROR : Impossible to create contour file %1.</translation>
     </message>
     <message>
         <location filename="src/contourslice.cpp" line="413"/>
         <location filename="src/contourslice.cpp" line="445"/>
         <source>ERREUR : Impossible de crÃ©er le ficher de points dominants %1.</source>
-        <translation type="unfinished"></translation>
+        <translation>ERROR : Impossible to create dominant point file %1.</translation>
     </message>
     <message>
         <location filename="src/contourslice.cpp" line="426"/>
         <location filename="src/contourslice.cpp" line="458"/>
         <source>ERREUR : Impossible de lire le ficher de points dominants %1.</source>
-        <translation type="unfinished"></translation>
+        <translation>ERROR : Impossible to read dominant point file %1.</translation>
     </message>
     <message>
         <location filename="src/curvaturehistogram.cpp" line="47"/>
         <source>ERREUR : Impossible de crÃ©er le ficher de courbure %1.</source>
-        <translation type="unfinished"></translation>
+        <translation>ERROR : Impossible to create curvature file %1.</translation>
     </message>
     <message>
         <location filename="src/curvaturehistogram.cpp" line="61"/>
         <source>ERREUR : Impossible de lire le ficher de courbure %1.</source>
-        <translation type="unfinished"></translation>
+        <translation>ERROR : Impossible to read curvature file %1.</translation>
     </message>
     <message>
         <location filename="src/dicomreader.cpp" line="25"/>
         <source>ERREUR : Impossible de lire le contenu du rÃ©pertoire.</source>
-        <translation type="unfinished"></translation>
+        <translation>ERROR : Impossible to read the folder content.</translation>
     </message>
     <message>
         <location filename="src/dicomreader.cpp" line="71"/>
         <location filename="src/dicomreader.cpp" line="77"/>
         <source>ERREUR : Lecture des dimensions de l&apos;image impossible.</source>
-        <translation type="unfinished"></translation>
+        <translation>ERROR : Impossible to read image dimensions.</translation>
     </message>
     <message>
         <location filename="src/dicomreader.cpp" line="117"/>
         <source>indÃ©finie</source>
-        <translation type="unfinished"></translation>
+        <translation>undefined</translation>
     </message>
     <message>
         <location filename="src/main.cpp" line="15"/>
         <source>Message d&apos;erreur</source>
-        <translation type="unfinished"></translation>
+        <translation>Error message</translation>
     </message>
     <message>
         <location filename="src/ofsexport.cpp" line="42"/>
@@ -1189,22 +1189,22 @@ to the contour origin</translation>
         <location filename="src/ofsexport.cpp" line="126"/>
         <location filename="src/ofsexport.cpp" line="144"/>
         <source>%1 file writing error.</source>
-        <translation type="unfinished"></translation>
+        <translation>%1 file writing error.</translation>
     </message>
     <message>
         <location filename="src/ofsexport.cpp" line="148"/>
         <source>No vertex to write</source>
-        <translation type="unfinished"></translation>
+        <translation>No vertex to write</translation>
     </message>
     <message>
         <location filename="src/pgm3dexport.cpp" line="17"/>
         <source>ERREUR : Impossible de crÃ©er le ficher PGM %1.</source>
-        <translation type="unfinished"></translation>
+        <translation>ERROR : Impossible to create the PGM file %1.</translation>
     </message>
     <message>
         <location filename="src/tiffreader.cpp" line="24"/>
         <source>ERREUR : Impossible de lire le contenu du fichier.</source>
-        <translation type="unfinished"></translation>
+        <translation>ERROR : Impossible to read the file content.</translation>
     </message>
 </context>
 <context>
