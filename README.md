@@ -3,27 +3,28 @@ TKDetection
 
 TKDetection is a software to detect and segment wood knots.
 
-1. [Dépendances](#dpendances)
-2. [Installation des dépendances sur Ubuntu](#installation-des-dpendances-sur-ubuntu)
-3. [Installation de TKDetection](#installation-de-tkdetection)
+1. [Dependencies](#dpendances)
+2. [Installation of dependencies on Ubuntu](#installation-des-dpendances-sur-ubuntu)
+3. [Installation of TKDetection](#installation-de-tkdetection)
 
 
-Dépendances
+Dependencies
 -----------
 
-|   |            Bibliothèques            |  Version testée  |   |      Bibliothèques      |  Version testée  |   |        Bibliothèques        |  Version testée  |
+|   |            Library                  |  Tested Version  |   |      Library            |  Tested Version  |   |        Library              |  Tested Version  |
 |:-:|:-----------------------------------:|:----------------:|---|:-----------------------:|:----------------:|---|:---------------------------:|:----------------:|
-| 1 | [Qt](#1-qt)                         |       4.8        | 4 | [Qwt](#4-qwt)           |       6.0.0      | 7 | [DGtalTools](#7-dgtaltools) |      dépôt       |
-| 2 | [Armadillo](#2-armadillo)           |       3.6.1      | 5 | [Qxt](#5-qxt)           |       0.6.2      | 8 | [DGLib](#9-dglib)           |     en ligne     |
-| 3 | [InsightToolkit](#3-insighttoolkit) |       4.1        | 6 | [QwtPolar](#6-qwtpolar) |       1.0.1      | 9 | [ImaGene](#8-imagene)       |      dépôt       |
+| 1 | [Qt](#1-qt)                         |       4.8        | 4 | [Qwt](#4-qwt)           |       6.0.0      | 7 | [DGtalTools](#7-dgtaltools) |   repository     |
+| 2 | [Armadillo](#2-armadillo)           |       3.6.1      | 5 | [Qxt](#5-qxt)           |       0.6.2      | 8 | [DGLib](#9-dglib)           |     online       |
+| 3 | [InsightToolkit](#3-insighttoolkit) |       4.1        | 6 | [QwtPolar](#6-qwtpolar) |       1.0.1      | 9 | [ImaGene](#8-imagene)       |   repository     |
 
 
-Installation des dépendances sur Ubuntu
+Installation of the dependencies on Ubuntu
 ---------------------------------------
 
-### Pré-requis
+### Preliminary 
 
-Installez les paquets "build-essential" et "cmake".
+Install the package "build-essential" and "cmake".
+
 
 ~~~
   sudo apt-get install build-essential cmake
@@ -33,8 +34,8 @@ Installez les paquets "build-essential" et "cmake".
 ### 1. QT
 [Top](#tkdetection)
 
-Installez le packet *qtcreator* disponible dans le dépôt *Universe*.
-C'est un méta-packet qui installe l'ensemble des dépendances de Qt.
+Install the package  *qtcreator* available on the repository *Universe*.
+It is a meta-packet which install  the set of QT dependencies.
 
 ~~~
   sudo apt-get install qtcreator
@@ -44,15 +45,16 @@ C'est un méta-packet qui installe l'ensemble des dépendances de Qt.
 ### 2. Armadillo
 [Top](#tkdetection)
 
-Téléchargez de la dernière version disponible sur le site http://arma.sourceforge.net.
+Download the last version available on the site: http://arma.sourceforge.net.
 
-Il est recommandé d'installer les bibliothèques LAPACK, BLAS, ATLAS et Boost pour améliorer les performances, particulièrement les additions et les multiplications de matrices.
+It is recommended to install the libraries LAPACK, BLAS, ATLAS, and Boost to improve the performances in particular for the addition and multiplications of matrices. 
+
 
 ~~~
   sudo apt-get install liblapack-dev libblas-dev libatlas-dev libboost-dev
 ~~~
 
-Installez ensuite Armadillo en remplaçant *x-x-x* par le numéro de la version téléchargée :
+Then install Armadillo by replacing *x-x-x* with  the number of the downloaded version:
 
 ~~~
   tar xvf armadillo-x.x.x.tar.gz
@@ -66,8 +68,8 @@ Installez ensuite Armadillo en remplaçant *x-x-x* par le numéro de la version 
 ### 3. InsightToolkit
 [Top](#tkdetection)
 
-Téléchargez la version disponible sur le site http://www.itk.org/ITK/resources/software.html.
-Installez-la en remplaçant *x-x-x* par le numéro de la version téléchargée :
+Download the version available on the site http://www.itk.org/ITK/resources/software.html.
+Install it by replacing  *x-x-x* with the number of the downloaded version :
 
 ~~~
   tar xvf InsightToolkit-x.x.x.tar.gz
@@ -83,7 +85,7 @@ Installez-la en remplaçant *x-x-x* par le numéro de la version téléchargée 
 ### 4. Qwt
 [Top](#tkdetection)
 
-Utilisez de la version disponible dans le dépôt *main*.
+Use the version available on the main repository. 
 
 ~~~
   sudo apt-get install libqwt-dev
@@ -93,10 +95,11 @@ Utilisez de la version disponible dans le dépôt *main*.
 ### 5. Qxt
 [Top](#tkdetection)
 
-Téléchargez la version disponible sur le site http://www.libqxt.org.
-La version disponible via les dépôts n'installe pas les fichiers de configuration *qxt.prf* et *qxtvars.prf* nécaissaires à TKDetection.pro.
+Download the version available on the site  http://www.libqxt.org.
+The version available on the directories does not install the configuration file  *qxt.prf* and *qxtvars.prf* needed to TKDetection.pro 
 
-Remplacez *xxxxxxxxx* par le numéro attribué au téléchargement.
+
+Replace  *xxxxxxxxx* with the number attributed to the download.
 
 ~~~
   tar xvf libqxt-libqxt-xxxxxxxxx.tar.bz2
@@ -106,21 +109,22 @@ Remplacez *xxxxxxxxx* par le numéro attribué au téléchargement.
   sudo make install
 ~~~
 
-Si la liste des widgets de Qxt n'apparait pas dans la liste des widgets de QtDesigner :
+The the list of the Qxt widgets does not appears in the list of the widgets of QtDesigner:
 
 ~~~
   sudo ln -s /usr/local/Qxt/lib/libQxtGui.so.0 /usr/lib/
   sudo ln -s /usr/local/Qxt/lib/libQxtCore.so.0 /usr/lib/
 ~~~
   
-Relancez QtDesigner.
+Reload  QtDesigner.
 
 
 ### 6. QwtPolar
 [Top](#tkdetection)
 
-Utilisez la version disponible sur le site http://sourceforge.net/projects/qwtpolar.
-Installez-la en remplaçant *x-x-x* par le numéro de la version téléchargée :
+Use the version available on the site:  http://sourceforge.net/projects/qwtpolar.
+Install it by replacing *x-x-x* with the number of the downloaded version:
+
 
 ~~~
   unzip qwtpolar-x-x-x.zip
@@ -131,19 +135,19 @@ Installez-la en remplaçant *x-x-x* par le numéro de la version téléchargée 
   sudo make install
 ~~~
 
-##### Si vous rencontrez des problèmes lors de la compilation de TKDetection :
+##### If you have problem during the compilation of TKDetection:
 
-1.  Vérifiez que les deux fichiers suivants existent :
+1.  Check that the following files exist:
     - /usr/share/qt4/mkspecs/features/qwtpolar.prf
     - /usr/share/qt4/mkspecs/features/qwtpolarconfig.pri
 
-  S'ils n'existent pas :
+  If they does not exist:
   ~~~
       sudo ln -s /usr/local/qwtpolar-x.x.x/features/qwtpolar.prf /usr/share/qt4/mkspecs/features/
       sudo ln -s /usr/local/qwtpolar-x.x.x/features/qwtpolarconfig.pri /usr/share/qt4/mkspecs/features/
   ~~~
 
-2.  Si 1. n'a pas résolu le problème :
+2.  if 1. does not resolve the problem apple: 
 
   ~~~
       sudo ln -s /usr/local/qwtpolar-x.x.x/lib/libqwtpolar.so       /usr/lib/
@@ -152,9 +156,9 @@ Installez-la en remplaçant *x-x-x* par le numéro de la version téléchargée 
       sudo ln -s /usr/local/qwtpolar-x.x.x/lib/libqwtpolar.so.1.0.0 /usr/lib/
   ~~~
 
-##### Si le widget QwtPolarPlot n'apparait pas dans la liste des widgets de QtDesigner
+##### If the widget  QwtPolarPlot does not appear in the list of QtDesigner widgets
 
-N'oubliez pas de remplacer x.x.x par le numéro de la version téléchargée :
+Don't forget to replace  x.x.x with the number of the downloaded version:
 
 ~~~
   sudo cp /usr/local/qwtpolar-x.x.x/plugins/designer/libqwt_polar_designer_plugin.so /usr/lib/x86_64-linux-gnu/qt4/plugins/designer/
@@ -164,8 +168,8 @@ N'oubliez pas de remplacer x.x.x par le numéro de la version téléchargée :
 ### 7. DGtalTools
 [Top](#tkdetection)
 
-Nécessite l'installation de DGtal.
-Faites-le par exemple en clonant le dépôt :
+Need the installation of the DGtal library.
+You can do it by cloning it directly from the main repository :
 
 ~~~
   git clone git://github.com/DGtal-team/DGtal.git DGtal
@@ -176,7 +180,7 @@ Faites-le par exemple en clonant le dépôt :
   sudo make install
 ~~~
 
-Installez ensuite DGtalTools :
+Then Install DGtalTools :
 
 ~~~
   git clone git://github.com/DGtal-team/DGtalTools.git DGtalTools
@@ -191,8 +195,8 @@ Installez ensuite DGtalTools :
 ### 8. ImaGene
 [Top](#tkdetection)
 
-DGLib utilise des fonctionalité de d'ImaGene.
-Installez ImaGene, par exemple à partir d'une version sans dépendance :
+DGLib uses feature of the ImaGene library.
+Install ImaGene, by using for example a version without dependencies :
 
 ~~~
   git clone git://github.com/kerautret/ImaGeneNoDep.git
@@ -207,7 +211,7 @@ Installez ImaGene, par exemple à partir d'une version sans dépendance :
 ### 9. DGLib
 [Top](#tkdetection)
 
-Doit être téléchargé ici : http://www.loria.fr/~krahenbu/dgci2013/DGLib_for_TKDetection.zip
+It should be downloaded here: http://www.loria.fr/~krahenbu/dgci2013/DGLib_for_TKDetection.zip
 
 ~~~
   unzip DGLib_for_TKDetection
@@ -218,7 +222,7 @@ Doit être téléchargé ici : http://www.loria.fr/~krahenbu/dgci2013/DGLib_for_
   sudo make install
 ~~~
 
-Installation de TKDetection
+Installation of TKDetection
 ---------------------------
 [Top](#tkdetection)
 
@@ -230,4 +234,4 @@ Installation de TKDetection
   make
 ~~~
 
-L'exécutable **TKDetection** se trouve alors dans le répertoire TKDetection.
+The executable binary file   **TKDetection** is then located in the directory TKDetection.
