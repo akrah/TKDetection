@@ -3,13 +3,13 @@ TKDetection
 
 TKDetection is a software to detect and segment wood knots.
 
-1. [Dependencies list](#dependancies)
+1. [Dependencies list](#dependencies-list)
 2. [Dependencies installation on Ubuntu](#dependencies-installation-on-ubuntu)
 3. [TKDetection installation](#tkdetection-installation)
 
 
-Dependencies
-------------
+Dependencies list
+-----------------
 
 |   |            Library                  |  Tested version  |   |      Library            |  Tested version  |   |        Library              |  Tested version  |
 |:-:|:-----------------------------------:|:----------------:|---|:-----------------------:|:----------------:|---|:---------------------------:|:----------------:|
@@ -19,7 +19,7 @@ Dependencies
 
 
 Dependencies installation on Ubuntu
-------------------------------------
+-----------------------------------
 
 ### Preliminaries
 
@@ -222,8 +222,8 @@ It should be downloaded here: http://www.loria.fr/~krahenbu/dgci2013/DGLib_for_T
   sudo make install
 ~~~
 
-Installation of TKDetection
----------------------------
+TKDetection installation
+-------------------------
 [Top](#tkdetection)
 
 Clone the project from the Github repository of this webpage and compile:
