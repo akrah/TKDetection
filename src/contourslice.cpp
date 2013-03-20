@@ -89,7 +89,7 @@ const rCoord2D &ContourSlice::rightMainSupportPoint() const
  **********************************/
 
 void ContourSlice::compute( Slice &resultSlice, const Slice &initialSlice, const uiCoord2D &sliceCenter, const int &intensityThreshold,
-							const int &blurredSegmentThickness, const int &smoothingRadius, const int &curvatureWidth,
+							const int &blurredSegmentThickness, const int &smoothingRadius, const int &/*curvatureWidth*/,
 							const int &minimumOriginDistance, const iCoord2D &startPoint )
 {
 	_contour.compute( initialSlice, sliceCenter, intensityThreshold, startPoint );

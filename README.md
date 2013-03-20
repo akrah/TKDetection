@@ -3,27 +3,27 @@ TKDetection
 
 TKDetection is a software to detect and segment wood knots.
 
-1. [Dependencies](#dpendances)
-2. [Installation of dependencies on Ubuntu](#installation-des-dpendances-sur-ubuntu)
-3. [Installation of TKDetection](#installation-de-tkdetection)
+1. [Dependencies list](#dpendances)
+2. [Dependencies installation on Ubuntu](#installation-des-dpendances-sur-ubuntu)
+3. [TKDetection installation](#installation-de-tkdetection)
 
 
 Dependencies
------------
+------------
 
-|   |            Library                  |  Tested Version  |   |      Library            |  Tested Version  |   |        Library              |  Tested Version  |
+|   |            Library                  |  Tested version  |   |      Library            |  Tested version  |   |        Library              |  Tested version  |
 |:-:|:-----------------------------------:|:----------------:|---|:-----------------------:|:----------------:|---|:---------------------------:|:----------------:|
 | 1 | [Qt](#1-qt)                         |       4.8        | 4 | [Qwt](#4-qwt)           |       6.0.0      | 7 | [DGtalTools](#7-dgtaltools) |   repository     |
 | 2 | [Armadillo](#2-armadillo)           |       3.6.1      | 5 | [Qxt](#5-qxt)           |       0.6.2      | 8 | [DGLib](#9-dglib)           |     online       |
 | 3 | [InsightToolkit](#3-insighttoolkit) |       4.1        | 6 | [QwtPolar](#6-qwtpolar) |       1.0.1      | 9 | [ImaGene](#8-imagene)       |   repository     |
 
 
-Installation of the dependencies on Ubuntu
----------------------------------------
+Dependencies installation on Ubuntu
+------------------------------------
 
-### Preliminary 
+### Preliminaries
 
-Install the package "build-essential" and "cmake".
+Install "build-essential" and "cmake" packages.
 
 
 ~~~
@@ -34,8 +34,8 @@ Install the package "build-essential" and "cmake".
 ### 1. QT
 [Top](#tkdetection)
 
-Install the package  *qtcreator* available on the repository *Universe*.
-It is a meta-packet which install  the set of QT dependencies.
+Install the *qtcreator* package available on the *Universe* repository.
+This meta-package install the set of Qt dependencies.
 
 ~~~
   sudo apt-get install qtcreator
@@ -45,16 +45,16 @@ It is a meta-packet which install  the set of QT dependencies.
 ### 2. Armadillo
 [Top](#tkdetection)
 
-Download the last version available on the site: http://arma.sourceforge.net.
+Download the last version available on the website http://arma.sourceforge.net.
 
-It is recommended to install the libraries LAPACK, BLAS, ATLAS, and Boost to improve the performances in particular for the addition and multiplications of matrices. 
+It is recommended to install the libraries LAPACK, BLAS, ATLAS, and Boost to improve the performances, in particular for the matrix sum and product. 
 
 
 ~~~
   sudo apt-get install liblapack-dev libblas-dev libatlas-dev libboost-dev
 ~~~
 
-Then install Armadillo by replacing *x-x-x* with  the number of the downloaded version:
+Install then Armadillo by replacing *x-x-x* by downloaded version number:
 
 ~~~
   tar xvf armadillo-x.x.x.tar.gz
@@ -68,8 +68,8 @@ Then install Armadillo by replacing *x-x-x* with  the number of the downloaded v
 ### 3. InsightToolkit
 [Top](#tkdetection)
 
-Download the version available on the site http://www.itk.org/ITK/resources/software.html.
-Install it by replacing  *x-x-x* with the number of the downloaded version :
+Download the version available on the website http://www.itk.org/ITK/resources/software.html.
+Replace *x-x-x* by downloaded version number:
 
 ~~~
   tar xvf InsightToolkit-x.x.x.tar.gz
@@ -85,7 +85,7 @@ Install it by replacing  *x-x-x* with the number of the downloaded version :
 ### 4. Qwt
 [Top](#tkdetection)
 
-Use the version available on the main repository. 
+Use the version available on the *Main* repository. 
 
 ~~~
   sudo apt-get install libqwt-dev
@@ -95,11 +95,11 @@ Use the version available on the main repository.
 ### 5. Qxt
 [Top](#tkdetection)
 
-Download the version available on the site  http://www.libqxt.org.
-The version available on the directories does not install the configuration file  *qxt.prf* and *qxtvars.prf* needed to TKDetection.pro 
+Download the version available on the website http://www.libqxt.org.
+The repository version does not install the configuration files *qxt.prf* and *qxtvars.prf*, required by TKDetection.pro.
 
 
-Replace  *xxxxxxxxx* with the number attributed to the download.
+Replace *xxxxxxxxx* by the downloaded file number.
 
 ~~~
   tar xvf libqxt-libqxt-xxxxxxxxx.tar.bz2
@@ -109,21 +109,21 @@ Replace  *xxxxxxxxx* with the number attributed to the download.
   sudo make install
 ~~~
 
-The the list of the Qxt widgets does not appears in the list of the widgets of QtDesigner:
+If Qxt widgets does not appear on QtDesigner:
 
 ~~~
   sudo ln -s /usr/local/Qxt/lib/libQxtGui.so.0 /usr/lib/
   sudo ln -s /usr/local/Qxt/lib/libQxtCore.so.0 /usr/lib/
 ~~~
   
-Reload  QtDesigner.
+Restart QtDesigner.
 
 
 ### 6. QwtPolar
 [Top](#tkdetection)
 
-Use the version available on the site:  http://sourceforge.net/projects/qwtpolar.
-Install it by replacing *x-x-x* with the number of the downloaded version:
+Use the version available on the website http://sourceforge.net/projects/qwtpolar.
+Replacing *x-x-x* by the downloaded version number:
 
 
 ~~~
@@ -135,19 +135,19 @@ Install it by replacing *x-x-x* with the number of the downloaded version:
   sudo make install
 ~~~
 
-##### If you have problem during the compilation of TKDetection:
+##### If you have a problem during the TKDetection compilation step:
 
 1.  Check that the following files exist:
     - /usr/share/qt4/mkspecs/features/qwtpolar.prf
     - /usr/share/qt4/mkspecs/features/qwtpolarconfig.pri
 
-  If they does not exist:
+  If they do not exist:
   ~~~
       sudo ln -s /usr/local/qwtpolar-x.x.x/features/qwtpolar.prf /usr/share/qt4/mkspecs/features/
       sudo ln -s /usr/local/qwtpolar-x.x.x/features/qwtpolarconfig.pri /usr/share/qt4/mkspecs/features/
   ~~~
 
-2.  if 1. does not resolve the problem apple: 
+2.  if 1. does not resolve the problem:
 
   ~~~
       sudo ln -s /usr/local/qwtpolar-x.x.x/lib/libqwtpolar.so       /usr/lib/
@@ -156,9 +156,9 @@ Install it by replacing *x-x-x* with the number of the downloaded version:
       sudo ln -s /usr/local/qwtpolar-x.x.x/lib/libqwtpolar.so.1.0.0 /usr/lib/
   ~~~
 
-##### If the widget  QwtPolarPlot does not appear in the list of QtDesigner widgets
+##### If the QwtPolarPlot widget does not appear in QtDesigner
 
-Don't forget to replace  x.x.x with the number of the downloaded version:
+Don't forget to replace *x.x.x* by the downloaded version number:
 
 ~~~
   sudo cp /usr/local/qwtpolar-x.x.x/plugins/designer/libqwt_polar_designer_plugin.so /usr/lib/x86_64-linux-gnu/qt4/plugins/designer/
@@ -168,8 +168,8 @@ Don't forget to replace  x.x.x with the number of the downloaded version:
 ### 7. DGtalTools
 [Top](#tkdetection)
 
-Need the installation of the DGtal library.
-You can do it by cloning it directly from the main repository :
+DGtalTools required the DGtal library.
+You can clone DGtalTools the main repository:
 
 ~~~
   git clone git://github.com/DGtal-team/DGtal.git DGtal
@@ -180,7 +180,7 @@ You can do it by cloning it directly from the main repository :
   sudo make install
 ~~~
 
-Then Install DGtalTools :
+Install then DGtalTools:
 
 ~~~
   git clone git://github.com/DGtal-team/DGtalTools.git DGtalTools
@@ -195,8 +195,8 @@ Then Install DGtalTools :
 ### 8. ImaGene
 [Top](#tkdetection)
 
-DGLib uses feature of the ImaGene library.
-Install ImaGene, by using for example a version without dependencies :
+DGLib uses features of ImaGene library.
+Install ImaGene by using the version without dependencies:
 
 ~~~
   git clone git://github.com/kerautret/ImaGeneNoDep.git
@@ -226,6 +226,8 @@ Installation of TKDetection
 ---------------------------
 [Top](#tkdetection)
 
+Clone the project from the Github repository of this webpage and compile:
+
 ~~~
   git clone https://github.com/adrien057/TKDetection.git
   cd TKDetection
@@ -234,4 +236,4 @@ Installation of TKDetection
   make
 ~~~
 
-The executable binary file   **TKDetection** is then located in the directory TKDetection.
+The binary file **TKDetection** is then located in the TKDetection directory.

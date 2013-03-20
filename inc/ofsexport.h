@@ -5,7 +5,7 @@
 #include "def/def_billon.h"
 
 template <typename T> class QVector;
-template <typename T, typename U> class QPair;
+template <typename T, typename U> struct QPair;
 template <typename T> class Interval;
 
 class QString;
