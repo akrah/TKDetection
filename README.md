@@ -54,7 +54,7 @@ It is recommended to install the libraries LAPACK, BLAS, ATLAS, and Boost to imp
   sudo apt-get install liblapack-dev libblas-dev libatlas-dev libboost-dev
 ~~~
 
-Install then Armadillo by replacing *x-x-x* by downloaded version number:
+Install then Armadillo by replacing *x-x-x* by the downloaded version number:
 
 ~~~
   tar xvf armadillo-x.x.x.tar.gz
@@ -69,7 +69,8 @@ Install then Armadillo by replacing *x-x-x* by downloaded version number:
 [Top](#tkdetection)
 
 Download the version available on the website http://www.itk.org/ITK/resources/software.html.
-Replace *x-x-x* by downloaded version number:
+
+Replace *x-x-x* by the downloaded version number:
 
 ~~~
   tar xvf InsightToolkit-x.x.x.tar.gz
@@ -123,7 +124,8 @@ Restart QtDesigner.
 [Top](#tkdetection)
 
 Use the version available on the website http://sourceforge.net/projects/qwtpolar.
-Replacing *x-x-x* by the downloaded version number:
+
+Replace *x-x-x* by the downloaded version number:
 
 
 ~~~
@@ -196,6 +198,7 @@ Install then DGtalTools:
 [Top](#tkdetection)
 
 DGLib uses features of ImaGene library.
+
 Install ImaGene by using the version without dependencies:
 
 ~~~
