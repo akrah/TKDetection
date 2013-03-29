@@ -20,7 +20,7 @@ struct coord2d
 	inline coord2d<T> & operator -= ( const coord2d<T> & other ) { x -= other.x; y -= other.y ; return *this; }
 	inline coord2d<T> & operator /= ( qreal div ) { x /= div; y /= div ; return *this; }
 	inline void print( std::ostream &flux ) const { return flux << "( " << x << ", " << y << " )"; }
-	inline qreal euclideanDistance( const coord2d &other ) const { return qSqrt( qPow(x-other.x,2) + qPow(y-other.y,2) ); }
+	inline qreal euclideanDistance( const coord2d &other ) const { return qSqrt( qPow((qreal)(x)-(qreal)(other.x),2) + qPow((qreal)(y)-(qreal)(other.y),2) ); }
 	// Angle orienté du vecteur (this,secondCoord) vers le vecteur (this,thirdCoord).
 	// Il est compris entre -PI et PI.
 	qreal angle( const coord2d &secondCoord, const coord2d &thirdCoord ) const
@@ -32,7 +32,7 @@ struct coord2d
 	qreal angle( const coord2d &other ) const
 	{
 		const qreal distance = this->euclideanDistance(other);
-		return qFuzzyIsNull(distance) ? 0. : y < other.y ? qAcos((other.x-x) / distance) : -qAcos((other.x-x) / distance);
+		return qFuzzyIsNull(distance) ? 0. : (qreal)(y) < (qreal)(other.y) ? qAcos(((qreal)(other.x)-(qreal)(x)) / distance) : -qAcos(((qreal)(other.x)-(qreal)(x)) / distance);
 	}
 };
 

@@ -129,6 +129,7 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 	QObject::connect(_ui->_spinMaxIntensity, SIGNAL(valueChanged(int)), this, SLOT(drawSlice()));
 	QObject::connect(_ui->_sliderRestrictedAreaPercentage, SIGNAL(valueChanged(int)), _ui->_spinRestrictedAreaPercentage, SLOT(setValue(int)));
 	QObject::connect(_ui->_spinRestrictedAreaPercentage, SIGNAL(valueChanged(int)), _ui->_sliderRestrictedAreaPercentage, SLOT(setValue(int)));
+	QObject::connect(_ui->_spinRestrictedAreaPercentage, SIGNAL(valueChanged(int)), this, SLOT(drawSlice()));
 	QObject::connect(_ui->_checkRadiusAroundPith, SIGNAL(clicked()), this, SLOT(drawSlice()));
 	QObject::connect(_ui->_sliderAngularResolution, SIGNAL(valueChanged(int)), _ui->_spinAngularResolution, SLOT(setValue(int)));
 	QObject::connect(_ui->_spinAngularResolution, SIGNAL(valueChanged(int)), _ui->_sliderAngularResolution, SLOT(setValue(int)));
@@ -272,7 +273,7 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *event)
 			{
 				iCoord2D pos = iCoord2D(mouseEvent->x(),mouseEvent->y())/_sliceZoomer.factor();
 				qDebug() << "Position (i,j) = " << pos.x << " , " << pos.y << " )";
-				_currentSector = _pieChart->sectorIndexOfAngle( _billon->pithCoord(_currentSlice).angle(iCoord2D(mouseEvent->x(),mouseEvent->y())/_sliceZoomer.factor()) );
+				_currentSector = _pieChart->sectorIndexOfAngle( _billon->pithCoord(_currentSlice).angle(uiCoord2D(mouseEvent->x(),mouseEvent->y())/_sliceZoomer.factor()) );
 				_plotSectorHistogram->moveCursor(_currentSector);
 				_ui->_plotSectorHistogram->replot();
 				_ui->_polarSectorHistogram->replot();
