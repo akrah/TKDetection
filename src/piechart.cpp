@@ -68,7 +68,7 @@ void PieChart::draw( QImage &image, const uiCoord2D &center, const uint &sectorI
 	const int width = image.width();
 	const int height = image.height();
 	iCoord2D end;
-	qreal angle;
+	qreal angle, a, b;
 
 	QPainter painter(&image);
 	painter.setPen(Qt::red);
@@ -84,9 +84,9 @@ void PieChart::draw( QImage &image, const uiCoord2D &center, const uint &sectorI
 			else if ( qFuzzyCompare(angle,THREE_PI_ON_TWO) ) end.y = 0;
 			else
 			{
-				const qreal a = qTan(angle);
-				const qreal b = center.y - (a*center.x);
-				if ( angle < PI_ON_TWO || angle > THREE_PI_ON_TWO ) end = iCoord2D(width,a*width+b);
+				a = qTan(angle);
+				b = center.y - (a*center.x);
+				if ( (angle < PI_ON_TWO) || (angle > THREE_PI_ON_TWO) ) end = iCoord2D(width,a*width+b);
 				else end = iCoord2D(0,b);
 			}
 			// Tracé du segment
@@ -145,7 +145,7 @@ void PieChart::draw(QImage &image, const uiCoord2D &center, const QVector< Inter
 				{
 					const qreal a = qTan(angle);
 					const qreal b = center.y - (a*center.x);
-					if ( (angle) < PI_ON_TWO || (angle) > THREE_PI_ON_TWO ) end = iCoord2D(width,a*width+b);
+					if ( (angle < PI_ON_TWO) || (angle > THREE_PI_ON_TWO) ) end = iCoord2D(width,a*width+b);
 					else end = iCoord2D(0,b);
 				}
 				// Tracé du segment
