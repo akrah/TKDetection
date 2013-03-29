@@ -624,13 +624,13 @@ void MainWindow::updateContourHistograms( const int &sliceNumber )
 		{
 			const ContourSlice &contourSlice = _contourBillon->contourSlice(sliceNumber-sliceInterval.min());
 
-			_plotCurvatureHistogram->update(contourSlice.curvatureHistogram(),contourSlice.dominantPointIndex());
+			_plotCurvatureHistogram->update(contourSlice.curvatureHistogram(),contourSlice.dominantPointIndexFromLeft());
 			_ui->_plotCurvatureHistogram->setAxisScale(QwtPlot::xBottom,0,contourSlice.curvatureHistogram().size());
 
-			_plotContourDistancesHistogram->update(contourSlice.contourDistancesHistogram(),contourSlice.dominantPointIndex());
+			_plotContourDistancesHistogram->update(contourSlice.contourDistancesHistogram(),contourSlice.dominantPointIndexFromLeft(),contourSlice.dominantPointIndexFromRight());
 			_ui->_plotContourDistancesHistogram->setAxisScale(QwtPlot::xBottom,0,contourSlice.contourDistancesHistogram().size());
 
-			_ui->_sliderContour->setMaximum(contourSlice.curvatureHistogram().size()-1);
+			_ui->_sliderContour->setMaximum(contourSlice.contour().size()-1);
 			moveContourCursor(0);
 		}
 	}

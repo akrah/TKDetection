@@ -7,8 +7,11 @@ PlotContourDistancesHistogram::PlotContourDistancesHistogram()
 	_histogramCursor.setBrush(Qt::red);
 	_histogramCursor.setPen(QPen(Qt::red));
 
-	_histogramDominantPoints.setBrush(Qt::green);
-	_histogramDominantPoints.setPen(QPen(Qt::green));
+	_histogramDominantPointsFromLeft.setBrush(Qt::green);
+	_histogramDominantPointsFromLeft.setPen(QPen(Qt::green));
+
+	_histogramDominantPointsFromRight.setBrush(Qt::yellow);
+	_histogramDominantPointsFromRight.setPen(QPen(Qt::yellow));
 }
 
 PlotContourDistancesHistogram::~PlotContourDistancesHistogram()
@@ -20,7 +23,8 @@ void PlotContourDistancesHistogram::attach( QwtPlot * const plot )
 	if ( plot != 0 )
 	{
 		_histogramData.attach(plot);
-		_histogramDominantPoints.attach(plot);
+		_histogramDominantPointsFromLeft.attach(plot);
+		_histogramDominantPointsFromRight.attach(plot);
 		_histogramCursor.attach(plot);
 	}
 }
@@ -29,7 +33,8 @@ void PlotContourDistancesHistogram::clear()
 {
 	const QVector<QwtIntervalSample> emptyData(0);
 	_histogramData.setSamples(emptyData);
-	_histogramDominantPoints.setSamples(emptyData);
+	_histogramDominantPointsFromLeft.setSamples(emptyData);
+	_histogramDominantPointsFromRight.setSamples(emptyData);
 	_histogramCursor.setSamples(emptyData);
 }
 
@@ -41,10 +46,10 @@ void PlotContourDistancesHistogram::moveCursor( const uint &sliceIndex )
 	_histogramCursor.setSamples(datasCursor);
 }
 
-void PlotContourDistancesHistogram::update( const ContourDistancesHistogram & histogram, const QVector<int> dominantPointsIndex )
+void PlotContourDistancesHistogram::update(const ContourDistancesHistogram &histogram, const QVector<int> &dominantPointsIndexFromLeft , const QVector<int> &dominantPointsIndexFromRight )
 {
 	updateDatas( histogram );
-	updateDominantPoints( histogram, dominantPointsIndex );
+	updateDominantPoints( histogram, dominantPointsIndexFromLeft, dominantPointsIndexFromRight );
 }
 
 void PlotContourDistancesHistogram::updateDatas( const ContourDistancesHistogram &histogram )
@@ -54,11 +59,9 @@ void PlotContourDistancesHistogram::updateDatas( const ContourDistancesHistogram
 	{
 		datasHistogram.reserve(histogram.size());
 		int i=0;
-		QVector<qreal>::ConstIterator begin = histogram.begin();
-		const QVector<qreal>::ConstIterator end = histogram.end();
-		while ( begin != end )
+		foreach (const qreal &distance, histogram)
 		{
-			datasHistogram.append(QwtIntervalSample(*begin++,i,i+1));
+			datasHistogram.append(QwtIntervalSample(distance,i,i+1));
 			++i;
 		}
 	}
@@ -66,19 +69,24 @@ void PlotContourDistancesHistogram::updateDatas( const ContourDistancesHistogram
 }
 
 
-void PlotContourDistancesHistogram::updateDominantPoints( const ContourDistancesHistogram &histogram, const QVector<int> dominantPointsIndex )
+void PlotContourDistancesHistogram::updateDominantPoints( const ContourDistancesHistogram &histogram, const QVector<int> &dominantPointsIndexFromLeft, const QVector<int> &dominantPointsIndexFromRight )
 {
 	QVector<QwtIntervalSample> dominantPointHistogram(0);
-	if ( histogram.size() > 0 && dominantPointsIndex.size() > 0 )
+	if ( histogram.size() > 0 && dominantPointsIndexFromLeft.size() > 0 )
 	{
-		dominantPointHistogram.reserve(dominantPointsIndex.size());
-		QVector<int>::ConstIterator begin = dominantPointsIndex.begin();
-		const QVector<int>::ConstIterator end = dominantPointsIndex.end();
-		while ( begin != end )
-		{
-			dominantPointHistogram.append(QwtIntervalSample(histogram[*begin],*begin,*begin+1));
-			++begin;
+		dominantPointHistogram.reserve(dominantPointsIndexFromLeft.size());
+		foreach (const int &dpIndex, dominantPointsIndexFromLeft) {
+			dominantPointHistogram.append(QwtIntervalSample(histogram[dpIndex],dpIndex,dpIndex+1));
 		}
 	}
-	_histogramDominantPoints.setSamples(dominantPointHistogram);
+	_histogramDominantPointsFromLeft.setSamples(dominantPointHistogram);
+	dominantPointHistogram.clear();
+	if ( histogram.size() > 0 && dominantPointsIndexFromRight.size() > 0 )
+	{
+		dominantPointHistogram.reserve(dominantPointsIndexFromRight.size());
+		foreach (const int &dpIndex, dominantPointsIndexFromRight) {
+			dominantPointHistogram.append(QwtIntervalSample(histogram[dpIndex],dpIndex,dpIndex+1));
+		}
+	}
+	_histogramDominantPointsFromRight.setSamples(dominantPointHistogram);
 }

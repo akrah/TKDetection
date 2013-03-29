@@ -16,15 +16,16 @@ public:
 
 	void moveCursor( const uint & sliceIndex );
 
-	void update( const ContourDistancesHistogram & histogram, const QVector<int> dominantPointsIndex );
+	void update( const ContourDistancesHistogram & histogram, const QVector<int> &dominantPointsIndexFromLeft, const QVector<int> &dominantPointsIndexFromRight );
 
 private:
 	void updateDatas( const ContourDistancesHistogram & histogram );
-	void updateDominantPoints( const ContourDistancesHistogram & histogram, const QVector<int> dominantPointsIndex );
+	void updateDominantPoints(const ContourDistancesHistogram & histogram, const QVector<int> &dominantPointsIndexFromLeft, const QVector<int> &dominantPointsIndexFromRight );
 
 private:
 	QwtPlotHistogram _histogramData;
-	QwtPlotHistogram _histogramDominantPoints;
+	QwtPlotHistogram _histogramDominantPointsFromLeft;
+	QwtPlotHistogram _histogramDominantPointsFromRight;
 	QwtPlotHistogram _histogramCursor;
 };
 

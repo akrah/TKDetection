@@ -37,21 +37,26 @@ const CurvatureHistogram &ContourSlice::curvatureHistogram() const
 	return _curvatureHistogram;
 }
 
-const iCoord2D &ContourSlice::dominantPoint( const uint &index ) const
+const iCoord2D &ContourSlice::dominantPointFromLeft( const uint &index ) const
 {
-	Q_ASSERT_X( index<static_cast<uint>(_dominantPointsIndex.size()), "Histogram::mainDominantPoint", "Le point dominants demandé n'existe pas" );
-	return _contour[_dominantPointsIndex[index]];
+	Q_ASSERT_X( index<static_cast<uint>(_dominantPointsIndexFromLeft.size()), "Histogram::mainDominantPoint", "Le point dominants demandé n'existe pas" );
+	return _contour[_dominantPointsIndexFromLeft[index]];
 }
 
-const iCoord2D &ContourSlice::dominantPoint2( const uint &index ) const
+const iCoord2D &ContourSlice::dominantPointFromRight( const uint &index ) const
 {
-	Q_ASSERT_X( index<static_cast<uint>(_dominantPointsIndex2.size()), "Histogram::mainDominantPoint", "Le point dominants demandé n'existe pas" );
-	return _contour[_dominantPointsIndex2[index]];
+	Q_ASSERT_X( index<static_cast<uint>(_dominantPointsIndexFromRight.size()), "Histogram::mainDominantPoint", "Le point dominants demandé n'existe pas" );
+	return _contour[_dominantPointsIndexFromRight[index]];
 }
 
-const QVector<int> &ContourSlice::dominantPointIndex() const
+const QVector<int> &ContourSlice::dominantPointIndexFromLeft() const
 {
-	return _dominantPointsIndex;
+	return _dominantPointsIndexFromLeft;
+}
+
+const QVector<int> &ContourSlice::dominantPointIndexFromRight() const
+{
+	return _dominantPointsIndexFromRight;
 }
 
 const iCoord2D &ContourSlice::leftMainDominantPoint() const
@@ -89,7 +94,7 @@ const rCoord2D &ContourSlice::rightMainSupportPoint() const
  **********************************/
 
 void ContourSlice::compute( Slice &resultSlice, const Slice &initialSlice, const uiCoord2D &sliceCenter, const int &intensityThreshold,
-							const int &blurredSegmentThickness, const int &smoothingRadius, const int &/*curvatureWidth*/,
+							const int &blurredSegmentThickness, const int &smoothingRadius, const int &curvatureWidth,
 							const int &minimumOriginDistance, const iCoord2D &startPoint )
 {
 	_contour.compute( initialSlice, sliceCenter, intensityThreshold, startPoint );
@@ -97,7 +102,7 @@ void ContourSlice::compute( Slice &resultSlice, const Slice &initialSlice, const
 	_contour.smooth(smoothingRadius);
 
 	_contourDistancesHistogram.construct( _contour, sliceCenter );
-	//_curvatureHistogram.construct( _contour, curvatureWidth  );
+	_curvatureHistogram.construct( _contour, curvatureWidth  );
 
 	_sliceCenter = sliceCenter;
 
@@ -114,7 +119,7 @@ void ContourSlice::computeOldMethod( Slice &resultSlice, const Slice &initialSli
 	_originalContour.clear();
 	_contourDistancesHistogram.clear();
 	_curvatureHistogram.clear();
-	_dominantPointsIndex.clear();
+	_dominantPointsIndexFromLeft.clear();
 	_leftMainDominantPointsIndex = _rightMainDominantPointsIndex = -1;
 	_leftMainSupportPoint = _rightMainSupportPoint = rCoord2D(-1,-1);
 	_contourPolygonBottom.clear();
@@ -161,8 +166,8 @@ void ContourSlice::draw( QPainter &painter, const int &cursorPosition, const TKD
 		painter.save();
 		_contour.draw(painter,cursorPosition,_sliceCenter,viewType);
 
-		const int nbDominantPoints = _dominantPointsIndex.size();
-		const int nbDominantPoints2 = _dominantPointsIndex2.size();
+		const int nbDominantPoints = _dominantPointsIndexFromLeft.size();
+		const int nbDominantPoints2 = _dominantPointsIndexFromRight.size();
 		if ( nbDominantPoints > 0 && nbDominantPoints2 > 0 )
 		{
 			// Dessin des points dominants
@@ -173,15 +178,15 @@ void ContourSlice::draw( QPainter &painter, const int &cursorPosition, const TKD
 			{
 				for ( i=0 ; i<nbDominantPoints ; ++i )
 				{
-					painter.drawEllipse(dominantPoint(i).x-2,dominantPoint(i).y-2,4,4);
+					painter.drawEllipse(dominantPointFromLeft(i).x-2,dominantPointFromLeft(i).y-2,4,4);
 				}
 			}
 			else if ( viewType == TKD::CARTESIAN_VIEW )
 			{
 				for ( k=0 ; k<nbDominantPoints ; ++k )
 				{
-					i = dominantPoint(k).x - _sliceCenter.x;
-					j = dominantPoint(k).y - _sliceCenter.y;
+					i = dominantPointFromLeft(k).x - _sliceCenter.x;
+					j = dominantPointFromLeft(k).y - _sliceCenter.y;
 					y = qSqrt(qPow(i,2) + qPow(j,2));
 					x = 2. * qAtan( j / (qreal)(i + y) ) * angularFactor;
 					painter.drawEllipse(x-2,y-2,4,4);
@@ -193,15 +198,15 @@ void ContourSlice::draw( QPainter &painter, const int &cursorPosition, const TKD
 			{
 				for ( i=0 ; i<nbDominantPoints2 ; ++i )
 				{
-					painter.drawEllipse(dominantPoint2(i).x-3,dominantPoint2(i).y-3,6,6);
+					painter.drawEllipse(dominantPointFromRight(i).x-3,dominantPointFromRight(i).y-3,6,6);
 				}
 			}
 			else if ( viewType == TKD::CARTESIAN_VIEW )
 			{
 				for ( k=0 ; k<nbDominantPoints2 ; ++k )
 				{
-					i = dominantPoint2(k).x - _sliceCenter.x;
-					j = dominantPoint2(k).y - _sliceCenter.y;
+					i = dominantPointFromRight(k).x - _sliceCenter.x;
+					j = dominantPointFromRight(k).y - _sliceCenter.y;
 					y = qSqrt(qPow(i,2) + qPow(j,2));
 					x = 2. * qAtan( j / (qreal)(i + y) ) * angularFactor;
 					painter.drawEllipse(x-3,y-3,6,6);
@@ -374,7 +379,7 @@ void ContourSlice::draw( QPainter &painter, const int &cursorPosition, const TKD
 
 void ContourSlice::computeDominantPoints( const int &blurredSegmentThickness )
 {
-	_dominantPointsIndex.clear();
+	_dominantPointsIndexFromLeft.clear();
 
 	int nbPoints, nbDominantPoints;
 	nbPoints = _contour.size();
@@ -429,10 +434,10 @@ void ContourSlice::computeDominantPoints( const int &blurredSegmentThickness )
 
 			QTextStream streamDominantPoints(&fileDominantPoint);
 			streamDominantPoints >> nbDominantPoints;
-			_dominantPointsIndex.resize(nbDominantPoints);
+			_dominantPointsIndexFromLeft.resize(nbDominantPoints);
 			for ( int i=0 ; i<nbDominantPoints ; ++i )
 			{
-				streamDominantPoints >> _dominantPointsIndex[i];
+				streamDominantPoints >> _dominantPointsIndexFromLeft[i];
 			}
 
 			fileDominantPoint.close();
@@ -461,12 +466,12 @@ void ContourSlice::computeDominantPoints( const int &blurredSegmentThickness )
 
 			QTextStream streamDominantPoints2(&fileDominantPoint2);
 			streamDominantPoints2 >> nbDominantPoints;
-			_dominantPointsIndex2.resize(nbDominantPoints);
+			_dominantPointsIndexFromRight.resize(nbDominantPoints);
 			int index;
 			for ( int i=0 ; i<nbDominantPoints ; ++i )
 			{
 				streamDominantPoints2 >> index;
-				_dominantPointsIndex2[i] = nbPoints-1 - index;
+				_dominantPointsIndexFromRight[i] = nbPoints-1 - index;
 			}
 
 			fileDominantPoint2.close();
@@ -481,8 +486,8 @@ void ContourSlice::computeMainDominantPoints( const int &minimumOriginDistance )
 	int nbDominantPoints, nbDominantPoints2, nbPoints, index, increment;
 	qreal currentDistance, previousDistance;
 
-	nbDominantPoints = _dominantPointsIndex.size();
-	nbDominantPoints2 = _dominantPointsIndex2.size();
+	nbDominantPoints = _dominantPointsIndexFromLeft.size();
+	nbDominantPoints2 = _dominantPointsIndexFromRight.size();
 	nbPoints = _contour.size();
 
 	if ( nbDominantPoints > 2 && nbDominantPoints2 > 2 && _contourDistancesHistogram.size() == nbPoints )
@@ -490,7 +495,7 @@ void ContourSlice::computeMainDominantPoints( const int &minimumOriginDistance )
 		increment = 0;
 		do
 		{
-			index = _dominantPointsIndex[++increment];
+			index = _dominantPointsIndexFromLeft[++increment];
 		}
 		while ( (_contourDistancesHistogram[index]-_contourDistancesHistogram[0] < minimumOriginDistance) && (increment < nbDominantPoints-1) );
 
@@ -510,9 +515,66 @@ void ContourSlice::computeMainDominantPoints( const int &minimumOriginDistance )
 		increment = 0;
 		do
 		{
-			index = _dominantPointsIndex2[++increment];
+			index = _dominantPointsIndexFromRight[++increment];
 		}
 		while ( (_contourDistancesHistogram[index]-_contourDistancesHistogram[0] < minimumOriginDistance) && (increment < nbDominantPoints2-1) );
+
+		if ( increment<nbDominantPoints2-1 )
+		{
+			currentDistance = _contourDistancesHistogram[index];
+			previousDistance = _contourDistancesHistogram[index+2];
+			while ( index<nbPoints-2 && previousDistance>currentDistance )
+			{
+				index++;
+				currentDistance = _contourDistancesHistogram[index];
+				previousDistance = _contourDistancesHistogram[index+2];
+			}
+			_rightMainDominantPointsIndex = index;
+		}
+	}
+}
+
+void ContourSlice::computeMainDominantPoints2( const int &minimumOriginDistance )
+{
+	_leftMainDominantPointsIndex = _rightMainDominantPointsIndex = -1;
+
+	int nbDominantPoints, nbDominantPoints2, nbPoints, index, increment;
+	qreal currentDistance, previousDistance;
+
+	nbDominantPoints = _dominantPointsIndexFromLeft.size();
+	nbDominantPoints2 = _dominantPointsIndexFromRight.size();
+	nbPoints = _contour.size();
+
+	if ( nbDominantPoints > 2 && nbDominantPoints2 > 2 && _contourDistancesHistogram.size() == nbPoints )
+	{
+		// Left main dominant point
+		increment = 0;
+		do
+		{
+			index = _dominantPointsIndexFromLeft[++increment];
+		}
+		while ( ((_contourDistancesHistogram[index]-_contourDistancesHistogram[0] < minimumOriginDistance) || _curvatureHistogram[index]>=0) && (increment < nbDominantPoints-1) );
+
+		if ( increment<nbDominantPoints-1 )
+		{
+			currentDistance = _contourDistancesHistogram[index];
+			previousDistance = _contourDistancesHistogram[index-2];
+			while ( index>1 && previousDistance>currentDistance )
+			{
+				index--;
+				currentDistance = _contourDistancesHistogram[index];
+				previousDistance = _contourDistancesHistogram[index-2];
+			}
+			_leftMainDominantPointsIndex = index;
+		}
+
+		// Right main dominant point
+		increment = 0;
+		do
+		{
+			index = _dominantPointsIndexFromRight[++increment];
+		}
+		while ( ((_contourDistancesHistogram[index]-_contourDistancesHistogram[0] < minimumOriginDistance) || _curvatureHistogram[index]>=0) && (increment < nbDominantPoints2-1) );
 
 		if ( increment<nbDominantPoints2-1 )
 		{
