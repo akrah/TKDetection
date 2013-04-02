@@ -102,7 +102,7 @@ void ContourSlice::compute( Slice &resultSlice, const Slice &initialSlice, const
 	_contour.smooth(smoothingRadius);
 
 	_contourDistancesHistogram.construct( _contour, sliceCenter );
-	_curvatureHistogram.construct( _contour, curvatureWidth  );
+	//_curvatureHistogram.construct( _contour, curvatureWidth  );
 
 	_sliceCenter = sliceCenter;
 
@@ -518,63 +518,6 @@ void ContourSlice::computeMainDominantPoints( const int &minimumOriginDistance )
 			index = _dominantPointsIndexFromRight[++increment];
 		}
 		while ( (_contourDistancesHistogram[index]-_contourDistancesHistogram[0] < minimumOriginDistance) && (increment < nbDominantPoints2-1) );
-
-		if ( increment<nbDominantPoints2-1 )
-		{
-			currentDistance = _contourDistancesHistogram[index];
-			previousDistance = _contourDistancesHistogram[index+2];
-			while ( index<nbPoints-2 && previousDistance>currentDistance )
-			{
-				index++;
-				currentDistance = _contourDistancesHistogram[index];
-				previousDistance = _contourDistancesHistogram[index+2];
-			}
-			_rightMainDominantPointsIndex = index;
-		}
-	}
-}
-
-void ContourSlice::computeMainDominantPoints2( const int &minimumOriginDistance )
-{
-	_leftMainDominantPointsIndex = _rightMainDominantPointsIndex = -1;
-
-	int nbDominantPoints, nbDominantPoints2, nbPoints, index, increment;
-	qreal currentDistance, previousDistance;
-
-	nbDominantPoints = _dominantPointsIndexFromLeft.size();
-	nbDominantPoints2 = _dominantPointsIndexFromRight.size();
-	nbPoints = _contour.size();
-
-	if ( nbDominantPoints > 2 && nbDominantPoints2 > 2 && _contourDistancesHistogram.size() == nbPoints )
-	{
-		// Left main dominant point
-		increment = 0;
-		do
-		{
-			index = _dominantPointsIndexFromLeft[++increment];
-		}
-		while ( ((_contourDistancesHistogram[index]-_contourDistancesHistogram[0] < minimumOriginDistance) || _curvatureHistogram[index]>=0) && (increment < nbDominantPoints-1) );
-
-		if ( increment<nbDominantPoints-1 )
-		{
-			currentDistance = _contourDistancesHistogram[index];
-			previousDistance = _contourDistancesHistogram[index-2];
-			while ( index>1 && previousDistance>currentDistance )
-			{
-				index--;
-				currentDistance = _contourDistancesHistogram[index];
-				previousDistance = _contourDistancesHistogram[index-2];
-			}
-			_leftMainDominantPointsIndex = index;
-		}
-
-		// Right main dominant point
-		increment = 0;
-		do
-		{
-			index = _dominantPointsIndexFromRight[++increment];
-		}
-		while ( ((_contourDistancesHistogram[index]-_contourDistancesHistogram[0] < minimumOriginDistance) || _curvatureHistogram[index]>=0) && (increment < nbDominantPoints2-1) );
 
 		if ( increment<nbDominantPoints2-1 )
 		{

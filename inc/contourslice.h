@@ -40,7 +40,6 @@ public:
 private:
 	void computeDominantPoints( const int &blurredSegmentThickness );
 	void computeMainDominantPoints( const int &minimumOriginDistance );
-	void computeMainDominantPoints2( const int &minimumOriginDistance );
 	void computeSupportsOfMainDominantPoints();
 	void computeContourPolygons();
 	void updateSlice( const Slice &initialSlice, Slice &resultSlice, const uiCoord2D &sliceCenter, const int &intensityThreshold );
