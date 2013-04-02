@@ -479,7 +479,7 @@ void ContourSlice::computeDominantPoints( const int &blurredSegmentThickness )
 	}
 }
 
-void ContourSlice::computeMainDominantPoints( const int &minimumOriginDistance )
+void ContourSlice::computeMainDominantPoints2( const int &minimumOriginDistance )
 {
 	_leftMainDominantPointsIndex = _rightMainDominantPointsIndex = -1;
 
