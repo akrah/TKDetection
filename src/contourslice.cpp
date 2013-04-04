@@ -617,10 +617,10 @@ void ContourSlice::computeMainDominantPoints( const int &minimumOriginDistance )
 	if ( nbDominantPoints > 2 && _contourDistancesHistogram.size() == nbPoints )
 	{
 		// Left main dominant point
-		increment = 0;
+		increment = 1;
 		do
 		{
-			index = allDominantPointsIndex[++increment];
+			index = allDominantPointsIndex[increment++];
 		}
 		while ( ((_contourDistancesHistogram[index]-_contourDistancesHistogram[0] < minimumOriginDistance) || _curvatureHistogram[index]>=0) && (increment < nbDominantPointsToCompare) );
 
@@ -641,7 +641,7 @@ void ContourSlice::computeMainDominantPoints( const int &minimumOriginDistance )
 		increment = nbDominantPoints-1;
 		do
 		{
-			index = allDominantPointsIndex[--increment];
+			index = allDominantPointsIndex[increment--];
 		}
 		while ( ((_contourDistancesHistogram[index]-_contourDistancesHistogram[0] < minimumOriginDistance) || _curvatureHistogram[index]>=0) && (increment > nbDominantPointsToCompare) );
 
