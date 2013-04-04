@@ -517,9 +517,9 @@ void MainWindow::setYSlice( const int &yPosition )
 
 void MainWindow::moveNearestPointsCursor( const int &position )
 {
-	if ( !_nearestPointsHistogram->intervals().isEmpty()
+	if ( !_nearestPointsHistogram->isEmpty()
 		 && _ui->_comboSelectSliceInterval->count()>1
-		 && _ui->_comboSelectSliceInterval->currentIndex()<static_cast<int>(_sliceHistogram->nbIntervals())
+		 && _ui->_comboSelectSliceInterval->currentIndex() <= static_cast<int>(_sliceHistogram->nbIntervals())
 		 && _sliceHistogram->interval(_ui->_comboSelectSliceInterval->currentIndex()-1).containsClosed(position) )
 	{
 		_plotNearestPointsHistogram->moveCursor(position-_sliceHistogram->interval(_ui->_comboSelectSliceInterval->currentIndex()-1).min());

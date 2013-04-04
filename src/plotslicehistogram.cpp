@@ -49,9 +49,10 @@ void PlotSliceHistogram::clear()
 
 void PlotSliceHistogram::moveCursor( const uint &sliceIndex )
 {
-	QVector<QwtIntervalSample> datasCursor(1);
-	datasCursor[0].interval.setInterval(sliceIndex,sliceIndex+1);
-	datasCursor[0].value = _histogramData.dataSize()>0?_histogramData.sample(sliceIndex).value:0;
+	static QVector<QwtIntervalSample> datasCursor(1);
+	static QwtIntervalSample &datasCursorInterval = datasCursor[0];
+	datasCursorInterval.interval.setInterval(sliceIndex,sliceIndex+1);
+	datasCursorInterval.value = _histogramData.dataSize()>0?_histogramData.sample(sliceIndex).value:0;
 	_histogramCursor.setSamples(datasCursor);
 }
 
