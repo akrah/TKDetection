@@ -84,7 +84,7 @@ void PlotSectorHistogram::clear()
 
 void PlotSectorHistogram::moveCursor( const uint &index )
 {
-	QVector<QwtIntervalSample> datasCursor(1);
+	static QVector<QwtIntervalSample> datasCursor(1);
 	if ( index < _histogramData.dataSize() )
 	{
 		const QwtIntervalSample &sample = _histogramData.sample(index);
