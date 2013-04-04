@@ -595,7 +595,7 @@ void ContourSlice::computeMainDominantPoints( const int &minimumOriginDistance )
 {
 	_leftMainDominantPointsIndex = _rightMainDominantPointsIndex = -1;
 
-	int nbDominantPoints, nbPoints, index, increment;
+	int nbDominantPoints, nbDominantPointsToCompare, nbPoints, index, increment;
 	qreal currentDistance, previousDistance;
 
 	QVector<int> allDominantPointsIndex(_dominantPointsIndexFromLeft);
@@ -603,6 +603,7 @@ void ContourSlice::computeMainDominantPoints( const int &minimumOriginDistance )
 	qSort(allDominantPointsIndex);
 
 	nbDominantPoints = allDominantPointsIndex.size();
+	nbDominantPointsToCompare = nbDominantPoints/2;
 	nbPoints = _contour.size();
 
 	if ( nbDominantPoints > 2 && _contourDistancesHistogram.size() == nbPoints )
@@ -613,9 +614,9 @@ void ContourSlice::computeMainDominantPoints( const int &minimumOriginDistance )
 		{
 			index = allDominantPointsIndex[++increment];
 		}
-		while ( ((_contourDistancesHistogram[index]-_contourDistancesHistogram[0] < minimumOriginDistance) || _curvatureHistogram[index]>=0) && (increment < nbDominantPoints-1) );
+		while ( ((_contourDistancesHistogram[index]-_contourDistancesHistogram[0] < minimumOriginDistance) || _curvatureHistogram[index]>=0) && (increment < nbDominantPointsToCompare) );
 
-		if ( increment<nbDominantPoints-1 )
+		if ( increment<nbDominantPointsToCompare )
 		{
 			currentDistance = _contourDistancesHistogram[index];
 			previousDistance = _contourDistancesHistogram[index-2];
@@ -634,9 +635,9 @@ void ContourSlice::computeMainDominantPoints( const int &minimumOriginDistance )
 		{
 			index = allDominantPointsIndex[--increment];
 		}
-		while ( ((_contourDistancesHistogram[index]-_contourDistancesHistogram[0] < minimumOriginDistance) || _curvatureHistogram[index]>=0) && (increment > 0) );
+		while ( ((_contourDistancesHistogram[index]-_contourDistancesHistogram[0] < minimumOriginDistance) || _curvatureHistogram[index]>=0) && (increment > nbDominantPointsToCompare) );
 
-		if ( increment>0 )
+		if ( increment>nbDominantPointsToCompare )
 		{
 			currentDistance = _contourDistancesHistogram[index];
 			previousDistance = _contourDistancesHistogram[index+2];
