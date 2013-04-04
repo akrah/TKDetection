@@ -1688,10 +1688,10 @@ l'intervalle angulaire</string>
                <number>0</number>
               </property>
               <property name="maximum">
-               <number>20</number>
+               <number>50</number>
               </property>
               <property name="value">
-               <number>5</number>
+               <number>20</number>
               </property>
              </widget>
             </item>
@@ -1720,7 +1720,7 @@ l'intervalle angulaire</string>
                <number>20</number>
               </property>
               <property name="value">
-               <number>10</number>
+               <number>5</number>
               </property>
              </widget>
             </item>
@@ -2246,8 +2246,8 @@ l'origine du contour</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>441</width>
-              <height>112</height>
+              <width>520</width>
+              <height>296</height>
              </rect>
             </property>
             <attribute name="label">
@@ -2487,7 +2487,7 @@ l'origine du contour</string>
          </item>
          <item>
           <widget class="QwtPolarPlot" name="_polarSectorHistogram">
-           <property name="plotBackground" stdset="0">
+           <property name="plotBackground">
             <brush brushstyle="SolidPattern">
              <color alpha="0">
               <red>255</red>
@@ -2573,15 +2573,15 @@ l'origine du contour</string>
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>QxtSpanSlider</class>
-   <extends>QSlider</extends>
-   <header>QxtSpanSlider</header>
-  </customwidget>
-  <customwidget>
    <class>QwtPolarPlot</class>
    <extends>QFrame</extends>
    <header>qwt_polar_plot.h</header>
    <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>QxtSpanSlider</class>
+   <extends>QSlider</extends>
+   <header>QxtSpanSlider</header>
   </customwidget>
  </customwidgets>
  <tabstops>
