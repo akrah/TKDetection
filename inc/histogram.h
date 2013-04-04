@@ -201,9 +201,9 @@ void Histogram<T>::meansSmoothing( const uint & smoothingRadius, const bool & lo
 		}
 		else
 		{
-			for ( i=0 ; i<smoothingRadius ; ++i ) copy << this->at(0);
+			for ( i=0 ; i<smoothingRadius ; ++i ) copy << this->at(i);
 			copy << (*this);
-			for ( i=0 ; i<smoothingRadius ; ++i ) copy << this->at(histoSize-1);
+			for ( i=histoSize-smoothingRadius ; i<histoSize ; ++i ) copy << this->at(i);
 		}
 
 		typename QVector<T>::ConstIterator copyIterBegin = copy.constBegin();

@@ -625,7 +625,7 @@ void MainWindow::updateContourHistograms( const int &sliceNumber )
 		{
 			const ContourSlice &contourSlice = _contourBillon->contourSlice(sliceNumber-sliceInterval.min());
 
-			_plotCurvatureHistogram->update(contourSlice.curvatureHistogram(),contourSlice.dominantPointIndexFromLeft());
+			_plotCurvatureHistogram->update(contourSlice.curvatureHistogram(),contourSlice.dominantPointIndexFromLeft(),contourSlice.dominantPointIndexFromRight());
 			_ui->_plotCurvatureHistogram->setAxisScale(QwtPlot::xBottom,0,contourSlice.curvatureHistogram().size());
 
 			_plotContourDistancesHistogram->update(contourSlice.contourDistancesHistogram(),contourSlice.dominantPointIndexFromLeft(),contourSlice.dominantPointIndexFromRight());
