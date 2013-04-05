@@ -65,7 +65,7 @@ void SectorHistogram::construct(const Billon &billon, const PieChart &pieChart, 
 						//if ( motionInterval.containsClosed(diff) )
 						if ( diff >= zMotionMin )
 						{
-							(*this)[pieChart.sectorIndexOfAngle( currentPithCoord.angle(currentPos) )] += (diff-zMotionMin);
+							(*this)[pieChart.sectorIndexOfAngle( currentPithCoord.angle(currentPos) )] += diff-zMotionMin;
 						}
 					}
 					currentPos.x++;

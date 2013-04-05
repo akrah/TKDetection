@@ -22,6 +22,7 @@ void SliceHistogram::construct( const Billon &billon, const Interval<int> &inten
 	const int depth = billon.n_slices;
 	const int radiusMax = radiusAroundPith+1;
 	const qreal squareRadius = qPow(radiusAroundPith,2);
+	const int zMotionMin = motionInterval.min();
 
 	clear();
 	resize(depth-1);
@@ -36,15 +37,13 @@ void SliceHistogram::construct( const Billon &billon, const Interval<int> &inten
 	const uint minOfInterval = borderPercentageToCut*depth/100.;
 	const uint maxOfInterval = qMin(depth-minOfInterval,static_cast<uint>(this->size()-1));
 	int i, j, iRadius, iRadiusMax;
-	__billon_type__ currentSliceValue, previousSliceValue, diff;
+	__billon_type__ diff;
 	iCoord2D currentPos;
 	uint k;
 	qreal cumul;
 
 	for ( k=minOfInterval ; k<maxOfInterval ; ++k )
 	{
-		const Slice &currentSlice = billon.slice(k);
-		const Slice &previousSlice = billon.previousSlice(k);
 		cumul = 0.;
 		currentPos.y = billon.pithCoord(k).y-radiusAroundPith;
 		for ( j=-radiusAroundPith ; j<radiusMax ; ++j )
@@ -56,12 +55,10 @@ void SliceHistogram::construct( const Billon &billon, const Interval<int> &inten
 			{
 				if ( currentPos.x >= 0 && currentPos.y >= 0 && currentPos.x < width && currentPos.y < height )
 				{
-					currentSliceValue = currentSlice.at(currentPos.y,currentPos.x);
-					previousSliceValue = previousSlice.at(currentPos.y,currentPos.x);
-					if ( intensity.containsClosed(currentSliceValue) && intensity.containsClosed(previousSliceValue) )
+					if ( intensity.containsClosed(billon.slice(k).at(currentPos.y,currentPos.x)) && intensity.containsClosed(billon.previousSlice(k).at(currentPos.y,currentPos.x)) )
 					{
-						diff = qAbs(currentSliceValue - previousSliceValue);
-						if ( motionInterval.containsClosed(diff) ) cumul += diff;
+						diff = billon.zMotion( currentPos.x, currentPos.y, k );
+						if ( diff > zMotionMin ) cumul += diff-zMotionMin;
 					}
 				}
 				currentPos.x++;
