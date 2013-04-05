@@ -30,7 +30,7 @@ void SliceView::drawSlice(QImage &image, const Billon &billon, const TKD::SliceT
 			{
 				// Affichage de la coupe de mouvements
 				case TKD::MOVEMENT :
-					drawMovementSlice( image, billon, sliceIndex, intensityInterval, motionInterval, angularResolution, axe );
+					drawMovementSlice( image, billon, sliceIndex, intensityInterval, motionInterval.min(), angularResolution, axe );
 					break;
 					// Affichage de la coupe de détection de mouvements
 				case TKD::EDGE_DETECTION :
@@ -54,7 +54,7 @@ void SliceView::drawSlice(QImage &image, const Billon &billon, const TKD::SliceT
 			{
 				// Affichage de la coupe de mouvements
 				case TKD::MOVEMENT :
-					drawMovementSlice( image, billon, sliceIndex, intensityInterval, motionInterval, angularResolution, axe );
+					drawMovementSlice( image, billon, sliceIndex, intensityInterval, motionInterval.min(), angularResolution, axe );
 					break;
 					// Affichage de la coupe originale
 				case TKD::CURRENT:
@@ -131,18 +131,18 @@ void SliceView::drawCurrentSlice( QImage &image, const Billon &billon, const uin
 }
 
 void SliceView::drawMovementSlice( QImage &image, const Billon &billon, const uint &sliceIndex, const Interval<int> &intensityInterval,
-								   const Interval<int> &motionInterval, const uint &angularResolution, const TKD::ViewType &axe )
+								   const int &zMotionMin, const uint &angularResolution, const TKD::ViewType &axe )
 {
 	const Slice &currentSlice = billon.slice(sliceIndex);
 	const Slice &previousSlice = billon.previousSlice(sliceIndex);
 
 	const uint &width = billon.n_cols;
 	const uint &height = billon.n_rows;
-	const int zMotionMin = motionInterval.min()-1;
-	const qreal fact = 255./motionInterval.width();
+//	const qreal fact = 255./zMotionMin.width();
 
 	QRgb * line = (QRgb *) image.bits();
 	int color;
+	const QRgb white = qRgb(255,255,255);
 	uint i,j,k;
 
 	if ( axe == TKD::Y_VIEW )
@@ -155,10 +155,13 @@ void SliceView::drawMovementSlice( QImage &image, const Billon &billon, const ui
 				if ( intensityInterval.containsClosed(billon.at(sliceIndex,i,k)) && intensityInterval.containsClosed(billon.at(sliceIndex>0 ? sliceIndex-1 : sliceIndex+1,i,k)) )
 				{
 					color = qAbs( billon.at(sliceIndex,i,k) - billon.at(sliceIndex>0 ? sliceIndex-1 : sliceIndex+1,i,k));
-					if ( motionInterval.containsClosed(color) )
+//					if ( motionInterval.containsClosed(color) )
+					if ( color > zMotionMin )
 					{
-						color *= fact;
-						*line = qRgb(color,color,color);
+//						color *= fact;
+//						color = qMin(255.,color*fact);
+//						*line = qRgb(color,color,color);
+						*line = white;
 					}
 				}
 				++line;
@@ -178,8 +181,9 @@ void SliceView::drawMovementSlice( QImage &image, const Billon &billon, const ui
 					if ( color > zMotionMin )
 					{
 //						color *= fact;
-						color = qMin(255.,color*fact);
-						*line = qRgb(color,color,color);
+//						color = qMin(255.,color*fact);
+//						*line = qRgb(color,color,color);
+						*line = white;
 					}
 				}
 				++line;
@@ -206,8 +210,9 @@ void SliceView::drawMovementSlice( QImage &image, const Billon &billon, const ui
 					if ( color > zMotionMin )
 					{
 //						color *= fact;
-						color = qMin(255.,color*fact);
+//						color = qMin(255.,color*fact);
 						*line = qRgb(color,color,color);
+						*line = white;
 					}
 				}
 				++line;
