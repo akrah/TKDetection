@@ -307,7 +307,7 @@ void Histogram<T>::computeIntervals( const int & derivativesPercentage, const ui
 			if ( cursorMin ) cursorMin--;
 			else cursorMin = histoSize-1;
 		}
-		while ( firstdDerivated(cursorMin,loop) > 0. )
+		while ( firstdDerivated(cursorMin,loop) > 1. )
 		{
 			if ( cursorMin ) cursorMin--;
 			else cursorMin = histoSizeMinusOne;
@@ -321,7 +321,7 @@ void Histogram<T>::computeIntervals( const int & derivativesPercentage, const ui
 			cursorMax++;
 			if ( cursorMax == histoSize ) cursorMax = 0;
 		}
-		while ( firstdDerivated(cursorMax,loop) < 0. )
+		while ( firstdDerivated(cursorMax,loop) < -1. )
 		{
 			cursorMax++;
 			if ( cursorMax == histoSize ) cursorMax = 0;

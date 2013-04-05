@@ -23,8 +23,8 @@ public:
 private :
 	void drawCurrentSlice( QImage &image, const Billon &billon, const uint &sliceIndex,
 						  const Interval<int> &intensityInterval, const uint &angularResolution, const TKD::ViewType &axe = TKD::Z_VIEW );
-	void drawMovementSlice(QImage &image, const Billon &billon, const uint &sliceIndex, const Interval<int> &intensityInterval,
-							const Interval<int> &motionInterval, const uint &angularResolution, const TKD::ViewType &axe = TKD::Z_VIEW );
+	void drawMovementSlice( QImage &image, const Billon &billon, const uint &sliceIndex, const Interval<int> &intensityInterval,
+							const int &zMotionMin, const uint &angularResolution, const TKD::ViewType &axe = TKD::Z_VIEW );
 	void drawEdgeDetectionSlice( QImage &image, const Billon &billon, const iCoord2D &center, const uint &sliceindex,
 								 const Interval<int> &intensityInterval, const TKD::EdgeDetectionParameters &edgeDetectionParameters );
 	void drawFlowSlice( QImage &image, const Billon &billon, const uint &sliceIndex, const TKD::OpticalFlowParameters &opticalFlowParameters );
