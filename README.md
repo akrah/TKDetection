@@ -13,9 +13,9 @@ Dependencies list
 
 |   |            Library                  |  Tested version  |   |      Library            |  Tested version  |   |        Library              |  Tested version  |
 |:-:|:-----------------------------------:|:----------------:|---|:-----------------------:|:----------------:|---|:---------------------------:|:----------------:|
-| 1 | [Qt](#1-qt)                         |       4.8        | 4 | [Qwt](#4-qwt)           |       6.0.0      | 7 | [DGtalTools](#7-dgtaltools) |   repository     |
-| 2 | [Armadillo](#2-armadillo)           |       3.6.1      | 5 | [Qxt](#5-qxt)           |       0.6.2      | 8 | [ImaGene](#8-imagene)       |   repository     |
-| 3 | [InsightToolkit](#3-insighttoolkit) |       4.1        | 6 | [QwtPolar](#6-qwtpolar) |       1.0.1      | 9 | [DGLib](#9-dglib)           |     online       |
+| 1 | [Qt](#1-qt)                         |       4.8        | 4 | [Qwt](#4-qwt)           |       6.0.2      | 7 | [DGtalTools](#7-dgtaltools) |       0.6        |
+| 2 | [Armadillo](#2-armadillo)           |     3.800.2      | 5 | [Qxt](#5-qxt)           |       0.6.2      | 8 | [ImaGene](#8-imagene)       |    repository    |
+| 3 | [InsightToolkit](#3-insighttoolkit) |      4.3.1       | 6 | [QwtPolar](#6-qwtpolar) |       1.0.1      | 9 | [DGLib](#9-dglib)           |      online      |
 
 
 Dependencies installation on Ubuntu
@@ -64,6 +64,15 @@ Install then Armadillo by replacing *x-x-x* by the downloaded version number:
   sudo make install
 ~~~
 
+If problems appear concerning boost, you can compile boost from the version available on the website http://www.boost.org/users/history/version_1_53_0.html:
+
+~~~
+  tar xvf boost_1_53_0.tar.gz
+  cd boost_1_53_0/
+  ./bootstrap.sh -prefix=/usr/
+  sudo ./b2 --build-type=complete --layout=tagged install
+~~~
+
 
 ### 3. InsightToolkit
 [Top](#tkdetection)
@@ -77,11 +86,19 @@ Replace *x-x-x* by the downloaded version number:
   cd InsightToolkit-x.x.x/
   mkdir binary
   cd binary
-  cmake ..
+  cmake .. -DBUILD_EXAMPLES:string=false -DBUILD_TESTING:string=false -DITK_BUILD_ALL_MODULES:string=false -DITKGroup_Core:string=true -DITKGroup_IO:string=true
   make
   sudo make install
 ~~~
 
+If a problem appear with *tif_config.h* and/or *tif_dir.h*, copy the corresponding files to the libraries repository:
+
+~~~
+  sudo cp  ./Modules/ThirdParty/TIFF/src/itktiff/tif_config.h /usr/local/include/ITK-4.3/itktiff/
+  sudo cp ../Modules/ThirdParty/TIFF/src/itktiff/tif_dir.h    /usr/local/include/ITK-4.3/itktiff/
+~~~
+
+**Think to change the ITK_NUMBER variable by x.x in the TKDetection.pro file (line 13) !**
 
 ### 4. Qwt
 [Top](#tkdetection)
@@ -92,6 +109,16 @@ Use the version available on the *Main* repository.
   sudo apt-get install libqwt-dev
 ~~~
 
+If problems appear, you can install the version available on the website http://sourceforge.net/projects/qwt/files/qwt/6.0.2/:
+
+~~~
+  tar xvf qwt-6.0.2.tar.bz2
+  cd qwt-6.0.2/
+  mkdir build && cd build
+  qmake ../qwt.pro
+  make
+  sudo make install
+~~~
 
 ### 5. Qxt
 [Top](#tkdetection)
@@ -182,6 +209,12 @@ You can clone DGtalTools the main repository:
   sudo make install
 ~~~
 
+If a problem appear during the cmake step, add an ITK parameter to the command with the version number of ITK (x.x below):
+
+~~~
+  cmake .. -DWITH_GMP=true -DWITH_ITK=true -DWITH_QGLVIEWER=true -DITK_DIR=/usr/local/lib/cmake/ITK-x.x/
+~~~
+
 Install then DGtalTools:
 
 ~~~
@@ -193,6 +226,11 @@ Install then DGtalTools:
   sudo make install
 ~~~
 
+If a problem appear, use the same tips than the DGtal installation:
+
+~~~
+  cmake .. -DWITH_VISU3D_QGLVIEWER=true -DWITH_QGLVIEWER=true -DITK_DIR=/usr/local/lib/cmake/ITK-x.x/
+~~~
 
 ### 8. ImaGene
 [Top](#tkdetection)
@@ -202,7 +240,7 @@ DGLib uses features of ImaGene library.
 Install ImaGene by using the version without dependencies:
 
 ~~~
-  git clone git://github.com/kerautret/ImaGeneNoDep.git
+  git clone git://github.com/kerautret/ImaGene-forIPOL.git
   cd ImaGeneNoDep
   mkdir build && cd build
   cmake ..
@@ -229,6 +267,9 @@ TKDetection installation
 -------------------------
 [Top](#tkdetection)
 
+
+Begin by check the ITK_NUMBER variable in the TKDetection.pro file (line 13).
+
 Clone the project from the Github repository of this webpage and compile:
 
 ~~~
@@ -239,4 +280,4 @@ Clone the project from the Github repository of this webpage and compile:
   make
 ~~~
 
-The binary file **TKDetection** is then located in the TKDetection directory.
+The binary file **TKDetection** is then located in the build/bin directory of TKDetection.
