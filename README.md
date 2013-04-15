@@ -98,7 +98,7 @@ If a problem appear with *tif_config.h* and/or *tif_dir.h*, copy the correspondi
   sudo cp ../Modules/ThirdParty/TIFF/src/itktiff/tif_dir.h    /usr/local/include/ITK-4.3/itktiff/
 ~~~
 
-**Think to change the ITK_NUMBER variable by x.x the TKDetection.pro file (line 13) !**
+**Think to change the ITK_NUMBER variable by x.x in the TKDetection.pro file (line 13) !**
 
 ### 4. Qwt
 [Top](#tkdetection)
@@ -268,7 +268,7 @@ TKDetection installation
 [Top](#tkdetection)
 
 
-Begin by check the ITK_NUMBER variable in TKDetection.pro file (line 13).
+Begin by check the ITK_NUMBER variable in the TKDetection.pro file (line 13).
 
 Clone the project from the Github repository of this webpage and compile:
 
