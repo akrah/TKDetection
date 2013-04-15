@@ -10,7 +10,7 @@
 
 # Version d'ITK installée : itk3 | itk4
 ITK_VERSION = itk4
-ITK_NUMBER =  4.1
+ITK_NUMBER =  4.3
 
 #                                                                #
 #                  NE PAS MODIFIER EN DESSOUS                    #
