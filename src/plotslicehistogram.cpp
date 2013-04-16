@@ -1,5 +1,4 @@
 #include "inc/plotslicehistogram.h"
-
 #include "inc/slicehistogram.h"
 
 PlotSliceHistogram::PlotSliceHistogram()
@@ -51,7 +50,7 @@ void PlotSliceHistogram::moveCursor( const uint &sliceIndex )
 {
 	QVector<QwtIntervalSample> datasCursor(1);
 	datasCursor[0].interval.setInterval(sliceIndex,sliceIndex+1);
-	datasCursor[0].value = _histogramData.dataSize()>0?_histogramData.sample(sliceIndex).value:0;
+	datasCursor[0].value = _histogramData.dataSize()>0 && sliceIndex<_histogramData.dataSize() ?_histogramData.sample(sliceIndex).value:0;
 	_histogramCursor.setSamples(datasCursor);
 }
 
