@@ -51,7 +51,7 @@ void PlotSliceHistogram::moveCursor( const uint &sliceIndex )
 {
 	QVector<QwtIntervalSample> datasCursor(1);
 	datasCursor[0].interval.setInterval(sliceIndex,sliceIndex+1);
-	datasCursor[0].value = _histogramData.sample(sliceIndex).value;
+	datasCursor[0].value = _histogramData.dataSize()>0?_histogramData.sample(sliceIndex).value:0;
 	_histogramCursor.setSamples(datasCursor);
 }
 

@@ -76,13 +76,13 @@ template <typename T> Histogram<T>::~Histogram() {}
  **********************************/
 
 template <typename T>
-inline const QVector<uint> & Histogram<T>::maximums() const
+const QVector<uint> & Histogram<T>::maximums() const
 {
 	return _maximums;
 }
 
 template <typename T>
-inline const QVector< Interval<uint> > & Histogram<T>::intervals() const
+const QVector< Interval<uint> > & Histogram<T>::intervals() const
 {
 	return _intervals;
 }
