@@ -129,7 +129,7 @@ int main(int argc, char** argv)
 
 	Surfaces<KSpace>::extractAllConnectedSCell(vectConnectedSCell,K, SAdj, set3d, true);
 
-	//   Surfaces<KSpace>::extractAllConnectedSCell(vectConnectedSCell,K, SAdj, set3d, true);
+
 	cerr << "[done]"<< endl;
 
 
