@@ -126,8 +126,8 @@ int main(int argc, char** argv)
 	vector<vector<SCell> > vectConnectedSCell;
 
 	cerr << "Extracting digital set .." ;
-	SetPredicate<DigitalSet> shape_set_predicate( set3d );
-	Surfaces<KSpace>::extractAllConnectedSCell(vectConnectedSCell,K, SAdj, shape_set_predicate, true);
+
+	Surfaces<KSpace>::extractAllConnectedSCell(vectConnectedSCell,K, SAdj, set3d, true);
 
 	//   Surfaces<KSpace>::extractAllConnectedSCell(vectConnectedSCell,K, SAdj, set3d, true);
 	cerr << "[done]"<< endl;
