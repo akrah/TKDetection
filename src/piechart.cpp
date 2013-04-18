@@ -110,7 +110,7 @@ void PieChart::draw(QImage &image, const uiCoord2D &center, const QVector< Inter
 	{
 		// Liste qui va contenir les angles des deux côté du secteur à dessiner
 		// Permet de factoriser le code de calcul des coordonnées juste en dessous
-		QList<qreal> twoSides;
+		QVector<qreal> twoSides;
 		QVector< Interval<uint> >::ConstIterator interval;
 		for ( interval = intervals.constBegin() ; interval < intervals.constEnd() ; ++interval )
 		{
@@ -119,22 +119,30 @@ void PieChart::draw(QImage &image, const uiCoord2D &center, const QVector< Inter
 		}
 
 		// Dessin des deux côtés du secteur
-		const int width = image.width();
-		const int height = image.height();
-		const QColor colors[] = { Qt::blue, Qt::cyan, Qt::magenta };
+		const int &width = image.width();
+		const int &height = image.height();
+		const int nbColors = 6;
+		QVector<QColor> colors(nbColors);
+		colors[0] = Qt::blue;
+		colors[1] = Qt::yellow;
+		colors[2] = Qt::green;
+		colors[3] = Qt::magenta;
+		colors[4] = Qt::cyan;
+		colors[5] = Qt::white;
+
 		QColor color;
 		iCoord2D end;
 		qreal angle;
 		int colorIndex = 0;
 
 		QPainter painter(&image);
-		QList<qreal>::ConstIterator side;
+		QVector<qreal>::ConstIterator side;
 		if ( viewType == TKD::Z_VIEW )
 		{
 			for ( side = twoSides.constBegin() ; side < twoSides.constEnd() ; ++side )
 			{
 				// Calcul des coordonnées du segment à tracer
-				color = colors[(colorIndex++/2)%3];
+				color = colors[(colorIndex++/2)%nbColors];
 				painter.setPen(color);
 				painter.setBrush(color);
 				angle = *side;
@@ -156,7 +164,7 @@ void PieChart::draw(QImage &image, const uiCoord2D &center, const QVector< Inter
 		{
 			for ( side = twoSides.constBegin() ; side < twoSides.constEnd() ; ++side )
 			{
-				color = colors[(colorIndex++/2)%3];
+				color = colors[(colorIndex++/2)%nbColors];
 				painter.setPen(color);
 				painter.setBrush(color);
 				angle = (*side)*width/TWO_PI;

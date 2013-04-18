@@ -102,7 +102,7 @@ void ContourSlice::compute( Slice &resultSlice, const Slice &initialSlice, const
 	_contour.smooth(smoothingRadius);
 
 	_contourDistancesHistogram.construct( _contour, sliceCenter );
-	//_curvatureHistogram.construct( _contour, curvatureWidth  );
+	_curvatureHistogram.construct( _contour, curvatureWidth  );
 
 	_sliceCenter = sliceCenter;
 
