@@ -58,7 +58,7 @@ inline const coord2d<T> operator +( const coord2d<T> & first, const coord2d<T> &
 template <typename T>
 inline const coord2d<T> operator *( const coord2d<T> & coord, const qreal & fact ) { return coord2d<T>(coord.x*fact,coord.y*fact); }
 template <typename T>
-inline const coord2d<T> operator *( const coord2d<T> & coord, const coord2d<T> & other ) { return coord2d<T>(coord.x*other.y,coord.y*other.y); }
+inline const coord2d<T> operator *( const coord2d<T> & coord, const coord2d<T> & other ) { return coord2d<T>(coord.x*other.x,coord.y*other.y); }
 template <typename T>
 inline const coord2d<T> operator -( const coord2d<T> & coord, const coord2d<T> & other ) { return coord2d<T>(coord.x-other.x,coord.y-other.y); }
 template <typename T>
