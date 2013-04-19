@@ -746,8 +746,7 @@ void MainWindow::selectSliceInterval( const int &index )
 
 	_ui->_comboSelectSectorInterval->clear();
 	_ui->_comboSelectSectorInterval->addItem(tr("Aucun"));
-	_ui->_spanSliderSelectInterval->setLowerValue(0);
-	_ui->_spanSliderSelectInterval->setUpperValue(0);
+
 	if ( index > 0 && index <= static_cast<int>(_sliceHistogram->nbIntervals()) )
 	{
 		const Interval<uint> &sliceInterval = _sliceHistogram->interval(index-1);
@@ -1155,7 +1154,7 @@ void MainWindow::exportPithToOfs()
 	QString fileName = QFileDialog::getSaveFileName(this, tr("Exporter en .ofs"), "output.ofs", tr("Fichiers de données (*.ofs);;Tous les fichiers (*.*)"));
 	if ( !fileName.isEmpty() )
 	{
-		OfsExport::process( *_billon, Interval<int>(_ui->_spinMinSlice->value(),_ui->_spinMaxSlice->value()), fileName,
+		OfsExport::process( *_billon, Interval<uint>(_ui->_spinMinSlice->value(),_ui->_spinMaxSlice->value()), fileName,
 							_ui->_spinExportNbEdges->value(), _ui->_spinExportRadius->value(), false );
 		QMessageBox::information( this, tr("Export en .ofs"), tr("Terminé avec succés !"));
 	}

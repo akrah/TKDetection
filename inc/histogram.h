@@ -201,9 +201,9 @@ void Histogram<T>::meansSmoothing( const uint & smoothingRadius, const bool & lo
 		}
 		else
 		{
-			for ( i=0 ; i<smoothingRadius ; ++i ) copy << this->at(0);
+			for ( i=0 ; i<smoothingRadius ; ++i ) copy << this->at(i);
 			copy << (*this);
-			for ( i=0 ; i<smoothingRadius ; ++i ) copy << this->at(histoSize-1);
+			for ( i=histoSize-smoothingRadius ; i<histoSize ; ++i ) copy << this->at(i);
 		}
 
 		typename QVector<T>::ConstIterator copyIterBegin = copy.constBegin();
@@ -298,36 +298,35 @@ void Histogram<T>::computeIntervals( const int & derivativesPercentage, const ui
 	for ( uint i=0 ; i<nbMaximums() ; ++i )
 	{
 		// Detection des bornes de l'intervalle courant
-		cursorMin = _maximums[i];
+		cursorMin = cursorMax =_maximums[i];
+
 		cursorStart = cursorMin+1;
 		if ( cursorStart == histoSize ) cursorStart = 0;
 		derivativeThreshold = this->at(cursorMin)*derivativesPercentage/100.;
 		while ( cursorMin != cursorStart && this->at(cursorMin) > derivativeThreshold )
 		{
 			if ( cursorMin ) cursorMin--;
-			else cursorMin = histoSize-1;
+			else cursorMin = histoSizeMinusOne;
 		}
-		while ( firstdDerivated(cursorMin,loop) > 0. )
+		while ( cursorMin != cursorStart && firstdDerivated(cursorMin,loop) > 1. )
 		{
 			if ( cursorMin ) cursorMin--;
 			else cursorMin = histoSizeMinusOne;
 		}
 
-		cursorMax = cursorStart;
+		cursorStart--;
 		if ( cursorStart ) cursorStart--;
-		else cursorStart = histoSize-1;
+		else cursorStart = histoSizeMinusOne;
 		while ( cursorMax != cursorStart && this->at(cursorMax) > derivativeThreshold )
 		{
 			cursorMax++;
 			if ( cursorMax == histoSize ) cursorMax = 0;
 		}
-		while ( firstdDerivated(cursorMax,loop) < 0. )
+		while ( cursorMax != cursorStart && firstdDerivated(cursorMax,loop) < -1. )
 		{
 			cursorMax++;
 			if ( cursorMax == histoSize ) cursorMax = 0;
 		}
-		if ( cursorMax ) cursorMax--;
-		else cursorMax = histoSizeMinusOne;
 
 		cursor.setBounds(cursorMin,cursorMax);
 
@@ -366,17 +365,17 @@ void Histogram<T>::computeIntervals( const int & derivativesPercentage, const ui
 					{
 						const uint &lastMax = _intervals.last().max();
 						const uint &firstMin = _intervals.first().min();
-						if ( cursorMin < lastMax )
+						if ( cursorMin < lastMax || !_intervals.last().isValid() )
 						{
 							cursorMin = lastMax;
 							cursor.setMin(lastMax);
 						}
-						if ( cursorMax > firstMin )
+						if ( cursorMax > firstMin || !_intervals.first().isValid() )
 						{
 							cursorMax = firstMin;
 							cursor.setMax(firstMin);
 						}
-						if ( histoSize-(cursor.min()-cursor.max()) >= minimumWidthOfIntervals ) _intervals.append(cursor);
+						if ( (cursor.isValid()?cursor.size():histoSize-(cursor.min()-cursor.max())) >= minimumWidthOfIntervals ) _intervals.append(cursor);
 					}
 				}
 			}
