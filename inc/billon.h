@@ -155,9 +155,9 @@ Slice& BillonTpl<T>::nextSlice( const uint currentSlice )
 template< typename T >
 T BillonTpl<T>::zMotion( const uint i, const uint j, const uint sliceIndex ) const
 {
-	//return qAbs( this->at(j,i,sliceIndex) - previousSlice(sliceIndex).at(j,i) );
+	return qAbs( this->at(j,i,sliceIndex) - previousSlice(sliceIndex).at(j,i) );
 	//return qAbs( nextSlice(sliceIndex).at(j,i) - previousSlice(sliceIndex).at(j,i) );
-	return 0.25 * qAbs( -2 * this->at(j,i,sliceIndex) + previousSlice(sliceIndex).at(j,i) + nextSlice(sliceIndex).at(j,i));
+	//return 0.25 * qAbs( -2 * this->at(j,i,sliceIndex) + previousSlice(sliceIndex).at(j,i) + nextSlice(sliceIndex).at(j,i));
 }
 
 template< typename T >

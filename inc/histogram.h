@@ -308,7 +308,7 @@ void Histogram<T>::computeIntervals( const int & derivativesPercentage, const ui
 			if ( cursorMin ) cursorMin--;
 			else cursorMin = histoSizeMinusOne;
 		}
-		while ( cursorMin != cursorStart && firstdDerivated(cursorMin,loop) > 1. )
+		while ( cursorMin != cursorStart && firstdDerivated(cursorMin,loop) > 0.5 )
 		{
 			if ( cursorMin ) cursorMin--;
 			else cursorMin = histoSizeMinusOne;
@@ -322,7 +322,7 @@ void Histogram<T>::computeIntervals( const int & derivativesPercentage, const ui
 			cursorMax++;
 			if ( cursorMax == histoSize ) cursorMax = 0;
 		}
-		while ( cursorMax != cursorStart && firstdDerivated(cursorMax,loop) < -1. )
+		while ( cursorMax != cursorStart && firstdDerivated(cursorMax,loop) < -0.5 )
 		{
 			cursorMax++;
 			if ( cursorMax == histoSize ) cursorMax = 0;
@@ -331,76 +331,19 @@ void Histogram<T>::computeIntervals( const int & derivativesPercentage, const ui
 		cursor.setBounds(cursorMin,cursorMax);
 
 		// Ajout et fusion de l'intervalle courant
-		if ( cursor.isValid() )
-		{
-			if ( cursor.width() >= minimumWidthOfIntervals )
-			{
-				if ( _intervals.isEmpty() || cursor.min() >= _intervals.last().max() )
-				{
-					_intervals.append(cursor);
-				}
-				else
-				{
-					cursorMin = _intervals.last().max();
-					if ( cursorMax > cursorMin )
-					{
-						cursor.setMin(cursorMin);
-						if ( cursor.width() > minimumWidthOfIntervals ) _intervals.append(cursor);
-					}
-					cursorMin = _intervals.last().min();
-				}
-			}
-		}
+		if ( _intervals.isEmpty() ) _intervals.append(cursor);
 		else
 		{
-			if ( loop )
+			const Interval<uint> &last = _intervals.last();
+			if ( !(cursor.isValid() || last.isValid()) || last.max() >= cursor.min() )
 			{
-				if ( histoSize-(cursor.min()-cursor.max()) >= minimumWidthOfIntervals )
-				{
-					if ( _intervals.isEmpty()  )
-					{
-						_intervals.append(cursor);
-					}
-					else
-					{
-						const uint &lastMax = _intervals.last().max();
-						const uint &firstMin = _intervals.first().min();
-						if ( cursorMin < lastMax || !_intervals.last().isValid() )
-						{
-							cursorMin = lastMax;
-							cursor.setMin(lastMax);
-						}
-						if ( cursorMax > firstMin || !_intervals.first().isValid() )
-						{
-							cursorMax = firstMin;
-							cursor.setMax(firstMin);
-						}
-						if ( (cursor.isValid()?cursor.size():histoSize-(cursor.min()-cursor.max())) >= minimumWidthOfIntervals ) _intervals.append(cursor);
-					}
-				}
+				cursorMin = last.max();
+				cursor.setMin(cursorMin);
 			}
-			else
-			{
-				if ( _intervals.isEmpty()  )
-				{
-					cursor.setMin(0);
-					cursorMin = 0;
-					if ( cursor.width() > minimumWidthOfIntervals ) _intervals.append(cursor);
-				}
-				else
-				{
-					cursorMax = histoSizeMinusOne;
-					cursor.setMax(cursorMax);
-					if ( _intervals.last().max() > cursorMin )
-					{
-						cursorMin = _intervals.last().max();
-						cursor.setMin(cursorMin);
-					}
-					if ( cursor.width() > minimumWidthOfIntervals )	_intervals.append(cursor);
-				}
-			}
+			if ( (cursor.isValid() ? cursor.width() : histoSize-(cursor.min()-cursor.max())) > minimumWidthOfIntervals ) _intervals.append(cursor);
 		}
 	}
+	if ( _intervals.last() == _intervals.first() ) _intervals.pop_back();
 }
 
 #endif // HISTOGRAM_H

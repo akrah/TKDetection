@@ -32,23 +32,30 @@ void SliceView::drawSlice(QImage &image, const Billon &billon, const TKD::SliceT
 				case TKD::MOVEMENT :
 					drawMovementSlice( image, billon, sliceIndex, intensityInterval, motionInterval.min(), angularResolution, axe );
 					break;
-					// Affichage de la coupe de détection de mouvements
+				// Affichage de la coupe de détection de mouvements
 				case TKD::EDGE_DETECTION :
 					drawEdgeDetectionSlice( image, billon, center, sliceIndex, intensityInterval, edgeDetectionParameters );
 					break;
-					// Affichage de la coupe de flot optique
+				// Affichage de la coupe de flot optique
 				case TKD::FLOW :
 					drawFlowSlice( image, billon, sliceIndex, opticalFlowParameters );
 					break;
-					// Affichage de la coupe originale
+				// Affichage de la coupe originale
 				case TKD::CURRENT:
 				default :
-					// Affichage de la coupe courante
 					drawCurrentSlice( image, billon, sliceIndex, intensityInterval, angularResolution, axe );
 					break;
 			}
 			break;
 		case TKD::Y_VIEW:
+			switch (sliceType)
+			{
+				// Affichage de la coupe originale
+				case TKD::CURRENT:
+				default :
+					drawCurrentSlice( image, billon, sliceIndex, intensityInterval, angularResolution, axe );
+					break;
+			}
 		case TKD::CARTESIAN_VIEW:
 			switch (sliceType)
 			{
@@ -56,10 +63,9 @@ void SliceView::drawSlice(QImage &image, const Billon &billon, const TKD::SliceT
 				case TKD::MOVEMENT :
 					drawMovementSlice( image, billon, sliceIndex, intensityInterval, motionInterval.min(), angularResolution, axe );
 					break;
-					// Affichage de la coupe originale
+				// Affichage de la coupe originale
 				case TKD::CURRENT:
 				default :
-					// Affichage de la coupe courante
 					drawCurrentSlice( image, billon, sliceIndex, intensityInterval, angularResolution, axe );
 					break;
 			}
@@ -143,32 +149,9 @@ void SliceView::drawMovementSlice( QImage &image, const Billon &billon, const ui
 	QRgb * line = (QRgb *) image.bits();
 	int color;
 	const QRgb white = qRgb(255,255,255);
-	uint i,j,k;
+	uint i,j;
 
-	if ( axe == TKD::Y_VIEW )
-	{
-		const uint &depth = billon.n_slices;
-		for ( k=0 ; k<depth ; ++k )
-		{
-			for ( i=0 ; i<width ; ++i )
-			{
-				if ( intensityInterval.containsClosed(billon.at(sliceIndex,i,k)) && intensityInterval.containsClosed(billon.at(sliceIndex>0 ? sliceIndex-1 : sliceIndex+1,i,k)) )
-				{
-					color = qAbs( billon.at(sliceIndex,i,k) - billon.at(sliceIndex>0 ? sliceIndex-1 : sliceIndex+1,i,k));
-//					if ( motionInterval.containsClosed(color) )
-					if ( color > zMotionMin )
-					{
-//						color *= fact;
-//						color = qMin(255.,color*fact);
-//						*line = qRgb(color,color,color);
-						*line = white;
-					}
-				}
-				++line;
-			}
-		}
-	}
-	else if ( axe == TKD::Z_VIEW )
+	if ( axe == TKD::Z_VIEW )
 	{
 		for ( j=0 ; j<height ; ++j )
 		{
@@ -211,7 +194,7 @@ void SliceView::drawMovementSlice( QImage &image, const Billon &billon, const ui
 					{
 //						color *= fact;
 //						color = qMin(255.,color*fact);
-						*line = qRgb(color,color,color);
+//						*line = qRgb(color,color,color);
 						*line = white;
 					}
 				}

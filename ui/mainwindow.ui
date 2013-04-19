@@ -245,7 +245,7 @@
      <item row="0" column="0">
       <widget class="QTabWidget" name="_tabs">
        <property name="currentIndex">
-        <number>3</number>
+        <number>0</number>
        </property>
        <widget class="QWidget" name="_tabAffichage">
         <attribute name="title">
@@ -1778,7 +1778,7 @@ l'origine du contour</string>
                  <number>20</number>
                 </property>
                 <property name="value">
-                 <number>2</number>
+                 <number>3</number>
                 </property>
                 <property name="orientation">
                  <enum>Qt::Horizontal</enum>
@@ -1794,7 +1794,7 @@ l'origine du contour</string>
                  <number>20</number>
                 </property>
                 <property name="value">
-                 <number>2</number>
+                 <number>3</number>
                 </property>
                </widget>
               </item>
@@ -2246,8 +2246,8 @@ l'origine du contour</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>441</width>
-              <height>112</height>
+              <width>520</width>
+              <height>296</height>
              </rect>
             </property>
             <attribute name="label">

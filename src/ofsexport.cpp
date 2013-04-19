@@ -159,8 +159,8 @@ namespace OfsExport
 		{
 			const int width = billon.n_cols;
 			const int height = billon.n_rows;
-			const int nbSlices = sliceInterval.size();
-			const qreal depthShift = 1./(normalized? (qreal)nbSlices: 1.0);
+			const qreal nbSlices = sliceInterval.size();
+			const qreal depthShift = 1./(normalized? nbSlices: 1.0);
 			const qreal angleShift = TWO_PI/(qreal)nbEdges;
 			const rCoord2D norm = normalized ? rCoord2D(width,height) : rCoord2D(1.,1.);
 			const rCoord2D ofsRadius = rCoord2D( radius, radius )/norm;
@@ -179,7 +179,7 @@ namespace OfsExport
 
 			const rCoord2D ofsStart(normalized?0.5:width/2,normalized?0.5:height/2);
 			rCoord2D *offsetsIterator, ofs;
-			qreal depth = normalized ? -0.5 : -(qreal)(sliceInterval.size()/2);
+			qreal depth = normalized ? -0.5 : -(sliceInterval.size()/2.);
 
 			stream << endl;
 			stream << nbEdges*(sliceInterval.width()+1) << endl;
@@ -214,7 +214,7 @@ namespace OfsExport
 			QVector<rCoord2D> offsets;
 			rCoord2D *offsetsIterator, ofs, ofsRadius;
 			iCoord2D coord;
-			qreal depth = normalized ? -0.5 : -(qreal)(sliceInterval.size()/2);
+			qreal depth = normalized ? -0.5 : -(sliceInterval.size()/2.);
 			qreal angle;
 			for ( k=sliceInterval.min() ; k<=sliceInterval.max() ; ++k )
 			{
@@ -267,7 +267,7 @@ namespace OfsExport
 
 				sumOfnbEdges += nbEdges*(interval.size()+1);
 
-				depth = normalized ? -0.5 : -interval.size()/2.;
+				depth = normalized ? -0.5 : -(interval.size()/2.);
 				for ( l=interval.min() ; l<=interval.max() ; ++l )
 				{
 					const iCoord2D &coord = billon.pithCoord(l);
@@ -305,7 +305,7 @@ namespace OfsExport
 
 			const rCoord2D ofsStart = normalized ? rCoord2D(0.5,0.5) : rCoord2D(width/2,height/2);
 			const rCoord2D norm = normalized ? rCoord2D( width, height ) : rCoord2D(1.,1.);
-			qreal depth = normalized ? -0.5 : -(qreal)(sliceInterval.size()/2);
+			qreal depth = normalized ? -0.5 : -(sliceInterval.size()/2.);
 			uint i, k;
 
 			stream << endl;
