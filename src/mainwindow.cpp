@@ -842,7 +842,7 @@ void MainWindow::selectSectorInterval(const int &index, const bool &draw )
 		{
 			_knotBillon = new Billon(*_componentBillon);
 			_contourBillon->compute( *_knotBillon, *_componentBillon, 0, _ui->_spinBlurredSegmentsThickness->value(), _ui->_spinContourSmoothingRadius->value(),
-									 _ui->_spinCurvatureWidth->value(), _ui->_spinMinimumOriginDistance->value() );
+									 _ui->_spinCurvatureWidth->value(), _ui->_spinMinimumOriginDistance->value(), _nearestPointsHistogram->intervals() );
 		}
 	}
 	if (draw) drawSlice();
