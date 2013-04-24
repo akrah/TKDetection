@@ -104,7 +104,7 @@ void PieChart::draw( QImage &image, const uiCoord2D &center, const uint &sectorI
 	}
 }
 
-void PieChart::draw(QImage &image, const uiCoord2D &center, const QVector< Interval<uint> > & intervals, const TKD::ViewType &viewType ) const
+void PieChart::draw( QImage &image, const uiCoord2D &center, const QVector< Interval<uint> > &intervals, const TKD::ViewType &viewType ) const
 {
 	if ( !intervals.isEmpty() )
 	{
@@ -121,8 +121,8 @@ void PieChart::draw(QImage &image, const uiCoord2D &center, const QVector< Inter
 		// Dessin des deux côtés du secteur
 		const int &width = image.width();
 		const int &height = image.height();
-		const int nbColors = 6;
-		QVector<QColor> colors(nbColors);
+
+		QVector<QColor> colors(6);
 		colors[0] = Qt::blue;
 		colors[1] = Qt::yellow;
 		colors[2] = Qt::green;
@@ -130,7 +130,9 @@ void PieChart::draw(QImage &image, const uiCoord2D &center, const QVector< Inter
 		colors[4] = Qt::cyan;
 		colors[5] = Qt::white;
 
-		QColor color;
+		const int nbColorsToUse = intervals.size()>colors.size() ? ((intervals.size()+1)/2)%colors.size() : colors.size();
+
+		QColor currentColor;
 		iCoord2D end;
 		qreal angle;
 		int colorIndex = 0;
@@ -139,12 +141,12 @@ void PieChart::draw(QImage &image, const uiCoord2D &center, const QVector< Inter
 		QVector<qreal>::ConstIterator side;
 		if ( viewType == TKD::Z_VIEW )
 		{
-			for ( side = twoSides.constBegin() ; side < twoSides.constEnd() ; ++side )
+			for ( side = twoSides.constBegin() ; side != twoSides.constEnd() ; ++side )
 			{
 				// Calcul des coordonnées du segment à tracer
-				color = colors[(colorIndex++/2)%nbColors];
-				painter.setPen(color);
-				painter.setBrush(color);
+				currentColor = colors[(colorIndex++/2)%nbColorsToUse];
+				painter.setPen(currentColor);
+				painter.setBrush(currentColor);
 				angle = *side;
 				end = center;
 				if ( qFuzzyCompare(angle,PI_ON_TWO) ) end.y = height;
@@ -162,11 +164,11 @@ void PieChart::draw(QImage &image, const uiCoord2D &center, const QVector< Inter
 		}
 		else if ( viewType == TKD::CARTESIAN_VIEW )
 		{
-			for ( side = twoSides.constBegin() ; side < twoSides.constEnd() ; ++side )
+			for ( side = twoSides.constBegin() ; side != twoSides.constEnd() ; ++side )
 			{
-				color = colors[(colorIndex++/2)%nbColors];
-				painter.setPen(color);
-				painter.setBrush(color);
+				currentColor = colors[(colorIndex++/2)%nbColorsToUse];
+				painter.setPen(currentColor);
+				painter.setBrush(currentColor);
 				angle = (*side)*width/TWO_PI;
 				// Tracé du segment
 				painter.drawLine(angle,0,angle,height);
