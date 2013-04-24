@@ -215,6 +215,7 @@ namespace OfsExport
 			rCoord2D *offsetsIterator, ofs, ofsRadius;
 			iCoord2D coord;
 			qreal depth = normalized ? -0.5 : -(sliceInterval.size()/2.);
+
 			qreal angle;
 			for ( k=sliceInterval.min() ; k<=sliceInterval.max() ; ++k )
 			{
