@@ -5,6 +5,7 @@
 #include "inc/define.h"
 
 #include <QPainter>
+#include <QLinkedList>
 
 Contour::Contour() : QVector<iCoord2D>(0)
 {
@@ -83,10 +84,10 @@ void Contour::smooth( int smoothingRadius )
 			this->clear();
 			this->append(iCoord2D( smoothingValueX/qSmoothingDiameter, smoothingValueY/qSmoothingDiameter ));
 			iCoord2D currentCoord;
-			for ( int i=1 ; i<nbPoints ; ++i )
+			for ( int i=0 ; i<nbPoints-1 ; ++i )
 			{
-				smoothingValueX = smoothingValueX - initialContour[i-1].x + initialContour[i+smoothingDiameter-1].x;
-				smoothingValueY = smoothingValueY - initialContour[i-1].y + initialContour[i+smoothingDiameter-1].y;
+				smoothingValueX = smoothingValueX - initialContour[i].x + initialContour[i+smoothingDiameter].x;
+				smoothingValueY = smoothingValueY - initialContour[i].y + initialContour[i+smoothingDiameter].y;
 				currentCoord.x = smoothingValueX / qSmoothingDiameter;
 				currentCoord.y = smoothingValueY / qSmoothingDiameter;
 				if ( this->last() != currentCoord ) this->append(currentCoord);

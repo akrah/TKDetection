@@ -35,6 +35,8 @@ public:
 
 	const Slice& previousSlice( const uint currentSlice) const;
 	Slice& previousSlice( const uint currentSlice );
+	const Slice& nextSlice( const uint currentSlice) const;
+	Slice& nextSlice( const uint currentSlice );
 	T zMotion( const uint i, const uint j, const uint sliceIndex ) const;
 
 	const Pith & pith() const;
@@ -127,7 +129,7 @@ const int &BillonTpl<T>::zPos() const
 }
 
 template< typename T >
-const Slice& BillonTpl<T>::previousSlice( const uint currentSlice) const
+const Slice& BillonTpl<T>::previousSlice( const uint currentSlice ) const
 {
 	return this->slice(currentSlice>0 ? currentSlice-1 : currentSlice+1);
 }
@@ -139,9 +141,23 @@ Slice& BillonTpl<T>::previousSlice( const uint currentSlice )
 }
 
 template< typename T >
+const Slice& BillonTpl<T>::nextSlice( const uint currentSlice ) const
+{
+	return this->slice(currentSlice<this->n_slices-1 ? currentSlice+1 : currentSlice-1);
+}
+
+template< typename T >
+Slice& BillonTpl<T>::nextSlice( const uint currentSlice )
+{
+	return this->slice(currentSlice<this->n_slices-1 ? currentSlice+1 : currentSlice-1);
+}
+
+template< typename T >
 T BillonTpl<T>::zMotion( const uint i, const uint j, const uint sliceIndex ) const
 {
 	return qAbs( this->at(j,i,sliceIndex) - previousSlice(sliceIndex).at(j,i) );
+	//return qAbs( nextSlice(sliceIndex).at(j,i) - previousSlice(sliceIndex).at(j,i) );
+	//return 0.25 * qAbs( -2 * this->at(j,i,sliceIndex) + previousSlice(sliceIndex).at(j,i) + nextSlice(sliceIndex).at(j,i));
 }
 
 template< typename T >

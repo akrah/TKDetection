@@ -483,52 +483,45 @@ void ContourSlice::computeMainDominantPoints( const int &minimumOriginDistance )
 {
 	_leftMainDominantPointsIndex = _rightMainDominantPointsIndex = -1;
 
-	int nbDominantPoints, nbDominantPoints2, nbPoints, index, increment;
-	qreal currentDistance, previousDistance;
+	int nbDominantPoints, nbDominantPointsToCompare, nbPoints, index, indexToCompare, increment;
 
-	nbDominantPoints = _dominantPointsIndexFromLeft.size();
-	nbDominantPoints2 = _dominantPointsIndexFromRight.size();
+	QVector<int> allDominantPointsIndex(_dominantPointsIndexFromLeft);
+	allDominantPointsIndex << _dominantPointsIndexFromRight;
+	qSort(allDominantPointsIndex);
+
+	nbDominantPoints = allDominantPointsIndex.size();
+	nbDominantPointsToCompare = nbDominantPoints/2;
 	nbPoints = _contour.size();
+	indexToCompare = nbPoints*0.35;
 
-	if ( nbDominantPoints > 2 && nbDominantPoints2 > 2 && _contourDistancesHistogram.size() == nbPoints )
+	if ( nbDominantPoints > 2 && _contourDistancesHistogram.size() == nbPoints && _curvatureHistogram.size() == nbPoints )
 	{
-		increment = 0;
+		// Left main dominant point
+		increment = 1;
 		do
 		{
-			index = _dominantPointsIndexFromLeft[++increment];
+			index = allDominantPointsIndex[increment++];
 		}
-		while ( (_contourDistancesHistogram[index]-_contourDistancesHistogram[0] < minimumOriginDistance) && (increment < nbDominantPoints-1) );
+		while ( (index < indexToCompare) && ((_curvatureHistogram[index]>=0 ) || (_contourDistancesHistogram[index]-_contourDistancesHistogram[0] < minimumOriginDistance)) );
 
-		if ( increment<nbDominantPoints-1 )
+		if ( index<indexToCompare && increment<nbDominantPointsToCompare )
 		{
-			currentDistance = _contourDistancesHistogram[index];
-			previousDistance = _contourDistancesHistogram[index-2];
-			while ( index>1 && previousDistance>currentDistance )
-			{
-				index--;
-				currentDistance = _contourDistancesHistogram[index];
-				previousDistance = _contourDistancesHistogram[index-2];
-			}
+			while ( index>minimumOriginDistance && _curvatureHistogram[index]<0 ) index--;
 			_leftMainDominantPointsIndex = index;
 		}
 
-		increment = 0;
+		// Right main dominant point
+		increment = nbDominantPoints-1;
+		indexToCompare = nbPoints - indexToCompare;
 		do
 		{
-			index = _dominantPointsIndexFromRight[++increment];
+			index = allDominantPointsIndex[increment--];
 		}
-		while ( (_contourDistancesHistogram[index]-_contourDistancesHistogram[0] < minimumOriginDistance) && (increment < nbDominantPoints2-1) );
+		while ( (index > indexToCompare) && ((_curvatureHistogram[index]>=0 ) || (_contourDistancesHistogram[index]-_contourDistancesHistogram[0] < minimumOriginDistance)) );
 
-		if ( increment<nbDominantPoints2-1 )
+		if ( index>indexToCompare && increment>nbDominantPointsToCompare )
 		{
-			currentDistance = _contourDistancesHistogram[index];
-			previousDistance = _contourDistancesHistogram[index+2];
-			while ( index<nbPoints-2 && previousDistance>currentDistance )
-			{
-				index++;
-				currentDistance = _contourDistancesHistogram[index];
-				previousDistance = _contourDistancesHistogram[index+2];
-			}
+			while ( index<nbPoints-minimumOriginDistance && _curvatureHistogram[index]<0 ) index++;
 			_rightMainDominantPointsIndex = index;
 		}
 	}
@@ -546,11 +539,11 @@ void ContourSlice::computeSupportsOfMainDominantPoints()
 	{
 		_leftMainSupportPoint.x = _leftMainSupportPoint.y = 0.;
 		counter = 0;
-		while ( index >= 0 )
+		while ( index >= qMax(_leftMainDominantPointsIndex-25,0) )
 		{
 			_leftMainSupportPoint.x += _contour[index].x;
 			_leftMainSupportPoint.y += _contour[index].y;
-			index -= 5;
+			index -= 1;
 			++counter;
 		}
 		_leftMainSupportPoint.x /= counter;
@@ -563,11 +556,11 @@ void ContourSlice::computeSupportsOfMainDominantPoints()
 	{
 		int nbPoints = _contour.size();
 		counter = 0;
-		while ( index < nbPoints )
+		while ( index < qMin(_rightMainDominantPointsIndex+25,nbPoints) )
 		{
 			_rightMainSupportPoint.x += _contour[index].x;
 			_rightMainSupportPoint.y += _contour[index].y;
-			index += 5;
+			index += 1;
 			++counter;
 		}
 		_rightMainSupportPoint.x /= counter;

@@ -25,7 +25,7 @@ PlotSliceHistogram::~PlotSliceHistogram()
 
 void PlotSliceHistogram::attach( QwtPlot * const plot )
 {
-	if ( plot != 0 )
+	if ( plot )
 	{
 		_histogramData.attach(plot);
 		_histogramIntervals.attach(plot);
@@ -48,9 +48,10 @@ void PlotSliceHistogram::clear()
 
 void PlotSliceHistogram::moveCursor( const uint &sliceIndex )
 {
-	QVector<QwtIntervalSample> datasCursor(1);
-	datasCursor[0].interval.setInterval(sliceIndex,sliceIndex+1);
-	datasCursor[0].value = _histogramData.dataSize()>0 && sliceIndex<_histogramData.dataSize() ?_histogramData.sample(sliceIndex).value:0;
+	static QVector<QwtIntervalSample> datasCursor(1);
+	static QwtIntervalSample &datasCursorInterval = datasCursor[0];
+	datasCursorInterval.interval.setInterval(sliceIndex,sliceIndex+1);
+	datasCursorInterval.value = sliceIndex<_histogramData.dataSize() ? _histogramData.sample(sliceIndex).value : 0;
 	_histogramCursor.setSamples(datasCursor);
 }
 

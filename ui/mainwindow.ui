@@ -96,7 +96,7 @@
         <widget class="QWidget" name="scrollAreaWidgetContents">
          <property name="geometry">
           <rect>
-           <x>171</x>
+           <x>203</x>
            <y>313</y>
            <width>0</width>
            <height>0</height>
@@ -245,7 +245,7 @@
      <item row="0" column="0">
       <widget class="QTabWidget" name="_tabs">
        <property name="currentIndex">
-        <number>0</number>
+        <number>1</number>
        </property>
        <widget class="QWidget" name="_tabAffichage">
         <attribute name="title">
@@ -289,8 +289,8 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>505</width>
-              <height>346</height>
+              <width>454</width>
+              <height>321</height>
              </rect>
             </property>
             <attribute name="label">
@@ -299,6 +299,9 @@
             <layout class="QVBoxLayout" name="verticalLayout_8">
              <item>
               <layout class="QFormLayout" name="formLayout_2">
+               <property name="fieldGrowthPolicy">
+                <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
+               </property>
                <item row="0" column="0">
                 <widget class="QLabel" name="label_42">
                  <property name="font">
@@ -415,42 +418,6 @@
                 </layout>
                </item>
                <item row="3" column="0">
-                <widget class="QLabel" name="label_31">
-                 <property name="font">
-                  <font>
-                   <weight>50</weight>
-                   <bold>false</bold>
-                  </font>
-                 </property>
-                 <property name="text">
-                  <string>Afficher les
-composantes connexes</string>
-                 </property>
-                </widget>
-               </item>
-               <item row="3" column="1">
-                <widget class="QCheckBox" name="_checkEnableConnexComponents">
-                 <property name="sizePolicy">
-                  <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
-                   <horstretch>0</horstretch>
-                   <verstretch>0</verstretch>
-                  </sizepolicy>
-                 </property>
-                 <property name="font">
-                  <font>
-                   <weight>50</weight>
-                   <bold>false</bold>
-                  </font>
-                 </property>
-                 <property name="text">
-                  <string/>
-                 </property>
-                 <property name="checked">
-                  <bool>true</bool>
-                 </property>
-                </widget>
-               </item>
-               <item row="4" column="0">
                 <widget class="QLabel" name="label_46">
                  <property name="font">
                   <font>
@@ -463,7 +430,7 @@ composantes connexes</string>
                  </property>
                 </widget>
                </item>
-               <item row="4" column="1">
+               <item row="3" column="1">
                 <layout class="QHBoxLayout" name="horizontalLayout_8">
                  <item>
                   <widget class="QSlider" name="_sliderAngularResolution">
@@ -1115,219 +1082,406 @@ zone restreinte</string>
         </attribute>
         <layout class="QVBoxLayout" name="verticalLayout_4">
          <item>
-          <layout class="QFormLayout" name="formLayout_10">
-           <item row="0" column="0">
-            <widget class="QLabel" name="label_38">
-             <property name="text">
-              <string>Rayon de lissage</string>
-             </property>
-            </widget>
-           </item>
-           <item row="0" column="1">
-            <layout class="QHBoxLayout" name="horizontalLayout_12">
-             <item>
-              <widget class="QSlider" name="_sliderHistogramSmoothingRadius">
-               <property name="minimum">
-                <number>0</number>
-               </property>
-               <property name="maximum">
-                <number>15</number>
-               </property>
-               <property name="pageStep">
-                <number>5</number>
-               </property>
-               <property name="value">
-                <number>5</number>
-               </property>
-               <property name="orientation">
-                <enum>Qt::Horizontal</enum>
+          <widget class="QTabWidget" name="tabWidget">
+           <property name="tabPosition">
+            <enum>QTabWidget::West</enum>
+           </property>
+           <property name="tabShape">
+            <enum>QTabWidget::Rounded</enum>
+           </property>
+           <property name="currentIndex">
+            <number>1</number>
+           </property>
+           <property name="documentMode">
+            <bool>false</bool>
+           </property>
+           <widget class="QWidget" name="tab_3">
+            <attribute name="title">
+             <string>Z-Mouvement</string>
+            </attribute>
+            <layout class="QFormLayout" name="formLayout_10">
+             <item row="0" column="0">
+              <widget class="QLabel" name="label_38">
+               <property name="text">
+                <string>Rayon de lissage</string>
                </property>
               </widget>
              </item>
-             <item>
-              <widget class="QSpinBox" name="_spinHistogramSmoothingRadius">
-               <property name="maximum">
-                <number>15</number>
-               </property>
-               <property name="value">
-                <number>5</number>
-               </property>
-              </widget>
+             <item row="0" column="1">
+              <layout class="QHBoxLayout" name="horizontalLayout_12">
+               <item>
+                <widget class="QSlider" name="_sliderHistogramSmoothingRadius_zMotion">
+                 <property name="minimum">
+                  <number>0</number>
+                 </property>
+                 <property name="maximum">
+                  <number>15</number>
+                 </property>
+                 <property name="pageStep">
+                  <number>5</number>
+                 </property>
+                 <property name="value">
+                  <number>5</number>
+                 </property>
+                 <property name="orientation">
+                  <enum>Qt::Horizontal</enum>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QSpinBox" name="_spinHistogramSmoothingRadius_zMotion">
+                 <property name="maximum">
+                  <number>15</number>
+                 </property>
+                 <property name="value">
+                  <number>5</number>
+                 </property>
+                </widget>
+               </item>
+              </layout>
              </item>
-            </layout>
-           </item>
-           <item row="1" column="0">
-            <widget class="QLabel" name="label_39">
-             <property name="text">
-              <string>Pourcentage de coupes à supprimer
+             <item row="1" column="0">
+              <widget class="QLabel" name="label_39">
+               <property name="text">
+                <string>Pourcentage de coupes à supprimer
 au début et à la fin</string>
-             </property>
-            </widget>
-           </item>
-           <item row="1" column="1">
-            <layout class="QHBoxLayout" name="horizontalLayout_23">
-             <item>
-              <widget class="QSlider" name="_sliderHistogramBorderPercentageToCut">
-               <property name="maximum">
-                <number>100</number>
-               </property>
-               <property name="value">
-                <number>5</number>
-               </property>
-               <property name="orientation">
-                <enum>Qt::Horizontal</enum>
                </property>
               </widget>
              </item>
-             <item>
-              <widget class="QSpinBox" name="_spinHistogramBorderPercentageToCut">
-               <property name="maximum">
-                <number>100</number>
-               </property>
-               <property name="value">
-                <number>5</number>
-               </property>
-              </widget>
+             <item row="1" column="1">
+              <layout class="QHBoxLayout" name="horizontalLayout_23">
+               <item>
+                <widget class="QSlider" name="_sliderHistogramBorderPercentageToCut_zMotion">
+                 <property name="maximum">
+                  <number>100</number>
+                 </property>
+                 <property name="value">
+                  <number>5</number>
+                 </property>
+                 <property name="orientation">
+                  <enum>Qt::Horizontal</enum>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QSpinBox" name="_spinHistogramBorderPercentageToCut_zMotion">
+                 <property name="maximum">
+                  <number>100</number>
+                 </property>
+                 <property name="value">
+                  <number>5</number>
+                 </property>
+                </widget>
+               </item>
+              </layout>
              </item>
-            </layout>
-           </item>
-           <item row="2" column="0">
-            <widget class="QLabel" name="label_26">
-             <property name="text">
-              <string>Hauteur minimum d'un maximum
+             <item row="2" column="0">
+              <widget class="QLabel" name="label_26">
+               <property name="text">
+                <string>Hauteur minimum d'un maximum
 (en % du maximum global)</string>
-             </property>
-            </widget>
-           </item>
-           <item row="2" column="1">
-            <layout class="QHBoxLayout" name="horizontalLayout_9">
-             <item>
-              <widget class="QSlider" name="_sliderHistogramMinimumHeightOfMaximum">
-               <property name="maximum">
-                <number>100</number>
-               </property>
-               <property name="value">
-                <number>10</number>
-               </property>
-               <property name="orientation">
-                <enum>Qt::Horizontal</enum>
                </property>
               </widget>
              </item>
-             <item>
-              <widget class="QSpinBox" name="_spinHistogramMinimumHeightOfMaximum">
-               <property name="maximum">
-                <number>100</number>
-               </property>
-               <property name="value">
-                <number>10</number>
+             <item row="2" column="1">
+              <layout class="QHBoxLayout" name="horizontalLayout_9">
+               <item>
+                <widget class="QSlider" name="_sliderHistogramMinimumHeightOfMaximum_zMotion">
+                 <property name="maximum">
+                  <number>100</number>
+                 </property>
+                 <property name="value">
+                  <number>10</number>
+                 </property>
+                 <property name="orientation">
+                  <enum>Qt::Horizontal</enum>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QSpinBox" name="_spinHistogramMinimumHeightOfMaximum_zMotion">
+                 <property name="maximum">
+                  <number>100</number>
+                 </property>
+                 <property name="value">
+                  <number>10</number>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+             <item row="3" column="0">
+              <widget class="QLabel" name="label_5">
+               <property name="text">
+                <string>Largeur minimum des intervalles</string>
                </property>
               </widget>
              </item>
-            </layout>
-           </item>
-           <item row="3" column="0">
-            <widget class="QLabel" name="label_5">
-             <property name="text">
-              <string>Largeur minimum des intervalles</string>
-             </property>
-            </widget>
-           </item>
-           <item row="3" column="1">
-            <layout class="QHBoxLayout" name="horizontalLayout_13">
-             <item>
-              <widget class="QSlider" name="_sliderHistogramMinimumWidthOfInterval">
-               <property name="maximum">
-                <number>50</number>
-               </property>
-               <property name="value">
-                <number>10</number>
-               </property>
-               <property name="orientation">
-                <enum>Qt::Horizontal</enum>
-               </property>
-              </widget>
+             <item row="3" column="1">
+              <layout class="QHBoxLayout" name="horizontalLayout_13">
+               <item>
+                <widget class="QSlider" name="_sliderHistogramMinimumWidthOfInterval_zMotion">
+                 <property name="maximum">
+                  <number>50</number>
+                 </property>
+                 <property name="value">
+                  <number>10</number>
+                 </property>
+                 <property name="orientation">
+                  <enum>Qt::Horizontal</enum>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QSpinBox" name="_spinHistogramMinimumWidthOfInterval_zMotion">
+                 <property name="maximum">
+                  <number>50</number>
+                 </property>
+                 <property name="value">
+                  <number>10</number>
+                 </property>
+                </widget>
+               </item>
+              </layout>
              </item>
-             <item>
-              <widget class="QSpinBox" name="_spinHistogramMinimumWidthOfInterval">
-               <property name="maximum">
-                <number>50</number>
-               </property>
-               <property name="value">
-                <number>10</number>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </item>
-           <item row="4" column="0">
-            <widget class="QLabel" name="label_2">
-             <property name="text">
-              <string>Hauteur de recherche des dérivées
+             <item row="4" column="0">
+              <widget class="QLabel" name="label_2">
+               <property name="text">
+                <string>Hauteur de recherche des dérivées
 (en % du maximum courant)</string>
-             </property>
-            </widget>
-           </item>
-           <item row="4" column="1">
-            <layout class="QHBoxLayout" name="horizontalLayout_20">
-             <item>
-              <widget class="QSlider" name="_sliderHistogramDerivativeSearchPercentage">
-               <property name="maximum">
-                <number>100</number>
-               </property>
-               <property name="value">
-                <number>30</number>
-               </property>
-               <property name="orientation">
-                <enum>Qt::Horizontal</enum>
                </property>
               </widget>
              </item>
-             <item>
-              <widget class="QSpinBox" name="_spinHistogramDerivativeSearchPercentage">
-               <property name="maximum">
-                <number>100</number>
-               </property>
-               <property name="value">
-                <number>30</number>
-               </property>
-              </widget>
+             <item row="4" column="1">
+              <layout class="QHBoxLayout" name="horizontalLayout_20">
+               <item>
+                <widget class="QSlider" name="_sliderHistogramDerivativeSearchPercentage_zMotion">
+                 <property name="maximum">
+                  <number>100</number>
+                 </property>
+                 <property name="value">
+                  <number>30</number>
+                 </property>
+                 <property name="orientation">
+                  <enum>Qt::Horizontal</enum>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QSpinBox" name="_spinHistogramDerivativeSearchPercentage_zMotion">
+                 <property name="maximum">
+                  <number>100</number>
+                 </property>
+                 <property name="value">
+                  <number>30</number>
+                 </property>
+                </widget>
+               </item>
+              </layout>
              </item>
-            </layout>
-           </item>
-           <item row="6" column="0">
-            <widget class="QLabel" name="label_27">
-             <property name="text">
-              <string>Valeurs par défaut</string>
-             </property>
-            </widget>
-           </item>
-           <item row="6" column="1">
-            <layout class="QHBoxLayout" name="horizontalLayout_14">
-             <item>
+             <item row="5" column="1">
               <widget class="QPushButton" name="_buttonHistogramResetDefaultValuesZMotion">
                <property name="text">
-                <string>Z-Mouvement</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QPushButton" name="_buttonHistogramResetDefaultValuesPithDistance">
-               <property name="text">
-                <string>Distance à la moelle</string>
+                <string>Valeurs par défaut</string>
                </property>
               </widget>
              </item>
             </layout>
-           </item>
-           <item row="5" column="1">
-            <widget class="Line" name="line">
-             <property name="orientation">
-              <enum>Qt::Horizontal</enum>
-             </property>
-            </widget>
-           </item>
-          </layout>
+           </widget>
+           <widget class="QWidget" name="tab_4">
+            <attribute name="title">
+             <string>Distance à la moelle</string>
+            </attribute>
+            <layout class="QFormLayout" name="formLayout_15">
+             <item row="0" column="0">
+              <widget class="QLabel" name="label_43">
+               <property name="text">
+                <string>Rayon de lissage</string>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="1">
+              <layout class="QHBoxLayout" name="horizontalLayout_14">
+               <item>
+                <widget class="QSlider" name="_sliderHistogramSmoothingRadius_nearestDistance">
+                 <property name="minimum">
+                  <number>0</number>
+                 </property>
+                 <property name="maximum">
+                  <number>15</number>
+                 </property>
+                 <property name="pageStep">
+                  <number>5</number>
+                 </property>
+                 <property name="value">
+                  <number>2</number>
+                 </property>
+                 <property name="orientation">
+                  <enum>Qt::Horizontal</enum>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QSpinBox" name="_spinHistogramSmoothingRadius_nearestDistance">
+                 <property name="maximum">
+                  <number>15</number>
+                 </property>
+                 <property name="value">
+                  <number>2</number>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+             <item row="1" column="0">
+              <widget class="QLabel" name="label_44">
+               <property name="text">
+                <string>Pourcentage de coupes à supprimer
+au début et à la fin</string>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="1">
+              <layout class="QHBoxLayout" name="horizontalLayout_27">
+               <item>
+                <widget class="QSlider" name="_sliderHistogramBorderPercentageToCut_nearestDistance">
+                 <property name="maximum">
+                  <number>100</number>
+                 </property>
+                 <property name="value">
+                  <number>0</number>
+                 </property>
+                 <property name="orientation">
+                  <enum>Qt::Horizontal</enum>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QSpinBox" name="_spinHistogramBorderPercentageToCut_nearestDistance">
+                 <property name="maximum">
+                  <number>100</number>
+                 </property>
+                 <property name="value">
+                  <number>0</number>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+             <item row="2" column="0">
+              <widget class="QLabel" name="label_31">
+               <property name="text">
+                <string>Hauteur minimum d'un maximum
+(en % du maximum global)</string>
+               </property>
+              </widget>
+             </item>
+             <item row="2" column="1">
+              <layout class="QHBoxLayout" name="horizontalLayout_31">
+               <item>
+                <widget class="QSlider" name="_sliderHistogramMinimumHeightOfMaximum_nearestDistance">
+                 <property name="maximum">
+                  <number>100</number>
+                 </property>
+                 <property name="value">
+                  <number>75</number>
+                 </property>
+                 <property name="orientation">
+                  <enum>Qt::Horizontal</enum>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QSpinBox" name="_spinHistogramMinimumHeightOfMaximum_nearestDistance">
+                 <property name="maximum">
+                  <number>100</number>
+                 </property>
+                 <property name="value">
+                  <number>75</number>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+             <item row="3" column="0">
+              <widget class="QLabel" name="label_47">
+               <property name="text">
+                <string>Largeur minimum des intervalles</string>
+               </property>
+              </widget>
+             </item>
+             <item row="3" column="1">
+              <layout class="QHBoxLayout" name="horizontalLayout_29">
+               <item>
+                <widget class="QSlider" name="_sliderHistogramMinimumWidthOfInterval_nearestDistance">
+                 <property name="maximum">
+                  <number>50</number>
+                 </property>
+                 <property name="value">
+                  <number>3</number>
+                 </property>
+                 <property name="orientation">
+                  <enum>Qt::Horizontal</enum>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QSpinBox" name="_spinHistogramMinimumWidthOfInterval_nearestDistance">
+                 <property name="maximum">
+                  <number>50</number>
+                 </property>
+                 <property name="value">
+                  <number>3</number>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+             <item row="4" column="0">
+              <widget class="QLabel" name="label_27">
+               <property name="text">
+                <string>Hauteur de recherche des dérivées
+(en % du maximum courant)</string>
+               </property>
+              </widget>
+             </item>
+             <item row="4" column="1">
+              <layout class="QHBoxLayout" name="horizontalLayout_21">
+               <item>
+                <widget class="QSlider" name="_sliderHistogramDerivativeSearchPercentage_nearestDistance">
+                 <property name="maximum">
+                  <number>100</number>
+                 </property>
+                 <property name="value">
+                  <number>50</number>
+                 </property>
+                 <property name="orientation">
+                  <enum>Qt::Horizontal</enum>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QSpinBox" name="_spinHistogramDerivativeSearchPercentage_nearestDistance">
+                 <property name="maximum">
+                  <number>100</number>
+                 </property>
+                 <property name="value">
+                  <number>50</number>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+             <item row="5" column="1">
+              <widget class="QPushButton" name="_buttonHistogramResetDefaultValuesNearestDistance">
+               <property name="text">
+                <string>Valeurs par défaut</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </widget>
          </item>
          <item>
           <widget class="QGroupBox" name="groupBox_9">
@@ -1335,6 +1489,9 @@ au début et à la fin</string>
             <string>Histogramme de secteurs</string>
            </property>
            <layout class="QFormLayout" name="formLayout_8">
+            <property name="fieldGrowthPolicy">
+             <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
+            </property>
             <item row="0" column="0">
              <widget class="QLabel" name="label_45">
               <property name="text">
@@ -1348,53 +1505,7 @@ au début et à la fin</string>
                <number>50</number>
               </property>
               <property name="value">
-               <number>5</number>
-              </property>
-             </widget>
-            </item>
-           </layout>
-          </widget>
-         </item>
-         <item>
-          <widget class="QGroupBox" name="groupBox_5">
-           <property name="title">
-            <string>Histogramme de distance à la moelle</string>
-           </property>
-           <layout class="QFormLayout" name="formLayout_15">
-            <property name="fieldGrowthPolicy">
-             <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
-            </property>
-            <item row="0" column="0">
-             <widget class="QLabel" name="label_43">
-              <property name="text">
-               <string>Distance de comparaison</string>
-              </property>
-             </widget>
-            </item>
-            <item row="0" column="1">
-             <widget class="QSpinBox" name="_spinNearestHistogramNeighborhood">
-              <property name="minimum">
-               <number>1</number>
-              </property>
-              <property name="value">
                <number>3</number>
-              </property>
-             </widget>
-            </item>
-            <item row="1" column="0">
-             <widget class="QLabel" name="label_44">
-              <property name="text">
-               <string>Différence minimum</string>
-              </property>
-             </widget>
-            </item>
-            <item row="1" column="1">
-             <widget class="QSpinBox" name="_spinNearestHistogramDifference">
-              <property name="minimum">
-               <number>1</number>
-              </property>
-              <property name="value">
-               <number>5</number>
               </property>
              </widget>
             </item>
@@ -1505,19 +1616,6 @@ l'intervalle angulaire</string>
             </layout>
            </item>
           </layout>
-         </item>
-         <item>
-          <spacer name="verticalSpacer_9">
-           <property name="orientation">
-            <enum>Qt::Vertical</enum>
-           </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>20</width>
-             <height>40</height>
-            </size>
-           </property>
-          </spacer>
          </item>
         </layout>
        </widget>
@@ -1688,10 +1786,10 @@ l'intervalle angulaire</string>
                <number>0</number>
               </property>
               <property name="maximum">
-               <number>20</number>
+               <number>50</number>
               </property>
               <property name="value">
-               <number>5</number>
+               <number>25</number>
               </property>
              </widget>
             </item>
@@ -1720,7 +1818,7 @@ l'intervalle angulaire</string>
                <number>20</number>
               </property>
               <property name="value">
-               <number>10</number>
+               <number>3</number>
               </property>
              </widget>
             </item>
@@ -1747,7 +1845,7 @@ l'origine du contour</string>
                <number>100</number>
               </property>
               <property name="value">
-               <number>20</number>
+               <number>15</number>
               </property>
              </widget>
             </item>
@@ -1778,7 +1876,7 @@ l'origine du contour</string>
                  <number>20</number>
                 </property>
                 <property name="value">
-                 <number>2</number>
+                 <number>3</number>
                 </property>
                 <property name="orientation">
                  <enum>Qt::Horizontal</enum>
@@ -1794,7 +1892,7 @@ l'origine du contour</string>
                  <number>20</number>
                 </property>
                 <property name="value">
-                 <number>2</number>
+                 <number>3</number>
                 </property>
                </widget>
               </item>
@@ -2246,8 +2344,8 @@ l'origine du contour</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>441</width>
-              <height>112</height>
+              <width>456</width>
+              <height>296</height>
              </rect>
             </property>
             <attribute name="label">
@@ -2331,7 +2429,7 @@ l'origine du contour</string>
         <enum>QTabWidget::South</enum>
        </property>
        <property name="currentIndex">
-        <number>0</number>
+        <number>1</number>
        </property>
        <widget class="QWidget" name="tab_2">
         <attribute name="title">
@@ -2487,7 +2585,7 @@ l'origine du contour</string>
          </item>
          <item>
           <widget class="QwtPolarPlot" name="_polarSectorHistogram">
-           <property name="plotBackground" stdset="0">
+           <property name="plotBackground">
             <brush brushstyle="SolidPattern">
              <color alpha="0">
               <red>255</red>
@@ -2573,15 +2671,15 @@ l'origine du contour</string>
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>QxtSpanSlider</class>
-   <extends>QSlider</extends>
-   <header>QxtSpanSlider</header>
-  </customwidget>
-  <customwidget>
    <class>QwtPolarPlot</class>
    <extends>QFrame</extends>
    <header>qwt_polar_plot.h</header>
    <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>QxtSpanSlider</class>
+   <extends>QSlider</extends>
+   <header>QxtSpanSlider</header>
   </customwidget>
  </customwidgets>
  <tabstops>
@@ -2604,15 +2702,15 @@ l'origine du contour</string>
   <tabstop>_buttonFlowUpdate</tabstop>
   <tabstop>_sliderRestrictedAreaPercentage</tabstop>
   <tabstop>_spinRestrictedAreaPercentage</tabstop>
-  <tabstop>_sliderHistogramSmoothingRadius</tabstop>
-  <tabstop>_spinHistogramSmoothingRadius</tabstop>
-  <tabstop>_sliderHistogramBorderPercentageToCut</tabstop>
-  <tabstop>_spinHistogramBorderPercentageToCut</tabstop>
-  <tabstop>_sliderHistogramMinimumHeightOfMaximum</tabstop>
-  <tabstop>_spinHistogramMinimumHeightOfMaximum</tabstop>
-  <tabstop>_sliderHistogramDerivativeSearchPercentage</tabstop>
-  <tabstop>_sliderHistogramMinimumWidthOfInterval</tabstop>
-  <tabstop>_spinHistogramMinimumWidthOfInterval</tabstop>
+  <tabstop>_sliderHistogramSmoothingRadius_zMotion</tabstop>
+  <tabstop>_spinHistogramSmoothingRadius_zMotion</tabstop>
+  <tabstop>_sliderHistogramBorderPercentageToCut_zMotion</tabstop>
+  <tabstop>_spinHistogramBorderPercentageToCut_zMotion</tabstop>
+  <tabstop>_sliderHistogramMinimumHeightOfMaximum_zMotion</tabstop>
+  <tabstop>_spinHistogramMinimumHeightOfMaximum_zMotion</tabstop>
+  <tabstop>_sliderHistogramDerivativeSearchPercentage_zMotion</tabstop>
+  <tabstop>_sliderHistogramMinimumWidthOfInterval_zMotion</tabstop>
+  <tabstop>_spinHistogramMinimumWidthOfInterval_zMotion</tabstop>
   <tabstop>_buttonComputePith</tabstop>
   <tabstop>_comboSelectSliceInterval</tabstop>
   <tabstop>_buttonSelectSliceIntervalUpdate</tabstop>
