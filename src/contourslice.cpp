@@ -554,11 +554,11 @@ void ContourSlice::computeSupportsOfMainDominantPoints()
 	{
 		_leftMainSupportPoint.x = _leftMainSupportPoint.y = 0.;
 		counter = 0;
-		while ( index >= 0 )
+		while ( index >= qMax(_leftMainDominantPointsIndex-15,0) )
 		{
 			_leftMainSupportPoint.x += _contour[index].x;
 			_leftMainSupportPoint.y += _contour[index].y;
-			index -= 5;
+			index -= 1;
 			++counter;
 		}
 		_leftMainSupportPoint.x /= counter;
@@ -571,11 +571,11 @@ void ContourSlice::computeSupportsOfMainDominantPoints()
 	{
 		int nbPoints = _contour.size();
 		counter = 0;
-		while ( index < nbPoints )
+		while ( index < qMin(_rightMainDominantPointsIndex+15,nbPoints) )
 		{
 			_rightMainSupportPoint.x += _contour[index].x;
 			_rightMainSupportPoint.y += _contour[index].y;
-			index += 5;
+			index += 1;
 			++counter;
 		}
 		_rightMainSupportPoint.x /= counter;

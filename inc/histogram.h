@@ -20,7 +20,7 @@ public:
 	virtual ~Histogram();
 
 	const QVector<uint> &maximums() const;
-	const QVector<Interval<uint> > &intervals() const;
+	const QVector< Interval<uint> > &intervals() const;
 
 	T min() const;
 	T max() const;
@@ -343,7 +343,7 @@ void Histogram<T>::computeIntervals( const int & derivativesPercentage, const ui
 			if ( (cursor.isValid() ? cursor.width() : histoSize-(cursor.min()-cursor.max())) > minimumWidthOfIntervals ) _intervals.append(cursor);
 		}
 	}
-	if ( _intervals.last() == _intervals.first() ) _intervals.pop_back();
+	if ( _intervals.size() > 1 && _intervals.last() == _intervals.first() ) _intervals.pop_back();
 }
 
 #endif // HISTOGRAM_H

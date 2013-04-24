@@ -34,15 +34,21 @@ bool ContourBillon::isEmpty()
 }
 
 void ContourBillon::compute( Billon &resultBillon, const Billon &billon, const int &intensityThreshold, const int &blurredSegmentThickness,
-							 const int &smoothingRadius, const int &curvatureWidth, const int &minimumOriginDistance )
+							 const int &smoothingRadius, const int &curvatureWidth, const int &minimumOriginDistance, const QVector< Interval<uint> > &intervals  )
 {
-	const uint &nbSlices = billon.n_slices;
 	resultBillon = billon;
-	_contourSlices.resize(nbSlices);
-	for ( uint k=0 ; k<nbSlices ; ++k )
+	_contourSlices.resize(billon.n_slices);
+
+	QVector< Interval<uint> >::ConstIterator intervalsIterator;
+	for ( intervalsIterator = intervals.constBegin() ; intervalsIterator != intervals.constEnd() ; ++intervalsIterator )
 	{
-		qDebug() << QString("Calcul de la coupe de contour : %1/%2").arg(k+1).arg(nbSlices);
-		_contourSlices[k].compute( resultBillon.slice(k), billon.slice(k), billon.pithCoord(k), intensityThreshold,
-								   blurredSegmentThickness, smoothingRadius, curvatureWidth, minimumOriginDistance );
+		const uint nbSlices = (*intervalsIterator).width()+1;
+		const uint &intervalEnd = (*intervalsIterator).max()+1;
+		for ( uint k=(*intervalsIterator).min() ; k<intervalEnd ; ++k )
+		{
+			qDebug() << QString("Calcul de la coupe de contour : %1/%2").arg(k+1).arg(nbSlices);
+			_contourSlices[k].compute( resultBillon.slice(k), billon.slice(k), billon.pithCoord(k), intensityThreshold,
+									   blurredSegmentThickness, smoothingRadius, curvatureWidth, minimumOriginDistance );
+		}
 	}
 }
