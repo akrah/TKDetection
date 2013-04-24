@@ -54,11 +54,11 @@ It is recommended to install the libraries LAPACK, BLAS, ATLAS, and Boost to imp
   sudo apt-get install liblapack-dev libblas-dev libatlas-dev libboost-dev
 ~~~
 
-Install then Armadillo by replacing *x-x-x* by the downloaded version number:
+Install then Armadillo by replacing *x.y.z* by the downloaded version number:
 
 ~~~
-  tar xvf armadillo-x.x.x.tar.gz
-  cd armadillo-x.x.x/
+  tar xvf armadillo-x.y.z.tar.gz
+  cd armadillo-x.y.z/
   ./configure
   make
   sudo make install
@@ -79,26 +79,26 @@ If problems appear concerning boost, you can compile boost from the version avai
 
 Download the version available on the website http://www.itk.org/ITK/resources/software.html.
 
-Replace *x-x-x* by the downloaded version number:
+Replace *x.y.z* by the downloaded version number:
 
 ~~~
-  tar xvf InsightToolkit-x.x.x.tar.gz
-  cd InsightToolkit-x.x.x/
+  tar xvf InsightToolkit-x.y.z.tar.gz
+  cd InsightToolkit-x.y.z/
   mkdir binary
   cd binary
-  cmake .. -DBUILD_EXAMPLES:string=false -DBUILD_TESTING:string=false -DITK_BUILD_ALL_MODULES:string=false -DITKGroup_Core:string=true -DITKGroup_IO:string=true
+  cmake -DBUILD_EXAMPLES=false -DBUILD_TESTING=false -DITK_BUILD_ALL_MODULES=false -DITKGroup_Core=true -DITKGroup_IO=true ..
   make
   sudo make install
 ~~~
 
-If a problem appear with *tif_config.h* and/or *tif_dir.h*, copy the corresponding files to the libraries repository:
+If a problem appear with *tif_config.h* and/or *tif_dir.h* (typically with ITK 4.3), copy the missing files to the libraries repository:
 
 ~~~
-  sudo cp  ./Modules/ThirdParty/TIFF/src/itktiff/tif_config.h /usr/local/include/ITK-4.3/itktiff/
-  sudo cp ../Modules/ThirdParty/TIFF/src/itktiff/tif_dir.h    /usr/local/include/ITK-4.3/itktiff/
+  sudo cp  ./Modules/ThirdParty/TIFF/src/itktiff/tif_config.h /usr/local/include/ITK-x.y/itktiff/
+  sudo cp ../Modules/ThirdParty/TIFF/src/itktiff/tif_dir.h    /usr/local/include/ITK-x.y/itktiff/
 ~~~
 
-**Think to change the ITK_NUMBER variable by x.x in the TKDetection.pro file (line 13) !**
+**Think to change the ITK_NUMBER variable by x.y in the TKDetection.pro file (line 13) !**
 
 ### 4. Qwt
 [Top](#tkdetection)
@@ -152,12 +152,12 @@ Restart QtDesigner.
 
 Use the version available on the website http://sourceforge.net/projects/qwtpolar.
 
-Replace *x-x-x* by the downloaded version number:
+Replace *x.y.z* by the downloaded version number:
 
 
 ~~~
-  unzip qwtpolar-x-x-x.zip
-  cd qwtpolar-x-x-x/
+  unzip qwtpolar-x.y.z.zip
+  cd qwtpolar-x.y.z/
   mkdir build && cd build
   qmake ..
   make
@@ -172,25 +172,25 @@ Replace *x-x-x* by the downloaded version number:
 
   If they do not exist:
   ~~~
-      sudo ln -s /usr/local/qwtpolar-x.x.x/features/qwtpolar.prf /usr/share/qt4/mkspecs/features/
-      sudo ln -s /usr/local/qwtpolar-x.x.x/features/qwtpolarconfig.pri /usr/share/qt4/mkspecs/features/
+      sudo ln -s /usr/local/qwtpolar-x.y.z/features/qwtpolar.prf /usr/share/qt4/mkspecs/features/
+      sudo ln -s /usr/local/qwtpolar-x.y.z/features/qwtpolarconfig.pri /usr/share/qt4/mkspecs/features/
   ~~~
 
 2.  if 1. does not resolve the problem:
 
   ~~~
-      sudo ln -s /usr/local/qwtpolar-x.x.x/lib/libqwtpolar.so       /usr/lib/
-      sudo ln -s /usr/local/qwtpolar-x.x.x/lib/libqwtpolar.so.1     /usr/lib/
-      sudo ln -s /usr/local/qwtpolar-x.x.x/lib/libqwtpolar.so.1.0   /usr/lib/
-      sudo ln -s /usr/local/qwtpolar-x.x.x/lib/libqwtpolar.so.1.0.0 /usr/lib/
+      sudo ln -s /usr/local/qwtpolar-x.y.z/lib/libqwtpolar.so       /usr/lib/
+      sudo ln -s /usr/local/qwtpolar-x.y.z/lib/libqwtpolar.so.1     /usr/lib/
+      sudo ln -s /usr/local/qwtpolar-x.y.z/lib/libqwtpolar.so.1.0   /usr/lib/
+      sudo ln -s /usr/local/qwtpolar-x.y.z/lib/libqwtpolar.so.1.0.0 /usr/lib/
   ~~~
 
 ##### If the QwtPolarPlot widget does not appear in QtDesigner
 
-Don't forget to replace *x.x.x* by the downloaded version number:
+Don't forget to replace *x.y.z* by the downloaded version number:
 
 ~~~
-  sudo cp /usr/local/qwtpolar-x.x.x/plugins/designer/libqwt_polar_designer_plugin.so /usr/lib/x86_64-linux-gnu/qt4/plugins/designer/
+  sudo cp /usr/local/qwtpolar-x.y.z/plugins/designer/libqwt_polar_designer_plugin.so /usr/lib/x86_64-linux-gnu/qt4/plugins/designer/
 ~~~
 
 
@@ -209,10 +209,10 @@ You can clone DGtalTools the main repository:
   sudo make install
 ~~~
 
-If a problem appear during the cmake step, add an ITK parameter to the command with the version number of ITK (x.x below):
+If a problem appear during the cmake step, add an ITK parameter to the command with the version number of ITK (x.y below):
 
 ~~~
-  cmake .. -DWITH_GMP=true -DWITH_ITK=true -DWITH_QGLVIEWER=true -DITK_DIR=/usr/local/lib/cmake/ITK-x.x/
+  cmake .. -DWITH_GMP=true -DWITH_ITK=true -DWITH_QGLVIEWER=true -DITK_DIR=/usr/local/lib/cmake/ITK-x.y/
 ~~~
 
 Install then DGtalTools:
@@ -229,7 +229,7 @@ Install then DGtalTools:
 If a problem appear, use the same tips than the DGtal installation:
 
 ~~~
-  cmake .. -DWITH_VISU3D_QGLVIEWER=true -DWITH_QGLVIEWER=true -DITK_DIR=/usr/local/lib/cmake/ITK-x.x/
+  cmake .. -DWITH_VISU3D_QGLVIEWER=true -DWITH_QGLVIEWER=true -DITK_DIR=/usr/local/lib/cmake/ITK-x.y/
 ~~~
 
 ### 8. ImaGene
