@@ -12,7 +12,7 @@ PlotZMotionDistributionHistogram::~PlotZMotionDistributionHistogram()
 
 void PlotZMotionDistributionHistogram::attach( QwtPlot * const plot )
 {
-	if ( plot != 0 )
+	if ( plot )
 	{
 		_histogramData.attach(plot);
 	}

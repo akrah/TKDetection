@@ -43,10 +43,11 @@ void ContourBillon::compute( Billon &resultBillon, const Billon &billon, const i
 	for ( intervalsIterator = intervals.constBegin() ; intervalsIterator != intervals.constEnd() ; ++intervalsIterator )
 	{
 		const uint nbSlices = (*intervalsIterator).width()+1;
-		const uint &intervalEnd = (*intervalsIterator).max()+1;
-		for ( uint k=(*intervalsIterator).min() ; k<intervalEnd ; ++k )
+		const uint intervalStart = (*intervalsIterator).min();
+		const uint intervalEnd = (*intervalsIterator).max()+1;
+		for ( uint k=intervalStart ; k<intervalEnd ; ++k )
 		{
-			qDebug() << QString("Calcul de la coupe de contour : %1/%2").arg(k+1).arg(nbSlices);
+			qDebug() << QString("Calcul de la coupe de contour : %1/%2").arg(k+1-intervalStart).arg(nbSlices);
 			_contourSlices[k].compute( resultBillon.slice(k), billon.slice(k), billon.pithCoord(k), intensityThreshold,
 									   blurredSegmentThickness, smoothingRadius, curvatureWidth, minimumOriginDistance );
 		}

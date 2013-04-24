@@ -28,9 +28,9 @@ MainModel::~MainModel()
 	delete _sectorHistogram;
 	delete _pieChart;
 	delete _sliceHistogram;
-	if ( _knotBillon != 0 ) delete _knotBillon;
-	if ( _componentBillon != 0 ) delete _componentBillon;
-	if ( _billon != 0 ) delete _billon;
+	if ( _knotBillon ) delete _knotBillon;
+	if ( _componentBillon ) delete _componentBillon;
+	if ( _billon ) delete _billon;
 }
 
 /*******************************
@@ -41,22 +41,22 @@ void MainModel::readBillon( const QString &folderName )
 {
 	if ( folderName.isEmpty() ) return;
 	Billon *billon = DicomReader::read(folderName);
-	if ( billon == 0 ) return;
+	if ( !billon ) return;
 	cleanAll();
 	setBillon(billon);
 }
 
 void MainModel::setBillon( Billon *billon )
 {
-	if ( _billon != 0 )	delete _billon;
+	if ( _billon )	delete _billon;
 	_billon = billon;
 }
 
 void MainModel::cleanAll()
 {
-	if ( _billon != 0 )	delete _billon;
-	if ( _componentBillon != 0 ) delete _componentBillon;
-	if ( _knotBillon != 0 )	delete _knotBillon;
+	if ( _billon )	delete _billon;
+	if ( _componentBillon ) delete _componentBillon;
+	if ( _knotBillon )	delete _knotBillon;
 
 	_billon = _componentBillon = _knotBillon = 0;
 
@@ -77,25 +77,25 @@ void MainModel::cleanAll()
 
 void MainModel::setCurrentSlice( const uint &sliceIndex )
 {
-	Q_ASSERT( _billon ? sliceIndex < _billon->n_slices : sliceIndex == 0 );
+	Q_ASSERT( _billon ? sliceIndex < _billon->n_slices : !sliceIndex );
 	_currentSlice = sliceIndex;
 }
 
 void MainModel::setCurrentYSlice( const uint &sliceIndex )
 {
-	Q_ASSERT( _billon ? sliceIndex < _billon->n_rows : sliceIndex == 0 );
+	Q_ASSERT( _billon ? sliceIndex < _billon->n_rows : !sliceIndex );
 	_currentYSlice = sliceIndex;
 }
 
 void MainModel::setCurrentMaximum( const uint &index )
 {
-	Q_ASSERT( _sliceHistogram->isEmpty() ? index == 0 : index < _sliceHistogram->nbMaximums() );
+	Q_ASSERT( _sliceHistogram->isEmpty() ? !index : index < _sliceHistogram->nbMaximums() );
 	_currentMaximum = index;
 }
 
 void MainModel::setCurrentSector( const uint &index )
 {
-	Q_ASSERT( _sectorHistogram->nbIntervals() ? index < _sectorHistogram->nbIntervals() : index == 0 );
+	Q_ASSERT( _sectorHistogram->nbIntervals() ? index < _sectorHistogram->nbIntervals() : !index );
 	_currentSector = index;
 }
 

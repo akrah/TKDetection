@@ -45,7 +45,7 @@ PlotSectorHistogram::~PlotSectorHistogram()
 
 void PlotSectorHistogram::attach( QwtPolarPlot * const polarPlot )
 {
-	if ( polarPlot != 0 )
+	if ( polarPlot )
 	{
 		_curveData.attach(polarPlot);
 		_curveIntervals.attach(polarPlot);
@@ -56,7 +56,7 @@ void PlotSectorHistogram::attach( QwtPolarPlot * const polarPlot )
 
 void PlotSectorHistogram::attach( QwtPlot * const plot )
 {
-	if ( plot != 0 )
+	if ( plot )
 	{
 		_histogramData.attach(plot);
 		_histogramIntervals.attach(plot);

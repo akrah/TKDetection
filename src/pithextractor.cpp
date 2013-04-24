@@ -78,7 +78,7 @@ void PithExtractor::process( Billon &billon ) const
 				billon._pith.append(coordCurrent);
 			}
 			maxStandList[i] = ((float)max)/nbContourPoints;
-			if (i % 20 == 0) {
+			if (!(i % 20)) {
 				std::cerr << std::endl;
 			}
 		//~ }else{
@@ -178,7 +178,7 @@ arma::fmat * PithExtractor::contour(const Slice &slice, arma::fmat **orientation
 			norm.at(i,j) = sqrt(resultatGX->at(i,j)*resultatGX->at(i,j)+resultatGY->at(i,j)*resultatGY->at(i,j))/4;
 			if (norm.at(i,j)>_binarizationThreshold && i>0 && i<norm.n_rows-1 && j>0 && j<norm.n_cols-1 ) {
 				contour->at(i,j) = 1;
-				if(resultatGX->at(i,j) != 0) {
+				if(resultatGX->at(i,j)) {
 					// Fred : pas de raison de faire une division entière ici :
 					// (*orientation)->at(i,j) = resultatGY->at(i,j) / resultatGX->at(i,j);	//tangente teta
 					(*orientation)->at(i,j) = double (resultatGY->at(i,j)) / resultatGX->at(i,j);	//tangente teta
@@ -480,7 +480,7 @@ void PithExtractor::correctPith( QVector<uiCoord2D> &moelle, float *listMax, flo
 			i++;
 			while(listMax[i]<seuilHough && i < pithSize) {i++;}
 			endSlice = i-1;
-			if(startSlice == 0){
+			if(!startSlice){
 				ax = 9999;
 				ay = 9999;
 				x1 = moelle.at(endSlice+1).x;

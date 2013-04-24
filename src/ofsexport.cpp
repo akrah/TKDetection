@@ -315,7 +315,7 @@ namespace OfsExport
 				pos = k*resolutionCercle;
 				for ( i=0 ; i<resolutionCercle ; i++ )
 				{
-					if ( displayBegEndFaces && i==0 && (k==sliceInterval.min() || k==sliceInterval.max()) )
+					if ( displayBegEndFaces && !i && (k==sliceInterval.min() || k==sliceInterval.max()) )
 						stream << 0 << ' ' << 0 << ' ' << depth << endl;
 					else
 						stream << ( vectVertex.at(pos).x /norm.x - ofsStart.x ) << ' ' << ( vectVertex.at(pos).y/norm.y - ofsStart.y ) << ' ' << depth << endl;

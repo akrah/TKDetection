@@ -20,7 +20,7 @@ PlotCurvatureHistogram::~PlotCurvatureHistogram()
 
 void PlotCurvatureHistogram::attach( QwtPlot * const plot )
 {
-	if ( plot != 0 )
+	if ( plot )
 	{
 		_histogramData.attach(plot);
 		_histogramDominantPointsFromLeft.attach(plot);

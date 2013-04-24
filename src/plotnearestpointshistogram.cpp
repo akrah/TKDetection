@@ -24,7 +24,7 @@ PlotNearestPointsHistogram::~PlotNearestPointsHistogram()
 
 void PlotNearestPointsHistogram::attach( QwtPlot * const plot )
 {
-	if ( plot != 0 )
+	if ( plot )
 	{
 		_histogramData.attach(plot);
 		_histogramIntervals.attach(plot);
