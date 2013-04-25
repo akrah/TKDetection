@@ -1,3 +1,0 @@
-class BillonTpl :
-	- Ajouter une fonction previousSlice( int k )
-Revoir les flots optiques avec iVec2D
