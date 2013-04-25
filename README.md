@@ -11,11 +11,12 @@ TKDetection is a software to detect and segment wood knots.
 Dependencies list
 -----------------
 
-|   |            Library                  |  Tested version  |   |      Library            |  Tested version  |   |        Library              |  Tested version  |
-|:-:|:-----------------------------------:|:----------------:|---|:-----------------------:|:----------------:|---|:---------------------------:|:----------------:|
-| 1 | [Qt](#1-qt)                         |       4.8        | 4 | [Qwt](#4-qwt)           |       6.0.2      | 7 | [DGtalTools](#7-dgtaltools) |       0.6        |
-| 2 | [Armadillo](#2-armadillo)           |     3.800.2      | 5 | [Qxt](#5-qxt)           |       0.6.2      | 8 | [ImaGene](#8-imagene)       |    repository    |
-| 3 | [InsightToolkit](#3-insighttoolkit) |      4.3.1       | 6 | [QwtPolar](#6-qwtpolar) |       1.0.1      | 9 | [DGLib](#9-dglib)           |      online      |
+|   |            Library                  |  Tested version  |   |          Library            |  Tested version  |    |        Library              |  Tested version  |
+|:-:|:-----------------------------------:|:----------------:|---|:---------------------------:|:----------------:|----|:---------------------------:|:----------------:|
+| 1 | [Qt](#1-qt)                         |       4.8        | 5 | [Qxt](#5-qxt)               |      0.6.2       |  8 | [ImaGene](#8-imagene)       |    repository    |
+| 2 | [Armadillo](#2-armadillo)           |     3.800.2      | 6 | [QwtPolar](#6-qwtpolar)     |      1.0.1       |  9 | [DGLib](#9-dglib)           |      online      |
+| 3 | [InsightToolkit](#3-insighttoolkit) |      4.3.1       | 7 | [DGtalTools](#7-dgtaltools) |       0.6        | 10 | [KerUtils](#10-kerutils)    |      online      |
+| 4 | [Qwt](#4-qwt)                       |      6.0.2       |
 
 
 Dependencies installation on Ubuntu
@@ -83,9 +84,8 @@ Replace *x.y.z* by the downloaded version number:
 
 ~~~
   tar xvf InsightToolkit-x.y.z.tar.gz
-  cd InsightToolkit-x.y.z/
-  mkdir binary
-  cd binary
+  mkdir InsightToolkit-x.y.z/build
+  cd InsightToolkit-x.y.z/build
   cmake -DBUILD_EXAMPLES=false -DBUILD_TESTING=false -DITK_BUILD_ALL_MODULES=false -DITKGroup_Core=true -DITKGroup_IO=true ..
   make
   sudo make install
@@ -113,8 +113,8 @@ If problems appear, you can install the version available on the website http://
 
 ~~~
   tar xvf qwt-6.0.2.tar.bz2
-  cd qwt-6.0.2/
-  mkdir build && cd build
+  mkdir qwt-6.0.2/build
+  cd qwt-6.0.2/build
   qmake ../qwt.pro
   make
   sudo make install
@@ -157,8 +157,8 @@ Replace *x.y.z* by the downloaded version number:
 
 ~~~
   unzip qwtpolar-x.y.z.zip
-  cd qwtpolar-x.y.z/
-  mkdir build && cd build
+  mkdir qwtpolar-x.y.z/build
+  cd qwtpolar-x.y.z/build
   qmake ..
   make
   sudo make install
@@ -202,8 +202,8 @@ You can clone DGtalTools the main repository:
 
 ~~~
   git clone git://github.com/DGtal-team/DGtal.git DGtal
-  cd DGtal
-  mkdir build && cd build
+  mkdir DGtal/build
+  cd DGtal/build
   cmake .. -DWITH_GMP=true -DWITH_ITK=true -DWITH_QGLVIEWER=true
   make
   sudo make install
@@ -219,8 +219,8 @@ Install then DGtalTools:
 
 ~~~
   git clone git://github.com/DGtal-team/DGtalTools.git DGtalTools
-  cd DGtalTools
-  mkdir build && cd build
+  mkdir DGtalTools/build
+  cd DGtalTools/build
   cmake .. -DWITH_VISU3D_QGLVIEWER=true
   make
   sudo make install
@@ -241,8 +241,8 @@ Install ImaGene by using the version without dependencies:
 
 ~~~
   git clone git://github.com/kerautret/ImaGene-forIPOL.git
-  cd ImaGeneNoDep
-  mkdir build && cd build
+  mkdir ImaGeneNoDep/build
+  cd ImaGeneNoDep/build
   cmake ..
   make
   sudo make install
@@ -252,13 +252,32 @@ Install ImaGene by using the version without dependencies:
 ### 9. DGLib
 [Top](#tkdetection)
 
-It should be downloaded here: http://www.loria.fr/~krahenbu/dgci2013/DGLib_for_TKDetection.zip
+DGLib is the library used to detect the dominant points.
+It provides the _cornerdetection_ binary file.
+
+DGLib should be downloaded here: http://www.loria.fr/~krahenbu/TKDetection/DGLib_for_TKDetection.zip
 
 ~~~
   unzip DGLib_for_TKDetection
-  cd DGLib_for_TKDetection
-  mkdir build && cd build
+  mkdir DGLib_for_TKDetection/build
+  cd DGLib_for_TKDetection/build
   cmake ..
+  make
+  sudo make install
+~~~
+
+### 10. KerUtils
+[Top](#tkdetection)
+
+KerUtils is the library used to detect the curvature on knot contour.
+It provides the _curvature\_gmcb_ binary file.
+
+KerUtils should be downloaded here: http://www.loria.fr/~krahenbu/TKDetection/KerUtils.zip
+
+~~~
+  unzip KerUtils.zip
+  mkdir KerUtils/build && cd KerUtils/build
+  cmake .. -DCMAKE_BUILD_TYPE=Release
   make
   sudo make install
 ~~~
