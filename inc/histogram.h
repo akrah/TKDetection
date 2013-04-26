@@ -301,31 +301,53 @@ void Histogram<T>::computeIntervals( const int & derivativesPercentage, const ui
 		cursorMin = cursorMax =_maximums[i];
 
 		cursorStart = cursorMin+1;
-		if ( cursorStart == histoSize ) cursorStart = 0;
+		if ( cursorStart == histoSize )
+		{
+			if ( loop ) cursorStart = 0;
+			else cursorStart = cursorMin;
+		}
 		derivativeThreshold = this->at(cursorMin)*derivativesPercentage/100.;
 		while ( cursorMin != cursorStart && this->at(cursorMin) > derivativeThreshold )
 		{
 			if ( cursorMin ) cursorMin--;
-			else cursorMin = histoSizeMinusOne;
+			else if ( loop ) cursorMin = histoSizeMinusOne;
+			else break;
 		}
 		while ( cursorMin != cursorStart && firstdDerivated(cursorMin,loop) > 0.5 )
 		{
 			if ( cursorMin ) cursorMin--;
-			else cursorMin = histoSizeMinusOne;
+			else if ( loop ) cursorMin = histoSizeMinusOne;
+			else break;
 		}
 
-		cursorStart--;
+		cursorStart = cursorMax;
 		if ( cursorStart ) cursorStart--;
-		else cursorStart = histoSizeMinusOne;
+		else if ( loop ) cursorStart = histoSizeMinusOne;
 		while ( cursorMax != cursorStart && this->at(cursorMax) > derivativeThreshold )
 		{
 			cursorMax++;
-			if ( cursorMax == histoSize ) cursorMax = 0;
+			if ( cursorMax == histoSize )
+			{
+				if ( loop ) cursorMax = 0;
+				else
+				{
+					cursorMax--;
+					break;
+				}
+			}
 		}
 		while ( cursorMax != cursorStart && firstdDerivated(cursorMax,loop) < -0.5 )
 		{
 			cursorMax++;
-			if ( cursorMax == histoSize ) cursorMax = 0;
+			if ( cursorMax == histoSize )
+			{
+				if ( loop ) cursorMax = 0;
+				else
+				{
+					cursorMax--;
+					break;
+				}
+			}
 		}
 
 		cursor.setBounds(cursorMin,cursorMax);
@@ -335,12 +357,21 @@ void Histogram<T>::computeIntervals( const int & derivativesPercentage, const ui
 		else
 		{
 			const Interval<uint> &last = _intervals.last();
-			if ( !(cursor.isValid() || last.isValid()) || last.max() >= cursor.min() )
+			if ( last.max() >= cursorMax && !(!cursor.isValid() && last.isValid()) )
 			{
-				cursorMin = last.max();
-				cursor.setMin(cursorMin);
+				cursor = last;
+				cursorMin = last.min();
+				cursorMax = last.max();
 			}
-			if ( (cursor.isValid() ? cursor.width() : histoSize-(cursor.min()-cursor.max())) > minimumWidthOfIntervals ) _intervals.append(cursor);
+			else
+			{
+				if ( !(cursor.isValid() || last.isValid()) || last.max() >= cursor.min() )
+				{
+					cursorMin = last.max();
+					cursor.setMin(cursorMin);
+				}
+				if ( (cursor.isValid() ? cursor.width() : histoSize-(cursor.min()-cursor.max())) > minimumWidthOfIntervals ) _intervals.append(cursor);
+			}
 		}
 	}
 	if ( _intervals.size() > 1 && _intervals.last() == _intervals.first() ) _intervals.pop_back();
