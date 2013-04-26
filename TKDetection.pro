@@ -50,7 +50,6 @@ SOURCES	=	main.cpp \
 			globalfunctions.cpp \
 			intensitydistributionhistogram.cpp \
 			nearestpointshistogram.cpp \
-			mainmodel.cpp \
 			mainwindow.cpp \
 			ofsexport.cpp \
 			opticalflow.cpp \
@@ -97,7 +96,6 @@ HEADERS	=	billon.h \
 			intensitydistributionhistogram.h \
 			interval.h \
 			nearestpointshistogram.h \
-			mainmodel.h \
 			mainwindow.h \
 			ofsexport.h \
 			opticalflow.h \
