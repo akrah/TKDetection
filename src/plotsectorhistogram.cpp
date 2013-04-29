@@ -231,7 +231,7 @@ void PlotSectorHistogram::updateIntervals( const SectorHistogram &histogram, con
 				}
 				_datasCurveIntervals->append(QwtPointPolar( pieChart.sector(max).leftAngle(), 0. ));
 			}
-			qDebug() << "  [ " << min << ", " << max << " ] => [" << pieChart.sector(min).rightAngle()*RAD_TO_DEG_FACT << ", " << pieChart.sector(max).leftAngle()*RAD_TO_DEG_FACT << "] avec largeur = " << max-min;
+			qDebug() << "  [ " << min << ", " << max << " ] => [" << pieChart.sector(min).rightAngle()*RAD_TO_DEG_FACT << ", " << pieChart.sector(max).leftAngle()*RAD_TO_DEG_FACT << "] avec largeur = " << max>min?max-min:360-min+max;
 		}
 	}
 	_histogramIntervals.setSamples(curveHistogramIntervalsDatas);
