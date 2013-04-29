@@ -85,8 +85,8 @@ void SectorHistogram::computeIntervals( const int &derivativesPercentage, const 
 		Interval<uint> &interval = _intervals[i];
 		min = interval.min();
 		max = interval.max();
-		interval.setMin(min<_intervalGap?359+min-_intervalGap:min-_intervalGap);
+		interval.setMin(min<_intervalGap?360+min-_intervalGap:min-_intervalGap);
 		// TODO : Faire de PieChart un singleton
-		interval.setMax(max>354?max+_intervalGap-359:max+_intervalGap);
+		interval.setMax(max>359-_intervalGap?max+_intervalGap-360:max+_intervalGap);
 	}
 }
