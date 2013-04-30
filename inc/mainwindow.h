@@ -96,6 +96,7 @@ private:
 	void exportSectorHistogramToImage();
 	void exportknotHistogramToImage();
 
+    void exportImgeSliceIntervalToPgm3d();
 	void exportCurrentSegmentedKnotToPgm3d();
 	void exportSegmentedKnotsOfCurrentSliceIntervalToPgm3d();
 

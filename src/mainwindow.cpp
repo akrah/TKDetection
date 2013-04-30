@@ -958,7 +958,9 @@ void MainWindow::exportToPgm3D()
 	{
 		case 0: exportSegmentedKnotsOfCurrentSliceIntervalToPgm3d();	break;
 		case 1: exportCurrentSegmentedKnotToPgm3d();	break;
-		default: break;
+        case 2: exportImgeSliceIntervalToPgm3d();	break;
+
+    default: break;
 	}
 }
 
@@ -1605,6 +1607,33 @@ void MainWindow::exportSegmentedKnotsOfCurrentSliceIntervalToPgm3d()
 	}
 	else QMessageBox::warning(this,tr("Exporter de la zone de nœuds courante en PGM3D"),tr("L'export a échoué : aucun intervalle angulaire sélectionné."));
 }
+
+
+
+void MainWindow::exportImgeSliceIntervalToPgm3d()
+{
+    if ( _billon )
+    {
+        QString fileName = QFileDialog::getSaveFileName(this, tr("Exporter l'image en .pgm3d"), "output.pgm3d", tr("Fichiers de données (*.pgm3d);;Tous les fichiers (*.*)"));
+        if ( !fileName.isEmpty() )
+        {
+            QFile file(fileName);
+            if ( file.open(QIODevice::WriteOnly) )
+            {
+                QTextStream stream(&file);
+                Pgm3dExport::processImage( stream, *_billon, Interval<int>(_ui->_spinMinSlice->value(),_ui->_spinMaxSlice->value()),
+                                    Interval<int>(_ui->_spinMinIntensity->value(),_ui->_spinMaxIntensity->value()), _ui->_spinDatExportResolution->value(),
+                                    (_ui->_spinDatExportContrast->value()+100.)/100. );
+                file.close();
+                QMessageBox::information(this,tr("Export en .pgm3d"), tr("Terminé avec succés !"));
+            }
+            else QMessageBox::warning(this,tr("Export en .pgm3d"), tr("L'export a échoué"));
+        }
+    }
+    else QMessageBox::warning(this,tr("Export en .pgm3d"), tr("Aucun fichier de billon ouvert."));
+}
+
+
 
 void MainWindow::exportCurrentSegmentedKnotToV3D()
 {
