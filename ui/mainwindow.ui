@@ -1990,8 +1990,8 @@ l'origine du contour</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>187</width>
-              <height>136</height>
+              <width>548</width>
+              <height>310</height>
              </rect>
             </property>
             <attribute name="label">
@@ -2265,6 +2265,33 @@ l'origine du contour</string>
               </layout>
              </item>
              <item>
+              <layout class="QFormLayout" name="formLayout_21">
+               <property name="horizontalSpacing">
+                <number>0</number>
+               </property>
+               <property name="verticalSpacing">
+                <number>0</number>
+               </property>
+               <item row="1" column="0">
+                <widget class="QSpinBox" name="_spinPGM3DExportResolution">
+                 <property name="minimum">
+                  <number>1</number>
+                 </property>
+                 <property name="maximum">
+                  <number>10</number>
+                 </property>
+                </widget>
+               </item>
+               <item row="0" column="0">
+                <widget class="QLabel" name="label_48">
+                 <property name="text">
+                  <string>Résolution (image des noeuds seulement)</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+             <item>
               <widget class="QPushButton" name="_buttonExportToPgm3d">
                <property name="text">
                 <string>Exporter</string>
@@ -2349,8 +2376,8 @@ l'origine du contour</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>548</width>
-              <height>310</height>
+              <width>447</width>
+              <height>115</height>
              </rect>
             </property>
             <attribute name="label">

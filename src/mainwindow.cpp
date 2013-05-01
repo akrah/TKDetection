@@ -897,7 +897,7 @@ void MainWindow::exportToOfs()
 		switch (_ui->_comboOfsExportType->currentIndex())
 		{
 			case TKD::PITH:
-				exportPithToOfs();
+                exportPithToOfs();
 				break;
 			case TKD::BILLON_RESTRICTED_AREA:
 				exportBillonRestrictedAreaToOfs();
@@ -1622,7 +1622,7 @@ void MainWindow::exportImgeSliceIntervalToPgm3d()
             {
                 QTextStream stream(&file);
                 Pgm3dExport::processImage( stream, *_billon, Interval<int>(_ui->_spinMinSlice->value(),_ui->_spinMaxSlice->value()),
-                                    Interval<int>(_ui->_spinMinIntensity->value(),_ui->_spinMaxIntensity->value()), _ui->_spinDatExportResolution->value(),
+                                    Interval<int>(_ui->_spinMinIntensity->value(),_ui->_spinMaxIntensity->value()), _ui-> _spinPGM3DExportResolution->value(),
                                     (_ui->_spinDatExportContrast->value()+100.)/100. );
                 file.close();
                 QMessageBox::information(this,tr("Export en .pgm3d"), tr("Terminé avec succés !"));
