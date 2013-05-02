@@ -109,7 +109,7 @@ Use the version available on the *Main* repository.
   sudo apt-get install libqwt-dev
 ~~~
 
-If problems appear, you can install the version available on the website http://sourceforge.net/projects/qwt/files/qwt/6.0.2/:
+If problems appear, you can install the version available on the website http://sourceforge.net/projects/qwt/files/qwt/6.0.2/ :
 
 ~~~
   tar xvf qwt-6.0.2.tar.bz2
@@ -123,8 +123,14 @@ If problems appear, you can install the version available on the website http://
 ### 5. Qxt
 [Top](#tkdetection)
 
-Download the version available on the website http://www.libqxt.org.
-The repository version does not install the configuration files *qxt.prf* and *qxtvars.prf*, required by TKDetection.pro.
+Use the version available on the *Main* repository. 
+
+~~~
+  sudo apt-get install libqxt-dev
+~~~
+
+If the repository version does not install the configuration files *qxt.prf* and *qxtvars.prf* required by TKDetection.pro,
+you can install the version available on the website http://www.libqxt.org.
 
 
 Replace *xxxxxxxxx* by the downloaded file number.
@@ -197,14 +203,22 @@ Don't forget to replace *x.y.z* by the downloaded version number:
 ### 7. DGtalTools
 [Top](#tkdetection)
 
-DGtalTools required the DGtal library.
-You can clone DGtalTools the main repository:
+You must install the DGtal library required by DGtalTools.
+
+The DGtal library required QGLViewer, Boost program options and GMP:
+
+~~~
+	sudo apt-get install libqglviewer-dev-common libboost-program-options-dev libgmp-dev
+~~~
+
+
+Now you can clone and install DGtal from the main repository:
 
 ~~~
   git clone git://github.com/DGtal-team/DGtal.git DGtal
   mkdir DGtal/build
   cd DGtal/build
-  cmake .. -DWITH_GMP=true -DWITH_ITK=true -DWITH_QGLVIEWER=true
+  cmake .. -DWITH_GMP=true -DWITH_ITK=true -DWITH_QGLVIEWER=true -DBUILD_EXAMPLES=false
   make
   sudo make install
 ~~~
@@ -212,7 +226,7 @@ You can clone DGtalTools the main repository:
 If a problem appear during the cmake step, add an ITK parameter to the command with the version number of ITK (x.y below):
 
 ~~~
-  cmake .. -DWITH_GMP=true -DWITH_ITK=true -DWITH_QGLVIEWER=true -DITK_DIR=/usr/local/lib/cmake/ITK-x.y/
+  cmake .. -DWITH_GMP=true -DWITH_ITK=true -DWITH_QGLVIEWER=true -DBUILD_EXAMPLES=false -DITK_DIR=/usr/local/lib/cmake/ITK-x.y/
 ~~~
 
 Install then DGtalTools:
