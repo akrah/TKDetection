@@ -22,6 +22,19 @@ Dependencies list
 Dependencies installation on Ubuntu
 -----------------------------------
 
+To install all dependencies on Ubuntu 12.10 64 bits, you can tu use the shell script script_install_dependencies_ubuntu12.10_x86_64.sh available on the TKDetection directory.
+We recomand to copy the script on a dedicated directory before to execute the following commands :
+
+~~~
+	chmod u+x script_install_dependencies_ubuntu12.10_x86_64.sh
+	./script_install_dependencies_ubuntu12.10_x86_64.sh
+~~~
+
+When installation finished, you can remove the dedicated directory.
+
+
+On another plateform, you must apply the following steps.
+
 ### Preliminaries
 
 Install "build-essential" and "cmake" packages.
@@ -272,7 +285,7 @@ It provides the _cornerdetection_ binary file.
 DGLib should be downloaded here: http://www.loria.fr/~krahenbu/TKDetection/DGLib_for_TKDetection.zip
 
 ~~~
-  unzip DGLib_for_TKDetection
+  unzip DGLib_for_TKDetection.zip
   mkdir DGLib_for_TKDetection/build
   cd DGLib_for_TKDetection/build
   cmake ..
