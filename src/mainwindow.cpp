@@ -225,7 +225,7 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 	QObject::connect(_ui->_buttonNextMaximum, SIGNAL(clicked()), this, SLOT(nextMaximumInSliceHistogram()));
 	QObject::connect(_ui->_buttonUpdateSliceHistogram, SIGNAL(clicked()), this, SLOT(updateSliceHistogram()));
 	// Onglet "4. Contours"
-	QObject::connect(_ui->_sliderContour, SIGNAL(valueChanged(int)), this, SLOT(moveContourCursor(int)));
+	QObject::connect(_ui->_sliderContour, SIGNAL(sliderMoved(int)), this, SLOT(moveContourCursor(int)));
 
 	/*******************
 	* Évènements du zoom
@@ -540,14 +540,17 @@ void MainWindow::moveNearestPointsCursor( const int &position )
 
 void MainWindow::moveContourCursor( const int &position )
 {
-	if ( !_contourBillon->isEmpty() && _sliceHistogram->interval(_ui->_comboSelectSliceInterval->currentIndex()-1).containsClosed(_currentSlice) )
+	if ( position < 0 || _contourBillon->isEmpty()
+		 || !_sliceHistogram->interval(_ui->_comboSelectSliceInterval->currentIndex()-1).containsClosed(_currentSlice) )
 	{
-		_plotCurvatureHistogram->moveCursor(position);
-		_ui->_plotCurvatureHistogram->replot();
-		_plotContourDistancesHistogram->moveCursor(position);
-		_ui->_plotContourDistancesHistogram->replot();
-		drawSlice();
+		return;
 	}
+
+	_plotCurvatureHistogram->moveCursor(position);
+	_ui->_plotCurvatureHistogram->replot();
+	_plotContourDistancesHistogram->moveCursor(position);
+	_ui->_plotContourDistancesHistogram->replot();
+	drawSlice();
 }
 
 void MainWindow::setTypeOfView( const int &type )
@@ -624,8 +627,8 @@ void MainWindow::updateSliceHistogram()
 
 void MainWindow::updateContourHistograms( const int &sliceNumber )
 {
+	_ui->_sliderContour->setMaximum(1);
 	_ui->_sliderContour->setValue(0);
-	_ui->_sliderContour->setMaximum(0);
 	_plotCurvatureHistogram->clear();
 	_plotContourDistancesHistogram->clear();
 	const int sliceIntervalIndex = _ui->_comboSelectSliceInterval->currentIndex();
@@ -642,7 +645,7 @@ void MainWindow::updateContourHistograms( const int &sliceNumber )
 			_plotContourDistancesHistogram->update(contourSlice.contourDistancesHistogram(),contourSlice.dominantPointIndexFromLeft(),contourSlice.dominantPointIndexFromRight());
 			_ui->_plotContourDistancesHistogram->setAxisScale(QwtPlot::xBottom,0,contourSlice.contourDistancesHistogram().size());
 
-			_ui->_sliderContour->setMaximum(contourSlice.contour().size()-1);
+			_ui->_sliderContour->setMaximum(contourSlice.contour().size()>0?contourSlice.contour().size()-1:0);
 			moveContourCursor(0);
 		}
 	}
@@ -897,7 +900,7 @@ void MainWindow::exportToOfs()
 		switch (_ui->_comboOfsExportType->currentIndex())
 		{
 			case TKD::PITH:
-                exportPithToOfs();
+				exportPithToOfs();
 				break;
 			case TKD::BILLON_RESTRICTED_AREA:
 				exportBillonRestrictedAreaToOfs();
@@ -958,9 +961,9 @@ void MainWindow::exportToPgm3D()
 	{
 		case 0: exportSegmentedKnotsOfCurrentSliceIntervalToPgm3d();	break;
 		case 1: exportCurrentSegmentedKnotToPgm3d();	break;
-        case 2: exportImgeSliceIntervalToPgm3d();	break;
+		case 2: exportImgeSliceIntervalToPgm3d();	break;
 
-    default: break;
+	default: break;
 	}
 }
 
@@ -1612,25 +1615,25 @@ void MainWindow::exportSegmentedKnotsOfCurrentSliceIntervalToPgm3d()
 
 void MainWindow::exportImgeSliceIntervalToPgm3d()
 {
-    if ( _billon )
-    {
-        QString fileName = QFileDialog::getSaveFileName(this, tr("Exporter l'image en .pgm3d"), "output.pgm3d", tr("Fichiers de données (*.pgm3d);;Tous les fichiers (*.*)"));
-        if ( !fileName.isEmpty() )
-        {
-            QFile file(fileName);
-            if ( file.open(QIODevice::WriteOnly) )
-            {
-                QTextStream stream(&file);
-                Pgm3dExport::processImage( stream, *_billon, Interval<int>(_ui->_spinMinSlice->value(),_ui->_spinMaxSlice->value()),
-                                    Interval<int>(_ui->_spinMinIntensity->value(),_ui->_spinMaxIntensity->value()), _ui-> _spinPGM3DExportResolution->value(),
-                                    (_ui->_spinDatExportContrast->value()+100.)/100. );
-                file.close();
-                QMessageBox::information(this,tr("Export en .pgm3d"), tr("Terminé avec succés !"));
-            }
-            else QMessageBox::warning(this,tr("Export en .pgm3d"), tr("L'export a échoué"));
-        }
-    }
-    else QMessageBox::warning(this,tr("Export en .pgm3d"), tr("Aucun fichier de billon ouvert."));
+	if ( _billon )
+	{
+		QString fileName = QFileDialog::getSaveFileName(this, tr("Exporter l'image en .pgm3d"), "output.pgm3d", tr("Fichiers de données (*.pgm3d);;Tous les fichiers (*.*)"));
+		if ( !fileName.isEmpty() )
+		{
+			QFile file(fileName);
+			if ( file.open(QIODevice::WriteOnly) )
+			{
+				QTextStream stream(&file);
+				Pgm3dExport::processImage( stream, *_billon, Interval<int>(_ui->_spinMinSlice->value(),_ui->_spinMaxSlice->value()),
+									Interval<int>(_ui->_spinMinIntensity->value(),_ui->_spinMaxIntensity->value()), _ui-> _spinPGM3DExportResolution->value(),
+									(_ui->_spinDatExportContrast->value()+100.)/100. );
+				file.close();
+				QMessageBox::information(this,tr("Export en .pgm3d"), tr("Terminé avec succés !"));
+			}
+			else QMessageBox::warning(this,tr("Export en .pgm3d"), tr("L'export a échoué"));
+		}
+	}
+	else QMessageBox::warning(this,tr("Export en .pgm3d"), tr("Aucun fichier de billon ouvert."));
 }
 
 

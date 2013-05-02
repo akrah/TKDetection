@@ -10,7 +10,7 @@
 
 # Version d'ITK installée : itk3 | itk4
 ITK_VERSION = itk4
-ITK_NUMBER =  4.1
+ITK_NUMBER =  4.3
 
 #                                                                #
 #                  NE PAS MODIFIER EN DESSOUS                    #
@@ -127,8 +127,8 @@ FORMS =	mainwindow.ui
 # Directives compilateur
 #-----------------------#
 CXXFLAGS += -std=c++0x
-macx:QMAKE_CC=/usr/bin/clang
-macx:QMAKE_CXX=/usr/bin/clang++
+macx:QMAKE_CC=/usr/bin/gcc
+macx:QMAKE_CXX=/usr/bin/g++
 
 
 # Librairies externes
