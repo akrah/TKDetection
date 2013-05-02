@@ -540,8 +540,10 @@ void MainWindow::moveNearestPointsCursor( const int &position )
 
 void MainWindow::moveContourCursor( const int &position )
 {
-	if ( position < 0 || _contourBillon->isEmpty()
-		 || !_sliceHistogram->interval(_ui->_comboSelectSliceInterval->currentIndex()-1).containsClosed(_currentSlice) )
+	if ( position < 0
+		 || !_sliceHistogram->interval(_ui->_comboSelectSliceInterval->currentIndex()-1).containsClosed(_currentSlice)
+		 || _contourBillon->isEmpty()
+		 || !_contourBillon->contourSlice(_currentSlice- _sliceHistogram->interval(_ui->_comboSelectSliceInterval->currentIndex()-1).min()).curvatureHistogram().size() )
 	{
 		return;
 	}
