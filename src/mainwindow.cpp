@@ -690,7 +690,7 @@ void MainWindow::updatePith()
 		PithExtractor pithExtractor;
 		pithExtractor.process(*_billon);
 	}
-	_treeRadius = BillonAlgorithms::restrictedAreaMeansRadius(*_billon,_ui->_spinRestrictedAreaResolution->value(),_ui->_spinRestrictedAreaThreshold->value());
+	_treeRadius = BillonAlgorithms::restrictedAreaMeansRadius(*_billon,_ui->_spinRestrictedAreaResolution->value(),_ui->_spinRestrictedAreaThreshold->value(),_billon->n_slices*_ui->_spinHistogramBorderPercentageToCut_zMotion->value()/100.);
 	_ui->_checkRadiusAroundPith->setText( QString::number(_treeRadius) );
 	drawSlice();
 	updateSliceHistogram();

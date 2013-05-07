@@ -113,24 +113,24 @@ namespace SliceAlgorithm
 
 		rCoord2D center, edge;
 		rVec2D direction;
-		qreal orientation, radius;
+		qreal orientation, radius, currentNorm;
 
-		radius = 0.;
+		radius = width;
 		center.x = pithCoord.x;
 		center.y = pithCoord.y;
-		orientation = 0.;
+		orientation = width;
 		while (orientation < TWO_PI)
 		{
 			orientation += angleIncrement;
 			direction.x = qCos(orientation);
 			direction.y = qSin(orientation);
-			edge = center + direction*30;
+			edge = center + direction*20;
 			while ( edge.x>0 && edge.y>0 && edge.x<width && edge.y<height && slice.at(edge.y,edge.x) > intensityThreshold )
 			{
 				edge += direction;
 			}
-			edge -= center;
-			radius += rVec2D(edge).norm()/nbPolygonPoints;
+			currentNorm = rVec2D(edge-center).norm();
+			if ( currentNorm < radius ) radius = currentNorm;
 		}
 		return radius;
 	}

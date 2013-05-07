@@ -10,8 +10,8 @@ template <typename T> class QVector;
 
 namespace BillonAlgorithms
 {
-	qreal restrictedAreaMeansRadius( const Billon &billon, const uint &nbPolygonPoints, const int &intensityThreshold );
-	QVector<rCoord2D> restrictedAreaVertex(const Billon &billon, const Interval<uint> &sliceInterval, const uint &nbPolygonVertex, const int &intensityThreshold );
+	qreal restrictedAreaMeansRadius( const Billon &billon, const uint &nbPolygonPoints, const int &intensityThreshold , const uint &nbSlicesToCut );
+	QVector<rCoord2D> restrictedAreaVertex( const Billon &billon, const Interval<uint> &sliceInterval, const uint &nbPolygonVertex, const int &intensityThreshold );
 }
 
 #endif // BILLONALGORITHMS_H

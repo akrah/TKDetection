@@ -4,44 +4,42 @@
 
 namespace BillonAlgorithms
 {
-	qreal restrictedAreaMeansRadius( const Billon &billon, const uint &nbPolygonPoints, const int &intensityThreshold )
+	qreal restrictedAreaMeansRadius( const Billon &billon, const uint &nbPolygonPoints, const int &intensityThreshold, const uint &nbSlicesToCut )
 	{
 		Q_ASSERT_X( nbPolygonPoints>0 , "BillonTpl<T>::getRestrictedAreaMeansRadius", "nbPolygonPoints arguments equals to 0 => division by zero" );
 
-		qreal radius = 133.33;
+		qreal radius = billon.n_cols/2.;
 		if ( billon.hasPith() )
 		{
 			const int width = billon.n_cols;
 			const int height = billon.n_rows;
-			const int depth = billon.n_slices;
+			const int depth = billon.n_slices-nbSlicesToCut;
 			const qreal angleIncrement = TWO_PI/static_cast<qreal>(nbPolygonPoints);
 
 			rCoord2D center, edge;
 			rVec2D direction;
-			qreal orientation;
+			qreal orientation, currentNorm;
 
-			radius = 0.;
-			for ( int k=0 ; k<depth ; ++k )
+			radius = width;
+			for ( int k=nbSlicesToCut ; k<depth ; ++k )
 			{
 				const Slice &currentSlice = billon.slice(k);
 				center.x = billon.pithCoord(k).x;
 				center.y = billon.pithCoord(k).y;
-				orientation = 0.;
+				orientation = angleIncrement;
 				while (orientation < TWO_PI)
 				{
 					orientation += angleIncrement;
 					direction = rVec2D(qCos(orientation),qSin(orientation));
-					edge = center + direction*30;
+					edge = center + direction*20;
 					while ( edge.x>0 && edge.y>0 && edge.x<width && edge.y<height && currentSlice.at(edge.y,edge.x) > intensityThreshold )
 					{
 						edge += direction;
 					}
-					edge -= center;
-					radius += rVec2D(edge).norm()/nbPolygonPoints;
+					currentNorm = rVec2D(edge-center).norm();
+					if ( currentNorm < radius ) radius = currentNorm;
 				}
 			}
-
-			radius/=depth;
 		}
 		qDebug() << "Rayon de la boite englobante (en pixels) : " << radius;
 		return radius;
