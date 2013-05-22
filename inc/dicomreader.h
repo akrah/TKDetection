@@ -7,7 +7,7 @@ class QString;
 
 namespace DicomReader
 {
-	Billon* read( const QString &repository );
+	Billon* read( const QString &repository, const bool &sliceOrderInversed = false );
 }
 
 #endif // DICOMREADER_H

@@ -301,40 +301,41 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *event)
 
 void MainWindow::openDicom()
 {
-	QString folderName = QFileDialog::getExistingDirectory(0,tr("Sélection du répertoire DICOM"),QDir::homePath(),QFileDialog::ShowDirsOnly);
-	if ( !folderName.isEmpty() )
-	{
-		Billon *billon = DicomReader::read(folderName);
-		if ( !billon ) return;
+	QString folderName = QFileDialog::getExistingDirectory(this,tr("Sélection du répertoire DICOM"),QDir::homePath(),QFileDialog::ShowDirsOnly);
+	if ( folderName.isEmpty() ) return;
 
-		closeImage();
-		_billon = billon;
-		updateUiComponentsValues();
-		enabledComponents();
+	QString text = QInputDialog::getItem(this, tr("Ordre de chargement des coupes du billon"), tr("Ordre :"), QStringList() << tr("Du fichier") << tr("Inversé"), 0, false);
+	if ( text.isEmpty() ) return;
 
-		setWindowTitle(QString("TKDetection - %1").arg(folderName.section(QDir::separator(),-1)));
+	Billon *billon = DicomReader::read(folderName,text.compare(tr("Inversé")));
+	if ( !billon ) return;
 
-		drawSlice();
-	}
+	closeImage();
+	_billon = billon;
+	updateUiComponentsValues();
+	enabledComponents();
+
+	setWindowTitle(QString("TKDetection - %1").arg(folderName.section(QDir::separator(),-1)));
+
+	drawSlice();
 }
 
 void MainWindow::openTiff()
 {
 	QString fileName = QFileDialog::getOpenFileName(0,tr("Sélection du fichier TIF"),QDir::homePath(),tr("Images TIFF (*.tiff *.tif)"));
-	if ( !fileName.isEmpty() )
-	{
-		Billon *billon = TiffReader::read(fileName);
-		if ( !billon ) return;
+	if ( fileName.isEmpty() ) return;
 
-		closeImage();
-		_billon = billon;
-		updateUiComponentsValues();
-		enabledComponents();
+	Billon *billon = TiffReader::read(fileName);
+	if ( !billon ) return;
 
-		setWindowTitle(QString("TKDetection - %1").arg(fileName.section(QDir::separator(),-1)));
+	closeImage();
+	_billon = billon;
+	updateUiComponentsValues();
+	enabledComponents();
 
-		drawSlice();
-	}
+	setWindowTitle(QString("TKDetection - %1").arg(fileName.section(QDir::separator(),-1)));
+
+	drawSlice();
 }
 
 void MainWindow::closeImage()

@@ -15,13 +15,13 @@ namespace DicomReader
 	// Déclaration de fonctions privées
 	namespace
 	{
-		Billon* makeBillonFromDicomWithITK( const QString &repository );
+		Billon* makeBillonFromDicomWithITK(const QString &repository , const bool &sliceOrderInversed);
 		QString getTag( const QString &entryId, const itk::MetaDataDictionary &dictionary );
 	}
 
-	Billon* read( const QString &repository )
+	Billon* read( const QString &repository, const bool &sliceOrderInversed )
 	{
-		Billon* cube = makeBillonFromDicomWithITK( repository );
+		Billon* cube = makeBillonFromDicomWithITK( repository, sliceOrderInversed );
 		if ( !cube ) qWarning() << QObject::tr("ERREUR : Impossible de lire le contenu du répertoire.");
 		return cube;
 	}
@@ -29,7 +29,7 @@ namespace DicomReader
 	// Implémentation des fonction privées
 	namespace
 	{
-		Billon* makeBillonFromDicomWithITK( const QString &repository )
+		Billon* makeBillonFromDicomWithITK( const QString &repository, const bool &sliceOrderInversed )
 		{
 			// Définition des type de l'image
 			const unsigned int InputDimension = 3;
@@ -89,7 +89,7 @@ namespace DicomReader
 
 			for ( uint k=0; k<depth; k++ )
 			{
-				Slice &slice = billon->slice(k);
+				Slice &slice = billon->slice(sliceOrderInversed?depth-1-k:k);
 				for ( uint j=0; j<height; j++ )
 				{
 					for ( uint i=0; i<width; i++ )
