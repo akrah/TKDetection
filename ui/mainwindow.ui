@@ -96,7 +96,7 @@
         <widget class="QWidget" name="scrollAreaWidgetContents">
          <property name="geometry">
           <rect>
-           <x>203</x>
+           <x>201</x>
            <y>323</y>
            <width>0</width>
            <height>0</height>
@@ -177,9 +177,6 @@
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
         </property>
-        <property name="handleMovementMode">
-         <enum>QxtSpanSlider::NoCrossing</enum>
-        </property>
        </widget>
       </item>
       <item>
@@ -245,7 +242,7 @@
      <item row="0" column="0">
       <widget class="QTabWidget" name="_tabs">
        <property name="currentIndex">
-        <number>0</number>
+        <number>1</number>
        </property>
        <widget class="QWidget" name="_tabAffichage">
         <attribute name="title">
@@ -289,8 +286,8 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>454</width>
-              <height>335</height>
+              <width>459</width>
+              <height>370</height>
              </rect>
             </property>
             <attribute name="label">
@@ -399,9 +396,6 @@
                    </property>
                    <property name="orientation">
                     <enum>Qt::Horizontal</enum>
-                   </property>
-                   <property name="handleMovementMode">
-                    <enum>QxtSpanSlider::NoCrossing</enum>
                    </property>
                   </widget>
                  </item>
@@ -643,7 +637,7 @@ zone restreinte</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>327</width>
+              <width>325</width>
               <height>49</height>
              </rect>
             </property>
@@ -693,14 +687,11 @@ zone restreinte</string>
                  <property name="orientation">
                   <enum>Qt::Horizontal</enum>
                  </property>
-                 <property name="lowerValue">
+                 <property name="lowerValue" stdset="0">
                   <number>0</number>
                  </property>
-                 <property name="upperValue">
+                 <property name="upperValue" stdset="0">
                   <number>500</number>
-                 </property>
-                 <property name="handleMovementMode">
-                  <enum>QxtSpanSlider::NoCrossing</enum>
                  </property>
                 </widget>
                </item>
@@ -729,7 +720,7 @@ zone restreinte</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>297</width>
+              <width>294</width>
               <height>221</height>
              </rect>
             </property>
@@ -924,7 +915,7 @@ zone restreinte</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>321</width>
+              <width>302</width>
               <height>152</height>
              </rect>
             </property>
@@ -1918,7 +1909,7 @@ l'origine du contour</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>381</width>
+              <width>384</width>
               <height>86</height>
              </rect>
             </property>
@@ -1990,7 +1981,7 @@ l'origine du contour</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>181</width>
+              <width>183</width>
               <height>123</height>
              </rect>
             </property>
@@ -2086,7 +2077,7 @@ l'origine du contour</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>377</width>
+              <width>384</width>
               <height>179</height>
              </rect>
             </property>
@@ -2203,8 +2194,8 @@ l'origine du contour</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>456</width>
-              <height>310</height>
+              <width>305</width>
+              <height>173</height>
              </rect>
             </property>
             <attribute name="label">
@@ -2318,7 +2309,7 @@ l'origine du contour</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>502</width>
+              <width>509</width>
               <height>53</height>
              </rect>
             </property>
@@ -2376,7 +2367,7 @@ l'origine du contour</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>441</width>
+              <width>449</width>
               <height>112</height>
              </rect>
             </property>
@@ -2617,7 +2608,7 @@ l'origine du contour</string>
          </item>
          <item>
           <widget class="QwtPolarPlot" name="_polarSectorHistogram">
-           <property name="plotBackground">
+           <property name="plotBackground" stdset="0">
             <brush brushstyle="SolidPattern">
              <color alpha="0">
               <red>255</red>

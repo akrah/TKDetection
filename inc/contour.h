@@ -20,6 +20,7 @@ public:
 
 	void compute( const Slice &slice, const iCoord2D &sliceCenter, const int &intensityThreshold, iCoord2D startPoint = iCoord2D(-1,-1) );
 	void smooth( int smoothingRadius );
+	Contour convexHull();
 
 	void draw( QPainter &painter, const int &cursorPosition, const iCoord2D &sliceCenter, const TKD::ViewType &viewType ) const;
 };

@@ -96,6 +96,24 @@ void Contour::smooth( int smoothingRadius )
 	}
 }
 
+Contour Contour::convexHull()
+{
+	Contour convexHull;
+	QVector<iCoord2D>::ConstIterator iterPoints = this->constBegin();
+	convexHull.append(*iterPoints++);
+	convexHull.append(*iterPoints++);
+	while ( iterPoints != this->end() )
+	{
+		const iCoord2D &point = *iterPoints++;
+		while ( convexHull.size() > 1 &&  convexHull.at(convexHull.size()-2).vectorProduct(convexHull.last(),point) <= 0 )
+		{
+			convexHull.pop_back();
+		}
+		convexHull.push_back(point);
+	}
+	return convexHull;
+}
+
 void Contour::draw( QPainter &painter, const int &cursorPosition, const iCoord2D &sliceCenter, const TKD::ViewType &viewType ) const
 {
 	const int nbPoints = this->size();

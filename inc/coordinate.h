@@ -34,6 +34,10 @@ struct coord2d
 		const qreal distance = this->euclideanDistance(other);
 		return qFuzzyIsNull(distance) ? 0. : (qreal)(y) < (qreal)(other.y) ? qAcos(((qreal)(other.x)-(qreal)(x)) / distance) : -qAcos(((qreal)(other.x)-(qreal)(x)) / distance);
 	}
+	qreal vectorProduct( const coord2d &secondCoord, const coord2d &thirdCoord ) const
+	{
+		return (secondCoord.x-x)*(thirdCoord.y-y) - (thirdCoord.x-x)*(secondCoord.y-y);
+	}
 };
 
 template<typename T>
