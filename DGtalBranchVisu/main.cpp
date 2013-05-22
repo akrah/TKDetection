@@ -34,12 +34,10 @@ int main(int argc, char** argv)
 	("input-file,i", po::value<std::string>(), "vol file (.vol) , pgm3d (.p3d or .pgm3d) file or sdp (sequence of discrete points)" )
 	("trunkBark-mesh,t", po::value<std::string>(), "mesh of the trunk bark in format OFS non normalized (.ofs)" )
 	("marrow-mesh,a", po::value<std::string>(), "mesh of trunk marrow  in format OFS non normalized (.ofs)" )
-	("thresholdMin,m",  po::value<int>()->default_value(0), "threshold min to define binary shape" )
-	("thresholdMax,M",  po::value<int>()->default_value(255), "threshold max to define binary shape" )
-	("scaleX,x",  po::value<float>()->default_value(1.0), "set the scale value in the X direction (default 1.0)" )
+    	("scaleX,x",  po::value<float>()->default_value(1.0), "set the scale value in the X direction (default 1.0)" )
 	("scaleY,y",  po::value<float>()->default_value(1.0), "set the scale value in the Y direction (default 1.0)" )
 	("scaleZ,z",  po::value<float>()->default_value(1.0), "set the scale value in the Z direction (default 1.0)")
-	("transparency,t",  po::value<uint>()->default_value(255), "transparency") ;
+	("transparency,T",  po::value<uint>()->default_value(100), "transparency") ;
   bool parseOK=true;
   po::variables_map vm;
   try{
@@ -68,9 +66,7 @@ int main(int argc, char** argv)
 	inputFilename = vm["input-file"].as<std::string>();
 	extension = inputFilename.substr(inputFilename.find_last_of(".") + 1);
   }
-//  int thresholdMin = vm["thresholdMin"].as<int>();
-//  int thresholdMax = vm["thresholdMax"].as<int>();
-//  unsigned char transp = vm["transparency"].as<uint>();
+  unsigned char transp = vm["transparency"].as<uint>();
   float sx = vm["scaleX"].as<float>();
   float sy = vm["scaleY"].as<float>();
   float sz = vm["scaleZ"].as<float>();
@@ -146,7 +142,7 @@ int main(int argc, char** argv)
 	viewer << SetMode3D(vectConnectedSCell.at(0).at(0).className(), "Basic");
 	for(uint i=0; i< vectConnectedSCell.size();i++){
 	  DGtal::Color c= gradient(i);
-	  viewer << CustomColors3D(Color(250, 0,0,100), Color(c.red(),
+	  viewer << CustomColors3D(Color(250, 0,0,transp), Color(c.red(),
 							  c.green(),
 							  c.blue(),120));
 
@@ -162,7 +158,7 @@ int main(int argc, char** argv)
 
   if(vm.count("trunkBark-mesh")){
 	string meshFilename = vm["trunkBark-mesh"].as<std::string>();
-	MeshFromPoints<Display3D::pointD3D> anImportedMesh(DGtal::Color(160, 30, 30,20));
+	Mesh<Display3D::pointD3D> anImportedMesh(DGtal::Color(160, 30, 30,20));
 	anImportedMesh.invertVertexFaceOrder();
 	bool import = anImportedMesh << meshFilename;
 	if(import){
@@ -173,7 +169,7 @@ int main(int argc, char** argv)
 
   if(vm.count("marrow-mesh")){
 	string meshFilename = vm["marrow-mesh"].as<std::string>();
-	MeshFromPoints<Display3D::pointD3D> anImportedMesh(DGtal::Color(70,70,70,255));
+	Mesh<Display3D::pointD3D> anImportedMesh(DGtal::Color(70,70,70,255));
 	bool import = anImportedMesh << meshFilename;
 	if(import){
 	  viewer << anImportedMesh;
