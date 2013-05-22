@@ -42,6 +42,7 @@ private:
 	void computeMainDominantPoints( const int &minimumOriginDistance );
 	void computeSupportsOfMainDominantPoints();
 	void computeContourPolygons();
+	void computeContourPolygons2();
 	void updateSlice( const Slice &initialSlice, Slice &resultSlice, const uiCoord2D &sliceCenter, const int &intensityThreshold );
 
 private:
