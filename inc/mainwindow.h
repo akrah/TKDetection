@@ -96,7 +96,7 @@ private:
 	void exportSectorHistogramToImage();
 	void exportknotHistogramToImage();
 
-    void exportImgeSliceIntervalToPgm3d();
+	void exportImgeSliceIntervalToPgm3d();
 	void exportCurrentSegmentedKnotToPgm3d();
 	void exportSegmentedKnotsOfCurrentSliceIntervalToPgm3d();
 
@@ -133,6 +133,7 @@ private:
 	PlotNearestPointsHistogram *_plotNearestPointsHistogram;
 
 	PlotCurvatureHistogram *_plotCurvatureHistogram;
+	PlotCurvatureHistogram *_plotCurvatureHistogramReverse;
 	PlotContourDistancesHistogram *_plotContourDistancesHistogram;
 
 	IntensityDistributionHistogram *_intensityDistributionHistogram;

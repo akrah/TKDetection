@@ -52,7 +52,7 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 	_sliceView(new SliceView()), _sliceHistogram(new SliceHistogram()), _plotSliceHistogram(new PlotSliceHistogram()),
 	_pieChart(new PieChart(360)), _sectorHistogram(new SectorHistogram()), _plotSectorHistogram(new PlotSectorHistogram()),
 	_nearestPointsHistogram(new NearestPointsHistogram()), _plotNearestPointsHistogram(new PlotNearestPointsHistogram()),
-	_plotCurvatureHistogram(new PlotCurvatureHistogram()), _plotContourDistancesHistogram(new PlotContourDistancesHistogram()),
+	_plotCurvatureHistogram(new PlotCurvatureHistogram()), _plotCurvatureHistogramReverse(new PlotCurvatureHistogram()), _plotContourDistancesHistogram(new PlotContourDistancesHistogram()),
 	_intensityDistributionHistogram(new IntensityDistributionHistogram()), _plotIntensityDistributionHistogram(new PlotIntensityDistributionHistogram()),
 	_zMotionDistributionHistogram(new ZMotionDistributionHistogram()), _plotZMotionDistributionHistogram(new PlotZMotionDistributionHistogram()),
 	_contourBillon(new ContourBillon()), _currentSlice(0), _currentYSlice(0), _currentMaximum(0), _currentSector(0), _treeRadius(0)
@@ -92,8 +92,9 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 	grid->setMajorGridPen(QPen(Qt::lightGray));
 	grid->attach(_ui->_polarSectorHistogram);
 
-	_plotContourDistancesHistogram->attach(_ui->_plotContourDistancesHistogram);
+	//_plotContourDistancesHistogram->attach(_ui->_plotContourDistancesHistogram);
 	_plotCurvatureHistogram->attach(_ui->_plotCurvatureHistogram);
+	_plotCurvatureHistogramReverse->attach(_ui->_plotContourDistancesHistogram);
 	_plotIntensityDistributionHistogram->attach(_ui->_plotIntensityDistributionHistogram);
 	_plotNearestPointsHistogram->attach(_ui->_plotNearestPointsHistogram);
 	_plotZMotionDistributionHistogram->attach(_ui->_plotZMotionDistributionHistogram);
@@ -255,6 +256,7 @@ MainWindow::~MainWindow()
 	delete _plotIntensityDistributionHistogram;
 	delete _plotContourDistancesHistogram;
 	delete _plotCurvatureHistogram;
+	delete _plotCurvatureHistogramReverse;
 	delete _plotNearestPointsHistogram;
 	delete _nearestPointsHistogram;
 	delete _plotSectorHistogram;
@@ -551,7 +553,8 @@ void MainWindow::moveContourCursor( const int &position )
 
 	_plotCurvatureHistogram->moveCursor(position);
 	_ui->_plotCurvatureHistogram->replot();
-	_plotContourDistancesHistogram->moveCursor(position);
+	//_plotContourDistancesHistogram->moveCursor(position);
+	_plotCurvatureHistogramReverse->moveCursor(position);
 	_ui->_plotContourDistancesHistogram->replot();
 	drawSlice();
 }
@@ -633,6 +636,7 @@ void MainWindow::updateContourHistograms( const int &sliceNumber )
 	_ui->_sliderContour->setMaximum(1);
 	_ui->_sliderContour->setValue(0);
 	_plotCurvatureHistogram->clear();
+	_plotCurvatureHistogramReverse->clear();
 	_plotContourDistancesHistogram->clear();
 	const int sliceIntervalIndex = _ui->_comboSelectSliceInterval->currentIndex();
 	if ( sliceIntervalIndex > 0 )
@@ -645,7 +649,8 @@ void MainWindow::updateContourHistograms( const int &sliceNumber )
 			_plotCurvatureHistogram->update(contourSlice.curvatureHistogram(),contourSlice.dominantPointIndexFromLeft(),contourSlice.dominantPointIndexFromRight());
 			_ui->_plotCurvatureHistogram->setAxisScale(QwtPlot::xBottom,0,contourSlice.curvatureHistogram().size());
 
-			_plotContourDistancesHistogram->update(contourSlice.contourDistancesHistogram(),contourSlice.dominantPointIndexFromLeft(),contourSlice.dominantPointIndexFromRight());
+			//_plotContourDistancesHistogram->update(contourSlice.contourDistancesHistogram(),contourSlice.dominantPointIndexFromLeft(),contourSlice.dominantPointIndexFromRight());
+			_plotCurvatureHistogramReverse->update(contourSlice.curvatureHistogramReverse(),contourSlice.dominantPointIndexFromLeft(),contourSlice.dominantPointIndexFromRight());
 			_ui->_plotContourDistancesHistogram->setAxisScale(QwtPlot::xBottom,0,contourSlice.contourDistancesHistogram().size());
 
 			_ui->_sliderContour->setMaximum(contourSlice.contour().size()>0?contourSlice.contour().size()-1:0);

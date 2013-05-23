@@ -96,7 +96,7 @@
         <widget class="QWidget" name="scrollAreaWidgetContents">
          <property name="geometry">
           <rect>
-           <x>201</x>
+           <x>203</x>
            <y>323</y>
            <width>0</width>
            <height>0</height>
@@ -242,7 +242,7 @@
      <item row="0" column="0">
       <widget class="QTabWidget" name="_tabs">
        <property name="currentIndex">
-        <number>1</number>
+        <number>0</number>
        </property>
        <widget class="QWidget" name="_tabAffichage">
         <attribute name="title">
@@ -286,8 +286,8 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>459</width>
-              <height>370</height>
+              <width>454</width>
+              <height>335</height>
              </rect>
             </property>
             <attribute name="label">
@@ -637,7 +637,7 @@ zone restreinte</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>325</width>
+              <width>327</width>
               <height>49</height>
              </rect>
             </property>
@@ -687,10 +687,10 @@ zone restreinte</string>
                  <property name="orientation">
                   <enum>Qt::Horizontal</enum>
                  </property>
-                 <property name="lowerValue" stdset="0">
+                 <property name="lowerValue">
                   <number>0</number>
                  </property>
-                 <property name="upperValue" stdset="0">
+                 <property name="upperValue">
                   <number>500</number>
                  </property>
                 </widget>
@@ -720,7 +720,7 @@ zone restreinte</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>294</width>
+              <width>297</width>
               <height>221</height>
              </rect>
             </property>
@@ -915,7 +915,7 @@ zone restreinte</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>302</width>
+              <width>321</width>
               <height>152</height>
              </rect>
             </property>
@@ -1909,7 +1909,7 @@ l'origine du contour</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>384</width>
+              <width>381</width>
               <height>86</height>
              </rect>
             </property>
@@ -1981,7 +1981,7 @@ l'origine du contour</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>183</width>
+              <width>181</width>
               <height>123</height>
              </rect>
             </property>
@@ -2077,7 +2077,7 @@ l'origine du contour</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>384</width>
+              <width>377</width>
               <height>179</height>
              </rect>
             </property>
@@ -2194,7 +2194,7 @@ l'origine du contour</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>305</width>
+              <width>298</width>
               <height>173</height>
              </rect>
             </property>
@@ -2309,7 +2309,7 @@ l'origine du contour</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>509</width>
+              <width>502</width>
               <height>53</height>
              </rect>
             </property>
@@ -2367,7 +2367,7 @@ l'origine du contour</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>449</width>
+              <width>441</width>
               <height>112</height>
              </rect>
             </property>
@@ -2608,7 +2608,7 @@ l'origine du contour</string>
          </item>
          <item>
           <widget class="QwtPolarPlot" name="_polarSectorHistogram">
-           <property name="plotBackground" stdset="0">
+           <property name="plotBackground">
             <brush brushstyle="SolidPattern">
              <color alpha="0">
               <red>255</red>

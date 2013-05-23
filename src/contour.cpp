@@ -88,8 +88,8 @@ void Contour::smooth( int smoothingRadius )
 			{
 				smoothingValueX = smoothingValueX - initialContour[i].x + initialContour[i+smoothingDiameter].x;
 				smoothingValueY = smoothingValueY - initialContour[i].y + initialContour[i+smoothingDiameter].y;
-				currentCoord.x = smoothingValueX / qSmoothingDiameter;
-				currentCoord.y = smoothingValueY / qSmoothingDiameter;
+				currentCoord.x = qRound(smoothingValueX / qSmoothingDiameter);
+				currentCoord.y = qRound(smoothingValueY / qSmoothingDiameter);
 				if ( this->last() != currentCoord ) this->append(currentCoord);
 			}
 		}

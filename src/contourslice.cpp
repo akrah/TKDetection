@@ -37,6 +37,11 @@ const CurvatureHistogram &ContourSlice::curvatureHistogram() const
 	return _curvatureHistogram;
 }
 
+const CurvatureHistogram &ContourSlice::curvatureHistogramReverse() const
+{
+	return _curvatureHistogramReverse;
+}
+
 const iCoord2D &ContourSlice::dominantPointFromLeft( const uint &index ) const
 {
 	Q_ASSERT_X( index<static_cast<uint>(_dominantPointsIndexFromLeft.size()), "Histogram::mainDominantPoint", "Le point dominants demandé n'existe pas" );
@@ -103,6 +108,7 @@ void ContourSlice::compute( Slice &resultSlice, const Slice &initialSlice, const
 
 	_contourDistancesHistogram.construct( _contour, sliceCenter );
 	_curvatureHistogram.construct( _contour, curvatureWidth  );
+	_curvatureHistogram.construct( _contour, curvatureWidth, true );
 
 	_sliceCenter = sliceCenter;
 
@@ -110,7 +116,7 @@ void ContourSlice::compute( Slice &resultSlice, const Slice &initialSlice, const
 	computeMainDominantPoints( minimumOriginDistance );
 	computeSupportsOfMainDominantPoints();
 	computeContourPolygons();
-	updateSlice( initialSlice, resultSlice, sliceCenter, intensityThreshold );
+	updateSlice( initialSlice, resultSlice, intensityThreshold );
 }
 
 void ContourSlice::computeOldMethod( Slice &resultSlice, const Slice &initialSlice, const uiCoord2D &sliceCenter, const int &intensityThreshold, const int &smoothingRadius, const int &curvatureWidth, const iCoord2D &startPoint )
@@ -540,15 +546,14 @@ void ContourSlice::computeSupportsOfMainDominantPoints()
 	{
 		_leftMainSupportPoint.x = _leftMainSupportPoint.y = 0.;
 		counter = 0;
-		while ( index >= qMax(_leftMainDominantPointsIndex-25,0) )
+		while ( index >= qMax(_leftMainDominantPointsIndex-30,0) )
 		{
 			_leftMainSupportPoint.x += _contour[index].x;
 			_leftMainSupportPoint.y += _contour[index].y;
-			index -= 1;
+			--index;
 			++counter;
 		}
-		_leftMainSupportPoint.x /= counter;
-		_leftMainSupportPoint.y /= counter;
+		_leftMainSupportPoint /= counter;
 	}
 
 	// Support du MDP droit
@@ -557,15 +562,14 @@ void ContourSlice::computeSupportsOfMainDominantPoints()
 	{
 		int nbPoints = _contour.size();
 		counter = 0;
-		while ( index < qMin(_rightMainDominantPointsIndex+25,nbPoints) )
+		while ( index < qMin(_rightMainDominantPointsIndex+30,nbPoints) )
 		{
 			_rightMainSupportPoint.x += _contour[index].x;
 			_rightMainSupportPoint.y += _contour[index].y;
-			index += 1;
+			++index;
 			++counter;
 		}
-		_rightMainSupportPoint.x /= counter;
-		_rightMainSupportPoint.y /= counter;
+		_rightMainSupportPoint /= counter;
 	}
 }
 
@@ -574,80 +578,10 @@ void ContourSlice::computeContourPolygons()
 	_contourPolygonBottom.clear();
 	_contourPolygonTop.clear();
 
-	const int nbOriginalPointsContour = _originalContour.size();
+	const int nbContourPoints = _contour.size();
+	if ( !nbContourPoints ) return;
 
-	int i, index, originalMain1Index, originalMain2Index;
-	qreal currentDistanceMain1, currentDistanceMain2;
-
-	// S'il y a deux points dominants principaux
-	if ( _leftMainDominantPointsIndex != -1 && _rightMainDominantPointsIndex != -1 )
-	{
-		const iCoord2D &leftMainPoint = leftMainDominantPoint();
-		const iCoord2D &rightMainPoint = rightMainDominantPoint();
-
-		// Calcul des point du contour original les plus proches des points dominants principaux
-		// et de la boite englobante du contour original
-		currentDistanceMain1 = leftMainDominantPoint().euclideanDistance(_originalContour[0]);
-		currentDistanceMain2 = rightMainDominantPoint().euclideanDistance(_originalContour[0]);
-		originalMain1Index = originalMain2Index = 0;
-		for ( index=1 ; index<nbOriginalPointsContour ; ++index )
-		{
-			const iCoord2D &currentContourPoint = _originalContour[index];
-			if ( leftMainPoint.euclideanDistance(currentContourPoint) < currentDistanceMain1 )
-			{
-				currentDistanceMain1 = leftMainPoint.euclideanDistance(currentContourPoint);
-				originalMain1Index = index;
-			}
-			if ( rightMainPoint.euclideanDistance(currentContourPoint) <= currentDistanceMain2 )
-			{
-				currentDistanceMain2 = rightMainPoint.euclideanDistance(currentContourPoint);
-				originalMain2Index = index;
-			}
-		}
-
-		// Création du polygone qui servira à tester l'appartenance d'un pixel en dessous de la droite des deux points dominants principaux au noeud.
-		// Ce polygone est constitué :
-		//     - des points compris entre le premier point du contour initial (non lissé) et le plus proche du premier point dominant
-		//     - du point le plus proche du premier point dominant
-		//     - du point le plus proche du second point dominant
-		//     - des points compris entre le point du contour initial le plus proche du second point dominant et le dernier points du contour initial.
-		for ( i=0 ; i<=originalMain1Index ; ++i ) _contourPolygonBottom << QPoint(_originalContour[i].x,_originalContour[i].y);
-		_contourPolygonBottom << QPoint(leftMainPoint.x,leftMainPoint.y)
-							 << QPoint(rightMainPoint.x,rightMainPoint.y);
-		for ( i=originalMain2Index ; i<nbOriginalPointsContour ; ++i ) _contourPolygonBottom << QPoint(_originalContour[i].x,_originalContour[i].y);
-		_contourPolygonBottom << QPoint(_originalContour[0].x,_originalContour[0].y);
-
-		// Création du polygone qui servira à tester l'appartenance d'un pixel au dessus de la droite des deux points dominants principaux au noeud.
-		// Ce polygone est constitué :
-		//     - du point le plus proche du premier point dominant
-		//     - des points du contour initial (non lissé) situés entre le point le plus proche du premier point dominant et le point le plus proche du second point dominant
-		//     - du point le plus proche du second point dominant
-		_contourPolygonTop << QPoint(leftMainPoint.x,leftMainPoint.y);
-		for ( i=originalMain1Index ; i<=originalMain2Index ; ++i ) _contourPolygonTop << QPoint(_originalContour[i].x,_originalContour[i].y);
-		_contourPolygonTop << QPoint(rightMainPoint.x,rightMainPoint.y)
-						  << QPoint(leftMainPoint.x,leftMainPoint.y);
-	}
-	else
-	{
-		// Création du polygone qui servira à tester l'appartenance d'un pixel au noeud.
-		// Ce polygone est constitué des pixels du contour initial (non lissé)
-		for ( i=0 ; i<nbOriginalPointsContour ; ++i )
-		{
-			_contourPolygonBottom << QPoint(_originalContour[i].x,_originalContour[i].y);
-		}
-		if ( nbOriginalPointsContour ) _contourPolygonBottom << QPoint(_originalContour[0].x,_originalContour[0].y);
-	}
-}
-
-void ContourSlice::computeContourPolygons2()
-{
-	_contourPolygonBottom.clear();
-	_contourPolygonTop.clear();
-
-	const int nbOriginalPointsContour = _originalContour.size();
-
-	int i, index, originalMain1Index, originalMain2Index;
-	qreal currentDistanceMain1, currentDistanceMain2;
+	int i;
 
 	// S'il y a deux points dominants principaux
 	if ( _leftMainDominantPointsIndex != -1 && _rightMainDominantPointsIndex != -1 )
@@ -655,61 +589,78 @@ void ContourSlice::computeContourPolygons2()
 		const iCoord2D &leftMainPoint = leftMainDominantPoint();
 		const iCoord2D &rightMainPoint = rightMainDominantPoint();
 
-		// Calcul des point du contour original les plus proches des points dominants principaux
-		// et de la boite englobante du contour original
-		currentDistanceMain1 = leftMainDominantPoint().euclideanDistance(_originalContour[0]);
-		currentDistanceMain2 = rightMainDominantPoint().euclideanDistance(_originalContour[0]);
-		originalMain1Index = originalMain2Index = 0;
-		for ( index=1 ; index<nbOriginalPointsContour ; ++index )
-		{
-			const iCoord2D &currentContourPoint = _originalContour[index];
-			if ( leftMainPoint.euclideanDistance(currentContourPoint) < currentDistanceMain1 )
-			{
-				currentDistanceMain1 = leftMainPoint.euclideanDistance(currentContourPoint);
-				originalMain1Index = index;
-			}
-			if ( rightMainPoint.euclideanDistance(currentContourPoint) <= currentDistanceMain2 )
-			{
-				currentDistanceMain2 = rightMainPoint.euclideanDistance(currentContourPoint);
-				originalMain2Index = index;
-			}
-		}
-
 		// Création du polygone qui servira à tester l'appartenance d'un pixel en dessous de la droite des deux points dominants principaux au noeud.
 		// Ce polygone est constitué :
-		//     - des points compris entre le premier point du contour initial (non lissé) et le plus proche du premier point dominant
-		//     - du point le plus proche du premier point dominant
-		//     - du point le plus proche du second point dominant
-		//     - des points compris entre le point du contour initial le plus proche du second point dominant et le dernier points du contour initial.
-		for ( i=0 ; i<=originalMain1Index ; ++i ) _contourPolygonBottom << QPoint(_originalContour[i].x,_originalContour[i].y);
+		//     - des points compris entre le premier point du contour lissé et le point dominant principal gauche
+		//     - du point dominant principal gauche
+		//     - du point dominant principal droit
+		//     - des points compris entre le point dominant principal droit et le dernier points du contour lissé.
+		for ( i=0 ; i<=_leftMainDominantPointsIndex ; ++i ) _contourPolygonBottom << QPoint(_contour[i].x,_contour[i].y);
 		_contourPolygonBottom << QPoint(leftMainPoint.x,leftMainPoint.y)
 							 << QPoint(rightMainPoint.x,rightMainPoint.y);
-		for ( i=originalMain2Index ; i<nbOriginalPointsContour ; ++i ) _contourPolygonBottom << QPoint(_originalContour[i].x,_originalContour[i].y);
-		_contourPolygonBottom << QPoint(_originalContour[0].x,_originalContour[0].y);
+		for ( i=_rightMainDominantPointsIndex ; i<nbContourPoints ; ++i ) _contourPolygonBottom << QPoint(_contour[i].x,_contour[i].y);
+		_contourPolygonBottom << QPoint(_contour[0].x,_contour[0].y);
 
 		// Création du polygone qui servira à tester l'appartenance d'un pixel au dessus de la droite des deux points dominants principaux au noeud.
 		// Ce polygone est constitué :
-		//     - du point le plus proche du premier point dominant
-		//     - des points du contour initial (non lissé) situés entre le point le plus proche du premier point dominant et le point le plus proche du second point dominant
-		//     - du point le plus proche du second point dominant
+		//     - du point le plus proche du point dominant
+		//     - des points du contour situés entre le point le point dominant principal gauche et le point dominant principal droit
+		//     - du point dominant principal droit
 		_contourPolygonTop << QPoint(leftMainPoint.x,leftMainPoint.y);
-		for ( i=originalMain1Index ; i<=originalMain2Index ; ++i ) _contourPolygonTop << QPoint(_originalContour[i].x,_originalContour[i].y);
+		for ( i=_leftMainDominantPointsIndex ; i<=_rightMainDominantPointsIndex ; ++i ) _contourPolygonTop << QPoint(_contour[i].x,_contour[i].y);
 		_contourPolygonTop << QPoint(rightMainPoint.x,rightMainPoint.y)
 						  << QPoint(leftMainPoint.x,leftMainPoint.y);
 	}
 	else
 	{
-		// Création du polygone qui servira à tester l'appartenance d'un pixel au noeud.
-		// Ce polygone est constitué des pixels du contour initial (non lissé)
-		for ( i=0 ; i<nbOriginalPointsContour ; ++i )
+		if ( _leftMainDominantPointsIndex != -1 )
 		{
-			_contourPolygonBottom << QPoint(_originalContour[i].x,_originalContour[i].y);
+			const iCoord2D &leftMainPoint = leftMainDominantPoint();
+			const int rightMainDominantPointsIndexComputed = nbContourPoints-_leftMainDominantPointsIndex;
+			const iCoord2D &rightMainPoint = _contour[rightMainDominantPointsIndexComputed];
+
+			// Création du polygone qui servira à tester l'appartenance d'un pixel en dessous de la droite des deux points dominants principaux au noeud.
+			// Ce polygone est constitué :
+			//     - des points compris entre le premier point du contour lissé et le point dominant principal gauche
+			//     - du point dominant principal gauche
+			//     - du point dominant principal droit calculé
+			//     - des points compris entre le point dominant principal droit principal calculé et le dernier points du contour lissé.
+			for ( i=0 ; i<=_leftMainDominantPointsIndex ; ++i ) _contourPolygonBottom << QPoint(_contour[i].x,_contour[i].y);
+			_contourPolygonBottom << QPoint(leftMainPoint.x,leftMainPoint.y)
+								  << QPoint(rightMainPoint.x,rightMainPoint.y);
+			for ( i=rightMainDominantPointsIndexComputed ; i<nbContourPoints ; ++i ) _contourPolygonBottom << QPoint(_contour[i].x,_contour[i].y);
+			_contourPolygonBottom << QPoint(_contour[0].x,_contour[0].y);
 		}
-		if ( nbOriginalPointsContour ) _contourPolygonBottom << QPoint(_originalContour[0].x,_originalContour[0].y);
+		else if ( _rightMainDominantPointsIndex != -1 )
+		{
+			const iCoord2D &rightMainPoint = rightMainDominantPoint();
+			const int leftMainDominantPointsIndexComputed = nbContourPoints-_rightMainDominantPointsIndex;
+			const iCoord2D &leftMainPoint = _contour[leftMainDominantPointsIndexComputed];
+
+			// Création du polygone qui servira à tester l'appartenance d'un pixel en dessous de la droite des deux points dominants principaux au noeud.
+			// Ce polygone est constitué :
+			//     - des points compris entre le premier point du contour lissé et le point dominant principal gauche
+			//     - du point dominant principal gauche
+			//     - du point dominant principal droit calculé
+			//     - des points compris entre le point dominant principal droit principal calculé et le dernier points du contour lissé.
+			for ( i=0 ; i<=leftMainDominantPointsIndexComputed ; ++i ) _contourPolygonBottom << QPoint(_contour[i].x,_contour[i].y);
+			_contourPolygonBottom << QPoint(leftMainPoint.x,leftMainPoint.y)
+								  << QPoint(rightMainPoint.x,rightMainPoint.y);
+			for ( i=_rightMainDominantPointsIndex ; i<nbContourPoints ; ++i ) _contourPolygonBottom << QPoint(_contour[i].x,_contour[i].y);
+			_contourPolygonBottom << QPoint(_contour[0].x,_contour[0].y);
+		}
+
+		// Création du polygone qui servira à tester l'appartenance d'un pixel au noeud.
+		// Ce polygone est constitué des pixels du contour lissé
+		for ( i=0 ; i<nbContourPoints ; ++i )
+		{
+			_contourPolygonTop << QPoint(_contour[i].x,_contour[i].y);
+		}
+		_contourPolygonTop << QPoint(_contour[0].x,_contour[0].y);
 	}
 }
 
-void ContourSlice::updateSlice( const Slice &initialSlice, Slice &resultSlice, const uiCoord2D &sliceCenter, const int &intensityThreshold )
+void ContourSlice::updateSlice( const Slice &initialSlice, Slice &resultSlice, const int &intensityThreshold )
 {
 	const int width = initialSlice.n_cols;
 	const int height = initialSlice.n_rows;
@@ -722,21 +673,6 @@ void ContourSlice::updateSlice( const Slice &initialSlice, Slice &resultSlice, c
 	const rCoord2D &leftSupportPoint = leftMainSupportPoint();
 	const rCoord2D &rightSupportPoint = rightMainSupportPoint();
 
-	const qreal daMain1Main2 = leftMainPoint.y - rightMainPoint.y;
-	const qreal dbMain1Main2 = rightMainPoint.x - leftMainPoint.x;
-	const qreal dcMain1Main2 = daMain1Main2*leftMainPoint.x + dbMain1Main2*leftMainPoint.y;
-	const bool supToMain1Main2 = ( daMain1Main2*sliceCenter.x + dbMain1Main2*sliceCenter.y ) > dcMain1Main2;
-
-	const qreal daMain1Support1 = leftMainPoint.y - leftSupportPoint.y;
-	const qreal dbMain1Support1 = leftSupportPoint.x - leftMainPoint.x;
-	const qreal dcMain1Support1 = daMain1Support1*leftMainPoint.x + dbMain1Support1*leftMainPoint.y;
-	const bool supToMain1Support1 = ( daMain1Support1*rightMainPoint.x + dbMain1Support1*rightMainPoint.y ) > dcMain1Support1;
-
-	const qreal daMain2Support2 = rightMainPoint.y - rightSupportPoint.y;
-	const qreal dbMain2Support2 = rightSupportPoint.x - rightMainPoint.x;
-	const qreal dcMain2Support2 = daMain2Support2*rightMainPoint.x + dbMain2Support2*rightMainPoint.y;
-	const bool supToMain2Support2 = ( daMain2Support2*leftMainPoint.x + dbMain2Support2*leftMainPoint.y ) > dcMain2Support2;
-
 	const bool hasMainLeft = _leftMainDominantPointsIndex != -1;
 	const bool hasMainRight = _rightMainDominantPointsIndex != -1;
 
@@ -745,7 +681,6 @@ void ContourSlice::updateSlice( const Slice &initialSlice, Slice &resultSlice, c
 	// S'il y a deux points dominants principaux
 	if ( hasMainLeft && hasMainRight )
 	{
-		// Ajout des pixel
 		for ( j=0 ; j<height ; ++j )
 		{
 			for ( i=0 ; i<width ; ++i )
@@ -753,70 +688,68 @@ void ContourSlice::updateSlice( const Slice &initialSlice, Slice &resultSlice, c
 				if ( initialSlice.at(j,i) > intensityThreshold &&
 					 ( _contourPolygonBottom.containsPoint(QPoint(i,j),Qt::OddEvenFill) ||
 					   (
-						   ((daMain1Main2*i+dbMain1Main2*j <= dcMain1Main2) == supToMain1Main2) &&
-						   ((daMain1Support1*i+dbMain1Support1*j >= dcMain1Support1) == supToMain1Support1) &&
-						   ((daMain2Support2*i+dbMain2Support2*j >= dcMain2Support2) == supToMain2Support2) &&
+						   leftSupportPoint.vectorProduct( leftMainPoint, iCoord2D(i,j) ) >= 0 &&
+						   rightSupportPoint.vectorProduct( rightMainPoint, iCoord2D(i,j) ) <= 0 &&
 						   _contourPolygonTop.containsPoint(QPoint(i,j),Qt::OddEvenFill)
-						   )
 					   )
 					 )
+				   )
 				{
 					resultSlice.at(j,i) = 1;
 				}
 			}
 		}
 	}
-	else
+	else if ( hasMainLeft )
 	{
-		if ( hasMainLeft )
+		for ( j=0 ; j<height ; ++j )
 		{
-			// Ajout des pixels du noeud du bon côté de chaque la droite de prolongement
-			// et à l'intérieur du contour original
-			const iCoord2D nextMain1( leftMainPoint.x - daMain1Support1, leftMainPoint.y - dbMain1Support1 );
-			const bool rightToMain1Support1 = ( daMain1Support1*nextMain1.x + dbMain1Support1*nextMain1.y ) > dcMain1Support1;
-			for ( j=0 ; j<height ; ++j )
+			for ( i=0 ; i<width ; ++i )
 			{
-				for ( i=0 ; i<width ; ++i )
+				if ( initialSlice.at(j,i) > intensityThreshold &&
+					 ( _contourPolygonBottom.containsPoint(QPoint(i,j),Qt::OddEvenFill) ||
+					   (
+						   leftSupportPoint.vectorProduct( leftMainPoint, iCoord2D(i,j) ) >= 0 &&
+						   _contourPolygonTop.containsPoint(QPoint(i,j),Qt::OddEvenFill)
+					   )
+					 )
+				   )
 				{
-					if ( initialSlice.at(j,i) > intensityThreshold
-						 && ((daMain1Support1*i+dbMain1Support1*j > dcMain1Support1) == rightToMain1Support1)
-						 && _contourPolygonBottom.containsPoint(QPoint(i,j),Qt::OddEvenFill) )
-					{
-						resultSlice.at(j,i) = 1;
-					}
+					resultSlice.at(j,i) = 1;
 				}
 			}
 		}
-		else if ( hasMainRight )
+	}
+	else if ( hasMainRight )
+	{
+		for ( j=0 ; j<height ; ++j )
 		{
-			// Ajout des pixels du noeud du bon côté de chaque la droite de prolongement
-			// et à l'intérieur du contour original
-			const iCoord2D nextMain2( rightMainPoint.x + daMain2Support2, rightMainPoint.y + dbMain2Support2 );
-			const bool leftToMain2Support2 = ( daMain2Support2*nextMain2.x + dbMain2Support2*nextMain2.y ) > dcMain2Support2;
-			for ( j=0 ; j<height ; ++j )
+			for ( i=0 ; i<width ; ++i )
 			{
-				for ( i=0 ; i<width ; ++i )
+				if ( initialSlice.at(j,i) > intensityThreshold &&
+					 ( _contourPolygonBottom.containsPoint(QPoint(i,j),Qt::OddEvenFill) ||
+					   (
+						   rightSupportPoint.vectorProduct( rightMainPoint, iCoord2D(i,j) ) <= 0 &&
+						   _contourPolygonTop.containsPoint(QPoint(i,j),Qt::OddEvenFill)
+					   )
+					 )
+				   )
 				{
-					if ( initialSlice.at(j,i) > intensityThreshold
-						 && ((daMain2Support2*i+dbMain2Support2*j > dcMain2Support2) == leftToMain2Support2)
-						 && _contourPolygonBottom.containsPoint(QPoint(i,j),Qt::OddEvenFill) )
-					{
-						resultSlice.at(j,i) = 1;
-					}
+					resultSlice.at(j,i) = 1;
 				}
 			}
 		}
-		else if ( nbOriginalPointsContour > 3 )
+	}
+	else if ( nbOriginalPointsContour > 3 )
+	{
+		// Sinon on ajoute la composante en entier
+		for ( j=0 ; j<height ; ++j )
 		{
-			// Sinon on ajoute la composante en entier
-			for ( j=0 ; j<height ; ++j )
+			for ( i=0 ; i<width ; ++i )
 			{
-				for ( i=0 ; i<width ; ++i )
+				if ( initialSlice.at(j,i) > intensityThreshold && _contourPolygonTop.containsPoint(QPoint(i,j),Qt::OddEvenFill) )
 				{
-					if ( initialSlice.at(j,i) > intensityThreshold && _contourPolygonBottom.containsPoint(QPoint(i,j),Qt::OddEvenFill) )
-					{
-						resultSlice.at(j,i) = 1;
-					}
+					resultSlice.at(j,i) = 1;
 				}
 			}
 		}
