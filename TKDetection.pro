@@ -10,7 +10,7 @@
 
 # Version d'ITK installée : itk3 | itk4
 ITK_VERSION = itk4
-ITK_NUMBER =  4.3
+ITK_NUMBER =  4.1
 
 #                                                                #
 #                  NE PAS MODIFIER EN DESSOUS                    #
@@ -19,14 +19,15 @@ ITK_NUMBER =  4.3
 # Configuration
 #--------------#
 TEMPLATE	=	app
-QT			*=	core gui xml
-CONFIG		*=	warn_on
+QT			=	core gui xml
+CONFIG		*=	copy_dir_files warn_on
 CONFIG		*=	qwt qxt qwtpolar $${ITK_VERSION}
 QXT			=	core gui
 
 # Répertoires
 #------------#
 TARGET				= TKDetection
+DEPENDPATH			= ./src/ ./inc/ ./ui/ ./tst/ ./def/
 macx:MOC_DIR		= .moc
 macx:OBJECTS_DIR	= .obj
 
@@ -36,103 +37,104 @@ TRANSLATIONS = TKDetection_en.ts
 
 # Fichiers
 #---------#
-SOURCES	=	src/main.cpp \
-            src/billonalgorithms.cpp \
-            src/connexcomponentextractor.cpp \
-            src/contour.cpp \
-            src/contourbillon.cpp \
-            src/contourdistanceshistogram.cpp \
-            src/contourslice.cpp \
-            src/curvaturehistogram.cpp \
-            src/datexport.cpp \
-            src/dicomreader.cpp \
-            src/globalfunctions.cpp \
-            src/intensitydistributionhistogram.cpp \
-            src/nearestpointshistogram.cpp \
-            src/mainwindow.cpp \
-            src/ofsexport.cpp \
-            src/opticalflow.cpp \
-            src/pgm3dexport.cpp \
-            src/piechart.cpp \
-            src/piepart.cpp \
-            src/pith.cpp \
-            src/pithextractor.cpp \
-            src/plotcontourdistanceshistogram.cpp \
-            src/plotcurvaturehistogram.cpp \
-            src/plotintensitydistributionhistogram.cpp \
-            src/plotnearestpointshistogram.cpp \
-            src/plotsectorhistogram.cpp \
-            src/plotslicehistogram.cpp \
-            src/plotzmotiondistributionhistogram.cpp \
-            src/pointpolarseriesdata.cpp \
-            src/sectorhistogram.cpp \
-            src/slicealgorithm.cpp \
-            src/slicehistogram.cpp \
-            src/sliceview.cpp \
-            src/slicezoomer.cpp \
-            tst/test_intervalshistogram.cpp \
-            src/tiffreader.cpp \
-            src/v3dexport.cpp \
-            src/zmotiondistributionhistogram.cpp
+SOURCES	=	main.cpp \
+			billonalgorithms.cpp \
+			connexcomponentextractor.cpp \
+			contour.cpp \
+			contourbillon.cpp \
+			contourdistanceshistogram.cpp \
+			contourslice.cpp \
+			curvaturehistogram.cpp \
+			datexport.cpp \
+			dicomreader.cpp \
+			globalfunctions.cpp \
+			intensitydistributionhistogram.cpp \
+			nearestpointshistogram.cpp \
+			mainwindow.cpp \
+			ofsexport.cpp \
+			opticalflow.cpp \
+			pgm3dexport.cpp \
+			piechart.cpp \
+			piepart.cpp \
+			pith.cpp \
+			pithextractor.cpp \
+			plotcontourdistanceshistogram.cpp \
+			plotcurvaturehistogram.cpp \
+			plotintensitydistributionhistogram.cpp \
+			plotnearestpointshistogram.cpp \
+			plotsectorhistogram.cpp \
+			plotslicehistogram.cpp \
+			plotzmotiondistributionhistogram.cpp \
+			pointpolarseriesdata.cpp \
+			sectorhistogram.cpp \
+			slicealgorithm.cpp \
+			slicehistogram.cpp \
+			sliceview.cpp \
+			slicezoomer.cpp \
+			test_intervalshistogram.cpp \
+			tiffreader.cpp \
+			v3dexport.cpp \
+			zmotiondistributionhistogram.cpp
 
-HEADERS	=	inc/billon.h \
-            inc/billonalgorithms.h \
-            inc/connexcomponentextractor.h \
-            inc/contour.h \
-            inc/contourbillon.h \
-            inc/contourdistanceshistogram.h \
-            inc/contourslice.h \
-            inc/coordinate.h \
-            inc/curvaturehistogram.h \
-            inc/datexport.h \
-            inc/define.h \
-            def/def_billon.h \
-            def/def_coordinate.h \
-            def/def_opticalflow.h \
-            inc/dicomreader.h \
-            inc/globalfunctions.h \
-            inc/histogram.h \
-            inc/intensitydistributionhistogram.h \
-            inc/interval.h \
-            inc/nearestpointshistogram.h \
-            inc/mainwindow.h \
-            inc/ofsexport.h \
-            inc/opticalflow.h \
-            inc/pgm3dexport.h \
-            inc/piepart.h \
-            inc/piechart.h \
-            inc/pith.h \
-            inc/pithextractor.h \
-            inc/plotcontourdistanceshistogram.h \
-            inc/plotcurvaturehistogram.h \
-            inc/plotintensitydistributionhistogram.h \
-            inc/plotnearestpointshistogram.h \
-            inc/plotsectorhistogram.h \
-            inc/plotslicehistogram.h \
-            inc/plotzmotiondistributionhistogram.h \
-            inc/pointpolarseriesdata.h \
-            inc/sectorhistogram.h \
-            inc/slicealgorithm.h \
-            inc/slicehistogram.h \
-            inc/sliceview.h \
-            inc/slicezoomer.h \
-            tst/test_intervalshistogram.h \
-            inc/tiffreader.h \
-            inc/v3dexport.h \
-            inc/zmotiondistributionhistogram.h
+HEADERS	=	billon.h \
+			billonalgorithms.h \
+			connexcomponentextractor.h \
+			contour.h \
+			contourbillon.h \
+			contourdistanceshistogram.h \
+			contourslice.h \
+			coordinate.h \
+			curvaturehistogram.h \
+			datexport.h \
+			define.h \
+			def_billon.h \
+			def_coordinate.h \
+			def_opticalflow.h \
+			dicomreader.h \
+			globalfunctions.h \
+			histogram.h \
+			intensitydistributionhistogram.h \
+			interval.h \
+			nearestpointshistogram.h \
+			mainwindow.h \
+			ofsexport.h \
+			opticalflow.h \
+			pgm3dexport.h \
+			piepart.h \
+			piechart.h \
+			pith.h \
+			pithextractor.h \
+			plotcontourdistanceshistogram.h \
+			plotcurvaturehistogram.h \
+			plotintensitydistributionhistogram.h \
+			plotnearestpointshistogram.h \
+			plotsectorhistogram.h \
+			plotslicehistogram.h \
+			plotzmotiondistributionhistogram.h \
+			pointpolarseriesdata.h \
+			sectorhistogram.h \
+			slicealgorithm.h \
+			slicehistogram.h \
+			sliceview.h \
+			slicezoomer.h \
+			test_intervalshistogram.h \
+			tiffreader.h \
+			v3dexport.h \
+			zmotiondistributionhistogram.h
 
-FORMS =	ui/mainwindow.ui
+FORMS =	mainwindow.ui
 
 # Directives compilateur
 #-----------------------#
-CXXFLAGS *= -std=c++0x
+CXXFLAGS += -std=c++0x
 macx:QMAKE_CC=/usr/bin/gcc
 macx:QMAKE_CXX=/usr/bin/g++
 
 
 # Librairies externes
 #--------------------#
-INCLUDEPATH *=	/usr/include/ /usr/local/include/
+INCLUDEPATH *=	/usr/include/ \
+				/usr/local/include/
 
 QMAKE_LIBDIR *=	/usr/local/lib/
 
@@ -199,6 +201,5 @@ else:itk4 {
 				-lITKIOTIFF-$${ITK_NUMBER} \
 					-litktiff-$${ITK_NUMBER} \
 					-litkjpeg-$${ITK_NUMBER} \
-                -ldl \
-                -lexpat
+
 }

@@ -96,8 +96,8 @@
         <widget class="QWidget" name="scrollAreaWidgetContents">
          <property name="geometry">
           <rect>
-           <x>201</x>
-           <y>323</y>
+           <x>140</x>
+           <y>316</y>
            <width>0</width>
            <height>0</height>
           </rect>
@@ -206,7 +206,7 @@
      <x>0</x>
      <y>0</y>
      <width>980</width>
-     <height>25</height>
+     <height>22</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFichier">
@@ -242,7 +242,7 @@
      <item row="0" column="0">
       <widget class="QTabWidget" name="_tabs">
        <property name="currentIndex">
-        <number>1</number>
+        <number>4</number>
        </property>
        <widget class="QWidget" name="_tabAffichage">
         <attribute name="title">
@@ -286,8 +286,8 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>459</width>
-              <height>370</height>
+              <width>546</width>
+              <height>338</height>
              </rect>
             </property>
             <attribute name="label">
@@ -637,8 +637,8 @@ zone restreinte</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>325</width>
-              <height>49</height>
+              <width>333</width>
+              <height>51</height>
              </rect>
             </property>
             <attribute name="label">
@@ -687,10 +687,10 @@ zone restreinte</string>
                  <property name="orientation">
                   <enum>Qt::Horizontal</enum>
                  </property>
-                 <property name="lowerValue" stdset="0">
+                 <property name="lowerValue">
                   <number>0</number>
                  </property>
-                 <property name="upperValue" stdset="0">
+                 <property name="upperValue">
                   <number>500</number>
                  </property>
                 </widget>
@@ -720,8 +720,8 @@ zone restreinte</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>294</width>
-              <height>221</height>
+              <width>299</width>
+              <height>241</height>
              </rect>
             </property>
             <attribute name="label">
@@ -915,8 +915,8 @@ zone restreinte</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>302</width>
-              <height>152</height>
+              <width>317</width>
+              <height>169</height>
              </rect>
             </property>
             <attribute name="label">
@@ -1909,8 +1909,8 @@ l'origine du contour</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>384</width>
-              <height>86</height>
+              <width>389</width>
+              <height>96</height>
              </rect>
             </property>
             <attribute name="label">
@@ -1981,8 +1981,8 @@ l'origine du contour</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>183</width>
-              <height>123</height>
+              <width>187</width>
+              <height>136</height>
              </rect>
             </property>
             <attribute name="label">
@@ -2077,8 +2077,8 @@ l'origine du contour</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>384</width>
-              <height>179</height>
+              <width>390</width>
+              <height>190</height>
              </rect>
             </property>
             <attribute name="label">
@@ -2194,8 +2194,8 @@ l'origine du contour</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>305</width>
-              <height>173</height>
+              <width>548</width>
+              <height>310</height>
              </rect>
             </property>
             <attribute name="label">
@@ -2217,6 +2217,11 @@ l'origine du contour</string>
                <item>
                 <property name="text">
                  <string>Images des zones de noeuds</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>Images (en Cartésien) des zones de noeuds </string>
                 </property>
                </item>
               </widget>
@@ -2309,8 +2314,8 @@ l'origine du contour</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>509</width>
-              <height>53</height>
+              <width>522</width>
+              <height>66</height>
              </rect>
             </property>
             <attribute name="label">
@@ -2367,8 +2372,8 @@ l'origine du contour</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>449</width>
-              <height>112</height>
+              <width>447</width>
+              <height>115</height>
              </rect>
             </property>
             <attribute name="label">
@@ -2688,6 +2693,11 @@ l'origine du contour</string>
  <layoutdefault spacing="6" margin="6"/>
  <customwidgets>
   <customwidget>
+   <class>QxtSpanSlider</class>
+   <extends>QSlider</extends>
+   <header>QxtSpanSlider</header>
+  </customwidget>
+  <customwidget>
    <class>QwtPlot</class>
    <extends>QFrame</extends>
    <header>qwt_plot.h</header>
@@ -2698,11 +2708,6 @@ l'origine du contour</string>
    <extends>QFrame</extends>
    <header>qwt_polar_plot.h</header>
    <container>1</container>
-  </customwidget>
-  <customwidget>
-   <class>QxtSpanSlider</class>
-   <extends>QSlider</extends>
-   <header>QxtSpanSlider</header>
   </customwidget>
  </customwidgets>
  <tabstops>
