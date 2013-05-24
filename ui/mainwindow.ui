@@ -637,8 +637,8 @@ zone restreinte</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>454</width>
-              <height>335</height>
+              <width>327</width>
+              <height>49</height>
              </rect>
             </property>
             <attribute name="label">
@@ -720,8 +720,8 @@ zone restreinte</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>454</width>
-              <height>335</height>
+              <width>297</width>
+              <height>221</height>
              </rect>
             </property>
             <attribute name="label">
@@ -915,8 +915,8 @@ zone restreinte</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>454</width>
-              <height>335</height>
+              <width>321</width>
+              <height>152</height>
              </rect>
             </property>
             <attribute name="label">
@@ -1081,7 +1081,7 @@ zone restreinte</string>
             <enum>QTabWidget::Rounded</enum>
            </property>
            <property name="currentIndex">
-            <number>0</number>
+            <number>1</number>
            </property>
            <property name="documentMode">
             <bool>false</bool>
@@ -1112,7 +1112,7 @@ zone restreinte</string>
                   <number>5</number>
                  </property>
                  <property name="value">
-                  <number>5</number>
+                  <number>10</number>
                  </property>
                  <property name="orientation">
                   <enum>Qt::Horizontal</enum>
@@ -1125,7 +1125,7 @@ zone restreinte</string>
                   <number>15</number>
                  </property>
                  <property name="value">
-                  <number>5</number>
+                  <number>10</number>
                  </property>
                 </widget>
                </item>
@@ -1305,7 +1305,7 @@ au début et à la fin</string>
                   <number>5</number>
                  </property>
                  <property name="value">
-                  <number>2</number>
+                  <number>5</number>
                  </property>
                  <property name="orientation">
                   <enum>Qt::Horizontal</enum>
