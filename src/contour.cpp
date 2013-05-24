@@ -61,7 +61,7 @@ void Contour::compute( const Slice &slice, const iCoord2D &sliceCenter, const in
 void Contour::smooth( int smoothingRadius )
 {
 	const int nbPoints = this->size();
-	if ( nbPoints > 0 && smoothingRadius > 0 )
+	if ( smoothingRadius > 0 && nbPoints > qMax(smoothingRadius,2) )
 	{
 		smoothingRadius = qMin(smoothingRadius,nbPoints);
 		const int smoothingDiameter = 2*smoothingRadius+1;
@@ -82,15 +82,26 @@ void Contour::smooth( int smoothingRadius )
 			}
 
 			this->clear();
-			this->append(iCoord2D( smoothingValueX/qSmoothingDiameter, smoothingValueY/qSmoothingDiameter ));
+			this->append(iCoord2D( qRound(smoothingValueX/qSmoothingDiameter), qRound(smoothingValueY/qSmoothingDiameter) ));
+
 			iCoord2D currentCoord;
+
 			for ( int i=0 ; i<nbPoints-1 ; ++i )
 			{
 				smoothingValueX = smoothingValueX - initialContour[i].x + initialContour[i+smoothingDiameter].x;
 				smoothingValueY = smoothingValueY - initialContour[i].y + initialContour[i+smoothingDiameter].y;
 				currentCoord.x = qRound(smoothingValueX / qSmoothingDiameter);
 				currentCoord.y = qRound(smoothingValueY / qSmoothingDiameter);
-				if ( this->last() != currentCoord ) this->append(currentCoord);
+				if ( currentCoord != this->last() )
+				{
+					const iCoord2D &oldCoord = (*this)[qMax(this->size()-2,0)];
+					if ( currentCoord == oldCoord && this->size() > 1 ) this->pop_back();
+					else
+					{
+						if ( qAbs(currentCoord.x-oldCoord.x)+qAbs(currentCoord.y-oldCoord.y) < 2 && this->size() > 1 ) this->pop_back();
+						this->append(currentCoord);
+					}
+				}
 			}
 		}
 	}

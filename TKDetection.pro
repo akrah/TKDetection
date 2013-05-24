@@ -37,89 +37,85 @@ TRANSLATIONS = TKDetection_en.ts
 # Fichiers
 #---------#
 SOURCES	=	src/main.cpp \
-            src/billonalgorithms.cpp \
-            src/connexcomponentextractor.cpp \
-            src/contour.cpp \
-            src/contourbillon.cpp \
-            src/contourdistanceshistogram.cpp \
-            src/contourslice.cpp \
-            src/curvaturehistogram.cpp \
-            src/datexport.cpp \
-            src/dicomreader.cpp \
-            src/globalfunctions.cpp \
-            src/intensitydistributionhistogram.cpp \
-            src/nearestpointshistogram.cpp \
-            src/mainwindow.cpp \
-            src/ofsexport.cpp \
-            src/opticalflow.cpp \
-            src/pgm3dexport.cpp \
-            src/piechart.cpp \
-            src/piepart.cpp \
-            src/pith.cpp \
-            src/pithextractor.cpp \
-            src/plotcontourdistanceshistogram.cpp \
-            src/plotcurvaturehistogram.cpp \
-            src/plotintensitydistributionhistogram.cpp \
-            src/plotnearestpointshistogram.cpp \
-            src/plotsectorhistogram.cpp \
-            src/plotslicehistogram.cpp \
-            src/plotzmotiondistributionhistogram.cpp \
-            src/pointpolarseriesdata.cpp \
-            src/sectorhistogram.cpp \
-            src/slicealgorithm.cpp \
-            src/slicehistogram.cpp \
-            src/sliceview.cpp \
-            src/slicezoomer.cpp \
-            tst/test_intervalshistogram.cpp \
-            src/tiffreader.cpp \
-            src/v3dexport.cpp \
-            src/zmotiondistributionhistogram.cpp
+			src/billonalgorithms.cpp \
+			src/connexcomponentextractor.cpp \
+			src/contour.cpp \
+			src/contourbillon.cpp \
+			src/contourdistanceshistogram.cpp \
+			src/contourslice.cpp \
+			src/curvaturehistogram.cpp \
+			src/datexport.cpp \
+			src/dicomreader.cpp \
+			src/globalfunctions.cpp \
+			src/intensitydistributionhistogram.cpp \
+			src/nearestpointshistogram.cpp \
+			src/mainwindow.cpp \
+			src/ofsexport.cpp \
+			src/opticalflow.cpp \
+			src/pgm3dexport.cpp \
+			src/piechart.cpp \
+			src/piepart.cpp \
+			src/pith.cpp \
+			src/pithextractor.cpp \
+			src/plotcontourdistanceshistogram.cpp \
+			src/plotcurvaturehistogram.cpp \
+			src/plotintensitydistributionhistogram.cpp \
+			src/plotnearestpointshistogram.cpp \
+			src/plotsectorhistogram.cpp \
+			src/plotslicehistogram.cpp \
+			src/pointpolarseriesdata.cpp \
+			src/sectorhistogram.cpp \
+			src/slicealgorithm.cpp \
+			src/slicehistogram.cpp \
+			src/sliceview.cpp \
+			src/slicezoomer.cpp \
+			tst/test_intervalshistogram.cpp \
+			src/tiffreader.cpp \
+			src/v3dexport.cpp \
 
 HEADERS	=	inc/billon.h \
-            inc/billonalgorithms.h \
-            inc/connexcomponentextractor.h \
-            inc/contour.h \
-            inc/contourbillon.h \
-            inc/contourdistanceshistogram.h \
-            inc/contourslice.h \
-            inc/coordinate.h \
-            inc/curvaturehistogram.h \
-            inc/datexport.h \
-            inc/define.h \
-            def/def_billon.h \
-            def/def_coordinate.h \
-            def/def_opticalflow.h \
-            inc/dicomreader.h \
-            inc/globalfunctions.h \
-            inc/histogram.h \
-            inc/intensitydistributionhistogram.h \
-            inc/interval.h \
-            inc/nearestpointshistogram.h \
-            inc/mainwindow.h \
-            inc/ofsexport.h \
-            inc/opticalflow.h \
-            inc/pgm3dexport.h \
-            inc/piepart.h \
-            inc/piechart.h \
-            inc/pith.h \
-            inc/pithextractor.h \
-            inc/plotcontourdistanceshistogram.h \
-            inc/plotcurvaturehistogram.h \
-            inc/plotintensitydistributionhistogram.h \
-            inc/plotnearestpointshistogram.h \
-            inc/plotsectorhistogram.h \
-            inc/plotslicehistogram.h \
-            inc/plotzmotiondistributionhistogram.h \
-            inc/pointpolarseriesdata.h \
-            inc/sectorhistogram.h \
-            inc/slicealgorithm.h \
-            inc/slicehistogram.h \
-            inc/sliceview.h \
-            inc/slicezoomer.h \
-            tst/test_intervalshistogram.h \
-            inc/tiffreader.h \
-            inc/v3dexport.h \
-            inc/zmotiondistributionhistogram.h
+			inc/billonalgorithms.h \
+			inc/connexcomponentextractor.h \
+			inc/contour.h \
+			inc/contourbillon.h \
+			inc/contourdistanceshistogram.h \
+			inc/contourslice.h \
+			inc/coordinate.h \
+			inc/curvaturehistogram.h \
+			inc/datexport.h \
+			inc/define.h \
+			def/def_billon.h \
+			def/def_coordinate.h \
+			def/def_opticalflow.h \
+			inc/dicomreader.h \
+			inc/globalfunctions.h \
+			inc/histogram.h \
+			inc/intensitydistributionhistogram.h \
+			inc/interval.h \
+			inc/nearestpointshistogram.h \
+			inc/mainwindow.h \
+			inc/ofsexport.h \
+			inc/opticalflow.h \
+			inc/pgm3dexport.h \
+			inc/piepart.h \
+			inc/piechart.h \
+			inc/pith.h \
+			inc/pithextractor.h \
+			inc/plotcontourdistanceshistogram.h \
+			inc/plotcurvaturehistogram.h \
+			inc/plotintensitydistributionhistogram.h \
+			inc/plotnearestpointshistogram.h \
+			inc/plotsectorhistogram.h \
+			inc/plotslicehistogram.h \
+			inc/pointpolarseriesdata.h \
+			inc/sectorhistogram.h \
+			inc/slicealgorithm.h \
+			inc/slicehistogram.h \
+			inc/sliceview.h \
+			inc/slicezoomer.h \
+			tst/test_intervalshistogram.h \
+			inc/tiffreader.h \
+			inc/v3dexport.h \
 
 FORMS =	ui/mainwindow.ui
 
@@ -199,6 +195,6 @@ else:itk4 {
 				-lITKIOTIFF-$${ITK_NUMBER} \
 					-litktiff-$${ITK_NUMBER} \
 					-litkjpeg-$${ITK_NUMBER} \
-                -ldl \
-                -lexpat
+				-ldl \
+				-lexpat
 }

@@ -25,7 +25,6 @@
 #include "inc/plotnearestpointshistogram.h"
 #include "inc/plotsectorhistogram.h"
 #include "inc/plotslicehistogram.h"
-#include "inc/plotzmotiondistributionhistogram.h"
 #include "inc/sectorhistogram.h"
 #include "inc/slicealgorithm.h"
 #include "inc/slicehistogram.h"
@@ -33,7 +32,6 @@
 #include "inc/v3dexport.h"
 #include "inc/v3dreader.h"
 #include "inc/tiffreader.h"
-#include "inc/zmotiondistributionhistogram.h"
 
 #include <QLabel>
 #include <QFileDialog>
@@ -54,7 +52,7 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 	_nearestPointsHistogram(new NearestPointsHistogram()), _plotNearestPointsHistogram(new PlotNearestPointsHistogram()),
 	_plotCurvatureHistogram(new PlotCurvatureHistogram()), _plotContourDistancesHistogram(new PlotContourDistancesHistogram()),
 	_intensityDistributionHistogram(new IntensityDistributionHistogram()), _plotIntensityDistributionHistogram(new PlotIntensityDistributionHistogram()),
-	_zMotionDistributionHistogram(new ZMotionDistributionHistogram()), _plotZMotionDistributionHistogram(new PlotZMotionDistributionHistogram()),
+	_intensityDistributionHistogramOnKnotArea(new IntensityDistributionHistogram()), _plotIntensityDistributionHistogramOnKnotArea(new PlotIntensityDistributionHistogram()),
 	_contourBillon(new ContourBillon()), _currentSlice(0), _currentYSlice(0), _currentMaximum(0), _currentSector(0), _treeRadius(0)
 {
 	_ui->setupUi(this);
@@ -96,7 +94,7 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 	_plotContourDistancesHistogram->attach(_ui->_plotContourDistancesHistogram);
 	_plotIntensityDistributionHistogram->attach(_ui->_plotIntensityDistributionHistogram);
 	_plotNearestPointsHistogram->attach(_ui->_plotNearestPointsHistogram);
-	_plotZMotionDistributionHistogram->attach(_ui->_plotZMotionDistributionHistogram);
+	_plotIntensityDistributionHistogramOnKnotArea->attach(_ui->_plotIntensityDistributionHistogramOnKnotArea);
 
 	/**** Mise en place de la communication MVC ****/
 
@@ -219,7 +217,7 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 	**************************************/
 	// Onglet "0. Intensité et z-mouvement"
 	QObject::connect(_ui->_buttonUpdateIntensityDistributionHistogram, SIGNAL(clicked()), this, SLOT(updateIntensityDistributionHistogram()));
-	QObject::connect(_ui->_buttonUpdateZMotionDistributionHistogram, SIGNAL(clicked()), this, SLOT(updateZMotionDistributionHistogram()));
+	QObject::connect(_ui->_buttonUpdateIntensityDistributionHistogramOnKnotArea, SIGNAL(clicked()), this, SLOT(updateIntensityDistributionHistogramOnKnotArea()));
 	// Onglet "1. Coupes"
 	QObject::connect(_ui->_buttonPreviousMaximum, SIGNAL(clicked()), this, SLOT(previousMaximumInSliceHistogram()));
 	QObject::connect(_ui->_buttonNextMaximum, SIGNAL(clicked()), this, SLOT(nextMaximumInSliceHistogram()));
@@ -251,7 +249,7 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 MainWindow::~MainWindow()
 {
 	delete _contourBillon;
-	delete _plotZMotionDistributionHistogram;
+	delete _plotIntensityDistributionHistogramOnKnotArea;
 	delete _plotIntensityDistributionHistogram;
 	delete _plotContourDistancesHistogram;
 	delete _plotCurvatureHistogram;
@@ -664,26 +662,27 @@ void MainWindow::updateIntensityDistributionHistogram()
 
 	if ( _billon )
 	{
-		_intensityDistributionHistogram->construct(*_billon,Interval<int>(_ui->_spinMinIntensity->value(),_ui->_spinMaxIntensity->value()),_ui->_spinHistogramSmoothingRadius_zMotion->value());
+		_intensityDistributionHistogram->construct(*_billon, Interval<uint>(0,_billon->n_slices-1), Interval<int>(_ui->_spinMinIntensity->value(),_ui->_spinMaxIntensity->value()),
+												   _ui->_spinHistogramSmoothingRadius_zMotion->value());
 	}
 
 	_plotIntensityDistributionHistogram->update(*_intensityDistributionHistogram,Interval<int>(_ui->_spinMinIntensity->value(),_ui->_spinMaxIntensity->value()));
 	_ui->_plotIntensityDistributionHistogram->replot();
 }
 
-void MainWindow::updateZMotionDistributionHistogram()
+void MainWindow::updateIntensityDistributionHistogramOnKnotArea()
 {
-	_zMotionDistributionHistogram->clear();
+	_intensityDistributionHistogramOnKnotArea->clear();
 
-	if ( _billon )
+	if ( _ui->_comboSelectSliceInterval->currentIndex() > 0 )
 	{
-		_zMotionDistributionHistogram->construct(*_billon,Interval<int>(_ui->_spinMinIntensity->value(),_ui->_spinMaxIntensity->value()),
-												 Interval<uint>(_ui->_spinMinZMotion->value(),_ui->_spinMaxZMotion->value()),_ui->_spinHistogramSmoothingRadius_zMotion->value(),
-												 _treeRadius);
+		_intensityDistributionHistogramOnKnotArea->construct(*_billon, _sliceHistogram->interval(_ui->_comboSelectSliceInterval->currentIndex()-1),
+															 Interval<int>(_ui->_spinMinIntensity->value(),_ui->_spinMaxIntensity->value()),
+															 _ui->_spinHistogramSmoothingRadius_zMotion->value());
 	}
 
-	_plotZMotionDistributionHistogram->update(*_zMotionDistributionHistogram,Interval<uint>(_ui->_spinMinZMotion->value(),_ui->_spinMaxZMotion->value()));
-	_ui->_plotZMotionDistributionHistogram->replot();
+	_plotIntensityDistributionHistogramOnKnotArea->update(*_intensityDistributionHistogramOnKnotArea,Interval<int>(_ui->_spinMinIntensity->value(),_ui->_spinMaxIntensity->value()));
+	_ui->_plotIntensityDistributionHistogramOnKnotArea->replot();
 }
 
 void MainWindow::updatePith()
@@ -1655,8 +1654,8 @@ void MainWindow::exportImgeCartesianSliceIntervalToPgm3d()
 			{
 				QTextStream stream(&file);
 				Pgm3dExport::processImageCartesian( stream, *_billon, Interval<int>(_ui->_spinMinSlice->value(),_ui->_spinMaxSlice->value()),
-								    Interval<int>(_ui->_spinMinIntensity->value(),_ui->_spinMaxIntensity->value()),  _ui-> _spinPGM3DExportResolution->value(), _ui-> _spinAngularResolution->value(), 
-								    (_ui->_spinDatExportContrast->value()+100.)/100. );
+									Interval<int>(_ui->_spinMinIntensity->value(),_ui->_spinMaxIntensity->value()),  _ui-> _spinPGM3DExportResolution->value(), _ui-> _spinAngularResolution->value(),
+									(_ui->_spinDatExportContrast->value()+100.)/100. );
 				file.close();
 				QMessageBox::information(this,tr("Export en .pgm3d"), tr("Terminé avec succés !"));
 			}

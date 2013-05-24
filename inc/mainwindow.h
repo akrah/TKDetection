@@ -25,11 +25,9 @@ class PlotIntensityDistributionHistogram;
 class PlotNearestPointsHistogram;
 class PlotSectorHistogram;
 class PlotSliceHistogram;
-class PlotZMotionDistributionHistogram;
 class SectorHistogram;
 class SliceHistogram;
 class SliceView;
-class ZMotionDistributionHistogram;
 
 template <typename T> class Interval;
 
@@ -58,7 +56,7 @@ private slots:
 	void updateSliceHistogram();
 	void updateContourHistograms( const int &histogramIndex );
 	void updateIntensityDistributionHistogram();
-	void updateZMotionDistributionHistogram();
+	void updateIntensityDistributionHistogramOnKnotArea();
 	void updatePith();
 	void setMinimumOfSliceIntervalToCurrentSlice();
 	void setMaximumOfSliceIntervalToCurrentSlice();
@@ -96,8 +94,8 @@ private:
 	void exportSectorHistogramToImage();
 	void exportknotHistogramToImage();
 
-    void exportImgeSliceIntervalToPgm3d();
-    void exportImgeCartesianSliceIntervalToPgm3d();
+	void exportImgeSliceIntervalToPgm3d();
+	void exportImgeCartesianSliceIntervalToPgm3d();
 	void exportCurrentSegmentedKnotToPgm3d();
 	void exportSegmentedKnotsOfCurrentSliceIntervalToPgm3d();
 
@@ -139,8 +137,8 @@ private:
 	IntensityDistributionHistogram *_intensityDistributionHistogram;
 	PlotIntensityDistributionHistogram *_plotIntensityDistributionHistogram;
 
-	ZMotionDistributionHistogram *_zMotionDistributionHistogram;
-	PlotZMotionDistributionHistogram * _plotZMotionDistributionHistogram;
+	IntensityDistributionHistogram *_intensityDistributionHistogramOnKnotArea;
+	PlotIntensityDistributionHistogram *_plotIntensityDistributionHistogramOnKnotArea;
 
 	ContourBillon *_contourBillon;
 

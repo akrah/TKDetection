@@ -10,7 +10,7 @@ public:
 	IntensityDistributionHistogram();
 	virtual ~IntensityDistributionHistogram();
 
-	void construct(const Billon &billon, const Interval<int> &intensityInterval, const uint &smoothingRadius );
+	void construct( const Billon &billon, const Interval<uint> &sliceInterval, const Interval<int> &intensityInterval, const uint &smoothingRadius );
 };
 
 #endif // INTENSITYDISTRIBUTIONHISTOGRAM_H

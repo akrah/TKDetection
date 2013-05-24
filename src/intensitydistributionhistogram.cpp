@@ -10,11 +10,10 @@ IntensityDistributionHistogram::~IntensityDistributionHistogram()
 {
 }
 
-void IntensityDistributionHistogram::construct( const Billon &billon, const Interval<int> &intensityInterval, const uint &smoothingRadius )
+void IntensityDistributionHistogram::construct( const Billon &billon, const Interval<uint> &sliceInterval, const Interval<int> &intensityInterval, const uint &smoothingRadius )
 {
 	const uint &width = billon.n_cols;
 	const uint &height = billon.n_rows;
-	const uint &depth = billon.n_slices;
 	const int &minVal = intensityInterval.min();
 
 	uint i, j, k;
@@ -22,7 +21,7 @@ void IntensityDistributionHistogram::construct( const Billon &billon, const Inte
 	clear();
 	resize(intensityInterval.size()+1);
 
-	for ( k=0 ; k<depth ; ++k )
+	for ( k=sliceInterval.min() ; k<=sliceInterval.max() ; ++k )
 	{
 		const Slice &slice = billon.slice(k);
 		for ( j=0 ; j<height ; ++j )
