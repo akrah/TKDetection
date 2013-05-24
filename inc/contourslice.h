@@ -22,7 +22,6 @@ public:
 	const Contour &contour() const;
 	const ContourDistancesHistogram &contourDistancesHistogram() const;
 	const CurvatureHistogram &curvatureHistogram() const;
-	const CurvatureHistogram &curvatureHistogramReverse() const;
 	const iCoord2D &dominantPointFromLeft( const uint &index ) const;
 	const iCoord2D &dominantPointFromRight( const uint &index ) const;
 	const QVector<int> &dominantPointIndexFromLeft() const;
@@ -43,9 +42,7 @@ private:
 	void computeMainDominantPoints( const int &minimumOriginDistance );
 	void computeSupportsOfMainDominantPoints();
 	void computeContourPolygons();
-	void computeContourPolygons2();
 	void updateSlice(const Slice &initialSlice, Slice &resultSlice, const int &intensityThreshold );
-	void updateSlice2( const Slice &initialSlice, Slice &resultSlice, const uiCoord2D &sliceCenter, const int &intensityThreshold );
 
 private:
 	Contour _contour;
@@ -54,7 +51,6 @@ private:
 
 	ContourDistancesHistogram _contourDistancesHistogram;
 	CurvatureHistogram _curvatureHistogram;
-	CurvatureHistogram _curvatureHistogramReverse;
 
 	QVector<int> _dominantPointsIndexFromLeft;
 	QVector<int> _dominantPointsIndexFromRight;

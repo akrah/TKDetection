@@ -37,11 +37,6 @@ const CurvatureHistogram &ContourSlice::curvatureHistogram() const
 	return _curvatureHistogram;
 }
 
-const CurvatureHistogram &ContourSlice::curvatureHistogramReverse() const
-{
-	return _curvatureHistogramReverse;
-}
-
 const iCoord2D &ContourSlice::dominantPointFromLeft( const uint &index ) const
 {
 	Q_ASSERT_X( index<static_cast<uint>(_dominantPointsIndexFromLeft.size()), "Histogram::mainDominantPoint", "Le point dominants demandé n'existe pas" );
@@ -108,7 +103,6 @@ void ContourSlice::compute( Slice &resultSlice, const Slice &initialSlice, const
 
 	_contourDistancesHistogram.construct( _contour, sliceCenter );
 	_curvatureHistogram.construct( _contour, curvatureWidth  );
-	_curvatureHistogram.construct( _contour, curvatureWidth, true );
 
 	_sliceCenter = sliceCenter;
 
@@ -664,7 +658,7 @@ void ContourSlice::updateSlice( const Slice &initialSlice, Slice &resultSlice, c
 {
 	const int width = initialSlice.n_cols;
 	const int height = initialSlice.n_rows;
-	const int nbOriginalPointsContour = _originalContour.size();
+	const int nbPointsContour = _contour.size();
 
 	resultSlice.fill(0);
 
@@ -740,14 +734,15 @@ void ContourSlice::updateSlice( const Slice &initialSlice, Slice &resultSlice, c
 			}
 		}
 	}
-	else if ( nbOriginalPointsContour > 3 )
+	else if ( nbPointsContour > 3 )
 	{
 		// Sinon on ajoute la composante en entier
 		for ( j=0 ; j<height ; ++j )
 		{
 			for ( i=0 ; i<width ; ++i )
 			{
-				if ( initialSlice.at(j,i) > intensityThreshold && _contourPolygonTop.containsPoint(QPoint(i,j),Qt::OddEvenFill) )
+				if ( initialSlice.at(j,i) > intensityThreshold &&
+					 _contourPolygonTop.containsPoint(QPoint(i,j),Qt::OddEvenFill) )
 				{
 					resultSlice.at(j,i) = 1;
 				}

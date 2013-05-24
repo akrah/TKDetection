@@ -18,7 +18,7 @@ CurvatureHistogram::~CurvatureHistogram()
  * Public setters
  **********************************/
 
-void CurvatureHistogram::construct(const Contour &contour, const int &curvatureWidth , const bool &reverse )
+void CurvatureHistogram::construct(const Contour &contour, const int &curvatureWidth )
 {
 	clear();
 
@@ -35,19 +35,9 @@ void CurvatureHistogram::construct(const Contour &contour, const int &curvatureW
 		}
 
 		QTextStream streamContours(&fileContours);
-		if ( reverse )
+		for ( i=0 ; i<nbPoints ; ++i )
 		{
-			for ( i=nbPoints-1 ; i>=0 ; --i )
-			{
-				streamContours << contour[i].x << " " << contour[i].y << endl;
-			}
-		}
-		else
-		{
-			for ( i=0 ; i<nbPoints ; ++i )
-			{
-				streamContours << contour[i].x << " " << contour[i].y << endl;
-			}
+			streamContours << contour[i].x << " " << contour[i].y << endl;
 		}
 		fileContours.close();
 

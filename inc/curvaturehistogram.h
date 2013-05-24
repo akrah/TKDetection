@@ -11,7 +11,7 @@ public:
 	CurvatureHistogram();
 	virtual ~CurvatureHistogram();
 
-	void construct( const Contour &contour , const int &curvatureWidth, const bool &reverse = false );
+	void construct( const Contour &contour , const int &curvatureWidth );
 };
 
 #endif // CURVATUREHISTOGRAM_H

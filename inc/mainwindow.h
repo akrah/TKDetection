@@ -133,7 +133,6 @@ private:
 	PlotNearestPointsHistogram *_plotNearestPointsHistogram;
 
 	PlotCurvatureHistogram *_plotCurvatureHistogram;
-	PlotCurvatureHistogram *_plotCurvatureHistogramReverse;
 	PlotContourDistancesHistogram *_plotContourDistancesHistogram;
 
 	IntensityDistributionHistogram *_intensityDistributionHistogram;
