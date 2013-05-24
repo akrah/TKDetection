@@ -965,6 +965,7 @@ void MainWindow::exportToPgm3D()
 		case 0: exportSegmentedKnotsOfCurrentSliceIntervalToPgm3d();	break;
 		case 1: exportCurrentSegmentedKnotToPgm3d();	break;
 		case 2: exportImgeSliceIntervalToPgm3d();	break;
+		case 3: exportImgeCartesianSliceIntervalToPgm3d();	break;
 
 	default: break;
 	}
@@ -1630,6 +1631,30 @@ void MainWindow::exportImgeSliceIntervalToPgm3d()
 				Pgm3dExport::processImage( stream, *_billon, Interval<int>(_ui->_spinMinSlice->value(),_ui->_spinMaxSlice->value()),
 									Interval<int>(_ui->_spinMinIntensity->value(),_ui->_spinMaxIntensity->value()), _ui-> _spinPGM3DExportResolution->value(),
 									(_ui->_spinDatExportContrast->value()+100.)/100. );
+				file.close();
+				QMessageBox::information(this,tr("Export en .pgm3d"), tr("Terminé avec succés !"));
+			}
+			else QMessageBox::warning(this,tr("Export en .pgm3d"), tr("L'export a échoué"));
+		}
+	}
+	else QMessageBox::warning(this,tr("Export en .pgm3d"), tr("Aucun fichier de billon ouvert."));
+}
+
+
+void MainWindow::exportImgeCartesianSliceIntervalToPgm3d()
+{
+	if ( _billon )
+	{
+		QString fileName = QFileDialog::getSaveFileName(this, tr("Exporter l'image en .pgm3d"), "output.pgm3d", tr("Fichiers de données (*.pgm3d);;Tous les fichiers (*.*)"));
+		if ( !fileName.isEmpty() )
+		{
+			QFile file(fileName);
+			if ( file.open(QIODevice::WriteOnly) )
+			{
+				QTextStream stream(&file);
+				Pgm3dExport::processImageCartesian( stream, *_billon, Interval<int>(_ui->_spinMinSlice->value(),_ui->_spinMaxSlice->value()),
+								    Interval<int>(_ui->_spinMinIntensity->value(),_ui->_spinMaxIntensity->value()),  _ui-> _spinPGM3DExportResolution->value(), _ui-> _spinAngularResolution->value(), 
+								    (_ui->_spinDatExportContrast->value()+100.)/100. );
 				file.close();
 				QMessageBox::information(this,tr("Export en .pgm3d"), tr("Terminé avec succés !"));
 			}
