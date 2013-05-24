@@ -304,10 +304,12 @@ void MainWindow::openDicom()
 	QString folderName = QFileDialog::getExistingDirectory(this,tr("Sélection du répertoire DICOM"),QDir::homePath(),QFileDialog::ShowDirsOnly);
 	if ( folderName.isEmpty() ) return;
 
-	QString text = QInputDialog::getItem(this, tr("Ordre de chargement des coupes du billon"), tr("Ordre :"), QStringList() << tr("Du fichier") << tr("Inversé"), 0, false);
-	if ( text.isEmpty() ) return;
+	bool ok = false;
+	const QString inverse = tr("Inversé");
+	QString text = QInputDialog::getItem(this, tr("Ordre de chargement des coupes du billon"), tr("Ordre :"), QStringList() << tr("De lecture du fichier") << inverse, 0, false,&ok);
+	if ( !ok || text.isEmpty() ) return;
 
-	Billon *billon = DicomReader::read(folderName,text.compare(tr("Inversé")));
+	Billon *billon = DicomReader::read(folderName,text.compare(inverse));
 	if ( !billon ) return;
 
 	closeImage();
