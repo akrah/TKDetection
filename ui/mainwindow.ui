@@ -242,7 +242,7 @@
      <item row="0" column="0">
       <widget class="QTabWidget" name="_tabs">
        <property name="currentIndex">
-        <number>4</number>
+        <number>0</number>
        </property>
        <widget class="QWidget" name="_tabAffichage">
         <attribute name="title">
@@ -286,8 +286,8 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>546</width>
-              <height>338</height>
+              <width>454</width>
+              <height>335</height>
              </rect>
             </property>
             <attribute name="label">
@@ -637,8 +637,8 @@ zone restreinte</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>333</width>
-              <height>51</height>
+              <width>327</width>
+              <height>49</height>
              </rect>
             </property>
             <attribute name="label">
@@ -720,8 +720,8 @@ zone restreinte</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>299</width>
-              <height>241</height>
+              <width>297</width>
+              <height>221</height>
              </rect>
             </property>
             <attribute name="label">
@@ -915,8 +915,8 @@ zone restreinte</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>317</width>
-              <height>169</height>
+              <width>321</width>
+              <height>152</height>
              </rect>
             </property>
             <attribute name="label">
@@ -1909,8 +1909,8 @@ l'origine du contour</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>389</width>
-              <height>96</height>
+              <width>381</width>
+              <height>86</height>
              </rect>
             </property>
             <attribute name="label">
@@ -1981,8 +1981,8 @@ l'origine du contour</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>187</width>
-              <height>136</height>
+              <width>181</width>
+              <height>123</height>
              </rect>
             </property>
             <attribute name="label">
@@ -2077,8 +2077,8 @@ l'origine du contour</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>390</width>
-              <height>190</height>
+              <width>377</width>
+              <height>179</height>
              </rect>
             </property>
             <attribute name="label">
@@ -2194,8 +2194,8 @@ l'origine du contour</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>548</width>
-              <height>310</height>
+              <width>298</width>
+              <height>173</height>
              </rect>
             </property>
             <attribute name="label">
@@ -2314,8 +2314,8 @@ l'origine du contour</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>522</width>
-              <height>66</height>
+              <width>502</width>
+              <height>53</height>
              </rect>
             </property>
             <attribute name="label">
@@ -2372,8 +2372,8 @@ l'origine du contour</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>447</width>
-              <height>115</height>
+              <width>441</width>
+              <height>112</height>
              </rect>
             </property>
             <attribute name="label">
@@ -2613,7 +2613,7 @@ l'origine du contour</string>
          </item>
          <item>
           <widget class="QwtPolarPlot" name="_polarSectorHistogram">
-           <property name="plotBackground" stdset="0">
+           <property name="plotBackground">
             <brush brushstyle="SolidPattern">
              <color alpha="0">
               <red>255</red>

@@ -92,8 +92,8 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 	grid->setMajorGridPen(QPen(Qt::lightGray));
 	grid->attach(_ui->_polarSectorHistogram);
 
-	_plotContourDistancesHistogram->attach(_ui->_plotContourDistancesHistogram);
 	_plotCurvatureHistogram->attach(_ui->_plotCurvatureHistogram);
+	_plotContourDistancesHistogram->attach(_ui->_plotContourDistancesHistogram);
 	_plotIntensityDistributionHistogram->attach(_ui->_plotIntensityDistributionHistogram);
 	_plotNearestPointsHistogram->attach(_ui->_plotNearestPointsHistogram);
 	_plotZMotionDistributionHistogram->attach(_ui->_plotZMotionDistributionHistogram);
@@ -225,7 +225,7 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 	QObject::connect(_ui->_buttonNextMaximum, SIGNAL(clicked()), this, SLOT(nextMaximumInSliceHistogram()));
 	QObject::connect(_ui->_buttonUpdateSliceHistogram, SIGNAL(clicked()), this, SLOT(updateSliceHistogram()));
 	// Onglet "4. Contours"
-	QObject::connect(_ui->_sliderContour, SIGNAL(sliderMoved(int)), this, SLOT(moveContourCursor(int)));
+	QObject::connect(_ui->_sliderContour, SIGNAL(valueChanged(int)), this, SLOT(moveContourCursor(int)));
 
 	/*******************
 	* Évènements du zoom
@@ -304,10 +304,12 @@ void MainWindow::openDicom()
 	QString folderName = QFileDialog::getExistingDirectory(this,tr("Sélection du répertoire DICOM"),QDir::homePath(),QFileDialog::ShowDirsOnly);
 	if ( folderName.isEmpty() ) return;
 
-	QString text = QInputDialog::getItem(this, tr("Ordre de chargement des coupes du billon"), tr("Ordre :"), QStringList() << tr("Du fichier") << tr("Inversé"), 0, false);
-	if ( text.isEmpty() ) return;
+	bool ok = false;
+	const QString inverse = tr("Inversé");
+	QString text = QInputDialog::getItem(this, tr("Ordre de chargement des coupes du billon"), tr("Ordre :"), QStringList() << tr("De lecture du fichier") << inverse, 0, false,&ok);
+	if ( !ok || text.isEmpty() ) return;
 
-	Billon *billon = DicomReader::read(folderName,text.compare(tr("Inversé")));
+	Billon *billon = DicomReader::read(folderName,text.compare(inverse));
 	if ( !billon ) return;
 
 	closeImage();

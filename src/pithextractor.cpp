@@ -471,10 +471,11 @@ void PithExtractor::minSlice(const Slice &slice, int *minValue, int *maxValue, u
 
 void PithExtractor::correctPith( QVector<uiCoord2D> &moelle, float *listMax, float seuilHough ) const {
 	const int pithSize = moelle.size();
+	if ( pithSize < 3 ) return;
 	int startSlice, endSlice, i=0, x1, y1, x2, y2, newx, newy;
 	float ax, ay;
 	std::cerr << "Coupes interpolées :\n";
-	while(i < pithSize && pithSize >2){
+	while(i < pithSize){
 		if(listMax[i] < seuilHough){
 			startSlice = i;
 			i++;

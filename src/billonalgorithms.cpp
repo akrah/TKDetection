@@ -13,15 +13,18 @@ namespace BillonAlgorithms
 		{
 			const int width = billon.n_cols;
 			const int height = billon.n_rows;
-			const int depth = billon.n_slices-nbSlicesToCut;
+			const int nbSlicesToIgnore = billon.n_slices*0.2;
+			const int depth = billon.n_slices-nbSlicesToIgnore;
 			const qreal angleIncrement = TWO_PI/static_cast<qreal>(nbPolygonPoints);
+			const int beginRadius = width/20.;
+			const int verifiedRadius = width/10;
 
 			rCoord2D center, edge;
 			rVec2D direction;
 			qreal orientation, currentNorm;
 
 			radius = width;
-			for ( int k=nbSlicesToCut ; k<depth ; ++k )
+			for ( int k=nbSlicesToIgnore ; k<depth ; ++k )
 			{
 				const Slice &currentSlice = billon.slice(k);
 				center.x = billon.pithCoord(k).x;
@@ -31,13 +34,13 @@ namespace BillonAlgorithms
 				{
 					orientation += angleIncrement;
 					direction = rVec2D(qCos(orientation),qSin(orientation));
-					edge = center + direction*20;
+					edge = center + direction*beginRadius;
 					while ( edge.x>0 && edge.y>0 && edge.x<width && edge.y<height && currentSlice.at(edge.y,edge.x) > intensityThreshold )
 					{
 						edge += direction;
 					}
 					currentNorm = rVec2D(edge-center).norm();
-					if ( currentNorm < radius ) radius = currentNorm;
+					if ( currentNorm > verifiedRadius && currentNorm < radius ) radius = currentNorm;
 				}
 			}
 		}

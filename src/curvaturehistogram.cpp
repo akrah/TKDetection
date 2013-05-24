@@ -18,7 +18,7 @@ CurvatureHistogram::~CurvatureHistogram()
  * Public setters
  **********************************/
 
-void CurvatureHistogram::construct( const Contour &contour, const int &curvatureWidth )
+void CurvatureHistogram::construct(const Contour &contour, const int &curvatureWidth )
 {
 	clear();
 
