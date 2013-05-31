@@ -96,8 +96,8 @@
         <widget class="QWidget" name="scrollAreaWidgetContents">
          <property name="geometry">
           <rect>
-           <x>203</x>
-           <y>323</y>
+           <x>140</x>
+           <y>316</y>
            <width>0</width>
            <height>0</height>
           </rect>
@@ -206,7 +206,7 @@
      <x>0</x>
      <y>0</y>
      <width>980</width>
-     <height>25</height>
+     <height>22</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFichier">
@@ -286,8 +286,8 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>454</width>
-              <height>335</height>
+              <width>531</width>
+              <height>359</height>
              </rect>
             </property>
             <attribute name="label">
@@ -469,6 +469,36 @@
                  </item>
                 </layout>
                </item>
+               <item row="4" column="1">
+                <layout class="QHBoxLayout" name="horizontalLayout_32">
+                 <item>
+                  <widget class="QLabel" name="label_49">
+                   <property name="text">
+                    <string>Color Map</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QComboBox" name="_comboViewRender">
+                   <item>
+                    <property name="text">
+                     <string>GrayScale</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>HueScale</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>Custom</string>
+                    </property>
+                   </item>
+                  </widget>
+                 </item>
+                </layout>
+               </item>
               </layout>
              </item>
              <item>
@@ -477,6 +507,9 @@
                 <string>Zone retreinte</string>
                </property>
                <layout class="QFormLayout" name="formLayout_18">
+                <property name="fieldGrowthPolicy">
+                 <enum>QFormLayout::FieldsStayAtSizeHint</enum>
+                </property>
                 <item row="0" column="0">
                  <widget class="QLabel" name="label_19">
                   <property name="font">
@@ -637,8 +670,8 @@ zone restreinte</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>327</width>
-              <height>49</height>
+              <width>546</width>
+              <height>338</height>
              </rect>
             </property>
             <attribute name="label">
@@ -720,8 +753,8 @@ zone restreinte</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>297</width>
-              <height>221</height>
+              <width>546</width>
+              <height>338</height>
              </rect>
             </property>
             <attribute name="label">
@@ -915,8 +948,8 @@ zone restreinte</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>321</width>
-              <height>152</height>
+              <width>546</width>
+              <height>338</height>
              </rect>
             </property>
             <attribute name="label">
@@ -1909,8 +1942,8 @@ l'origine du contour</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>381</width>
-              <height>86</height>
+              <width>389</width>
+              <height>96</height>
              </rect>
             </property>
             <attribute name="label">
@@ -1981,8 +2014,8 @@ l'origine du contour</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>181</width>
-              <height>123</height>
+              <width>187</width>
+              <height>136</height>
              </rect>
             </property>
             <attribute name="label">
@@ -2077,8 +2110,8 @@ l'origine du contour</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>377</width>
-              <height>179</height>
+              <width>390</width>
+              <height>190</height>
              </rect>
             </property>
             <attribute name="label">
@@ -2194,7 +2227,7 @@ l'origine du contour</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>456</width>
+              <width>548</width>
               <height>310</height>
              </rect>
             </property>
@@ -2314,8 +2347,8 @@ l'origine du contour</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>502</width>
-              <height>53</height>
+              <width>522</width>
+              <height>66</height>
              </rect>
             </property>
             <attribute name="label">
@@ -2372,8 +2405,8 @@ l'origine du contour</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>441</width>
-              <height>112</height>
+              <width>447</width>
+              <height>115</height>
              </rect>
             </property>
             <attribute name="label">
@@ -2613,7 +2646,7 @@ l'origine du contour</string>
          </item>
          <item>
           <widget class="QwtPolarPlot" name="_polarSectorHistogram">
-           <property name="plotBackground">
+           <property name="plotBackground" stdset="0">
             <brush brushstyle="SolidPattern">
              <color alpha="0">
               <red>255</red>
@@ -2693,6 +2726,11 @@ l'origine du contour</string>
  <layoutdefault spacing="6" margin="6"/>
  <customwidgets>
   <customwidget>
+   <class>QxtSpanSlider</class>
+   <extends>QSlider</extends>
+   <header>QxtSpanSlider</header>
+  </customwidget>
+  <customwidget>
    <class>QwtPlot</class>
    <extends>QFrame</extends>
    <header>qwt_plot.h</header>
@@ -2703,11 +2741,6 @@ l'origine du contour</string>
    <extends>QFrame</extends>
    <header>qwt_polar_plot.h</header>
    <container>1</container>
-  </customwidget>
-  <customwidget>
-   <class>QxtSpanSlider</class>
-   <extends>QSlider</extends>
-   <header>QxtSpanSlider</header>
   </customwidget>
  </customwidgets>
  <tabstops>

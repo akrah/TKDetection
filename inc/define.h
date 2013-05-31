@@ -119,6 +119,16 @@ namespace TKD
 		_VIEW_TYPE_MAX_
 	};
 
+
+  // Type de rendu image
+  enum ImageViewRender
+    {
+      _ImageViewRender_MIN_ = -1,	
+      GrayScale,
+      HueScale
+    };
+  
+
 /*************************************
  * Enumerations
  *************************************/

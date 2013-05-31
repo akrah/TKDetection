@@ -118,6 +118,7 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 	// Onglet "Paramètres de l'affichage original"
 	QObject::connect(_ui->_radioYView, SIGNAL(clicked()), this, SLOT(drawSlice()));
 	QObject::connect(_ui->_radioZView, SIGNAL(clicked()), this, SLOT(drawSlice()));
+	QObject::connect(_ui->_comboViewRender, SIGNAL(currentIndexChanged(int)), this, SLOT(drawSlice()));
 	QObject::connect(_ui->_radioCartesianView, SIGNAL(clicked()), this, SLOT(drawSlice()));
 	QObject::connect(_ui->_spanSliderIntensityThreshold, SIGNAL(lowerValueChanged(int)), _ui->_spinMinIntensity, SLOT(setValue(int)));
 	QObject::connect(_ui->_spinMinIntensity, SIGNAL(valueChanged(int)), _ui->_spanSliderIntensityThreshold, SLOT(setLowerValue(int)));
@@ -411,10 +412,10 @@ void MainWindow::drawSlice()
 		_mainPix.fill(0xff000000);
 
 		_sliceView->drawSlice(_mainPix, *_billon, sliceType, pithCoord, currentSlice, Interval<int>(_ui->_spinMinIntensity->value(), _ui->_spinMaxIntensity->value()),
-							  Interval<int>(_ui->_spinMinZMotion->value(), _ui->_spinMaxZMotion->value()), _ui->_spinAngularResolution->value(), viewType,
-							  TKD::OpticalFlowParameters(_ui->_spinFlowAlpha->value(),_ui->_spinFlowEpsilon->value(),_ui->_spinFlowMaximumIterations->value()),
-							  TKD::EdgeDetectionParameters(static_cast<const TKD::EdgeDetectionType>(_ui->_comboEdgeDetectionType->currentIndex()),_ui->_spinCannyRadiusOfGaussianMask->value(),
-														   _ui->_spinCannySigmaOfGaussianMask->value(), _ui->_spinCannyMinimumGradient->value(), _ui->_spinCannyMinimumDeviation->value()));
+				      Interval<int>(_ui->_spinMinZMotion->value(), _ui->_spinMaxZMotion->value()), _ui->_spinAngularResolution->value(), viewType,
+				      TKD::OpticalFlowParameters(_ui->_spinFlowAlpha->value(),_ui->_spinFlowEpsilon->value(),_ui->_spinFlowMaximumIterations->value()),
+				      TKD::EdgeDetectionParameters(static_cast<const TKD::EdgeDetectionType>(_ui->_comboEdgeDetectionType->currentIndex()),_ui->_spinCannyRadiusOfGaussianMask->value(),
+								   _ui->_spinCannySigmaOfGaussianMask->value(), _ui->_spinCannyMinimumGradient->value(), _ui->_spinCannyMinimumDeviation->value()), TKD::ImageViewRender(_ui->_comboViewRender->currentIndex()));
 
 		if ( (viewType == TKD::Z_VIEW || viewType == TKD::CARTESIAN_VIEW) && _billon->hasPith() )
 		{
