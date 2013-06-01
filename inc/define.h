@@ -125,7 +125,9 @@ namespace TKD
     {
       _ImageViewRender_MIN_ = -1,	
       GrayScale,
-      HueScale
+      HueScale,
+      HueScaleLog,
+      Custom
     };
   
 

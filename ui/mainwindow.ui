@@ -492,6 +492,11 @@
                    </item>
                    <item>
                     <property name="text">
+                     <string>HueScaleLog</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
                      <string>Custom</string>
                     </property>
                    </item>
