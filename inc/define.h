@@ -26,7 +26,7 @@ namespace TKD
  *************************************/
 
 // Paramètres de détection des maximums et intervalles dans un histogramme
-#define HISTOGRAM_SMOOTHING_RADIUS 5
+#define HISTOGRAM_SMOOTHING_RADIUS 10
 #define HISTOGRAM_BORDER_PERCENTAGE_TO_CUT 5
 #define HISTOGRAM_PERCENTAGE_OF_MINIMUM_HEIGHT_OF_MAXIMUM 10
 #define HISTOGRAM_MINIMUM_WIDTH_OF_INTERVALS 10
