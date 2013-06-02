@@ -83,7 +83,7 @@ void SliceView::drawSlice(QImage &image, const Billon &billon, const TKD::SliceT
  * Private functions
  *******************************/
 
-void SliceView::drawCurrentSlice( QImage &image, const Billon &billon, 
+void SliceView::drawCurrentSlice( QImage &image, const Billon &billon,
 				  const uint &sliceIndex, const Interval<int> &intensityInterval,
 				  const uint &angularResolution, const TKD::ImageViewRender &aRender, const TKD::ViewType &axe)
 {
@@ -94,14 +94,14 @@ void SliceView::drawCurrentSlice( QImage &image, const Billon &billon,
 	const uint &depth = billon.n_slices;
 	const int &minIntensity = intensityInterval.min();
 	const qreal fact = 255.0/intensityInterval.size();
-	
+
 	DGtal::HueShadeColorMap<unsigned char> hueShade (0, 255);
 	DGtal::HueShadeColorMap<unsigned char> hueShadeLog (log(1), log(1+255));
 	DGtal::GrayscaleColorMap<unsigned char> grayShade (0, 255);
 	DGtal::GradientColorMap<unsigned char> customShade(0,255);
 	customShade.addColor( DGtal::Color::Blue );
 	customShade.addColor( DGtal::Color::Red );
-	customShade.addColor( DGtal::Color::Green );   
+	customShade.addColor( DGtal::Color::Green );
 	customShade.addColor( DGtal::Color::White );
 
 	QRgb * line = (QRgb *) image.bits();
@@ -148,7 +148,7 @@ void SliceView::drawCurrentSlice( QImage &image, const Billon &billon,
 				color = (TKD::restrictedValue(slice.at(y,x),intensityInterval)-minIntensity)*fact;
 				DGtal::Color col= ((aRender== TKD::HueScale) ? hueShade( color): (aRender==TKD::GrayScale)? grayShade(color): (aRender==TKD::HueScaleLog)? hueShadeLog(log(1+color)):customShade(color));
 				*(line++) = qRgb(col.red(),col.green(),col.blue());
-				
+
 			}
 		}
 	}

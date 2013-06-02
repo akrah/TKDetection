@@ -68,6 +68,7 @@ private slots:
 	void selectCurrentSliceInterval();
 	void selectSectorInterval( const int &index, const bool &draw = true );
 	void selectCurrentSectorInterval();
+	void setSectorNumber( const int &value );
 	void exportToDat();
 	void exportToOfs();
 	void exportHistograms();
