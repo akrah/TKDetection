@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>908</width>
-    <height>715</height>
+    <height>727</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -96,8 +96,8 @@
         <widget class="QWidget" name="scrollAreaWidgetContents">
          <property name="geometry">
           <rect>
-           <x>175</x>
-           <y>251</y>
+           <x>174</x>
+           <y>257</y>
            <width>0</width>
            <height>0</height>
           </rect>
@@ -251,6 +251,9 @@
         <layout class="QVBoxLayout" name="verticalLayout_6">
          <item>
           <layout class="QFormLayout" name="formLayout_12">
+           <property name="fieldGrowthPolicy">
+            <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
+           </property>
            <item row="0" column="0">
             <widget class="QLabel" name="label_23">
              <property name="text">
@@ -285,22 +288,19 @@
             <property name="geometry">
              <rect>
               <x>0</x>
-              <y>0</y>
-              <width>438</width>
-              <height>175</height>
+              <y>-61</y>
+              <width>423</width>
+              <height>205</height>
              </rect>
             </property>
             <attribute name="label">
              <string>Paramètres de l'affichage original</string>
             </attribute>
-            <layout class="QVBoxLayout" name="verticalLayout_8">
-             <item>
-              <layout class="QFormLayout" name="formLayout_2">
-               <property name="fieldGrowthPolicy">
-                <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
-               </property>
-               <item row="0" column="0">
-                <widget class="QLabel" name="label_42">
+            <layout class="QFormLayout" name="formLayout_2">
+             <item row="0" column="1">
+              <layout class="QHBoxLayout" name="horizontalLayout">
+               <item>
+                <widget class="QRadioButton" name="_radioZView">
                  <property name="font">
                   <font>
                    <weight>50</weight>
@@ -308,58 +308,15 @@
                   </font>
                  </property>
                  <property name="text">
-                  <string>Projection</string>
+                  <string>z</string>
+                 </property>
+                 <property name="checked">
+                  <bool>true</bool>
                  </property>
                 </widget>
                </item>
-               <item row="0" column="1">
-                <layout class="QHBoxLayout" name="horizontalLayout">
-                 <item>
-                  <widget class="QRadioButton" name="_radioZView">
-                   <property name="font">
-                    <font>
-                     <weight>50</weight>
-                     <bold>false</bold>
-                    </font>
-                   </property>
-                   <property name="text">
-                    <string>z</string>
-                   </property>
-                   <property name="checked">
-                    <bool>true</bool>
-                   </property>
-                  </widget>
-                 </item>
-                 <item>
-                  <widget class="QRadioButton" name="_radioYView">
-                   <property name="font">
-                    <font>
-                     <weight>50</weight>
-                     <bold>false</bold>
-                    </font>
-                   </property>
-                   <property name="text">
-                    <string>y</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item>
-                  <widget class="QRadioButton" name="_radioCartesianView">
-                   <property name="font">
-                    <font>
-                     <weight>50</weight>
-                     <bold>false</bold>
-                    </font>
-                   </property>
-                   <property name="text">
-                    <string>Cartésienne</string>
-                   </property>
-                  </widget>
-                 </item>
-                </layout>
-               </item>
-               <item row="1" column="0">
-                <widget class="QLabel" name="label_6">
+               <item>
+                <widget class="QRadioButton" name="_radioYView">
                  <property name="font">
                   <font>
                    <weight>50</weight>
@@ -367,52 +324,12 @@
                   </font>
                  </property>
                  <property name="text">
-                  <string>Seuillage</string>
+                  <string>y</string>
                  </property>
                 </widget>
                </item>
-               <item row="1" column="1">
-                <layout class="QHBoxLayout" name="horizontalLayout_2">
-                 <item>
-                  <widget class="QSpinBox" name="_spinMinIntensity">
-                   <property name="font">
-                    <font>
-                     <weight>50</weight>
-                     <bold>false</bold>
-                    </font>
-                   </property>
-                  </widget>
-                 </item>
-                 <item>
-                  <widget class="QxtSpanSlider" name="_spanSliderIntensityThreshold">
-                   <property name="font">
-                    <font>
-                     <weight>50</weight>
-                     <bold>false</bold>
-                    </font>
-                   </property>
-                   <property name="maximum">
-                    <number>0</number>
-                   </property>
-                   <property name="orientation">
-                    <enum>Qt::Horizontal</enum>
-                   </property>
-                  </widget>
-                 </item>
-                 <item>
-                  <widget class="QSpinBox" name="_spinMaxIntensity">
-                   <property name="font">
-                    <font>
-                     <weight>50</weight>
-                     <bold>false</bold>
-                    </font>
-                   </property>
-                  </widget>
-                 </item>
-                </layout>
-               </item>
-               <item row="3" column="0">
-                <widget class="QLabel" name="label_46">
+               <item>
+                <widget class="QRadioButton" name="_radioCartesianView">
                  <property name="font">
                   <font>
                    <weight>50</weight>
@@ -420,92 +337,179 @@
                   </font>
                  </property>
                  <property name="text">
-                  <string>Résolution angulaire
-de la projection cartesienne</string>
+                  <string>Cartésienne</string>
                  </property>
                 </widget>
-               </item>
-               <item row="3" column="1">
-                <layout class="QHBoxLayout" name="horizontalLayout_8">
-                 <item>
-                  <widget class="QSlider" name="_sliderAngularResolution">
-                   <property name="font">
-                    <font>
-                     <weight>50</weight>
-                     <bold>false</bold>
-                    </font>
-                   </property>
-                   <property name="minimum">
-                    <number>10</number>
-                   </property>
-                   <property name="maximum">
-                    <number>360</number>
-                   </property>
-                   <property name="value">
-                    <number>360</number>
-                   </property>
-                   <property name="orientation">
-                    <enum>Qt::Horizontal</enum>
-                   </property>
-                  </widget>
-                 </item>
-                 <item>
-                  <widget class="QSpinBox" name="_spinAngularResolution">
-                   <property name="font">
-                    <font>
-                     <weight>50</weight>
-                     <bold>false</bold>
-                    </font>
-                   </property>
-                   <property name="minimum">
-                    <number>10</number>
-                   </property>
-                   <property name="maximum">
-                    <number>360</number>
-                   </property>
-                   <property name="value">
-                    <number>360</number>
-                   </property>
-                  </widget>
-                 </item>
-                </layout>
-               </item>
-               <item row="4" column="1">
-                <layout class="QHBoxLayout" name="horizontalLayout_32">
-                 <item>
-                  <widget class="QLabel" name="label_49">
-                   <property name="text">
-                    <string>Color Map</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item>
-                  <widget class="QComboBox" name="_comboViewRender">
-                   <item>
-                    <property name="text">
-                     <string>GrayScale</string>
-                    </property>
-                   </item>
-                   <item>
-                    <property name="text">
-                     <string>HueScale</string>
-                    </property>
-                   </item>
-                   <item>
-                    <property name="text">
-                     <string>HueScaleLog</string>
-                    </property>
-                   </item>
-                   <item>
-                    <property name="text">
-                     <string>Custom</string>
-                    </property>
-                   </item>
-                  </widget>
-                 </item>
-                </layout>
                </item>
               </layout>
+             </item>
+             <item row="0" column="0">
+              <widget class="QLabel" name="label_42">
+               <property name="font">
+                <font>
+                 <weight>50</weight>
+                 <bold>false</bold>
+                </font>
+               </property>
+               <property name="text">
+                <string>Projection</string>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="0">
+              <widget class="QLabel" name="label_6">
+               <property name="font">
+                <font>
+                 <weight>50</weight>
+                 <bold>false</bold>
+                </font>
+               </property>
+               <property name="text">
+                <string>Seuillage</string>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="1">
+              <layout class="QHBoxLayout" name="horizontalLayout_2">
+               <item>
+                <widget class="QSpinBox" name="_spinMinIntensity">
+                 <property name="font">
+                  <font>
+                   <weight>50</weight>
+                   <bold>false</bold>
+                  </font>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QxtSpanSlider" name="_spanSliderIntensityThreshold">
+                 <property name="font">
+                  <font>
+                   <weight>50</weight>
+                   <bold>false</bold>
+                  </font>
+                 </property>
+                 <property name="maximum">
+                  <number>0</number>
+                 </property>
+                 <property name="orientation">
+                  <enum>Qt::Horizontal</enum>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QSpinBox" name="_spinMaxIntensity">
+                 <property name="font">
+                  <font>
+                   <weight>50</weight>
+                   <bold>false</bold>
+                  </font>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+             <item row="2" column="0">
+              <widget class="QLabel" name="label_46">
+               <property name="font">
+                <font>
+                 <weight>50</weight>
+                 <bold>false</bold>
+                </font>
+               </property>
+               <property name="text">
+                <string>Résolution angulaire
+de la projection cartesienne</string>
+               </property>
+              </widget>
+             </item>
+             <item row="2" column="1">
+              <layout class="QHBoxLayout" name="horizontalLayout_8">
+               <item>
+                <widget class="QSlider" name="_sliderAngularResolution">
+                 <property name="font">
+                  <font>
+                   <weight>50</weight>
+                   <bold>false</bold>
+                  </font>
+                 </property>
+                 <property name="minimum">
+                  <number>10</number>
+                 </property>
+                 <property name="maximum">
+                  <number>360</number>
+                 </property>
+                 <property name="value">
+                  <number>360</number>
+                 </property>
+                 <property name="orientation">
+                  <enum>Qt::Horizontal</enum>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QSpinBox" name="_spinAngularResolution">
+                 <property name="font">
+                  <font>
+                   <weight>50</weight>
+                   <bold>false</bold>
+                  </font>
+                 </property>
+                 <property name="minimum">
+                  <number>10</number>
+                 </property>
+                 <property name="maximum">
+                  <number>360</number>
+                 </property>
+                 <property name="value">
+                  <number>360</number>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+             <item row="3" column="1">
+              <widget class="QComboBox" name="_comboViewRender">
+               <property name="font">
+                <font>
+                 <weight>50</weight>
+                 <bold>false</bold>
+                </font>
+               </property>
+               <item>
+                <property name="text">
+                 <string>GrayScale</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>HueScale</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>HueScaleLog</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>Custom</string>
+                </property>
+               </item>
+              </widget>
+             </item>
+             <item row="3" column="0">
+              <widget class="QLabel" name="label_49">
+               <property name="font">
+                <font>
+                 <weight>50</weight>
+                 <bold>false</bold>
+                </font>
+               </property>
+               <property name="text">
+                <string>Color Map</string>
+               </property>
+              </widget>
              </item>
             </layout>
            </widget>
@@ -514,7 +518,7 @@ de la projection cartesienne</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>246</width>
+              <width>423</width>
               <height>184</height>
              </rect>
             </property>
@@ -722,8 +726,8 @@ zone restreinte</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>330</width>
-              <height>51</height>
+              <width>436</width>
+              <height>144</height>
              </rect>
             </property>
             <attribute name="label">
@@ -772,10 +776,10 @@ zone restreinte</string>
                  <property name="orientation">
                   <enum>Qt::Horizontal</enum>
                  </property>
-                 <property name="lowerValue" stdset="0">
+                 <property name="lowerValue">
                   <number>0</number>
                  </property>
-                 <property name="upperValue" stdset="0">
+                 <property name="upperValue">
                   <number>500</number>
                  </property>
                 </widget>
@@ -805,237 +809,7 @@ zone restreinte</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>292</width>
-              <height>241</height>
-             </rect>
-            </property>
-            <attribute name="label">
-             <string>Paramètres de la détection de contours</string>
-            </attribute>
-            <layout class="QVBoxLayout" name="verticalLayout">
-             <item>
-              <layout class="QFormLayout" name="formLayout_3">
-               <property name="fieldGrowthPolicy">
-                <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
-               </property>
-               <property name="text">
-                <string>Seuil de contour</string>
-               </property>
-              </widget>
-             </item>
-             <item row="2" column="0">
-              <widget class="QLabel" name="label_25">
-               <property name="font">
-                <font>
-                 <weight>50</weight>
-                 <bold>false</bold>
-                </font>
-               </property>
-               <property name="text">
-                <string>Pourcentage du
-rayon moyen</string>
-               </property>
-              </widget>
-             </item>
-             <item row="2" column="1">
-              <layout class="QHBoxLayout" name="horizontalLayout_11">
-               <item>
-                <widget class="QSlider" name="_sliderRestrictedAreaPercentage">
-                 <property name="font">
-                  <font>
-                   <weight>50</weight>
-                   <bold>false</bold>
-                  </font>
-                 </property>
-                 <property name="maximum">
-                  <number>100</number>
-                 </property>
-                 <property name="value">
-                  <number>95</number>
-                 </property>
-                 <property name="orientation">
-                  <enum>Qt::Horizontal</enum>
-                 </property>
-                </widget>
-               </item>
-               <item>
-                <widget class="QSpinBox" name="_spinRestrictedAreaPercentage">
-                 <property name="font">
-                  <font>
-                   <weight>50</weight>
-                   <bold>false</bold>
-                  </font>
-                 </property>
-                 <property name="maximum">
-                  <number>100</number>
-                 </property>
-                 <property name="value">
-                  <number>95</number>
-                 </property>
-                </widget>
-               </item>
-              </layout>
-             </item>
-             <item row="3" column="0">
-              <widget class="QLabel" name="label_20">
-               <property name="font">
-                <font>
-                 <weight>50</weight>
-                 <bold>false</bold>
-                </font>
-               </property>
-               <property name="text">
-                <string>Afficher la
-zone restreinte</string>
-               </property>
-              </widget>
-             </item>
-             <item row="3" column="1">
-              <widget class="QCheckBox" name="_checkRadiusAroundPith">
-               <property name="font">
-                <font>
-                 <weight>50</weight>
-                 <bold>false</bold>
-                </font>
-               </property>
-               <property name="text">
-                <string>100</string>
-               </property>
-              </widget>
-             </item>
-             <item row="0" column="1">
-              <layout class="QHBoxLayout" name="horizontalLayout_30">
-               <item>
-                <widget class="QSlider" name="_sliderRestrictedAreaResolution">
-                 <property name="minimum">
-                  <number>3</number>
-                 </property>
-                 <property name="maximum">
-                  <number>500</number>
-                 </property>
-                 <property name="value">
-                  <number>20</number>
-                 </property>
-                 <property name="orientation">
-                  <enum>Qt::Horizontal</enum>
-                 </property>
-                </widget>
-               </item>
-               <item>
-                <widget class="QSpinBox" name="_spinRestrictedAreaResolution">
-                 <property name="font">
-                  <font>
-                   <weight>50</weight>
-                   <bold>false</bold>
-                  </font>
-                 </property>
-                 <property name="minimum">
-                  <number>3</number>
-                 </property>
-                 <property name="maximum">
-                  <number>500</number>
-                 </property>
-                 <property name="singleStep">
-                  <number>10</number>
-                 </property>
-                 <property name="value">
-                  <number>20</number>
-                 </property>
-                </widget>
-               </item>
-              </layout>
-             </item>
-            </layout>
-           </widget>
-           <widget class="QWidget" name="_pageMovementParameters">
-            <property name="geometry">
-             <rect>
-              <x>0</x>
-              <y>0</y>
-              <width>330</width>
-              <height>51</height>
-             </rect>
-            </property>
-            <attribute name="label">
-             <string>Paramètres du z-mouvement</string>
-            </attribute>
-            <layout class="QFormLayout" name="formLayout_7">
-             <property name="fieldGrowthPolicy">
-              <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
-             </property>
-             <item row="0" column="0">
-              <widget class="QLabel" name="label_9">
-               <property name="font">
-                <font>
-                 <weight>50</weight>
-                 <bold>false</bold>
-                </font>
-               </property>
-               <property name="text">
-                <string>Seuil de z-mouvement</string>
-               </property>
-              </widget>
-             </item>
-             <item row="0" column="1">
-              <layout class="QHBoxLayout" name="horizontalLayout_22">
-               <item>
-                <widget class="QSpinBox" name="_spinMinZMotion">
-                 <property name="font">
-                  <font>
-                   <weight>50</weight>
-                   <bold>false</bold>
-                  </font>
-                 </property>
-                 <property name="maximum">
-                  <number>1000</number>
-                 </property>
-                 <property name="value">
-                  <number>200</number>
-                 </property>
-                </widget>
-               </item>
-               <item>
-                <widget class="QxtSpanSlider" name="_spanSliderZMotionThreshold">
-                 <property name="maximum">
-                  <number>1000</number>
-                 </property>
-                 <property name="orientation">
-                  <enum>Qt::Horizontal</enum>
-                 </property>
-                 <property name="lowerValue" stdset="0">
-                  <number>0</number>
-                 </property>
-                 <property name="upperValue" stdset="0">
-                  <number>500</number>
-                 </property>
-                </widget>
-               </item>
-               <item>
-                <widget class="QSpinBox" name="_spinMaxZMotion">
-                 <property name="font">
-                  <font>
-                   <weight>50</weight>
-                   <bold>false</bold>
-                  </font>
-                 </property>
-                 <property name="maximum">
-                  <number>1000</number>
-                 </property>
-                 <property name="value">
-                  <number>500</number>
-                 </property>
-                </widget>
-               </item>
-              </layout>
-             </item>
-            </layout>
-           </widget>
-           <widget class="QWidget" name="_pageEdgeDetection">
-            <property name="geometry">
-             <rect>
-              <x>0</x>
-              <y>0</y>
-              <width>292</width>
+              <width>423</width>
               <height>241</height>
              </rect>
             </property>
@@ -1230,7 +1004,7 @@ zone restreinte</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>300</width>
+              <width>423</width>
               <height>168</height>
              </rect>
             </property>
@@ -1876,8 +1650,8 @@ au début et à la fin</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>440</width>
-              <height>282</height>
+              <width>438</width>
+              <height>251</height>
              </rect>
             </property>
             <attribute name="label">
@@ -2001,8 +1775,8 @@ au début et à la fin</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>440</width>
-              <height>282</height>
+              <width>349</width>
+              <height>145</height>
              </rect>
             </property>
             <attribute name="label">
@@ -2253,7 +2027,7 @@ l'intervalle angulaire</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>365</width>
+              <width>360</width>
               <height>88</height>
              </rect>
             </property>
@@ -2318,7 +2092,7 @@ l'intervalle angulaire</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>184</width>
+              <width>182</width>
               <height>129</height>
              </rect>
             </property>
@@ -2418,7 +2192,7 @@ l'intervalle angulaire</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>324</width>
+              <width>323</width>
               <height>199</height>
              </rect>
             </property>
@@ -2575,7 +2349,7 @@ l'intervalle angulaire</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>334</width>
+              <width>331</width>
               <height>174</height>
              </rect>
             </property>
@@ -2716,7 +2490,7 @@ l'intervalle angulaire</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>263</width>
+              <width>260</width>
               <height>86</height>
              </rect>
             </property>
@@ -2757,8 +2531,8 @@ l'intervalle angulaire</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>440</width>
-              <height>181</height>
+              <width>438</width>
+              <height>150</height>
              </rect>
             </property>
             <attribute name="label">
@@ -2998,7 +2772,7 @@ l'intervalle angulaire</string>
          </item>
          <item>
           <widget class="QwtPolarPlot" name="_polarSectorHistogram">
-           <property name="plotBackground" stdset="0">
+           <property name="plotBackground">
             <brush brushstyle="SolidPattern">
              <color alpha="0">
               <red>255</red>
@@ -3078,11 +2852,6 @@ l'intervalle angulaire</string>
  <layoutdefault spacing="6" margin="6"/>
  <customwidgets>
   <customwidget>
-   <class>QxtSpanSlider</class>
-   <extends>QSlider</extends>
-   <header>QxtSpanSlider</header>
-  </customwidget>
-  <customwidget>
    <class>QwtPlot</class>
    <extends>QFrame</extends>
    <header>qwt_plot.h</header>
@@ -3093,6 +2862,11 @@ l'intervalle angulaire</string>
    <extends>QFrame</extends>
    <header>qwt_polar_plot.h</header>
    <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>QxtSpanSlider</class>
+   <extends>QSlider</extends>
+   <header>QxtSpanSlider</header>
   </customwidget>
  </customwidgets>
  <tabstops>
