@@ -33,13 +33,15 @@ public:
 	const rCoord2D &leftMainSupportPoint() const;
 	const rCoord2D &rightMainSupportPoint() const;
 
-	void compute(Slice &resultSlice, const Slice &initialSlice, const uiCoord2D &sliceCenter, const int &intensityThreshold, const int &blurredSegmentThickness, const int &smoothingRadius, const int &curvatureWidth, const int &minimumOriginDistance, const iCoord2D &startPoint = iCoord2D(-1,-1) );
-	void computeOldMethod( Slice &resultSlice, const Slice &initialSlice, const uiCoord2D &sliceCenter, const int &intensityThreshold, const int &smoothingRadius, const int &curvatureWidth, const iCoord2D &startPoint = iCoord2D(-1,-1) );
+	void compute(Slice &resultSlice, const Slice &initialSlice, const uiCoord2D &sliceCenter, const int &intensityThreshold,
+				 const int &blurredSegmentThickness, const int &smoothingRadius, const int &curvatureWidth, const iCoord2D &startPoint = iCoord2D(-1,-1) );
+	void computeOldMethod( Slice &resultSlice, const Slice &initialSlice, const uiCoord2D &sliceCenter, const int &intensityThreshold,
+						   const int &smoothingRadius, const int &curvatureWidth, const iCoord2D &startPoint = iCoord2D(-1,-1) );
 	void draw( QPainter &painter, const int &cursorPosition, const TKD::ViewType &viewType ) const;
 
 private:
 	void computeDominantPoints( const int &blurredSegmentThickness );
-	void computeMainDominantPoints( const int &minimumOriginDistance );
+	void computeMainDominantPoints();
 	void computeSupportsOfMainDominantPoints();
 	void computeContourPolygons();
 	void updateSlice(const Slice &initialSlice, Slice &resultSlice, const int &intensityThreshold );

@@ -94,8 +94,7 @@ const rCoord2D &ContourSlice::rightMainSupportPoint() const
  **********************************/
 
 void ContourSlice::compute( Slice &resultSlice, const Slice &initialSlice, const uiCoord2D &sliceCenter, const int &intensityThreshold,
-							const int &blurredSegmentThickness, const int &smoothingRadius, const int &curvatureWidth,
-							const int &minimumOriginDistance, const iCoord2D &startPoint )
+							const int &blurredSegmentThickness, const int &smoothingRadius, const int &curvatureWidth, const iCoord2D &startPoint )
 {
 	_contour.compute( initialSlice, sliceCenter, intensityThreshold, startPoint );
 	_originalContour = _contour;
@@ -107,7 +106,7 @@ void ContourSlice::compute( Slice &resultSlice, const Slice &initialSlice, const
 	_sliceCenter = sliceCenter;
 
 	computeDominantPoints( blurredSegmentThickness );
-	computeMainDominantPoints( minimumOriginDistance );
+	computeMainDominantPoints();
 	computeSupportsOfMainDominantPoints();
 	computeContourPolygons();
 	updateSlice( initialSlice, resultSlice, intensityThreshold );
@@ -480,7 +479,7 @@ void ContourSlice::computeDominantPoints( const int &blurredSegmentThickness )
 	}
 }
 
-void ContourSlice::computeMainDominantPoints( const int &minimumOriginDistance )
+void ContourSlice::computeMainDominantPoints()
 {
 	_leftMainDominantPointsIndex = _rightMainDominantPointsIndex = -1;
 
@@ -503,12 +502,13 @@ void ContourSlice::computeMainDominantPoints( const int &minimumOriginDistance )
 		{
 			index = allDominantPointsIndex[increment++];
 		}
-		while ( (index < indexToCompare) && ((_curvatureHistogram[index]>=0 ) || (_contourDistancesHistogram[index]-_contourDistancesHistogram[0] < minimumOriginDistance)) );
+		while ( (index < indexToCompare) && (_curvatureHistogram[index]>=0 ) );
 
 		if ( index<indexToCompare && increment<nbDominantPointsToCompare )
 		{
-			while ( index>minimumOriginDistance && _curvatureHistogram[index]<0 ) index--;
-			_leftMainDominantPointsIndex = index;
+			while ( index && _curvatureHistogram[index]<0 ) index--;
+			_leftMainDominantPointsIndex = index>=0?index:0;
+
 		}
 
 		// Right main dominant point
@@ -518,12 +518,12 @@ void ContourSlice::computeMainDominantPoints( const int &minimumOriginDistance )
 		{
 			index = allDominantPointsIndex[increment--];
 		}
-		while ( (index > indexToCompare) && ((_curvatureHistogram[index]>=0 ) || (_contourDistancesHistogram[index]-_contourDistancesHistogram[0] < minimumOriginDistance)) );
+		while ( (index > indexToCompare) && (_curvatureHistogram[index]>=0 ) );
 
 		if ( index>indexToCompare && increment>nbDominantPointsToCompare )
 		{
-			while ( index<nbPoints-minimumOriginDistance && _curvatureHistogram[index]<0 ) index++;
-			_rightMainDominantPointsIndex = index;
+			while ( index<nbPoints && _curvatureHistogram[index]<0 ) index++;
+			_rightMainDominantPointsIndex = index<nbPoints?index:nbPoints-1;
 		}
 	}
 }

@@ -17,8 +17,8 @@ SectorHistogram::~SectorHistogram()
  * Public setters
  *******************************/
 
-void SectorHistogram::construct(const Billon &billon, const PieChart &pieChart, const Interval<uint> &sliceInterval, const Interval<int> &intensity,
-								 const Interval<int> &motionInterval, const int &radiusAroundPith , const uint &intervalGap )
+void SectorHistogram::construct( const Billon &billon, const PieChart &pieChart, const Interval<uint> &sliceInterval, const Interval<int> &intensity,
+								 const uint &zMotionMin, const int &radiusAroundPith , const uint &intervalGap )
 {
 	clear();
 	_intervalGap = intervalGap;
@@ -27,7 +27,6 @@ void SectorHistogram::construct(const Billon &billon, const PieChart &pieChart, 
 	{
 		const int &width = billon.n_cols;
 		const int &height = billon.n_rows;
-		const int zMotionMin = motionInterval.min();
 		const qreal squareRadius = qPow(radiusAroundPith,2);
 
 		fill(0.,pieChart.nbSectors());
@@ -41,7 +40,7 @@ void SectorHistogram::construct(const Billon &billon, const PieChart &pieChart, 
 
 		QVector<int>::ConstIterator circlesLinesIterator;
 		int iRadius;
-		__billon_type__ diff;
+		uint diff;
 		iCoord2D currentPos;
 
 		// Calcul du diagramme en parcourant les tranches du billon comprises dans l'intervalle
@@ -76,17 +75,18 @@ void SectorHistogram::construct(const Billon &billon, const PieChart &pieChart, 
 	}
 }
 
-void SectorHistogram::computeIntervals( const int &derivativesPercentage, const uint &minimumWidthOfIntervals, const bool &loop )
+void SectorHistogram::computeIntervals( const PieChart &pieChart, const int &derivativesPercentage, const uint &minimumWidthOfIntervals, const bool &loop )
 {
 	Histogram<qreal>::computeIntervals( derivativesPercentage, minimumWidthOfIntervals, loop );
+	const uint &nbSectors = pieChart.nbSectors();
 	uint min, max;
 	for ( int i=0 ; i<_intervals.size() ; ++i )
 	{
 		Interval<uint> &interval = _intervals[i];
 		min = interval.min();
 		max = interval.max();
-		interval.setMin(min<_intervalGap?360+min-_intervalGap:min-_intervalGap);
+		interval.setMin(min<_intervalGap?nbSectors+min-_intervalGap:min-_intervalGap);
 		// TODO : Faire de PieChart un singleton
-		interval.setMax(max>359-_intervalGap?max+_intervalGap-360:max+_intervalGap);
+		interval.setMax(max>nbSectors-1-_intervalGap?max+_intervalGap-nbSectors:max+_intervalGap);
 	}
 }
