@@ -48,7 +48,7 @@
 
 MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::MainWindow), _labelSliceView(new QLabel), _billon(0), _componentBillon(0), _knotBillon(0),
 	_sliceView(new SliceView()), _sliceHistogram(new SliceHistogram()), _plotSliceHistogram(new PlotSliceHistogram()),
-	_pieChart(new PieChart(360)), _sectorHistogram(new SectorHistogram()), _plotSectorHistogram(new PlotSectorHistogram()),
+	_pieChart(new PieChart(720)), _sectorHistogram(new SectorHistogram()), _plotSectorHistogram(new PlotSectorHistogram()),
 	_nearestPointsHistogram(new NearestPointsHistogram()), _plotNearestPointsHistogram(new PlotNearestPointsHistogram()),
 	_plotCurvatureHistogram(new PlotCurvatureHistogram()), _plotContourDistancesHistogram(new PlotContourDistancesHistogram()),
 	_intensityDistributionHistogram(new IntensityDistributionHistogram()), _plotIntensityDistributionHistogram(new PlotIntensityDistributionHistogram()),
@@ -98,6 +98,8 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 
 	/**** Mise en place de la communication MVC ****/
 
+	initComponentsValues();
+
 	/**********************************
 	 * Évènements sur le widget central
 	 **********************************/
@@ -139,12 +141,9 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 	QObject::connect(_ui->_spinRestrictedAreaPercentage, SIGNAL(valueChanged(int)), this, SLOT(drawSlice()));
 	QObject::connect(_ui->_checkRadiusAroundPith, SIGNAL(clicked()), this, SLOT(drawSlice()));
 	// Onglet "Paramètres du mouvement"
-	QObject::connect(_ui->_spanSliderZMotionThreshold, SIGNAL(lowerValueChanged(int)), _ui->_spinMinZMotion, SLOT(setValue(int)));
-	QObject::connect(_ui->_spinMinZMotion, SIGNAL(valueChanged(int)), _ui->_spanSliderZMotionThreshold, SLOT(setLowerValue(int)));
-	QObject::connect(_ui->_spinMinZMotion, SIGNAL(valueChanged(int)), this, SLOT(drawSlice()));
-	QObject::connect(_ui->_spanSliderZMotionThreshold, SIGNAL(upperValueChanged(int)), _ui->_spinMaxZMotion, SLOT(setValue(int)));
-	QObject::connect(_ui->_spinMaxZMotion, SIGNAL(valueChanged(int)), _ui->_spanSliderZMotionThreshold, SLOT(setUpperValue(int)));
-	QObject::connect(_ui->_spinMaxZMotion, SIGNAL(valueChanged(int)), this, SLOT(drawSlice()));
+	QObject::connect(_ui->_sliderZMotionMin, SIGNAL(valueChanged(int)), _ui->_spinZMotionMin, SLOT(setValue(int)));
+	QObject::connect(_ui->_spinZMotionMin, SIGNAL(valueChanged(int)), _ui->_sliderZMotionMin, SLOT(setValue(int)));
+	QObject::connect(_ui->_spinZMotionMin, SIGNAL(valueChanged(int)), this, SLOT(drawSlice()));
 	// Onglet "Paramètres de détection de contours"
 	QObject::connect(_ui->_comboEdgeDetectionType, SIGNAL(currentIndexChanged(int)), this, SLOT(drawSlice()));
 	QObject::connect(_ui->_spinCannyRadiusOfGaussianMask, SIGNAL(valueChanged(int)), this, SLOT(drawSlice()));
@@ -271,7 +270,6 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 	QObject::connect(_ui->_actionQuit, SIGNAL(triggered()), this, SLOT(close()));
 
 	closeImage();
-	initComponentsValues();
 }
 
 MainWindow::~MainWindow()
@@ -439,9 +437,9 @@ void MainWindow::drawSlice()
 		_mainPix.fill(0xff000000);
 
 		_sliceView->drawSlice(_mainPix, *_billon, sliceType, pithCoord, currentSlice, Interval<int>(_ui->_spinMinIntensity->value(), _ui->_spinMaxIntensity->value()),
-				      Interval<int>(_ui->_spinMinZMotion->value(), _ui->_spinMaxZMotion->value()), _ui->_spinAngularResolution->value(), viewType,
-				      TKD::OpticalFlowParameters(_ui->_spinFlowAlpha->value(),_ui->_spinFlowEpsilon->value(),_ui->_spinFlowMaximumIterations->value()),
-				      TKD::EdgeDetectionParameters(static_cast<const TKD::EdgeDetectionType>(_ui->_comboEdgeDetectionType->currentIndex()),_ui->_spinCannyRadiusOfGaussianMask->value(),
+					  _ui->_spinZMotionMin->value(), _ui->_spinAngularResolution->value(), viewType,
+					  TKD::OpticalFlowParameters(_ui->_spinFlowAlpha->value(),_ui->_spinFlowEpsilon->value(),_ui->_spinFlowMaximumIterations->value()),
+					  TKD::EdgeDetectionParameters(static_cast<const TKD::EdgeDetectionType>(_ui->_comboEdgeDetectionType->currentIndex()),_ui->_spinCannyRadiusOfGaussianMask->value(),
 								   _ui->_spinCannySigmaOfGaussianMask->value(), _ui->_spinCannyMinimumGradient->value(), _ui->_spinCannyMinimumDeviation->value()), TKD::ImageViewRender(_ui->_comboViewRender->currentIndex()));
 
 		if ( (viewType == TKD::Z_VIEW || viewType == TKD::CARTESIAN_VIEW) && _billon->hasPith() )
@@ -630,8 +628,7 @@ void MainWindow::updateSliceHistogram()
 	if ( _billon && _billon->hasPith() )
 	{
 		_sliceHistogram->construct(*_billon, Interval<int>(_ui->_spinMinIntensity->value(),_ui->_spinMaxIntensity->value()),
-								   Interval<int>(_ui->_spinMinZMotion->value(),_ui->_spinMaxZMotion->value()),
-								   _ui->_spinHistogramBorderPercentageToCut_zMotion->value(), _treeRadius*_ui->_spinRestrictedAreaPercentage->value()/100.);
+								   _ui->_spinZMotionMin->value(), _ui->_spinHistogramBorderPercentageToCut_zMotion->value(), _treeRadius*_ui->_spinRestrictedAreaPercentage->value()/100.);
 		_sliceHistogram->computeMaximumsAndIntervals( _ui->_spinHistogramSmoothingRadius_zMotion->value(), _ui->_spinHistogramMinimumHeightOfMaximum_zMotion->value(),
 													  _ui->_spinHistogramDerivativeSearchPercentage_zMotion->value(), _ui->_spinHistogramMinimumWidthOfInterval_zMotion->value(), false);
 	}
@@ -1088,11 +1085,9 @@ void MainWindow::initComponentsValues() {
 	_ui->_sliderSelectYSlice->setValue(0);
 	_ui->_sliderSelectYSlice->setRange(0,0);
 
-	_ui->_spanSliderZMotionThreshold->setMinimum(0);
-	_ui->_spanSliderZMotionThreshold->setMaximum(1000);
-	_ui->_spanSliderZMotionThreshold->setLowerValue(0);
-	_ui->_spanSliderZMotionThreshold->setUpperValue(MAXIMUM_Z_MOTION);
-	_ui->_spanSliderZMotionThreshold->setLowerValue(MINIMUM_Z_MOTION);
+	_ui->_spinZMotionMin->setMinimum(0);
+	_ui->_spinZMotionMin->setMaximum(2000);
+	_ui->_spinZMotionMin->setValue(200);
 
 	_ui->_spinHistogramMinimumWidthOfInterval_zMotion->setMinimum(0);
 	_ui->_spinHistogramMinimumWidthOfInterval_zMotion->setMaximum(50);
@@ -1189,8 +1184,7 @@ void MainWindow::updateSectorHistogram( const Interval<uint> &interval )
 	if ( _billon )
 	{
 		_sectorHistogram->construct( *_billon, *_pieChart, interval, Interval<int>(_ui->_spinMinIntensity->value(),_ui->_spinMaxIntensity->value()),
-									 Interval<int>(_ui->_spinMinZMotion->value(),_ui->_spinMaxZMotion->value()),
-									 _treeRadius*_ui->_spinRestrictedAreaPercentage->value()/100., _ui->_spinSectorHistogramIntervalGap->value());
+									 _ui->_spinZMotionMin->value(), _treeRadius*_ui->_spinRestrictedAreaPercentage->value()/100., _ui->_spinSectorHistogramIntervalGap->value());
 		_sectorHistogram->computeMaximumsAndIntervals( _ui->_spinHistogramSmoothingRadius_zMotion->value(), _ui->_spinHistogramMinimumHeightOfMaximum_zMotion->value(),
 													   _ui->_spinHistogramDerivativeSearchPercentage_zMotion->value(), _ui->_spinHistogramMinimumWidthOfInterval_zMotion->value(), true );
 	}

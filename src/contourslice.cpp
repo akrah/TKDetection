@@ -507,7 +507,8 @@ void ContourSlice::computeMainDominantPoints()
 		if ( index<indexToCompare && increment<nbDominantPointsToCompare )
 		{
 			while ( index && _curvatureHistogram[index]<0 ) index--;
-			_leftMainDominantPointsIndex = index;
+			_leftMainDominantPointsIndex = index>=0?index:0;
+
 		}
 
 		// Right main dominant point
@@ -522,7 +523,7 @@ void ContourSlice::computeMainDominantPoints()
 		if ( index>indexToCompare && increment>nbDominantPointsToCompare )
 		{
 			while ( index<nbPoints && _curvatureHistogram[index]<0 ) index++;
-			_rightMainDominantPointsIndex = index;
+			_rightMainDominantPointsIndex = index<nbPoints?index:nbPoints-1;
 		}
 	}
 }
