@@ -483,7 +483,7 @@ void ContourSlice::computeMainDominantPoints()
 {
 	_leftMainDominantPointsIndex = _rightMainDominantPointsIndex = -1;
 
-	int nbDominantPoints, nbDominantPointsToCompare, nbPoints, index, indexToCompare, increment;
+	int nbDominantPoints, nbDominantPointsToCompare, nbPoints, index, indexToCompare, savedIndex, increment;
 
 	QVector<int> allDominantPointsIndex(_dominantPointsIndexFromLeft);
 	allDominantPointsIndex << _dominantPointsIndexFromRight;
@@ -492,7 +492,7 @@ void ContourSlice::computeMainDominantPoints()
 	nbDominantPoints = allDominantPointsIndex.size();
 	nbDominantPointsToCompare = nbDominantPoints/2;
 	nbPoints = _contour.size();
-	indexToCompare = nbPoints*0.35;
+	indexToCompare = nbPoints*0.45;
 
 	if ( nbDominantPoints > 2 && _contourDistancesHistogram.size() == nbPoints && _curvatureHistogram.size() == nbPoints )
 	{
@@ -502,12 +502,13 @@ void ContourSlice::computeMainDominantPoints()
 		{
 			index = allDominantPointsIndex[increment++];
 		}
-		while ( (index < indexToCompare) && (_curvatureHistogram[index]>=0 ) );
+		while ( (index < indexToCompare) && (_curvatureHistogram[index] >= 0) );
 
 		if ( index<indexToCompare && increment<nbDominantPointsToCompare )
 		{
+			savedIndex = index;
 			while ( index && _curvatureHistogram[index]<0 ) index--;
-			_leftMainDominantPointsIndex = index>=0?index:0;
+			_leftMainDominantPointsIndex = index>=0?index:savedIndex;
 
 		}
 
@@ -522,8 +523,9 @@ void ContourSlice::computeMainDominantPoints()
 
 		if ( index>indexToCompare && increment>nbDominantPointsToCompare )
 		{
+			savedIndex = index;
 			while ( index<nbPoints && _curvatureHistogram[index]<0 ) index++;
-			_rightMainDominantPointsIndex = index<nbPoints?index:nbPoints-1;
+			_rightMainDominantPointsIndex = index<nbPoints?index:savedIndex;
 		}
 	}
 }
@@ -540,7 +542,7 @@ void ContourSlice::computeSupportsOfMainDominantPoints()
 	{
 		_leftMainSupportPoint.x = _leftMainSupportPoint.y = 0.;
 		counter = 0;
-		while ( index >= qMax(_leftMainDominantPointsIndex-30,0) )
+		while ( index >= qMax(_leftMainDominantPointsIndex-25,0) )
 		{
 			_leftMainSupportPoint.x += _contour[index].x;
 			_leftMainSupportPoint.y += _contour[index].y;
@@ -556,7 +558,7 @@ void ContourSlice::computeSupportsOfMainDominantPoints()
 	{
 		int nbPoints = _contour.size();
 		counter = 0;
-		while ( index < qMin(_rightMainDominantPointsIndex+30,nbPoints) )
+		while ( index < qMin(_rightMainDominantPointsIndex+25,nbPoints) )
 		{
 			_rightMainSupportPoint.x += _contour[index].x;
 			_rightMainSupportPoint.y += _contour[index].y;

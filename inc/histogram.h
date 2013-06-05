@@ -320,6 +320,7 @@ void Histogram<T>::computeIntervals( const int & derivativesPercentage, const ui
 			else break;
 		}
 
+
 		cursorStart = cursorMax;
 		if ( cursorStart ) cursorStart--;
 		else if ( loop ) cursorStart = histoSizeMinusOne;
@@ -349,6 +350,8 @@ void Histogram<T>::computeIntervals( const int & derivativesPercentage, const ui
 				}
 			}
 		}
+		if ( cursorMax ) cursorMax--;
+		else if (loop) cursorMax = histoSizeMinusOne;
 
 		cursor.setBounds(cursorMin,cursorMax);
 
