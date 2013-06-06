@@ -726,8 +726,8 @@ zone restreinte</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>439</width>
-              <height>125</height>
+              <width>258</width>
+              <height>52</height>
              </rect>
             </property>
             <attribute name="label">
@@ -986,7 +986,7 @@ minimum</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>426</width>
+              <width>321</width>
               <height>152</height>
              </rect>
             </property>
