@@ -492,7 +492,7 @@ void ContourSlice::computeMainDominantPoints()
 	nbDominantPoints = allDominantPointsIndex.size();
 	nbDominantPointsToCompare = nbDominantPoints/2;
 	nbPoints = _contour.size();
-	indexToCompare = nbPoints*0.45;
+	indexToCompare = nbPoints*0.4;
 
 	if ( nbDominantPoints > 2 && _contourDistancesHistogram.size() == nbPoints && _curvatureHistogram.size() == nbPoints )
 	{
@@ -502,30 +502,29 @@ void ContourSlice::computeMainDominantPoints()
 		{
 			index = allDominantPointsIndex[increment++];
 		}
-		while ( (index < indexToCompare) && (_curvatureHistogram[index] >= 0) );
+		while ( (index < indexToCompare) && (_curvatureHistogram[index] > 0) );
 
 		if ( index<indexToCompare && increment<nbDominantPointsToCompare )
 		{
 			savedIndex = index;
 			while ( index && _curvatureHistogram[index]<0 ) index--;
-			_leftMainDominantPointsIndex = index>=0?index:savedIndex;
-
+			_leftMainDominantPointsIndex = index>1?index:savedIndex;
 		}
 
 		// Right main dominant point
-		increment = nbDominantPoints-1;
+		increment = nbDominantPoints-2;
 		indexToCompare = nbPoints - indexToCompare;
 		do
 		{
 			index = allDominantPointsIndex[increment--];
 		}
-		while ( (index > indexToCompare) && (_curvatureHistogram[index]>=0 ) );
+		while ( (index > indexToCompare) && (_curvatureHistogram[index] > 0 ) );
 
 		if ( index>indexToCompare && increment>nbDominantPointsToCompare )
 		{
 			savedIndex = index;
 			while ( index<nbPoints && _curvatureHistogram[index]<0 ) index++;
-			_rightMainDominantPointsIndex = index<nbPoints?index:savedIndex;
+			_rightMainDominantPointsIndex = index<nbPoints-2?index:savedIndex;
 		}
 	}
 }

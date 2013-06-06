@@ -518,8 +518,8 @@ de la projection cartesienne</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>446</width>
-              <height>178</height>
+              <width>251</width>
+              <height>166</height>
              </rect>
             </property>
             <attribute name="label">
@@ -726,8 +726,8 @@ zone restreinte</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>446</width>
-              <height>178</height>
+              <width>258</width>
+              <height>52</height>
              </rect>
             </property>
             <attribute name="label">
@@ -791,7 +791,7 @@ minimum</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>433</width>
+              <width>297</width>
               <height>221</height>
              </rect>
             </property>
@@ -986,8 +986,8 @@ minimum</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>446</width>
-              <height>178</height>
+              <width>321</width>
+              <height>152</height>
              </rect>
             </property>
             <attribute name="label">
@@ -1693,7 +1693,7 @@ au début et à la fin</string>
                <item>
                 <widget class="QSlider" name="_sliderMinimalSizeOf3DConnexComponents">
                  <property name="maximum">
-                  <number>200</number>
+                  <number>30</number>
                  </property>
                  <property name="value">
                   <number>20</number>
@@ -1706,10 +1706,10 @@ au début et à la fin</string>
                <item>
                 <widget class="QSpinBox" name="_spinMinimalSizeOf3DConnexComponents">
                  <property name="maximum">
-                  <number>200</number>
+                  <number>30</number>
                  </property>
                  <property name="value">
-                  <number>6</number>
+                  <number>20</number>
                  </property>
                 </widget>
                </item>
@@ -1728,7 +1728,7 @@ au début et à la fin</string>
                <item>
                 <widget class="QSlider" name="_sliderMinimalSizeOf2DConnexComponents">
                  <property name="maximum">
-                  <number>200</number>
+                  <number>30</number>
                  </property>
                  <property name="value">
                   <number>15</number>
@@ -1741,10 +1741,10 @@ au début et à la fin</string>
                <item>
                 <widget class="QSpinBox" name="_spinMinimalSizeOf2DConnexComponents">
                  <property name="maximum">
-                  <number>200</number>
+                  <number>30</number>
                  </property>
                  <property name="value">
-                  <number>6</number>
+                  <number>15</number>
                  </property>
                 </widget>
                </item>
