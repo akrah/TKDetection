@@ -92,16 +92,18 @@ void Contour::smooth( int smoothingRadius )
 				smoothingValueY = smoothingValueY - initialContour[i].y + initialContour[i+smoothingDiameter].y;
 				currentCoord.x = qRound(smoothingValueX / qSmoothingDiameter);
 				currentCoord.y = qRound(smoothingValueY / qSmoothingDiameter);
-				if ( currentCoord != this->last() )
+				if ( currentCoord == this->last() ) continue;
+				if ( this->size() > 1 )
 				{
-					const iCoord2D &oldCoord = (*this)[qMax(this->size()-2,0)];
-					if ( currentCoord == oldCoord && this->size() > 1 ) this->pop_back();
+					const iCoord2D &oldCoord = (*this)[this->size()-2];
+					if ( currentCoord == oldCoord ) this->pop_back();
 					else
 					{
-						if ( qAbs(currentCoord.x-oldCoord.x)+qAbs(currentCoord.y-oldCoord.y) < 2 && this->size() > 1 ) this->pop_back();
+						if ( qAbs(currentCoord.x-oldCoord.x)+qAbs(currentCoord.y-oldCoord.y) < 2 ) this->pop_back();
 						this->append(currentCoord);
 					}
 				}
+				else this->append(currentCoord);
 			}
 		}
 	}
