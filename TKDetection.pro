@@ -10,10 +10,11 @@
 
 # Version d'ITK installée : itk3 | itk4
 ITK_VERSION = itk4
-ITK_NUMBER =  4.3
+ITK_NUMBER =  4.4
+
 
 #                                                                #
-#                  NE PAS MODIFIER EN DESSOUS                    #
+#                  Ne PAS MODIFIER EN DESSOUS                    #
 ##################################################################
 
 # Configuration
@@ -29,6 +30,8 @@ QXT			=	core gui
 TARGET				= TKDetection
 macx:MOC_DIR		= .moc
 macx:OBJECTS_DIR	= .obj
+CONFIG  += qxt
+QXT     += core gui
 
 # Traductions
 #------------#
