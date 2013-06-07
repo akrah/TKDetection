@@ -23,7 +23,7 @@ TEMPLATE	=	app
 QT			*=	core gui xml
 CONFIG		*=	warn_on
 CONFIG		*=	qwt qxt qwtpolar $${ITK_VERSION}
-QXT			=	core gui
+QXT			=	core gui widgets
 
 # Répertoires
 #------------#
