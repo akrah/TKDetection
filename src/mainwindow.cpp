@@ -201,6 +201,8 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 	QObject::connect(_ui->_spinBlurredSegmentsThickness, SIGNAL(valueChanged(int)), _ui->_sliderBlurredSegmentsThickness, SLOT(setValue(int)));
 	QObject::connect(_ui->_sliderCurvatureWidth, SIGNAL(valueChanged(int)), _ui->_spinCurvatureWidth, SLOT(setValue(int)));
 	QObject::connect(_ui->_spinCurvatureWidth, SIGNAL(valueChanged(int)), _ui->_sliderCurvatureWidth, SLOT(setValue(int)));
+	QObject::connect(_ui->_sliderCurvatureThreshold, SIGNAL(valueChanged(int)), this, SLOT(updateCurvatureThreshold(int)));
+	QObject::connect(_ui->_spinCurvatureThreshold, SIGNAL(valueChanged(double)), this, SLOT(updateCurvatureThreshold(double)));
 
 	/***********************************
 	* Évènements de l'onglet "Processus"
@@ -440,7 +442,8 @@ void MainWindow::drawSlice()
 					  _ui->_spinZMotionMin->value(), _ui->_spinAngularResolution->value(), viewType,
 					  TKD::OpticalFlowParameters(_ui->_spinFlowAlpha->value(),_ui->_spinFlowEpsilon->value(),_ui->_spinFlowMaximumIterations->value()),
 					  TKD::EdgeDetectionParameters(static_cast<const TKD::EdgeDetectionType>(_ui->_comboEdgeDetectionType->currentIndex()),_ui->_spinCannyRadiusOfGaussianMask->value(),
-								   _ui->_spinCannySigmaOfGaussianMask->value(), _ui->_spinCannyMinimumGradient->value(), _ui->_spinCannyMinimumDeviation->value()), TKD::ImageViewRender(_ui->_comboViewRender->currentIndex()));
+												   _ui->_spinCannySigmaOfGaussianMask->value(), _ui->_spinCannyMinimumGradient->value(), _ui->_spinCannyMinimumDeviation->value()),
+							  TKD::ImageViewRender(_ui->_comboViewRender->currentIndex()));
 
 		if ( (viewType == TKD::Z_VIEW || viewType == TKD::CARTESIAN_VIEW) && _billon->hasPith() )
 		{
@@ -514,8 +517,8 @@ void MainWindow::drawSlice()
 
 					if ( _knotBillon )
 					{
-						SliceAlgorithm::draw( painter, _knotBillon->slice(slicePosition), pithCoord, 0, viewType );
-						_contourBillon->contourSlice(slicePosition).draw( painter, _ui->_sliderContour->value(), viewType );
+						//SliceAlgorithm::draw( painter, _knotBillon->slice(slicePosition), pithCoord, 0, viewType );
+						//_contourBillon->contourSlice(slicePosition).draw( painter, _ui->_sliderContour->value(), viewType );
 					}
 					painter.end();
 				}
@@ -667,10 +670,10 @@ void MainWindow::updateContourHistograms( const int &sliceNumber )
 		{
 			const ContourSlice &contourSlice = _contourBillon->contourSlice(sliceNumber-sliceInterval.min());
 
-			_plotCurvatureHistogram->update(contourSlice.curvatureHistogram(),contourSlice.dominantPointIndexFromLeft(),contourSlice.dominantPointIndexFromRight());
+			_plotCurvatureHistogram->update(contourSlice.curvatureHistogram(),contourSlice.leftMainDominantPointIndex(),contourSlice.rightMainDominantPointIndex());
 			_ui->_plotCurvatureHistogram->setAxisScale(QwtPlot::xBottom,0,contourSlice.curvatureHistogram().size());
 
-			_plotContourDistancesHistogram->update(contourSlice.contourDistancesHistogram(),contourSlice.dominantPointIndexFromLeft(),contourSlice.dominantPointIndexFromRight());
+			_plotContourDistancesHistogram->update(contourSlice.contourDistancesHistogram(),contourSlice.leftMainDominantPointIndex(),contourSlice.rightMainDominantPointIndex());
 			_ui->_plotContourDistancesHistogram->setAxisScale(QwtPlot::xBottom,0,contourSlice.contourDistancesHistogram().size());
 
 			_ui->_sliderContour->setMaximum(contourSlice.contour().size()>0?contourSlice.contour().size()-1:0);
@@ -889,8 +892,8 @@ void MainWindow::selectSectorInterval(const int &index, const bool &draw )
 		_ui->_plotNearestPointsHistogram->replot();
 
 		_knotBillon = new Billon(*_componentBillon);
-		_contourBillon->compute( *_knotBillon, *_componentBillon, 0, _ui->_spinBlurredSegmentsThickness->value(), _ui->_spinContourSmoothingRadius->value(),
-								 _ui->_spinCurvatureWidth->value(), _nearestPointsHistogram->intervals() );
+		_contourBillon->compute( *_knotBillon, *_componentBillon, 0, _ui->_spinContourSmoothingRadius->value(), _ui->_spinCurvatureWidth->value(),
+								 -_ui->_spinCurvatureThreshold->value(), _nearestPointsHistogram->intervals() );
 	}
 	if (draw) drawSlice();
 }
@@ -903,6 +906,20 @@ void MainWindow::selectCurrentSectorInterval()
 void MainWindow::setSectorNumber( const int &value )
 {
 	_pieChart->setSectorsNumber(value);
+}
+
+void MainWindow::updateCurvatureThreshold( const int &value )
+{
+	_ui->_spinCurvatureThreshold->blockSignals(true);
+	_ui->_spinCurvatureThreshold->setValue(value*0.001);
+	_ui->_spinCurvatureThreshold->blockSignals(false);
+}
+
+void MainWindow::updateCurvatureThreshold( const double &value )
+{
+	_ui->_sliderCurvatureThreshold->blockSignals(true);
+	_ui->_sliderCurvatureThreshold->setValue(value*1000);
+	_ui->_sliderCurvatureThreshold->blockSignals(false);
 }
 
 void MainWindow::exportToDat()
@@ -1184,9 +1201,10 @@ void MainWindow::updateSectorHistogram( const Interval<uint> &interval )
 	if ( _billon )
 	{
 		_sectorHistogram->construct( *_billon, *_pieChart, interval, Interval<int>(_ui->_spinMinIntensity->value(),_ui->_spinMaxIntensity->value()),
-									 _ui->_spinZMotionMin->value(), _treeRadius*_ui->_spinRestrictedAreaPercentage->value()/100., _ui->_spinSectorHistogramIntervalGap->value());
+									 _ui->_spinZMotionMin->value(), _treeRadius*_ui->_spinRestrictedAreaPercentage->value()/100.);
 		_sectorHistogram->computeMaximumsAndIntervals( _ui->_spinHistogramSmoothingRadius_zMotion->value(), _ui->_spinHistogramMinimumHeightOfMaximum_zMotion->value(),
-													   _ui->_spinHistogramDerivativeSearchPercentage_zMotion->value(), _ui->_spinHistogramMinimumWidthOfInterval_zMotion->value(), true );
+													   _ui->_spinHistogramDerivativeSearchPercentage_zMotion->value(), _ui->_spinHistogramMinimumWidthOfInterval_zMotion->value(),
+													   *_pieChart, _ui->_spinSectorHistogramIntervalGap->value(), true );
 	}
 
 	_plotSectorHistogram->update(*_sectorHistogram, *_pieChart);

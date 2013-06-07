@@ -33,8 +33,8 @@ bool ContourBillon::isEmpty()
 	return _contourSlices.isEmpty();
 }
 
-void ContourBillon::compute( Billon &resultBillon, const Billon &billon, const int &intensityThreshold, const int &blurredSegmentThickness,
-							 const int &smoothingRadius, const int &curvatureWidth, const QVector< Interval<uint> > &intervals  )
+void ContourBillon::compute( Billon &resultBillon, const Billon &billon, const int &intensityThreshold, const int &smoothingRadius,
+							 const int &curvatureWidth, const qreal &curvatureThreshold, const QVector< Interval<uint> > &intervals  )
 {
 	resultBillon = billon;
 	_contourSlices.resize(billon.n_slices);
@@ -49,7 +49,7 @@ void ContourBillon::compute( Billon &resultBillon, const Billon &billon, const i
 		{
 			qDebug() << QString("Calcul de la coupe de contour : %1/%2").arg(k+1-intervalStart).arg(nbSlices);
 			_contourSlices[k].compute( resultBillon.slice(k), billon.slice(k), billon.pithCoord(k), intensityThreshold,
-									   blurredSegmentThickness, smoothingRadius, curvatureWidth );
+									   smoothingRadius, curvatureWidth, curvatureThreshold );
 		}
 	}
 }
