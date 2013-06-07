@@ -15,7 +15,6 @@ public:
 	void construct( const Billon &billon, const int &treeRadius );
 	void computeMaximumsAndIntervals( const uint &smoothingRadius, const int & minimumHeightPercentageOfMaximum,
 									  const int & derivativesPercentage, const int &minimumWidthOfIntervals, const bool & loop );
-	//void computeMaximumsAndIntervals( const uint &comparisonShift, const qreal &comparisonValue );
 };
 
 #endif // NEARESTPOINTSHISTOGRAM_H
