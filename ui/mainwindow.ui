@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>908</width>
-    <height>727</height>
+    <width>901</width>
+    <height>663</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -97,7 +97,7 @@
          <property name="geometry">
           <rect>
            <x>171</x>
-           <y>263</y>
+           <y>231</y>
            <width>0</width>
            <height>0</height>
           </rect>
@@ -205,7 +205,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>908</width>
+     <width>901</width>
      <height>25</height>
     </rect>
    </property>
@@ -289,8 +289,8 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>446</width>
-              <height>178</height>
+              <width>426</width>
+              <height>152</height>
              </rect>
             </property>
             <attribute name="label">
@@ -518,7 +518,7 @@ de la projection cartesienne</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>251</width>
+              <width>426</width>
               <height>166</height>
              </rect>
             </property>
@@ -726,8 +726,8 @@ zone restreinte</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>258</width>
-              <height>52</height>
+              <width>439</width>
+              <height>125</height>
              </rect>
             </property>
             <attribute name="label">
@@ -791,7 +791,7 @@ minimum</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>297</width>
+              <width>426</width>
               <height>221</height>
              </rect>
             </property>
@@ -986,7 +986,7 @@ minimum</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>321</width>
+              <width>426</width>
               <height>152</height>
              </rect>
             </property>
@@ -1389,7 +1389,7 @@ au début et à la fin</string>
                   <number>15</number>
                  </property>
                  <property name="value">
-                  <number>2</number>
+                  <number>5</number>
                  </property>
                 </widget>
                </item>
@@ -1632,8 +1632,8 @@ au début et à la fin</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>448</width>
-              <height>273</height>
+              <width>441</width>
+              <height>220</height>
              </rect>
             </property>
             <attribute name="label">
@@ -1757,8 +1757,8 @@ au début et à la fin</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>351</width>
-              <height>129</height>
+              <width>441</width>
+              <height>220</height>
              </rect>
             </property>
             <attribute name="label">
@@ -1802,7 +1802,7 @@ pour la détection de la courbure</string>
                   <number>12</number>
                  </property>
                  <property name="value">
-                  <number>2</number>
+                  <number>5</number>
                  </property>
                  <property name="orientation">
                   <enum>Qt::Horizontal</enum>
@@ -1818,7 +1818,7 @@ pour la détection de la courbure</string>
                   <number>12</number>
                  </property>
                  <property name="value">
-                  <number>2</number>
+                  <number>5</number>
                  </property>
                 </widget>
                </item>
@@ -1832,7 +1832,7 @@ pour la détection de la courbure</string>
                   <number>50</number>
                  </property>
                  <property name="value">
-                  <number>20</number>
+                  <number>10</number>
                  </property>
                  <property name="orientation">
                   <enum>Qt::Horizontal</enum>
@@ -1848,7 +1848,7 @@ pour la détection de la courbure</string>
                   <number>50</number>
                  </property>
                  <property name="value">
-                  <number>20</number>
+                  <number>10</number>
                  </property>
                 </widget>
                </item>
@@ -1882,6 +1882,46 @@ pour la détection de la courbure</string>
                  </property>
                  <property name="value">
                   <number>3</number>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+             <item row="3" column="0">
+              <widget class="QLabel" name="label_41">
+               <property name="text">
+                <string>Seuil de courbure</string>
+               </property>
+              </widget>
+             </item>
+             <item row="3" column="1">
+              <layout class="QHBoxLayout" name="horizontalLayout_40">
+               <item>
+                <widget class="QSlider" name="_sliderCurvatureThreshold">
+                 <property name="maximum">
+                  <number>100</number>
+                 </property>
+                 <property name="value">
+                  <number>1</number>
+                 </property>
+                 <property name="orientation">
+                  <enum>Qt::Horizontal</enum>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QDoubleSpinBox" name="_spinCurvatureThreshold">
+                 <property name="decimals">
+                  <number>3</number>
+                 </property>
+                 <property name="maximum">
+                  <double>0.100000000000000</double>
+                 </property>
+                 <property name="singleStep">
+                  <double>0.001000000000000</double>
+                 </property>
+                 <property name="value">
+                  <double>0.001000000000000</double>
                  </property>
                 </widget>
                </item>
@@ -2513,8 +2553,8 @@ l'intervalle angulaire</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>448</width>
-              <height>184</height>
+              <width>441</width>
+              <height>131</height>
              </rect>
             </property>
             <attribute name="label">

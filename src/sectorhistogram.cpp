@@ -18,10 +18,9 @@ SectorHistogram::~SectorHistogram()
  *******************************/
 
 void SectorHistogram::construct( const Billon &billon, const PieChart &pieChart, const Interval<uint> &sliceInterval, const Interval<int> &intensity,
-								 const uint &zMotionMin, const int &radiusAroundPith , const uint &intervalGap )
+								 const uint &zMotionMin, const int &radiusAroundPith )
 {
 	clear();
-	_intervalGap = intervalGap;
 
 	if ( billon.hasPith() && sliceInterval.isValid() && sliceInterval.width() > 0 )
 	{
@@ -75,9 +74,11 @@ void SectorHistogram::construct( const Billon &billon, const PieChart &pieChart,
 	}
 }
 
-void SectorHistogram::computeIntervals( const PieChart &pieChart, const int &derivativesPercentage, const uint &minimumWidthOfIntervals, const bool &loop )
+void SectorHistogram::computeMaximumsAndIntervals( const uint &smoothingRadius, const int & minimumHeightPercentageOfMaximum, const int & derivativesPercentage,
+												   const int &minimumWidthOfIntervals,  const PieChart &pieChart, const uint &intervalGap, const bool & loop )
 {
-	Histogram<qreal>::computeIntervals( derivativesPercentage, minimumWidthOfIntervals, loop );
+	Histogram<qreal>::computeMaximumsAndIntervals( smoothingRadius, minimumHeightPercentageOfMaximum, derivativesPercentage, minimumWidthOfIntervals, loop );
+
 	const uint &nbSectors = pieChart.nbSectors();
 	uint min, max;
 	for ( int i=0 ; i<_intervals.size() ; ++i )
@@ -85,8 +86,8 @@ void SectorHistogram::computeIntervals( const PieChart &pieChart, const int &der
 		Interval<uint> &interval = _intervals[i];
 		min = interval.min();
 		max = interval.max();
-		interval.setMin(min<_intervalGap?nbSectors+min-_intervalGap:min-_intervalGap);
+		interval.setMin(min<intervalGap?nbSectors+min-intervalGap:min-intervalGap);
 		// TODO : Faire de PieChart un singleton
-		interval.setMax(max>nbSectors-1-_intervalGap?max+_intervalGap-nbSectors:max+_intervalGap);
+		interval.setMax(max>nbSectors-1-intervalGap?max+intervalGap-nbSectors:max+intervalGap);
 	}
 }
