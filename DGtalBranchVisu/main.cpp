@@ -267,7 +267,7 @@ int main(int argc, char** argv)
 	}
       }
     }
-    GenericWriter< ImageContainerBySTLVector<Domain, unsigned char> >::exportFile("marker.vol", markerImage);
+    GenericWriter< ImageContainerBySTLVector<Domain, unsigned char> >::exportFile("marker.pgm3D", markerImage);
   }
   if(vm.count("trunkBark-mesh")){
     string meshFilename = vm["trunkBark-mesh"].as<std::string>();
