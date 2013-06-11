@@ -10,7 +10,9 @@
 #include <boost/program_options/variables_map.hpp>
 #include "DGtal/topology/helpers/Surfaces.h"
 #include "DGtal/images/imagesSetsUtils/SetFromImage.h"
+#include "DGtal/images/imagesSetsUtils/ImageFromSet.h"
 #include "DGtal/io/readers/GenericReader.h"
+#include "DGtal/io/writers/GenericWriter.h"
 
 #include "DGtal/shapes/implicit/ImplicitBall.h"
 #include <DGtal/shapes/Shapes.h>
@@ -239,6 +241,8 @@ int main(int argc, char** argv)
     gradient.addColor(DGtal::Color::Red);
 
     viewer << SetMode3D(vectConnectedSCell.at(0).at(0).className(), "Basic");
+    ImageContainerBySTLVector<Domain, unsigned char> markerImage(domain);
+    
     for(uint i=0; i< vectConnectedSCell.size();i++){
       Domain bDomain= getBoundingBoxDomain(K, vectConnectedSCell.at(i)); 
       Point lowerPt = bDomain.lowerBound();
@@ -246,26 +250,25 @@ int main(int argc, char** argv)
       
       unsigned int width = upperPt[2] - lowerPt[2] ;
       trace.info() << "width= " << width <<endl;
+
       if(width>5){
+
 	Z3i::DigitalSet aSet = getMakerFromKnot(domain, K, vectConnectedSCell.at(i), center, 5, 2, 100, -60 );
+	DGtal::ImageFromSet<ImageContainerBySTLVector<Domain, unsigned char> >::append(markerImage,aSet, 128);
 	viewer << aSet;
    	
 	DGtal::Color c= gradient(i);
 	viewer << CustomColors3D(Color(250, 0,0,transp), Color(c.red(),
 							       c.green(),
-							       c.blue(),120));
-	    
+							       c.blue(),120));	    
 	    
 	for(uint j=0; j< vectConnectedSCell.at(i).size();j++){
 	  viewer << vectConnectedSCell.at(i).at(j);
 	}
       }
     }
-
-    
-
+    GenericWriter< ImageContainerBySTLVector<Domain, unsigned char> >::exportFile("marker.vol", markerImage);
   }
-
   if(vm.count("trunkBark-mesh")){
     string meshFilename = vm["trunkBark-mesh"].as<std::string>();
     Mesh<Display3D::pointD3D> anImportedMesh(DGtal::Color(160, 30, 30,20));
