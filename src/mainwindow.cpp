@@ -517,8 +517,8 @@ void MainWindow::drawSlice()
 
 					if ( _knotBillon )
 					{
-						//SliceAlgorithm::draw( painter, _knotBillon->slice(slicePosition), pithCoord, 0, viewType );
-						//_contourBillon->contourSlice(slicePosition).draw( painter, _ui->_sliderContour->value(), viewType );
+						SliceAlgorithm::draw( painter, _knotBillon->slice(slicePosition), pithCoord, 0, viewType );
+						_contourBillon->contourSlice(slicePosition).draw( painter, _ui->_sliderContour->value(), viewType );
 					}
 					painter.end();
 				}
@@ -722,6 +722,7 @@ void MainWindow::updatePith()
 	}
 	_treeRadius = BillonAlgorithms::restrictedAreaMeansRadius(*_billon,_ui->_spinRestrictedAreaResolution->value(),_ui->_spinRestrictedAreaThreshold->value());
 	_ui->_checkRadiusAroundPith->setText( QString::number(_treeRadius) );
+	_ui->_spinSectorsNumber->setValue(TWO_PI*_treeRadius);
 	drawSlice();
 	updateSliceHistogram();
 }
