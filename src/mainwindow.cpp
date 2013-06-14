@@ -797,8 +797,10 @@ void MainWindow::selectSliceInterval( const int &index )
 
 	_contourBillon->clear();
 
+	_ui->_comboSelectSectorInterval->blockSignals(true);
 	_ui->_comboSelectSectorInterval->clear();
 	_ui->_comboSelectSectorInterval->addItem(tr("Aucun"));
+	_ui->_comboSelectSectorInterval->blockSignals(false);
 
 	if ( index > 0 && index <= static_cast<int>(_sliceHistogram->nbIntervals()) )
 	{
