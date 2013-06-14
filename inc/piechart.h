@@ -27,10 +27,6 @@ public:
 	void draw( QImage &image, const uiCoord2D &center, const QVector<Interval<uint> > &intervals, const TKD::ViewType &viewType ) const;
 
 private:
-	void updateSectors( const int &nbSectors );
-
-private:
-	qreal _sectorAngle; // En radians
 	QVector<PiePart> _sectors;
 };
 
