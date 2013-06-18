@@ -197,8 +197,6 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 	// Onglet "Contours"
 	QObject::connect(_ui->_sliderContourSmoothingRadius, SIGNAL(valueChanged(int)), _ui->_spinContourSmoothingRadius, SLOT(setValue(int)));
 	QObject::connect(_ui->_spinContourSmoothingRadius, SIGNAL(valueChanged(int)), _ui->_sliderContourSmoothingRadius, SLOT(setValue(int)));
-	QObject::connect(_ui->_sliderBlurredSegmentsThickness, SIGNAL(valueChanged(int)), _ui->_spinBlurredSegmentsThickness, SLOT(setValue(int)));
-	QObject::connect(_ui->_spinBlurredSegmentsThickness, SIGNAL(valueChanged(int)), _ui->_sliderBlurredSegmentsThickness, SLOT(setValue(int)));
 	QObject::connect(_ui->_sliderCurvatureWidth, SIGNAL(valueChanged(int)), _ui->_spinCurvatureWidth, SLOT(setValue(int)));
 	QObject::connect(_ui->_spinCurvatureWidth, SIGNAL(valueChanged(int)), _ui->_sliderCurvatureWidth, SLOT(setValue(int)));
 	QObject::connect(_ui->_sliderCurvatureThreshold, SIGNAL(valueChanged(int)), this, SLOT(updateCurvatureThreshold(int)));
