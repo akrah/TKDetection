@@ -79,6 +79,18 @@ getBarycenter(const KSpace &K,  const vector<SCell> &aScellVect){
 
 
 
+
+void 
+exportSDP(std::ofstream &out,  const DigitalSet &aSet){
+  for(DigitalSet::ConstIterator it = aSet.begin(); it!= aSet.end(); it++){
+    out <<  (*it)[ 0 ] << " " ;
+    out <<  (*it)[ 1 ] << " " ;
+    out <<  (*it)[ 2 ] << " " <<std::endl;
+  }
+}
+
+
+
 DigitalSet 
 getMakerFromKnot(const Domain &aDomain, const KSpace &K, const vector<SCell> & aSCellVect, 
 		 const RealPoint &center, double radius=5.0, double step=2, unsigned int length = 30,  int dec=0){
@@ -243,20 +255,37 @@ int main(int argc, char** argv)
     viewer << SetMode3D(vectConnectedSCell.at(0).at(0).className(), "Basic");
     ImageContainerBySTLVector<Domain, unsigned char> markerImage(domain);
     
+    //default domain defined from set fo voxel
+    Domain domainMarker(pMin, pMax);
+    //domain given from parameters
+    if(vm.count("domain")){
+      std::vector<int> domainCoords= vm["domain"].as<std::vector <int> >();	
+      Z3i::Point ptLower(domainCoords[0],domainCoords[1], domainCoords[2]);
+      Z3i::Point ptUpper(domainCoords[3],domainCoords[4], domainCoords[5]);
+      domainMarker= Domain(ptLower, ptUpper);
+    }
+    
+    std::string filename= "exportedMarker.sdp";
+    ofstream out; 
+    out.open(filename.c_str());
+	
+    ImageContainerBySTLVector<Domain, unsigned char> markerImage(domainMarker);
+    viewer << SetMode3D(vectConnectedSCell.at(0).at(0).className(), "Basic");    
     for(uint i=0; i< vectConnectedSCell.size();i++){
       Domain bDomain= getBoundingBoxDomain(K, vectConnectedSCell.at(i)); 
       Point lowerPt = bDomain.lowerBound();
       Point upperPt = bDomain.upperBound();
       
       unsigned int width = upperPt[2] - lowerPt[2] ;
-      trace.info() << "width= " << width <<endl;
-
+      // trace.info() << "width= " << width <<endl;
+      
       if(width>5){
 
 	Z3i::DigitalSet aSet = getMakerFromKnot(domain, K, vectConnectedSCell.at(i), center, 5, 2, 100, -60 );
+	exportSDP(out, aSet);  
+	
 	DGtal::ImageFromSet<ImageContainerBySTLVector<Domain, unsigned char> >::append(markerImage,aSet, 128);
 	viewer << aSet;
-   	
 	DGtal::Color c= gradient(i);
 	viewer << CustomColors3D(Color(250, 0,0,transp), Color(c.red(),
 							       c.green(),
@@ -268,6 +297,11 @@ int main(int argc, char** argv)
       }
     }
     GenericWriter< ImageContainerBySTLVector<Domain, unsigned char> >::exportFile("marker.pgm3D", markerImage);
+    ImageContainerBySTLVector<Domain, unsigned char> markerImageSRC = 	DGtal::ImageFromSet<ImageContainerBySTLVector<Domain, unsigned char> >::create(set3d, 128);
+    GenericWriter< ImageContainerBySTLVector<Domain, unsigned char> >::exportFile("marker2.pgm3D", markerImageSRC);
+
+    
+    
   }
   if(vm.count("trunkBark-mesh")){
     string meshFilename = vm["trunkBark-mesh"].as<std::string>();
@@ -289,7 +323,7 @@ int main(int argc, char** argv)
     }
   }
 
-
+  
  
 
   viewer << Viewer3D::updateDisplay;
