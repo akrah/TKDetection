@@ -317,8 +317,6 @@ int main(int argc, char** argv)
     GenericWriter< ImageContainerBySTLVector<Domain, unsigned char> >::exportFile("marker.pgm3D", markerImage);
     ImageContainerBySTLVector<Domain, unsigned char> markerImageSRC = 	DGtal::ImageFromSet<ImageContainerBySTLVector<Domain, unsigned char> >::create(set3d, 128);
     GenericWriter< ImageContainerBySTLVector<Domain, unsigned char> >::exportFile("marker2.pgm3D", markerImageSRC);
-
-    
     
   }
   if(vm.count("trunkBark-mesh")){
