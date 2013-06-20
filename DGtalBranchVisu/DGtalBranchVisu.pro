@@ -18,4 +18,5 @@ LIBS += -lDGtal -lDGtalIO  -lboost_program_options  -lQGLViewer
 
 # Input
 
-SOURCES += main.cpp 
+
+SOURCES += main.cpp  

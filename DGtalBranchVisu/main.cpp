@@ -132,6 +132,9 @@ int main(int argc, char** argv)
     ("scaleY,y",  po::value<float>()->default_value(1.0), "set the scale value in the Y direction (default 1.0)" )
     ("scaleZ,z",  po::value<float>()->default_value(1.0), "set the scale value in the Z direction (default 1.0)")
     ("center,c",  po::value<std::vector <int> >()->multitoken(), "The coordinates of the center to define the seed ")
+    ("domain,d",  po::value<std::vector <int> >()->multitoken(), "The domain xmin ymin zmin xmax ymax zmax ")
+    ("backgroundSourceImage", po::value<std::string>(), "adds background source image")
+    ("backgroundSourceMin", po::value<int>()->default_value(10), "define the min threshold to consider to considered as backgroundSource in the image given by backgroundSourceImage (default 10) ")
     ("minSizeBoundary,m",  po::value<unsigned int >()->default_value(100.0), "set the min size of the boundary to be extracted (default 100)" )
     ("transparency,T",  po::value<uint>()->default_value(100), "transparency") ;
   bool parseOK=true;
@@ -167,7 +170,6 @@ int main(int argc, char** argv)
   float sy = vm["scaleY"].as<float>();
   float sz = vm["scaleZ"].as<float>();
 
-  
 
   QApplication application(argc,argv);
   Viewer3D viewer;
@@ -242,7 +244,6 @@ int main(int argc, char** argv)
     cerr << "[done]"<< endl;
 
 
-
     GradientColorMap<long> gradient( 0, vectConnectedSCell.size());
     gradient.addColor(DGtal::Color::Red);
     gradient.addColor(DGtal::Color::Yellow);
@@ -251,11 +252,10 @@ int main(int argc, char** argv)
     gradient.addColor(DGtal::Color::Blue);
     gradient.addColor(DGtal::Color::Magenta);
     gradient.addColor(DGtal::Color::Red);
-
     viewer << SetMode3D(vectConnectedSCell.at(0).at(0).className(), "Basic");
-    ImageContainerBySTLVector<Domain, unsigned char> markerImage(domain);
-    
-    //default domain defined from set fo voxel
+
+
+  //default domain defined from set fo voxel
     Domain domainMarker(pMin, pMax);
     //domain given from parameters
     if(vm.count("domain")){
@@ -268,9 +268,27 @@ int main(int argc, char** argv)
     std::string filename= "exportedMarker.sdp";
     ofstream out; 
     out.open(filename.c_str());
-	
+    
     ImageContainerBySTLVector<Domain, unsigned char> markerImage(domainMarker);
     viewer << SetMode3D(vectConnectedSCell.at(0).at(0).className(), "Basic");    
+      
+    if(!vm.count("backgroundSourceImage")){
+      for(Domain::ConstIterator it = domainMarker.begin();  it!= domainMarker.end(); it++){
+	markerImage.setValue(*it, 128);
+      }
+    }else{
+      typedef DGtal::ImageContainerBySTLMap<DGtal::Z3i::Domain, unsigned int> Image3D;
+      Image3D imageSrc= DGtal::GenericReader<Image3D>::import(vm["backgroundSourceImage"].as<std::string>());
+      int threshold  = vm["backgroundSourceMin"].as<int>();
+      for(Domain::ConstIterator it = domainMarker.begin();  it!= domainMarker.end(); it++){
+	if(imageSrc(*it)<threshold)
+	  markerImage.setValue(*it, 0);
+	else
+	  markerImage.setValue(*it, 128);
+      }
+    }
+    
+    
     for(uint i=0; i< vectConnectedSCell.size();i++){
       Domain bDomain= getBoundingBoxDomain(K, vectConnectedSCell.at(i)); 
       Point lowerPt = bDomain.lowerBound();
@@ -284,7 +302,7 @@ int main(int argc, char** argv)
 	Z3i::DigitalSet aSet = getMakerFromKnot(domain, K, vectConnectedSCell.at(i), center, 5, 2, 100, -60 );
 	exportSDP(out, aSet);  
 	
-	DGtal::ImageFromSet<ImageContainerBySTLVector<Domain, unsigned char> >::append(markerImage,aSet, 128);
+	DGtal::ImageFromSet<ImageContainerBySTLVector<Domain, unsigned char> >::append(markerImage,aSet, 250);
 	viewer << aSet;
 	DGtal::Color c= gradient(i);
 	viewer << CustomColors3D(Color(250, 0,0,transp), Color(c.red(),
