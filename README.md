@@ -14,8 +14,8 @@ Dependencies list
 |   |            Library                  |  Tested version  |   |          Library            |  Tested version  |   |        Library              |  Tested version  |
 |:-:|:-----------------------------------:|:----------------:|---|:---------------------------:|:----------------:|---|:---------------------------:|:----------------:|
 | 1 | [Qt](#1-qt)                         |       4.8        | 4 | [Qwt](#4-qwt)               |      6.0.2       | 7 | [DGtalTools](#7-dgtaltools) |       0.6        |
-| 2 | [Armadillo](#2-armadillo)           |     3.800.2      | 5 | [Qxt](#5-qxt)               |      0.6.2       | 8 | [DGLib](#9-dglib)           |      online      |
-| 3 | [InsightToolkit](#3-insighttoolkit) |      4.3.1       | 6 | [QwtPolar](#6-qwtpolar)     |      1.0.1       | 9 | [KerUtils](#10-kerutils)    |      online      |
+| 2 | [Armadillo](#2-armadillo)           |     3.800.2      | 5 | [Qxt](#5-qxt)               |      0.6.2       | 8 | [DGLib](#8-dglib)           |      online      |
+| 3 | [InsightToolkit](#3-insighttoolkit) |      4.3.1       | 6 | [QwtPolar](#6-qwtpolar)     |      1.0.1       | 9 | [KerUtils](#9-kerutils)     |      online      |
 
 
 
