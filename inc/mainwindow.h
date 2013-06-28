@@ -54,7 +54,7 @@ private slots:
 	void resetHistogramDefaultValuesZMotion();
 	void resetHistogramDefaultValuesNearestDistance();
 	void updateSliceHistogram();
-	void updateContourHistograms( const int &histogramIndex );
+	void updateContourHistograms( const int &sliceIndex );
 	void updateIntensityDistributionHistogram();
 	void updateIntensityDistributionHistogramOnKnotArea();
 	void updatePith();
@@ -69,6 +69,8 @@ private slots:
 	void selectSectorInterval( const int &index, const bool &draw = true );
 	void selectCurrentSectorInterval();
 	void setSectorNumber( const int &value );
+	void updateCurvatureThreshold( const int &value );
+	void updateCurvatureThreshold(const double &value );
 	void exportToDat();
 	void exportToOfs();
 	void exportHistograms();

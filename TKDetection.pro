@@ -10,7 +10,7 @@
 
 # Version d'ITK installée : itk3 | itk4
 ITK_VERSION = itk4
-ITK_NUMBER =  4.4
+ITK_NUMBER =  4.3
 
 
 #                                                                #
@@ -135,7 +135,7 @@ INCLUDEPATH *=	/usr/include/ /usr/local/include/
 
 QMAKE_LIBDIR *=	/usr/local/lib/
 
-LIBS *= -lblas -llapack -larmadillo   -lDGtal -lDGtalIO  
+LIBS *= -lblas -llapack -larmadillo   -lDGtal -lDGtalIO
 
 # ITK
 #----#

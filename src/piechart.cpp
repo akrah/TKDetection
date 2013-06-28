@@ -9,13 +9,13 @@
 
 #include <cmath>
 
-PieChart::PieChart( const int &nbSectors ) : _sectorAngle(TWO_PI/static_cast<qreal>(nbSectors))
+PieChart::PieChart( const int &nbSectors )
 {
-	updateSectors(nbSectors);
+	setSectorsNumber(nbSectors);
 }
 
 
-PieChart::PieChart( const PieChart &pieChart ) : _sectorAngle(pieChart._sectorAngle), _sectors(pieChart._sectors)
+PieChart::PieChart( const PieChart &pieChart ) : _sectors(pieChart._sectors)
 {
 }
 
@@ -25,12 +25,12 @@ PieChart::PieChart( const PieChart &pieChart ) : _sectorAngle(pieChart._sectorAn
 
 qreal PieChart::sectorAngle() const
 {
-	return _sectorAngle;
+	return TWO_PI/static_cast<qreal>(_sectors.size());
 }
 
 uint PieChart::nbSectors() const
 {
-	return qRound(TWO_PI/_sectorAngle);
+	return _sectors.size();
 }
 
 const PiePart &PieChart::sector( const uint &index ) const
@@ -50,8 +50,12 @@ uint PieChart::sectorIndexOfAngle( qreal angle ) const
 
 void PieChart::setSectorsNumber( const uint &nbSectors )
 {
-	_sectorAngle = TWO_PI/static_cast<qreal>(nbSectors);
-	updateSectors(nbSectors);
+	const qreal sectorAngle = TWO_PI/static_cast<qreal>(nbSectors);
+	_sectors.clear();
+	for ( uint i=0 ; i<nbSectors ; ++i )
+	{
+		_sectors.append(PiePart( i*sectorAngle, sectorAngle ));
+	}
 }
 
 void PieChart::draw( QImage &image, const uiCoord2D &center, const uint &sectorIdx, const TKD::ViewType &viewType ) const
@@ -130,7 +134,7 @@ void PieChart::draw( QImage &image, const uiCoord2D &center, const QVector< Inte
 		colors[4] = Qt::cyan;
 		colors[5] = Qt::white;
 
-		const int nbColorsToUse = intervals.size()>colors.size() ? ((intervals.size()+1)/2)%colors.size() : colors.size();
+		const int nbColorsToUse = qMax( intervals.size()>colors.size() ? ((intervals.size()+1)/2)%colors.size() : colors.size() , 1 );
 
 		QColor currentColor;
 		iCoord2D end;
@@ -174,20 +178,5 @@ void PieChart::draw( QImage &image, const uiCoord2D &center, const QVector< Inte
 				painter.drawLine(angle,0,angle,height);
 			}
 		}
-	}
-}
-
-/*******************************
- * Private setters
- *******************************/
-
-void PieChart::updateSectors( const int &nbSectors )
-{
-	_sectors.clear();
-	qreal currentOrientation = 0.;
-	for ( int i=0 ; i<nbSectors ; ++i )
-	{
-		_sectors.append(PiePart( currentOrientation, _sectorAngle ));
-		currentOrientation += _sectorAngle;
 	}
 }

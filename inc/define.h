@@ -26,13 +26,13 @@ namespace TKD
  *************************************/
 
 // Paramètres de détection des maximums et intervalles dans un histogramme
-#define HISTOGRAM_SMOOTHING_RADIUS 10
+#define HISTOGRAM_SMOOTHING_RADIUS 8
 #define HISTOGRAM_BORDER_PERCENTAGE_TO_CUT 5
 #define HISTOGRAM_PERCENTAGE_OF_MINIMUM_HEIGHT_OF_MAXIMUM 10
 #define HISTOGRAM_MINIMUM_WIDTH_OF_INTERVALS 10
 #define HISTOGRAM_DERIVATIVE_SEARCH_PERCENTAGE 30
 
-#define HISTOGRAM_DISTANCE_SMOOTHING_RADIUS 2
+#define HISTOGRAM_DISTANCE_SMOOTHING_RADIUS 5
 #define HISTOGRAM_DISTANCE_BORDER_PERCENTAGE_TO_CUT 0
 #define HISTOGRAM_DISTANCE_PERCENTAGE_OF_MINIMUM_HEIGHT_OF_MAXIMUM 75
 #define HISTOGRAM_DISTANCE_MINIMUM_WIDTH_OF_INTERVALS 3
@@ -122,14 +122,14 @@ namespace TKD
 
   // Type de rendu image
   enum ImageViewRender
-    {
-      _ImageViewRender_MIN_ = -1,	
-      GrayScale,
-      HueScale,
-      HueScaleLog,
-      Custom
-    };
-  
+	{
+	  _ImageViewRender_MIN_ = -1,
+	  GrayScale,
+	  HueScale,
+	  HueScaleLog,
+	  Custom
+	};
+
 
 /*************************************
  * Enumerations

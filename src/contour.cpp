@@ -84,7 +84,8 @@ void Contour::smooth( int smoothingRadius )
 			this->clear();
 			this->append(iCoord2D( qRound(smoothingValueX/qSmoothingDiameter), qRound(smoothingValueY/qSmoothingDiameter) ));
 
-			iCoord2D currentCoord;
+			iCoord2D currentCoord, oldCoord;
+			bool isModified;
 
 			for ( int i=0 ; i<nbPoints-1 ; ++i )
 			{
@@ -92,16 +93,38 @@ void Contour::smooth( int smoothingRadius )
 				smoothingValueY = smoothingValueY - initialContour[i].y + initialContour[i+smoothingDiameter].y;
 				currentCoord.x = qRound(smoothingValueX / qSmoothingDiameter);
 				currentCoord.y = qRound(smoothingValueY / qSmoothingDiameter);
-				if ( currentCoord != this->last() )
+				if ( currentCoord == this->last() ) continue;
+				if ( this->size() > 1 )
 				{
-					const iCoord2D &oldCoord = (*this)[qMax(this->size()-2,0)];
-					if ( currentCoord == oldCoord && this->size() > 1 ) this->pop_back();
-					else
+					oldCoord = (*this)[this->size()-2];
+					isModified = true;
+					while ( isModified )
 					{
-						if ( qAbs(currentCoord.x-oldCoord.x)+qAbs(currentCoord.y-oldCoord.y) < 2 && this->size() > 1 ) this->pop_back();
-						this->append(currentCoord);
+						if ( currentCoord == oldCoord )
+						{
+							this->pop_back();
+							this->pop_back();
+							if ( this->size() > 1 ) oldCoord = (*this)[this->size()-2];
+							else isModified = false;
+						}
+						else
+						{
+							if ( qSqrt( qPow(currentCoord.x-oldCoord.x,2)+qPow(currentCoord.y-oldCoord.y,2) ) < 2 )
+							{
+								this->pop_back();
+								if ( this->size() > 1 ) oldCoord = (*this)[this->size()-2];
+								else isModified = false;
+							}
+							else isModified = false;
+						}
 					}
 				}
+				this->append(currentCoord);
+			}
+			if ( this->size() > 2 && (*this)[1] == (*this)[this->size()-2] )
+			{
+				this->pop_back();
+				this->pop_front();
 			}
 		}
 	}

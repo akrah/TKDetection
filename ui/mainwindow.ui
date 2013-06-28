@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>908</width>
-    <height>727</height>
+    <width>901</width>
+    <height>663</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -97,7 +97,7 @@
          <property name="geometry">
           <rect>
            <x>171</x>
-           <y>263</y>
+           <y>231</y>
            <width>0</width>
            <height>0</height>
           </rect>
@@ -205,7 +205,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>908</width>
+     <width>901</width>
      <height>25</height>
     </rect>
    </property>
@@ -289,8 +289,8 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>446</width>
-              <height>178</height>
+              <width>426</width>
+              <height>152</height>
              </rect>
             </property>
             <attribute name="label">
@@ -518,8 +518,8 @@ de la projection cartesienne</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>446</width>
-              <height>178</height>
+              <width>251</width>
+              <height>166</height>
              </rect>
             </property>
             <attribute name="label">
@@ -726,8 +726,8 @@ zone restreinte</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>446</width>
-              <height>178</height>
+              <width>258</width>
+              <height>52</height>
              </rect>
             </property>
             <attribute name="label">
@@ -791,7 +791,7 @@ minimum</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>433</width>
+              <width>297</width>
               <height>221</height>
              </rect>
             </property>
@@ -986,8 +986,8 @@ minimum</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>446</width>
-              <height>178</height>
+              <width>321</width>
+              <height>152</height>
              </rect>
             </property>
             <attribute name="label">
@@ -1389,7 +1389,7 @@ au début et à la fin</string>
                   <number>15</number>
                  </property>
                  <property name="value">
-                  <number>2</number>
+                  <number>5</number>
                  </property>
                 </widget>
                </item>
@@ -1632,8 +1632,8 @@ au début et à la fin</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>448</width>
-              <height>273</height>
+              <width>441</width>
+              <height>220</height>
              </rect>
             </property>
             <attribute name="label">
@@ -1693,7 +1693,7 @@ au début et à la fin</string>
                <item>
                 <widget class="QSlider" name="_sliderMinimalSizeOf3DConnexComponents">
                  <property name="maximum">
-                  <number>200</number>
+                  <number>30</number>
                  </property>
                  <property name="value">
                   <number>20</number>
@@ -1706,10 +1706,10 @@ au début et à la fin</string>
                <item>
                 <widget class="QSpinBox" name="_spinMinimalSizeOf3DConnexComponents">
                  <property name="maximum">
-                  <number>200</number>
+                  <number>30</number>
                  </property>
                  <property name="value">
-                  <number>6</number>
+                  <number>20</number>
                  </property>
                 </widget>
                </item>
@@ -1728,7 +1728,7 @@ au début et à la fin</string>
                <item>
                 <widget class="QSlider" name="_sliderMinimalSizeOf2DConnexComponents">
                  <property name="maximum">
-                  <number>200</number>
+                  <number>30</number>
                  </property>
                  <property name="value">
                   <number>15</number>
@@ -1741,10 +1741,10 @@ au début et à la fin</string>
                <item>
                 <widget class="QSpinBox" name="_spinMinimalSizeOf2DConnexComponents">
                  <property name="maximum">
-                  <number>200</number>
+                  <number>30</number>
                  </property>
                  <property name="value">
-                  <number>6</number>
+                  <number>15</number>
                  </property>
                 </widget>
                </item>
@@ -1757,8 +1757,8 @@ au début et à la fin</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>351</width>
-              <height>129</height>
+              <width>441</width>
+              <height>220</height>
              </rect>
             </property>
             <attribute name="label">
@@ -1775,55 +1775,6 @@ au début et à la fin</string>
                </property>
               </widget>
              </item>
-             <item row="1" column="0">
-              <widget class="QLabel" name="label_35">
-               <property name="text">
-                <string>Epaisseur des segments flous
-pour détection des points dominants</string>
-               </property>
-              </widget>
-             </item>
-             <item row="2" column="0">
-              <widget class="QLabel" name="label_40">
-               <property name="text">
-                <string>Épaisseur des segments flous
-pour la détection de la courbure</string>
-               </property>
-              </widget>
-             </item>
-             <item row="2" column="1">
-              <layout class="QHBoxLayout" name="horizontalLayout_6">
-               <item>
-                <widget class="QSlider" name="_sliderCurvatureWidth">
-                 <property name="minimum">
-                  <number>1</number>
-                 </property>
-                 <property name="maximum">
-                  <number>12</number>
-                 </property>
-                 <property name="value">
-                  <number>2</number>
-                 </property>
-                 <property name="orientation">
-                  <enum>Qt::Horizontal</enum>
-                 </property>
-                </widget>
-               </item>
-               <item>
-                <widget class="QSpinBox" name="_spinCurvatureWidth">
-                 <property name="minimum">
-                  <number>1</number>
-                 </property>
-                 <property name="maximum">
-                  <number>12</number>
-                 </property>
-                 <property name="value">
-                  <number>2</number>
-                 </property>
-                </widget>
-               </item>
-              </layout>
-             </item>
              <item row="0" column="1">
               <layout class="QHBoxLayout" name="horizontalLayout_34">
                <item>
@@ -1832,7 +1783,7 @@ pour la détection de la courbure</string>
                   <number>50</number>
                  </property>
                  <property name="value">
-                  <number>20</number>
+                  <number>10</number>
                  </property>
                  <property name="orientation">
                   <enum>Qt::Horizontal</enum>
@@ -1848,16 +1799,16 @@ pour la détection de la courbure</string>
                   <number>50</number>
                  </property>
                  <property name="value">
-                  <number>20</number>
+                  <number>10</number>
                  </property>
                 </widget>
                </item>
               </layout>
              </item>
              <item row="1" column="1">
-              <layout class="QHBoxLayout" name="horizontalLayout_35">
+              <layout class="QHBoxLayout" name="horizontalLayout_6">
                <item>
-                <widget class="QSlider" name="_sliderBlurredSegmentsThickness">
+                <widget class="QSlider" name="_sliderCurvatureWidth">
                  <property name="minimum">
                   <number>1</number>
                  </property>
@@ -1865,7 +1816,7 @@ pour la détection de la courbure</string>
                   <number>12</number>
                  </property>
                  <property name="value">
-                  <number>3</number>
+                  <number>5</number>
                  </property>
                  <property name="orientation">
                   <enum>Qt::Horizontal</enum>
@@ -1873,7 +1824,7 @@ pour la détection de la courbure</string>
                 </widget>
                </item>
                <item>
-                <widget class="QSpinBox" name="_spinBlurredSegmentsThickness">
+                <widget class="QSpinBox" name="_spinCurvatureWidth">
                  <property name="minimum">
                   <number>1</number>
                  </property>
@@ -1881,11 +1832,59 @@ pour la détection de la courbure</string>
                   <number>12</number>
                  </property>
                  <property name="value">
-                  <number>3</number>
+                  <number>5</number>
                  </property>
                 </widget>
                </item>
               </layout>
+             </item>
+             <item row="2" column="0">
+              <widget class="QLabel" name="label_41">
+               <property name="text">
+                <string>Seuil de courbure</string>
+               </property>
+              </widget>
+             </item>
+             <item row="2" column="1">
+              <layout class="QHBoxLayout" name="horizontalLayout_40">
+               <item>
+                <widget class="QSlider" name="_sliderCurvatureThreshold">
+                 <property name="maximum">
+                  <number>100</number>
+                 </property>
+                 <property name="value">
+                  <number>10</number>
+                 </property>
+                 <property name="orientation">
+                  <enum>Qt::Horizontal</enum>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QDoubleSpinBox" name="_spinCurvatureThreshold">
+                 <property name="decimals">
+                  <number>3</number>
+                 </property>
+                 <property name="maximum">
+                  <double>0.100000000000000</double>
+                 </property>
+                 <property name="singleStep">
+                  <double>0.001000000000000</double>
+                 </property>
+                 <property name="value">
+                  <double>0.010000000000000</double>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+             <item row="1" column="0">
+              <widget class="QLabel" name="label_40">
+               <property name="text">
+                <string>Épaisseur des segments flous
+pour la détection de la courbure</string>
+               </property>
+              </widget>
              </item>
             </layout>
            </widget>
@@ -2002,15 +2001,15 @@ l'intervalle angulaire</string>
          <item>
           <widget class="QToolBox" name="toolBox">
            <property name="currentIndex">
-            <number>5</number>
+            <number>0</number>
            </property>
            <widget class="QWidget" name="page">
             <property name="geometry">
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>374</width>
-              <height>80</height>
+              <width>441</width>
+              <height>131</height>
              </rect>
             </property>
             <attribute name="label">
@@ -2513,8 +2512,8 @@ l'intervalle angulaire</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>448</width>
-              <height>184</height>
+              <width>264</width>
+              <height>112</height>
              </rect>
             </property>
             <attribute name="label">
@@ -2598,7 +2597,7 @@ l'intervalle angulaire</string>
         <enum>QTabWidget::South</enum>
        </property>
        <property name="currentIndex">
-        <number>1</number>
+        <number>4</number>
        </property>
        <widget class="QWidget" name="tab_2">
         <attribute name="title">
@@ -2854,9 +2853,23 @@ l'intervalle angulaire</string>
  <tabstops>
   <tabstop>_tabs</tabstop>
   <tabstop>_comboSliceType</tabstop>
+  <tabstop>_radioZView</tabstop>
+  <tabstop>_radioYView</tabstop>
+  <tabstop>_radioCartesianView</tabstop>
   <tabstop>_spinMinIntensity</tabstop>
   <tabstop>_spanSliderIntensityThreshold</tabstop>
   <tabstop>_spinMaxIntensity</tabstop>
+  <tabstop>_sliderAngularResolution</tabstop>
+  <tabstop>_spinAngularResolution</tabstop>
+  <tabstop>_comboViewRender</tabstop>
+  <tabstop>_sliderRestrictedAreaResolution</tabstop>
+  <tabstop>_spinRestrictedAreaResolution</tabstop>
+  <tabstop>_sliderRestrictedAreaThreshold</tabstop>
+  <tabstop>_spinRestrictedAreaThreshold</tabstop>
+  <tabstop>_sliderRestrictedAreaPercentage</tabstop>
+  <tabstop>_spinRestrictedAreaPercentage</tabstop>
+  <tabstop>_checkRadiusAroundPith</tabstop>
+  <tabstop>_sliderZMotionMin</tabstop>
   <tabstop>_spinZMotionMin</tabstop>
   <tabstop>_comboEdgeDetectionType</tabstop>
   <tabstop>_spinCannyRadiusOfGaussianMask</tabstop>
@@ -2867,21 +2880,31 @@ l'intervalle angulaire</string>
   <tabstop>_spinFlowEpsilon</tabstop>
   <tabstop>_spinFlowMaximumIterations</tabstop>
   <tabstop>_buttonFlowUpdate</tabstop>
-  <tabstop>_sliderRestrictedAreaPercentage</tabstop>
-  <tabstop>_spinRestrictedAreaPercentage</tabstop>
+  <tabstop>tabWidget</tabstop>
   <tabstop>_sliderHistogramSmoothingRadius_zMotion</tabstop>
   <tabstop>_spinHistogramSmoothingRadius_zMotion</tabstop>
   <tabstop>_sliderHistogramBorderPercentageToCut_zMotion</tabstop>
   <tabstop>_spinHistogramBorderPercentageToCut_zMotion</tabstop>
   <tabstop>_sliderHistogramMinimumHeightOfMaximum_zMotion</tabstop>
   <tabstop>_spinHistogramMinimumHeightOfMaximum_zMotion</tabstop>
-  <tabstop>_sliderHistogramDerivativeSearchPercentage_zMotion</tabstop>
   <tabstop>_sliderHistogramMinimumWidthOfInterval_zMotion</tabstop>
   <tabstop>_spinHistogramMinimumWidthOfInterval_zMotion</tabstop>
-  <tabstop>_comboSelectSliceInterval</tabstop>
-  <tabstop>_buttonSelectSliceIntervalUpdate</tabstop>
-  <tabstop>_comboSelectSectorInterval</tabstop>
-  <tabstop>_buttonSelectSectorIntervalUpdate</tabstop>
+  <tabstop>_sliderHistogramDerivativeSearchPercentage_zMotion</tabstop>
+  <tabstop>_spinHistogramDerivativeSearchPercentage_zMotion</tabstop>
+  <tabstop>_buttonHistogramResetDefaultValuesZMotion</tabstop>
+  <tabstop>_sliderHistogramSmoothingRadius_nearestDistance</tabstop>
+  <tabstop>_spinHistogramSmoothingRadius_nearestDistance</tabstop>
+  <tabstop>_sliderHistogramBorderPercentageToCut_nearestDistance</tabstop>
+  <tabstop>_spinHistogramBorderPercentageToCut_nearestDistance</tabstop>
+  <tabstop>_sliderHistogramMinimumHeightOfMaximum_nearestDistance</tabstop>
+  <tabstop>_spinHistogramMinimumHeightOfMaximum_nearestDistance</tabstop>
+  <tabstop>_sliderHistogramMinimumWidthOfInterval_nearestDistance</tabstop>
+  <tabstop>_spinHistogramMinimumWidthOfInterval_nearestDistance</tabstop>
+  <tabstop>_sliderHistogramDerivativeSearchPercentage_nearestDistance</tabstop>
+  <tabstop>_spinHistogramDerivativeSearchPercentage_nearestDistance</tabstop>
+  <tabstop>_buttonHistogramResetDefaultValuesNearestDistance</tabstop>
+  <tabstop>_sliderSectorHistogramIntervalGap</tabstop>
+  <tabstop>_spinSectorHistogramIntervalGap</tabstop>
   <tabstop>_spinSectorsNumber</tabstop>
   <tabstop>_sliderSectorThresholding</tabstop>
   <tabstop>_spinSectorThresholding</tabstop>
@@ -2889,29 +2912,57 @@ l'intervalle angulaire</string>
   <tabstop>_spinMinimalSizeOf3DConnexComponents</tabstop>
   <tabstop>_sliderMinimalSizeOf2DConnexComponents</tabstop>
   <tabstop>_spinMinimalSizeOf2DConnexComponents</tabstop>
+  <tabstop>_sliderContourSmoothingRadius</tabstop>
+  <tabstop>_spinContourSmoothingRadius</tabstop>
   <tabstop>_sliderCurvatureWidth</tabstop>
   <tabstop>_spinCurvatureWidth</tabstop>
+  <tabstop>_sliderCurvatureThreshold</tabstop>
+  <tabstop>_spinCurvatureThreshold</tabstop>
+  <tabstop>_buttonComputePith</tabstop>
+  <tabstop>_comboSelectSliceInterval</tabstop>
+  <tabstop>_buttonSelectSliceIntervalUpdate</tabstop>
+  <tabstop>_comboSelectSectorInterval</tabstop>
+  <tabstop>_buttonSelectSectorIntervalUpdate</tabstop>
   <tabstop>_comboExportHistoType</tabstop>
   <tabstop>_buttonExportHistograms</tabstop>
   <tabstop>_comboExportHistoFormat</tabstop>
+  <tabstop>_sliderDatExportResolution</tabstop>
+  <tabstop>_spinDatExportResolution</tabstop>
   <tabstop>_sliderDatExportContrast</tabstop>
   <tabstop>_spinDatExportContrast</tabstop>
   <tabstop>_buttonExportToDat</tabstop>
   <tabstop>_comboOfsExportType</tabstop>
+  <tabstop>_sliderExportNbEdges</tabstop>
+  <tabstop>_spinExportNbEdges</tabstop>
+  <tabstop>_sliderExportRadius</tabstop>
+  <tabstop>_spinExportRadius</tabstop>
   <tabstop>_checkCloseBillon</tabstop>
   <tabstop>_buttonExportToOfs</tabstop>
   <tabstop>_comboExportPgm3dType</tabstop>
+  <tabstop>_sliderPgm3dExportContrast</tabstop>
+  <tabstop>_spinPgm3dExportContrast</tabstop>
+  <tabstop>_sliderPgm3dExportResolution</tabstop>
+  <tabstop>_spinPgm3dExportResolution</tabstop>
   <tabstop>_buttonExportToPgm3d</tabstop>
+  <tabstop>_comboExportToV3DType</tabstop>
+  <tabstop>_buttonExportToV3D</tabstop>
   <tabstop>_comboExportToSdpType</tabstop>
   <tabstop>_checkExportSdpOldMethod</tabstop>
   <tabstop>_buttonExportToSDP</tabstop>
+  <tabstop>tabWidget_2</tabstop>
+  <tabstop>_buttonUpdateIntensityDistributionHistogram</tabstop>
+  <tabstop>_buttonUpdateIntensityDistributionHistogramOnKnotArea</tabstop>
   <tabstop>_buttonPreviousMaximum</tabstop>
   <tabstop>_buttonUpdateSliceHistogram</tabstop>
   <tabstop>_buttonNextMaximum</tabstop>
   <tabstop>_sliderContour</tabstop>
-  <tabstop>_spanSliderSelectInterval</tabstop>
+  <tabstop>_sliderSelectYSlice</tabstop>
+  <tabstop>_scrollSliceView</tabstop>
+  <tabstop>_buttonZoomInitial</tabstop>
+  <tabstop>_sliderSelectSlice</tabstop>
   <tabstop>_buttonMinSlice</tabstop>
   <tabstop>_spinMinSlice</tabstop>
+  <tabstop>_spanSliderSelectInterval</tabstop>
   <tabstop>_spinMaxSlice</tabstop>
   <tabstop>_buttonMaxSlice</tabstop>
  </tabstops>

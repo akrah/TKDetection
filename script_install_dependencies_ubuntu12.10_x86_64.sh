@@ -68,31 +68,12 @@ sudo make install
 cd -
 
 ### DGLib
-wget "http://www.loria.fr/~krahenbu/TKDetection/DGLib_for_TKDetection.zip"
-unzip DGLib_for_TKDetection.zip
-mkdir DGLib_for_TKDetection/build
-cd DGLib_for_TKDetection/build
-cmake ..
+wget "http://www.loria.fr/~krahenbu/TKDetection/KerUtils.zip"
+unzip KerUtils.zip
+mkdir KerUtils/build
+cd KerUtils/build
+cmake .. -DCMAKE_BUILD_TYPE=Release
 make
 sudo make install
 cd -
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 

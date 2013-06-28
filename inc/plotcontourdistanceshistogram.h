@@ -14,18 +14,17 @@ public:
 	void attach( QwtPlot * const plot );
 	void clear();
 
-	void moveCursor( const uint & sliceIndex );
+	void moveCursor(const uint & contourIndex );
 
-	void update( const ContourDistancesHistogram & histogram, const QVector<int> &dominantPointsIndexFromLeft, const QVector<int> &dominantPointsIndexFromRight );
+	void update( const ContourDistancesHistogram & histogram, const int &leftMainDominantPointIndex, const int &rightMainDominantPointIndex );
 
 private:
 	void updateDatas( const ContourDistancesHistogram & histogram );
-	void updateDominantPoints(const ContourDistancesHistogram & histogram, const QVector<int> &dominantPointsIndexFromLeft, const QVector<int> &dominantPointsIndexFromRight );
+	void updateDominantPoints(const ContourDistancesHistogram & histogram, const int &leftMainDominantPointIndex, const int &rightMainDominantPointIndex );
 
 private:
 	QwtPlotHistogram _histogramData;
-	QwtPlotHistogram _histogramDominantPointsFromLeft;
-	QwtPlotHistogram _histogramDominantPointsFromRight;
+	QwtPlotHistogram _histogramMainDominantPoints;
 	QwtPlotHistogram _histogramCursor;
 };
 
