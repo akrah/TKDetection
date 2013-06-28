@@ -1624,8 +1624,14 @@ au début et à la fin</string>
          </item>
          <item>
           <widget class="QToolBox" name="toolBox_2">
+           <property name="font">
+            <font>
+             <weight>75</weight>
+             <bold>true</bold>
+            </font>
+           </property>
            <property name="currentIndex">
-            <number>0</number>
+            <number>1</number>
            </property>
            <widget class="QWidget" name="page_8">
             <property name="geometry">
@@ -1642,6 +1648,12 @@ au début et à la fin</string>
             <layout class="QFormLayout" name="formLayout_20">
              <item row="0" column="0">
               <widget class="QLabel" name="label_33">
+               <property name="font">
+                <font>
+                 <weight>50</weight>
+                 <bold>false</bold>
+                </font>
+               </property>
                <property name="text">
                 <string>Seuillage</string>
                </property>
@@ -1651,6 +1663,12 @@ au début et à la fin</string>
               <layout class="QHBoxLayout" name="horizontalLayout_17">
                <item>
                 <widget class="QSlider" name="_sliderSectorThresholding">
+                 <property name="font">
+                  <font>
+                   <weight>50</weight>
+                   <bold>false</bold>
+                  </font>
+                 </property>
                  <property name="minimum">
                   <number>-900</number>
                  </property>
@@ -1667,6 +1685,12 @@ au début et à la fin</string>
                </item>
                <item>
                 <widget class="QSpinBox" name="_spinSectorThresholding">
+                 <property name="font">
+                  <font>
+                   <weight>50</weight>
+                   <bold>false</bold>
+                  </font>
+                 </property>
                  <property name="minimum">
                   <number>-900</number>
                  </property>
@@ -1682,6 +1706,12 @@ au début et à la fin</string>
              </item>
              <item row="1" column="0">
               <widget class="QLabel" name="label_34">
+               <property name="font">
+                <font>
+                 <weight>50</weight>
+                 <bold>false</bold>
+                </font>
+               </property>
                <property name="text">
                 <string>Taille minimum en 3D
 (côté du cube)</string>
@@ -1692,6 +1722,12 @@ au début et à la fin</string>
               <layout class="QHBoxLayout" name="horizontalLayout_18">
                <item>
                 <widget class="QSlider" name="_sliderMinimalSizeOf3DConnexComponents">
+                 <property name="font">
+                  <font>
+                   <weight>50</weight>
+                   <bold>false</bold>
+                  </font>
+                 </property>
                  <property name="maximum">
                   <number>30</number>
                  </property>
@@ -1705,6 +1741,12 @@ au début et à la fin</string>
                </item>
                <item>
                 <widget class="QSpinBox" name="_spinMinimalSizeOf3DConnexComponents">
+                 <property name="font">
+                  <font>
+                   <weight>50</weight>
+                   <bold>false</bold>
+                  </font>
+                 </property>
                  <property name="maximum">
                   <number>30</number>
                  </property>
@@ -1717,6 +1759,12 @@ au début et à la fin</string>
              </item>
              <item row="2" column="0">
               <widget class="QLabel" name="label_37">
+               <property name="font">
+                <font>
+                 <weight>50</weight>
+                 <bold>false</bold>
+                </font>
+               </property>
                <property name="text">
                 <string>Taille minimum en 2D
 (côté du carré)</string>
@@ -1727,6 +1775,12 @@ au début et à la fin</string>
               <layout class="QHBoxLayout" name="horizontalLayout_5">
                <item>
                 <widget class="QSlider" name="_sliderMinimalSizeOf2DConnexComponents">
+                 <property name="font">
+                  <font>
+                   <weight>50</weight>
+                   <bold>false</bold>
+                  </font>
+                 </property>
                  <property name="maximum">
                   <number>30</number>
                  </property>
@@ -1740,6 +1794,12 @@ au début et à la fin</string>
                </item>
                <item>
                 <widget class="QSpinBox" name="_spinMinimalSizeOf2DConnexComponents">
+                 <property name="font">
+                  <font>
+                   <weight>50</weight>
+                   <bold>false</bold>
+                  </font>
+                 </property>
                  <property name="maximum">
                   <number>30</number>
                  </property>
@@ -1770,6 +1830,12 @@ au début et à la fin</string>
              </property>
              <item row="0" column="0">
               <widget class="QLabel" name="label_36">
+               <property name="font">
+                <font>
+                 <weight>50</weight>
+                 <bold>false</bold>
+                </font>
+               </property>
                <property name="text">
                 <string>Rayon de lissage</string>
                </property>
@@ -1779,6 +1845,12 @@ au début et à la fin</string>
               <layout class="QHBoxLayout" name="horizontalLayout_34">
                <item>
                 <widget class="QSlider" name="_sliderContourSmoothingRadius">
+                 <property name="font">
+                  <font>
+                   <weight>50</weight>
+                   <bold>false</bold>
+                  </font>
+                 </property>
                  <property name="maximum">
                   <number>50</number>
                  </property>
@@ -1792,6 +1864,12 @@ au début et à la fin</string>
                </item>
                <item>
                 <widget class="QSpinBox" name="_spinContourSmoothingRadius">
+                 <property name="font">
+                  <font>
+                   <weight>50</weight>
+                   <bold>false</bold>
+                  </font>
+                 </property>
                  <property name="minimum">
                   <number>0</number>
                  </property>
@@ -1809,6 +1887,12 @@ au début et à la fin</string>
               <layout class="QHBoxLayout" name="horizontalLayout_6">
                <item>
                 <widget class="QSlider" name="_sliderCurvatureWidth">
+                 <property name="font">
+                  <font>
+                   <weight>50</weight>
+                   <bold>false</bold>
+                  </font>
+                 </property>
                  <property name="minimum">
                   <number>1</number>
                  </property>
@@ -1825,6 +1909,12 @@ au début et à la fin</string>
                </item>
                <item>
                 <widget class="QSpinBox" name="_spinCurvatureWidth">
+                 <property name="font">
+                  <font>
+                   <weight>50</weight>
+                   <bold>false</bold>
+                  </font>
+                 </property>
                  <property name="minimum">
                   <number>1</number>
                  </property>
@@ -1840,6 +1930,12 @@ au début et à la fin</string>
              </item>
              <item row="2" column="0">
               <widget class="QLabel" name="label_41">
+               <property name="font">
+                <font>
+                 <weight>50</weight>
+                 <bold>false</bold>
+                </font>
+               </property>
                <property name="text">
                 <string>Seuil de courbure</string>
                </property>
@@ -1849,6 +1945,12 @@ au début et à la fin</string>
               <layout class="QHBoxLayout" name="horizontalLayout_40">
                <item>
                 <widget class="QSlider" name="_sliderCurvatureThreshold">
+                 <property name="font">
+                  <font>
+                   <weight>50</weight>
+                   <bold>false</bold>
+                  </font>
+                 </property>
                  <property name="maximum">
                   <number>100</number>
                  </property>
@@ -1862,6 +1964,12 @@ au début et à la fin</string>
                </item>
                <item>
                 <widget class="QDoubleSpinBox" name="_spinCurvatureThreshold">
+                 <property name="font">
+                  <font>
+                   <weight>50</weight>
+                   <bold>false</bold>
+                  </font>
+                 </property>
                  <property name="decimals">
                   <number>3</number>
                  </property>
@@ -1880,6 +1988,12 @@ au début et à la fin</string>
              </item>
              <item row="1" column="0">
               <widget class="QLabel" name="label_40">
+               <property name="font">
+                <font>
+                 <weight>50</weight>
+                 <bold>false</bold>
+                </font>
+               </property>
                <property name="text">
                 <string>Épaisseur des segments flous
 pour la détection de la courbure</string>
@@ -2000,6 +2114,12 @@ l'intervalle angulaire</string>
         <layout class="QVBoxLayout" name="verticalLayout_11">
          <item>
           <widget class="QToolBox" name="toolBox">
+           <property name="font">
+            <font>
+             <weight>75</weight>
+             <bold>true</bold>
+            </font>
+           </property>
            <property name="currentIndex">
             <number>0</number>
            </property>
@@ -2018,6 +2138,12 @@ l'intervalle angulaire</string>
             <layout class="QVBoxLayout" name="verticalLayout_13">
              <item>
               <widget class="QComboBox" name="_comboExportHistoType">
+               <property name="font">
+                <font>
+                 <weight>50</weight>
+                 <bold>false</bold>
+                </font>
+               </property>
                <item>
                 <property name="text">
                  <string>Histogramme de coupes</string>
@@ -2045,6 +2171,12 @@ l'intervalle angulaire</string>
                    <verstretch>0</verstretch>
                   </sizepolicy>
                  </property>
+                 <property name="font">
+                  <font>
+                   <weight>50</weight>
+                   <bold>false</bold>
+                  </font>
+                 </property>
                  <property name="text">
                   <string>Exporter</string>
                  </property>
@@ -2052,6 +2184,12 @@ l'intervalle angulaire</string>
                </item>
                <item>
                 <widget class="QComboBox" name="_comboExportHistoFormat">
+                 <property name="font">
+                  <font>
+                   <weight>50</weight>
+                   <bold>false</bold>
+                  </font>
+                 </property>
                  <item>
                   <property name="text">
                    <string>En .sep</string>
@@ -2073,8 +2211,8 @@ l'intervalle angulaire</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>181</width>
-              <height>121</height>
+              <width>441</width>
+              <height>131</height>
              </rect>
             </property>
             <attribute name="label">
@@ -2085,6 +2223,12 @@ l'intervalle angulaire</string>
               <layout class="QFormLayout" name="formLayout_6">
                <item row="0" column="0">
                 <widget class="QLabel" name="label_16">
+                 <property name="font">
+                  <font>
+                   <weight>50</weight>
+                   <bold>false</bold>
+                  </font>
+                 </property>
                  <property name="text">
                   <string>Résolution</string>
                  </property>
@@ -2092,6 +2236,12 @@ l'intervalle angulaire</string>
                </item>
                <item row="1" column="0">
                 <widget class="QLabel" name="label_12">
+                 <property name="font">
+                  <font>
+                   <weight>50</weight>
+                   <bold>false</bold>
+                  </font>
+                 </property>
                  <property name="toolTip">
                   <string/>
                  </property>
@@ -2104,6 +2254,12 @@ l'intervalle angulaire</string>
                 <layout class="QHBoxLayout" name="horizontalLayout_26">
                  <item>
                   <widget class="QSlider" name="_sliderDatExportContrast">
+                   <property name="font">
+                    <font>
+                     <weight>50</weight>
+                     <bold>false</bold>
+                    </font>
+                   </property>
                    <property name="toolTip">
                     <string/>
                    </property>
@@ -2120,6 +2276,12 @@ l'intervalle angulaire</string>
                  </item>
                  <item>
                   <widget class="QSpinBox" name="_spinDatExportContrast">
+                   <property name="font">
+                    <font>
+                     <weight>50</weight>
+                     <bold>false</bold>
+                    </font>
+                   </property>
                    <property name="minimum">
                     <number>-100</number>
                    </property>
@@ -2134,6 +2296,12 @@ l'intervalle angulaire</string>
                 <layout class="QHBoxLayout" name="horizontalLayout_36">
                  <item>
                   <widget class="QSlider" name="_sliderDatExportResolution">
+                   <property name="font">
+                    <font>
+                     <weight>50</weight>
+                     <bold>false</bold>
+                    </font>
+                   </property>
                    <property name="minimum">
                     <number>1</number>
                    </property>
@@ -2147,6 +2315,12 @@ l'intervalle angulaire</string>
                  </item>
                  <item>
                   <widget class="QSpinBox" name="_spinDatExportResolution">
+                   <property name="font">
+                    <font>
+                     <weight>50</weight>
+                     <bold>false</bold>
+                    </font>
+                   </property>
                    <property name="minimum">
                     <number>1</number>
                    </property>
@@ -2161,6 +2335,12 @@ l'intervalle angulaire</string>
              </item>
              <item>
               <widget class="QPushButton" name="_buttonExportToDat">
+               <property name="font">
+                <font>
+                 <weight>50</weight>
+                 <bold>false</bold>
+                </font>
+               </property>
                <property name="text">
                 <string>Exporter</string>
                </property>
@@ -2172,8 +2352,8 @@ l'intervalle angulaire</string>
             <property name="geometry">
              <rect>
               <x>0</x>
-              <y>0</y>
-              <width>321</width>
+              <y>-56</y>
+              <width>428</width>
               <height>187</height>
              </rect>
             </property>
@@ -2183,6 +2363,12 @@ l'intervalle angulaire</string>
             <layout class="QVBoxLayout" name="verticalLayout_10">
              <item>
               <widget class="QComboBox" name="_comboOfsExportType">
+               <property name="font">
+                <font>
+                 <weight>50</weight>
+                 <bold>false</bold>
+                </font>
+               </property>
                <item>
                 <property name="text">
                  <string>Moelle du billon</string>
@@ -2209,6 +2395,12 @@ l'intervalle angulaire</string>
               <layout class="QFormLayout" name="formLayout_13">
                <item row="0" column="0">
                 <widget class="QLabel" name="label_18">
+                 <property name="font">
+                  <font>
+                   <weight>50</weight>
+                   <bold>false</bold>
+                  </font>
+                 </property>
                  <property name="text">
                   <string>Nombre de sommets</string>
                  </property>
@@ -2216,6 +2408,12 @@ l'intervalle angulaire</string>
                </item>
                <item row="1" column="0">
                 <widget class="QLabel" name="label_17">
+                 <property name="font">
+                  <font>
+                   <weight>50</weight>
+                   <bold>false</bold>
+                  </font>
+                 </property>
                  <property name="text">
                   <string>Rayon autour de la moelle</string>
                  </property>
@@ -2223,6 +2421,12 @@ l'intervalle angulaire</string>
                </item>
                <item row="2" column="0">
                 <widget class="QLabel" name="label_24">
+                 <property name="font">
+                  <font>
+                   <weight>50</weight>
+                   <bold>false</bold>
+                  </font>
+                 </property>
                  <property name="text">
                   <string>Fermer les faces du cylindre</string>
                  </property>
@@ -2230,6 +2434,12 @@ l'intervalle angulaire</string>
                </item>
                <item row="2" column="1">
                 <widget class="QCheckBox" name="_checkCloseBillon">
+                 <property name="font">
+                  <font>
+                   <weight>50</weight>
+                   <bold>false</bold>
+                  </font>
+                 </property>
                  <property name="text">
                   <string/>
                  </property>
@@ -2239,6 +2449,12 @@ l'intervalle angulaire</string>
                 <layout class="QHBoxLayout" name="horizontalLayout_37">
                  <item>
                   <widget class="QSlider" name="_sliderExportNbEdges">
+                   <property name="font">
+                    <font>
+                     <weight>50</weight>
+                     <bold>false</bold>
+                    </font>
+                   </property>
                    <property name="minimum">
                     <number>3</number>
                    </property>
@@ -2255,6 +2471,12 @@ l'intervalle angulaire</string>
                  </item>
                  <item>
                   <widget class="QSpinBox" name="_spinExportNbEdges">
+                   <property name="font">
+                    <font>
+                     <weight>50</weight>
+                     <bold>false</bold>
+                    </font>
+                   </property>
                    <property name="minimum">
                     <number>3</number>
                    </property>
@@ -2272,6 +2494,12 @@ l'intervalle angulaire</string>
                 <layout class="QHBoxLayout" name="horizontalLayout_38">
                  <item>
                   <widget class="QSlider" name="_sliderExportRadius">
+                   <property name="font">
+                    <font>
+                     <weight>50</weight>
+                     <bold>false</bold>
+                    </font>
+                   </property>
                    <property name="minimum">
                     <number>1</number>
                    </property>
@@ -2288,6 +2516,12 @@ l'intervalle angulaire</string>
                  </item>
                  <item>
                   <widget class="QSpinBox" name="_spinExportRadius">
+                   <property name="font">
+                    <font>
+                     <weight>50</weight>
+                     <bold>false</bold>
+                    </font>
+                   </property>
                    <property name="minimum">
                     <number>1</number>
                    </property>
@@ -2305,6 +2539,12 @@ l'intervalle angulaire</string>
              </item>
              <item>
               <widget class="QPushButton" name="_buttonExportToOfs">
+               <property name="font">
+                <font>
+                 <weight>50</weight>
+                 <bold>false</bold>
+                </font>
+               </property>
                <property name="text">
                 <string>Exporter</string>
                </property>
@@ -2330,7 +2570,7 @@ l'intervalle angulaire</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>334</width>
+              <width>428</width>
               <height>157</height>
              </rect>
             </property>
@@ -2340,6 +2580,12 @@ l'intervalle angulaire</string>
             <layout class="QVBoxLayout" name="verticalLayout_14">
              <item>
               <widget class="QComboBox" name="_comboExportPgm3dType">
+               <property name="font">
+                <font>
+                 <weight>50</weight>
+                 <bold>false</bold>
+                </font>
+               </property>
                <item>
                 <property name="text">
                  <string>Nœud courant</string>
@@ -2375,6 +2621,12 @@ l'intervalle angulaire</string>
                </property>
                <item row="0" column="0">
                 <widget class="QLabel" name="label_32">
+                 <property name="font">
+                  <font>
+                   <weight>50</weight>
+                   <bold>false</bold>
+                  </font>
+                 </property>
                  <property name="text">
                   <string>Contraste</string>
                  </property>
@@ -2384,6 +2636,12 @@ l'intervalle angulaire</string>
                 <layout class="QHBoxLayout" name="horizontalLayout_32">
                  <item>
                   <widget class="QSlider" name="_sliderPgm3dExportContrast">
+                   <property name="font">
+                    <font>
+                     <weight>50</weight>
+                     <bold>false</bold>
+                    </font>
+                   </property>
                    <property name="minimum">
                     <number>-100</number>
                    </property>
@@ -2397,6 +2655,12 @@ l'intervalle angulaire</string>
                  </item>
                  <item>
                   <widget class="QSpinBox" name="_spinPgm3dExportContrast">
+                   <property name="font">
+                    <font>
+                     <weight>50</weight>
+                     <bold>false</bold>
+                    </font>
+                   </property>
                    <property name="minimum">
                     <number>-100</number>
                    </property>
@@ -2409,6 +2673,12 @@ l'intervalle angulaire</string>
                </item>
                <item row="1" column="0">
                 <widget class="QLabel" name="label_48">
+                 <property name="font">
+                  <font>
+                   <weight>50</weight>
+                   <bold>false</bold>
+                  </font>
+                 </property>
                  <property name="text">
                   <string>Résolution (image de
  noeuds seulement)</string>
@@ -2419,6 +2689,12 @@ l'intervalle angulaire</string>
                 <layout class="QHBoxLayout" name="horizontalLayout_39">
                  <item>
                   <widget class="QSlider" name="_sliderPgm3dExportResolution">
+                   <property name="font">
+                    <font>
+                     <weight>50</weight>
+                     <bold>false</bold>
+                    </font>
+                   </property>
                    <property name="minimum">
                     <number>1</number>
                    </property>
@@ -2432,6 +2708,12 @@ l'intervalle angulaire</string>
                  </item>
                  <item>
                   <widget class="QSpinBox" name="_spinPgm3dExportResolution">
+                   <property name="font">
+                    <font>
+                     <weight>50</weight>
+                     <bold>false</bold>
+                    </font>
+                   </property>
                    <property name="minimum">
                     <number>1</number>
                    </property>
@@ -2446,6 +2728,12 @@ l'intervalle angulaire</string>
              </item>
              <item>
               <widget class="QPushButton" name="_buttonExportToPgm3d">
+               <property name="font">
+                <font>
+                 <weight>50</weight>
+                 <bold>false</bold>
+                </font>
+               </property>
                <property name="text">
                 <string>Exporter</string>
                </property>
@@ -2471,8 +2759,8 @@ l'intervalle angulaire</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>261</width>
-              <height>78</height>
+              <width>441</width>
+              <height>131</height>
              </rect>
             </property>
             <attribute name="label">
@@ -2481,6 +2769,12 @@ l'intervalle angulaire</string>
             <layout class="QVBoxLayout" name="verticalLayout_3">
              <item>
               <widget class="QComboBox" name="_comboExportToV3DType">
+               <property name="font">
+                <font>
+                 <weight>50</weight>
+                 <bold>false</bold>
+                </font>
+               </property>
                <item>
                 <property name="text">
                  <string>Nœud courant</string>
@@ -2500,6 +2794,12 @@ l'intervalle angulaire</string>
              </item>
              <item>
               <widget class="QPushButton" name="_buttonExportToV3D">
+               <property name="font">
+                <font>
+                 <weight>50</weight>
+                 <bold>false</bold>
+                </font>
+               </property>
                <property name="text">
                 <string>Exporter</string>
                </property>
@@ -2512,8 +2812,8 @@ l'intervalle angulaire</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>264</width>
-              <height>112</height>
+              <width>441</width>
+              <height>131</height>
              </rect>
             </property>
             <attribute name="label">
@@ -2522,6 +2822,12 @@ l'intervalle angulaire</string>
             <layout class="QVBoxLayout" name="verticalLayout_12">
              <item>
               <widget class="QComboBox" name="_comboExportToSdpType">
+               <property name="font">
+                <font>
+                 <weight>50</weight>
+                 <bold>false</bold>
+                </font>
+               </property>
                <item>
                 <property name="text">
                  <string>Contour de la coupe</string>
@@ -2546,6 +2852,12 @@ l'intervalle angulaire</string>
              </item>
              <item>
               <widget class="QCheckBox" name="_checkExportSdpOldMethod">
+               <property name="font">
+                <font>
+                 <weight>50</weight>
+                 <bold>false</bold>
+                </font>
+               </property>
                <property name="text">
                 <string>Ancienne méthode</string>
                </property>
@@ -2553,6 +2865,12 @@ l'intervalle angulaire</string>
              </item>
              <item>
               <widget class="QPushButton" name="_buttonExportToSDP">
+               <property name="font">
+                <font>
+                 <weight>50</weight>
+                 <bold>false</bold>
+                </font>
+               </property>
                <property name="text">
                 <string>Exporter</string>
                </property>
