@@ -128,13 +128,15 @@ int main(int argc, char** argv)
     ("input-file,i", po::value<std::string>(), "vol file (.vol) , pgm3d (.p3d or .pgm3d) file or sdp (sequence of discrete points)" )
     ("trunkBark-mesh,t", po::value<std::string>(), "mesh of the trunk bark in format OFS non normalized (.ofs)" )
     ("marrow-mesh,a", po::value<std::string>(), "mesh of trunk marrow  in format OFS non normalized (.ofs)" )
+    ("seeds", "inside exporting markers export seeds with labels from 0, 1, 2 for each  markers")
+    ("backgroundValue", po::value<int>()->default_value(10),  "define the default background value (default 128)")
     ("scaleX,x",  po::value<float>()->default_value(1.0), "set the scale value in the X direction (default 1.0)" )
     ("scaleY,y",  po::value<float>()->default_value(1.0), "set the scale value in the Y direction (default 1.0)" )
     ("scaleZ,z",  po::value<float>()->default_value(1.0), "set the scale value in the Z direction (default 1.0)")
     ("center,c",  po::value<std::vector <int> >()->multitoken(), "The coordinates of the center to define the seed ")
     ("domain,d",  po::value<std::vector <int> >()->multitoken(), "The domain xmin ymin zmin xmax ymax zmax ")
     ("backgroundSourceImage", po::value<std::string>(), "adds background source image")
-    ("backgroundSourceMin", po::value<int>()->default_value(10), "define the min threshold to consider to considered as backgroundSource in the image given by backgroundSourceImage (default 10) ")
+    ("backgroundSourceMin", po::value<int>()->default_value(10), "define the min threshold of backgroundSourceImage (default 10) ")
     ("minSizeBoundary,m",  po::value<unsigned int >()->default_value(100.0), "set the min size of the boundary to be extracted (default 100)" )
     ("transparency,T",  po::value<uint>()->default_value(100), "transparency") ;
   bool parseOK=true;
@@ -274,7 +276,7 @@ int main(int argc, char** argv)
       
     if(!vm.count("backgroundSourceImage")){
       for(Domain::ConstIterator it = domainMarker.begin();  it!= domainMarker.end(); it++){
-	markerImage.setValue(*it, 128);
+	markerImage.setValue(*it, vm["backgroundValue"].as<int>());
       }
     }else{
       typedef DGtal::ImageContainerBySTLMap<DGtal::Z3i::Domain, unsigned int> Image3D;
@@ -284,7 +286,7 @@ int main(int argc, char** argv)
 	if(imageSrc(*it)<threshold)
 	  markerImage.setValue(*it, 0);
 	else
-	  markerImage.setValue(*it, 128);
+	  markerImage.setValue(*it, vm["backgroundValue"].as<int>());
       }
     }
     
@@ -301,14 +303,13 @@ int main(int argc, char** argv)
 
 	Z3i::DigitalSet aSet = getMakerFromKnot(domain, K, vectConnectedSCell.at(i), center, 5, 2, 100, -60 );
 	exportSDP(out, aSet);  
-	
-	DGtal::ImageFromSet<ImageContainerBySTLVector<Domain, unsigned char> >::append(markerImage,aSet, 250);
+	DGtal::ImageFromSet<ImageContainerBySTLVector<Domain, unsigned char> >::append(markerImage,aSet, vm.count("seeds")? i  :250);
 	viewer << aSet;
 	DGtal::Color c= gradient(i);
 	viewer << CustomColors3D(Color(250, 0,0,transp), Color(c.red(),
 							       c.green(),
 							       c.blue(),120));	    
-	    
+	
 	for(uint j=0; j< vectConnectedSCell.at(i).size();j++){
 	  viewer << vectConnectedSCell.at(i).at(j);
 	}
