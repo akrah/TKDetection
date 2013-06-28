@@ -54,7 +54,7 @@ private slots:
 	void resetHistogramDefaultValuesZMotion();
 	void resetHistogramDefaultValuesNearestDistance();
 	void updateSliceHistogram();
-	void updateContourHistograms( const int &histogramIndex );
+	void updateContourHistograms( const int &sliceIndex );
 	void updateIntensityDistributionHistogram();
 	void updateIntensityDistributionHistogramOnKnotArea();
 	void updatePith();

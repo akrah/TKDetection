@@ -654,7 +654,7 @@ void MainWindow::updateSliceHistogram()
 	_ui->_comboSelectSliceInterval->setCurrentIndex(oldIntervalIndex<=intervals.size()?oldIntervalIndex:0);
 }
 
-void MainWindow::updateContourHistograms( const int &sliceNumber )
+void MainWindow::updateContourHistograms( const int &sliceIndex )
 {
 	_ui->_sliderContour->setMaximum(1);
 	_ui->_sliderContour->setValue(0);
@@ -664,9 +664,9 @@ void MainWindow::updateContourHistograms( const int &sliceNumber )
 	if ( sliceIntervalIndex > 0 )
 	{
 		const Interval<uint> &sliceInterval = _sliceHistogram->interval(sliceIntervalIndex-1);
-		if ( !_contourBillon->isEmpty() && sliceInterval.containsClosed(_currentSlice) )
+		if ( !_contourBillon->isEmpty() && sliceInterval.containsClosed(sliceIndex) )
 		{
-			const ContourSlice &contourSlice = _contourBillon->contourSlice(sliceNumber-sliceInterval.min());
+			const ContourSlice &contourSlice = _contourBillon->contourSlice(sliceIndex-sliceInterval.min());
 
 			_plotCurvatureHistogram->update(contourSlice.curvatureHistogram(),contourSlice.leftMainDominantPointIndex(),contourSlice.rightMainDominantPointIndex());
 			_ui->_plotCurvatureHistogram->setAxisScale(QwtPlot::xBottom,0,contourSlice.curvatureHistogram().size());
@@ -895,6 +895,8 @@ void MainWindow::selectSectorInterval(const int &index, const bool &draw )
 		_knotBillon = new Billon(*_componentBillon);
 		_contourBillon->compute( *_knotBillon, *_componentBillon, 0, _ui->_spinContourSmoothingRadius->value(), _ui->_spinCurvatureWidth->value(),
 								 -_ui->_spinCurvatureThreshold->value(), _nearestPointsHistogram->intervals() );
+
+		updateContourHistograms( _currentSlice );
 	}
 	if (draw) drawSlice();
 }

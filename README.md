@@ -11,12 +11,12 @@ TKDetection is a software to detect and segment wood knots.
 Dependencies list
 -----------------
 
-|   |            Library                  |  Tested version  |   |          Library            |  Tested version  |    |        Library              |  Tested version  |
-|:-:|:-----------------------------------:|:----------------:|---|:---------------------------:|:----------------:|----|:---------------------------:|:----------------:|
-| 1 | [Qt](#1-qt)                         |       4.8        | 5 | [Qxt](#5-qxt)               |      0.6.2       |  8 | [ImaGene](#8-imagene)       |    repository    |
-| 2 | [Armadillo](#2-armadillo)           |     3.800.2      | 6 | [QwtPolar](#6-qwtpolar)     |      1.0.1       |  9 | [DGLib](#9-dglib)           |      online      |
-| 3 | [InsightToolkit](#3-insighttoolkit) |      4.3.1       | 7 | [DGtalTools](#7-dgtaltools) |       0.6        | 10 | [KerUtils](#10-kerutils)    |      online      |
-| 4 | [Qwt](#4-qwt)                       |      6.0.2       |
+|   |            Library                  |  Tested version  |   |          Library            |  Tested version  |   |        Library              |  Tested version  |
+|:-:|:-----------------------------------:|:----------------:|---|:---------------------------:|:----------------:|---|:---------------------------:|:----------------:|
+| 1 | [Qt](#1-qt)                         |       4.8        | 4 | [Qwt](#4-qwt)               |      6.0.2       | 7 | [DGtalTools](#7-dgtaltools) |       0.6        |
+| 2 | [Armadillo](#2-armadillo)           |     3.800.2      | 5 | [Qxt](#5-qxt)               |      0.6.2       | 8 | [DGLib](#9-dglib)           |      online      |
+| 3 | [InsightToolkit](#3-insighttoolkit) |      4.3.1       | 6 | [QwtPolar](#6-qwtpolar)     |      1.0.1       | 9 | [KerUtils](#10-kerutils)    |      online      |
+
 
 
 Dependencies installation on Ubuntu
@@ -262,7 +262,7 @@ If a problem appear, use the same tips than the DGtal installation:
 ### 8. ImaGene
 [Top](#tkdetection)
 
-DGLib uses features of ImaGene library.
+Kerutils uses features of ImaGene library.
 
 Install ImaGene by using the version without dependencies:
 
@@ -275,28 +275,10 @@ Install ImaGene by using the version without dependencies:
   sudo make install
 ~~~
 
-
-### 9. DGLib
+### 9. KerUtils
 [Top](#tkdetection)
 
-DGLib is the library used to detect the dominant points.
-It provides the _cornerdetection_ binary file.
-
-DGLib should be downloaded here: http://www.loria.fr/~krahenbu/TKDetection/DGLib_for_TKDetection.zip
-
-~~~
-  unzip DGLib_for_TKDetection.zip
-  mkdir DGLib_for_TKDetection/build
-  cd DGLib_for_TKDetection/build
-  cmake ..
-  make
-  sudo make install
-~~~
-
-### 10. KerUtils
-[Top](#tkdetection)
-
-KerUtils is the library used to detect the curvature on knot contour.
+KerUtils is the library used to detect the curvature on contour of knots.
 It provides the _curvature\_gmcb_ binary file.
 
 KerUtils should be downloaded here: http://www.loria.fr/~krahenbu/TKDetection/KerUtils.zip
