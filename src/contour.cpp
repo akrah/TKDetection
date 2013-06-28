@@ -109,7 +109,7 @@ void Contour::smooth( int smoothingRadius )
 						}
 						else
 						{
-							if ( qAbs(currentCoord.x-oldCoord.x)+qAbs(currentCoord.y-oldCoord.y) < 2 )
+							if ( qSqrt( qPow(currentCoord.x-oldCoord.x,2)+qPow(currentCoord.y-oldCoord.y,2) ) < 2 )
 							{
 								this->pop_back();
 								if ( this->size() > 1 ) oldCoord = (*this)[this->size()-2];
