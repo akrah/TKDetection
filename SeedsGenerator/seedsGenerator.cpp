@@ -1,6 +1,5 @@
-#include <qapplication.h>
 #include <DGtal/base/Common.h>
-#include <DGtal/io/viewers/Viewer3D.h>
+
 #include "DGtal/io/readers/VolReader.h"
 #include "DGtal/io/Color.h"
 #include "DGtal/io/colormaps/GradientColorMap.h"
@@ -125,20 +124,15 @@ int main(int argc, char** argv)
   po::options_description general_opt("Allowed options are: ");
   general_opt.add_options()
     ("help,h", "display this message")
-    ("input-file,i", po::value<std::string>(), "vol file (.vol) , pgm3d (.p3d or .pgm3d) file or sdp (sequence of discrete points)" )
-    ("trunkBark-mesh,t", po::value<std::string>(), "mesh of the trunk bark in format OFS non normalized (.ofs)" )
-    ("marrow-mesh,a", po::value<std::string>(), "mesh of trunk marrow  in format OFS non normalized (.ofs)" )
-    ("seeds", "inside exporting markers export seeds with labels from 0, 1, 2 for each  markers")
-    ("backgroundValue", po::value<int>()->default_value(10),  "define the default background value (default 128)")
-    ("scaleX,x",  po::value<float>()->default_value(1.0), "set the scale value in the X direction (default 1.0)" )
-    ("scaleY,y",  po::value<float>()->default_value(1.0), "set the scale value in the Y direction (default 1.0)" )
-    ("scaleZ,z",  po::value<float>()->default_value(1.0), "set the scale value in the Z direction (default 1.0)")
+    ("input-file,i", po::value<std::string>(), "knots as sdp file  (sequence of discrete points)" )
+    ("multipleLabels", "export markers with by labels from 0, 1, 2 ... for each  markers")
+    ("segmentationAreaValue", po::value<int>()->default_value(10),  "define the value wich will define the segmentation area (default 128)")
     ("center,c",  po::value<std::vector <int> >()->multitoken(), "The coordinates of the center to define the seed ")
     ("domain,d",  po::value<std::vector <int> >()->multitoken(), "The domain xmin ymin zmin xmax ymax zmax ")
     ("backgroundSourceImage", po::value<std::string>(), "adds background source image")
     ("backgroundSourceMin", po::value<int>()->default_value(10), "define the min threshold of backgroundSourceImage (default 10) ")
-    ("minSizeBoundary,m",  po::value<unsigned int >()->default_value(100.0), "set the min size of the boundary to be extracted (default 100)" )
-    ("transparency,T",  po::value<uint>()->default_value(100), "transparency") ;
+    ("minSizeBoundary,m",  po::value<unsigned int >()->default_value(100.0), "set the min size of the boundary to be extracted (default 100)" );
+
   bool parseOK=true;
   po::variables_map vm;
   try{
@@ -151,7 +145,7 @@ int main(int argc, char** argv)
   if( !parseOK || vm.count("help")||argc<=1)
     {
       std::cout << "Usage: " << argv[0] << " [input-file]\n"
-		<< "Display volume file as a voxel set by using QGLviewer"
+		<< "Construct markers  from knot (as SDP) and export them as SDP and PGM Image "
 		<< general_opt << "\n";
       return 0;
     }
@@ -167,18 +161,11 @@ int main(int argc, char** argv)
     inputFilename = vm["input-file"].as<std::string>();
     extension = inputFilename.substr(inputFilename.find_last_of(".") + 1);
   }
-  unsigned char transp = vm["transparency"].as<uint>();
-  float sx = vm["scaleX"].as<float>();
-  float sy = vm["scaleY"].as<float>();
-  float sz = vm["scaleZ"].as<float>();
 
 
-  QApplication application(argc,argv);
-  Viewer3D viewer;
 
-  viewer.setScale(sx,sy,sz);
-  viewer.setWindowTitle("simple Volume Viewer");
-  viewer.show();
+
+
 
   Point center(0,0,0);
   
@@ -246,15 +233,6 @@ int main(int argc, char** argv)
     cerr << "[done]"<< endl;
 
 
-    GradientColorMap<long> gradient( 0, vectConnectedSCell.size());
-    gradient.addColor(DGtal::Color::Red);
-    gradient.addColor(DGtal::Color::Yellow);
-    gradient.addColor(DGtal::Color::Green);
-    gradient.addColor(DGtal::Color::Cyan);
-    gradient.addColor(DGtal::Color::Blue);
-    gradient.addColor(DGtal::Color::Magenta);
-    gradient.addColor(DGtal::Color::Red);
-    viewer << SetMode3D(vectConnectedSCell.at(0).at(0).className(), "Basic");
 
 
   //default domain defined from set fo voxel
@@ -272,11 +250,11 @@ int main(int argc, char** argv)
     out.open(filename.c_str());
     
     ImageContainerBySTLVector<Domain, unsigned char> markerImage(domainMarker);
-    viewer << SetMode3D(vectConnectedSCell.at(0).at(0).className(), "Basic");    
+
       
     if(!vm.count("backgroundSourceImage")){
       for(Domain::ConstIterator it = domainMarker.begin();  it!= domainMarker.end(); it++){
-	markerImage.setValue(*it, vm["backgroundValue"].as<int>());
+	markerImage.setValue(*it, vm["segmentationAreaValue"].as<int>());
       }
     }else{
       typedef DGtal::ImageContainerBySTLMap<DGtal::Z3i::Domain, unsigned int> Image3D;
@@ -286,7 +264,7 @@ int main(int argc, char** argv)
 	if(imageSrc(*it)<threshold)
 	  markerImage.setValue(*it, 0);
 	else
-	  markerImage.setValue(*it, vm["backgroundValue"].as<int>());
+	  markerImage.setValue(*it, vm["segmentationAreaValue"].as<int>());
       }
     }
     
@@ -303,16 +281,7 @@ int main(int argc, char** argv)
 
 	Z3i::DigitalSet aSet = getMakerFromKnot(domain, K, vectConnectedSCell.at(i), center, 5, 2, 100, -60 );
 	exportSDP(out, aSet);  
-	DGtal::ImageFromSet<ImageContainerBySTLVector<Domain, unsigned char> >::append(markerImage,aSet, vm.count("seeds")? i  :250);
-	viewer << aSet;
-	DGtal::Color c= gradient(i);
-	viewer << CustomColors3D(Color(250, 0,0,transp), Color(c.red(),
-							       c.green(),
-							       c.blue(),120));	    
-	
-	for(uint j=0; j< vectConnectedSCell.at(i).size();j++){
-	  viewer << vectConnectedSCell.at(i).at(j);
-	}
+	DGtal::ImageFromSet<ImageContainerBySTLVector<Domain, unsigned char> >::append(markerImage,aSet, vm.count("multipleLabels")? i  :250);
       }
     }
     GenericWriter< ImageContainerBySTLVector<Domain, unsigned char> >::exportFile("marker.pgm3D", markerImage);
@@ -320,34 +289,7 @@ int main(int argc, char** argv)
     GenericWriter< ImageContainerBySTLVector<Domain, unsigned char> >::exportFile("marker2.pgm3D", markerImageSRC);
     
   }
-  if(vm.count("trunkBark-mesh")){
-    string meshFilename = vm["trunkBark-mesh"].as<std::string>();
-    Mesh<Display3D::pointD3D> anImportedMesh(DGtal::Color(160, 30, 30,20));
-    anImportedMesh.invertVertexFaceOrder();
-    bool import = anImportedMesh << meshFilename;
-    if(import){
-      viewer << anImportedMesh;
-    }
-  }
-
-
-  if(vm.count("marrow-mesh")){
-    string meshFilename = vm["marrow-mesh"].as<std::string>();
-    Mesh<Display3D::pointD3D> anImportedMesh(DGtal::Color(70,70,70,255));
-    bool import = anImportedMesh << meshFilename;
-    if(import){
-      viewer << anImportedMesh;
-    }
-  }
-
   
- 
-
-  viewer << Viewer3D::updateDisplay;
-
-
-
-  return application.exec();
 }
 
 
