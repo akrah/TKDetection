@@ -17,6 +17,7 @@
 #include <DGtal/shapes/Shapes.h>
 #include "DGtal/io/readers/MeshReader.h"
 
+#include <sstream>
 
 using namespace std;
 using namespace DGtal;
@@ -125,12 +126,14 @@ int main(int argc, char** argv)
   general_opt.add_options()
     ("help,h", "display this message")
     ("input-file,i", po::value<std::string>(), "knots as sdp file  (sequence of discrete points)" )
+    ("output-file,o", po::value<std::string>(), "set output basename (default output)" )
     ("multipleLabels", "export markers with by labels from 0, 1, 2 ... for each  markers")
     ("segmentationAreaValue", po::value<int>()->default_value(10),  "define the value wich will define the segmentation area (default 128)")
     ("center,c",  po::value<std::vector <int> >()->multitoken(), "The coordinates of the center to define the seed ")
     ("domain,d",  po::value<std::vector <int> >()->multitoken(), "The domain xmin ymin zmin xmax ymax zmax ")
     ("backgroundSourceImage", po::value<std::string>(), "adds background source image")
     ("backgroundSourceMin", po::value<int>()->default_value(10), "define the min threshold of backgroundSourceImage (default 10) ")
+    ("pgmExt", "use pgm extension instead pgm3d")
     ("minSizeBoundary,m",  po::value<unsigned int >()->default_value(100.0), "set the min size of the boundary to be extracted (default 100)" );
 
   bool parseOK=true;
@@ -156,14 +159,18 @@ int main(int argc, char** argv)
       return 0;
     }
   string inputFilename;
+  string outputFilename;
   string extension;
   if( vm.count("input-file")){
     inputFilename = vm["input-file"].as<std::string>();
     extension = inputFilename.substr(inputFilename.find_last_of(".") + 1);
   }
-
-
-
+  if( vm.count("output-file")){
+    outputFilename = vm["output-file"].as<std::string>();
+  }else{
+    outputFilename = inputFilename.substr(inputFilename.find_last_of("/")+1, inputFilename.find_last_of(".")-inputFilename.find_last_of("/")-1 );
+  }
+  
 
 
 
@@ -245,10 +252,10 @@ int main(int argc, char** argv)
       domainMarker= Domain(ptLower, ptUpper);
     }
     
-    std::string filename= "exportedMarker.sdp";
+    stringstream sdpExport; sdpExport << outputFilename << "Marker.sdp";
     ofstream out; 
-    out.open(filename.c_str());
-    
+    out.open(sdpExport.str().c_str());
+   
     ImageContainerBySTLVector<Domain, unsigned char> markerImage(domainMarker);
 
       
@@ -275,18 +282,23 @@ int main(int argc, char** argv)
       Point upperPt = bDomain.upperBound();
       
       unsigned int width = upperPt[2] - lowerPt[2] ;
-      // trace.info() << "width= " << width <<endl;
       
       if(width>5){
-
 	Z3i::DigitalSet aSet = getMakerFromKnot(domain, K, vectConnectedSCell.at(i), center, 5, 2, 100, -60 );
 	exportSDP(out, aSet);  
 	DGtal::ImageFromSet<ImageContainerBySTLVector<Domain, unsigned char> >::append(markerImage,aSet, vm.count("multipleLabels")? i  :250);
       }
     }
-    GenericWriter< ImageContainerBySTLVector<Domain, unsigned char> >::exportFile("marker.pgm3D", markerImage);
-    ImageContainerBySTLVector<Domain, unsigned char> markerImageSRC = 	DGtal::ImageFromSet<ImageContainerBySTLVector<Domain, unsigned char> >::create(set3d, 128);
-    GenericWriter< ImageContainerBySTLVector<Domain, unsigned char> >::exportFile("marker2.pgm3D", markerImageSRC);
+    
+    
+    stringstream markerName; 
+    if(vm.count("backgroundSourceMin")){
+      markerName << outputFilename << "MarkerBGtreshold" << vm["backgroundSourceMin"].as<int>() << (vm.count("pgmExt") ?  ".pgm" : ".pgm3d") ; 
+    }else{
+      markerName << outputFilename << "Marker" <<  (vm.count("pgmExt") ?  ".pgm" : ".pgm3d") ; 
+    }
+    
+    GenericWriter< ImageContainerBySTLVector<Domain, unsigned char> >::exportFile(markerName.str(), markerImage);
     
   }
   
