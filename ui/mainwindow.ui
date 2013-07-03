@@ -1557,7 +1557,7 @@ au début et à la fin</string>
             <item row="0" column="0">
              <widget class="QLabel" name="label_45">
               <property name="text">
-               <string>Écart ajouté aux intervalles</string>
+               <string>Écart ajouté aux intervalles (en degrés)</string>
               </property>
              </widget>
             </item>
@@ -1631,15 +1631,15 @@ au début et à la fin</string>
             </font>
            </property>
            <property name="currentIndex">
-            <number>1</number>
+            <number>0</number>
            </property>
            <widget class="QWidget" name="page_8">
             <property name="geometry">
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>441</width>
-              <height>220</height>
+              <width>250</width>
+              <height>129</height>
              </rect>
             </property>
             <attribute name="label">
@@ -1817,8 +1817,8 @@ au début et à la fin</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>441</width>
-              <height>220</height>
+              <width>328</width>
+              <height>126</height>
              </rect>
             </property>
             <attribute name="label">
@@ -2128,8 +2128,8 @@ l'intervalle angulaire</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>441</width>
-              <height>131</height>
+              <width>374</width>
+              <height>80</height>
              </rect>
             </property>
             <attribute name="label">
@@ -2211,8 +2211,8 @@ l'intervalle angulaire</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>441</width>
-              <height>131</height>
+              <width>181</width>
+              <height>121</height>
              </rect>
             </property>
             <attribute name="label">
@@ -2352,8 +2352,8 @@ l'intervalle angulaire</string>
             <property name="geometry">
              <rect>
               <x>0</x>
-              <y>-56</y>
-              <width>428</width>
+              <y>0</y>
+              <width>321</width>
               <height>187</height>
              </rect>
             </property>
@@ -2570,7 +2570,7 @@ l'intervalle angulaire</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>428</width>
+              <width>334</width>
               <height>157</height>
              </rect>
             </property>
@@ -2759,8 +2759,8 @@ l'intervalle angulaire</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>441</width>
-              <height>131</height>
+              <width>261</width>
+              <height>78</height>
              </rect>
             </property>
             <attribute name="label">
@@ -2812,8 +2812,8 @@ l'intervalle angulaire</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>441</width>
-              <height>131</height>
+              <width>264</width>
+              <height>112</height>
              </rect>
             </property>
             <attribute name="label">

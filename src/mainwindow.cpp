@@ -333,7 +333,7 @@ void MainWindow::openDicom()
 	QString text = QInputDialog::getItem(this, tr("Ordre de chargement des coupes du billon"), tr("Ordre :"), QStringList() << tr("De lecture du fichier") << inverse, 0, false,&ok);
 	if ( !ok || text.isEmpty() ) return;
 
-	Billon *billon = DicomReader::read(folderName,text.compare(inverse));
+	Billon *billon = DicomReader::read(folderName,!text.compare(inverse));
 	if ( !billon ) return;
 
 	closeImage();
@@ -1207,7 +1207,7 @@ void MainWindow::updateSectorHistogram( const Interval<uint> &interval )
 									 _ui->_spinZMotionMin->value(), _treeRadius*_ui->_spinRestrictedAreaPercentage->value()/100.);
 		_sectorHistogram->computeMaximumsAndIntervals( _ui->_spinHistogramSmoothingRadius_zMotion->value(), _ui->_spinHistogramMinimumHeightOfMaximum_zMotion->value(),
 													   _ui->_spinHistogramDerivativeSearchPercentage_zMotion->value(), _ui->_spinHistogramMinimumWidthOfInterval_zMotion->value(),
-													   *_pieChart, _ui->_spinSectorHistogramIntervalGap->value(), true );
+													   *_pieChart, _ui->_spinSectorHistogramIntervalGap->value()*360./static_cast<qreal>(_ui->_spinSectorsNumber->value()), true );
 	}
 
 	_plotSectorHistogram->update(*_sectorHistogram, *_pieChart);

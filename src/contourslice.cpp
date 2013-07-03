@@ -268,7 +268,7 @@ void ContourSlice::computeMainDominantPoints( const qreal &curvatureThreshold )
 	int nbPoints, index, indexToCompare;
 
 	nbPoints = _contour.size();
-	indexToCompare = nbPoints*0.4;
+	indexToCompare = nbPoints*0.3;
 
 	if ( _contourDistancesHistogram.size() == nbPoints && _curvatureHistogram.size() == nbPoints )
 	{
