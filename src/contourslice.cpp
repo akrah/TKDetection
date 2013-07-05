@@ -84,7 +84,7 @@ void ContourSlice::compute( Slice &resultSlice, const Slice &initialSlice, const
 	_sliceCenter = sliceCenter;
 
 	computeMainDominantPoints( curvatureThreshold );
-	computeSupportsOfMainDominantPoints( 25 );
+	computeSupportsOfMainDominantPoints( 10 );
 	computeContourPolygons();
 	updateSlice( initialSlice, resultSlice, intensityThreshold );
 }

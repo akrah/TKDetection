@@ -3,20 +3,20 @@
 ######################################################################
 
 TEMPLATE = app
-TARGET = 
+TARGET =
 
 macx:QMAKE_CC=/usr/bin/clang
 macx:QMAKE_CXX=/usr/bin/clang++
 
-QT *= opengl xml 
+QT *= opengl xml
 CONFIG += qt  warn_on  boost
 
 
-DEFINES += WITH_VISU3D_QGLVIEWER 
+DEFINES += WITH_VISU3D_QGLVIEWER
 
-LIBS += -lDGtal -lDGtalIO  -lboost_program_options  -lQGLViewer 
+LIBS += -lDGtal -lDGtalIO  -lboost_program_options  -lQGLViewer
 
 # Input
 
 
-SOURCES += main.cpp  
+SOURCES += seedsGenerator.cpp
