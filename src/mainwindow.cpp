@@ -700,10 +700,10 @@ void MainWindow::updateIntensityDistributionHistogramOnKnotArea()
 {
 	_intensityDistributionHistogramOnKnotArea->clear();
 
-	if ( _ui->_comboSelectSliceInterval->currentIndex() > 0 )
+	if ( _ui->_comboSelectSliceInterval->currentIndex() > 0 && _knotBillon != 0 )
 	{
-		_intensityDistributionHistogramOnKnotArea->construct(*_billon, _sliceHistogram->interval(_ui->_comboSelectSliceInterval->currentIndex()-1),
-															 Interval<int>(_ui->_spinMinIntensity->value(),_ui->_spinMaxIntensity->value()),
+		_intensityDistributionHistogramOnKnotArea->construct(*_billon, _nearestPointsHistogram->interval(0), _sectorHistogram->interval(_ui->_comboSelectSectorInterval->currentIndex()-1),
+															 *_pieChart, _billon->pithCoord(_knotBillon->zPos()), Interval<int>(_ui->_spinMinIntensity->value(),_ui->_spinMaxIntensity->value()),
 															 _ui->_spinHistogramSmoothingRadius_zMotion->value());
 	}
 
