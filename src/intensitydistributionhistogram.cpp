@@ -39,7 +39,8 @@ void IntensityDistributionHistogram::construct( const Billon &billon, const Inte
 }
 
 void IntensityDistributionHistogram::construct( const Billon &billon, const Interval<uint> &sliceInterval, const Interval<uint> &sectorInterval,
-												const PieChart &pieChart, const iCoord2D &pithCoord, const Interval<int> &intensityInterval, const uint &smoothingRadius )
+												const PieChart &pieChart, const iCoord2D &pithCoord, const uint &maxDistance, const Interval<int> &intensityInterval,
+												const uint &smoothingRadius )
 {
 	const uint &width = billon.n_cols;
 	const uint &height = billon.n_rows;
@@ -55,7 +56,7 @@ void IntensityDistributionHistogram::construct( const Billon &billon, const Inte
 		for ( i=0 ; i<width ; ++i )
 		{
 
-			if ( sectorInterval.containsClosed(pieChart.sectorIndexOfAngle(pithCoord.angle(iCoord2D(i,j)))) && pithCoord.euclideanDistance(iCoord2D(i,j)) < 200 )
+			if ( sectorInterval.containsClosed(pieChart.sectorIndexOfAngle(pithCoord.angle(iCoord2D(i,j)))) && pithCoord.euclideanDistance(iCoord2D(i,j)) < maxDistance )
 			{
 				for ( k=sliceInterval.min() ; k<=sliceInterval.max() ; ++k )
 				{
@@ -66,4 +67,22 @@ void IntensityDistributionHistogram::construct( const Billon &billon, const Inte
 	}
 
 	meansSmoothing(smoothingRadius,false);
+}
+
+int IntensityDistributionHistogram::computeIndexOfPartialSum( const qreal &percentage )
+{
+	int searchIndex;
+	qreal partialSum, totalSum;
+	totalSum = 0.;
+	for ( int k=0 ; k<this->size() ; ++k )
+	{
+		totalSum += (*this)[k];
+	}
+	partialSum = 0.;
+	searchIndex = 0;
+	while ( partialSum/totalSum < percentage )
+	{
+		partialSum += (*this)[searchIndex++];
+	}
+	return searchIndex;
 }

@@ -689,7 +689,11 @@ void MainWindow::updateIntensityDistributionHistogram()
 	if ( _billon )
 	{
 		_intensityDistributionHistogram->construct(*_billon, Interval<uint>(0,_billon->n_slices-1), Interval<int>(_ui->_spinMinIntensity->value(),_ui->_spinMaxIntensity->value()),
-												   _ui->_spinHistogramSmoothingRadius_zMotion->value());
+												   0);
+		std::cout << "Indice d'intensité avec 50% des valeurs inférieures : " << _ui->_spinMinIntensity->value()+_intensityDistributionHistogram->computeIndexOfPartialSum(0.5) << std::endl;
+		std::cout << "Indice d'intensité avec 60% des valeurs inférieures : " << _ui->_spinMinIntensity->value()+_intensityDistributionHistogram->computeIndexOfPartialSum(0.6) << std::endl;
+		std::cout << "Indice d'intensité avec 70% des valeurs inférieures : " << _ui->_spinMinIntensity->value()+_intensityDistributionHistogram->computeIndexOfPartialSum(0.7) << std::endl;
+		std::cout << "Indice d'intensité avec 80% des valeurs inférieures : " << _ui->_spinMinIntensity->value()+_intensityDistributionHistogram->computeIndexOfPartialSum(0.8) << std::endl;
 	}
 
 	_plotIntensityDistributionHistogram->update(*_intensityDistributionHistogram,Interval<int>(_ui->_spinMinIntensity->value(),_ui->_spinMaxIntensity->value()));
@@ -702,9 +706,14 @@ void MainWindow::updateIntensityDistributionHistogramOnKnotArea()
 
 	if ( _ui->_comboSelectSliceInterval->currentIndex() > 0 && _knotBillon != 0 )
 	{
-		_intensityDistributionHistogramOnKnotArea->construct(*_billon, _nearestPointsHistogram->interval(0), _sectorHistogram->interval(_ui->_comboSelectSectorInterval->currentIndex()-1),
-															 *_pieChart, _billon->pithCoord(_knotBillon->zPos()), Interval<int>(_ui->_spinMinIntensity->value(),_ui->_spinMaxIntensity->value()),
-															 _ui->_spinHistogramSmoothingRadius_zMotion->value());
+		_intensityDistributionHistogramOnKnotArea->construct(*_billon, _sliceHistogram->interval(_ui->_comboSelectSliceInterval->currentIndex()-1), _sectorHistogram->interval(_ui->_comboSelectSectorInterval->currentIndex()-1),
+															 *_pieChart, _billon->pithCoord(_knotBillon->zPos()+_knotBillon->n_slices/2), _treeRadius,
+															 Interval<int>(_ui->_spinMinIntensity->value(),_ui->_spinMaxIntensity->value()),
+															 0);
+		std::cout << "Indice d'intensité avec 50% des valeurs inférieures : " << _ui->_spinMinIntensity->value()+_intensityDistributionHistogramOnKnotArea->computeIndexOfPartialSum(0.5) << std::endl;
+		std::cout << "Indice d'intensité avec 60% des valeurs inférieures : " << _ui->_spinMinIntensity->value()+_intensityDistributionHistogramOnKnotArea->computeIndexOfPartialSum(0.6) << std::endl;
+		std::cout << "Indice d'intensité avec 70% des valeurs inférieures : " << _ui->_spinMinIntensity->value()+_intensityDistributionHistogramOnKnotArea->computeIndexOfPartialSum(0.7) << std::endl;
+		std::cout << "Indice d'intensité avec 80% des valeurs inférieures : " << _ui->_spinMinIntensity->value()+_intensityDistributionHistogramOnKnotArea->computeIndexOfPartialSum(0.8) << std::endl;
 	}
 
 	_plotIntensityDistributionHistogramOnKnotArea->update(*_intensityDistributionHistogramOnKnotArea,Interval<int>(_ui->_spinMinIntensity->value(),_ui->_spinMaxIntensity->value()));

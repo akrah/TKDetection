@@ -447,6 +447,7 @@ void ContourSlice::updateSlice( const Slice &initialSlice, Slice &resultSlice, c
 					   (
 						   leftSupportPoint.vectorProduct( leftMainPoint, iCoord2D(i,j) ) >= 0 &&
 						   rightSupportPoint.vectorProduct( rightMainPoint, iCoord2D(i,j) ) <= 0 &&
+						   leftMainPoint.vectorProduct( rightMainPoint, iCoord2D(i,j) ) <= 0 &&
 						   _contourPolygonTop.containsPoint(QPoint(i,j),Qt::OddEvenFill)
 					   )
 					 )

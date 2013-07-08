@@ -14,8 +14,9 @@ public:
 	virtual ~IntensityDistributionHistogram();
 
 	void construct( const Billon &billon, const Interval<uint> &sliceInterval, const Interval<int> &intensityInterval, const uint &smoothingRadius );
-	void construct( const Billon &billon, const Interval<uint> &sliceInterval, const Interval<uint> &sectorInterval, const PieChart &pieChart, const iCoord2D &pithCoord,
-					const Interval<int> &intensityInterval, const uint &smoothingRadius );
+	void construct( const Billon &billon, const Interval<uint> &sliceInterval, const Interval<uint> &sectorInterval, const PieChart &pieChart,
+					const iCoord2D &pith, const uint &maxDistance, const Interval<int> &intensityInterval, const uint &smoothingRadius );
+	int computeIndexOfPartialSum( const qreal &percentage );
 };
 
 #endif // INTENSITYDISTRIBUTIONHISTOGRAM_H
