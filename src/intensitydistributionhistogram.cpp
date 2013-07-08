@@ -55,7 +55,6 @@ void IntensityDistributionHistogram::construct( const Billon &billon, const Inte
 	{
 		for ( i=0 ; i<width ; ++i )
 		{
-
 			if ( sectorInterval.containsClosed(pieChart.sectorIndexOfAngle(pithCoord.angle(iCoord2D(i,j)))) && pithCoord.euclideanDistance(iCoord2D(i,j)) < maxDistance )
 			{
 				for ( k=sliceInterval.min() ; k<=sliceInterval.max() ; ++k )
@@ -86,3 +85,4 @@ int IntensityDistributionHistogram::computeIndexOfPartialSum( const qreal &perce
 	}
 	return searchIndex;
 }
+
