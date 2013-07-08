@@ -134,7 +134,9 @@ int main(int argc, char** argv)
     ("backgroundSourceImage", po::value<std::string>(), "adds background source image")
     ("backgroundSourceMin", po::value<int>()->default_value(10), "define the min threshold of backgroundSourceImage (default 10) ")
     ("pgmExt", "use pgm extension instead pgm3d")
-    ("minSizeBoundary,m",  po::value<unsigned int >()->default_value(100.0), "set the min size of the boundary to be extracted (default 100)" );
+    ("minZWidth",po::value<unsigned int >()->default_value(5), "set the min width in the Z direction for a connected to be considerd")
+    ("markerFromThresold", "use pgm extension instead pgm3d")
+    ("minSizeBoundary,m",  po::value<unsigned int >()->default_value(100), "set the min size of the boundary to be extracted (default 100)" );
 
   bool parseOK=true;
   po::variables_map vm;
@@ -282,8 +284,9 @@ int main(int argc, char** argv)
       Point upperPt = bDomain.upperBound();
       
       unsigned int width = upperPt[2] - lowerPt[2] ;
+      unsigned int minZWidth = vm["minZWidth"].as<unsigned int>();
       
-      if(width>5){
+      if(width>minZWidth){
 	Z3i::DigitalSet aSet = getMakerFromKnot(domain, K, vectConnectedSCell.at(i), center, 5, 2, 100, -60 );
 	exportSDP(out, aSet);  
 	DGtal::ImageFromSet<ImageContainerBySTLVector<Domain, unsigned char> >::append(markerImage,aSet, vm.count("multipleLabels")? i  :250);
