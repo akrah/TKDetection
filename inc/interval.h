@@ -50,6 +50,12 @@ bool operator !=( Interval<T> first, Interval<T> second )
 	return (first.min() != second.min()) || (first.max() != second.max());
 }
 
+template <typename T>
+Interval<T> operator +( Interval<T> first, T shift )
+{
+	return Interval<T>(first.min()+shift,first.max()+shift);
+}
+
 /*######################################################
   # IMPLEMENTATION
   ######################################################*/
