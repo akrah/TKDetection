@@ -114,21 +114,25 @@ getMakerFromKnot(const Domain &aDomain, const KSpace &K, const vector<SCell> & a
 
 int main(int argc, char** argv)
 {
+  typedef DGtal::ImageContainerBySTLMap<DGtal::Z3i::Domain, unsigned int> Image3D;
+
 
   // parse command line ----------------------------------------------
   po::options_description general_opt("Allowed options are: ");
   general_opt.add_options()
-	("help,h", "display this message")
-	("input-file,i", po::value<std::string>(), "knots as sdp file  (sequence of discrete points)" )
-	("output-file,o", po::value<std::string>(), "set output basename (default output)" )
-	("multipleLabels", "export markers with by labels from 0, 1, 2 ... for each  markers")
-	("segmentationAreaValue", po::value<int>()->default_value(10),  "define the value wich will define the segmentation area (default 128)")
-	("center,c",  po::value<std::vector <int> >()->multitoken(), "The coordinates of the center to define the seed ")
-	("domain,d",  po::value<std::vector <int> >()->multitoken(), "The domain xmin ymin zmin xmax ymax zmax ")
-	("backgroundSourceImage", po::value<std::string>(), "adds background source image")
-	("backgroundSourceMin", po::value<int>()->default_value(10), "define the min threshold of backgroundSourceImage (default 10) ")
-	("pgmExt", "use pgm extension instead pgm3d")
-	("minSizeBoundary,m",  po::value<unsigned int >()->default_value(100.0), "set the min size of the boundary to be extracted (default 100)" );
+    ("help,h", "display this message")
+    ("input-file,i", po::value<std::string>(), "knots as sdp file  (sequence of discrete points)" )
+    ("output-file,o", po::value<std::string>(), "set output basename (default output)" )
+    ("multipleLabels", "export markers with by labels from 0, 1, 2 ... for each  markers")
+    ("segmentationAreaValue", po::value<int>()->default_value(10),  "define the value wich will define the segmentation area (default 128)")
+    ("center,c",  po::value<std::vector <int> >()->multitoken(), "The coordinates of the center to define the seed ")
+    ("domain,d",  po::value<std::vector <int> >()->multitoken(), "The domain xmin ymin zmin xmax ymax zmax ")
+    ("backgroundSourceImage", po::value<std::string>(), "adds background source image")
+    ("backgroundSourceMin", po::value<int>()->default_value(10), "define the min threshold of backgroundSourceImage (default 10) ")
+    ("pgmExt", "use pgm extension instead pgm3d")
+    ("minZWidth",po::value<unsigned int >()->default_value(5), "set the min width in the Z direction for a connected to be considerd")
+    ("markerFromThresold", po::value<std::vector <int> >()->multitoken(), " valMin valMax: defines markers simply from thresholds (all voxels includes in (valMin valMax) are set as foreground). ")
+    ("minSizeBoundary,m",  po::value<unsigned int >()->default_value(100), "set the min size of the boundary to be extracted (default 100)" );
 
   bool parseOK=true;
   po::variables_map vm;
@@ -256,44 +260,55 @@ int main(int argc, char** argv)
 	if(!vm.count("backgroundSourceImage")){
 	  for(Domain::ConstIterator it = domainMarker.begin();  it!= domainMarker.end(); it++){
 	markerImage.setValue(*it, vm["segmentationAreaValue"].as<int>());
-	  }
-	}else{
-	  typedef DGtal::ImageContainerBySTLMap<DGtal::Z3i::Domain, unsigned int> Image3D;
-	  Image3D imageSrc= DGtal::GenericReader<Image3D>::import(vm["backgroundSourceImage"].as<std::string>());
-	  int threshold  = vm["backgroundSourceMin"].as<int>();
-	  for(Domain::ConstIterator it = domainMarker.begin();  it!= domainMarker.end(); it++){
+      }
+    }else{
+
+      Image3D imageSrc= DGtal::GenericReader<Image3D>::import(vm["backgroundSourceImage"].as<std::string>());
+      int threshold  = vm["backgroundSourceMin"].as<int>();
+      for(Domain::ConstIterator it = domainMarker.begin();  it!= domainMarker.end(); it++){
 	if(imageSrc(*it)<threshold)
 	  markerImage.setValue(*it, 0);
 	else
 	  markerImage.setValue(*it, vm["segmentationAreaValue"].as<int>());
-	  }
+      }
+    }
+    
+    if(!vm.count("markerFromThresold")){
+      for(uint i=0; i< vectConnectedSCell.size();i++){
+	Domain bDomain= getBoundingBoxDomain(K, vectConnectedSCell.at(i)); 
+	Point lowerPt = bDomain.lowerBound();
+	Point upperPt = bDomain.upperBound();
+	unsigned int width = upperPt[2] - lowerPt[2] ;
+	unsigned int minZWidth = vm["minZWidth"].as<unsigned int>();
+	
+	if(width>minZWidth){
+	  Z3i::DigitalSet aSet = getMakerFromKnot(domain, K, vectConnectedSCell.at(i), center, 5, 2, 100, -60 );
+	  exportSDP(out, aSet);  
+	  DGtal::ImageFromSet<ImageContainerBySTLVector<Domain, unsigned char> >::append(markerImage,aSet, vm.count("multipleLabels")? i  :250);
 	}
-
-
-	for(uint i=0; i< vectConnectedSCell.size();i++){
-	  Domain bDomain= getBoundingBoxDomain(K, vectConnectedSCell.at(i));
-	  Point lowerPt = bDomain.lowerBound();
-	  Point upperPt = bDomain.upperBound();
-
-	  unsigned int width = upperPt[2] - lowerPt[2] ;
-
-	  if(width>5){
-	Z3i::DigitalSet aSet = getMakerFromKnot(domain, K, vectConnectedSCell.at(i), center, 5, 2, 100, -60 );
-	exportSDP(out, aSet);
-	DGtal::ImageFromSet<ImageContainerBySTLVector<Domain, unsigned char> >::append(markerImage,aSet, vm.count("multipleLabels")? i  :250);
-	  }
+      }
+    }else {
+      std::vector<int> vectMinMax= vm["markerFromThresold"].as<std::vector <int> >();	
+      int valMin = vectMinMax.at(0);
+      int valMax = vectMinMax.at(1);
+      Image3D imageSrc= DGtal::GenericReader<Image3D>::import(vm["backgroundSourceImage"].as<std::string>());
+      
+      for(Domain::ConstIterator it = domainMarker.begin();  it!= domainMarker.end(); it++){
+	if(imageSrc(*it)<valMax && imageSrc(*it)>valMin ){
+	  markerImage.setValue(*it, 250);
 	}
-
-
-	stringstream markerName;
-	if(vm.count("backgroundSourceMin")){
-	  markerName << outputFilename << "MarkerBGtreshold" << vm["backgroundSourceMin"].as<int>() << (vm.count("pgmExt") ?  ".pgm" : ".pgm3d") ;
-	}else{
-	  markerName << outputFilename << "Marker" <<  (vm.count("pgmExt") ?  ".pgm" : ".pgm3d") ;
-	}
-
-	GenericWriter< ImageContainerBySTLVector<Domain, unsigned char> >::exportFile(markerName.str(), markerImage);
-
+      }
+    }
+    
+    
+    stringstream markerName; 
+    if(vm.count("backgroundSourceMin")){
+      markerName << outputFilename << "MarkerBGtreshold" << vm["backgroundSourceMin"].as<int>() << (vm.count("pgmExt") ?  ".pgm" : ".pgm3d") ; 
+    }else{
+      markerName << outputFilename << "Marker" <<  (vm.count("pgmExt") ?  ".pgm" : ".pgm3d") ; 
+    }
+    
+    GenericWriter< ImageContainerBySTLVector<Domain, unsigned char> >::exportFile(markerName.str(), markerImage);
   }
 
 }
