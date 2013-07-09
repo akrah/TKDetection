@@ -186,7 +186,7 @@ template <typename T>
 void Histogram<T>::meansSmoothing( const uint & smoothingRadius, const bool & loop )
 {
 	const uint histoSize = this->size();
-	if ( histoSize > 0 )
+	if ( histoSize > 0 && smoothingRadius > 0 )
 	{
 		const T maskWidth = 2*smoothingRadius+1;
 		uint i;
@@ -220,6 +220,10 @@ void Histogram<T>::meansSmoothing( const uint & smoothingRadius, const bool & lo
 			*histIter++ = currentValue/maskWidth;
 		}
 	}
+	typename QVector<T>::iterator begin = this->begin();
+	typename QVector<T>::const_iterator end = this->end();
+	T min = this->min();
+	while ( begin != end ) (*begin++) -= min;
 }
 
 template <typename T>
