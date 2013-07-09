@@ -308,8 +308,13 @@ int main(int argc, char** argv)
     
     
     stringstream markerName; 
-    if(vm.count("backgroundSourceMin")){
+    if(vm.count("backgroundSourceMin") && !vm.count("markerFromThresold")){
       markerName << outputFilename << "MarkerBGtreshold" << vm["backgroundSourceMin"].as<int>() << (vm.count("pgmExt") ?  ".pgm" : ".pgm3d") ; 
+    }else if(vm.count("backgroundSourceMin")){
+      std::vector<int> vectMinMax= vm["markerFromThresold"].as<std::vector <int> >();	
+      int valMin = vectMinMax.at(0);
+      int valMax = vectMinMax.at(1);
+      markerName << outputFilename << "MarkerBasic" << valMin << "_" << valMax <<  "BG" << vm["backgroundSourceMin"].as<int>() << (vm.count("pgmExt") ?  ".pgm" : ".pgm3d") ; 
     }else{
       markerName << outputFilename << "Marker" <<  (vm.count("pgmExt") ?  ".pgm" : ".pgm3d") ; 
     }
