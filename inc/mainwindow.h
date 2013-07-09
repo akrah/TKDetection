@@ -52,6 +52,7 @@ private slots:
 	void moveContourCursor( const int &position );
 	void setTypeOfView( const int &type );
 	void resetHistogramDefaultValuesZMotion();
+	void resetHistogramDefaultValuesZMotionAngular();
 	void resetHistogramDefaultValuesNearestDistance();
 	void updateSliceHistogram();
 	void updateContourHistograms( const int &sliceIndex );

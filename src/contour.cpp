@@ -121,10 +121,17 @@ void Contour::smooth( int smoothingRadius )
 				}
 				this->append(currentCoord);
 			}
-			if ( this->size() > 2 && (*this)[1] == (*this)[this->size()-2] )
+			isModified = true;
+			while ( this->size() > 3 && isModified )
 			{
-				this->pop_back();
-				this->pop_front();
+				if ( (*this)[0] == (*this)[this->size()-2] ) this->pop_back();
+				else if ((*this)[1] == (*this)[this->size()-1] ) this->pop_front();
+				else if ((*this)[1] == (*this)[this->size()-2] )
+				{
+					this->pop_back();
+					this->pop_front();
+				}
+				else isModified = false;
 			}
 		}
 	}
