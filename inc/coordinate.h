@@ -40,6 +40,9 @@ struct coord2d
 	}
 };
 
+
+static coord2d<int> invalidICoord2D = coord2d<int>(-1,-1);
+
 template<typename T>
 struct vec2d : public coord2d<T>
 {

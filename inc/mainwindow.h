@@ -14,11 +14,13 @@ namespace Ui
 
 class QLabel;
 
+class ConcavityPointSerieCurve;
 class ContourBillon;
 class CurvatureHistogram;
 class IntensityDistributionHistogram;
 class NearestPointsHistogram;
 class PieChart;
+class PlotConcavityPointSerieCurve;
 class PlotContourDistancesHistogram;
 class PlotCurvatureHistogram;
 class PlotIntensityDistributionHistogram;
@@ -58,6 +60,7 @@ private slots:
 	void updateContourHistograms( const int &sliceIndex );
 	void updateIntensityDistributionHistogram();
 	void updateIntensityDistributionHistogramOnKnotArea();
+	void updateConcavitypointSerieCurve();
 	void updatePith();
 	void setMinimumOfSliceIntervalToCurrentSlice();
 	void setMaximumOfSliceIntervalToCurrentSlice();
@@ -128,7 +131,6 @@ private:
 	SliceHistogram *_sliceHistogram;
 	PlotSliceHistogram *_plotSliceHistogram;
 
-	PieChart *_pieChart;
 	SectorHistogram *_sectorHistogram;
 	PlotSectorHistogram * _plotSectorHistogram;
 
@@ -143,6 +145,9 @@ private:
 
 	IntensityDistributionHistogram *_intensityDistributionHistogramOnKnotArea;
 	PlotIntensityDistributionHistogram *_plotIntensityDistributionHistogramOnKnotArea;
+
+	ConcavityPointSerieCurve * _concavityPointSerieCurve;
+	PlotConcavityPointSerieCurve * _plotConcavityPointSerieCurve;
 
 	ContourBillon *_contourBillon;
 

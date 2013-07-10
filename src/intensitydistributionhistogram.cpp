@@ -39,7 +39,7 @@ void IntensityDistributionHistogram::construct( const Billon &billon, const Inte
 }
 
 void IntensityDistributionHistogram::construct( const Billon &billon, const Interval<uint> &sliceInterval, const Interval<uint> &sectorInterval,
-												const PieChart &pieChart, const iCoord2D &pithCoord, const uint &maxDistance, const Interval<int> &intensityInterval,
+												const iCoord2D &pithCoord, const uint &maxDistance, const Interval<int> &intensityInterval,
 												const uint &smoothingRadius )
 {
 	const uint &width = billon.n_cols;
@@ -55,7 +55,7 @@ void IntensityDistributionHistogram::construct( const Billon &billon, const Inte
 	{
 		for ( i=0 ; i<width ; ++i )
 		{
-			if ( sectorInterval.containsClosed(pieChart.sectorIndexOfAngle(pithCoord.angle(iCoord2D(i,j)))) && pithCoord.euclideanDistance(iCoord2D(i,j)) < maxDistance )
+			if ( sectorInterval.containsClosed(PieChartSingleton::getInstance()->sectorIndexOfAngle(pithCoord.angle(iCoord2D(i,j)))) && pithCoord.euclideanDistance(iCoord2D(i,j)) < maxDistance )
 			{
 				for ( k=sliceInterval.min() ; k<=sliceInterval.max() ; ++k )
 				{
