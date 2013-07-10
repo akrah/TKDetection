@@ -1229,9 +1229,12 @@ void MainWindow::updateSectorHistogram( const Interval<uint> &interval )
 	{
 		_sectorHistogram->construct( *_billon, *_pieChart, interval, Interval<int>(_ui->_spinMinIntensity->value(),_ui->_spinMaxIntensity->value()),
 									 _ui->_spinZMotionMin->value(), _treeRadius*_ui->_spinRestrictedAreaPercentage->value()/100.);
-		_sectorHistogram->computeMaximumsAndIntervals( _ui->_spinHistogramSmoothingRadius_zMotionAngular->value(), _ui->_spinHistogramMinimumHeightOfMaximum_zMotionAngular->value(),
-													   _ui->_spinHistogramDerivativeSearchPercentage_zMotionAngular->value(), _ui->_spinHistogramMinimumWidthOfInterval_zMotionAngular->value(),
-													   *_pieChart, _ui->_spinSectorHistogramIntervalGap->value()*360./static_cast<qreal>(_ui->_spinSectorsNumber->value()), true );
+		qreal coeffDegToSize = _ui->_spinSectorsNumber->value()/360.;
+		_sectorHistogram->computeMaximumsAndIntervals( _ui->_spinHistogramSmoothingRadius_zMotionAngular->value()*coeffDegToSize,
+													   _ui->_spinHistogramMinimumHeightOfMaximum_zMotionAngular->value(),
+													   _ui->_spinHistogramDerivativeSearchPercentage_zMotionAngular->value(),
+													   _ui->_spinHistogramMinimumWidthOfInterval_zMotionAngular->value()*coeffDegToSize,
+													   *_pieChart, _ui->_spinSectorHistogramIntervalGap->value()*coeffDegToSize, true );
 	}
 
 	_plotSectorHistogram->update(*_sectorHistogram, *_pieChart);
