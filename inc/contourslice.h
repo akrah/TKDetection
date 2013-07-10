@@ -22,12 +22,13 @@ public:
 	const Contour &contour() const;
 	const ContourDistancesHistogram &contourDistancesHistogram() const;
 	const CurvatureHistogram &curvatureHistogram() const;
-	const iCoord2D &leftMainDominantPoint() const;
-	const iCoord2D &rightMainDominantPoint() const;
-	const int &leftMainDominantPointIndex() const;
-	const int &rightMainDominantPointIndex() const;
-	const rCoord2D &leftMainSupportPoint() const;
-	const rCoord2D &rightMainSupportPoint() const;
+	const iCoord2D &leftConcavityPoint() const;
+	const iCoord2D &rightConcavityPoint() const;
+	const int &leftConcavityPointIndex() const;
+	const int &rightConcavityPointIndex() const;
+	const rCoord2D &leftSupportPoint() const;
+	const rCoord2D &rightSupportPoint() const;
+	const uiCoord2D &sliceCenter() const;
 
 	void compute( Slice &resultSlice, const Slice &initialSlice, const uiCoord2D &sliceCenter, const int &intensityThreshold,
 				  const int &smoothingRadius, const int &curvatureWidth, const qreal &curvatureThreshold, const iCoord2D &startPoint = iCoord2D(-1,-1) );
@@ -35,8 +36,8 @@ public:
 	void draw( QPainter &painter, const int &cursorPosition, const TKD::ViewType &viewType ) const;
 
 private:
-	void computeMainDominantPoints( const qreal &curvatureThreshold );
-	void computeSupportsOfMainDominantPoints( const int &meansMaskSize );
+	void computeConcavityPoints( const qreal &curvatureThreshold );
+	void computeSupportPoints( const int &meansMaskSize );
 	void computeContourPolygons();
 	void updateSlice(const Slice &initialSlice, Slice &resultSlice, const int &intensityThreshold );
 
@@ -48,15 +49,13 @@ private:
 	ContourDistancesHistogram _contourDistancesHistogram;
 	CurvatureHistogram _curvatureHistogram;
 
-	int _leftMainDominantPointsIndex;
-	int _rightMainDominantPointsIndex;
-	rCoord2D _leftMainSupportPoint;
-	rCoord2D _rightMainSupportPoint;
+	int _leftConcavityPointsIndex;
+	int _rightConcavityPointsIndex;
+	rCoord2D _leftSupportPoint;
+	rCoord2D _rightSupportPoint;
 
 	QPolygon _contourPolygonBottom;
 	QPolygon _contourPolygonTop;
-
-	static iCoord2D invalidICoord2D;
 };
 
 #endif // CONTOURSLICE_H

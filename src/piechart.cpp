@@ -9,6 +9,8 @@
 
 #include <cmath>
 
+PieChartSingleton *PieChartSingleton::_singleton = 0;
+
 PieChart::PieChart( const int &nbSectors )
 {
 	setSectorsNumber(nbSectors);

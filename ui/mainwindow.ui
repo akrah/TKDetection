@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>888</width>
-    <height>728</height>
+    <width>795</width>
+    <height>740</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -97,7 +97,7 @@
          <property name="geometry">
           <rect>
            <x>171</x>
-           <y>263</y>
+           <y>269</y>
            <width>0</width>
            <height>0</height>
           </rect>
@@ -205,7 +205,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>888</width>
+     <width>795</width>
      <height>25</height>
     </rect>
    </property>
@@ -289,7 +289,7 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>421</width>
+              <width>413</width>
               <height>152</height>
              </rect>
             </property>
@@ -518,7 +518,7 @@ de la projection cartesienne</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>408</width>
+              <width>320</width>
               <height>166</height>
              </rect>
             </property>
@@ -726,8 +726,8 @@ zone restreinte</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>421</width>
-              <height>152</height>
+              <width>333</width>
+              <height>74</height>
              </rect>
             </property>
             <attribute name="label">
@@ -791,7 +791,7 @@ minimum</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>408</width>
+              <width>320</width>
               <height>221</height>
              </rect>
             </property>
@@ -986,7 +986,7 @@ minimum</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>421</width>
+              <width>321</width>
               <height>152</height>
              </rect>
             </property>
@@ -1156,8 +1156,8 @@ minimum</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>423</width>
-              <height>251</height>
+              <width>407</width>
+              <height>239</height>
              </rect>
             </property>
             <attribute name="label">
@@ -1423,8 +1423,8 @@ au début et à la fin</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>423</width>
-              <height>251</height>
+              <width>398</width>
+              <height>242</height>
              </rect>
             </property>
             <attribute name="label">
@@ -1694,8 +1694,8 @@ au début et à la fin</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>423</width>
-              <height>251</height>
+              <width>398</width>
+              <height>199</height>
              </rect>
             </property>
             <attribute name="label">
@@ -1961,8 +1961,8 @@ au début et à la fin</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>423</width>
-              <height>247</height>
+              <width>335</width>
+              <height>169</height>
              </rect>
             </property>
             <attribute name="label">
@@ -2140,8 +2140,8 @@ au début et à la fin</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>418</width>
-              <height>262</height>
+              <width>328</width>
+              <height>126</height>
              </rect>
             </property>
             <attribute name="label">
@@ -2451,8 +2451,8 @@ l'intervalle angulaire</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>423</width>
-              <height>158</height>
+              <width>374</width>
+              <height>80</height>
              </rect>
             </property>
             <attribute name="label">
@@ -2534,8 +2534,8 @@ l'intervalle angulaire</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>418</width>
-              <height>173</height>
+              <width>181</width>
+              <height>121</height>
              </rect>
             </property>
             <attribute name="label">
@@ -2676,7 +2676,7 @@ l'intervalle angulaire</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>410</width>
+              <width>321</width>
               <height>181</height>
              </rect>
             </property>
@@ -2880,8 +2880,8 @@ l'intervalle angulaire</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>418</width>
-              <height>173</height>
+              <width>334</width>
+              <height>157</height>
              </rect>
             </property>
             <attribute name="label">
@@ -3069,8 +3069,8 @@ l'intervalle angulaire</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>418</width>
-              <height>173</height>
+              <width>261</width>
+              <height>78</height>
              </rect>
             </property>
             <attribute name="label">
@@ -3122,8 +3122,8 @@ l'intervalle angulaire</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>418</width>
-              <height>173</height>
+              <width>264</width>
+              <height>112</height>
              </rect>
             </property>
             <attribute name="label">
@@ -3225,7 +3225,7 @@ l'intervalle angulaire</string>
         <enum>QTabWidget::South</enum>
        </property>
        <property name="currentIndex">
-        <number>1</number>
+        <number>5</number>
        </property>
        <widget class="QWidget" name="tab_2">
         <attribute name="title">
@@ -3424,6 +3424,16 @@ l'intervalle angulaire</string>
             <enum>Qt::Horizontal</enum>
            </property>
           </widget>
+         </item>
+        </layout>
+       </widget>
+       <widget class="QWidget" name="tab_3">
+        <attribute name="title">
+         <string>Points de concavité</string>
+        </attribute>
+        <layout class="QVBoxLayout" name="verticalLayout_7">
+         <item>
+          <widget class="QwtPlot" name="_plotConcavityPointSerieCurve"/>
          </item>
         </layout>
        </widget>
