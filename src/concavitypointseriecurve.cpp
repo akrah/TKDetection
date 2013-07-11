@@ -11,30 +11,30 @@ ConcavityPointSerieCurve::~ConcavityPointSerieCurve()
 {
 }
 
-const QVector<rCoord2D> &ConcavityPointSerieCurve::leftConcavityPointsSerie() const
+const QVector<rCoord2D> &ConcavityPointSerieCurve::maxConcavityPointsSerie() const
 {
-	return _leftConcavityPointsSerie;
+	return _maxConcavityPointsSerie;
 }
 
-const QVector<rCoord2D> &ConcavityPointSerieCurve::rightConcavityPointsSerie() const
+const QVector<rCoord2D> &ConcavityPointSerieCurve::minConcavityPointsSerie() const
 {
-	return _rightConcavityPointsSerie;
+	return _minConcavityPointsSerie;
 }
 
-int ConcavityPointSerieCurve::nbLeftConcavityPoints() const
+int ConcavityPointSerieCurve::nbMaxConcavityPoints() const
 {
-	return _leftConcavityPointsSerie.size();
+	return _maxConcavityPointsSerie.size();
 }
 
-int ConcavityPointSerieCurve::nbRightConcavityPoints() const
+int ConcavityPointSerieCurve::nbMinConcavityPoints() const
 {
-	return _rightConcavityPointsSerie.size();
+	return _minConcavityPointsSerie.size();
 }
 
 void ConcavityPointSerieCurve::clear()
 {
-	_leftConcavityPointsSerie.clear();
-	_rightConcavityPointsSerie.clear();
+	_maxConcavityPointsSerie.clear();
+	_minConcavityPointsSerie.clear();
 }
 
 void ConcavityPointSerieCurve::construct( const ContourBillon &contourBillon )
@@ -42,20 +42,20 @@ void ConcavityPointSerieCurve::construct( const ContourBillon &contourBillon )
 	const QVector<ContourSlice> &contourSlices = contourBillon.contourSlices();
 	const int nbSlices = contourSlices.size();
 
-	_leftConcavityPointsSerie.reserve(nbSlices);
-	_rightConcavityPointsSerie.reserve(nbSlices);
+	_maxConcavityPointsSerie.reserve(nbSlices);
+	_minConcavityPointsSerie.reserve(nbSlices);
 
 	for ( int i=0 ; i<nbSlices ; ++i )
 	{
-		const iCoord2D &leftConcavityPoint = contourSlices[i].leftConcavityPoint();
-		if ( leftConcavityPoint != invalidICoord2D )
+		const iCoord2D &maxConcavityPoint = contourSlices[i].maxConcavityPoint();
+		if ( maxConcavityPoint != invalidICoord2D )
 		{
-			_leftConcavityPointsSerie.append(rCoord2D(i,leftConcavityPoint.angle(contourSlices[i].leftSupportPoint())));
+			_maxConcavityPointsSerie.append(rCoord2D(i,fmod(contourSlices[i].maxSupportPoint().angle(maxConcavityPoint)+TWO_PI,TWO_PI)*RAD_TO_DEG_FACT));
 		}
-		const iCoord2D &rightConcavityPoint = contourSlices[i].rightConcavityPoint();
-		if ( rightConcavityPoint != invalidICoord2D )
+		const iCoord2D &minConcavityPoint = contourSlices[i].minConcavityPoint();
+		if ( minConcavityPoint != invalidICoord2D )
 		{
-			_rightConcavityPointsSerie.append(rCoord2D(i,rightConcavityPoint.angle(contourSlices[i].rightSupportPoint())));
+			_minConcavityPointsSerie.append(rCoord2D(i,fmod(contourSlices[i].minSupportPoint().angle(minConcavityPoint)+TWO_PI,TWO_PI)*RAD_TO_DEG_FACT));
 		}
 	}
 }

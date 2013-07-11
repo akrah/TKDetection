@@ -25,7 +25,7 @@ public:
 	void setSectorsNumber( const uint &nbSectors );
 
 	void draw( QImage &image, const uiCoord2D &center, const uint &sectorIdx, const TKD::ViewType &viewType ) const;
-	void draw( QImage &image, const uiCoord2D &center, const QVector<Interval<uint> > &intervals, const TKD::ViewType &viewType ) const;
+	void draw( QImage &image, const uiCoord2D &center, const QVector<Interval<uint> > &angleIntervals, const TKD::ViewType &viewType ) const;
 
 private:
 	QVector<PiePart> _sectors;
@@ -35,7 +35,7 @@ class PieChartSingleton : public PieChart
 {
 private:
 	PieChartSingleton() : PieChart(360) {}
-	~PieChartSingleton () { kill(); }
+	~PieChartSingleton () {}
 
 public:
 

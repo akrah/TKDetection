@@ -38,8 +38,8 @@ void Contour::compute( const Slice &slice, const iCoord2D &sliceCenter, const in
 		int interdit, j;
 
 		// Using Moore-Neighbor Tracing
-		startAngle = startPoint.angle(sliceCenter);
-		interdit = qRound(startAngle>=0 ? startAngle*4./PI : (startAngle+TWO_PI)*8./TWO_PI);
+		startAngle = fmod(startPoint.angle(sliceCenter)+TWO_PI,TWO_PI);
+		interdit = qRound(startAngle*4./PI);
 		do
 		{
 			this->append(currentPos);

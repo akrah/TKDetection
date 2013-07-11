@@ -12,10 +12,10 @@ public:
 
 	qreal angle() const;
 	qreal orientation() const;
-	qreal rightAngle() const;
-	qreal leftAngle() const;
+	qreal minAngle() const;
+	qreal maxAngle() const;
 
-	bool contains( const qreal &angle ) const;
+	bool contains( qreal angle ) const;
 
 	void setAngle( const qreal &angle );
 	void setOrientation( const qreal &orientation );
@@ -24,8 +24,8 @@ private:
 	// <En radians>
 	qreal _orientation;
 	qreal _angle;
-	qreal _leftAngle;
-	qreal _rightAngle;
+	qreal _maxAngle;
+	qreal _minAngle;
 	// </En radians>
 };
 

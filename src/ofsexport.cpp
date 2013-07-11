@@ -16,7 +16,7 @@ namespace OfsExport
 	{
 		// Calcul les coordonnées des sommets du maillage de la moelle
 		void computeAndWriteAllEdges( QTextStream &stream,const Billon &billon, const Interval<uint> &sliceInterval, const uint &nbEdges, const uint &radius, const bool &normalized );
-		void computeAndWriteSectorEdges( QTextStream &stream,const Billon &billon, const Interval<uint> &sliceInterval, const uint &nbEdges, const qreal &rightAngle, const qreal &leftAngle, const bool &normalized);
+		void computeAndWriteSectorEdges( QTextStream &stream,const Billon &billon, const Interval<uint> &sliceInterval, const uint &nbEdges, const qreal &minAngle, const qreal &maxAngle, const bool &normalized);
 		void computeAndWriteAllSectorInAllIntervalsEdges( QTextStream &stream, const Billon &billon, const QVector< QPair< Interval<uint>, QPair<qreal, qreal> > > &intervals, const uint &nbEdges, const bool &normalized );
 
 		// Calcul les faces du maillages de la moelle
@@ -43,14 +43,14 @@ namespace OfsExport
 		}
 	}
 
-	void processOnSector( const Billon &billon, const Interval<uint> &interval, const QString &fileName, const qreal &rightAngle, const qreal &leftAngle, const int &nbEdgesPerSlice, const bool &normalized )
+	void processOnSector( const Billon &billon, const Interval<uint> &interval, const QString &fileName, const qreal &minAngle, const qreal &maxAngle, const int &nbEdgesPerSlice, const bool &normalized )
 	{
 		QFile file(fileName);
 		if ( file.open(QIODevice::WriteOnly) )
 		{
 			QTextStream stream(&file);
 			stream << "OFS MHD" << endl;
-			computeAndWriteSectorEdges( stream, billon, interval, nbEdgesPerSlice, rightAngle, leftAngle, normalized );
+			computeAndWriteSectorEdges( stream, billon, interval, nbEdgesPerSlice, minAngle, maxAngle, normalized );
 			computeAndWriteEdgesLinks( stream, nbEdgesPerSlice, interval.width()+1, true );
 			file.close();
 		}
@@ -197,13 +197,13 @@ namespace OfsExport
 		}
 
 		// Les angles doivent être compris entre 0 et 360
-		void computeAndWriteSectorEdges( QTextStream &stream, const Billon &billon, const Interval<uint> &sliceInterval, const uint &nbEdges, const qreal &rightAngle, const qreal &leftAngle, const bool &normalized )
+		void computeAndWriteSectorEdges( QTextStream &stream, const Billon &billon, const Interval<uint> &sliceInterval, const uint &nbEdges, const qreal &minAngle, const qreal &maxAngle, const bool &normalized )
 		{
 			const int width = billon.n_cols;
 			const int height = billon.n_rows;
 			const int nbSlices = sliceInterval.size();
 			const qreal depthShift = 1./(normalized? (qreal)nbSlices:1.);
-			const qreal angleShift = (rightAngle<leftAngle?leftAngle-rightAngle:leftAngle+(TWO_PI-rightAngle))/(qreal)(nbEdges-1);
+			const qreal angleShift = (minAngle<maxAngle?maxAngle-minAngle:maxAngle+(TWO_PI-minAngle))/(qreal)(nbEdges-1);
 			uint i, k;
 
 			stream << endl;
@@ -222,9 +222,9 @@ namespace OfsExport
 				coord = billon.pithCoord(k);
 				ofs = coord/norm - ofsStart;
 				ofsRadius = rCoord2D( qMin(coord.x,width-coord.x), qMin(coord.y,width-coord.y) )/norm;
-				angle = rightAngle<leftAngle?rightAngle:-TWO_PI+rightAngle;
+				angle = minAngle<maxAngle?minAngle:-TWO_PI+minAngle;
 				offsets.clear();
-				while ( angle < leftAngle )
+				while ( angle < maxAngle )
 				{
 					offsets.append( ofsRadius * rCoord2D( qCos(angle), qSin(angle) ) );
 					angle += angleShift;
@@ -260,11 +260,11 @@ namespace OfsExport
 			for ( int k = 0; k<intervals.size() ; ++k )
 			{
 				const Interval<uint> interval = intervals[k].first;
-				const qreal rightAngle = intervals[k].second.first;
-				const qreal leftAngle = intervals[k].second.second;
+				const qreal minAngle = intervals[k].second.first;
+				const qreal maxAngle = intervals[k].second.second;
 
 				const qreal depthShift = 1./(normalized? static_cast<qreal>(interval.size()):1.0);
-				const qreal angleShift = (rightAngle<leftAngle?leftAngle-rightAngle:leftAngle+(TWO_PI-rightAngle))/(qreal)(nbEdges-1);
+				const qreal angleShift = (minAngle<maxAngle?maxAngle-minAngle:maxAngle+(TWO_PI-minAngle))/(qreal)(nbEdges-1);
 
 				sumOfnbEdges += nbEdges*(interval.size()+1);
 
@@ -274,9 +274,9 @@ namespace OfsExport
 					const iCoord2D &coord = billon.pithCoord(l);
 					ofs = coord/norm - ofsStart;
 					ofsRadius = rCoord2D( qMin(coord.x,width-coord.x), qMin(coord.y,height-coord.y) )/norm;
-					angle = rightAngle<leftAngle?rightAngle:-TWO_PI+rightAngle;
+					angle = minAngle<maxAngle?minAngle:-TWO_PI+minAngle;
 					offsets.clear();
-					while ( angle < leftAngle )
+					while ( angle < maxAngle )
 					{
 						offsets.append( ofsRadius * rCoord2D( qCos(angle), qSin(angle) ) );
 						angle += angleShift;
