@@ -40,6 +40,17 @@ struct coord2d
 	}
 };
 
+template<typename T>
+static bool lessThanX( const coord2d<T> &left, const coord2d<T> &right )
+{
+	return left.x < right.x;
+}
+
+template<typename T>
+static bool lessThanY( const coord2d<T> &left, const coord2d<T> &right )
+{
+	return left.y < right.y;
+}
 
 static coord2d<int> invalidICoord2D = coord2d<int>(-1,-1);
 

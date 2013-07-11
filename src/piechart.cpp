@@ -67,8 +67,8 @@ void PieChart::draw( QImage &image, const uiCoord2D &center, const uint &sectorI
 	// Liste qui va contenir les angles des deux côté du secteur à dessiner
 	// Permet de factoriser le code de calcul des coordonnées juste en dessous
 	QList<qreal> twoSides;
-	twoSides.append( _sectors.at(sectorIdx).rightAngle() );
-	twoSides.append( _sectors.at(sectorIdx).leftAngle() );
+	twoSides.append( _sectors.at(sectorIdx).minAngle() );
+	twoSides.append( _sectors.at(sectorIdx).maxAngle() );
 
 	// Dessin des deux côtés du secteur
 	const int width = image.width();
@@ -110,18 +110,18 @@ void PieChart::draw( QImage &image, const uiCoord2D &center, const uint &sectorI
 	}
 }
 
-void PieChart::draw( QImage &image, const uiCoord2D &center, const QVector< Interval<uint> > &intervals, const TKD::ViewType &viewType ) const
+void PieChart::draw( QImage &image, const uiCoord2D &center, const QVector< Interval<uint> > &angleIntervals, const TKD::ViewType &viewType ) const
 {
-	if ( !intervals.isEmpty() )
+	if ( !angleIntervals.isEmpty() )
 	{
 		// Liste qui va contenir les angles des deux côté du secteur à dessiner
 		// Permet de factoriser le code de calcul des coordonnées juste en dessous
 		QVector<qreal> twoSides;
 		QVector< Interval<uint> >::ConstIterator interval;
-		for ( interval = intervals.constBegin() ; interval < intervals.constEnd() ; ++interval )
+		for ( interval = angleIntervals.constBegin() ; interval < angleIntervals.constEnd() ; ++interval )
 		{
-			twoSides.append( sector((*interval).min()).leftAngle() );
-			twoSides.append( sector((*interval).max()).rightAngle() );
+			twoSides.append( sector((*interval).min()).maxAngle() );
+			twoSides.append( sector((*interval).max()).minAngle() );
 		}
 
 		// Dessin des deux côtés du secteur
@@ -136,7 +136,7 @@ void PieChart::draw( QImage &image, const uiCoord2D &center, const QVector< Inte
 		colors[4] = Qt::cyan;
 		colors[5] = Qt::white;
 
-		const int nbColorsToUse = qMax( intervals.size()>colors.size() ? ((intervals.size()+1)/2)%colors.size() : colors.size() , 1 );
+		const int nbColorsToUse = qMax( angleIntervals.size()>colors.size() ? ((angleIntervals.size()+1)/2)%colors.size() : colors.size() , 1 );
 
 		QColor currentColor;
 		iCoord2D end;

@@ -691,10 +691,10 @@ void MainWindow::updateContourHistograms( const int &sliceIndex )
 		{
 			const ContourSlice &contourSlice = _contourBillon->contourSlice(sliceIndex-sliceInterval.min());
 
-			_plotCurvatureHistogram->update(contourSlice.curvatureHistogram(),contourSlice.leftConcavityPointIndex(),contourSlice.rightConcavityPointIndex());
+			_plotCurvatureHistogram->update(contourSlice.curvatureHistogram(),contourSlice.maxConcavityPointIndex(),contourSlice.minConcavityPointIndex());
 			_ui->_plotCurvatureHistogram->setAxisScale(QwtPlot::xBottom,0,contourSlice.curvatureHistogram().size());
 
-			_plotContourDistancesHistogram->update(contourSlice.contourDistancesHistogram(),contourSlice.leftConcavityPointIndex(),contourSlice.rightConcavityPointIndex());
+			_plotContourDistancesHistogram->update(contourSlice.contourDistancesHistogram(),contourSlice.maxConcavityPointIndex(),contourSlice.minConcavityPointIndex());
 			_ui->_plotContourDistancesHistogram->setAxisScale(QwtPlot::xBottom,0,contourSlice.contourDistancesHistogram().size());
 
 			_ui->_sliderContour->setMaximum(contourSlice.contour().size()>0?contourSlice.contour().size()-1:0);
@@ -753,7 +753,17 @@ void MainWindow::updateConcavitypointSerieCurve()
 		_concavityPointSerieCurve->construct( *_contourBillon );
 	}
 
-	_plotConcavityPointSerieCurve->update( *_concavityPointSerieCurve );
+	if ( !_sectorHistogram->isEmpty() && _knotBillon )
+	{
+		const Interval<uint> &sectorInterval = _sectorHistogram->interval(_ui->_comboSelectSectorInterval->currentIndex()-1);
+		const Interval<qreal> angularInterval(PieChartSingleton::getInstance()->sector(sectorInterval.min()).minAngle(),
+											  PieChartSingleton::getInstance()->sector(sectorInterval.max()).maxAngle() );
+		_plotConcavityPointSerieCurve->update( *_concavityPointSerieCurve, angularInterval );
+	}
+	else
+	{
+		_plotConcavityPointSerieCurve->update( *_concavityPointSerieCurve, Interval<qreal>() );
+	}
 	_ui->_plotConcavityPointSerieCurve->replot();
 }
 
@@ -855,14 +865,14 @@ void MainWindow::selectSliceInterval( const int &index )
 		const QVector< Interval<uint> > &angularIntervals = _sectorHistogram->intervals();
 		if ( !angularIntervals.isEmpty() )
 		{
-			qreal rightAngle, leftAngle;
+			qreal minAngle, maxAngle;
 			for ( int i=0 ; i<angularIntervals.size() ; ++i )
 			{
 				const Interval<uint> &currentAngularInterval = angularIntervals[i];
-				rightAngle = PieChartSingleton::getInstance()->sector(currentAngularInterval.min()).rightAngle()*RAD_TO_DEG_FACT;
-				leftAngle = PieChartSingleton::getInstance()->sector(currentAngularInterval.max()).leftAngle()*RAD_TO_DEG_FACT;
-				_ui->_comboSelectSectorInterval->addItem(tr("Secteur %1 : [ %2, %3 ] (%4 degres)").arg(i).arg(rightAngle).arg(leftAngle)
-														 .arg(currentAngularInterval.isValid()?leftAngle-rightAngle:leftAngle-rightAngle+360.));
+				minAngle = PieChartSingleton::getInstance()->sector(currentAngularInterval.min()).minAngle()*RAD_TO_DEG_FACT;
+				maxAngle = PieChartSingleton::getInstance()->sector(currentAngularInterval.max()).maxAngle()*RAD_TO_DEG_FACT;
+				_ui->_comboSelectSectorInterval->addItem(tr("Secteur %1 : [ %2, %3 ] (%4 degres)").arg(i).arg(minAngle).arg(maxAngle)
+														 .arg(currentAngularInterval.isValid()?maxAngle-minAngle:maxAngle-minAngle+360.));
 			}
 		}
 		_ui->_spanSliderSelectInterval->setUpperValue(sliceInterval.max());
@@ -939,8 +949,12 @@ void MainWindow::selectSectorInterval(const int &index, const bool &draw )
 		_ui->_plotNearestPointsHistogram->replot();
 
 		_knotBillon = new Billon(*_componentBillon);
+
+		const Interval<qreal> angularInterval(PieChartSingleton::getInstance()->sector(sectorInterval.min()).minAngle(),
+											  PieChartSingleton::getInstance()->sector(sectorInterval.max()).maxAngle() );
+
 		_contourBillon->compute( *_knotBillon, *_componentBillon, 0, _ui->_spinContourSmoothingRadius->value(), _ui->_spinCurvatureWidth->value(),
-								 -_ui->_spinCurvatureThreshold->value(), _nearestPointsHistogram->intervals() );
+								 -_ui->_spinCurvatureThreshold->value(), _nearestPointsHistogram->intervals(), angularInterval );
 
 		updateContourHistograms( _currentSlice );
 		updateConcavitypointSerieCurve();
@@ -1302,8 +1316,8 @@ void MainWindow::exportCurrentAngularSectorLargeAreaToOfs()
 		{
 			const Interval<uint> &sectorInterval = _sectorHistogram->interval(_ui->_comboSelectSectorInterval->currentIndex()-1);
 			const Interval<uint> &slicesInterval = _sliceHistogram->interval(_ui->_comboSelectSliceInterval->currentIndex()-1);
-			OfsExport::processOnSector( *_billon, slicesInterval, fileName, PieChartSingleton::getInstance()->sector(sectorInterval.min()).rightAngle(),
-										PieChartSingleton::getInstance()->sector(sectorInterval.max()).leftAngle(), _ui->_spinExportNbEdges->value() );
+			OfsExport::processOnSector( *_billon, slicesInterval, fileName, PieChartSingleton::getInstance()->sector(sectorInterval.min()).minAngle(),
+										PieChartSingleton::getInstance()->sector(sectorInterval.max()).maxAngle(), _ui->_spinExportNbEdges->value() );
 			QMessageBox::information(this,tr("Export en .ofs"), tr("Terminé avec succés !"));
 		}
 	}
@@ -1324,7 +1338,7 @@ void MainWindow::exportAllAngularSectorsOfAllSliceIntervalsLargeAreaToOfs()
 				for ( int j=0 ; j<_ui->_comboSelectSectorInterval->count()-1 ; j++ )
 				{
 					const Interval<uint> &sectorInterval = _sectorHistogram->interval(j);
-					const QPair<qreal,qreal> angles( PieChartSingleton::getInstance()->sector(sectorInterval.min()).rightAngle(), PieChartSingleton::getInstance()->sector(sectorInterval.max()).leftAngle() );
+					const QPair<qreal,qreal> angles( PieChartSingleton::getInstance()->sector(sectorInterval.min()).minAngle(), PieChartSingleton::getInstance()->sector(sectorInterval.max()).maxAngle() );
 					intervals.append( QPair< Interval<uint>, QPair<qreal,qreal> >( slicesInterval, angles ) );
 				}
 			}

@@ -4,6 +4,7 @@
 #include <qwt_plot_curve.h>
 
 class ConcavityPointSerieCurve;
+template <typename T> class Interval;
 
 class PlotConcavityPointSerieCurve
 {
@@ -14,11 +15,13 @@ public:
 	void attach( QwtPlot * const plot );
 	void clear();
 
-	void update( const ConcavityPointSerieCurve &curve );
+	void update( const ConcavityPointSerieCurve &curve, const Interval<qreal> &angularInterval );
 
 private:
-	QwtPlotCurve _leftConcavityPointsData;
-	QwtPlotCurve _rightConcavityPointsData;
+	QwtPlotCurve _maxConcavityPointsData;
+	QwtPlotCurve _minConcavityPointsData;
+	QwtPlotCurve _maxKnotAreaAngle;
+	QwtPlotCurve _minKnotAreaAngle;
 };
 
 #endif // PLOTCONCAVITYPOINTSERIECURVE_H
