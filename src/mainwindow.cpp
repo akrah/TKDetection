@@ -753,7 +753,7 @@ void MainWindow::updateConcavitypointSerieCurve()
 		_concavityPointSerieCurve->construct( *_contourBillon );
 	}
 
-	if ( !_sectorHistogram->isEmpty() && _knotBillon )
+	if ( !_sectorHistogram->isEmpty() && _knotBillon && _ui->_comboSelectSectorInterval->currentIndex()>0 )
 	{
 		const Interval<uint> &sectorInterval = _sectorHistogram->interval(_ui->_comboSelectSectorInterval->currentIndex()-1);
 		const Interval<qreal> angularInterval(PieChartSingleton::getInstance()->sector(sectorInterval.min()).minAngle(),
@@ -945,8 +945,6 @@ void MainWindow::selectSectorInterval(const int &index, const bool &draw )
 															  _ui->_spinHistogramDerivativeSearchPercentage_nearestDistance->value(),
 															  _ui->_spinHistogramMinimumWidthOfInterval_nearestDistance->value(), false );
 		_plotNearestPointsHistogram->update( *_nearestPointsHistogram );
-		_ui->_plotNearestPointsHistogram->setAxisScale(QwtPlot::xBottom,0,_nearestPointsHistogram->size());
-		_ui->_plotNearestPointsHistogram->replot();
 
 		_knotBillon = new Billon(*_componentBillon);
 
@@ -956,10 +954,15 @@ void MainWindow::selectSectorInterval(const int &index, const bool &draw )
 		_contourBillon->compute( *_knotBillon, *_componentBillon, 0, _ui->_spinContourSmoothingRadius->value(), _ui->_spinCurvatureWidth->value(),
 								 -_ui->_spinCurvatureThreshold->value(), _nearestPointsHistogram->intervals(), angularInterval );
 
+	}
+	if (draw)
+	{
 		updateContourHistograms( _currentSlice );
 		updateConcavitypointSerieCurve();
+		_ui->_plotNearestPointsHistogram->setAxisScale(QwtPlot::xBottom,0,_nearestPointsHistogram->size());
+		_ui->_plotNearestPointsHistogram->replot();
+		drawSlice();
 	}
-	if (draw) drawSlice();
 }
 
 void MainWindow::selectCurrentSectorInterval()

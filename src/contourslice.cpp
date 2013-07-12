@@ -97,6 +97,13 @@ const uiCoord2D &ContourSlice::sliceCenter() const
 void ContourSlice::compute( Slice &resultSlice, const Slice &initialSlice, const uiCoord2D &sliceCenter, const int &intensityThreshold,
 							const int &smoothingRadius, const int &curvatureWidth, const qreal &curvatureThreshold, const iCoord2D &startPoint )
 {
+	computeStart( initialSlice, sliceCenter, intensityThreshold, smoothingRadius, curvatureWidth, curvatureThreshold, startPoint );
+	computeEnd( resultSlice, initialSlice, intensityThreshold );
+}
+
+void ContourSlice::computeStart( const Slice &initialSlice, const uiCoord2D &sliceCenter, const int &intensityThreshold,
+				   const int &smoothingRadius, const int &curvatureWidth, const qreal &curvatureThreshold, const iCoord2D &startPoint )
+{
 	_contour.compute( initialSlice, sliceCenter, intensityThreshold, startPoint );
 	_originalContour = _contour;
 	_contour.smooth(smoothingRadius);
@@ -108,6 +115,10 @@ void ContourSlice::compute( Slice &resultSlice, const Slice &initialSlice, const
 
 	computeConcavityPoints( curvatureThreshold );
 	computeSupportPoints( 10 );
+}
+
+void ContourSlice::computeEnd( Slice &resultSlice, const Slice &initialSlice, const int &intensityThreshold )
+{
 	computeContourPolygons();
 	updateSlice( initialSlice, resultSlice, intensityThreshold );
 }
@@ -305,7 +316,7 @@ void ContourSlice::computeConcavityPoints( const qreal &curvatureThreshold )
 	int nbPoints, index, indexToCompare;
 
 	nbPoints = _contour.size();
-	indexToCompare = nbPoints*0.3;
+	indexToCompare = nbPoints*0.4;
 
 	if ( nbPoints > 0 && _contourDistancesHistogram.size() == nbPoints && _curvatureHistogram.size() == nbPoints )
 	{

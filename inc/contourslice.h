@@ -37,6 +37,10 @@ public:
 	void compute( Slice &resultSlice, const Slice &initialSlice, const uiCoord2D &sliceCenter, const int &intensityThreshold,
 				  const int &smoothingRadius, const int &curvatureWidth, const qreal &curvatureThreshold, const iCoord2D &startPoint = iCoord2D(-1,-1) );
 
+	void computeStart( const Slice &initialSlice, const uiCoord2D &sliceCenter, const int &intensityThreshold,
+					   const int &smoothingRadius, const int &curvatureWidth, const qreal &curvatureThreshold, const iCoord2D &startPoint = iCoord2D(-1,-1) );
+	void computeEnd( Slice &resultSlice, const Slice &initialSlice, const int &intensityThreshold );
+
 	void draw( QPainter &painter, const int &cursorPosition, const TKD::ViewType &viewType ) const;
 
 private:
