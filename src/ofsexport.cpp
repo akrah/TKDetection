@@ -157,6 +157,9 @@ namespace OfsExport
 	{
 		void computeAndWriteAllEdges( QTextStream &stream, const Billon &billon, const Interval<uint> &sliceInterval, const uint &nbEdges, const uint &radius, const bool &normalized )
 		{
+		       //variable ajoutée @todo supprimer
+  		        bool autoCenter = false;
+		  
 			const int width = billon.n_cols;
 			const int height = billon.n_rows;
 			const qreal nbSlices = sliceInterval.size();
@@ -176,17 +179,20 @@ namespace OfsExport
 				offsets.append( ofsRadius * rCoord2D( qCos(angle), qSin(angle) ) );
 				angle += angleShift;
 			}
-
+			
 			const rCoord2D ofsStart(normalized?0.5:width/2,normalized?0.5:height/2);
 			rCoord2D *offsetsIterator, ofs;
-			qreal depth = normalized ? -0.5 : -(sliceInterval.size()/2.);
+			qreal depth = normalized ? -0.5 : (autoCenter? -(sliceInterval.size()/2.) :0 );
 
 			stream << endl;
 			stream << nbEdges*(sliceInterval.width()+1) << endl;
 			for ( k=sliceInterval.min() ; k<=sliceInterval.max() ; ++k )
 			{
-				ofs = billon.pithCoord(k)/norm - ofsStart;
-				offsetsIterator = offsets.data();
+			  if(autoCenter)
+			    ofs = billon.pithCoord(k)/norm - ofsStart;
+			  else 
+			    ofs = billon.pithCoord(k);
+			  offsetsIterator = offsets.data();
 				for ( i=0 ; i<nbEdges ; ++i )
 				{
 					stream << ofs.x+offsetsIterator->x << ' ' << ofs.y+offsetsIterator->y << ' ' << depth << endl;
