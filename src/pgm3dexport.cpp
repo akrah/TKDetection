@@ -84,6 +84,7 @@ namespace Pgm3dExport
 		unsigned int height = 2*qMin(billon.n_cols,billon.n_rows)/3;
 
 		stream << "P3D" << endl;
+		stream << "#!VoxelDim " << billon.voxelWidth() << ' ' << billon.voxelHeight() << ' ' << billon.voxelDepth() << endl;
 		stream << width << " " << height/resolution << " " <<   slicesInterval.width()+1<< endl;
 		stream << "255" << endl;
 
@@ -126,6 +127,7 @@ namespace Pgm3dExport
 		const qreal fact = 255.0/(intensityInterval.size());
 
 		stream << "P3D" << endl;
+		stream << "#!VoxelDim " << billon.voxelWidth() << ' ' << billon.voxelHeight() << ' ' << billon.voxelDepth() << endl;
 		stream << width/resolution << " " << height/resolution << " " <<  slicesInterval.width()+1 << endl;
 		stream << "255" << endl;
 
