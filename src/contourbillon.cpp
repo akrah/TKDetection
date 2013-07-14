@@ -53,6 +53,7 @@ void ContourBillon::compute( Billon &resultBillon, const Billon &billon, const i
 		const uint nbSlices = (*intervalsIterator).width()+1;
 		const uint intervalStart = (*intervalsIterator).min();
 		const uint intervalEnd = (*intervalsIterator).max()+1;
+
 		for ( uint k=intervalStart ; k<intervalEnd ; ++k )
 		{
 			ContourSlice &contourSlice = _contourSlices[k];
@@ -74,7 +75,6 @@ void ContourBillon::compute( Billon &resultBillon, const Billon &billon, const i
 				else if ( currentAngle > currentPithAngle )
 				{
 					contourSlice.setMaxSupportPoint( billon.pithCoord(k) );
-					//contourSlice.setMaxSupportPoint( rCoord2D( contourSlice.maxConcavityPoint().x - qCos(angleMax), contourSlice.maxConcavityPoint().y - qSin(angleMax) ) );
 				}
 			}
 			if ( contourSlice.minConcavityPointIndex() != -1 )
@@ -90,12 +90,10 @@ void ContourBillon::compute( Billon &resultBillon, const Billon &billon, const i
 				else if ( currentAngle < currentPithAngle )
 				{
 					contourSlice.setMinSupportPoint( billon.pithCoord(k) );
-					//contourSlice.setMinSupportPoint( rCoord2D( contourSlice.minConcavityPoint().x - qCos(angleMin), contourSlice.minConcavityPoint().y - qSin(angleMin) ) );
 				}
 			}
-
-			//contourSlice.computeEnd( resultBillon.slice(k), billon.slice(k), intensityThreshold );
 		}
+
 		qDebug() << QString("Optimisation de la coupe de contour : %1/%2").arg(intervalStart).arg(nbSlices);
 		_contourSlices[intervalStart].computeEnd( resultBillon.slice(intervalStart), billon.slice(intervalStart), intensityThreshold );
 		for ( uint k=intervalStart+1 ; k<intervalEnd-1 ; ++k )
