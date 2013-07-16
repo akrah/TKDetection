@@ -37,105 +37,108 @@ void ContourBillon::compute( Billon &resultBillon, const Billon &billon, const i
 							 const int &curvatureWidth, const qreal &curvatureThreshold, const QVector< Interval<uint> > &sliceIntervals,
 							 const Interval<qreal> &angularInterval )
 {
-	resultBillon = billon;
-	_contourSlices.resize(billon.n_slices);
+	if ( !sliceIntervals.size() ) return;
+
+	const Interval<uint> &sliceInterval = sliceIntervals[0];
+	const uint nbSlices = sliceInterval.width()+1;
+	const uint intervalStart = sliceInterval.min();
+	const uint intervalEnd = sliceInterval.max();
 
 	const bool minSupMax = angularInterval.min() > angularInterval.max();
-	const qreal &angleMax = minSupMax ? angularInterval.max() + TWO_PI : angularInterval.max();
-	const qreal &angleMin = angularInterval.min();
-	const qreal &angleMid = fmod(((angleMax + angleMin) / 2. + PI),TWO_PI);
+	const qreal angleMax = minSupMax ? angularInterval.max() + TWO_PI : angularInterval.max();
+	const qreal angleMin = angularInterval.min();
+	const qreal angleMid = fmod(((angleMax + angleMin) / 2. + PI),TWO_PI);
+	const qreal maxAngle = (minSupMax && angleMax < angleMid) ? angleMax+TWO_PI : angleMax;
+	const qreal minAngle = angleMin;
 
 	qreal currentAngle, currentPithAngle, previousAngle, nextAngle;
 
-	QVector< Interval<uint> >::ConstIterator intervalsIterator;
-	for ( intervalsIterator = sliceIntervals.constBegin() ; intervalsIterator != sliceIntervals.constEnd() ; ++intervalsIterator )
+	resultBillon = Billon(billon,sliceInterval);
+	_contourSlices.resize(nbSlices);
+
+	for ( uint k=intervalStart ; k<=intervalEnd ; ++k )
 	{
-		const uint nbSlices = (*intervalsIterator).width()+1;
-		const uint intervalStart = (*intervalsIterator).min();
-		const uint intervalEnd = (*intervalsIterator).max()+1;
+		ContourSlice &contourSlice = _contourSlices[k-intervalStart];
 
-		for ( uint k=intervalStart ; k<intervalEnd ; ++k )
+		qDebug() << QString("Calcul de la coupe de contour : %1/%2").arg(k+1-intervalStart).arg(nbSlices);
+		contourSlice.computeStart( billon.slice(k), billon.pithCoord(k), intensityThreshold,
+								   smoothingRadius, curvatureWidth, curvatureThreshold );
+
+		if ( contourSlice.maxConcavityPointIndex() != -1 )
 		{
-			ContourSlice &contourSlice = _contourSlices[k];
-
-			qDebug() << QString("Calcul de la coupe de contour : %1/%2").arg(k+1-intervalStart).arg(nbSlices);
-			contourSlice.computeStart( billon.slice(k), billon.pithCoord(k), intensityThreshold,
-								  smoothingRadius, curvatureWidth, curvatureThreshold );
-
-			if ( contourSlice.maxConcavityPointIndex() != -1 )
+			currentAngle = fmod(contourSlice.maxSupportPoint().angle(contourSlice.maxConcavityPoint())+TWO_PI,TWO_PI);
+			if ( minSupMax && currentAngle < angleMid ) currentAngle += TWO_PI;
+			currentPithAngle = fmod(billon.pithCoord(k).angle(contourSlice.maxSupportPoint())+TWO_PI,TWO_PI);
+			if ( minSupMax && currentPithAngle < angleMid ) currentPithAngle += TWO_PI;
+			if ( currentAngle < minAngle )
 			{
-				currentAngle = fmod(contourSlice.maxSupportPoint().angle(contourSlice.maxConcavityPoint())+TWO_PI,TWO_PI);
-				if ( minSupMax && currentAngle < angleMid ) currentAngle += TWO_PI;
-				currentPithAngle = fmod(billon.pithCoord(k).angle(contourSlice.maxSupportPoint())+TWO_PI,TWO_PI);
-				if ( minSupMax && currentPithAngle < angleMid ) currentPithAngle += TWO_PI;
-				if ( currentAngle < currentPithAngle-PI_ON_TWO )
-				{
-					contourSlice.setMaxConcavityPointIndex(-1);
-				}
-				else if ( currentAngle > currentPithAngle )
-				{
-					contourSlice.setMaxSupportPoint( billon.pithCoord(k) );
-				}
+				contourSlice.setMaxSupportPoint( rCoord2D( contourSlice.maxConcavityPoint().x-qCos(minAngle),
+														   contourSlice.maxConcavityPoint().y-qSin(minAngle) ) );
 			}
-			if ( contourSlice.minConcavityPointIndex() != -1 )
+			else if ( currentAngle > currentPithAngle )
 			{
-				currentAngle = fmod(contourSlice.minSupportPoint().angle(contourSlice.minConcavityPoint())+TWO_PI,TWO_PI);
-				if ( minSupMax && currentAngle < angleMid ) currentAngle += TWO_PI;
-				currentPithAngle = fmod(billon.pithCoord(k).angle(contourSlice.minSupportPoint())+TWO_PI,TWO_PI);
-				if ( minSupMax && currentPithAngle < angleMid ) currentPithAngle += TWO_PI;
-				if ( currentAngle > currentPithAngle+PI_ON_TWO )
-				{
-					contourSlice.setMinConcavityPointIndex(-1);
-				}
-				else if ( currentAngle < currentPithAngle )
-				{
-					contourSlice.setMinSupportPoint( billon.pithCoord(k) );
-				}
+				contourSlice.setMaxSupportPoint( billon.pithCoord(k) );
 			}
 		}
-
-		qDebug() << QString("Optimisation de la coupe de contour : %1/%2").arg(intervalStart).arg(nbSlices);
-		_contourSlices[intervalStart].computeEnd( resultBillon.slice(intervalStart), billon.slice(intervalStart), intensityThreshold );
-		for ( uint k=intervalStart+1 ; k<intervalEnd-1 ; ++k )
+		if ( contourSlice.minConcavityPointIndex() != -1 )
 		{
-			ContourSlice &contourSlice = _contourSlices[k];
-			ContourSlice &previousContourSlice = _contourSlices[k-1];
-			ContourSlice &nextContourSlice = _contourSlices[k+1];
-
-			qDebug() << QString("Optimisation de la coupe de contour : %1/%2").arg(k+1-intervalStart).arg(nbSlices);
-
-			if ( contourSlice.maxConcavityPointIndex() != -1 && previousContourSlice.maxConcavityPointIndex() != -1 && nextContourSlice.maxConcavityPointIndex() != -1 )
+			currentAngle = fmod(contourSlice.minSupportPoint().angle(contourSlice.minConcavityPoint())+TWO_PI,TWO_PI);
+			if ( minSupMax && currentAngle < angleMid ) currentAngle += TWO_PI;
+			currentPithAngle = fmod(billon.pithCoord(k).angle(contourSlice.minSupportPoint())+TWO_PI,TWO_PI);
+			if ( minSupMax && currentPithAngle < angleMid ) currentPithAngle += TWO_PI;
+			if ( currentAngle > maxAngle )
 			{
-				currentAngle = fmod(contourSlice.maxSupportPoint().angle(contourSlice.maxConcavityPoint())+TWO_PI,TWO_PI);
-				if ( minSupMax && currentAngle < angleMid ) currentAngle += TWO_PI;
-				previousAngle = fmod(previousContourSlice.maxSupportPoint().angle(previousContourSlice.maxConcavityPoint())+TWO_PI,TWO_PI);
-				if ( minSupMax && previousAngle < angleMid ) previousAngle += TWO_PI;
-				nextAngle = fmod(nextContourSlice.maxSupportPoint().angle(nextContourSlice.maxConcavityPoint())+TWO_PI,TWO_PI);
-				if ( minSupMax && nextAngle < angleMid ) nextAngle += TWO_PI;
-				if ( (previousAngle < currentAngle) == (nextAngle < currentAngle) )
-				{
-					contourSlice.setMaxSupportPoint( rCoord2D( contourSlice.maxConcavityPoint().x - qCos((previousAngle+nextAngle)/2.),
-															   contourSlice.maxConcavityPoint().y - qSin((previousAngle+nextAngle)/2.) ) );
-				}
+				contourSlice.setMinSupportPoint( rCoord2D( contourSlice.minConcavityPoint().x-qCos(maxAngle),
+														   contourSlice.minConcavityPoint().y-qSin(maxAngle) ) );
 			}
-			if ( contourSlice.minConcavityPointIndex() != -1 && previousContourSlice.minConcavityPointIndex() != -1 && nextContourSlice.minConcavityPointIndex() != -1 )
+			else if ( currentAngle < currentPithAngle )
 			{
-				currentAngle = fmod(contourSlice.minSupportPoint().angle(contourSlice.minConcavityPoint())+TWO_PI,TWO_PI);
-				if ( minSupMax && currentAngle < angleMid ) currentAngle += TWO_PI;
-				previousAngle = fmod(previousContourSlice.minSupportPoint().angle(previousContourSlice.minConcavityPoint())+TWO_PI,TWO_PI);
-				if ( minSupMax && previousAngle < angleMid ) previousAngle += TWO_PI;
-				nextAngle = fmod(nextContourSlice.minSupportPoint().angle(nextContourSlice.minConcavityPoint())+TWO_PI,TWO_PI);
-				if ( minSupMax && nextAngle < angleMid ) nextAngle += TWO_PI;
-				if ( (previousAngle < currentAngle) == (nextAngle < currentAngle) )
-				{
-					contourSlice.setMinSupportPoint( rCoord2D( contourSlice.minConcavityPoint().x - qCos((previousAngle+nextAngle)/2.),
-															   contourSlice.minConcavityPoint().y - qSin((previousAngle+nextAngle)/2.) ) );
-				}
+				contourSlice.setMinSupportPoint( billon.pithCoord(k) );
 			}
-
-			contourSlice.computeEnd( resultBillon.slice(k), billon.slice(k), intensityThreshold );
 		}
-		qDebug() << QString("Optimisation de la coupe de contour : %1/%2").arg(intervalEnd-intervalStart).arg(nbSlices);
-		_contourSlices[intervalEnd-1].computeEnd( resultBillon.slice(intervalEnd-1), billon.slice(intervalEnd-1), intensityThreshold );
 	}
+
+	qDebug() << QString("Optimisation de la coupe de contour : 1/%1").arg(nbSlices);
+	_contourSlices[0].computeEnd( resultBillon.slice(0), billon.slice(intervalStart), intensityThreshold );
+	for ( uint k=intervalStart+1 ; k<intervalEnd ; ++k )
+	{
+		ContourSlice &contourSlice = _contourSlices[k-intervalStart];
+		ContourSlice &previousContourSlice = _contourSlices[k-1-intervalStart];
+		ContourSlice &nextContourSlice = _contourSlices[k+1-intervalStart];
+
+		qDebug() << QString("Optimisation de la coupe de contour : %1/%2").arg(k+1-intervalStart).arg(nbSlices);
+
+		if ( contourSlice.maxConcavityPointIndex() != -1 && previousContourSlice.maxConcavityPointIndex() != -1 && nextContourSlice.maxConcavityPointIndex() != -1 )
+		{
+			currentAngle = fmod(contourSlice.maxSupportPoint().angle(contourSlice.maxConcavityPoint())+TWO_PI,TWO_PI);
+			if ( minSupMax && currentAngle < angleMid ) currentAngle += TWO_PI;
+			previousAngle = fmod(previousContourSlice.maxSupportPoint().angle(previousContourSlice.maxConcavityPoint())+TWO_PI,TWO_PI);
+			if ( minSupMax && previousAngle < angleMid ) previousAngle += TWO_PI;
+			nextAngle = fmod(nextContourSlice.maxSupportPoint().angle(nextContourSlice.maxConcavityPoint())+TWO_PI,TWO_PI);
+			if ( minSupMax && nextAngle < angleMid ) nextAngle += TWO_PI;
+			if ( (previousAngle < currentAngle) == (nextAngle < currentAngle) )
+			{
+				contourSlice.setMaxSupportPoint( rCoord2D( contourSlice.maxConcavityPoint().x - qCos((previousAngle+nextAngle)/2.),
+														   contourSlice.maxConcavityPoint().y - qSin((previousAngle+nextAngle)/2.) ) );
+			}
+		}
+		if ( contourSlice.minConcavityPointIndex() != -1 && previousContourSlice.minConcavityPointIndex() != -1 && nextContourSlice.minConcavityPointIndex() != -1 )
+		{
+			currentAngle = fmod(contourSlice.minSupportPoint().angle(contourSlice.minConcavityPoint())+TWO_PI,TWO_PI);
+			if ( minSupMax && currentAngle < angleMid ) currentAngle += TWO_PI;
+			previousAngle = fmod(previousContourSlice.minSupportPoint().angle(previousContourSlice.minConcavityPoint())+TWO_PI,TWO_PI);
+			if ( minSupMax && previousAngle < angleMid ) previousAngle += TWO_PI;
+			nextAngle = fmod(nextContourSlice.minSupportPoint().angle(nextContourSlice.minConcavityPoint())+TWO_PI,TWO_PI);
+			if ( minSupMax && nextAngle < angleMid ) nextAngle += TWO_PI;
+			if ( (previousAngle < currentAngle) == (nextAngle < currentAngle) )
+			{
+				contourSlice.setMinSupportPoint( rCoord2D( contourSlice.minConcavityPoint().x - qCos((previousAngle+nextAngle)/2.),
+														   contourSlice.minConcavityPoint().y - qSin((previousAngle+nextAngle)/2.) ) );
+			}
+		}
+
+		contourSlice.computeEnd( resultBillon.slice(k-intervalStart), billon.slice(k), intensityThreshold );
+	}
+	qDebug() << QString("Optimisation de la coupe de contour : %1/%2").arg(nbSlices).arg(nbSlices);
+	_contourSlices.last().computeEnd( resultBillon.slice(nbSlices-1), billon.slice(intervalEnd), intensityThreshold );
 }

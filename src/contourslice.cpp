@@ -322,7 +322,7 @@ void ContourSlice::computeConcavityPoints( const qreal &curvatureThreshold )
 	{
 		// Min concavity point
 		index = 1;
-		while ( (index < indexToCompare) && (_curvatureHistogram[index] > curvatureThreshold) )
+		while ( (index < indexToCompare) && (_curvatureHistogram[index] > curvatureThreshold || _contour[0].euclideanDistance(_contour[index]) < 10) )
 		{
 			index++;
 		}
@@ -331,7 +331,7 @@ void ContourSlice::computeConcavityPoints( const qreal &curvatureThreshold )
 		// Max concavity point
 		index = nbPoints-2;
 		indexToCompare = nbPoints-indexToCompare;
-		while ( (index > indexToCompare) && (_curvatureHistogram[index] > curvatureThreshold) )
+		while ( (index > indexToCompare) && (_curvatureHistogram[index] > curvatureThreshold || _contour[0].euclideanDistance(_contour[index]) < 10) )
 		{
 			index--;
 		}

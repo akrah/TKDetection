@@ -47,34 +47,41 @@ private slots:
 	void openDicom();
 	void openTiff();
 	void closeImage();
+
 	void drawSlice();
-	void setSlice( const int &sliceNumber );
-	void setYSlice( const int &yPosition );
-	void moveNearestPointsCursor( const int &position );
-	void moveContourCursor( const int &position );
 	void setTypeOfView( const int &type );
-	void resetHistogramDefaultValuesZMotion();
-	void resetHistogramDefaultValuesZMotionAngular();
-	void resetHistogramDefaultValuesNearestDistance();
-	void updateSliceHistogram();
-	void updateContourHistograms( const int &sliceIndex );
-	void updateIntensityDistributionHistogram();
-	void updateIntensityDistributionHistogramOnKnotArea();
-	void updateConcavitypointSerieCurve();
-	void updatePith();
-	void setMinimumOfSliceIntervalToCurrentSlice();
-	void setMaximumOfSliceIntervalToCurrentSlice();
-	void previousMaximumInSliceHistogram();
-	void nextMaximumInSliceHistogram();
 	void zoomInSliceView( const qreal &zoomFactor, const qreal &zoomCoefficient );
 	void dragInSliceView( const QPoint &movementVector );
+	void previousMaximumInSliceHistogram();
+	void nextMaximumInSliceHistogram();
+
+	void setSlice( const int &sliceNumber );
+	void setYSlice( const int &yPosition );
+	void setSectorNumber( const int &value );
+	void setMinimumOfSliceIntervalToCurrentSlice();
+	void setMaximumOfSliceIntervalToCurrentSlice();
+
 	void selectSliceInterval( const int &index );
 	void selectCurrentSliceInterval();
 	void selectSectorInterval( const int &index, const bool &draw = true );
 	void selectCurrentSectorInterval();
-	void setSectorNumber( const int &value );
+
+	void updatePith();
+	void updateSliceHistogram();
+	void updateSectorHistogram( const Interval<uint> &interval );
+	void updateContourHistograms( const int &sliceIndex );
+	void updateConcavitypointSerieCurve();
+	void updateIntensityDistributionHistogram();
+	void updateIntensityDistributionHistogramOnKnotArea();
+
 	void updateCurvatureThreshold( const int &value );
-	void updateCurvatureThreshold(const double &value );
+	void updateCurvatureThreshold( const double &value );
+	void resetHistogramDefaultValuesZMotion();
+	void resetHistogramDefaultValuesZMotionAngular();
+	void resetHistogramDefaultValuesNearestDistance();
+	void moveNearestPointsCursor( const int &position );
+	void moveContourCursor( const int &position );
+
 	void exportToDat();
 	void exportToOfs();
 	void exportHistograms();
@@ -83,11 +90,10 @@ private slots:
 	void exportToSdp();
 
 private:
-	void openNewBillon(const QString &fileName);
+	void openNewBillon( const QString &fileName );
 	void initComponentsValues();
 	void updateUiComponentsValues();
 	void enabledComponents();
-	void updateSectorHistogram( const Interval<uint> &interval );
 
 	void exportPithToOfs();
 	void exportBillonRestrictedAreaToOfs();

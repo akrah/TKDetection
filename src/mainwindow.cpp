@@ -423,6 +423,10 @@ void MainWindow::closeImage()
 	setWindowTitle("TKDetection");
 }
 
+/********/
+/*******************************************/
+/*******/
+
 void MainWindow::drawSlice()
 {
 	if ( _billon )
@@ -485,8 +489,7 @@ void MainWindow::drawSlice()
 				}
 				if ( _componentBillon  )
 				{
-					const uint slicePosition = _currentSlice-_componentBillon->zPos();
-					const Slice &componentSlice = _componentBillon->slice(slicePosition);
+					const Slice &componentSlice = _componentBillon->slice(_currentSlice-_componentBillon->zPos());
 
 					const QColor colors[] = { QColor(0,0,255,127), QColor(255,0,255,127), QColor(255,0,0,127), QColor(255,255,0,127), QColor(0,255,0,127) };
 					const int nbColors = sizeof(colors)/sizeof(QColor);
@@ -529,10 +532,11 @@ void MainWindow::drawSlice()
 						}
 					}
 
-					if ( _knotBillon )
+					if ( _knotBillon && _nearestPointsHistogram->intervals().size()
+						 && _nearestPointsHistogram->interval(0).containsClosed(_currentSlice-_componentBillon->zPos()))
 					{
-						SliceAlgorithm::draw( painter, _knotBillon->slice(slicePosition), pithCoord, 0, viewType );
-						_contourBillon->contourSlice(slicePosition).draw( painter, _ui->_sliderContour->value(), viewType );
+						SliceAlgorithm::draw( painter, _knotBillon->slice(_currentSlice-_knotBillon->zPos()), pithCoord, 0, viewType );
+						_contourBillon->contourSlice(_currentSlice-_knotBillon->zPos()).draw( painter, _ui->_sliderContour->value(), viewType );
 					}
 					painter.end();
 				}
@@ -549,55 +553,6 @@ void MainWindow::drawSlice()
 	_labelSliceView->resize(_sliceZoomer.factor() * _mainPix.size());
 }
 
-void MainWindow::setSlice( const int &sliceNumber )
-{
-	_currentSlice = sliceNumber;
-	_ui->_labelSliceNumber->setNum(sliceNumber);
-
-	_plotSliceHistogram->moveCursor(sliceNumber);
-	_ui->_plotSliceHistogram->replot();
-
-	moveNearestPointsCursor(sliceNumber);
-
-	updateContourHistograms(sliceNumber);
-
-	drawSlice();
-}
-
-void MainWindow::setYSlice( const int &yPosition )
-{
-	_currentYSlice = yPosition;
-	drawSlice();
-}
-
-void MainWindow::moveNearestPointsCursor( const int &position )
-{
-	if ( !_nearestPointsHistogram->isEmpty()
-		 && _ui->_comboSelectSliceInterval->count()>1
-		 && _ui->_comboSelectSliceInterval->currentIndex() <= static_cast<int>(_sliceHistogram->nbIntervals())
-		 && _sliceHistogram->interval(_ui->_comboSelectSliceInterval->currentIndex()-1).containsClosed(position) )
-	{
-		_plotNearestPointsHistogram->moveCursor(position-_sliceHistogram->interval(_ui->_comboSelectSliceInterval->currentIndex()-1).min());
-		_ui->_plotNearestPointsHistogram->replot();
-	}
-}
-
-void MainWindow::moveContourCursor( const int &position )
-{
-	if ( position < 0
-		 || !_sliceHistogram->interval(_ui->_comboSelectSliceInterval->currentIndex()-1).containsClosed(_currentSlice)
-		 || _contourBillon->isEmpty()
-		 || !_contourBillon->contourSlice(_currentSlice- _sliceHistogram->interval(_ui->_comboSelectSliceInterval->currentIndex()-1).min()).curvatureHistogram().size() )
-	{
-		return;
-	}
-
-	_plotCurvatureHistogram->moveCursor(position);
-	_ui->_plotCurvatureHistogram->replot();
-	_plotContourDistancesHistogram->moveCursor(position);
-	_ui->_plotContourDistancesHistogram->replot();
-	drawSlice();
-}
 
 void MainWindow::setTypeOfView( const int &type )
 {
@@ -620,175 +575,20 @@ void MainWindow::setTypeOfView( const int &type )
 	drawSlice();
 }
 
-void MainWindow::resetHistogramDefaultValuesZMotion()
+void MainWindow::zoomInSliceView( const qreal &zoomFactor, const qreal &zoomCoefficient )
 {
-	_ui->_spinHistogramSmoothingRadius_zMotion->setValue(HISTOGRAM_SMOOTHING_RADIUS);
-	_ui->_spinHistogramBorderPercentageToCut_zMotion->setValue(HISTOGRAM_BORDER_PERCENTAGE_TO_CUT);
-	_ui->_spinHistogramMinimumHeightOfMaximum_zMotion->setValue(HISTOGRAM_PERCENTAGE_OF_MINIMUM_HEIGHT_OF_MAXIMUM);
-	_ui->_spinHistogramMinimumWidthOfInterval_zMotion->setValue(HISTOGRAM_MINIMUM_WIDTH_OF_INTERVALS);
-	_ui->_spinHistogramDerivativeSearchPercentage_zMotion->setValue(HISTOGRAM_DERIVATIVE_SEARCH_PERCENTAGE);
+	_labelSliceView->resize(zoomFactor * _mainPix.size());
+	QScrollBar *hBar = _ui->_scrollSliceView->horizontalScrollBar();
+	hBar->setValue(int(zoomCoefficient * hBar->value() + ((zoomCoefficient - 1) * hBar->pageStep()/2)));
+	QScrollBar *vBar = _ui->_scrollSliceView->verticalScrollBar();
+	vBar->setValue(int(zoomCoefficient * vBar->value() + ((zoomCoefficient - 1) * vBar->pageStep()/2)));
 }
 
-void MainWindow::resetHistogramDefaultValuesZMotionAngular()
+void MainWindow::dragInSliceView( const QPoint &movementVector )
 {
-	_ui->_spinHistogramSmoothingRadius_zMotionAngular->setValue(HISTOGRAM_ANGULAR_SMOOTHING_RADIUS);
-	_ui->_spinHistogramMinimumHeightOfMaximum_zMotionAngular->setValue(HISTOGRAM_ANGULAR_PERCENTAGE_OF_MINIMUM_HEIGHT_OF_MAXIMUM);
-	_ui->_spinHistogramMinimumWidthOfInterval_zMotionAngular->setValue(HISTOGRAM_ANGULAR_MINIMUM_WIDTH_OF_INTERVALS);
-	_ui->_spinHistogramDerivativeSearchPercentage_zMotionAngular->setValue(HISTOGRAM_ANGULAR_DERIVATIVE_SEARCH_PERCENTAGE);
-}
-
-void MainWindow::resetHistogramDefaultValuesNearestDistance()
-{
-	_ui->_spinHistogramSmoothingRadius_nearestDistance->setValue(HISTOGRAM_DISTANCE_SMOOTHING_RADIUS);
-	_ui->_spinHistogramMinimumHeightOfMaximum_nearestDistance->setValue(HISTOGRAM_DISTANCE_PERCENTAGE_OF_MINIMUM_HEIGHT_OF_MAXIMUM);
-	_ui->_spinHistogramMinimumWidthOfInterval_nearestDistance->setValue(HISTOGRAM_DISTANCE_MINIMUM_WIDTH_OF_INTERVALS);
-	_ui->_spinHistogramDerivativeSearchPercentage_nearestDistance->setValue(HISTOGRAM_DISTANCE_DERIVATIVE_SEARCH_PERCENTAGE);
-}
-
-void MainWindow::updateSliceHistogram()
-{
-	_sliceHistogram->clear();
-
-	if ( _billon && _billon->hasPith() )
-	{
-		_sliceHistogram->construct(*_billon, Interval<int>(_ui->_spinMinIntensity->value(),_ui->_spinMaxIntensity->value()),
-								   _ui->_spinZMotionMin->value(), _ui->_spinHistogramBorderPercentageToCut_zMotion->value(), _treeRadius*_ui->_spinRestrictedAreaPercentage->value()/100.);
-		_sliceHistogram->computeMaximumsAndIntervals( _ui->_spinHistogramSmoothingRadius_zMotion->value(), _ui->_spinHistogramMinimumHeightOfMaximum_zMotion->value(),
-													  _ui->_spinHistogramDerivativeSearchPercentage_zMotion->value(), _ui->_spinHistogramMinimumWidthOfInterval_zMotion->value(), false);
-	}
-	_plotSliceHistogram->update( *_sliceHistogram );
-	_plotSliceHistogram->moveCursor( _currentSlice );
-	_plotSliceHistogram->updatePercentageCurve( _sliceHistogram->thresholdOfMaximums( _ui->_spinHistogramMinimumHeightOfMaximum_zMotion->value() ) );
-	_ui->_plotSliceHistogram->setAxisScale(QwtPlot::xBottom,0,_sliceHistogram->size());
-	_ui->_plotSliceHistogram->replot();
-
-	const int oldIntervalIndex = _ui->_comboSelectSliceInterval->currentIndex();
-	_ui->_comboSelectSliceInterval->clear();
-	_ui->_comboSelectSliceInterval->addItem(tr("Aucun"));
-	const QVector< Interval<uint> > &intervals = _sliceHistogram->intervals();
-	if ( !intervals.isEmpty() )
-	{
-		for ( int i=0 ; i<intervals.size() ; ++i )
-		{
-			const Interval<uint> &interval = intervals[i];
-			_ui->_comboSelectSliceInterval->addItem(tr("Interval %1 : [ %2, %3 ] (%4 coupes)").arg(i).arg(interval.min()).arg(interval.max()).arg(interval.width()+1));
-		}
-	}
-	_ui->_comboSelectSliceInterval->setCurrentIndex(oldIntervalIndex<=intervals.size()?oldIntervalIndex:0);
-}
-
-void MainWindow::updateContourHistograms( const int &sliceIndex )
-{
-	_ui->_sliderContour->setMaximum(1);
-	_ui->_sliderContour->setValue(0);
-	_plotCurvatureHistogram->clear();
-	_plotContourDistancesHistogram->clear();
-	const int sliceIntervalIndex = _ui->_comboSelectSliceInterval->currentIndex();
-	if ( sliceIntervalIndex > 0 )
-	{
-		const Interval<uint> &sliceInterval = _sliceHistogram->interval(sliceIntervalIndex-1);
-		if ( !_contourBillon->isEmpty() && sliceInterval.containsClosed(sliceIndex) )
-		{
-			const ContourSlice &contourSlice = _contourBillon->contourSlice(sliceIndex-sliceInterval.min());
-
-			_plotCurvatureHistogram->update(contourSlice.curvatureHistogram(),contourSlice.maxConcavityPointIndex(),contourSlice.minConcavityPointIndex());
-			_ui->_plotCurvatureHistogram->setAxisScale(QwtPlot::xBottom,0,contourSlice.curvatureHistogram().size());
-
-			_plotContourDistancesHistogram->update(contourSlice.contourDistancesHistogram(),contourSlice.maxConcavityPointIndex(),contourSlice.minConcavityPointIndex());
-			_ui->_plotContourDistancesHistogram->setAxisScale(QwtPlot::xBottom,0,contourSlice.contourDistancesHistogram().size());
-
-			_ui->_sliderContour->setMaximum(contourSlice.contour().size()>0?contourSlice.contour().size()-1:0);
-			moveContourCursor(0);
-		}
-	}
-	_ui->_plotCurvatureHistogram->replot();
-	_ui->_plotContourDistancesHistogram->replot();
-}
-
-void MainWindow::updateIntensityDistributionHistogram()
-{
-	_intensityDistributionHistogram->clear();
-
-	if ( _billon )
-	{
-		_intensityDistributionHistogram->construct(*_billon, Interval<uint>(0,_billon->n_slices-1), Interval<int>(_ui->_spinMinIntensity->value(),_ui->_spinMaxIntensity->value()),
-												   0);
-		std::cout << "Indice d'intensité avec 50% des valeurs inférieures : " << _ui->_spinMinIntensity->value()+_intensityDistributionHistogram->computeIndexOfPartialSum(0.5) << std::endl;
-		std::cout << "Indice d'intensité avec 60% des valeurs inférieures : " << _ui->_spinMinIntensity->value()+_intensityDistributionHistogram->computeIndexOfPartialSum(0.6) << std::endl;
-		std::cout << "Indice d'intensité avec 70% des valeurs inférieures : " << _ui->_spinMinIntensity->value()+_intensityDistributionHistogram->computeIndexOfPartialSum(0.7) << std::endl;
-		std::cout << "Indice d'intensité avec 80% des valeurs inférieures : " << _ui->_spinMinIntensity->value()+_intensityDistributionHistogram->computeIndexOfPartialSum(0.8) << std::endl;
-	}
-
-	_plotIntensityDistributionHistogram->update(*_intensityDistributionHistogram,Interval<int>(_ui->_spinMinIntensity->value(),_ui->_spinMaxIntensity->value()));
-	_ui->_plotIntensityDistributionHistogram->replot();
-}
-
-void MainWindow::updateIntensityDistributionHistogramOnKnotArea()
-{
-	_intensityDistributionHistogramOnKnotArea->clear();
-
-	if ( _ui->_comboSelectSliceInterval->currentIndex() > 0 && _knotBillon != 0 )
-	{
-		_intensityDistributionHistogramOnKnotArea->construct(*_billon, _sliceHistogram->interval(_ui->_comboSelectSliceInterval->currentIndex()-1), _sectorHistogram->interval(_ui->_comboSelectSectorInterval->currentIndex()-1),
-															 _billon->pithCoord(_knotBillon->zPos()+_knotBillon->n_slices/2), _treeRadius,
-															 Interval<int>(_ui->_spinMinIntensity->value(),_ui->_spinMaxIntensity->value()),
-															 0);
-		std::cout << "Indice d'intensité avec 50% des valeurs inférieures : " << _ui->_spinMinIntensity->value()+_intensityDistributionHistogramOnKnotArea->computeIndexOfPartialSum(0.5) << std::endl;
-		std::cout << "Indice d'intensité avec 60% des valeurs inférieures : " << _ui->_spinMinIntensity->value()+_intensityDistributionHistogramOnKnotArea->computeIndexOfPartialSum(0.6) << std::endl;
-		std::cout << "Indice d'intensité avec 70% des valeurs inférieures : " << _ui->_spinMinIntensity->value()+_intensityDistributionHistogramOnKnotArea->computeIndexOfPartialSum(0.7) << std::endl;
-		std::cout << "Indice d'intensité avec 80% des valeurs inférieures : " << _ui->_spinMinIntensity->value()+_intensityDistributionHistogramOnKnotArea->computeIndexOfPartialSum(0.8) << std::endl;
-	}
-
-	_plotIntensityDistributionHistogramOnKnotArea->update(*_intensityDistributionHistogramOnKnotArea,Interval<int>(_ui->_spinMinIntensity->value(),_ui->_spinMaxIntensity->value()));
-	_ui->_plotIntensityDistributionHistogramOnKnotArea->replot();
-}
-
-void MainWindow::updateConcavitypointSerieCurve()
-{
-	_concavityPointSerieCurve->clear();
-	_plotConcavityPointSerieCurve->clear();
-
-	if ( _contourBillon && !_contourBillon->isEmpty() )
-	{
-		_concavityPointSerieCurve->construct( *_contourBillon );
-	}
-
-	if ( !_sectorHistogram->isEmpty() && _knotBillon && _ui->_comboSelectSectorInterval->currentIndex()>0 )
-	{
-		const Interval<uint> &sectorInterval = _sectorHistogram->interval(_ui->_comboSelectSectorInterval->currentIndex()-1);
-		const Interval<qreal> angularInterval(PieChartSingleton::getInstance()->sector(sectorInterval.min()).minAngle(),
-											  PieChartSingleton::getInstance()->sector(sectorInterval.max()).maxAngle() );
-		_plotConcavityPointSerieCurve->update( *_concavityPointSerieCurve, angularInterval );
-	}
-	else
-	{
-		_plotConcavityPointSerieCurve->update( *_concavityPointSerieCurve, Interval<qreal>() );
-	}
-	_ui->_plotConcavityPointSerieCurve->replot();
-}
-
-void MainWindow::updatePith()
-{
-	if ( _billon )
-	{
-		PithExtractor pithExtractor;
-		pithExtractor.process(*_billon);
-	}
-	_treeRadius = BillonAlgorithms::restrictedAreaMeansRadius(*_billon,_ui->_spinRestrictedAreaResolution->value(),_ui->_spinRestrictedAreaThreshold->value());
-	_ui->_checkRadiusAroundPith->setText( QString::number(_treeRadius) );
-	_ui->_spinSectorsNumber->setValue(TWO_PI*_treeRadius);
-	drawSlice();
-	updateSliceHistogram();
-}
-
-void MainWindow::setMinimumOfSliceIntervalToCurrentSlice()
-{
-	_ui->_spinMinSlice->setValue(_currentSlice);
-}
-
-void MainWindow::setMaximumOfSliceIntervalToCurrentSlice()
-{
-	_ui->_spinMaxSlice->setValue(_currentSlice);
+	QScrollArea &scrollArea = *(_ui->_scrollSliceView);
+	if ( movementVector.x() ) scrollArea.horizontalScrollBar()->setValue(scrollArea.horizontalScrollBar()->value()-movementVector.x());
+	if ( movementVector.y() ) scrollArea.verticalScrollBar()->setValue(scrollArea.verticalScrollBar()->value()-movementVector.y());
 }
 
 void MainWindow::previousMaximumInSliceHistogram()
@@ -819,21 +619,50 @@ void MainWindow::nextMaximumInSliceHistogram()
 	}
 }
 
-void MainWindow::zoomInSliceView( const qreal &zoomFactor, const qreal &zoomCoefficient )
+/********/
+/*******************************************/
+/*******/
+
+void MainWindow::setSlice( const int &sliceNumber )
 {
-	_labelSliceView->resize(zoomFactor * _mainPix.size());
-	QScrollBar *hBar = _ui->_scrollSliceView->horizontalScrollBar();
-	hBar->setValue(int(zoomCoefficient * hBar->value() + ((zoomCoefficient - 1) * hBar->pageStep()/2)));
-	QScrollBar *vBar = _ui->_scrollSliceView->verticalScrollBar();
-	vBar->setValue(int(zoomCoefficient * vBar->value() + ((zoomCoefficient - 1) * vBar->pageStep()/2)));
+	_currentSlice = sliceNumber;
+	_ui->_labelSliceNumber->setNum(sliceNumber);
+
+	_plotSliceHistogram->moveCursor(sliceNumber);
+	_ui->_plotSliceHistogram->replot();
+
+	moveNearestPointsCursor(sliceNumber);
+
+	updateContourHistograms(sliceNumber);
+
+	drawSlice();
 }
 
-void MainWindow::dragInSliceView( const QPoint &movementVector )
+void MainWindow::setYSlice( const int &yPosition )
 {
-	QScrollArea &scrollArea = *(_ui->_scrollSliceView);
-	if ( movementVector.x() ) scrollArea.horizontalScrollBar()->setValue(scrollArea.horizontalScrollBar()->value()-movementVector.x());
-	if ( movementVector.y() ) scrollArea.verticalScrollBar()->setValue(scrollArea.verticalScrollBar()->value()-movementVector.y());
+	_currentYSlice = yPosition;
+	drawSlice();
 }
+
+void MainWindow::setSectorNumber( const int &value )
+{
+	PieChartSingleton::getInstance()->setSectorsNumber(value);
+}
+
+void MainWindow::setMinimumOfSliceIntervalToCurrentSlice()
+{
+	_ui->_spinMinSlice->setValue(_currentSlice);
+}
+
+void MainWindow::setMaximumOfSliceIntervalToCurrentSlice()
+{
+	_ui->_spinMaxSlice->setValue(_currentSlice);
+}
+
+
+/********/
+/*******************************************/
+/*******/
 
 void MainWindow::selectSliceInterval( const int &index )
 {
@@ -944,9 +773,8 @@ void MainWindow::selectSectorInterval(const int &index, const bool &draw )
 		_nearestPointsHistogram->computeMaximumsAndIntervals( _ui->_spinHistogramSmoothingRadius_nearestDistance->value(), _ui->_spinHistogramMinimumHeightOfMaximum_nearestDistance->value(),
 															  _ui->_spinHistogramDerivativeSearchPercentage_nearestDistance->value(),
 															  _ui->_spinHistogramMinimumWidthOfInterval_nearestDistance->value(), false );
-		_plotNearestPointsHistogram->update( *_nearestPointsHistogram );
 
-		_knotBillon = new Billon(*_componentBillon);
+		_knotBillon = new Billon();
 
 		const Interval<qreal> angularInterval(PieChartSingleton::getInstance()->sector(sectorInterval.min()).minAngle(),
 											  PieChartSingleton::getInstance()->sector(sectorInterval.max()).maxAngle() );
@@ -959,6 +787,7 @@ void MainWindow::selectSectorInterval(const int &index, const bool &draw )
 	{
 		updateContourHistograms( _currentSlice );
 		updateConcavitypointSerieCurve();
+		_plotNearestPointsHistogram->update( *_nearestPointsHistogram );
 		_ui->_plotNearestPointsHistogram->setAxisScale(QwtPlot::xBottom,0,_nearestPointsHistogram->size());
 		_ui->_plotNearestPointsHistogram->replot();
 		drawSlice();
@@ -970,10 +799,168 @@ void MainWindow::selectCurrentSectorInterval()
 	selectSectorInterval(_ui->_comboSelectSectorInterval->currentIndex());
 }
 
-void MainWindow::setSectorNumber( const int &value )
+void MainWindow::updatePith()
 {
-	PieChartSingleton::getInstance()->setSectorsNumber(value);
+	if ( _billon )
+	{
+		PithExtractor pithExtractor;
+		pithExtractor.process(*_billon);
+	}
+	_treeRadius = BillonAlgorithms::restrictedAreaMeansRadius(*_billon,_ui->_spinRestrictedAreaResolution->value(),_ui->_spinRestrictedAreaThreshold->value());
+	_ui->_checkRadiusAroundPith->setText( QString::number(_treeRadius) );
+	_ui->_spinSectorsNumber->setValue(TWO_PI*_treeRadius);
+	drawSlice();
+	updateSliceHistogram();
 }
+
+void MainWindow::updateSliceHistogram()
+{
+	_sliceHistogram->clear();
+
+	if ( _billon && _billon->hasPith() )
+	{
+		_sliceHistogram->construct(*_billon, Interval<int>(_ui->_spinMinIntensity->value(),_ui->_spinMaxIntensity->value()),
+								   _ui->_spinZMotionMin->value(), _ui->_spinHistogramBorderPercentageToCut_zMotion->value(), _treeRadius*_ui->_spinRestrictedAreaPercentage->value()/100.);
+		_sliceHistogram->computeMaximumsAndIntervals( _ui->_spinHistogramSmoothingRadius_zMotion->value(), _ui->_spinHistogramMinimumHeightOfMaximum_zMotion->value(),
+													  _ui->_spinHistogramDerivativeSearchPercentage_zMotion->value(), _ui->_spinHistogramMinimumWidthOfInterval_zMotion->value(), false);
+	}
+	_plotSliceHistogram->update( *_sliceHistogram );
+	_plotSliceHistogram->moveCursor( _currentSlice );
+	_plotSliceHistogram->updatePercentageCurve( _sliceHistogram->thresholdOfMaximums( _ui->_spinHistogramMinimumHeightOfMaximum_zMotion->value() ) );
+	_ui->_plotSliceHistogram->setAxisScale(QwtPlot::xBottom,0,_sliceHistogram->size());
+	_ui->_plotSliceHistogram->replot();
+
+	const int oldIntervalIndex = _ui->_comboSelectSliceInterval->currentIndex();
+	_ui->_comboSelectSliceInterval->clear();
+	_ui->_comboSelectSliceInterval->addItem(tr("Aucun"));
+	const QVector< Interval<uint> > &intervals = _sliceHistogram->intervals();
+	if ( !intervals.isEmpty() )
+	{
+		for ( int i=0 ; i<intervals.size() ; ++i )
+		{
+			const Interval<uint> &interval = intervals[i];
+			_ui->_comboSelectSliceInterval->addItem(tr("Interval %1 : [ %2, %3 ] (%4 coupes)").arg(i).arg(interval.min()).arg(interval.max()).arg(interval.width()+1));
+		}
+	}
+	_ui->_comboSelectSliceInterval->setCurrentIndex(oldIntervalIndex<=intervals.size()?oldIntervalIndex:0);
+}
+
+void MainWindow::updateSectorHistogram( const Interval<uint> &interval )
+{
+	_sectorHistogram->clear();
+
+	if ( _billon )
+	{
+		_sectorHistogram->construct( *_billon, interval, Interval<int>(_ui->_spinMinIntensity->value(),_ui->_spinMaxIntensity->value()),
+									 _ui->_spinZMotionMin->value(), _treeRadius*_ui->_spinRestrictedAreaPercentage->value()/100.);
+		qreal coeffDegToSize = _ui->_spinSectorsNumber->value()/360.;
+		_sectorHistogram->computeMaximumsAndIntervals( _ui->_spinHistogramSmoothingRadius_zMotionAngular->value()*coeffDegToSize,
+													   _ui->_spinHistogramMinimumHeightOfMaximum_zMotionAngular->value(),
+													   _ui->_spinHistogramDerivativeSearchPercentage_zMotionAngular->value(),
+													   _ui->_spinHistogramMinimumWidthOfInterval_zMotionAngular->value()*coeffDegToSize,
+													   _ui->_spinSectorHistogramIntervalGap->value()*coeffDegToSize, true );
+	}
+
+	_plotSectorHistogram->update(*_sectorHistogram);
+	_ui->_plotSectorHistogram->replot();
+	_ui->_polarSectorHistogram->replot();
+	drawSlice();
+}
+
+void MainWindow::updateContourHistograms( const int &sliceIndex )
+{
+	_ui->_sliderContour->setMaximum(1);
+	_ui->_sliderContour->setValue(0);
+	_plotCurvatureHistogram->clear();
+	_plotContourDistancesHistogram->clear();
+	const int sliceIntervalIndex = _ui->_comboSelectSliceInterval->currentIndex();
+	if ( sliceIntervalIndex > 0 )
+	{
+		const Interval<uint> &sliceInterval = _sliceHistogram->interval(sliceIntervalIndex-1);
+		if ( !_contourBillon->isEmpty() && sliceInterval.containsClosed(sliceIndex)
+			 && _nearestPointsHistogram->intervals().size() && _nearestPointsHistogram->interval(0).containsClosed(sliceIndex-sliceInterval.min()) )
+		{
+			const ContourSlice &contourSlice = _contourBillon->contourSlice(sliceIndex-_knotBillon->zPos());
+
+			_plotCurvatureHistogram->update(contourSlice.curvatureHistogram(),contourSlice.maxConcavityPointIndex(),contourSlice.minConcavityPointIndex());
+			_ui->_plotCurvatureHistogram->setAxisScale(QwtPlot::xBottom,0,contourSlice.curvatureHistogram().size());
+
+			_plotContourDistancesHistogram->update(contourSlice.contourDistancesHistogram(),contourSlice.maxConcavityPointIndex(),contourSlice.minConcavityPointIndex());
+			_ui->_plotContourDistancesHistogram->setAxisScale(QwtPlot::xBottom,0,contourSlice.contourDistancesHistogram().size());
+
+			_ui->_sliderContour->setMaximum(contourSlice.contour().size()>0?contourSlice.contour().size()-1:0);
+			moveContourCursor(0);
+		}
+	}
+	_ui->_plotCurvatureHistogram->replot();
+	_ui->_plotContourDistancesHistogram->replot();
+}
+
+void MainWindow::updateConcavitypointSerieCurve()
+{
+	_concavityPointSerieCurve->clear();
+	_plotConcavityPointSerieCurve->clear();
+
+	if ( _contourBillon && !_contourBillon->isEmpty() )
+	{
+		_concavityPointSerieCurve->construct( *_contourBillon );
+	}
+
+	if ( !_sectorHistogram->isEmpty() && _ui->_comboSelectSectorInterval->currentIndex()>0 )
+	{
+		const Interval<uint> &sectorInterval = _sectorHistogram->interval(_ui->_comboSelectSectorInterval->currentIndex()-1);
+		const Interval<qreal> angularInterval(PieChartSingleton::getInstance()->sector(sectorInterval.min()).minAngle(),
+											  PieChartSingleton::getInstance()->sector(sectorInterval.max()).maxAngle() );
+		_plotConcavityPointSerieCurve->update( *_concavityPointSerieCurve, angularInterval );
+	}
+	else
+	{
+		_plotConcavityPointSerieCurve->update( *_concavityPointSerieCurve, Interval<qreal>() );
+	}
+	_ui->_plotConcavityPointSerieCurve->replot();
+}
+
+void MainWindow::updateIntensityDistributionHistogram()
+{
+	_intensityDistributionHistogram->clear();
+
+	if ( _billon )
+	{
+		_intensityDistributionHistogram->construct(*_billon, Interval<uint>(0,_billon->n_slices-1), Interval<int>(_ui->_spinMinIntensity->value(),_ui->_spinMaxIntensity->value()),
+												   0);
+		std::cout << "Indice d'intensité avec 50% des valeurs inférieures : " << _ui->_spinMinIntensity->value()+_intensityDistributionHistogram->computeIndexOfPartialSum(0.5) << std::endl;
+		std::cout << "Indice d'intensité avec 60% des valeurs inférieures : " << _ui->_spinMinIntensity->value()+_intensityDistributionHistogram->computeIndexOfPartialSum(0.6) << std::endl;
+		std::cout << "Indice d'intensité avec 70% des valeurs inférieures : " << _ui->_spinMinIntensity->value()+_intensityDistributionHistogram->computeIndexOfPartialSum(0.7) << std::endl;
+		std::cout << "Indice d'intensité avec 80% des valeurs inférieures : " << _ui->_spinMinIntensity->value()+_intensityDistributionHistogram->computeIndexOfPartialSum(0.8) << std::endl;
+	}
+
+	_plotIntensityDistributionHistogram->update(*_intensityDistributionHistogram,Interval<int>(_ui->_spinMinIntensity->value(),_ui->_spinMaxIntensity->value()));
+	_ui->_plotIntensityDistributionHistogram->replot();
+}
+
+void MainWindow::updateIntensityDistributionHistogramOnKnotArea()
+{
+	_intensityDistributionHistogramOnKnotArea->clear();
+
+	if ( _ui->_comboSelectSliceInterval->currentIndex() > 0 && _knotBillon )
+	{
+		_intensityDistributionHistogramOnKnotArea->construct(*_billon, _sliceHistogram->interval(_ui->_comboSelectSliceInterval->currentIndex()-1), _sectorHistogram->interval(_ui->_comboSelectSectorInterval->currentIndex()-1),
+															 _billon->pithCoord(_knotBillon->zPos()+_knotBillon->n_slices/2), _treeRadius,
+															 Interval<int>(_ui->_spinMinIntensity->value(),_ui->_spinMaxIntensity->value()),
+															 0);
+		std::cout << "Indice d'intensité avec 50% des valeurs inférieures : " << _ui->_spinMinIntensity->value()+_intensityDistributionHistogramOnKnotArea->computeIndexOfPartialSum(0.5) << std::endl;
+		std::cout << "Indice d'intensité avec 60% des valeurs inférieures : " << _ui->_spinMinIntensity->value()+_intensityDistributionHistogramOnKnotArea->computeIndexOfPartialSum(0.6) << std::endl;
+		std::cout << "Indice d'intensité avec 70% des valeurs inférieures : " << _ui->_spinMinIntensity->value()+_intensityDistributionHistogramOnKnotArea->computeIndexOfPartialSum(0.7) << std::endl;
+		std::cout << "Indice d'intensité avec 80% des valeurs inférieures : " << _ui->_spinMinIntensity->value()+_intensityDistributionHistogramOnKnotArea->computeIndexOfPartialSum(0.8) << std::endl;
+	}
+
+	_plotIntensityDistributionHistogramOnKnotArea->update(*_intensityDistributionHistogramOnKnotArea,Interval<int>(_ui->_spinMinIntensity->value(),_ui->_spinMaxIntensity->value()));
+	_ui->_plotIntensityDistributionHistogramOnKnotArea->replot();
+}
+
+/********/
+/*******************************************/
+/*******/
 
 void MainWindow::updateCurvatureThreshold( const int &value )
 {
@@ -988,6 +975,65 @@ void MainWindow::updateCurvatureThreshold( const double &value )
 	_ui->_sliderCurvatureThreshold->setValue(value*1000);
 	_ui->_sliderCurvatureThreshold->blockSignals(false);
 }
+
+void MainWindow::resetHistogramDefaultValuesZMotion()
+{
+	_ui->_spinHistogramSmoothingRadius_zMotion->setValue(HISTOGRAM_SMOOTHING_RADIUS);
+	_ui->_spinHistogramBorderPercentageToCut_zMotion->setValue(HISTOGRAM_BORDER_PERCENTAGE_TO_CUT);
+	_ui->_spinHistogramMinimumHeightOfMaximum_zMotion->setValue(HISTOGRAM_PERCENTAGE_OF_MINIMUM_HEIGHT_OF_MAXIMUM);
+	_ui->_spinHistogramMinimumWidthOfInterval_zMotion->setValue(HISTOGRAM_MINIMUM_WIDTH_OF_INTERVALS);
+	_ui->_spinHistogramDerivativeSearchPercentage_zMotion->setValue(HISTOGRAM_DERIVATIVE_SEARCH_PERCENTAGE);
+}
+
+void MainWindow::resetHistogramDefaultValuesZMotionAngular()
+{
+	_ui->_spinHistogramSmoothingRadius_zMotionAngular->setValue(HISTOGRAM_ANGULAR_SMOOTHING_RADIUS);
+	_ui->_spinHistogramMinimumHeightOfMaximum_zMotionAngular->setValue(HISTOGRAM_ANGULAR_PERCENTAGE_OF_MINIMUM_HEIGHT_OF_MAXIMUM);
+	_ui->_spinHistogramMinimumWidthOfInterval_zMotionAngular->setValue(HISTOGRAM_ANGULAR_MINIMUM_WIDTH_OF_INTERVALS);
+	_ui->_spinHistogramDerivativeSearchPercentage_zMotionAngular->setValue(HISTOGRAM_ANGULAR_DERIVATIVE_SEARCH_PERCENTAGE);
+}
+
+void MainWindow::resetHistogramDefaultValuesNearestDistance()
+{
+	_ui->_spinHistogramSmoothingRadius_nearestDistance->setValue(HISTOGRAM_DISTANCE_SMOOTHING_RADIUS);
+	_ui->_spinHistogramMinimumHeightOfMaximum_nearestDistance->setValue(HISTOGRAM_DISTANCE_PERCENTAGE_OF_MINIMUM_HEIGHT_OF_MAXIMUM);
+	_ui->_spinHistogramMinimumWidthOfInterval_nearestDistance->setValue(HISTOGRAM_DISTANCE_MINIMUM_WIDTH_OF_INTERVALS);
+	_ui->_spinHistogramDerivativeSearchPercentage_nearestDistance->setValue(HISTOGRAM_DISTANCE_DERIVATIVE_SEARCH_PERCENTAGE);
+}
+
+void MainWindow::moveNearestPointsCursor( const int &position )
+{
+	if ( !_nearestPointsHistogram->isEmpty()
+		 && _ui->_comboSelectSliceInterval->count()>1
+		 && _ui->_comboSelectSliceInterval->currentIndex() <= static_cast<int>(_sliceHistogram->nbIntervals())
+		 && _sliceHistogram->interval(_ui->_comboSelectSliceInterval->currentIndex()-1).containsClosed(position) )
+	{
+		_plotNearestPointsHistogram->moveCursor(position-_sliceHistogram->interval(_ui->_comboSelectSliceInterval->currentIndex()-1).min());
+		_ui->_plotNearestPointsHistogram->replot();
+	}
+}
+
+void MainWindow::moveContourCursor( const int &position )
+{
+	if ( position >= 0
+		 && _sliceHistogram->interval(_ui->_comboSelectSliceInterval->currentIndex()-1).containsClosed(_currentSlice)
+		 && !_contourBillon->isEmpty()
+		 && _knotBillon
+		 && _contourBillon->contourSlice(_currentSlice-_knotBillon->zPos()).curvatureHistogram().size() )
+	{
+		_plotCurvatureHistogram->moveCursor(position);
+		_plotContourDistancesHistogram->moveCursor(position);
+	}
+
+	_ui->_plotCurvatureHistogram->replot();
+	_ui->_plotContourDistancesHistogram->replot();
+	drawSlice();
+}
+
+
+/********/
+/*******************************************/
+/*******/
 
 void MainWindow::exportToDat()
 {
@@ -1258,29 +1304,6 @@ void MainWindow::enabledComponents()
 	_ui->_buttonExportToOfs->setEnabled(enable);
 	_ui->_buttonNextMaximum->setEnabled(enable);
 	_ui->_buttonPreviousMaximum->setEnabled(enable);
-}
-
-
-void MainWindow::updateSectorHistogram( const Interval<uint> &interval )
-{
-	_sectorHistogram->clear();
-
-	if ( _billon )
-	{
-		_sectorHistogram->construct( *_billon, interval, Interval<int>(_ui->_spinMinIntensity->value(),_ui->_spinMaxIntensity->value()),
-									 _ui->_spinZMotionMin->value(), _treeRadius*_ui->_spinRestrictedAreaPercentage->value()/100.);
-		qreal coeffDegToSize = _ui->_spinSectorsNumber->value()/360.;
-		_sectorHistogram->computeMaximumsAndIntervals( _ui->_spinHistogramSmoothingRadius_zMotionAngular->value()*coeffDegToSize,
-													   _ui->_spinHistogramMinimumHeightOfMaximum_zMotionAngular->value(),
-													   _ui->_spinHistogramDerivativeSearchPercentage_zMotionAngular->value(),
-													   _ui->_spinHistogramMinimumWidthOfInterval_zMotionAngular->value()*coeffDegToSize,
-													   _ui->_spinSectorHistogramIntervalGap->value()*coeffDegToSize, true );
-	}
-
-	_plotSectorHistogram->update(*_sectorHistogram);
-	_ui->_plotSectorHistogram->replot();
-	_ui->_polarSectorHistogram->replot();
-	drawSlice();
 }
 
 void MainWindow::exportPithToOfs()
@@ -1633,6 +1656,57 @@ void MainWindow::exportknotHistogramToImage()
 	else QMessageBox::warning(this,tr("Export de l'histogramme de zone de nœuds en image"),tr("L'export a échoué : l'histogramme de zone de nœuds n'est pas calculé."));
 }
 
+
+void MainWindow::exportImgeSliceIntervalToPgm3d()
+{
+	if ( _billon )
+	{
+		QString fileName = QFileDialog::getSaveFileName(this, tr("Exporter l'image en .pgm3d"), "output.pgm3d", tr("Fichiers de données (*.pgm3d);;Tous les fichiers (*.*)"));
+		if ( !fileName.isEmpty() )
+		{
+			QFile file(fileName);
+			if ( file.open(QIODevice::WriteOnly) )
+			{
+				QTextStream stream(&file);
+				Pgm3dExport::processImage( stream, *_billon, Interval<int>(_ui->_spinMinSlice->value(),_ui->_spinMaxSlice->value()),
+									Interval<int>(_ui->_spinMinIntensity->value(),_ui->_spinMaxIntensity->value()), _ui-> _spinPgm3dExportResolution->value(),
+									(_ui->_spinDatExportContrast->value()+100.)/100. );
+				file.close();
+				QMessageBox::information(this,tr("Export en .pgm3d"), tr("Terminé avec succés !"));
+			}
+			else QMessageBox::warning(this,tr("Export en .pgm3d"), tr("L'export a échoué"));
+		}
+	}
+	else QMessageBox::warning(this,tr("Export en .pgm3d"), tr("Aucun fichier de billon ouvert."));
+}
+
+
+
+void MainWindow::exportImgeCartesianSliceIntervalToPgm3d()
+{
+	if ( _billon )
+	{
+		QString fileName = QFileDialog::getSaveFileName(this, tr("Exporter l'image en .pgm3d"), "output.pgm3d", tr("Fichiers de données (*.pgm3d);;Tous les fichiers (*.*)"));
+		if ( !fileName.isEmpty() )
+		{
+			QFile file(fileName);
+			if ( file.open(QIODevice::WriteOnly) )
+			{
+				QTextStream stream(&file);
+				Pgm3dExport::processImageCartesian( stream, *_billon, Interval<int>(_ui->_spinMinSlice->value(),_ui->_spinMaxSlice->value()),
+									Interval<int>(_ui->_spinMinIntensity->value(),_ui->_spinMaxIntensity->value()),  _ui-> _spinPgm3dExportResolution->value(), _ui-> _spinAngularResolution->value(),
+									(_ui->_spinDatExportContrast->value()+100.)/100. );
+				file.close();
+				QMessageBox::information(this,tr("Export en .pgm3d"), tr("Terminé avec succés !"));
+			}
+			else QMessageBox::warning(this,tr("Export en .pgm3d"), tr("L'export a échoué"));
+		}
+	}
+	else QMessageBox::warning(this,tr("Export en .pgm3d"), tr("Aucun fichier de billon ouvert."));
+}
+
+
+
 void MainWindow::exportCurrentSegmentedKnotToPgm3d()
 {
 	if ( _knotBillon )
@@ -1650,7 +1724,7 @@ void MainWindow::exportCurrentSegmentedKnotToPgm3d()
 				stream << 1 << endl;
 
 				QDataStream dstream(&file);
-				for ( uint k=_nearestPointsHistogram->interval(0).min() ; k<=_nearestPointsHistogram->interval(0).max() ; ++k )
+				for ( uint k=0 ; k<_knotBillon->n_slices ; ++k )
 				{
 					SliceAlgorithm::writeInPgm3D( _knotBillon->slice(k) , dstream );
 				}
@@ -1687,9 +1761,9 @@ void MainWindow::exportSegmentedKnotsOfCurrentSliceIntervalToPgm3d()
 				for ( int sectorIndex=1 ; sectorIndex< _ui->_comboSelectSectorInterval->count() ; ++sectorIndex )
 				{
 					selectSectorInterval(sectorIndex,false);
-					if ( _knotBillon && _nearestPointsHistogram->intervals().size()>0 )
+					if ( _knotBillon )
 					{
-						for ( k=_nearestPointsHistogram->interval(0).min() ; k<=_nearestPointsHistogram->interval(0).max() ; ++k )
+						for ( k=0 ; k<_knotBillon->n_slices ; ++k )
 						{
 							const Slice &knotSlice = _knotBillon->slice(k);
 							Slice &slice = billonToWrite.slice(k);
@@ -1728,56 +1802,6 @@ void MainWindow::exportSegmentedKnotsOfCurrentSliceIntervalToPgm3d()
 }
 
 
-
-void MainWindow::exportImgeSliceIntervalToPgm3d()
-{
-	if ( _billon )
-	{
-		QString fileName = QFileDialog::getSaveFileName(this, tr("Exporter l'image en .pgm3d"), "output.pgm3d", tr("Fichiers de données (*.pgm3d);;Tous les fichiers (*.*)"));
-		if ( !fileName.isEmpty() )
-		{
-			QFile file(fileName);
-			if ( file.open(QIODevice::WriteOnly) )
-			{
-				QTextStream stream(&file);
-				Pgm3dExport::processImage( stream, *_billon, Interval<int>(_ui->_spinMinSlice->value(),_ui->_spinMaxSlice->value()),
-									Interval<int>(_ui->_spinMinIntensity->value(),_ui->_spinMaxIntensity->value()), _ui-> _spinPgm3dExportResolution->value(),
-									(_ui->_spinDatExportContrast->value()+100.)/100. );
-				file.close();
-				QMessageBox::information(this,tr("Export en .pgm3d"), tr("Terminé avec succés !"));
-			}
-			else QMessageBox::warning(this,tr("Export en .pgm3d"), tr("L'export a échoué"));
-		}
-	}
-	else QMessageBox::warning(this,tr("Export en .pgm3d"), tr("Aucun fichier de billon ouvert."));
-}
-
-
-void MainWindow::exportImgeCartesianSliceIntervalToPgm3d()
-{
-	if ( _billon )
-	{
-		QString fileName = QFileDialog::getSaveFileName(this, tr("Exporter l'image en .pgm3d"), "output.pgm3d", tr("Fichiers de données (*.pgm3d);;Tous les fichiers (*.*)"));
-		if ( !fileName.isEmpty() )
-		{
-			QFile file(fileName);
-			if ( file.open(QIODevice::WriteOnly) )
-			{
-				QTextStream stream(&file);
-				Pgm3dExport::processImageCartesian( stream, *_billon, Interval<int>(_ui->_spinMinSlice->value(),_ui->_spinMaxSlice->value()),
-									Interval<int>(_ui->_spinMinIntensity->value(),_ui->_spinMaxIntensity->value()),  _ui-> _spinPgm3dExportResolution->value(), _ui-> _spinAngularResolution->value(),
-									(_ui->_spinDatExportContrast->value()+100.)/100. );
-				file.close();
-				QMessageBox::information(this,tr("Export en .pgm3d"), tr("Terminé avec succés !"));
-			}
-			else QMessageBox::warning(this,tr("Export en .pgm3d"), tr("L'export a échoué"));
-		}
-	}
-	else QMessageBox::warning(this,tr("Export en .pgm3d"), tr("Aucun fichier de billon ouvert."));
-}
-
-
-
 void MainWindow::exportCurrentSegmentedKnotToV3D()
 {
 	if ( _knotBillon )
@@ -1788,7 +1812,7 @@ void MainWindow::exportCurrentSegmentedKnotToV3D()
 			QFile file(fileName);
 			if( file.open(QIODevice::WriteOnly) )
 			{
-				V3DExport::process( file, *_knotBillon, _nearestPointsHistogram->interval(0) );
+				V3DExport::process( file, *_knotBillon );
 				file.close();
 
 				QMessageBox::information(this,"Exporter le nœud courant segmenté en V3D", "Export réussi !");
@@ -1822,9 +1846,9 @@ void MainWindow::exportSegmentedKnotsOfCurrentSliceIntervalToV3D()
 				for ( sectorIndex=1 ; sectorIndex< _ui->_comboSelectSectorInterval->count() ; ++sectorIndex )
 				{
 					selectSectorInterval(sectorIndex,false);
-					if ( _knotBillon && _nearestPointsHistogram->intervals().size()>0 )
+					if ( _knotBillon )
 					{
-						V3DExport::appendComponent( stream, *_knotBillon, _nearestPointsHistogram->interval(0), sectorIndex );
+						V3DExport::appendComponent( stream, *_knotBillon, sectorIndex );
 					}
 				}
 				V3DExport::endComponents(stream);
@@ -1867,9 +1891,9 @@ void MainWindow::exportAllSegmentedKnotsOfBillonToV3D()
 					for ( sectorIndex=1 ; sectorIndex< _ui->_comboSelectSectorInterval->count() ; ++sectorIndex )
 					{
 						selectSectorInterval(sectorIndex,false);
-						if ( _knotBillon && _nearestPointsHistogram->intervals().size()>0 )
+						if ( _knotBillon )
 						{
-							V3DExport::appendComponent( stream, *_knotBillon, _nearestPointsHistogram->interval(0), counter++ );
+							V3DExport::appendComponent( stream, *_knotBillon, counter++ );
 						}
 					}
 				}
@@ -1889,17 +1913,15 @@ void MainWindow::exportAllSegmentedKnotsOfBillonToV3D()
 
 void MainWindow::exportContourToSdp()
 {
-	if ( !_contourBillon->isEmpty() )
+	if ( _knotBillon && !_contourBillon->isEmpty() )
 	{
-		const Interval<uint> &sliceInterval = _sliceHistogram->interval(_ui->_comboSelectSliceInterval->currentIndex()-1);
-
 		QString fileName = QFileDialog::getSaveFileName(this, tr("Exporter le contour de la coupe courante en SDP"), "output.ctr", tr("Fichiers de contours (*.sdp);;Tous les fichiers (*.*)"));
 		if ( !fileName.isEmpty() )
 		{
 			QFile file(fileName);
 			if ( file.open(QIODevice::WriteOnly) )
 			{
-				const Contour &contour = _contourBillon->contourSlice(_currentSlice-sliceInterval.min()).contour();
+				const Contour &contour = _contourBillon->contourSlice(_currentSlice-_knotBillon->zPos()).contour();
 
 				QTextStream stream(&file);
 				stream << contour.size() << endl;
@@ -1930,7 +1952,7 @@ void MainWindow::exportCurrentSegmentedKnotToSdp()
 				QTextStream stream(&file);
 				stream << "#SDP (Sequence of Discrete Points)" << endl;
 
-				for ( uint k=_nearestPointsHistogram->interval(0).min() ; k<=_nearestPointsHistogram->interval(0).max() ; ++k )
+				for ( uint k=0 ; k<_knotBillon->n_slices ; ++k )
 				{
 					SliceAlgorithm::writeInSDP( _knotBillon->slice(k) , stream, k, 0 );
 				}
@@ -1959,18 +1981,17 @@ void MainWindow::exportSegmentedKnotsOfCurrentSliceIntervalToSdp()
 				QTextStream stream(&file);
 				stream << "#SDP (Sequence of Discrete Points)" << endl;
 
-				const bool useOldMethod = _ui->_checkExportSdpOldMethod->isChecked();
 				int sectorIndex;
 				uint k;
 
 				for ( sectorIndex=1 ; sectorIndex< _ui->_comboSelectSectorInterval->count() ; ++sectorIndex )
 				{
 					_ui->_comboSelectSectorInterval->setCurrentIndex(sectorIndex);
-					if ( _knotBillon && _nearestPointsHistogram->intervals().size()>0 )
+					if ( _knotBillon )
 					{
-						for ( k=_nearestPointsHistogram->interval(0).min() ; k<=_nearestPointsHistogram->interval(0).max() ; ++k )
+						for ( k=0 ; k<_knotBillon->n_slices ; ++k )
 						{
-							SliceAlgorithm::writeInSDP( useOldMethod?_componentBillon->slice(k):_knotBillon->slice(k) , stream, k, 0 );
+							SliceAlgorithm::writeInSDP( _knotBillon->slice(k) , stream, k, 0 );
 						}
 					}
 				}
@@ -1998,7 +2019,6 @@ void MainWindow::exportAllSegmentedKnotsOfBillonToSdp()
 				QTextStream stream(&file);
 				stream << "#SDP (Sequence of Discrete Points)" << endl;
 
-				const bool useOldMethod = _ui->_checkExportSdpOldMethod->isChecked();
 				int intervalIndex, sectorIndex;
 				uint k;
 
@@ -2008,11 +2028,11 @@ void MainWindow::exportAllSegmentedKnotsOfBillonToSdp()
 					for ( sectorIndex=1 ; sectorIndex< _ui->_comboSelectSectorInterval->count() ; ++sectorIndex )
 					{
 						_ui->_comboSelectSectorInterval->setCurrentIndex(sectorIndex);
-						if ( _knotBillon && _nearestPointsHistogram->intervals().size() > 0 )
+						if ( _knotBillon )
 						{
-							for ( k=_nearestPointsHistogram->interval(0).min() ; k<=_nearestPointsHistogram->interval(0).max() ; ++k )
+							for ( k=0 ; k<_knotBillon->n_slices ; ++k )
 							{
-								SliceAlgorithm::writeInSDP( useOldMethod?_componentBillon->slice(k):_knotBillon->slice(k) , stream, k, 0 );
+								SliceAlgorithm::writeInSDP( _knotBillon->slice(k) , stream, k, 0 );
 							}
 						}
 					}
