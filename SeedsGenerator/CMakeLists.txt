@@ -23,6 +23,12 @@ INCLUDE_DIRECTORIES(${DGTAL_INCLUDE_DIRS})
 LINK_DIRECTORIES(${DGTAL_LIBRARY_DIRS})
 
 ADD_EXECUTABLE(seedsGenerator seedsGenerator)
+ADD_EXECUTABLE(seedsGeneratorManual seedsGeneratorManual)
+
 TARGET_LINK_LIBRARIES(seedsGenerator ${DGTAL_LIBRARIES} ${DGtalToolsLibDependencies})
-INSTALL(TARGETS seedsGenerator
-        RUNTIME DESTINATION bin)
+TARGET_LINK_LIBRARIES(seedsGeneratorManual ${DGTAL_LIBRARIES} ${DGtalToolsLibDependencies})
+INSTALL(TARGETS seedsGenerator  RUNTIME DESTINATION bin)
+INSTALL(TARGETS seedsGeneratorManual  RUNTIME DESTINATION bin)
+
+
+

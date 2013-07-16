@@ -175,7 +175,7 @@ int main(int argc, char** argv)
       return 0;
     }
 
-  if(! vm.count("input-file") && ! vm.count("mesh-file") && !vm.count("manualBarycenter"))
+  if( (! vm.count("mesh-file") && !vm.count("manualBarycenter")&& !vm.count("markerFromThresold")) || ! vm.count("domain"))
     {
       trace.error() << " No input file was given" << endl;
       return 0;
@@ -209,118 +209,49 @@ int main(int argc, char** argv)
     center[2]= centerC[2];
   }
 
-  // Point for the domain
-  Z3i::Point pMin;
-  Z3i::Point pMax;
 
-  if(extension=="sdp"){
-    vector<Z3i::Point> vectVoxels = PointListReader<Z3i::Point>::getPointsFromFile(inputFilename);
-    for(uint i=0;i< vectVoxels.size(); i++){
-      const Z3i::Point &p= vectVoxels.at(i);
-      if( p[0]<pMin[0]){
-	pMin[0]=p[0];
-      }
-      if( p[1]<pMin[1]){
-	pMin[1]=p[1];
-      }
-      if( p[2]<pMin[2]){
-	pMin[2]=p[2];
-      }
+  
+  SurfelAdjacency<3> SAdj( true );
+  
 
-      if( p[0]>pMax[0]){
-	pMax[0]=p[0];
-      }
-      if( p[1]>pMax[1]){
-	pMax[1]=p[1];
-      }
-      if( p[2]>pMax[2]){
-	pMax[2]=p[2];
-      }
+  
+  std::vector<int> domainCoords= vm["domain"].as<std::vector <int> >();
+  Z3i::Point ptLower(domainCoords[0],domainCoords[1], domainCoords[2]);
+  Z3i::Point ptUpper(domainCoords[3],domainCoords[4], domainCoords[5]);
+  Domain domainMarker (ptLower, ptUpper);
+  
+
+  stringstream sdpExport; sdpExport << outputFilename << "ManualMarker.sdp";
+  ofstream out;
+  out.open(sdpExport.str().c_str());
+  
+  ImageContainerBySTLVector<Domain, unsigned char> markerImage(domainMarker);
+  
+  if(!vm.count("backgroundSourceImage")){
+    for(Domain::ConstIterator it = domainMarker.begin();  it!= domainMarker.end(); it++){
+      markerImage.setValue(*it, vm["segmentationAreaValue"].as<int>());
     }
-
-    Domain domain(pMin, pMax);
-    Z3i::DigitalSet set3d(domain);
-    for(uint i=0;i< vectVoxels.size(); i++){
-      set3d.insert(vectVoxels.at(i));
-    }
-    //A KhalimskySpace is constructed from the domain boundary points.
-    KSpace K;
-    K.init(pMin, pMax, true);
-
-    SurfelAdjacency<3> SAdj( true );
-    vector<vector<SCell> > vectConnectedSCell;
-
-    cerr << "Extracting digital set .." ;
-
-    Surfaces<KSpace>::extractAllConnectedSCell(vectConnectedSCell,K, SAdj, set3d, true);
-    bool filterSizeBoundary=false;
-    filterSizeBoundary= vm.count("minSizeBoundary");
-    unsigned int minSize=0;
-    if(filterSizeBoundary) {
-      minSize  = vm["minSizeBoundary"].as<unsigned int>();
-    }
-    cerr << "[done]"<< endl;
-
-
-
-
-    //default domain defined from set fo voxel
-    Domain domainMarker(pMin, pMax);
-    //domain given from parameters
-    if(vm.count("domain")){
-      std::vector<int> domainCoords= vm["domain"].as<std::vector <int> >();
-      Z3i::Point ptLower(domainCoords[0],domainCoords[1], domainCoords[2]);
-      Z3i::Point ptUpper(domainCoords[3],domainCoords[4], domainCoords[5]);
-      domainMarker= Domain(ptLower, ptUpper);
-    }
-
-    stringstream sdpExport; sdpExport << outputFilename << "Marker.sdp";
-    ofstream out;
-    out.open(sdpExport.str().c_str());
-
-    ImageContainerBySTLVector<Domain, unsigned char> markerImage(domainMarker);
-
-
-    if(!vm.count("backgroundSourceImage")){
-      for(Domain::ConstIterator it = domainMarker.begin();  it!= domainMarker.end(); it++){
+  }else{
+    Image3D imageSrc= DGtal::GenericReader<Image3D>::import(vm["backgroundSourceImage"].as<std::string>());
+    int threshold  = vm["backgroundSourceMin"].as<int>();
+    for(Domain::ConstIterator it = domainMarker.begin();  it!= domainMarker.end(); it++){
+      if(imageSrc(*it)<threshold)
+	markerImage.setValue(*it, 0);
+      else
 	markerImage.setValue(*it, vm["segmentationAreaValue"].as<int>());
       }
-    }else{
-
-      Image3D imageSrc= DGtal::GenericReader<Image3D>::import(vm["backgroundSourceImage"].as<std::string>());
-      int threshold  = vm["backgroundSourceMin"].as<int>();
-      for(Domain::ConstIterator it = domainMarker.begin();  it!= domainMarker.end(); it++){
-	if(imageSrc(*it)<threshold)
-	  markerImage.setValue(*it, 0);
-	else
-	  markerImage.setValue(*it, vm["segmentationAreaValue"].as<int>());
-      }
-    }
-    
-    if(!vm.count("markerFromThresold")  && !vm.count("manualBarycenter")){
-      for(uint i=0; i< vectConnectedSCell.size();i++){
-	Domain bDomain= getBoundingBoxDomain(K, vectConnectedSCell.at(i)); 
-	Point lowerPt = bDomain.lowerBound();
-	Point upperPt = bDomain.upperBound();
-	unsigned int width = upperPt[2] - lowerPt[2] ;
-	unsigned int minZWidth = vm["minZWidth"].as<unsigned int>();
-       	if(width>minZWidth){
-	  Z3i::DigitalSet aSet = getMakerFromKnot(domain, K, vectConnectedSCell.at(i), center, 5, 2, 100, -60 );
-	  exportSDP(out, aSet);  
-	  DGtal::ImageFromSet<ImageContainerBySTLVector<Domain, unsigned char> >::append(markerImage,aSet, vm.count("multipleLabels")? i  :250);
-	}
-      }
-    }else if(vm.count("manualBarycenter")){
+  }
+  
+  if(vm.count("manualBarycenter")){
       std:: vector<int> vectBarycenter = vm["manualBarycenter"].as<std::vector<int> >();
       for(unsigned int i = 0; i+2 <vectBarycenter.size(); i=i+3){
 	trace.info() << "Processing barycenter " << i << endl; 
 	Point barycenter (vectBarycenter[i], vectBarycenter[i+1], vectBarycenter[i+2] ); 	
-	Z3i::DigitalSet aSet = getMakerFromBarycenter(domain,barycenter , center, 5, 2, 100, -60 );
+	Z3i::DigitalSet aSet = getMakerFromBarycenter(domainMarker, barycenter , center, 5, 2, 100, -60 );
 	exportSDP(out, aSet);  
 	DGtal::ImageFromSet<ImageContainerBySTLVector<Domain, unsigned char> >::append(markerImage,aSet, vm.count("multipleLabels")? i  :250);
-
       }
-      
+     
       
     } else {
       std::vector<int> vectMinMax= vm["markerFromThresold"].as<std::vector <int> >();	
@@ -343,13 +274,13 @@ int main(int argc, char** argv)
       std::vector<int> vectMinMax= vm["markerFromThresold"].as<std::vector <int> >();	
       int valMin = vectMinMax.at(0);
       int valMax = vectMinMax.at(1);
-      markerName << outputFilename << "MarkerBasic" << valMin << "_" << valMax <<  "BG" << vm["backgroundSourceMin"].as<int>() << (vm.count("pgmExt") ?  ".pgm" : ".pgm3d") ; 
+      markerName << outputFilename << "ManualMarkerBasic" << valMin << "_" << valMax <<  "BG" << vm["backgroundSourceMin"].as<int>() << (vm.count("pgmExt") ?  ".pgm" : ".pgm3d") ; 
     }else{
       markerName << outputFilename << "Marker" <<  (vm.count("pgmExt") ?  ".pgm" : ".pgm3d") ; 
     }
     
     GenericWriter< ImageContainerBySTLVector<Domain, unsigned char> >::exportFile(markerName.str(), markerImage);
-  }
+  
 
 }
 
