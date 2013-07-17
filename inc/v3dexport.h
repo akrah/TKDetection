@@ -20,9 +20,9 @@ namespace V3DExport
 
 	void appendTags( QXmlStreamWriter &stream, const Billon &billon );
 	void startComponents( QXmlStreamWriter &stream );
-	void appendComponent( QXmlStreamWriter &stream, const Billon &billon, const int &index );
+	void appendComponent( QXmlStreamWriter &stream, const Billon &billon, const uint &firstSlicePos, const int &index );
 	void endComponents( QXmlStreamWriter &stream );
-	void appendPith( QXmlStreamWriter &stream, const Billon &billon );
+	void appendPith( QXmlStreamWriter &stream, const Billon &billon , const uint &firstSlicePos );
 }
 
 #endif // V3DEXPORT_H

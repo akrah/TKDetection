@@ -1740,7 +1740,7 @@ void MainWindow::exportCurrentSegmentedKnotToPgm3d()
 
 void MainWindow::exportSegmentedKnotsOfCurrentSliceIntervalToPgm3d()
 {
-	if ( _billon && _billon->hasPith() && _ui->_comboSelectSliceInterval->currentIndex() > 0 )
+	if ( _billon && _billon->hasPith() && _ui->_comboSelectSliceInterval->currentIndex() )
 	{
 		QString fileName = QFileDialog::getSaveFileName(this, tr("Exporter la zone de nœuds courante en PGM3D"), "output.pgm3d", tr("Fichiers de données (*.pgm3d);;Tous les fichiers (*.*)"));
 		if ( !fileName.isEmpty() )
@@ -1825,7 +1825,7 @@ void MainWindow::exportCurrentSegmentedKnotToV3D()
 
 void MainWindow::exportSegmentedKnotsOfCurrentSliceIntervalToV3D()
 {
-	if ( _billon && _billon->hasPith() && _ui->_comboSelectSliceInterval->currentIndex() > 0 )
+	if ( _billon && _billon->hasPith() && _ui->_comboSelectSliceInterval->currentIndex() )
 	{
 		QString fileName = QFileDialog::getSaveFileName(this, tr("Exporter les nœuds segmentés de l'intervalle de coupe courant en V3D"), "output.v3d",
 														tr("Fichiers V3D (*.v3d);;Tous les fichiers (*.*)"));
@@ -1838,7 +1838,6 @@ void MainWindow::exportSegmentedKnotsOfCurrentSliceIntervalToV3D()
 				V3DExport::init(file,stream);
 
 				V3DExport::appendTags(stream,*_billon );
-				V3DExport::appendPith(stream,*_billon );
 
 				int sectorIndex;
 
@@ -1846,12 +1845,15 @@ void MainWindow::exportSegmentedKnotsOfCurrentSliceIntervalToV3D()
 				for ( sectorIndex=1 ; sectorIndex< _ui->_comboSelectSectorInterval->count() ; ++sectorIndex )
 				{
 					selectSectorInterval(sectorIndex,false);
-					if ( _knotBillon )
+					if ( _componentBillon && _knotBillon )
 					{
-						V3DExport::appendComponent( stream, *_knotBillon, sectorIndex );
+						V3DExport::appendComponent( stream, *_knotBillon, _knotBillon->zPos()-_componentBillon->zPos(), sectorIndex );
 					}
 				}
 				V3DExport::endComponents(stream);
+
+				if (_componentBillon) V3DExport::appendPith(stream,*_componentBillon, 0 );
+				else V3DExport::appendPith(stream,*_billon, -_sliceHistogram->interval(_ui->_comboSelectSliceInterval->currentIndex()-1).min() );
 
 				V3DExport::close(stream);
 
@@ -1879,7 +1881,7 @@ void MainWindow::exportAllSegmentedKnotsOfBillonToV3D()
 				V3DExport::init(file,stream);
 
 				V3DExport::appendTags(stream,*_billon );
-				V3DExport::appendPith(stream,*_billon );
+				V3DExport::appendPith(stream,*_billon, 0 );
 
 				int intervalIndex, sectorIndex, counter;
 
@@ -1893,7 +1895,7 @@ void MainWindow::exportAllSegmentedKnotsOfBillonToV3D()
 						selectSectorInterval(sectorIndex,false);
 						if ( _knotBillon )
 						{
-							V3DExport::appendComponent( stream, *_knotBillon, counter++ );
+							V3DExport::appendComponent( stream, *_knotBillon, _knotBillon->zPos(), counter++ );
 						}
 					}
 				}
@@ -1991,7 +1993,7 @@ void MainWindow::exportSegmentedKnotsOfCurrentSliceIntervalToSdp()
 					{
 						for ( k=0 ; k<_knotBillon->n_slices ; ++k )
 						{
-							SliceAlgorithm::writeInSDP( _knotBillon->slice(k) , stream, k, 0 );
+							SliceAlgorithm::writeInSDP( _knotBillon->slice(k) , stream, _knotBillon->zPos()-_componentBillon->zPos()+k, 0 );
 						}
 					}
 				}
@@ -2032,7 +2034,7 @@ void MainWindow::exportAllSegmentedKnotsOfBillonToSdp()
 						{
 							for ( k=0 ; k<_knotBillon->n_slices ; ++k )
 							{
-								SliceAlgorithm::writeInSDP( _knotBillon->slice(k) , stream, k, 0 );
+								SliceAlgorithm::writeInSDP( _knotBillon->slice(k) , stream, _knotBillon->zPos()+k, 0 );
 							}
 						}
 					}
