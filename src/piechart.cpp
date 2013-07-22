@@ -13,7 +13,7 @@ PieChartSingleton *PieChartSingleton::_singleton = 0;
 
 PieChart::PieChart( const int &nbSectors )
 {
-	setSectorsNumber(nbSectors);
+	setNumberOfAngularSectors(nbSectors);
 }
 
 
@@ -50,7 +50,7 @@ uint PieChart::sectorIndexOfAngle( qreal angle ) const
  * Public setters
  *******************************/
 
-void PieChart::setSectorsNumber( const uint &nbSectors )
+void PieChart::setNumberOfAngularSectors( const uint &nbSectors )
 {
 	const qreal sectorAngle = TWO_PI/static_cast<qreal>(nbSectors);
 	_sectors.clear();
@@ -60,7 +60,7 @@ void PieChart::setSectorsNumber( const uint &nbSectors )
 	}
 }
 
-void PieChart::draw( QImage &image, const uiCoord2D &center, const uint &sectorIdx, const TKD::ViewType &viewType ) const
+void PieChart::draw( QImage &image, const uiCoord2D &center, const uint &sectorIdx, const TKD::ProjectionType &viewType ) const
 {
 	Q_ASSERT_X( sectorIdx<nbSectors() , "draw", "sector index greater than sector number" );
 
@@ -79,7 +79,7 @@ void PieChart::draw( QImage &image, const uiCoord2D &center, const uint &sectorI
 	QPainter painter(&image);
 	painter.setPen(Qt::red);
 	QList<qreal>::const_iterator side;
-	if ( viewType == TKD::Z_VIEW )
+	if ( viewType == TKD::Z_PROJECTION )
 	{
 		for ( side = twoSides.constBegin() ; side < twoSides.constEnd() ; ++side )
 		{
@@ -99,7 +99,7 @@ void PieChart::draw( QImage &image, const uiCoord2D &center, const uint &sectorI
 			painter.drawLine(center.x,center.y,end.x,end.y);
 		}
 	}
-	else if ( viewType == TKD::CARTESIAN_VIEW )
+	else if ( viewType == TKD::CARTESIAN_PROJECTION )
 	{
 		for ( side = twoSides.constBegin() ; side < twoSides.constEnd() ; ++side )
 		{
@@ -110,7 +110,7 @@ void PieChart::draw( QImage &image, const uiCoord2D &center, const uint &sectorI
 	}
 }
 
-void PieChart::draw( QImage &image, const uiCoord2D &center, const QVector< Interval<uint> > &angleIntervals, const TKD::ViewType &viewType ) const
+void PieChart::draw( QImage &image, const uiCoord2D &center, const QVector< Interval<uint> > &angleIntervals, const TKD::ProjectionType &viewType ) const
 {
 	if ( !angleIntervals.isEmpty() )
 	{
@@ -145,7 +145,7 @@ void PieChart::draw( QImage &image, const uiCoord2D &center, const QVector< Inte
 
 		QPainter painter(&image);
 		QVector<qreal>::ConstIterator side;
-		if ( viewType == TKD::Z_VIEW )
+		if ( viewType == TKD::Z_PROJECTION )
 		{
 			for ( side = twoSides.constBegin() ; side != twoSides.constEnd() ; ++side )
 			{
@@ -168,7 +168,7 @@ void PieChart::draw( QImage &image, const uiCoord2D &center, const QVector< Inte
 				painter.drawLine(center.x,center.y,end.x,end.y);
 			}
 		}
-		else if ( viewType == TKD::CARTESIAN_VIEW )
+		else if ( viewType == TKD::CARTESIAN_PROJECTION )
 		{
 			for ( side = twoSides.constBegin() ; side != twoSides.constEnd() ; ++side )
 			{

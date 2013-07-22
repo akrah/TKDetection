@@ -57,6 +57,7 @@ void PlotConcavityPointSerieCurve::update( const ConcavityPointSerieCurve &curve
 		const qreal maxAngle = angularInterval.isValid() ? angularInterval.max() : angularInterval.max()+TWO_PI;
 
 		int firstX, lastX;
+		firstX = lastX = 0;
 		if ( nbMaxConcavityPoints>0 && nbMinConcavityPoints>0 )
 		{
 			firstX = qMin(curve.maxConcavityPointsSerie().first().x,curve.minConcavityPointsSerie().first().x);

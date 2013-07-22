@@ -35,7 +35,7 @@ bool ContourBillon::isEmpty()
 
 void ContourBillon::compute( Billon &resultBillon, const Billon &billon, const int &intensityThreshold, const int &smoothingRadius,
 							 const int &curvatureWidth, const qreal &curvatureThreshold, const QVector< Interval<uint> > &sliceIntervals,
-							 const Interval<qreal> &angularInterval )
+							 const Interval<qreal> &angularInterval, const uint &minimumDistanceFromContourOrigin )
 {
 	if ( !sliceIntervals.size() ) return;
 
@@ -62,7 +62,7 @@ void ContourBillon::compute( Billon &resultBillon, const Billon &billon, const i
 
 		qDebug() << QString("Calcul de la coupe de contour : %1/%2").arg(k+1-intervalStart).arg(nbSlices);
 		contourSlice.computeStart( billon.slice(k), billon.pithCoord(k), intensityThreshold,
-								   smoothingRadius, curvatureWidth, curvatureThreshold );
+								   smoothingRadius, curvatureWidth, curvatureThreshold, minimumDistanceFromContourOrigin );
 
 		if ( contourSlice.maxConcavityPointIndex() != -1 )
 		{

@@ -22,10 +22,10 @@ public:
 	const PiePart &sector( const uint &index ) const;
 	uint sectorIndexOfAngle( qreal sectorAngle ) const;
 
-	void setSectorsNumber( const uint &nbSectors );
+	void setNumberOfAngularSectors( const uint &nbSectors );
 
-	void draw( QImage &image, const uiCoord2D &center, const uint &sectorIdx, const TKD::ViewType &viewType ) const;
-	void draw( QImage &image, const uiCoord2D &center, const QVector<Interval<uint> > &angleIntervals, const TKD::ViewType &viewType ) const;
+	void draw( QImage &image, const uiCoord2D &center, const uint &sectorIdx, const TKD::ProjectionType &viewType ) const;
+	void draw( QImage &image, const uiCoord2D &center, const QVector<Interval<uint> > &angleIntervals, const TKD::ProjectionType &viewType ) const;
 
 private:
 	QVector<PiePart> _sectors;

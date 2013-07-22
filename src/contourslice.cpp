@@ -95,14 +95,16 @@ const uiCoord2D &ContourSlice::sliceCenter() const
  **********************************/
 
 void ContourSlice::compute( Slice &resultSlice, const Slice &initialSlice, const uiCoord2D &sliceCenter, const int &intensityThreshold,
-							const int &smoothingRadius, const int &curvatureWidth, const qreal &curvatureThreshold, const iCoord2D &startPoint )
+							const int &smoothingRadius, const int &curvatureWidth, const qreal &curvatureThreshold,
+							const uint &minimumDistanceFromContourOrigin, const iCoord2D &startPoint )
 {
-	computeStart( initialSlice, sliceCenter, intensityThreshold, smoothingRadius, curvatureWidth, curvatureThreshold, startPoint );
+	computeStart( initialSlice, sliceCenter, intensityThreshold, smoothingRadius, curvatureWidth, curvatureThreshold, minimumDistanceFromContourOrigin, startPoint );
 	computeEnd( resultSlice, initialSlice, intensityThreshold );
 }
 
 void ContourSlice::computeStart( const Slice &initialSlice, const uiCoord2D &sliceCenter, const int &intensityThreshold,
-				   const int &smoothingRadius, const int &curvatureWidth, const qreal &curvatureThreshold, const iCoord2D &startPoint )
+								 const int &smoothingRadius, const int &curvatureWidth, const qreal &curvatureThreshold,
+								 const uint &minimumDistanceFromContourOrigin, const iCoord2D &startPoint )
 {
 	_contour.compute( initialSlice, sliceCenter, intensityThreshold, startPoint );
 	_originalContour = _contour;
@@ -113,7 +115,7 @@ void ContourSlice::computeStart( const Slice &initialSlice, const uiCoord2D &sli
 
 	_sliceCenter = sliceCenter;
 
-	computeConcavityPoints( curvatureThreshold );
+	computeConcavityPoints( curvatureThreshold, minimumDistanceFromContourOrigin );
 	computeSupportPoints( 10 );
 }
 
@@ -123,7 +125,7 @@ void ContourSlice::computeEnd( Slice &resultSlice, const Slice &initialSlice, co
 	updateSlice( initialSlice, resultSlice, intensityThreshold );
 }
 
-void ContourSlice::draw( QPainter &painter, const int &cursorPosition, const TKD::ViewType &viewType ) const
+void ContourSlice::draw( QPainter &painter, const int &cursorPosition, const TKD::ProjectionType &viewType ) const
 {
 	const int nbContourPoints = _contour.size();
 	const uint width = painter.window().width();
@@ -146,11 +148,11 @@ void ContourSlice::draw( QPainter &painter, const int &cursorPosition, const TKD
 
 			painter.setPen(Qt::green);
 
-			if ( viewType == TKD::Z_VIEW )
+			if ( viewType == TKD::Z_PROJECTION )
 			{
 				painter.drawEllipse(maxConcavityPoint.x-2,maxConcavityPoint.y-2,4,4);
 			}
-			else if ( viewType == TKD::CARTESIAN_VIEW )
+			else if ( viewType == TKD::CARTESIAN_PROJECTION )
 			{
 				i = maxConcavityPoint.x - _sliceCenter.x;
 				j = maxConcavityPoint.y - _sliceCenter.y;
@@ -173,11 +175,11 @@ void ContourSlice::draw( QPainter &painter, const int &cursorPosition, const TKD
 				}
 				else if ( maxSupportPoint.x < maxConcavityPoint.x )
 				{
-					if ( viewType == TKD::Z_VIEW )
+					if ( viewType == TKD::Z_PROJECTION )
 					{
 						painter.drawLine(maxConcavityPoint.x, maxConcavityPoint.y, width, a * width + b );
 					}
-					else if ( viewType == TKD::CARTESIAN_VIEW )
+					else if ( viewType == TKD::CARTESIAN_PROJECTION )
 					{
 						i = maxConcavityPoint.x - _sliceCenter.x;
 						j = maxConcavityPoint.y - _sliceCenter.y;
@@ -192,11 +194,11 @@ void ContourSlice::draw( QPainter &painter, const int &cursorPosition, const TKD
 				}
 				else
 				{
-					if ( viewType == TKD::Z_VIEW )
+					if ( viewType == TKD::Z_PROJECTION )
 					{
 						painter.drawLine(maxConcavityPoint.x, maxConcavityPoint.y, 0., b );
 					}
-					else if ( viewType == TKD::CARTESIAN_VIEW )
+					else if ( viewType == TKD::CARTESIAN_PROJECTION )
 					{
 						i = maxConcavityPoint.x - _sliceCenter.x;
 						j = maxConcavityPoint.y - _sliceCenter.y;
@@ -217,11 +219,11 @@ void ContourSlice::draw( QPainter &painter, const int &cursorPosition, const TKD
 			const iCoord2D &minConcavityPoint = this->minConcavityPoint();
 
 			painter.setPen(Qt::green);
-			if ( viewType == TKD::Z_VIEW )
+			if ( viewType == TKD::Z_PROJECTION )
 			{
 				painter.drawEllipse(minConcavityPoint.x-2,minConcavityPoint.y-2,4,4);
 			}
-			else if ( viewType == TKD::CARTESIAN_VIEW )
+			else if ( viewType == TKD::CARTESIAN_PROJECTION )
 			{
 				i = minConcavityPoint.x - _sliceCenter.x;
 				j = minConcavityPoint.y - _sliceCenter.y;
@@ -239,7 +241,7 @@ void ContourSlice::draw( QPainter &painter, const int &cursorPosition, const TKD
 				b = ( minConcavityPoint.y * minSupportPoint.x - minConcavityPoint.x * minSupportPoint.y ) / static_cast<qreal>( minSupportPoint.x - minConcavityPoint.x );
 				if ( qFuzzyCompare(minConcavityPoint.x, minSupportPoint.x) )
 				{
-					if ( viewType == TKD::Z_VIEW )
+					if ( viewType == TKD::Z_PROJECTION )
 					{
 						if ( minSupportPoint.y < minConcavityPoint.y ) painter.drawLine(minConcavityPoint.x, minConcavityPoint.y, minConcavityPoint.x, height );
 						else painter.drawLine(minConcavityPoint.x, minConcavityPoint.y, minConcavityPoint.x, 0 );
@@ -247,11 +249,11 @@ void ContourSlice::draw( QPainter &painter, const int &cursorPosition, const TKD
 				}
 				else if ( minSupportPoint.x < minConcavityPoint.x )
 				{
-					if ( viewType == TKD::Z_VIEW )
+					if ( viewType == TKD::Z_PROJECTION )
 					{
 						painter.drawLine(minConcavityPoint.x, minConcavityPoint.y, width, a * width + b );
 					}
-					else if ( viewType == TKD::CARTESIAN_VIEW )
+					else if ( viewType == TKD::CARTESIAN_PROJECTION )
 					{
 						i = minConcavityPoint.x - _sliceCenter.x;
 						j = minConcavityPoint.y - _sliceCenter.y;
@@ -266,11 +268,11 @@ void ContourSlice::draw( QPainter &painter, const int &cursorPosition, const TKD
 				}
 				else
 				{
-					if ( viewType == TKD::Z_VIEW )
+					if ( viewType == TKD::Z_PROJECTION )
 					{
 						painter.drawLine(minConcavityPoint.x, minConcavityPoint.y, 0., b );
 					}
-					else if ( viewType == TKD::CARTESIAN_VIEW )
+					else if ( viewType == TKD::CARTESIAN_PROJECTION )
 					{
 						i = minConcavityPoint.x - _sliceCenter.x;
 						j = minConcavityPoint.y - _sliceCenter.y;
@@ -288,11 +290,11 @@ void ContourSlice::draw( QPainter &painter, const int &cursorPosition, const TKD
 
 		// Dessin du point de contour initial
 		painter.setPen(Qt::red);
-		if ( viewType == TKD::Z_VIEW )
+		if ( viewType == TKD::Z_PROJECTION )
 		{
 			painter.drawEllipse(_contour[0].x-2,_contour[0].y-2,4,4);
 		}
-		else if ( viewType == TKD::CARTESIAN_VIEW )
+		else if ( viewType == TKD::CARTESIAN_PROJECTION )
 		{
 			i = _contour[0].x - _sliceCenter.x;
 			j = _contour[0].y - _sliceCenter.y;
@@ -309,7 +311,7 @@ void ContourSlice::draw( QPainter &painter, const int &cursorPosition, const TKD
  * Private setters
  **********************************/
 
-void ContourSlice::computeConcavityPoints( const qreal &curvatureThreshold )
+void ContourSlice::computeConcavityPoints( const qreal &curvatureThreshold, const uint &minimumDistanceFromContourOrigin )
 {
 	_maxConcavityPointsIndex = _minConcavityPointsIndex = -1;
 
@@ -322,7 +324,7 @@ void ContourSlice::computeConcavityPoints( const qreal &curvatureThreshold )
 	{
 		// Min concavity point
 		index = 1;
-		while ( (index < indexToCompare) && (_curvatureHistogram[index] > curvatureThreshold || _contour[0].euclideanDistance(_contour[index]) < 10) )
+		while ( (index < indexToCompare) && (_curvatureHistogram[index] > curvatureThreshold || _contour[0].euclideanDistance(_contour[index]) < minimumDistanceFromContourOrigin) )
 		{
 			index++;
 		}
@@ -331,7 +333,7 @@ void ContourSlice::computeConcavityPoints( const qreal &curvatureThreshold )
 		// Max concavity point
 		index = nbPoints-2;
 		indexToCompare = nbPoints-indexToCompare;
-		while ( (index > indexToCompare) && (_curvatureHistogram[index] > curvatureThreshold || _contour[0].euclideanDistance(_contour[index]) < 10) )
+		while ( (index > indexToCompare) && (_curvatureHistogram[index] > curvatureThreshold || _contour[0].euclideanDistance(_contour[index]) < minimumDistanceFromContourOrigin) )
 		{
 			index--;
 		}

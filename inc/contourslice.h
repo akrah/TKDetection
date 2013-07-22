@@ -35,16 +35,17 @@ public:
 	const uiCoord2D &sliceCenter() const;
 
 	void compute( Slice &resultSlice, const Slice &initialSlice, const uiCoord2D &sliceCenter, const int &intensityThreshold,
-				  const int &smoothingRadius, const int &curvatureWidth, const qreal &curvatureThreshold, const iCoord2D &startPoint = iCoord2D(-1,-1) );
-
+				  const int &smoothingRadius, const int &curvatureWidth, const qreal &curvatureThreshold,
+				  const uint &minimumDistanceFromContourOrigin, const iCoord2D &startPoint = iCoord2D(-1,-1) );
 	void computeStart( const Slice &initialSlice, const uiCoord2D &sliceCenter, const int &intensityThreshold,
-					   const int &smoothingRadius, const int &curvatureWidth, const qreal &curvatureThreshold, const iCoord2D &startPoint = iCoord2D(-1,-1) );
+					   const int &smoothingRadius, const int &curvatureWidth, const qreal &curvatureThreshold,
+					   const uint &minimumDistanceFromContourOrigin, const iCoord2D &startPoint = iCoord2D(-1,-1) );
 	void computeEnd( Slice &resultSlice, const Slice &initialSlice, const int &intensityThreshold );
 
-	void draw( QPainter &painter, const int &cursorPosition, const TKD::ViewType &viewType ) const;
+	void draw( QPainter &painter, const int &cursorPosition, const TKD::ProjectionType &viewType ) const;
 
 private:
-	void computeConcavityPoints( const qreal &curvatureThreshold );
+	void computeConcavityPoints( const qreal &curvatureThreshold , const uint &minimumDistanceFromContourOrigin );
 	void computeSupportPoints( const int &meansMaskSize );
 	void computeContourPolygons();
 	void updateSlice( const Slice &initialSlice, Slice &resultSlice, const int &intensityThreshold );

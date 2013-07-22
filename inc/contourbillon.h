@@ -23,7 +23,7 @@ public:
 
 	void compute( Billon &resultBillon, const Billon &billon, const int &intensityThreshold, const int &smoothingRadius,
 				  const int &curvatureWidth, const qreal &curvatureThreshold, const QVector< Interval<uint> > &sliceIntervals,
-				  const Interval<qreal> &angularInterval );
+				  const Interval<qreal> &angularInterval , const uint &minimumDistanceFromContourOrigin );
 
 private:
 	QVector<ContourSlice> _contourSlices;

@@ -15,7 +15,7 @@ SliceHistogram::~SliceHistogram()
  **********************************/
 
 void SliceHistogram::construct( const Billon &billon, const Interval<int> &intensity, const uint &zMotionMin,
-				const int & borderPercentageToCut, const int &radiusAroundPith )
+								const uint &nbSlicesToIgnore, const int &radiusAroundPith )
 {
 	const int width = billon.n_cols;
 	const int height = billon.n_rows;
@@ -33,14 +33,13 @@ void SliceHistogram::construct( const Billon &billon, const Interval<int> &inten
 		circleLines.append(qSqrt(squareRadius-qPow(lineIndex,2)));
 	}
 
-	const uint minOfInterval = borderPercentageToCut*depth/100.;
-	const uint maxOfInterval = qMin(depth-minOfInterval,static_cast<uint>(this->size()-1));
+	const uint maxOfInterval = qMin(depth-nbSlicesToIgnore,static_cast<uint>(this->size()-1));
 	int i, j, iRadius, iRadiusMax;
 	uint diff, k;
 	iCoord2D currentPos;
 	qreal cumul;
 
-	for ( k=minOfInterval ; k<maxOfInterval ; ++k )
+	for ( k=nbSlicesToIgnore ; k<maxOfInterval ; ++k )
 	{
 		cumul = 0.;
 		currentPos.y = billon.pithCoord(k).y-radiusAroundPith;
