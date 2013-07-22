@@ -151,6 +151,8 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 	QObject::connect(_ui->_sliderZMotionMin, SIGNAL(valueChanged(int)), _ui->_spinZMotionMin, SLOT(setValue(int)));
 	QObject::connect(_ui->_spinZMotionMin, SIGNAL(valueChanged(int)), _ui->_sliderZMotionMin, SLOT(setValue(int)));
 	QObject::connect(_ui->_spinZMotionMin, SIGNAL(valueChanged(int)), this, SLOT(drawSlice()));
+	QObject::connect(_ui->_sliderNumberOfAngularSectors, SIGNAL(valueChanged(int)), _ui->_spinNumberOfAngularSectors, SLOT(setValue(int)));
+	QObject::connect(_ui->_spinNumberOfAngularSectors, SIGNAL(valueChanged(int)), _ui->_sliderNumberOfAngularSectors, SLOT(setValue(int)));
 	QObject::connect(_ui->_spinNumberOfAngularSectors, SIGNAL(valueChanged(int)), this, SLOT(setSectorNumber(int)));
 	QObject::connect(_ui->_sliderPercentageOfSlicesToIgnore, SIGNAL(valueChanged(int)), _ui->_spinPercentageOfSlicesToIgnore, SLOT(setValue(int)));
 	QObject::connect(_ui->_spinPercentageOfSlicesToIgnore, SIGNAL(valueChanged(int)), _ui->_sliderPercentageOfSlicesToIgnore, SLOT(setValue(int)));
