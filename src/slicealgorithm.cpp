@@ -135,7 +135,7 @@ namespace SliceAlgorithm
 		return radius;
 	}
 
-	void draw( QPainter &painter, const Slice &slice, const uiCoord2D &pithCoord, const int &intensityThreshold, const TKD::ViewType &view )
+	void draw( QPainter &painter, const Slice &slice, const uiCoord2D &pithCoord, const int &intensityThreshold, const TKD::ProjectionType &view )
 	{
 		painter.save();
 		painter.setPen(QColor(255,255,255,127));
@@ -147,7 +147,7 @@ namespace SliceAlgorithm
 
 		uint i, j, x, y;
 
-		if ( view == TKD::Z_VIEW )
+		if ( view == TKD::Z_PROJECTION )
 		{
 			for ( j=0 ; j<height ; ++j )
 			{
@@ -157,7 +157,7 @@ namespace SliceAlgorithm
 				}
 			}
 		}
-		else if ( view == TKD::CARTESIAN_VIEW )
+		else if ( view == TKD::CARTESIAN_PROJECTION )
 		{
 			for ( j=0 ; j<height ; ++j )
 			{

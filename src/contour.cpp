@@ -38,8 +38,8 @@ void Contour::compute( const Slice &slice, const iCoord2D &sliceCenter, const in
 		int interdit, j;
 
 		// Using Moore-Neighbor Tracing
-		startAngle = startPoint.angle(sliceCenter);
-		interdit = qRound(startAngle>=0 ? startAngle*4./PI : (startAngle+TWO_PI)*8./TWO_PI);
+		startAngle = fmod(startPoint.angle(sliceCenter)+TWO_PI,TWO_PI);
+		interdit = qRound(startAngle*4./PI);
 		do
 		{
 			this->append(currentPos);
@@ -155,7 +155,7 @@ Contour Contour::convexHull()
 	return convexHull;
 }
 
-void Contour::draw( QPainter &painter, const int &cursorPosition, const iCoord2D &sliceCenter, const TKD::ViewType &viewType ) const
+void Contour::draw( QPainter &painter, const int &cursorPosition, const iCoord2D &sliceCenter, const TKD::ProjectionType &viewType ) const
 {
 	const int nbPoints = this->size();
 	if ( nbPoints > 0 )
@@ -165,7 +165,7 @@ void Contour::draw( QPainter &painter, const int &cursorPosition, const iCoord2D
 
 		painter.save();
 		painter.setPen(Qt::blue);
-		if ( viewType == TKD::Z_VIEW )
+		if ( viewType == TKD::Z_PROJECTION )
 		{
 			for ( int i=0 ; i<nbPoints ; ++i )
 			{
@@ -173,7 +173,7 @@ void Contour::draw( QPainter &painter, const int &cursorPosition, const iCoord2D
 			}
 
 		}
-		else if ( viewType == TKD::CARTESIAN_VIEW )
+		else if ( viewType == TKD::CARTESIAN_PROJECTION )
 		{
 			for ( k=0 ; k<nbPoints ; ++k )
 			{
@@ -189,11 +189,11 @@ void Contour::draw( QPainter &painter, const int &cursorPosition, const iCoord2D
 		if ( cursorPosition >= 0 )
 		{
 			painter.setPen(Qt::cyan);
-			if ( viewType == TKD::Z_VIEW )
+			if ( viewType == TKD::Z_PROJECTION )
 			{
 				painter.drawEllipse((*this)[cursorPosition].x-1,(*this)[cursorPosition].y-1,2,2);
 			}
-			else if ( viewType == TKD::CARTESIAN_VIEW )
+			else if ( viewType == TKD::CARTESIAN_PROJECTION )
 			{
 				i = sliceCenter.x - (*this)[cursorPosition].x;
 				j = sliceCenter.y - (*this)[cursorPosition].y;

@@ -16,7 +16,7 @@ public:
 	SliceHistogram();
 	virtual ~SliceHistogram();
 
-	void construct( const Billon &billon, const Interval<int> &intensity, const uint &zMotionMin, const int &borderPercentageToCut, const int &radiusAroundPith );
+	void construct( const Billon &billon, const Interval<int> &intensity, const uint &zMotionMin, const uint &nbSlicesToIgnore, const int &radiusAroundPith );
 };
 
 #endif // SLICEHISTOGRAM_H

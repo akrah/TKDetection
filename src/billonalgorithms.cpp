@@ -4,20 +4,17 @@
 
 namespace BillonAlgorithms
 {
-	qreal restrictedAreaMeansRadius( const Billon &billon, const uint &nbPolygonPoints, const int &intensityThreshold )
+	qreal restrictedAreaMeansRadius(const Billon &billon, const uint &nbDirections, const int &intensityThreshold, const uint &minimumRadius, const uint &nbSlicesToIgnore )
 	{
-		Q_ASSERT_X( nbPolygonPoints>0 , "BillonTpl<T>::getRestrictedAreaMeansRadius", "nbPolygonPoints arguments equals to 0 => division by zero" );
+		Q_ASSERT_X( nbDirections>0 , "BillonTpl<T>::getRestrictedAreaMeansRadius", "nbPolygonPoints arguments equals to 0 => division by zero" );
 
 		qreal radius = billon.n_cols/2.;
 		if ( billon.hasPith() )
 		{
 			const int width = billon.n_cols;
 			const int height = billon.n_rows;
-			const int nbSlicesToIgnore = billon.n_slices*0.2;
 			const int depth = billon.n_slices-nbSlicesToIgnore;
-			const qreal angleIncrement = TWO_PI/static_cast<qreal>(nbPolygonPoints);
-			const int beginRadius = width/20.;
-			const int verifiedRadius = width/10;
+			const qreal angleIncrement = TWO_PI/static_cast<qreal>(nbDirections);
 
 			rCoord2D center, edge;
 			rVec2D direction;
@@ -34,13 +31,13 @@ namespace BillonAlgorithms
 				{
 					orientation += angleIncrement;
 					direction = rVec2D(qCos(orientation),qSin(orientation));
-					edge = center + direction*beginRadius;
+					edge = center + direction*minimumRadius;
 					while ( edge.x>0 && edge.y>0 && edge.x<width && edge.y<height && currentSlice.at(edge.y,edge.x) > intensityThreshold )
 					{
 						edge += direction;
 					}
 					currentNorm = rVec2D(edge-center).norm();
-					if ( currentNorm > verifiedRadius && currentNorm < radius ) radius = currentNorm;
+					if ( currentNorm < radius ) radius = currentNorm;
 				}
 			}
 		}

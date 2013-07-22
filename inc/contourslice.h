@@ -22,23 +22,33 @@ public:
 	const Contour &contour() const;
 	const ContourDistancesHistogram &contourDistancesHistogram() const;
 	const CurvatureHistogram &curvatureHistogram() const;
-	const iCoord2D &leftMainDominantPoint() const;
-	const iCoord2D &rightMainDominantPoint() const;
-	const int &leftMainDominantPointIndex() const;
-	const int &rightMainDominantPointIndex() const;
-	const rCoord2D &leftMainSupportPoint() const;
-	const rCoord2D &rightMainSupportPoint() const;
+	const iCoord2D &maxConcavityPoint() const;
+	const iCoord2D &minConcavityPoint() const;
+	const int &maxConcavityPointIndex() const;
+	void setMaxConcavityPointIndex( int maxConcavityIndex );
+	const int &minConcavityPointIndex() const;
+	void setMinConcavityPointIndex( int maxConcavityIndex );
+	const rCoord2D &maxSupportPoint() const;
+	void setMaxSupportPoint( const rCoord2D &maxSupportPoint );
+	const rCoord2D &minSupportPoint() const;
+	void setMinSupportPoint( const rCoord2D &minSupportPoint );
+	const uiCoord2D &sliceCenter() const;
 
 	void compute( Slice &resultSlice, const Slice &initialSlice, const uiCoord2D &sliceCenter, const int &intensityThreshold,
-				  const int &smoothingRadius, const int &curvatureWidth, const qreal &curvatureThreshold, const iCoord2D &startPoint = iCoord2D(-1,-1) );
+				  const int &smoothingRadius, const int &curvatureWidth, const qreal &curvatureThreshold,
+				  const uint &minimumDistanceFromContourOrigin, const iCoord2D &startPoint = iCoord2D(-1,-1) );
+	void computeStart( const Slice &initialSlice, const uiCoord2D &sliceCenter, const int &intensityThreshold,
+					   const int &smoothingRadius, const int &curvatureWidth, const qreal &curvatureThreshold,
+					   const uint &minimumDistanceFromContourOrigin, const iCoord2D &startPoint = iCoord2D(-1,-1) );
+	void computeEnd( Slice &resultSlice, const Slice &initialSlice, const int &intensityThreshold );
 
-	void draw( QPainter &painter, const int &cursorPosition, const TKD::ViewType &viewType ) const;
+	void draw( QPainter &painter, const int &cursorPosition, const TKD::ProjectionType &viewType ) const;
 
 private:
-	void computeMainDominantPoints( const qreal &curvatureThreshold );
-	void computeSupportsOfMainDominantPoints( const int &meansMaskSize );
+	void computeConcavityPoints( const qreal &curvatureThreshold , const uint &minimumDistanceFromContourOrigin );
+	void computeSupportPoints( const int &meansMaskSize );
 	void computeContourPolygons();
-	void updateSlice(const Slice &initialSlice, Slice &resultSlice, const int &intensityThreshold );
+	void updateSlice( const Slice &initialSlice, Slice &resultSlice, const int &intensityThreshold );
 
 private:
 	Contour _contour;
@@ -48,15 +58,13 @@ private:
 	ContourDistancesHistogram _contourDistancesHistogram;
 	CurvatureHistogram _curvatureHistogram;
 
-	int _leftMainDominantPointsIndex;
-	int _rightMainDominantPointsIndex;
-	rCoord2D _leftMainSupportPoint;
-	rCoord2D _rightMainSupportPoint;
+	int _maxConcavityPointsIndex;
+	int _minConcavityPointsIndex;
+	rCoord2D _maxSupportPoint;
+	rCoord2D _minSupportPoint;
 
 	QPolygon _contourPolygonBottom;
 	QPolygon _contourPolygonTop;
-
-	static iCoord2D invalidICoord2D;
 };
 
 #endif // CONTOURSLICE_H

@@ -8,9 +8,7 @@
 #include <QTemporaryFile>
 #include <QPainter>
 
-iCoord2D ContourSlice::invalidICoord2D = iCoord2D(-1,-1);
-
-ContourSlice::ContourSlice()
+ContourSlice::ContourSlice() : _maxConcavityPointsIndex(-1), _minConcavityPointsIndex(-1)
 {
 }
 
@@ -37,34 +35,59 @@ const CurvatureHistogram &ContourSlice::curvatureHistogram() const
 	return _curvatureHistogram;
 }
 
-const iCoord2D &ContourSlice::leftMainDominantPoint() const
+const iCoord2D &ContourSlice::maxConcavityPoint() const
 {
-	return _leftMainDominantPointsIndex != -1 ? _contour[_leftMainDominantPointsIndex] : invalidICoord2D;
+	return _maxConcavityPointsIndex != -1 ? _contour[_maxConcavityPointsIndex] : invalidICoord2D;
 }
 
-const iCoord2D &ContourSlice::rightMainDominantPoint() const
+const iCoord2D &ContourSlice::minConcavityPoint() const
 {
-	return _rightMainDominantPointsIndex != -1 ? _contour[_rightMainDominantPointsIndex] : invalidICoord2D;
+	return _minConcavityPointsIndex != -1 ? _contour[_minConcavityPointsIndex] : invalidICoord2D;
 }
 
-const int &ContourSlice::leftMainDominantPointIndex() const
+const int &ContourSlice::maxConcavityPointIndex() const
 {
-	return _leftMainDominantPointsIndex;
+	return _maxConcavityPointsIndex;
 }
 
-const int &ContourSlice::rightMainDominantPointIndex() const
+void ContourSlice::setMaxConcavityPointIndex( int maxConcavityIndex )
 {
-	return _rightMainDominantPointsIndex;
+	_maxConcavityPointsIndex = maxConcavityIndex;
 }
 
-const rCoord2D &ContourSlice::leftMainSupportPoint() const
+const int &ContourSlice::minConcavityPointIndex() const
 {
-	return _leftMainSupportPoint;
+	return _minConcavityPointsIndex;
 }
 
-const rCoord2D &ContourSlice::rightMainSupportPoint() const
+void ContourSlice::setMinConcavityPointIndex( int minConcavityIndex )
 {
-	return _rightMainSupportPoint;
+	_minConcavityPointsIndex = minConcavityIndex;
+}
+
+const rCoord2D &ContourSlice::maxSupportPoint() const
+{
+	return _maxSupportPoint;
+}
+
+void ContourSlice::setMaxSupportPoint( const rCoord2D &maxSupportPoint )
+{
+	_maxSupportPoint = maxSupportPoint;
+}
+
+const rCoord2D &ContourSlice::minSupportPoint() const
+{
+	return _minSupportPoint;
+}
+
+void ContourSlice::setMinSupportPoint( const rCoord2D &minSupportPoint )
+{
+	_minSupportPoint = minSupportPoint;
+}
+
+const uiCoord2D &ContourSlice::sliceCenter() const
+{
+	return _sliceCenter;
 }
 
 /**********************************
@@ -72,7 +95,16 @@ const rCoord2D &ContourSlice::rightMainSupportPoint() const
  **********************************/
 
 void ContourSlice::compute( Slice &resultSlice, const Slice &initialSlice, const uiCoord2D &sliceCenter, const int &intensityThreshold,
-							const int &smoothingRadius, const int &curvatureWidth, const qreal &curvatureThreshold, const iCoord2D &startPoint )
+							const int &smoothingRadius, const int &curvatureWidth, const qreal &curvatureThreshold,
+							const uint &minimumDistanceFromContourOrigin, const iCoord2D &startPoint )
+{
+	computeStart( initialSlice, sliceCenter, intensityThreshold, smoothingRadius, curvatureWidth, curvatureThreshold, minimumDistanceFromContourOrigin, startPoint );
+	computeEnd( resultSlice, initialSlice, intensityThreshold );
+}
+
+void ContourSlice::computeStart( const Slice &initialSlice, const uiCoord2D &sliceCenter, const int &intensityThreshold,
+								 const int &smoothingRadius, const int &curvatureWidth, const qreal &curvatureThreshold,
+								 const uint &minimumDistanceFromContourOrigin, const iCoord2D &startPoint )
 {
 	_contour.compute( initialSlice, sliceCenter, intensityThreshold, startPoint );
 	_originalContour = _contour;
@@ -83,16 +115,21 @@ void ContourSlice::compute( Slice &resultSlice, const Slice &initialSlice, const
 
 	_sliceCenter = sliceCenter;
 
-	computeMainDominantPoints( curvatureThreshold );
-	computeSupportsOfMainDominantPoints( 10 );
+	computeConcavityPoints( curvatureThreshold, minimumDistanceFromContourOrigin );
+	computeSupportPoints( 10 );
+}
+
+void ContourSlice::computeEnd( Slice &resultSlice, const Slice &initialSlice, const int &intensityThreshold )
+{
 	computeContourPolygons();
 	updateSlice( initialSlice, resultSlice, intensityThreshold );
 }
 
-void ContourSlice::draw( QPainter &painter, const int &cursorPosition, const TKD::ViewType &viewType ) const
+void ContourSlice::draw( QPainter &painter, const int &cursorPosition, const TKD::ProjectionType &viewType ) const
 {
 	const int nbContourPoints = _contour.size();
 	const uint width = painter.window().width();
+	const uint height = painter.window().height();
 	const qreal angularFactor = width/TWO_PI;
 
 	if ( nbContourPoints > 0 )
@@ -102,45 +139,50 @@ void ContourSlice::draw( QPainter &painter, const int &cursorPosition, const TKD
 
 		int i, j, x, y, i2, j2, x2, y2;
 
-		// Dessins des points dominants principaux
+		// Dessins des points de concavité
 		qreal a, b;
-		if ( leftMainDominantPointIndex() != -1 )
+		if ( maxConcavityPointIndex() != -1 )
 		{
-			// Dessin du point dominants principal gauche
-			const iCoord2D &leftMainPoint = leftMainDominantPoint();
+			// Dessin du point de concavité gauche
+			const iCoord2D &maxConcavityPoint = this->maxConcavityPoint();
 
 			painter.setPen(Qt::green);
 
-			if ( viewType == TKD::Z_VIEW )
+			if ( viewType == TKD::Z_PROJECTION )
 			{
-				painter.drawEllipse(leftMainPoint.x-2,leftMainPoint.y-2,4,4);
+				painter.drawEllipse(maxConcavityPoint.x-2,maxConcavityPoint.y-2,4,4);
 			}
-			else if ( viewType == TKD::CARTESIAN_VIEW )
+			else if ( viewType == TKD::CARTESIAN_PROJECTION )
 			{
-				i = leftMainPoint.x - _sliceCenter.x;
-				j = leftMainPoint.y - _sliceCenter.y;
+				i = maxConcavityPoint.x - _sliceCenter.x;
+				j = maxConcavityPoint.y - _sliceCenter.y;
 				y = qSqrt(qPow(i,2) + qPow(j,2));
 				x = 2. * qAtan( j / (qreal)(i + y) ) * angularFactor;
 				painter.drawEllipse(x-2,y-2,4,4);
 			}
 
-			// Dessins de la droite de coupe issue du point de dominant principal gauche
-			const rCoord2D &leftSupportPoint = leftMainSupportPoint();
-			if ( leftSupportPoint.x != -1 || leftSupportPoint.y != -1 )
+			// Dessins de la droite de coupe issue du point de concavité gauche
+			const rCoord2D &maxSupportPoint = this->maxSupportPoint();
+			if ( maxSupportPoint.x != -1 || maxSupportPoint.y != -1 )
 			{
 				painter.setPen(Qt::gray);
-				a = ( leftMainPoint.y - leftSupportPoint.y ) / static_cast<qreal>( leftMainPoint.x - leftSupportPoint.x );
-				b = ( leftMainPoint.y * leftSupportPoint.x - leftMainPoint.x * leftSupportPoint.y ) / static_cast<qreal>( leftSupportPoint.x - leftMainPoint.x );
-				if ( leftSupportPoint.x < leftMainPoint.x )
+				a = ( maxConcavityPoint.y - maxSupportPoint.y ) / static_cast<qreal>( maxConcavityPoint.x - maxSupportPoint.x );
+				b = ( maxConcavityPoint.y * maxSupportPoint.x - maxConcavityPoint.x * maxSupportPoint.y ) / static_cast<qreal>( maxSupportPoint.x - maxConcavityPoint.x );
+				if ( qFuzzyCompare(maxConcavityPoint.x, maxSupportPoint.x) )
 				{
-					if ( viewType == TKD::Z_VIEW )
+					if ( maxSupportPoint.y < maxConcavityPoint.y ) painter.drawLine(maxConcavityPoint.x, maxConcavityPoint.y, maxConcavityPoint.x, height );
+					else painter.drawLine(maxConcavityPoint.x, maxConcavityPoint.y, maxConcavityPoint.x, 0 );
+				}
+				else if ( maxSupportPoint.x < maxConcavityPoint.x )
+				{
+					if ( viewType == TKD::Z_PROJECTION )
 					{
-						painter.drawLine(leftMainPoint.x, leftMainPoint.y, width, a * width + b );
+						painter.drawLine(maxConcavityPoint.x, maxConcavityPoint.y, width, a * width + b );
 					}
-					else if ( viewType == TKD::CARTESIAN_VIEW )
+					else if ( viewType == TKD::CARTESIAN_PROJECTION )
 					{
-						i = leftMainPoint.x - _sliceCenter.x;
-						j = leftMainPoint.y - _sliceCenter.y;
+						i = maxConcavityPoint.x - _sliceCenter.x;
+						j = maxConcavityPoint.y - _sliceCenter.y;
 						y = qSqrt(qPow(i,2) + qPow(j,2));
 						x = 2. * qAtan( j / (qreal)(i + y) ) * angularFactor;
 						i2 = width - _sliceCenter.x;
@@ -152,14 +194,14 @@ void ContourSlice::draw( QPainter &painter, const int &cursorPosition, const TKD
 				}
 				else
 				{
-					if ( viewType == TKD::Z_VIEW )
+					if ( viewType == TKD::Z_PROJECTION )
 					{
-						painter.drawLine(leftMainPoint.x, leftMainPoint.y, 0., b );
+						painter.drawLine(maxConcavityPoint.x, maxConcavityPoint.y, 0., b );
 					}
-					else if ( viewType == TKD::CARTESIAN_VIEW )
+					else if ( viewType == TKD::CARTESIAN_PROJECTION )
 					{
-						i = leftMainPoint.x - _sliceCenter.x;
-						j = leftMainPoint.y - _sliceCenter.y;
+						i = maxConcavityPoint.x - _sliceCenter.x;
+						j = maxConcavityPoint.y - _sliceCenter.y;
 						y = qSqrt(qPow(i,2) + qPow(j,2));
 						x = 2. * qAtan( j / (qreal)(i + y) ) * angularFactor;
 						i2 = -_sliceCenter.x;
@@ -171,42 +213,50 @@ void ContourSlice::draw( QPainter &painter, const int &cursorPosition, const TKD
 				}
 			}
 		}
-		if ( rightMainDominantPointIndex() != -1 )
+		if ( minConcavityPointIndex() != -1 )
 		{
-			// Dessin du point dominants principal droit
-			const iCoord2D &rightMainPoint = rightMainDominantPoint();
+			// Dessin du point de concavité droit
+			const iCoord2D &minConcavityPoint = this->minConcavityPoint();
 
 			painter.setPen(Qt::green);
-			if ( viewType == TKD::Z_VIEW )
+			if ( viewType == TKD::Z_PROJECTION )
 			{
-				painter.drawEllipse(rightMainPoint.x-2,rightMainPoint.y-2,4,4);
+				painter.drawEllipse(minConcavityPoint.x-2,minConcavityPoint.y-2,4,4);
 			}
-			else if ( viewType == TKD::CARTESIAN_VIEW )
+			else if ( viewType == TKD::CARTESIAN_PROJECTION )
 			{
-				i = rightMainPoint.x - _sliceCenter.x;
-				j = rightMainPoint.y - _sliceCenter.y;
+				i = minConcavityPoint.x - _sliceCenter.x;
+				j = minConcavityPoint.y - _sliceCenter.y;
 				y = qSqrt(qPow(i,2) + qPow(j,2));
 				x = 2. * qAtan( j / (qreal)(i + y) ) * angularFactor;
 				painter.drawEllipse(x-2,y-2,4,4);
 			}
 
-			// Dessins de la droite de coupe issue du point de dominant principal droit
-			const rCoord2D &rightSupportPoint = rightMainSupportPoint();
-			if ( rightSupportPoint.x != -1 || rightSupportPoint.y != -1 )
+			// Dessins de la droite de coupe issue du point de concavité droit
+			const rCoord2D &minSupportPoint = this->minSupportPoint();
+			if ( minSupportPoint.x != -1 || minSupportPoint.y != -1 )
 			{
 				painter.setPen(Qt::gray);
-				a = ( rightMainPoint.y - rightSupportPoint.y ) / static_cast<qreal>( rightMainPoint.x - rightSupportPoint.x );
-				b = ( rightMainPoint.y * rightSupportPoint.x - rightMainPoint.x * rightSupportPoint.y ) / static_cast<qreal>( rightSupportPoint.x - rightMainPoint.x );
-				if ( rightSupportPoint.x < rightMainPoint.x )
+				a = ( minConcavityPoint.y - minSupportPoint.y ) / static_cast<qreal>( minConcavityPoint.x - minSupportPoint.x );
+				b = ( minConcavityPoint.y * minSupportPoint.x - minConcavityPoint.x * minSupportPoint.y ) / static_cast<qreal>( minSupportPoint.x - minConcavityPoint.x );
+				if ( qFuzzyCompare(minConcavityPoint.x, minSupportPoint.x) )
 				{
-					if ( viewType == TKD::Z_VIEW )
+					if ( viewType == TKD::Z_PROJECTION )
 					{
-						painter.drawLine(rightMainPoint.x, rightMainPoint.y, width, a * width + b );
+						if ( minSupportPoint.y < minConcavityPoint.y ) painter.drawLine(minConcavityPoint.x, minConcavityPoint.y, minConcavityPoint.x, height );
+						else painter.drawLine(minConcavityPoint.x, minConcavityPoint.y, minConcavityPoint.x, 0 );
 					}
-					else if ( viewType == TKD::CARTESIAN_VIEW )
+				}
+				else if ( minSupportPoint.x < minConcavityPoint.x )
+				{
+					if ( viewType == TKD::Z_PROJECTION )
 					{
-						i = rightMainPoint.x - _sliceCenter.x;
-						j = rightMainPoint.y - _sliceCenter.y;
+						painter.drawLine(minConcavityPoint.x, minConcavityPoint.y, width, a * width + b );
+					}
+					else if ( viewType == TKD::CARTESIAN_PROJECTION )
+					{
+						i = minConcavityPoint.x - _sliceCenter.x;
+						j = minConcavityPoint.y - _sliceCenter.y;
 						y = qSqrt(qPow(i,2) + qPow(j,2));
 						x = 2. * qAtan( j / (qreal)(i + y) ) * angularFactor;
 						i2 = width - _sliceCenter.x;
@@ -218,14 +268,14 @@ void ContourSlice::draw( QPainter &painter, const int &cursorPosition, const TKD
 				}
 				else
 				{
-					if ( viewType == TKD::Z_VIEW )
+					if ( viewType == TKD::Z_PROJECTION )
 					{
-						painter.drawLine(rightMainPoint.x, rightMainPoint.y, 0., b );
+						painter.drawLine(minConcavityPoint.x, minConcavityPoint.y, 0., b );
 					}
-					else if ( viewType == TKD::CARTESIAN_VIEW )
+					else if ( viewType == TKD::CARTESIAN_PROJECTION )
 					{
-						i = rightMainPoint.x - _sliceCenter.x;
-						j = rightMainPoint.y - _sliceCenter.y;
+						i = minConcavityPoint.x - _sliceCenter.x;
+						j = minConcavityPoint.y - _sliceCenter.y;
 						y = qSqrt(qPow(i,2) + qPow(j,2));
 						x = 2. * qAtan( j / (qreal)(i + y) ) * angularFactor;
 						i2 = -_sliceCenter.x;
@@ -240,11 +290,11 @@ void ContourSlice::draw( QPainter &painter, const int &cursorPosition, const TKD
 
 		// Dessin du point de contour initial
 		painter.setPen(Qt::red);
-		if ( viewType == TKD::Z_VIEW )
+		if ( viewType == TKD::Z_PROJECTION )
 		{
 			painter.drawEllipse(_contour[0].x-2,_contour[0].y-2,4,4);
 		}
-		else if ( viewType == TKD::CARTESIAN_VIEW )
+		else if ( viewType == TKD::CARTESIAN_PROJECTION )
 		{
 			i = _contour[0].x - _sliceCenter.x;
 			j = _contour[0].y - _sliceCenter.y;
@@ -261,72 +311,73 @@ void ContourSlice::draw( QPainter &painter, const int &cursorPosition, const TKD
  * Private setters
  **********************************/
 
-void ContourSlice::computeMainDominantPoints( const qreal &curvatureThreshold )
+void ContourSlice::computeConcavityPoints( const qreal &curvatureThreshold, const uint &minimumDistanceFromContourOrigin )
 {
-	_leftMainDominantPointsIndex = _rightMainDominantPointsIndex = -1;
+	_maxConcavityPointsIndex = _minConcavityPointsIndex = -1;
 
 	int nbPoints, index, indexToCompare;
 
 	nbPoints = _contour.size();
-	indexToCompare = nbPoints*0.3;
+	indexToCompare = nbPoints*0.4;
 
-	if ( _contourDistancesHistogram.size() == nbPoints && _curvatureHistogram.size() == nbPoints )
+	if ( nbPoints > 0 && _contourDistancesHistogram.size() == nbPoints && _curvatureHistogram.size() == nbPoints )
 	{
-		// Left main dominant point
+		// Min concavity point
 		index = 1;
-		while ( (index < indexToCompare) && (_curvatureHistogram[index] > curvatureThreshold) )
+		while ( (index < indexToCompare) && (_curvatureHistogram[index] > curvatureThreshold || _contour[0].euclideanDistance(_contour[index]) < minimumDistanceFromContourOrigin) )
 		{
 			index++;
 		}
-		if ( index < indexToCompare ) _leftMainDominantPointsIndex = index;
+		if ( index < indexToCompare ) _minConcavityPointsIndex = index;
 
-		// Right main dominant point
+		// Max concavity point
 		index = nbPoints-2;
 		indexToCompare = nbPoints-indexToCompare;
-		while ( (index > indexToCompare) && (_curvatureHistogram[index] > curvatureThreshold) )
+		while ( (index > indexToCompare) && (_curvatureHistogram[index] > curvatureThreshold || _contour[0].euclideanDistance(_contour[index]) < minimumDistanceFromContourOrigin) )
 		{
 			index--;
 		}
-		if ( index > indexToCompare ) _rightMainDominantPointsIndex = index;
+		if ( index > indexToCompare ) _maxConcavityPointsIndex = index;
 	}
 }
 
-void ContourSlice::computeSupportsOfMainDominantPoints( const int &meansMaskSize )
+void ContourSlice::computeSupportPoints( const int &meansMaskSize )
 {
-	_leftMainSupportPoint = _rightMainSupportPoint = rCoord2D(-1,-1);
+	_maxSupportPoint = _minSupportPoint = rCoord2D(-1,-1);
 
 	int index, counter;
 
-	// Support du MDP gauche
-	index = _leftMainDominantPointsIndex;
+	// Support du point de concavité min
+	index = _minConcavityPointsIndex;
 	if ( index != -1 )
 	{
-		_leftMainSupportPoint.x = _leftMainSupportPoint.y = 0.;
+		_minSupportPoint.x = _minSupportPoint.y = 0.;
 		counter = 0;
-		while ( index >= qMax(_leftMainDominantPointsIndex-meansMaskSize,0) )
+		while ( index >= qMax(_minConcavityPointsIndex-meansMaskSize,0) )
 		{
-			_leftMainSupportPoint.x += _contour[index].x;
-			_leftMainSupportPoint.y += _contour[index].y;
+			_minSupportPoint.x += _contour[index].x;
+			_minSupportPoint.y += _contour[index].y;
 			--index;
 			++counter;
 		}
-		_leftMainSupportPoint /= counter;
+		_minSupportPoint /= counter;
 	}
 
-	// Support du MDP droit
-	index = _rightMainDominantPointsIndex;
+	// Support du point de concavité max
+	index = _maxConcavityPointsIndex;
 	if ( index != -1 )
 	{
-		int nbPoints = _contour.size();
+		const int nbPoints = _contour.size();
+		_maxSupportPoint.x = _maxSupportPoint.y = 0.;
 		counter = 0;
-		while ( index < qMin(_rightMainDominantPointsIndex+meansMaskSize,nbPoints) )
+		while ( index < qMin(_maxConcavityPointsIndex+meansMaskSize,nbPoints) )
 		{
-			_rightMainSupportPoint.x += _contour[index].x;
-			_rightMainSupportPoint.y += _contour[index].y;
+			_maxSupportPoint.x += _contour[index].x;
+			_maxSupportPoint.y += _contour[index].y;
 			++index;
 			++counter;
 		}
-		_rightMainSupportPoint /= counter;
+		_maxSupportPoint /= counter;
 	}
 }
 
@@ -340,70 +391,70 @@ void ContourSlice::computeContourPolygons()
 
 	int i;
 
-	// S'il y a deux points dominants principaux
-	if ( _leftMainDominantPointsIndex != -1 && _rightMainDominantPointsIndex != -1 )
+	// S'il y a deux points de concavité
+	if ( _maxConcavityPointsIndex != -1 && _minConcavityPointsIndex != -1 )
 	{
-		const iCoord2D &leftMainPoint = leftMainDominantPoint();
-		const iCoord2D &rightMainPoint = rightMainDominantPoint();
+		const iCoord2D &maxConcavityPoint = this->maxConcavityPoint();
+		const iCoord2D &minConcavityPoint = this->minConcavityPoint();
 
-		// Création du polygone qui servira à tester l'appartenance d'un pixel en dessous de la droite des deux points dominants principaux au noeud.
+		// Création du polygone qui servira à tester l'appartenance d'un pixel en dessous de la droite des deux points de concavité au noeud.
 		// Ce polygone est constitué :
-		//     - des points compris entre le premier point du contour lissé et le point dominant principal gauche
-		//     - du point dominant principal gauche
-		//     - du point dominant principal droit
-		//     - des points compris entre le point dominant principal droit et le dernier points du contour lissé.
-		for ( i=0 ; i<=_leftMainDominantPointsIndex ; ++i ) _contourPolygonBottom << QPoint(_contour[i].x,_contour[i].y);
-		_contourPolygonBottom << QPoint(leftMainPoint.x,leftMainPoint.y)
-							 << QPoint(rightMainPoint.x,rightMainPoint.y);
-		for ( i=_rightMainDominantPointsIndex ; i<nbContourPoints ; ++i ) _contourPolygonBottom << QPoint(_contour[i].x,_contour[i].y);
+		//     - des points compris entre le premier point du contour lissé et le point de concavité gauche
+		//     - du point de concavité gauche
+		//     - du point de concavité droit
+		//     - des points compris entre le point de concavité droit et le dernier points du contour lissé.
+		for ( i=0 ; i<=_minConcavityPointsIndex ; ++i ) _contourPolygonBottom << QPoint(_contour[i].x,_contour[i].y);
+		_contourPolygonBottom << QPoint(minConcavityPoint.x,minConcavityPoint.y)
+							 << QPoint(maxConcavityPoint.x,maxConcavityPoint.y);
+		for ( i=_maxConcavityPointsIndex ; i<nbContourPoints ; ++i ) _contourPolygonBottom << QPoint(_contour[i].x,_contour[i].y);
 		_contourPolygonBottom << QPoint(_contour[0].x,_contour[0].y);
 
-		// Création du polygone qui servira à tester l'appartenance d'un pixel au dessus de la droite des deux points dominants principaux au noeud.
+		// Création du polygone qui servira à tester l'appartenance d'un pixel au dessus de la droite des deux points de concavité au noeud.
 		// Ce polygone est constitué :
-		//     - du point le plus proche du point dominant
-		//     - des points du contour situés entre le point le point dominant principal gauche et le point dominant principal droit
-		//     - du point dominant principal droit
-		_contourPolygonTop << QPoint(leftMainPoint.x,leftMainPoint.y);
-		for ( i=_leftMainDominantPointsIndex ; i<=_rightMainDominantPointsIndex ; ++i ) _contourPolygonTop << QPoint(_contour[i].x,_contour[i].y);
-		_contourPolygonTop << QPoint(rightMainPoint.x,rightMainPoint.y)
-						  << QPoint(leftMainPoint.x,leftMainPoint.y);
+		//     - du point le plus proche du point de concavité
+		//     - des points du contour situés entre le point le point de concavité gauche et le point de concavité droit
+		//     - du point de concavité droit
+		_contourPolygonTop << QPoint(minConcavityPoint.x,minConcavityPoint.y);
+		for ( i=_minConcavityPointsIndex ; i<=_maxConcavityPointsIndex ; ++i ) _contourPolygonTop << QPoint(_contour[i].x,_contour[i].y);
+		_contourPolygonTop << QPoint(maxConcavityPoint.x,maxConcavityPoint.y)
+						  << QPoint(minConcavityPoint.x,minConcavityPoint.y);
 	}
 	else
 	{
-		if ( _leftMainDominantPointsIndex != -1 )
+		if ( _maxConcavityPointsIndex != -1 )
 		{
-			const iCoord2D &leftMainPoint = leftMainDominantPoint();
-			const int rightMainDominantPointsIndexComputed = nbContourPoints-_leftMainDominantPointsIndex;
-			const iCoord2D &rightMainPoint = _contour[rightMainDominantPointsIndexComputed];
+			const iCoord2D &maxConcavityPoint = this->maxConcavityPoint();
+			const int minConcavityPointsIndexComputed = nbContourPoints-_maxConcavityPointsIndex;
+			const iCoord2D &minConcavityPoint = _contour[minConcavityPointsIndexComputed];
 
-			// Création du polygone qui servira à tester l'appartenance d'un pixel en dessous de la droite des deux points dominants principaux au noeud.
+			// Création du polygone qui servira à tester l'appartenance d'un pixel en dessous de la droite des deux points de concavité au noeud.
 			// Ce polygone est constitué :
-			//     - des points compris entre le premier point du contour lissé et le point dominant principal gauche
-			//     - du point dominant principal gauche
-			//     - du point dominant principal droit calculé
-			//     - des points compris entre le point dominant principal droit principal calculé et le dernier points du contour lissé.
-			for ( i=0 ; i<=_leftMainDominantPointsIndex ; ++i ) _contourPolygonBottom << QPoint(_contour[i].x,_contour[i].y);
-			_contourPolygonBottom << QPoint(leftMainPoint.x,leftMainPoint.y)
-								  << QPoint(rightMainPoint.x,rightMainPoint.y);
-			for ( i=rightMainDominantPointsIndexComputed ; i<nbContourPoints ; ++i ) _contourPolygonBottom << QPoint(_contour[i].x,_contour[i].y);
+			//     - des points compris entre le premier point du contour lissé et le point de concavité gauche
+			//     - du point de concavité gauche
+			//     - du pointde concavité droit calculé
+			//     - des points compris entre le point de concavité droit principal calculé et le dernier points du contour lissé.
+			for ( i=0 ; i<=minConcavityPointsIndexComputed ; ++i ) _contourPolygonBottom << QPoint(_contour[i].x,_contour[i].y);
+			_contourPolygonBottom << QPoint(minConcavityPoint.x,minConcavityPoint.y)
+								  << QPoint(maxConcavityPoint.x,maxConcavityPoint.y);
+			for ( i=_maxConcavityPointsIndex ; i<nbContourPoints ; ++i ) _contourPolygonBottom << QPoint(_contour[i].x,_contour[i].y);
 			_contourPolygonBottom << QPoint(_contour[0].x,_contour[0].y);
 		}
-		else if ( _rightMainDominantPointsIndex != -1 )
+		else if ( _minConcavityPointsIndex != -1 )
 		{
-			const iCoord2D &rightMainPoint = rightMainDominantPoint();
-			const int leftMainDominantPointsIndexComputed = nbContourPoints-_rightMainDominantPointsIndex;
-			const iCoord2D &leftMainPoint = _contour[leftMainDominantPointsIndexComputed];
+			const iCoord2D &minConcavityPoint = this->minConcavityPoint();
+			const int maxConcavityPointsIndexComputed = nbContourPoints-_minConcavityPointsIndex;
+			const iCoord2D &maxConcavityPoint = _contour[maxConcavityPointsIndexComputed];
 
-			// Création du polygone qui servira à tester l'appartenance d'un pixel en dessous de la droite des deux points dominants principaux au noeud.
+			// Création du polygone qui servira à tester l'appartenance d'un pixel en dessous de la droite des deux points de concavité au noeud.
 			// Ce polygone est constitué :
-			//     - des points compris entre le premier point du contour lissé et le point dominant principal gauche
-			//     - du point dominant principal gauche
-			//     - du point dominant principal droit calculé
-			//     - des points compris entre le point dominant principal droit principal calculé et le dernier points du contour lissé.
-			for ( i=0 ; i<=leftMainDominantPointsIndexComputed ; ++i ) _contourPolygonBottom << QPoint(_contour[i].x,_contour[i].y);
-			_contourPolygonBottom << QPoint(leftMainPoint.x,leftMainPoint.y)
-								  << QPoint(rightMainPoint.x,rightMainPoint.y);
-			for ( i=_rightMainDominantPointsIndex ; i<nbContourPoints ; ++i ) _contourPolygonBottom << QPoint(_contour[i].x,_contour[i].y);
+			//     - des points compris entre le premier point du contour lissé et le point de concavité principal gauche
+			//     - du point de concavité gauche
+			//     - du point de concavité droit calculé
+			//     - des points compris entre le point de concavité droit principal calculé et le dernier points du contour lissé.
+			for ( i=0 ; i<=_minConcavityPointsIndex ; ++i ) _contourPolygonBottom << QPoint(_contour[i].x,_contour[i].y);
+			_contourPolygonBottom << QPoint(minConcavityPoint.x,minConcavityPoint.y)
+								  << QPoint(maxConcavityPoint.x,maxConcavityPoint.y);
+			for ( i=maxConcavityPointsIndexComputed ; i<nbContourPoints ; ++i ) _contourPolygonBottom << QPoint(_contour[i].x,_contour[i].y);
 			_contourPolygonBottom << QPoint(_contour[0].x,_contour[0].y);
 		}
 
@@ -425,18 +476,18 @@ void ContourSlice::updateSlice( const Slice &initialSlice, Slice &resultSlice, c
 
 	resultSlice.fill(0);
 
-	const iCoord2D &leftMainPoint = leftMainDominantPoint();
-	const iCoord2D &rightMainPoint = rightMainDominantPoint();
-	const rCoord2D &leftSupportPoint = leftMainSupportPoint();
-	const rCoord2D &rightSupportPoint = rightMainSupportPoint();
+	const iCoord2D &maxConcavityPoint = this->maxConcavityPoint();
+	const iCoord2D &minConcavityPoint = this->minConcavityPoint();
+	const rCoord2D &maxSupportPoint = this->maxSupportPoint();
+	const rCoord2D &minSupportPoint = this->minSupportPoint();
 
-	const bool hasMainLeft = _leftMainDominantPointsIndex != -1;
-	const bool hasMainRight = _rightMainDominantPointsIndex != -1;
+	const bool hasMaxConcavity = _maxConcavityPointsIndex != -1;
+	const bool hasMinConcavity = _minConcavityPointsIndex != -1;
 
 	int i,j;
 
-	// S'il y a deux points dominants principaux
-	if ( hasMainLeft && hasMainRight )
+	// S'il y a deux points de concavité
+	if ( hasMaxConcavity && hasMinConcavity )
 	{
 		for ( j=0 ; j<height ; ++j )
 		{
@@ -445,9 +496,9 @@ void ContourSlice::updateSlice( const Slice &initialSlice, Slice &resultSlice, c
 				if ( initialSlice.at(j,i) > intensityThreshold &&
 					 ( _contourPolygonBottom.containsPoint(QPoint(i,j),Qt::OddEvenFill) ||
 					   (
-						   leftSupportPoint.vectorProduct( leftMainPoint, iCoord2D(i,j) ) >= 0 &&
-						   rightSupportPoint.vectorProduct( rightMainPoint, iCoord2D(i,j) ) <= 0 &&
-						   leftMainPoint.vectorProduct( rightMainPoint, iCoord2D(i,j) ) <= 0 &&
+						   maxSupportPoint.vectorProduct( maxConcavityPoint, iCoord2D(i,j) ) <= 0 &&
+						   minSupportPoint.vectorProduct( minConcavityPoint, iCoord2D(i,j) ) >= 0 &&
+						   maxConcavityPoint.vectorProduct( minConcavityPoint, iCoord2D(i,j) ) >= 0 &&
 						   _contourPolygonTop.containsPoint(QPoint(i,j),Qt::OddEvenFill)
 					   )
 					 )
@@ -458,7 +509,7 @@ void ContourSlice::updateSlice( const Slice &initialSlice, Slice &resultSlice, c
 			}
 		}
 	}
-	else if ( hasMainLeft )
+	else if ( hasMaxConcavity )
 	{
 		for ( j=0 ; j<height ; ++j )
 		{
@@ -467,7 +518,7 @@ void ContourSlice::updateSlice( const Slice &initialSlice, Slice &resultSlice, c
 				if ( initialSlice.at(j,i) > intensityThreshold &&
 					 ( _contourPolygonBottom.containsPoint(QPoint(i,j),Qt::OddEvenFill) ||
 					   (
-						   leftSupportPoint.vectorProduct( leftMainPoint, iCoord2D(i,j) ) >= 0 &&
+						   maxSupportPoint.vectorProduct( maxConcavityPoint, iCoord2D(i,j) ) <= 0 &&
 						   _contourPolygonTop.containsPoint(QPoint(i,j),Qt::OddEvenFill)
 					   )
 					 )
@@ -478,7 +529,7 @@ void ContourSlice::updateSlice( const Slice &initialSlice, Slice &resultSlice, c
 			}
 		}
 	}
-	else if ( hasMainRight )
+	else if ( hasMinConcavity )
 	{
 		for ( j=0 ; j<height ; ++j )
 		{
@@ -487,7 +538,7 @@ void ContourSlice::updateSlice( const Slice &initialSlice, Slice &resultSlice, c
 				if ( initialSlice.at(j,i) > intensityThreshold &&
 					 ( _contourPolygonBottom.containsPoint(QPoint(i,j),Qt::OddEvenFill) ||
 					   (
-						   rightSupportPoint.vectorProduct( rightMainPoint, iCoord2D(i,j) ) <= 0 &&
+						   minSupportPoint.vectorProduct( minConcavityPoint, iCoord2D(i,j) ) >= 0 &&
 						   _contourPolygonTop.containsPoint(QPoint(i,j),Qt::OddEvenFill)
 					   )
 					 )

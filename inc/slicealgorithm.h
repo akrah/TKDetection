@@ -18,7 +18,7 @@ namespace SliceAlgorithm
 	iCoord2D findNearestPointOfThePith( const Slice &slice, const iCoord2D & sliceCenter, const int &intensityThreshold );
 	qreal restrictedAreaRadius( const Slice &slice, const iCoord2D &pithCoord, const uint &nbPolygonPoints, const int &intensityThreshold );
 
-	void draw(QPainter &painter, const Slice &slice, const uiCoord2D &pithCoord, const int &intensityThreshold , const TKD::ViewType &view );
+	void draw(QPainter &painter, const Slice &slice, const uiCoord2D &pithCoord, const int &intensityThreshold , const TKD::ProjectionType &view );
 	void writeInPgm3D( const Slice &slice, QDataStream &stream );
 	void writeInSDP( const Slice &slice, QTextStream &stream, const uint &sliceNum, const int &intensityThreshold );
 }

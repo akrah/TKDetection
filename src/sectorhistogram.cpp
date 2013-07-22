@@ -17,7 +17,7 @@ SectorHistogram::~SectorHistogram()
  * Public setters
  *******************************/
 
-void SectorHistogram::construct( const Billon &billon, const PieChart &pieChart, const Interval<uint> &sliceInterval, const Interval<int> &intensity,
+void SectorHistogram::construct( const Billon &billon, const Interval<uint> &sliceInterval, const Interval<int> &intensity,
 								 const uint &zMotionMin, const int &radiusAroundPith )
 {
 	clear();
@@ -28,7 +28,7 @@ void SectorHistogram::construct( const Billon &billon, const PieChart &pieChart,
 		const int &height = billon.n_rows;
 		const qreal squareRadius = qPow(radiusAroundPith,2);
 
-		fill(0.,pieChart.nbSectors());
+		fill(0.,PieChartSingleton::getInstance()->nbSectors());
 
 		QVector<int> circleLines;
 		circleLines.reserve(2*radiusAroundPith+1);
@@ -63,7 +63,7 @@ void SectorHistogram::construct( const Billon &billon, const PieChart &pieChart,
 						//if ( motionInterval.containsClosed(diff) )
 						if ( diff >= zMotionMin )
 						{
-							(*this)[pieChart.sectorIndexOfAngle( currentPithCoord.angle(currentPos) )] += diff-zMotionMin;
+							(*this)[PieChartSingleton::getInstance()->sectorIndexOfAngle( currentPithCoord.angle(currentPos) )] += diff-zMotionMin;
 						}
 					}
 					currentPos.x++;
@@ -74,12 +74,12 @@ void SectorHistogram::construct( const Billon &billon, const PieChart &pieChart,
 	}
 }
 
-void SectorHistogram::computeMaximumsAndIntervals( const uint &smoothingRadius, const int & minimumHeightPercentageOfMaximum, const int & derivativesPercentage,
-												   const int &minimumWidthOfIntervals,  const PieChart &pieChart, const uint &intervalGap, const bool & loop )
+void SectorHistogram::computeMaximumsAndIntervals(const uint &smoothingRadius, const int & minimumHeightPercentageOfMaximum, const int & derivativesPercentage,
+												   const int &minimumWidthOfIntervals, const uint &intervalGap, const bool & loop )
 {
 	Histogram<qreal>::computeMaximumsAndIntervals( smoothingRadius, minimumHeightPercentageOfMaximum, derivativesPercentage, minimumWidthOfIntervals, loop );
 
-	const uint &nbSectors = pieChart.nbSectors();
+	const uint &nbSectors = PieChartSingleton::getInstance()->nbSectors();
 	uint min, max;
 	for ( int i=0 ; i<_intervals.size() ; ++i )
 	{

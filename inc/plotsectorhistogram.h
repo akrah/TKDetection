@@ -9,7 +9,6 @@
 
 class SectorHistogram;
 class PointPolarSeriesData;
-class PieChart;
 class QwtPlot;
 
 class PlotSectorHistogram
@@ -22,14 +21,14 @@ public:
 	void attach( QwtPlot * const plot );
 	void clear();
 
-	void update( const SectorHistogram &histogram, const PieChart &pieChart );
+	void update(const SectorHistogram &histogram);
 
 	void moveCursor( const uint &index );
 
 private:
-	void updateDatas( const SectorHistogram &histogram, const PieChart &pieChart );
-	void updateMaximums( const SectorHistogram &histogram, const PieChart &pieChart );
-	void updateIntervals( const SectorHistogram &histogram, const PieChart &pieChart );
+	void updateDatas(const SectorHistogram &histogram);
+	void updateMaximums( const SectorHistogram &histogram);
+	void updateIntervals(const SectorHistogram &histogram);
 
 private:
 	QwtPlotHistogram _histogramData;

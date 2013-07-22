@@ -27,7 +27,6 @@ namespace TKD
 
 // Paramètres de détection des maximums et intervalles dans un histogramme
 #define HISTOGRAM_SMOOTHING_RADIUS 8
-#define HISTOGRAM_BORDER_PERCENTAGE_TO_CUT 5
 #define HISTOGRAM_PERCENTAGE_OF_MINIMUM_HEIGHT_OF_MAXIMUM 10
 #define HISTOGRAM_MINIMUM_WIDTH_OF_INTERVALS 10
 #define HISTOGRAM_DERIVATIVE_SEARCH_PERCENTAGE 30
@@ -39,8 +38,8 @@ namespace TKD
 
 #define HISTOGRAM_DISTANCE_SMOOTHING_RADIUS 5
 #define HISTOGRAM_DISTANCE_PERCENTAGE_OF_MINIMUM_HEIGHT_OF_MAXIMUM 75
-#define HISTOGRAM_DISTANCE_MINIMUM_WIDTH_OF_INTERVALS 3
-#define HISTOGRAM_DISTANCE_DERIVATIVE_SEARCH_PERCENTAGE 50
+#define HISTOGRAM_DISTANCE_MINIMUM_WIDTH_OF_INTERVALS 5
+#define HISTOGRAM_DISTANCE_DERIVATIVE_SEARCH_PERCENTAGE 75
 
 // Paramètres d'intensité
 #define MINIMUM_INTENSITY -900
@@ -72,14 +71,14 @@ namespace TKD
  *************************************/
 
 	// Types de coupe possibles
-	enum SliceType
+	enum ViewType
 	{
-		_SLICE_TYPE_MIN_ = -1,
-		CURRENT,
-		MOVEMENT,
+		_VIEW_TYPE_MIN_ = -1,
+		CLASSIC,
+		Z_MOTION,
 		EDGE_DETECTION,
-		FLOW,
-		_SLICE_TYPE_MAX_
+		OPTICAL_FLOWS,
+		_VIEW_TYPE_MAX_
 	};
 
 	// Type de detection de contours
@@ -114,13 +113,13 @@ namespace TKD
 	};
 
 	// Type de vue
-	enum ViewType
+	enum ProjectionType
 	{
-		_VIEW_TYPE_MIN_ = -1,
-		Y_VIEW,
-		Z_VIEW,
-		CARTESIAN_VIEW,
-		_VIEW_TYPE_MAX_
+		_PROJECTION_TYPE_MIN_ = -1,
+		Y_PROJECTION,
+		Z_PROJECTION,
+		CARTESIAN_PROJECTION,
+		_PROJECTION_TYPE_MAX_
 	};
 
 

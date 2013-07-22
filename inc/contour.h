@@ -23,7 +23,7 @@ public:
 	void simplifyConnexity();
 	Contour convexHull();
 
-	void draw( QPainter &painter, const int &cursorPosition, const iCoord2D &sliceCenter, const TKD::ViewType &viewType ) const;
+	void draw( QPainter &painter, const int &cursorPosition, const iCoord2D &sliceCenter, const TKD::ProjectionType &viewType ) const;
 };
 
 #endif // CONTOUR_H
