@@ -58,8 +58,6 @@ private slots:
 	void setSlice( const int &sliceNumber );
 	void setYSlice( const int &yPosition );
 	void setSectorNumber( const int &value );
-	void setMinimumOfSliceIntervalToCurrentSlice();
-	void setMaximumOfSliceIntervalToCurrentSlice();
 
 	void selectSliceInterval( const int &index );
 	void selectCurrentSliceInterval();
@@ -82,7 +80,6 @@ private slots:
 	void moveNearestPointsCursor( const int &position );
 	void moveContourCursor( const int &position );
 
-	void exportToDat();
 	void exportToOfs();
 	void exportHistograms();
 	void exportToPgm3D();
@@ -107,8 +104,8 @@ private:
 	void exportSectorHistogramToImage();
 	void exportknotHistogramToImage();
 
-	void exportImgeSliceIntervalToPgm3d();
-	void exportImgeCartesianSliceIntervalToPgm3d();
+	void exportImageSliceIntervalToPgm3d();
+	void exportImageCartesianSliceIntervalToPgm3d();
 	void exportCurrentSegmentedKnotToPgm3d();
 	void exportSegmentedKnotsOfCurrentSliceIntervalToPgm3d();
 

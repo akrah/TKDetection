@@ -8,7 +8,6 @@
 #include "inc/connexcomponentextractor.h"
 #include "inc/contourbillon.h"
 #include "inc/contourslice.h"
-#include "inc/datexport.h"
 #include "inc/define.h"
 #include "inc/dicomreader.h"
 #include "inc/intensitydistributionhistogram.h"
@@ -110,12 +109,6 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 	QObject::connect(_ui->_sliderSelectSlice, SIGNAL(valueChanged(int)), this, SLOT(setSlice(int)));
 	QObject::connect(_ui->_sliderSelectYSlice, SIGNAL(valueChanged(int)), this, SLOT(setYSlice(int)));
 	QObject::connect(_ui->_buttonZoomInitial, SIGNAL(clicked()), &_sliceZoomer, SLOT(resetZoom()));
-	QObject::connect(_ui->_spinMinSlice, SIGNAL(valueChanged(int)), _ui->_spanSliderSelectInterval, SLOT(setLowerValue(int)));
-	QObject::connect(_ui->_spanSliderSelectInterval, SIGNAL(lowerValueChanged(int)), _ui->_spinMinSlice, SLOT(setValue(int)));
-	QObject::connect(_ui->_buttonMinSlice, SIGNAL(clicked()), this, SLOT(setMinimumOfSliceIntervalToCurrentSlice()));
-	QObject::connect(_ui->_spinMaxSlice, SIGNAL(valueChanged(int)), _ui->_spanSliderSelectInterval, SLOT(setUpperValue(int)));
-	QObject::connect(_ui->_spanSliderSelectInterval, SIGNAL(upperValueChanged(int)), _ui->_spinMaxSlice, SLOT(setValue(int)));
-	QObject::connect(_ui->_buttonMaxSlice, SIGNAL(clicked()), this, SLOT(setMaximumOfSliceIntervalToCurrentSlice()));
 
 	/***********************************
 	* Évènements de l'onglet "Affichage"
@@ -237,12 +230,6 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 	*********************************/
 	// Onglet "Exporter les histogrammes"
 	QObject::connect(_ui->_buttonExportHistograms, SIGNAL(clicked()), this, SLOT(exportHistograms()));
-	// Onglet "Exporter en DAT"
-	QObject::connect(_ui->_sliderDatExportResolution, SIGNAL(valueChanged(int)), _ui->_spinDatExportResolution, SLOT(setValue(int)));
-	QObject::connect(_ui->_spinDatExportResolution, SIGNAL(valueChanged(int)), _ui->_sliderDatExportResolution, SLOT(setValue(int)));
-	QObject::connect(_ui->_sliderDatExportContrast, SIGNAL(valueChanged(int)), _ui->_spinDatExportContrast, SLOT(setValue(int)));
-	QObject::connect(_ui->_spinDatExportContrast, SIGNAL(valueChanged(int)), _ui->_sliderDatExportContrast, SLOT(setValue(int)));
-	QObject::connect(_ui->_buttonExportToDat, SIGNAL(clicked()), this, SLOT(exportToDat()));
 	// Onglet "Exporter en OFS"
 	QObject::connect(_ui->_sliderExportNbEdges, SIGNAL(valueChanged(int)), _ui->_spinExportNbEdges, SLOT(setValue(int)));
 	QObject::connect(_ui->_spinExportNbEdges, SIGNAL(valueChanged(int)), _ui->_sliderExportNbEdges, SLOT(setValue(int)));
@@ -654,16 +641,6 @@ void MainWindow::setSectorNumber( const int &value )
 	PieChartSingleton::getInstance()->setNumberOfAngularSectors(value);
 }
 
-void MainWindow::setMinimumOfSliceIntervalToCurrentSlice()
-{
-	_ui->_spinMinSlice->setValue(_currentSlice);
-}
-
-void MainWindow::setMaximumOfSliceIntervalToCurrentSlice()
-{
-	_ui->_spinMaxSlice->setValue(_currentSlice);
-}
-
 
 /********/
 /*******************************************/
@@ -709,8 +686,6 @@ void MainWindow::selectSliceInterval( const int &index )
 														 .arg(currentAngularInterval.isValid()?maxAngle-minAngle:maxAngle-minAngle+360.));
 			}
 		}
-		_ui->_spanSliderSelectInterval->setUpperValue(sliceInterval.max());
-		_ui->_spanSliderSelectInterval->setLowerValue(sliceInterval.min());
 	}
 }
 
@@ -1039,29 +1014,6 @@ void MainWindow::moveContourCursor( const int &position )
 /*******************************************/
 /*******/
 
-void MainWindow::exportToDat()
-{
-	if ( _billon )
-	{
-		QString fileName = QFileDialog::getSaveFileName(this, tr("Exporter en .dat"), "output.dat", tr("Fichiers de données (*.dat);;Tous les fichiers (*.*)"));
-		if ( !fileName.isEmpty() )
-		{
-			QFile file(fileName);
-			if ( file.open(QIODevice::WriteOnly) )
-			{
-				QTextStream stream(&file);
-				DatExport::process( stream, *_billon, Interval<int>(_ui->_spinMinSlice->value(),_ui->_spinMaxSlice->value()),
-									Interval<int>(_ui->_spinMinIntensity->value(),_ui->_spinMaxIntensity->value()), _ui->_spinDatExportResolution->value(),
-									(_ui->_spinDatExportContrast->value()+100.)/100. );
-				file.close();
-				QMessageBox::information(this,tr("Export en .dat"), tr("Terminé avec succés !"));
-			}
-			else QMessageBox::warning(this,tr("Export en .dat"), tr("L'export a échoué"));
-		}
-	}
-	else QMessageBox::warning(this,tr("Export en .dat"), tr("Aucun fichier de billon ouvert."));
-}
-
 void MainWindow::exportToOfs()
 {
 	if ( _billon )
@@ -1130,8 +1082,8 @@ void MainWindow::exportToPgm3D()
 	{
 		case 0: exportCurrentSegmentedKnotToPgm3d();	break;
 		case 1: exportSegmentedKnotsOfCurrentSliceIntervalToPgm3d();	break;
-		case 2: exportImgeSliceIntervalToPgm3d();	break;
-		case 3: exportImgeCartesianSliceIntervalToPgm3d();	break;
+		case 2: exportImageSliceIntervalToPgm3d();	break;
+		case 3: exportImageCartesianSliceIntervalToPgm3d();	break;
 
 	default: break;
 	}
@@ -1200,19 +1152,6 @@ void MainWindow::initComponentsValues() {
 	_ui->_spinMaxIntensity->setMaximum(MAXIMUM_INTENSITY);
 	_ui->_spinMaxIntensity->setValue(MAXIMUM_INTENSITY);
 
-	_ui->_spinMinSlice->setMinimum(0);
-	_ui->_spinMinSlice->setMaximum(0);
-	_ui->_spinMinSlice->setValue(0);
-
-	_ui->_spinMaxSlice->setMinimum(0);
-	_ui->_spinMaxSlice->setMaximum(0);
-	_ui->_spinMaxSlice->setValue(0);
-
-	_ui->_spanSliderSelectInterval->setMinimum(0);
-	_ui->_spanSliderSelectInterval->setMaximum(0);
-	_ui->_spanSliderSelectInterval->setLowerValue(0);
-	_ui->_spanSliderSelectInterval->setUpperValue(0);
-
 	_ui->_sliderSelectSlice->setValue(0);
 	_ui->_sliderSelectSlice->setRange(0,0);
 
@@ -1261,19 +1200,6 @@ void MainWindow::updateUiComponentsValues()
 	_ui->_sliderSelectYSlice->setValue(0);
 	_ui->_sliderSelectYSlice->setRange(0,height);
 
-	_ui->_spinMinSlice->setMinimum(0);
-	_ui->_spinMinSlice->setMaximum(nbSlices);
-	_ui->_spinMinSlice->setValue(0);
-
-	_ui->_spinMaxSlice->setMinimum(0);
-	_ui->_spinMaxSlice->setMaximum(nbSlices);
-	_ui->_spinMaxSlice->setValue(nbSlices);
-
-	_ui->_spanSliderSelectInterval->setMinimum(0);
-	_ui->_spanSliderSelectInterval->setMaximum(nbSlices);
-	_ui->_spanSliderSelectInterval->setLowerValue(0);
-	_ui->_spanSliderSelectInterval->setUpperValue(nbSlices);
-
 	_ui->_spinMinIntensity->setMinimum(minValue);
 	_ui->_spinMinIntensity->setMaximum(maxValue);
 	_ui->_spinMinIntensity->setValue(MINIMUM_INTENSITY);
@@ -1302,9 +1228,6 @@ void MainWindow::enabledComponents()
 	_ui->_buttonComputePith->setEnabled(enable);
 	_ui->_buttonUpdateSliceHistogram->setEnabled(enable);
 	_ui->_buttonExportHistograms->setEnabled(enable);
-	_ui->_buttonMaxSlice->setEnabled(enable);
-	_ui->_buttonMinSlice->setEnabled(enable);
-	_ui->_buttonExportToDat->setEnabled(enable);
 	_ui->_buttonExportToOfs->setEnabled(enable);
 	_ui->_buttonNextMaximum->setEnabled(enable);
 	_ui->_buttonPreviousMaximum->setEnabled(enable);
@@ -1312,71 +1235,135 @@ void MainWindow::enabledComponents()
 
 void MainWindow::exportPithToOfs()
 {
+	if ( !_billon )
+	{
+		QMessageBox::warning( this, tr("Export en .ofs"), tr("Aucun billon ouvert."));
+		return;
+	}
+	if ( !_billon->hasPith() )
+	{
+		QMessageBox::warning( this, tr("Export en .ofs"), tr("La moelle n'est pas calculée."));
+		return;
+	}
 	QString fileName = QFileDialog::getSaveFileName(this, tr("Exporter en .ofs"), "output.ofs", tr("Fichiers de données (*.ofs);;Tous les fichiers (*.*)"));
 	if ( !fileName.isEmpty() )
 	{
-		OfsExport::process( *_billon, Interval<uint>(_ui->_spinMinSlice->value(),_ui->_spinMaxSlice->value()), fileName,
-							_ui->_spinExportNbEdges->value(), _ui->_spinExportRadius->value(), false );
-		QMessageBox::information( this, tr("Export en .ofs"), tr("Terminé avec succés !"));
+		QFile file(fileName);
+		if ( file.open(QIODevice::WriteOnly) )
+		{
+			QTextStream stream(&file);
+			OfsExport::writeHeader( stream );
+			OfsExport::process( stream, *_billon, Interval<uint>(0,_billon->n_slices-1), _ui->_spinExportNbEdges->value(), _ui->_spinExportRadius->value(), false );
+			file.close();
+			QMessageBox::information( this, tr("Export en .ofs"), tr("Terminé avec succés !"));
+		}
+		else QMessageBox::warning( this, tr("Export en .ofs"), tr("Impossible d'écrire le fichier."));
 	}
 }
 
 void MainWindow::exportBillonRestrictedAreaToOfs()
 {
-	if ( _billon->hasPith() )
+	if ( !_billon )
 	{
-		QString fileName = QFileDialog::getSaveFileName(this, tr("Exporter en .ofs"), "output.ofs", tr("Fichiers de données (*.ofs);;Tous les fichiers (*.*)"));
-		if ( !fileName.isEmpty() )
-		{
-			OfsExport::processOnRestrictedMesh( *_billon, Interval<uint>(_ui->_spinMinSlice->value(),_ui->_spinMaxSlice->value()),
-												fileName, _ui->_spinRestrictedAreaResolution->value(), _ui->_spinRestrictedAreaThreshold->value(), false, _ui->_checkCloseBillon->isChecked() );
-			QMessageBox::information( this, tr("Export en .ofs"), tr("Terminé avec succés !"));
-		}
+		QMessageBox::warning( this, tr("Export en .ofs"), tr("Aucun billon ouvert."));
+		return;
 	}
-	else QMessageBox::warning( this, tr("Export en .ofs"), tr("La moelle n'est pas calculée."));
+	if ( !_billon->hasPith() )
+	{
+		QMessageBox::warning( this, tr("Export en .ofs"), tr("La moelle n'est pas calculée."));
+		return;
+	}
+	QString fileName = QFileDialog::getSaveFileName(this, tr("Exporter en .ofs"), "output.ofs", tr("Fichiers de données (*.ofs);;Tous les fichiers (*.*)"));
+	if ( !fileName.isEmpty() )
+	{
+		QFile file(fileName);
+		if ( file.open(QIODevice::WriteOnly) )
+		{
+			QTextStream stream(&file);
+			const Interval<uint> sliceInterval(0,_billon->n_slices-1);
+			QVector<rCoord2D> vectVertex = BillonAlgorithms::restrictedAreaVertex( *_billon, sliceInterval, _ui->_spinRestrictedAreaResolution->value(),
+																				   _ui->_spinRestrictedAreaThreshold->value() );
+			if ( !vectVertex.isEmpty() )
+			{
+				OfsExport::writeHeader( stream );
+				OfsExport::processOnRestrictedMesh( stream, *_billon, sliceInterval, vectVertex, _ui->_spinRestrictedAreaResolution->value(), false, _ui->_checkCloseBillon->isChecked() );
+				QMessageBox::information( this, tr("Export en .ofs"), tr("Terminé avec succés !"));
+			}
+			else QMessageBox::warning( this, tr("Export en .ofs"), tr("Erreur lors de la création du tube."));
+			file.close();
+		}
+		else QMessageBox::warning( this, tr("Export en .ofs"), tr("Impossible d'écrire le fichier."));
+	}
 }
 
 void MainWindow::exportCurrentAngularSectorLargeAreaToOfs()
 {
-	uint index = _ui->_comboSelectSectorInterval->currentIndex();
-	if ( _billon->hasPith() && index > 0 && index <= _sectorHistogram->nbIntervals() )
+	if ( !_billon )
 	{
-		QString fileName = QFileDialog::getSaveFileName(this, tr("Exporter en .ofs"), "output.ofs", tr("Fichiers de données (*.ofs);;Tous les fichiers (*.*)"));
-		if ( !fileName.isEmpty() )
+		QMessageBox::warning( this, tr("Export en .ofs"), tr("Aucun billon ouvert."));
+		return;
+	}
+	if ( !_knotBillon )
+	{
+		QMessageBox::warning( this, tr("Export en .ofs"), tr("Aucune zone de nœud selectionnée."));
+		return;
+	}
+	QString fileName = QFileDialog::getSaveFileName(this, tr("Exporter en .ofs"), "output.ofs", tr("Fichiers de données (*.ofs);;Tous les fichiers (*.*)"));
+	if ( !fileName.isEmpty() )
+	{
+		const Interval<uint> &sectorInterval = _sectorHistogram->interval(_ui->_comboSelectSectorInterval->currentIndex()-1);
+		QFile file(fileName);
+		if ( file.open(QIODevice::WriteOnly) )
 		{
-			const Interval<uint> &sectorInterval = _sectorHistogram->interval(_ui->_comboSelectSectorInterval->currentIndex()-1);
-			const Interval<uint> &slicesInterval = _sliceHistogram->interval(_ui->_comboSelectSliceInterval->currentIndex()-1);
-			OfsExport::processOnSector( *_billon, slicesInterval, fileName, PieChartSingleton::getInstance()->sector(sectorInterval.min()).minAngle(),
+			QTextStream stream(&file);
+			OfsExport::writeHeader( stream );
+			OfsExport::processOnSector( stream, *_knotBillon, PieChartSingleton::getInstance()->sector(sectorInterval.min()).minAngle(),
 										PieChartSingleton::getInstance()->sector(sectorInterval.max()).maxAngle(), _ui->_spinExportNbEdges->value() );
 			QMessageBox::information(this,tr("Export en .ofs"), tr("Terminé avec succés !"));
+			file.close();
 		}
+		else QMessageBox::warning( this, tr("Export en .ofs"), tr("Impossible d'écrire le fichier."));
 	}
-	else QMessageBox::warning(this,tr("Export en .ofs"), tr("Impossible  d'exporter car la moelle n'est pas calculée ou aucun secteur angulaire n'est sélectionné."));
 }
 
 void MainWindow::exportAllAngularSectorsOfAllSliceIntervalsLargeAreaToOfs()
 {
-	if ( _billon->hasPith() && _ui->_comboSelectSliceInterval->count() > 0 )
+	if ( !_billon )
 	{
-		QString fileName = QFileDialog::getSaveFileName(this, tr("Exporter en .ofs"), "output.ofs", tr("Fichiers de données (*.ofs);;Tous les fichiers (*.*)"));
-		if ( !fileName.isEmpty() )
-		{
-			QVector< QPair< Interval<uint>, QPair<qreal,qreal> > > intervals;
-			for ( int i=0 ; i<_ui->_comboSelectSliceInterval->count()-1 ; i++ )
-			{
-				const Interval<uint> &slicesInterval = _sliceHistogram->interval(i);
-				for ( int j=0 ; j<_ui->_comboSelectSectorInterval->count()-1 ; j++ )
-				{
-					const Interval<uint> &sectorInterval = _sectorHistogram->interval(j);
-					const QPair<qreal,qreal> angles( PieChartSingleton::getInstance()->sector(sectorInterval.min()).minAngle(), PieChartSingleton::getInstance()->sector(sectorInterval.max()).maxAngle() );
-					intervals.append( QPair< Interval<uint>, QPair<qreal,qreal> >( slicesInterval, angles ) );
-				}
-			}
-			OfsExport::processOnAllSectorInAllIntervals( *_billon, intervals, fileName, _ui->_spinExportNbEdges->value() );
-			QMessageBox::information(this,tr("Export en .ofs"), tr("Terminé avec succés !"));
-		}
+		QMessageBox::warning( this, tr("Export en .ofs"), tr("Aucun billon ouvert."));
+		return;
 	}
-	else QMessageBox::warning(this,tr("Export en .ofs"), tr("Impossible car la moelle et/ou les interalles de coupes ne sont pas calculés."));
+	if ( !_billon->hasPith() )
+	{
+		QMessageBox::warning( this, tr("Export en .ofs"), tr("La moelle n'est pas calculée."));
+		return;
+	}
+	QString fileName = QFileDialog::getSaveFileName(this, tr("Exporter en .ofs"), "output.ofs", tr("Fichiers de données (*.ofs);;Tous les fichiers (*.*)"));
+	if ( !fileName.isEmpty() )
+	{
+		QVector< QPair< Interval<uint>, QPair<qreal,qreal> > > intervals;
+		for ( int i=0 ; i<_sliceHistogram->intervals().size() ; ++i )
+		{
+			const Interval<uint> &slicesInterval = _sliceHistogram->interval(i);
+			_ui->_comboSelectSliceInterval->setCurrentIndex(i+1);
+			for ( int j=0 ; j<_sectorHistogram->intervals().size() ; ++j )
+			{
+				const Interval<uint> &sectorInterval = _sectorHistogram->interval(j);
+				const QPair<qreal,qreal> angles( PieChartSingleton::getInstance()->sector(sectorInterval.min()).minAngle(), PieChartSingleton::getInstance()->sector(sectorInterval.max()).maxAngle() );
+				intervals.append( QPair< Interval<uint>, QPair<qreal,qreal> >( slicesInterval, angles ) );
+			}
+		}
+		QFile file(fileName);
+		if ( file.open(QIODevice::WriteOnly) )
+		{
+			QTextStream stream(&file);
+			OfsExport::writeHeader( stream );
+			OfsExport::processOnAllSectorInAllIntervals( stream, *_billon, intervals, _ui->_spinExportNbEdges->value() );
+			QMessageBox::information(this,tr("Export en .ofs"), tr("Terminé avec succés !"));
+			file.close();
+		}
+		else QMessageBox::warning( this, tr("Export en .ofs"), tr("Impossible d'écrire le fichier."));
+	}
 }
 
 void MainWindow::exportSliceHistogramToSep()
@@ -1661,52 +1648,54 @@ void MainWindow::exportknotHistogramToImage()
 }
 
 
-void MainWindow::exportImgeSliceIntervalToPgm3d()
+void MainWindow::exportImageSliceIntervalToPgm3d()
 {
-	if ( _billon )
+	if ( !_billon )
 	{
-		QString fileName = QFileDialog::getSaveFileName(this, tr("Exporter l'image en .pgm3d"), "output.pgm3d", tr("Fichiers de données (*.pgm3d);;Tous les fichiers (*.*)"));
-		if ( !fileName.isEmpty() )
-		{
-			QFile file(fileName);
-			if ( file.open(QIODevice::WriteOnly) )
-			{
-				QTextStream stream(&file);
-				Pgm3dExport::processImage( stream, *_billon, Interval<int>(_ui->_spinMinSlice->value(),_ui->_spinMaxSlice->value()),
-									Interval<int>(_ui->_spinMinIntensity->value(),_ui->_spinMaxIntensity->value()), _ui-> _spinPgm3dExportResolution->value(),
-									(_ui->_spinDatExportContrast->value()+100.)/100. );
-				file.close();
-				QMessageBox::information(this,tr("Export en .pgm3d"), tr("Terminé avec succés !"));
-			}
-			else QMessageBox::warning(this,tr("Export en .pgm3d"), tr("L'export a échoué"));
-		}
+		QMessageBox::warning(this,tr("Export en .pgm3d"), tr("Aucun billon ouvert."));
+		return;
 	}
-	else QMessageBox::warning(this,tr("Export en .pgm3d"), tr("Aucun fichier de billon ouvert."));
+	QString fileName = QFileDialog::getSaveFileName(this, tr("Exporter l'image en .pgm3d"), "output.pgm3d", tr("Fichiers de données (*.pgm3d);;Tous les fichiers (*.*)"));
+	if ( !fileName.isEmpty() )
+	{
+		QFile file(fileName);
+		if ( file.open(QIODevice::WriteOnly) )
+		{
+			QTextStream stream(&file);
+			Pgm3dExport::processImage( stream, *_billon, Interval<int>(0,_billon->n_slices-1),
+									   Interval<int>(_ui->_spinMinIntensity->value(),_ui->_spinMaxIntensity->value()), _ui-> _spinPgm3dExportResolution->value(),
+									   (_ui->_spinPgm3dExportContrast->value()+100.)/100. );
+			file.close();
+			QMessageBox::information(this,tr("Export en .pgm3d"), tr("Terminé avec succés !"));
+		}
+		else QMessageBox::warning(this,tr("Export en .pgm3d"), tr("Impossible d'écrire le fichier."));
+	}
 }
 
 
 
-void MainWindow::exportImgeCartesianSliceIntervalToPgm3d()
+void MainWindow::exportImageCartesianSliceIntervalToPgm3d()
 {
-	if ( _billon )
+	if ( !_billon )
 	{
-		QString fileName = QFileDialog::getSaveFileName(this, tr("Exporter l'image en .pgm3d"), "output.pgm3d", tr("Fichiers de données (*.pgm3d);;Tous les fichiers (*.*)"));
-		if ( !fileName.isEmpty() )
-		{
-			QFile file(fileName);
-			if ( file.open(QIODevice::WriteOnly) )
-			{
-				QTextStream stream(&file);
-				Pgm3dExport::processImageCartesian( stream, *_billon, Interval<int>(_ui->_spinMinSlice->value(),_ui->_spinMaxSlice->value()),
-									Interval<int>(_ui->_spinMinIntensity->value(),_ui->_spinMaxIntensity->value()),  _ui-> _spinPgm3dExportResolution->value(), _ui-> _spinCartesianAngularResolution->value(),
-									(_ui->_spinDatExportContrast->value()+100.)/100. );
-				file.close();
-				QMessageBox::information(this,tr("Export en .pgm3d"), tr("Terminé avec succés !"));
-			}
-			else QMessageBox::warning(this,tr("Export en .pgm3d"), tr("L'export a échoué"));
-		}
+		QMessageBox::warning(this,tr("Export en .pgm3d"), tr("Aucun billon ouvert."));
+		return;
 	}
-	else QMessageBox::warning(this,tr("Export en .pgm3d"), tr("Aucun fichier de billon ouvert."));
+	QString fileName = QFileDialog::getSaveFileName(this, tr("Exporter l'image en .pgm3d"), "output.pgm3d", tr("Fichiers de données (*.pgm3d);;Tous les fichiers (*.*)"));
+	if ( !fileName.isEmpty() )
+	{
+		QFile file(fileName);
+		if ( file.open(QIODevice::WriteOnly) )
+		{
+			QTextStream stream(&file);
+			Pgm3dExport::processImageCartesian( stream, *_billon, Interval<int>(0,_billon->n_slices-1),
+												Interval<int>(_ui->_spinMinIntensity->value(),_ui->_spinMaxIntensity->value()),  _ui-> _spinPgm3dExportResolution->value(),
+												_ui-> _spinCartesianAngularResolution->value(), (_ui->_spinPgm3dExportContrast->value()+100.)/100. );
+			file.close();
+			QMessageBox::information(this,tr("Export en .pgm3d"), tr("Terminé avec succés !"));
+		}
+		else QMessageBox::warning(this,tr("Export en .pgm3d"), tr("Impossible d'écrire le fichier."));
+	}
 }
 
 

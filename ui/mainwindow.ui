@@ -120,7 +120,7 @@
          <property name="geometry">
           <rect>
            <x>171</x>
-           <y>254</y>
+           <y>273</y>
            <width>0</width>
            <height>0</height>
           </rect>
@@ -138,61 +138,6 @@
         </property>
         <property name="tickPosition">
          <enum>QSlider::TicksAbove</enum>
-        </property>
-       </widget>
-      </item>
-     </layout>
-    </item>
-    <item>
-     <layout class="QHBoxLayout" name="horizontalLayout_10">
-      <item>
-       <widget class="QLabel" name="label_7">
-        <property name="text">
-         <string>Intervalle</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QPushButton" name="_buttonMinSlice">
-        <property name="toolTip">
-         <string>Coupe courante</string>
-        </property>
-        <property name="text">
-         <string>+</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QSpinBox" name="_spinMinSlice">
-        <property name="maximum">
-         <number>0</number>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QxtSpanSlider" name="_spanSliderSelectInterval">
-        <property name="maximum">
-         <number>0</number>
-        </property>
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QSpinBox" name="_spinMaxSlice">
-        <property name="maximum">
-         <number>0</number>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QPushButton" name="_buttonMaxSlice">
-        <property name="toolTip">
-         <string>Coupe courante</string>
-        </property>
-        <property name="text">
-         <string>+</string>
         </property>
        </widget>
       </item>
@@ -242,7 +187,7 @@
      <item row="0" column="0">
       <widget class="QTabWidget" name="_tabs">
        <property name="currentIndex">
-        <number>1</number>
+        <number>5</number>
        </property>
        <widget class="QWidget" name="_tabAffichage">
         <attribute name="title">
@@ -1483,7 +1428,7 @@ résolution de l'image)</string>
               <x>0</x>
               <y>0</y>
               <width>398</width>
-              <height>258</height>
+              <height>242</height>
              </rect>
             </property>
             <attribute name="label">
@@ -1754,7 +1699,7 @@ résolution de l'image)</string>
               <x>0</x>
               <y>0</y>
               <width>398</width>
-              <height>258</height>
+              <height>199</height>
              </rect>
             </property>
             <attribute name="label">
@@ -1996,8 +1941,8 @@ résolution de l'image)</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>335</width>
-              <height>302</height>
+              <width>250</width>
+              <height>129</height>
              </rect>
             </property>
             <attribute name="label">
@@ -2527,7 +2472,7 @@ l'intervalle angulaire</string>
             </font>
            </property>
            <property name="currentIndex">
-            <number>5</number>
+            <number>1</number>
            </property>
            <widget class="QWidget" name="page">
             <property name="geometry">
@@ -2535,7 +2480,7 @@ l'intervalle angulaire</string>
               <x>0</x>
               <y>0</y>
               <width>374</width>
-              <height>86</height>
+              <height>196</height>
              </rect>
             </property>
             <attribute name="label">
@@ -2625,168 +2570,13 @@ l'intervalle angulaire</string>
              </item>
             </layout>
            </widget>
-           <widget class="QWidget" name="page_2">
-            <property name="geometry">
-             <rect>
-              <x>0</x>
-              <y>0</y>
-              <width>181</width>
-              <height>127</height>
-             </rect>
-            </property>
-            <attribute name="label">
-             <string>Exporter en DAT</string>
-            </attribute>
-            <layout class="QVBoxLayout" name="verticalLayout_15">
-             <item>
-              <layout class="QFormLayout" name="formLayout_6">
-               <item row="0" column="0">
-                <widget class="QLabel" name="label_16">
-                 <property name="font">
-                  <font>
-                   <weight>50</weight>
-                   <bold>false</bold>
-                  </font>
-                 </property>
-                 <property name="text">
-                  <string>Résolution</string>
-                 </property>
-                </widget>
-               </item>
-               <item row="1" column="0">
-                <widget class="QLabel" name="label_12">
-                 <property name="font">
-                  <font>
-                   <weight>50</weight>
-                   <bold>false</bold>
-                  </font>
-                 </property>
-                 <property name="toolTip">
-                  <string/>
-                 </property>
-                 <property name="text">
-                  <string>Contraste</string>
-                 </property>
-                </widget>
-               </item>
-               <item row="1" column="1">
-                <layout class="QHBoxLayout" name="horizontalLayout_26">
-                 <item>
-                  <widget class="QSlider" name="_sliderDatExportContrast">
-                   <property name="font">
-                    <font>
-                     <weight>50</weight>
-                     <bold>false</bold>
-                    </font>
-                   </property>
-                   <property name="toolTip">
-                    <string/>
-                   </property>
-                   <property name="minimum">
-                    <number>-100</number>
-                   </property>
-                   <property name="maximum">
-                    <number>100</number>
-                   </property>
-                   <property name="orientation">
-                    <enum>Qt::Horizontal</enum>
-                   </property>
-                  </widget>
-                 </item>
-                 <item>
-                  <widget class="QSpinBox" name="_spinDatExportContrast">
-                   <property name="font">
-                    <font>
-                     <weight>50</weight>
-                     <bold>false</bold>
-                    </font>
-                   </property>
-                   <property name="minimum">
-                    <number>-100</number>
-                   </property>
-                   <property name="maximum">
-                    <number>100</number>
-                   </property>
-                  </widget>
-                 </item>
-                </layout>
-               </item>
-               <item row="0" column="1">
-                <layout class="QHBoxLayout" name="horizontalLayout_36">
-                 <item>
-                  <widget class="QSlider" name="_sliderDatExportResolution">
-                   <property name="font">
-                    <font>
-                     <weight>50</weight>
-                     <bold>false</bold>
-                    </font>
-                   </property>
-                   <property name="minimum">
-                    <number>1</number>
-                   </property>
-                   <property name="maximum">
-                    <number>8</number>
-                   </property>
-                   <property name="orientation">
-                    <enum>Qt::Horizontal</enum>
-                   </property>
-                  </widget>
-                 </item>
-                 <item>
-                  <widget class="QSpinBox" name="_spinDatExportResolution">
-                   <property name="font">
-                    <font>
-                     <weight>50</weight>
-                     <bold>false</bold>
-                    </font>
-                   </property>
-                   <property name="minimum">
-                    <number>1</number>
-                   </property>
-                   <property name="maximum">
-                    <number>8</number>
-                   </property>
-                  </widget>
-                 </item>
-                </layout>
-               </item>
-              </layout>
-             </item>
-             <item>
-              <widget class="QPushButton" name="_buttonExportToDat">
-               <property name="font">
-                <font>
-                 <weight>50</weight>
-                 <bold>false</bold>
-                </font>
-               </property>
-               <property name="text">
-                <string>Exporter</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <spacer name="verticalSpacer_4">
-               <property name="orientation">
-                <enum>Qt::Vertical</enum>
-               </property>
-               <property name="sizeHint" stdset="0">
-                <size>
-                 <width>20</width>
-                 <height>40</height>
-                </size>
-               </property>
-              </spacer>
-             </item>
-            </layout>
-           </widget>
            <widget class="QWidget" name="page_3">
             <property name="geometry">
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>321</width>
-              <height>181</height>
+              <width>414</width>
+              <height>196</height>
              </rect>
             </property>
             <attribute name="label">
@@ -2794,34 +2584,41 @@ l'intervalle angulaire</string>
             </attribute>
             <layout class="QVBoxLayout" name="verticalLayout_10">
              <item>
-              <widget class="QComboBox" name="_comboOfsExportType">
-               <property name="font">
-                <font>
-                 <weight>50</weight>
-                 <bold>false</bold>
-                </font>
-               </property>
+              <layout class="QHBoxLayout" name="horizontalLayout_10">
                <item>
-                <property name="text">
-                 <string>Moelle du billon</string>
-                </property>
+                <widget class="QComboBox" name="_comboOfsExportType">
+                 <property name="font">
+                  <font>
+                   <weight>50</weight>
+                   <bold>false</bold>
+                  </font>
+                 </property>
+                 <item>
+                  <property name="text">
+                   <string>Moelle du billon</string>
+                  </property>
+                 </item>
+                 <item>
+                  <property name="text">
+                   <string>Tronc</string>
+                  </property>
+                 </item>
+                 <item>
+                  <property name="text">
+                   <string>Secteur angulaire courant (zone large)</string>
+                  </property>
+                 </item>
+                 <item>
+                  <property name="text">
+                   <string>Secteurs angulaires du billon (zone large)</string>
+                  </property>
+                 </item>
+                </widget>
                </item>
                <item>
-                <property name="text">
-                 <string>Zone réduite du billon</string>
-                </property>
+                <widget class="QComboBox" name="comboBox"/>
                </item>
-               <item>
-                <property name="text">
-                 <string>Secteur angulaire courant (zone large)</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>Secteurs angulaires du billon (zone large)</string>
-                </property>
-               </item>
-              </widget>
+              </layout>
              </item>
              <item>
               <layout class="QFormLayout" name="formLayout_13">
@@ -2989,8 +2786,8 @@ l'intervalle angulaire</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>334</width>
-              <height>157</height>
+              <width>335</width>
+              <height>209</height>
              </rect>
             </property>
             <attribute name="label">
@@ -3178,8 +2975,8 @@ l'intervalle angulaire</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>261</width>
-              <height>84</height>
+              <width>335</width>
+              <height>209</height>
              </rect>
             </property>
             <attribute name="label">
@@ -3245,7 +3042,7 @@ l'intervalle angulaire</string>
               <x>0</x>
               <y>0</y>
               <width>335</width>
-              <height>178</height>
+              <height>209</height>
              </rect>
             </property>
             <attribute name="label">
@@ -3663,12 +3460,6 @@ l'intervalle angulaire</string>
   <tabstop>_comboExportHistoType</tabstop>
   <tabstop>_buttonExportHistograms</tabstop>
   <tabstop>_comboExportHistoFormat</tabstop>
-  <tabstop>_sliderDatExportResolution</tabstop>
-  <tabstop>_spinDatExportResolution</tabstop>
-  <tabstop>_sliderDatExportContrast</tabstop>
-  <tabstop>_spinDatExportContrast</tabstop>
-  <tabstop>_buttonExportToDat</tabstop>
-  <tabstop>_comboOfsExportType</tabstop>
   <tabstop>_sliderExportNbEdges</tabstop>
   <tabstop>_spinExportNbEdges</tabstop>
   <tabstop>_sliderExportRadius</tabstop>
@@ -3696,11 +3487,6 @@ l'intervalle angulaire</string>
   <tabstop>_scrollSliceView</tabstop>
   <tabstop>_buttonZoomInitial</tabstop>
   <tabstop>_sliderSelectSlice</tabstop>
-  <tabstop>_buttonMinSlice</tabstop>
-  <tabstop>_spinMinSlice</tabstop>
-  <tabstop>_spanSliderSelectInterval</tabstop>
-  <tabstop>_spinMaxSlice</tabstop>
-  <tabstop>_buttonMaxSlice</tabstop>
  </tabstops>
  <resources/>
  <connections/>
