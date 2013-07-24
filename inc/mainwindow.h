@@ -92,10 +92,11 @@ private:
 	void updateUiComponentsValues();
 	void enabledComponents();
 
-	void exportPithToOfs();
-	void exportBillonRestrictedAreaToOfs();
-	void exportCurrentAngularSectorLargeAreaToOfs();
-	void exportAllAngularSectorsOfAllSliceIntervalsLargeAreaToOfs();
+	void exportPithToOfs( const bool &onCurrentSliceInterval );
+	void exportCompleteBillonToOfs();
+	void exportAllKnotAreasToOfs();
+	void exportAllKnotAreasOfCurrentSliceIntervalToOfs();
+	void exportCurrentKnotAreaToOfs();
 
 	void exportSliceHistogramToSep();
 	void exportSectorHistogramToSep();

@@ -1020,17 +1020,22 @@ void MainWindow::exportToOfs()
 	{
 		switch (_ui->_comboOfsExportType->currentIndex())
 		{
-			case TKD::PITH:
-				exportPithToOfs();
+			case TKD::COMPLETE_PITH:
+				exportPithToOfs(false);
 				break;
-			case TKD::BILLON_RESTRICTED_AREA:
-				exportBillonRestrictedAreaToOfs();
+			case TKD::PITH_ON_CURRENT_SLICE_INTERVAL:
+				exportPithToOfs(true);
 				break;
-			case TKD::CURENT_ANGULAR_SECTOR_LARGE_AREA:
-				exportCurrentAngularSectorLargeAreaToOfs();
+			case TKD::COMPLETE_BILLON:
+				exportCompleteBillonToOfs();
 				break;
-			case TKD::ALL_ANGULAR_SECTORS_ALL_SLICE_INTERVALS_LARGE_AREA:
-				exportAllAngularSectorsOfAllSliceIntervalsLargeAreaToOfs();
+			case TKD::ALL_KNOT_AREAS:
+				exportAllKnotAreasToOfs();
+				break;
+			case TKD::ALL_KNOT_AREAS_OF_CURRENT_SLICE_INTERVAL:
+				break;
+			case TKD::CURRENT_KNOT_AREA:
+				exportCurrentKnotAreaToOfs();
 				break;
 			default:
 				QMessageBox::warning(this,tr("Export en .ofs"), tr("Contenu à exporter inconnu."));
@@ -1233,7 +1238,7 @@ void MainWindow::enabledComponents()
 	_ui->_buttonPreviousMaximum->setEnabled(enable);
 }
 
-void MainWindow::exportPithToOfs()
+void MainWindow::exportPithToOfs( const bool &onCurrentSliceInterval )
 {
 	if ( !_billon )
 	{
@@ -1245,6 +1250,11 @@ void MainWindow::exportPithToOfs()
 		QMessageBox::warning( this, tr("Export en .ofs"), tr("La moelle n'est pas calculée."));
 		return;
 	}
+	if ( onCurrentSliceInterval && !_ui->_comboSelectSliceInterval->currentIndex() )
+	{
+		QMessageBox::warning( this, tr("Export en .ofs"), tr("Aucun intervalle de coupes selectionné."));
+		return;
+	}
 	QString fileName = QFileDialog::getSaveFileName(this, tr("Exporter en .ofs"), "output.ofs", tr("Fichiers de données (*.ofs);;Tous les fichiers (*.*)"));
 	if ( !fileName.isEmpty() )
 	{
@@ -1253,7 +1263,8 @@ void MainWindow::exportPithToOfs()
 		{
 			QTextStream stream(&file);
 			OfsExport::writeHeader( stream );
-			OfsExport::process( stream, *_billon, Interval<uint>(0,_billon->n_slices-1), _ui->_spinExportNbEdges->value(), _ui->_spinExportRadius->value(), false );
+			const Interval<uint> &sliceInterval = onCurrentSliceInterval ? _sliceHistogram->interval(_ui->_comboSelectSliceInterval->currentIndex()) : Interval<uint>(0,_billon->n_slices-1);
+			OfsExport::processOnPith( stream, *_billon, sliceInterval, _ui->_spinExportNbEdges->value(), _ui->_spinExportRadius->value(), false );
 			file.close();
 			QMessageBox::information( this, tr("Export en .ofs"), tr("Terminé avec succés !"));
 		}
@@ -1261,7 +1272,7 @@ void MainWindow::exportPithToOfs()
 	}
 }
 
-void MainWindow::exportBillonRestrictedAreaToOfs()
+void MainWindow::exportCompleteBillonToOfs()
 {
 	if ( !_billon )
 	{
@@ -1296,7 +1307,7 @@ void MainWindow::exportBillonRestrictedAreaToOfs()
 	}
 }
 
-void MainWindow::exportCurrentAngularSectorLargeAreaToOfs()
+void MainWindow::exportCurrentKnotAreaToOfs()
 {
 	if ( !_billon )
 	{
@@ -1326,7 +1337,7 @@ void MainWindow::exportCurrentAngularSectorLargeAreaToOfs()
 	}
 }
 
-void MainWindow::exportAllAngularSectorsOfAllSliceIntervalsLargeAreaToOfs()
+void MainWindow::exportAllKnotAreasToOfs()
 {
 	if ( !_billon )
 	{

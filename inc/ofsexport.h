@@ -15,8 +15,8 @@ class QTextStream;
 namespace OfsExport
 {
 	void writeHeader( QTextStream &stream );
-	void process( QTextStream &stream, const Billon &billon, const Interval<uint> &sliceInterval, const int &nbEdgesPerSlice,
-				  const int &radiusOfTubes, const bool &normalized = false );
+	void processOnPith( QTextStream &stream, const Billon &billon, const Interval<uint> &sliceInterval, const int &nbEdgesPerSlice,
+						const int &radiusOfTubes, const bool &normalized = false );
 	void processOnSector( QTextStream &stream, const Billon &billon, const qreal &minAngle, const qreal &maxAngle,
 						  const int &nbEdgesPerSlice, const bool &normalized = false );
 	void processOnAllSectorInAllIntervals( QTextStream &stream, const Billon &billon, const QVector< QPair< Interval<uint>, QPair<qreal,qreal> > > &intervals,
