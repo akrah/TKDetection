@@ -1307,36 +1307,6 @@ void MainWindow::exportCompleteBillonToOfs()
 	}
 }
 
-void MainWindow::exportCurrentKnotAreaToOfs()
-{
-	if ( !_billon )
-	{
-		QMessageBox::warning( this, tr("Export en .ofs"), tr("Aucun billon ouvert."));
-		return;
-	}
-	if ( !_knotBillon )
-	{
-		QMessageBox::warning( this, tr("Export en .ofs"), tr("Aucune zone de nœud selectionnée."));
-		return;
-	}
-	QString fileName = QFileDialog::getSaveFileName(this, tr("Exporter en .ofs"), "output.ofs", tr("Fichiers de données (*.ofs);;Tous les fichiers (*.*)"));
-	if ( !fileName.isEmpty() )
-	{
-		const Interval<uint> &sectorInterval = _sectorHistogram->interval(_ui->_comboSelectSectorInterval->currentIndex()-1);
-		QFile file(fileName);
-		if ( file.open(QIODevice::WriteOnly) )
-		{
-			QTextStream stream(&file);
-			OfsExport::writeHeader( stream );
-			OfsExport::processOnSector( stream, *_knotBillon, PieChartSingleton::getInstance()->sector(sectorInterval.min()).minAngle(),
-										PieChartSingleton::getInstance()->sector(sectorInterval.max()).maxAngle(), _ui->_spinExportNbEdges->value() );
-			QMessageBox::information(this,tr("Export en .ofs"), tr("Terminé avec succés !"));
-			file.close();
-		}
-		else QMessageBox::warning( this, tr("Export en .ofs"), tr("Impossible d'écrire le fichier."));
-	}
-}
-
 void MainWindow::exportAllKnotAreasToOfs()
 {
 	if ( !_billon )
@@ -1352,16 +1322,15 @@ void MainWindow::exportAllKnotAreasToOfs()
 	QString fileName = QFileDialog::getSaveFileName(this, tr("Exporter en .ofs"), "output.ofs", tr("Fichiers de données (*.ofs);;Tous les fichiers (*.*)"));
 	if ( !fileName.isEmpty() )
 	{
-		QVector< QPair< Interval<uint>, QPair<qreal,qreal> > > intervals;
-		for ( int i=0 ; i<_sliceHistogram->intervals().size() ; ++i )
+		const QVector< Interval<uint> > &sliceIntervals = _sliceHistogram->intervals();
+		QVector< QVector< Interval<qreal> > > angleIntervals(sliceIntervals.size());
+		for ( int i=0 ; i<sliceIntervals.size() ; ++i )
 		{
-			const Interval<uint> &slicesInterval = _sliceHistogram->interval(i);
 			_ui->_comboSelectSliceInterval->setCurrentIndex(i+1);
 			for ( int j=0 ; j<_sectorHistogram->intervals().size() ; ++j )
 			{
 				const Interval<uint> &sectorInterval = _sectorHistogram->interval(j);
-				const QPair<qreal,qreal> angles( PieChartSingleton::getInstance()->sector(sectorInterval.min()).minAngle(), PieChartSingleton::getInstance()->sector(sectorInterval.max()).maxAngle() );
-				intervals.append( QPair< Interval<uint>, QPair<qreal,qreal> >( slicesInterval, angles ) );
+				angleIntervals[i].append( Interval<qreal>( PieChartSingleton::getInstance()->sector(sectorInterval.min()).minAngle(), PieChartSingleton::getInstance()->sector(sectorInterval.max()).maxAngle() ) );
 			}
 		}
 		QFile file(fileName);
@@ -1369,7 +1338,38 @@ void MainWindow::exportAllKnotAreasToOfs()
 		{
 			QTextStream stream(&file);
 			OfsExport::writeHeader( stream );
-			OfsExport::processOnAllSectorInAllIntervals( stream, *_billon, intervals, _ui->_spinExportNbEdges->value() );
+			OfsExport::processOnAllSectorInAllIntervals( stream, *_billon, _ui->_spinExportNbEdges->value(), _treeRadius, sliceIntervals, angleIntervals, false );
+			QMessageBox::information(this,tr("Export en .ofs"), tr("Terminé avec succés !"));
+			file.close();
+		}
+		else QMessageBox::warning( this, tr("Export en .ofs"), tr("Impossible d'écrire le fichier."));
+	}
+}
+
+void MainWindow::exportCurrentKnotAreaToOfs()
+{
+	if ( !_billon )
+	{
+		QMessageBox::warning( this, tr("Export en .ofs"), tr("Aucun billon ouvert."));
+		return;
+	}
+	if ( !_knotBillon )
+	{
+		QMessageBox::warning( this, tr("Export en .ofs"), tr("Aucune zone de nœud selectionnée."));
+		return;
+	}
+	QString fileName = QFileDialog::getSaveFileName(this, tr("Exporter en .ofs"), "output.ofs", tr("Fichiers de données (*.ofs);;Tous les fichiers (*.*)"));
+	if ( !fileName.isEmpty() )
+	{
+		const Interval<uint> &sliceInterval = _sliceHistogram->interval(_ui->_comboSelectSliceInterval->currentIndex()-1);
+		const Interval<uint> &sectorInterval = _sectorHistogram->interval(_ui->_comboSelectSectorInterval->currentIndex()-1);
+		QFile file(fileName);
+		if ( file.open(QIODevice::WriteOnly) )
+		{
+			QTextStream stream(&file);
+			OfsExport::writeHeader( stream );
+			OfsExport::processOnSector( stream, *_knotBillon, _ui->_spinExportNbEdges->value(), _treeRadius, sliceInterval, Interval<qreal>( PieChartSingleton::getInstance()->sector(sectorInterval.min()).minAngle(),
+										PieChartSingleton::getInstance()->sector(sectorInterval.max()).maxAngle() ), false );
 			QMessageBox::information(this,tr("Export en .ofs"), tr("Terminé avec succés !"));
 			file.close();
 		}

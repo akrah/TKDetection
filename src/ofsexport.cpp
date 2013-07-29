@@ -15,8 +15,8 @@ namespace OfsExport
 		// Calcul les coordonnées des sommets du maillage de la moelle
 		void computeAndWriteSectorEdges( QTextStream &stream, const Billon &billon, const uint &nbEdges, const uint &radius,
 										 const Interval<uint> &sliceInterval, const Interval<qreal> &angleInterval, const bool &normalized );
-		void computeAndWriteAllSectorInAllIntervalsEdges( QTextStream &stream, const Billon &billon, const uint &nbEdges, const uint &radius,
-														  const QVector< Interval<uint> > &sliceIntervals, const QVector< Interval<qreal> > &angleIntervals, const bool &normalized );
+		void computeAndWriteAllSectorInAllIntervalsEdges(QTextStream &stream, const Billon &billon, const uint &nbEdges, const uint &radius,
+														  const QVector< Interval<uint> > &sliceIntervals, const QVector<QVector<Interval<qreal> > > & angleIntervals, const bool &normalized );
 
 		// Calcul les faces du maillages de la moelle
 		void computeAndWriteEdgesLinks( QTextStream &stream, const int &nbEdges, const int &nbSlices, bool displayBegEndFaces );
@@ -45,7 +45,7 @@ namespace OfsExport
 	}
 
 	void processOnAllSectorInAllIntervals( QTextStream &stream, const Billon &billon, const uint &nbEdgesPerSlice, const uint &radius,
-										   const QVector< Interval<uint> > &sliceIntervals, const QVector< Interval<qreal> > &angleIntervals, const bool &normalized )
+										   const QVector< Interval<uint> > &sliceIntervals, const QVector< QVector< Interval<qreal> > > &angleIntervals, const bool &normalized )
 	{
 		computeAndWriteAllSectorInAllIntervalsEdges( stream, billon, nbEdgesPerSlice, radius, sliceIntervals, angleIntervals, normalized );
 
@@ -159,7 +159,7 @@ namespace OfsExport
 
 
 		void computeAndWriteAllSectorInAllIntervalsEdges( QTextStream &stream, const Billon &billon, const uint &nbEdges, const uint &radius,
-														  const QVector< Interval<uint> > &sliceIntervals, const QVector< Interval<qreal> > &angleIntervals, const bool &normalized )
+														  const QVector< Interval<uint> > &sliceIntervals, const QVector< QVector< Interval<qreal> > > &angleIntervals, const bool &normalized )
 		{
 			Q_ASSERT_X(sliceIntervals.size() == angleIntervals.size(), "OfsExport::computeAndWriteAllSectorInAllIntervalsEdges", tr("Pas de correspondance entre intervalles de coupes et intervalles d'angles !"));
 
@@ -174,41 +174,45 @@ namespace OfsExport
 			QVector<rCoord2D> offsets;
 			rCoord2D *offsetsIterator, ofs;
 			qreal depth, angle;
-			uint j, k;
-			int i;
+			uint k, n;
+			int i, j;
 
 			int sumOfnbEdges = 0;
-			for ( i = 0; i<sliceIntervals.size() ; ++i )
+			for ( i=0 ; i<sliceIntervals.size() ; ++i )
 			{
 				const Interval<uint> &sliceInterval = sliceIntervals[i];
-				const Interval<qreal> &angleInterval = angleIntervals[i];
-
 				const qreal nbSlices = sliceInterval.width()+1;
-				const qreal angleShift = (angleInterval.min()<angleInterval.max()?angleInterval.max()-angleInterval.min():angleInterval.max()+(TWO_PI-angleInterval.min()))/(qreal)(nbEdges-1);
 
-				sumOfnbEdges += nbEdges*nbSlices;
-
-				angle = angleInterval.min()<angleInterval.max()?angleInterval.min():-TWO_PI+angleInterval.min();
-				offsets.clear();
-				offsets.reserve(nbEdges);
-				while ( angle < angleInterval.max() )
+				const QVector< Interval<qreal> > &angleIntervalsOfCurrentSliceInterval = angleIntervals[i];
+				for ( j=0 ; j<angleIntervalsOfCurrentSliceInterval.size() ; j++ )
 				{
-					offsets.append( ofsRadius * rCoord2D( qCos(angle), qSin(angle) ) );
-					angle += angleShift;
-				}
+					const Interval<qreal> &angleInterval = angleIntervalsOfCurrentSliceInterval[j];
+					const qreal angleShift = (angleInterval.min()<angleInterval.max()?angleInterval.max()-angleInterval.min():angleInterval.max()+(TWO_PI-angleInterval.min()))/(qreal)(nbEdges-1);
 
-				depth = normalized ? -0.5+depthShift*sliceInterval.min() : sliceInterval.min();
-				for ( k=sliceInterval.min() ; k<=sliceInterval.max() ; ++k )
-				{
-					ofs = billon.pithCoord(k)/norm - ofsStart;
-					offsetsIterator = offsets.data();
-					if ( !qFuzzyCompare( sliceInterval.max() - sliceInterval.min(), TWO_PI ) ) fullStream << ofs.x << ' ' << ofs.y << ' ' << depth << endl;
-					for ( j=0 ; j<nbEdges-1 ; ++j )
+					sumOfnbEdges += nbEdges*nbSlices;
+
+					angle = angleInterval.min()<angleInterval.max()?angleInterval.min():-TWO_PI+angleInterval.min();
+					offsets.clear();
+					offsets.reserve(nbEdges);
+					while ( angle < angleInterval.max() )
 					{
-						fullStream << ofs.x+offsetsIterator->x << ' ' << ofs.y+offsetsIterator->y << ' ' << depth << endl;
-						offsetsIterator++;
+						offsets.append( ofsRadius * rCoord2D( qCos(angle), qSin(angle) ) );
+						angle += angleShift;
 					}
-					depth += depthShift;
+
+					depth = normalized ? -0.5+depthShift*sliceInterval.min() : sliceInterval.min();
+					for ( k=sliceInterval.min() ; k<=sliceInterval.max() ; ++k )
+					{
+						ofs = billon.pithCoord(k)/norm - ofsStart;
+						offsetsIterator = offsets.data();
+						if ( !qFuzzyCompare( sliceInterval.max() - sliceInterval.min(), TWO_PI ) ) fullStream << ofs.x << ' ' << ofs.y << ' ' << depth << endl;
+						for ( n=0 ; n<nbEdges-1 ; ++n )
+						{
+							fullStream << ofs.x+offsetsIterator->x << ' ' << ofs.y+offsetsIterator->y << ' ' << depth << endl;
+							offsetsIterator++;
+						}
+						depth += depthShift;
+					}
 				}
 
 			}

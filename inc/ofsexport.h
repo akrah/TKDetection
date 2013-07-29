@@ -16,11 +16,11 @@ namespace OfsExport
 {
 	void writeHeader( QTextStream &stream );
 	void processOnPith( QTextStream &stream, const Billon &billon, const Interval<uint> &sliceInterval, const int &nbEdgesPerSlice,
-						const int &radiusOfTubes, const bool &normalized = false );
-	void processOnSector( QTextStream &stream, const Billon &billon, const qreal &minAngle, const qreal &maxAngle,
-						  const int &nbEdgesPerSlice, const bool &normalized = false );
-	void processOnAllSectorInAllIntervals( QTextStream &stream, const Billon &billon, const QVector< QPair< Interval<uint>, QPair<qreal,qreal> > > &intervals,
-										   const int &nbEdgesPerSlice,  const bool &normalized = false );
+						const int &radiusOfTubes, const bool &normalized );
+	void processOnSector( QTextStream &stream, const Billon &billon, const int &nbEdgesPerSlice, const uint &radius, const Interval<uint> &sliceInterval,
+						  const Interval<qreal> &angleInterval, const bool &normalized );
+	void processOnAllSectorInAllIntervals( QTextStream &stream, const Billon &billon, const uint &nbEdgesPerSlice, const uint &radius,
+										   const QVector< Interval<uint> > &sliceIntervals, const QVector< QVector< Interval<qreal> > > &angleIntervals, const bool &normalized );
 	void processOnRestrictedMesh( QTextStream &stream, const Billon &billon, const Interval<uint> & sliceInterval, const QVector<rCoord2D> &vectVertex,
 								  const uint & circleResolution, const bool &normalized, const bool &displayBegEndFaces = false );
 }
