@@ -41,13 +41,13 @@ TRANSLATIONS = TKDetection_en.ts
 #---------#
 SOURCES	=	src/main.cpp \
 			src/billonalgorithms.cpp \
+			src/concavitypointseriecurve.cpp \
 			src/connexcomponentextractor.cpp \
 			src/contour.cpp \
 			src/contourbillon.cpp \
 			src/contourdistanceshistogram.cpp \
 			src/contourslice.cpp \
 			src/curvaturehistogram.cpp \
-			src/datexport.cpp \
 			src/dicomreader.cpp \
 			src/globalfunctions.cpp \
 			src/intensitydistributionhistogram.cpp \
@@ -60,6 +60,7 @@ SOURCES	=	src/main.cpp \
 			src/piepart.cpp \
 			src/pith.cpp \
 			src/pithextractor.cpp \
+			src/plotconcavitypointseriecurve.cpp \
 			src/plotcontourdistanceshistogram.cpp \
 			src/plotcurvaturehistogram.cpp \
 			src/plotintensitydistributionhistogram.cpp \
@@ -75,11 +76,10 @@ SOURCES	=	src/main.cpp \
 			tst/test_intervalshistogram.cpp \
 			src/tiffreader.cpp \
 			src/v3dexport.cpp \
-	src/concavitypointseriecurve.cpp \
-	src/plotconcavitypointseriecurve.cpp
 
 HEADERS	=	inc/billon.h \
 			inc/billonalgorithms.h \
+			inc/concavitypointseriecurve.h \
 			inc/connexcomponentextractor.h \
 			inc/contour.h \
 			inc/contourbillon.h \
@@ -87,7 +87,6 @@ HEADERS	=	inc/billon.h \
 			inc/contourslice.h \
 			inc/coordinate.h \
 			inc/curvaturehistogram.h \
-			inc/datexport.h \
 			inc/define.h \
 			def/def_billon.h \
 			def/def_coordinate.h \
@@ -106,6 +105,7 @@ HEADERS	=	inc/billon.h \
 			inc/piechart.h \
 			inc/pith.h \
 			inc/pithextractor.h \
+			inc/plotconcavitypointseriecurve.h \
 			inc/plotcontourdistanceshistogram.h \
 			inc/plotcurvaturehistogram.h \
 			inc/plotintensitydistributionhistogram.h \
@@ -121,8 +121,6 @@ HEADERS	=	inc/billon.h \
 			tst/test_intervalshistogram.h \
 			inc/tiffreader.h \
 			inc/v3dexport.h \
-	inc/concavitypointseriecurve.h \
-	inc/plotconcavitypointseriecurve.h
 
 FORMS =	ui/mainwindow.ui
 

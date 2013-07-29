@@ -1,10 +1,8 @@
 #include "inc/ofsexport.h"
 
-#include "def/def_coordinate.h"
 #include "inc/coordinate.h"
 #include "inc/billon.h"
 #include "inc/billonalgorithms.h"
-#include "inc/pith.h"
 
 #include <QTextStream>
 #include <QFile>
@@ -15,184 +13,140 @@ namespace OfsExport
 	namespace
 	{
 		// Calcul les coordonnées des sommets du maillage de la moelle
-		void computeAndWriteAllEdges( QTextStream &stream,const Billon &billon, const Interval<uint> &sliceInterval, const uint &nbEdges, const uint &radius, const bool &normalized );
-		void computeAndWriteSectorEdges( QTextStream &stream,const Billon &billon, const Interval<uint> &sliceInterval, const uint &nbEdges, const qreal &minAngle, const qreal &maxAngle, const bool &normalized);
-		void computeAndWriteAllSectorInAllIntervalsEdges( QTextStream &stream, const Billon &billon, const QVector< QPair< Interval<uint>, QPair<qreal, qreal> > > &intervals, const uint &nbEdges, const bool &normalized );
+		void computeAndWriteSectorEdges( QTextStream &stream, const Billon &billon, const uint &nbEdges, const uint &radius,
+										 const Interval<uint> &sliceInterval, const Interval<qreal> &angleInterval, const bool &normalized );
+		void computeAndWriteAllSectorInAllIntervalsEdges(QTextStream &stream, const Billon &billon, const uint &nbEdges, const uint &radius,
+														  const QVector< Interval<uint> > &sliceIntervals, const QVector<QVector<Interval<qreal> > > & angleIntervals, const bool &normalized );
 
 		// Calcul les faces du maillages de la moelle
 		void computeAndWriteEdgesLinks( QTextStream &stream, const int &nbEdges, const int &nbSlices, bool displayBegEndFaces );
 
 		//Rajout BK: Affiche les coordonnées des sommets pour l'export OFS (utile iuniquement pour le maillage de la zone réduite)
-		void writeExportedVertex( QTextStream &stream, const Billon &billon, const QVector<rCoord2D> &vectVertex, const Interval<uint> &interval, const uint &resolutionCercle, const bool &normalized, const bool &displayBegEndFaces );
+		void writeExportedVertex( QTextStream &stream, const Billon &billon, const QVector<rCoord2D> &vectVertex, const Interval<uint> &interval,
+								  const uint &resolutionCercle, const bool &normalized, const bool &displayBegEndFaces );
 	}
 
-	void process( const Billon &billon, const Interval<uint> &sliceInterval, const QString &fileName, const int &nbEdgesPerSlice, const int &radiusOfTubes, const bool &normalized )
+	void writeHeader( QTextStream &stream )
 	{
-		QFile file(fileName);
-		if ( file.open(QIODevice::WriteOnly) )
-		{
-			QTextStream stream(&file);
-			stream << "OFS MHD" << endl;
-			computeAndWriteAllEdges( stream, billon, sliceInterval, nbEdgesPerSlice, radiusOfTubes, normalized );
-			computeAndWriteEdgesLinks( stream, nbEdgesPerSlice, sliceInterval.width()+1, true );
-			file.close();
-		}
-		else
-		{
-			qDebug() << QObject::tr("%1 file writing error.").arg(fileName);
-		}
+		stream << "OFS MHD" << endl;
 	}
 
-	void processOnSector( const Billon &billon, const Interval<uint> &interval, const QString &fileName, const qreal &minAngle, const qreal &maxAngle, const int &nbEdgesPerSlice, const bool &normalized )
+	void processOnPith( QTextStream &stream, const Billon &billon, const Interval<uint> &sliceInterval, const int &nbEdgesPerSlice, const int &radiusOfTubes, const bool &normalized )
 	{
-		QFile file(fileName);
-		if ( file.open(QIODevice::WriteOnly) )
-		{
-			QTextStream stream(&file);
-			stream << "OFS MHD" << endl;
-			computeAndWriteSectorEdges( stream, billon, interval, nbEdgesPerSlice, minAngle, maxAngle, normalized );
-			computeAndWriteEdgesLinks( stream, nbEdgesPerSlice, interval.width()+1, true );
-			file.close();
-		}
-		else
-		{
-			qDebug() << QObject::tr("%1 file writing error.").arg(fileName);
-		}
+		computeAndWriteSectorEdges( stream, billon, nbEdgesPerSlice, radiusOfTubes, sliceInterval, Interval<qreal>(0,TWO_PI), normalized );
+		computeAndWriteEdgesLinks( stream, nbEdgesPerSlice, sliceInterval.width()+1, true );
 	}
 
-	void processOnAllSectorInAllIntervals( const Billon &billon, const QVector<QPair<Interval<uint>, QPair<qreal, qreal> > > &intervals, const QString &fileName, const int &nbEdgesPerSlice, const bool &normalized )
+	void processOnSector( QTextStream &stream, const Billon &billon, const int &nbEdgesPerSlice, const uint &radius, const Interval<uint> &sliceInterval,
+						  const Interval<qreal> &angleInterval, const bool &normalized )
 	{
-		QFile file(fileName);
-		if ( file.open(QIODevice::WriteOnly) )
-		{
-			QTextStream stream(&file);
-			stream << "OFS MHD" << endl;
-			computeAndWriteAllSectorInAllIntervalsEdges( stream, billon, intervals, nbEdgesPerSlice, normalized );
+		computeAndWriteSectorEdges( stream, billon, nbEdgesPerSlice, radius, sliceInterval, angleInterval, normalized );
+		computeAndWriteEdgesLinks( stream, nbEdgesPerSlice, sliceInterval.width()+1, true );
+	}
 
-			QString fullStream;
-			int sumNbLinks = 0;
-			int currentBase = 0;
-			const int nbPointsFoTube = 4*nbEdgesPerSlice;
-			for ( int k=0 ; k<intervals.size() ; ++k )
+	void processOnAllSectorInAllIntervals( QTextStream &stream, const Billon &billon, const uint &nbEdgesPerSlice, const uint &radius,
+										   const QVector< Interval<uint> > &sliceIntervals, const QVector< QVector< Interval<qreal> > > &angleIntervals, const bool &normalized )
+	{
+		computeAndWriteAllSectorInAllIntervalsEdges( stream, billon, nbEdgesPerSlice, radius, sliceIntervals, angleIntervals, normalized );
+
+		QTextStream fullStream;
+		uint i, base;
+		int k;
+
+		int sumNbLinks = 0;
+		int currentBase = 0;
+		const uint nbPointsFoTube = 4*nbEdgesPerSlice;
+
+		for ( k=0 ; k<sliceIntervals.size() ; ++k )
+		{
+			const int nbSlices = sliceIntervals[k].size()+1;
+			const uint nbPoints = nbEdgesPerSlice*nbSlices;
+
+			sumNbLinks += 2*(nbEdgesPerSlice+nbPoints);
+
+			// La face de devant
+			for ( i=1 ; i<nbEdgesPerSlice-1 ; ++i )
 			{
-				const int nbSlices = intervals[k].first.size();
-				const int nbPoints = nbEdgesPerSlice*(nbSlices-1);
-
-				sumNbLinks += 2*(nbEdgesPerSlice+nbPoints-2);
-
-				// La face de devant
-				for ( int i=1 ; i<nbEdgesPerSlice-1 ; ++i )
-				{
-					stream << currentBase << ' ' << currentBase+i << ' ' << currentBase+i+1 << endl;
-				}
-				// Les autres faces
-				QList<qint32> tubes;
-				int i;
-				for ( i=0 ; i<nbEdgesPerSlice-1 ; ++i )
-				{
-					tubes.append(currentBase+i);
-					tubes.append(currentBase+i+nbEdgesPerSlice);
-					tubes.append(currentBase+i+nbEdgesPerSlice+1);
-					tubes.append(currentBase+i+1);
-				}
+				fullStream << currentBase << ' ' << currentBase+i << ' ' << currentBase+i+1 << endl;
+			}
+			// Les autres faces
+			QList<qint32> tubes;
+			for ( i=0 ; i<nbEdgesPerSlice-1 ; ++i )
+			{
 				tubes.append(currentBase+i);
 				tubes.append(currentBase+i+nbEdgesPerSlice);
-				tubes.append(currentBase+nbEdgesPerSlice);
-				tubes.append(currentBase);
-				for ( int base = 0 ; base<nbPoints ; base += nbEdgesPerSlice )
-				{
-					for ( int i=0 ; i<nbPointsFoTube ; i+=4 ) {
-						stream << base+tubes[i] << ' ' << base+tubes[i+1] << ' ' << base+tubes[i+2] << endl;
-						stream << base+tubes[i] << ' ' << base+tubes[i+2] << ' ' << base+tubes[i+3] << endl;
-					}
-				}
-				// La face de derrière
-				const int lastBase = currentBase+nbPoints;
-				for ( int i=lastBase+1 ; i<nbSlices*nbEdgesPerSlice-1 ; ++i )
-				{
-					stream << lastBase << ' ' << i+1 << ' ' << i << endl;
-				}
-
-				currentBase += nbSlices*nbEdgesPerSlice;
+				tubes.append(currentBase+i+nbEdgesPerSlice+1);
+				tubes.append(currentBase+i+1);
 			}
-			stream << endl;
-			stream << sumNbLinks << endl;
-			stream << fullStream;
+			tubes.append(currentBase+i);
+			tubes.append(currentBase+i+nbEdgesPerSlice);
+			tubes.append(currentBase+nbEdgesPerSlice);
+			tubes.append(currentBase);
+			for ( base = 0 ; base<nbPoints ; base += nbEdgesPerSlice )
+			{
+				for ( i=0 ; i<nbPointsFoTube ; i+=4 ) {
+					fullStream << base+tubes[i] << ' ' << base+tubes[i+1] << ' ' << base+tubes[i+2] << endl;
+					fullStream << base+tubes[i] << ' ' << base+tubes[i+2] << ' ' << base+tubes[i+3] << endl;
+				}
+			}
+			// La face de derrière
+			const int lastBase = currentBase+nbPoints;
+			for ( i=lastBase+1 ; i<nbSlices*nbEdgesPerSlice-1 ; ++i )
+			{
+				fullStream << lastBase << ' ' << i+1 << ' ' << i << endl;
+			}
 
-			file.close();
+			currentBase += nbSlices*nbEdgesPerSlice;
 		}
-		else
-		{
-			qDebug() << QObject::tr("%1 file writing error.").arg(fileName);
-		}
+		stream << endl;
+		stream << sumNbLinks << endl;
+		stream << *(fullStream.string());
 	}
 
-	void processOnRestrictedMesh( const Billon &billon, const Interval<uint> & sliceInterval, const QString &fileName, const uint & circleResolution, const int &contourThreshold, const bool &normalized, const bool &displayBegEndFaces )
+	void processOnRestrictedMesh( QTextStream &stream, const Billon &billon, const Interval<uint> & sliceInterval, const QVector<rCoord2D> &vectVertex,
+								  const uint & circleResolution, const bool &normalized, const bool &displayBegEndFaces )
 	{
-		QVector<rCoord2D> vectVertex = BillonAlgorithms::restrictedAreaVertex( billon, sliceInterval, circleResolution, contourThreshold );
-		if ( !vectVertex.isEmpty() )
-		{
-			QFile file(fileName);
-			if ( file.open(QIODevice::WriteOnly) )
-			{
-				QTextStream stream(&file);
-				stream << "OFS MHD" << endl;
-				writeExportedVertex(stream, billon, vectVertex, sliceInterval, circleResolution, normalized, displayBegEndFaces);
-				computeAndWriteEdgesLinks( stream, circleResolution, sliceInterval.width()+1, displayBegEndFaces );
-				file.close();
-			}
-			else
-			{
-				qDebug() << QObject::tr("%1 file writing error.").arg(fileName);
-			}
-		}
-		else
-		{
-			qDebug() << QObject::tr("No vertex to write");
-		}
+		writeExportedVertex(stream, billon, vectVertex, sliceInterval, circleResolution, normalized, displayBegEndFaces);
+		computeAndWriteEdgesLinks( stream, circleResolution, sliceInterval.width()+1, displayBegEndFaces );
 	}
 
 
 	namespace
 	{
-		void computeAndWriteAllEdges( QTextStream &stream, const Billon &billon, const Interval<uint> &sliceInterval, const uint &nbEdges, const uint &radius, const bool &normalized )
+		// Les angles doivent être compris entre 0 et 360
+		void computeAndWriteSectorEdges( QTextStream &stream, const Billon &billon, const uint &nbEdges, const uint &radius,
+										 const Interval<uint> &sliceInterval, const Interval<qreal> &angleInterval, const bool &normalized )
 		{
-		       //variable ajoutée @todo supprimer
-  		        bool autoCenter = false;
-		  
 			const int width = billon.n_cols;
 			const int height = billon.n_rows;
-			const qreal nbSlices = sliceInterval.size();
-			const qreal depthShift = 1./(normalized? nbSlices: 1.0);
-			const qreal angleShift = TWO_PI/(qreal)nbEdges;
+			const qreal nbSlices = sliceInterval.width()+1;
+			const qreal depthShift = 1./( normalized ? billon.n_slices : 1. );
+			const qreal angleShift = (angleInterval.min()<angleInterval.max()?angleInterval.max()-angleInterval.min():angleInterval.max()+(TWO_PI-angleInterval.min()))/(qreal)(nbEdges-1);
 			const rCoord2D norm = normalized ? rCoord2D(width,height) : rCoord2D(1.,1.);
 			const rCoord2D ofsRadius = rCoord2D( radius, radius )/norm;
-
-			uint i, k;
+			const rCoord2D ofsStart(normalized?-0.5:0,normalized?-0.5:0);
 
 			QVector<rCoord2D> offsets;
-			offsets.reserve(nbEdges);
-			qreal angle = 0;
+			rCoord2D *offsetsIterator, ofs;
+			uint i, k;
 
-			while ( angle < TWO_PI )
+			qreal angle = angleInterval.min()<angleInterval.max()?angleInterval.min():-TWO_PI+angleInterval.min();
+			offsets.reserve(nbEdges);
+			while ( angle < angleInterval.max() )
 			{
 				offsets.append( ofsRadius * rCoord2D( qCos(angle), qSin(angle) ) );
 				angle += angleShift;
 			}
-			
-			const rCoord2D ofsStart(normalized?0.5:width/2,normalized?0.5:height/2);
-			rCoord2D *offsetsIterator, ofs;
-			qreal depth = normalized ? -0.5 : (autoCenter? -(sliceInterval.size()/2.) :0 );
 
 			stream << endl;
-			stream << nbEdges*(sliceInterval.width()+1) << endl;
+			stream << nbEdges*nbSlices << endl;
+
+			qreal depth = normalized ? -0.5+depthShift*sliceInterval.min() : sliceInterval.min();
 			for ( k=sliceInterval.min() ; k<=sliceInterval.max() ; ++k )
 			{
-			  if(autoCenter)
-			    ofs = billon.pithCoord(k)/norm - ofsStart;
-			  else 
-			    ofs = billon.pithCoord(k);
-			  offsetsIterator = offsets.data();
+				ofs = billon.pithCoord(k)/norm + ofsStart;
+				offsetsIterator = offsets.data();
+				if ( !qFuzzyCompare( sliceInterval.max()-sliceInterval.min(), TWO_PI ) ) stream << ofs.x << ' ' << ofs.y << ' ' << depth << endl;
 				for ( i=0 ; i<nbEdges ; ++i )
 				{
 					stream << ofs.x+offsetsIterator->x << ' ' << ofs.y+offsetsIterator->y << ' ' << depth << endl;
@@ -202,99 +156,63 @@ namespace OfsExport
 			}
 		}
 
-		// Les angles doivent être compris entre 0 et 360
-		void computeAndWriteSectorEdges( QTextStream &stream, const Billon &billon, const Interval<uint> &sliceInterval, const uint &nbEdges, const qreal &minAngle, const qreal &maxAngle, const bool &normalized )
+
+
+		void computeAndWriteAllSectorInAllIntervalsEdges( QTextStream &stream, const Billon &billon, const uint &nbEdges, const uint &radius,
+														  const QVector< Interval<uint> > &sliceIntervals, const QVector< QVector< Interval<qreal> > > &angleIntervals, const bool &normalized )
 		{
+			Q_ASSERT_X(sliceIntervals.size() == angleIntervals.size(), "OfsExport::computeAndWriteAllSectorInAllIntervalsEdges", tr("Pas de correspondance entre intervalles de coupes et intervalles d'angles !"));
+
 			const int width = billon.n_cols;
 			const int height = billon.n_rows;
-			const int nbSlices = sliceInterval.size();
-			const qreal depthShift = 1./(normalized? (qreal)nbSlices:1.);
-			const qreal angleShift = (minAngle<maxAngle?maxAngle-minAngle:maxAngle+(TWO_PI-minAngle))/(qreal)(nbEdges-1);
-			uint i, k;
-
-			stream << endl;
-			stream << nbEdges*(nbSlices+1) << endl;
-
-			const rCoord2D ofsStart(normalized?0.5:width/2,normalized?0.5:height/2);
+			const qreal depthShift = 1./(normalized?billon.n_slices:1.0);
 			const rCoord2D norm = normalized ? rCoord2D(width,height) : rCoord2D(1.,1.);
-			QVector<rCoord2D> offsets;
-			rCoord2D *offsetsIterator, ofs, ofsRadius;
-			iCoord2D coord;
-			qreal depth = normalized ? -0.5 : -(sliceInterval.size()/2.);
-
-			qreal angle;
-			for ( k=sliceInterval.min() ; k<=sliceInterval.max() ; ++k )
-			{
-				coord = billon.pithCoord(k);
-				ofs = coord/norm - ofsStart;
-				ofsRadius = rCoord2D( qMin(coord.x,width-coord.x), qMin(coord.y,width-coord.y) )/norm;
-				angle = minAngle<maxAngle?minAngle:-TWO_PI+minAngle;
-				offsets.clear();
-				while ( angle < maxAngle )
-				{
-					offsets.append( ofsRadius * rCoord2D( qCos(angle), qSin(angle) ) );
-					angle += angleShift;
-				}
-				offsetsIterator = offsets.data();
-				stream << ofs.x << ' ' << ofs.y << ' ' << depth << endl;
-				for ( i=0 ; i<nbEdges-1 ; ++i )
-				{
-					stream << ofs.x+offsetsIterator->x << ' ' << ofs.y+offsetsIterator->y << ' ' << depth << endl;
-					offsetsIterator++;
-				}
-				depth += depthShift;
-			}
-		}
-
-
-
-		void computeAndWriteAllSectorInAllIntervalsEdges( QTextStream &stream, const Billon &billon, const QVector< QPair< Interval<uint>, QPair<qreal,qreal> > > &intervals, const uint &nbEdges, const bool &normalized )
-		{
-			const int width = billon.n_cols;
-			const int height = billon.n_rows;
+			const rCoord2D ofsRadius = rCoord2D( radius, radius )/norm;
+			const rCoord2D ofsStart(normalized?-0.5:0,normalized?-0.5:0);
 
 			QTextStream fullStream;
-			int sumOfnbEdges = 0;
 			QVector<rCoord2D> offsets;
-			rCoord2D *offsetsIterator, ofs, ofsRadius;
+			rCoord2D *offsetsIterator, ofs;
 			qreal depth, angle;
-			uint l;
+			uint k, n;
+			int i, j;
 
-			const rCoord2D ofsStart(normalized?0.5:width/2,normalized?0.5:height/2);
-			const rCoord2D norm = normalized ? rCoord2D(width,height) : rCoord2D(1.,1.);
-
-			for ( int k = 0; k<intervals.size() ; ++k )
+			int sumOfnbEdges = 0;
+			for ( i=0 ; i<sliceIntervals.size() ; ++i )
 			{
-				const Interval<uint> interval = intervals[k].first;
-				const qreal minAngle = intervals[k].second.first;
-				const qreal maxAngle = intervals[k].second.second;
+				const Interval<uint> &sliceInterval = sliceIntervals[i];
+				const qreal nbSlices = sliceInterval.width()+1;
 
-				const qreal depthShift = 1./(normalized? static_cast<qreal>(interval.size()):1.0);
-				const qreal angleShift = (minAngle<maxAngle?maxAngle-minAngle:maxAngle+(TWO_PI-minAngle))/(qreal)(nbEdges-1);
-
-				sumOfnbEdges += nbEdges*(interval.size()+1);
-
-				depth = normalized ? -0.5 : -(interval.size()/2.);
-				for ( l=interval.min() ; l<=interval.max() ; ++l )
+				const QVector< Interval<qreal> > &angleIntervalsOfCurrentSliceInterval = angleIntervals[i];
+				for ( j=0 ; j<angleIntervalsOfCurrentSliceInterval.size() ; j++ )
 				{
-					const iCoord2D &coord = billon.pithCoord(l);
-					ofs = coord/norm - ofsStart;
-					ofsRadius = rCoord2D( qMin(coord.x,width-coord.x), qMin(coord.y,height-coord.y) )/norm;
-					angle = minAngle<maxAngle?minAngle:-TWO_PI+minAngle;
+					const Interval<qreal> &angleInterval = angleIntervalsOfCurrentSliceInterval[j];
+					const qreal angleShift = (angleInterval.min()<angleInterval.max()?angleInterval.max()-angleInterval.min():angleInterval.max()+(TWO_PI-angleInterval.min()))/(qreal)(nbEdges-1);
+
+					sumOfnbEdges += nbEdges*nbSlices;
+
+					angle = angleInterval.min()<angleInterval.max()?angleInterval.min():-TWO_PI+angleInterval.min();
 					offsets.clear();
-					while ( angle < maxAngle )
+					offsets.reserve(nbEdges);
+					while ( angle < angleInterval.max() )
 					{
 						offsets.append( ofsRadius * rCoord2D( qCos(angle), qSin(angle) ) );
 						angle += angleShift;
 					}
-					offsetsIterator = offsets.data();
-					fullStream << ofs.x << ' ' << ofs.y << ' ' << depth << endl;
-					for ( uint i=0 ; i<nbEdges-1 ; ++i )
+
+					depth = normalized ? -0.5+depthShift*sliceInterval.min() : sliceInterval.min();
+					for ( k=sliceInterval.min() ; k<=sliceInterval.max() ; ++k )
 					{
-						stream << ofs.x+offsetsIterator->x << ' ' << ofs.y+offsetsIterator->y << ' ' << depth << endl;
-						offsetsIterator++;
+						ofs = billon.pithCoord(k)/norm - ofsStart;
+						offsetsIterator = offsets.data();
+						if ( !qFuzzyCompare( sliceInterval.max() - sliceInterval.min(), TWO_PI ) ) fullStream << ofs.x << ' ' << ofs.y << ' ' << depth << endl;
+						for ( n=0 ; n<nbEdges-1 ; ++n )
+						{
+							fullStream << ofs.x+offsetsIterator->x << ' ' << ofs.y+offsetsIterator->y << ' ' << depth << endl;
+							offsetsIterator++;
+						}
+						depth += depthShift;
 					}
-					depth += depthShift;
 				}
 
 			}
@@ -303,20 +221,22 @@ namespace OfsExport
 			stream << *(fullStream.string());
 		}
 
-		void writeExportedVertex( QTextStream &stream, const Billon &billon, const QVector<rCoord2D> &vectVertex, const Interval<uint> &sliceInterval,const uint &resolutionCercle, const bool &normalized, const bool &displayBegEndFaces )
+		void writeExportedVertex( QTextStream &stream, const Billon &billon, const QVector<rCoord2D> &vectVertex, const Interval<uint> &sliceInterval,
+								  const uint &resolutionCercle, const bool &normalized, const bool &displayBegEndFaces )
 		{
 			const int width = billon.n_cols;
 			const int height = billon.n_rows;
-			const qreal depthShift = 1./(normalized ? (qreal)sliceInterval.width() : 1.);
+			const qreal nbSlices = sliceInterval.width()+1;
+			const qreal depthShift = 1./(normalized ? nbSlices : 1.);
 			int pos=0;
 
 			const rCoord2D ofsStart = normalized ? rCoord2D(0.5,0.5) : rCoord2D(width/2,height/2);
 			const rCoord2D norm = normalized ? rCoord2D( width, height ) : rCoord2D(1.,1.);
-			qreal depth = normalized ? -0.5 : -(sliceInterval.size()/2.);
+			qreal depth = normalized ? -0.5 : -(nbSlices/2.);
 			uint i, k;
 
 			stream << endl;
-			stream << resolutionCercle*(sliceInterval.width()+1) << endl;
+			stream << resolutionCercle*nbSlices << endl;
 			for ( k=sliceInterval.min() ; k<=sliceInterval.max() ; ++k )
 			{
 				pos = k*resolutionCercle;
