@@ -16,7 +16,7 @@ namespace OfsExport
 		void computeAndWriteSectorEdges( QTextStream &stream, const Billon &billon, const uint &nbEdges, const uint &radius,
 										 const Interval<uint> &sliceInterval, const Interval<qreal> &angleInterval, const bool &normalized );
 		void computeAndWriteAllSectorInAllIntervalsEdges(QTextStream &stream, const Billon &billon, const uint &nbEdges, const uint &radius,
-														  const QVector< Interval<uint> > &sliceIntervals, const QVector<QVector<Interval<qreal> > > & angleIntervals, const bool &normalized );
+														  const QVector< Interval<uint> > &sliceIntervals, const QVector<QVector<Interval<qreal> > > &angleIntervals, const bool &normalized );
 
 		// Calcul les faces du maillages de la moelle
 		void computeAndWriteEdgesLinks( QTextStream &stream, const int &nbEdges, const int &nbSlices, bool displayBegEndFaces );
@@ -216,6 +216,7 @@ namespace OfsExport
 				}
 
 			}
+
 			stream << endl;
 			stream << sumOfnbEdges << endl;
 			stream << *(fullStream.string());

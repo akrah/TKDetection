@@ -22,7 +22,7 @@ namespace OfsExport
 	void processOnAllSectorInAllIntervals( QTextStream &stream, const Billon &billon, const uint &nbEdgesPerSlice, const uint &radius,
 										   const QVector< Interval<uint> > &sliceIntervals, const QVector< QVector< Interval<qreal> > > &angleIntervals, const bool &normalized );
 	void processOnRestrictedMesh( QTextStream &stream, const Billon &billon, const Interval<uint> & sliceInterval, const QVector<rCoord2D> &vectVertex,
-								  const uint & circleResolution, const bool &normalized, const bool &displayBegEndFaces = false );
+								  const uint & circleResolution, const bool &normalized, const bool &displayBegEndFace );
 }
 
 

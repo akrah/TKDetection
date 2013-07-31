@@ -1333,6 +1333,7 @@ void MainWindow::exportAllKnotAreasToOfs()
 				angleIntervals[i].append( Interval<qreal>( PieChartSingleton::getInstance()->sector(sectorInterval.min()).minAngle(), PieChartSingleton::getInstance()->sector(sectorInterval.max()).maxAngle() ) );
 			}
 		}
+
 		QFile file(fileName);
 		if ( file.open(QIODevice::WriteOnly) )
 		{

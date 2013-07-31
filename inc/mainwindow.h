@@ -94,9 +94,9 @@ private:
 
 	void exportPithToOfs( const bool &onCurrentSliceInterval );
 	void exportCompleteBillonToOfs();
-	void exportAllKnotAreasToOfs();
-	void exportAllKnotAreasOfCurrentSliceIntervalToOfs();
 	void exportCurrentKnotAreaToOfs();
+	void exportAllKnotAreasOfCurrentSliceIntervalToOfs();
+	void exportAllKnotAreasToOfs();
 
 	void exportSliceHistogramToSep();
 	void exportSectorHistogramToSep();
