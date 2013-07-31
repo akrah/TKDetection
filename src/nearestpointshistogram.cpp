@@ -44,11 +44,15 @@ void NearestPointsHistogram::computeMaximumsAndIntervals( const uint &smoothingR
 											derivativesPercentage, minimumWidthOfIntervals , loop );
 
 
-	QVector< Interval<uint> >::Iterator intervalsIter = _intervals.begin();
-	while ( intervalsIter != _intervals.end() )
+	QMutableVectorIterator< Interval<uint> > intervalsIter(_intervals);
+	while ( intervalsIter.hasNext() )
 	{
-		Interval<uint> &currentInterval = *intervalsIter++;
-		currentInterval.setMin( currentInterval.min() + smoothingRadius + 1 );
-		currentInterval.setMax( currentInterval.max() - smoothingRadius - 1 );
+		Interval<uint> &currentInterval = intervalsIter.next();
+		if ( currentInterval.max() - currentInterval.min() > 2*smoothingRadius+2 )
+		{
+			currentInterval.setMin( currentInterval.min() + smoothingRadius + 1 );
+			currentInterval.setMax( currentInterval.max() - smoothingRadius - 1 );
+		}
+		else intervalsIter.remove();
 	}
 }

@@ -161,7 +161,7 @@ namespace OfsExport
 		void computeAndWriteAllSectorInAllIntervalsEdges( QTextStream &stream, const Billon &billon, const uint &nbEdges, const uint &radius,
 														  const QVector< Interval<uint> > &sliceIntervals, const QVector< QVector< Interval<qreal> > > &angleIntervals, const bool &normalized )
 		{
-			Q_ASSERT_X(sliceIntervals.size() == angleIntervals.size(), "OfsExport::computeAndWriteAllSectorInAllIntervalsEdges", tr("Pas de correspondance entre intervalles de coupes et intervalles d'angles !"));
+			Q_ASSERT_X(sliceIntervals.size() == angleIntervals.size(), "OfsExport::computeAndWriteAllSectorInAllIntervalsEdges", QObject::tr("Pas de correspondance entre intervalles de coupes et intervalles d'angles !").toStdString().c_str());
 
 			const int width = billon.n_cols;
 			const int height = billon.n_rows;
