@@ -7,6 +7,8 @@
 #include "def/def_coordinate.h"
 #include "slicezoomer.h"
 
+#include <chrono>
+
 namespace Ui
 {
 	class MainWindow;
@@ -61,7 +63,7 @@ private slots:
 
 	void selectSliceInterval( const int &index );
 	void selectCurrentSliceInterval();
-	void selectSectorInterval( const int &index, const bool &draw = true );
+	void selectSectorInterval(const int &index, const bool &draw = true , qreal *execTime = 0 );
 	void selectCurrentSectorInterval();
 
 	void updatePith();

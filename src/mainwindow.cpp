@@ -694,7 +694,7 @@ void MainWindow::selectCurrentSliceInterval()
 	selectSliceInterval(_ui->_comboSelectSliceInterval->currentIndex());
 }
 
-void MainWindow::selectSectorInterval(const int &index, const bool &draw )
+void MainWindow::selectSectorInterval(const int &index, const bool &draw, qreal *execTime )
 {
 	if ( _componentBillon )
 	{
@@ -742,6 +742,9 @@ void MainWindow::selectSectorInterval(const int &index, const bool &draw )
 			}
 		}
 
+		std::chrono::system_clock::time_point start;
+		if (execTime) start = std::chrono::system_clock::now();
+
 		ConnexComponentExtractor::extractConnexComponents(*_componentBillon,*_componentBillon,qPow(_ui->_spinMinimalSizeOf3DConnexComponents->value(),3),intensityInterval.min());
 
 		for ( k=0 ; k<_componentBillon->n_slices ; ++k )
@@ -762,6 +765,7 @@ void MainWindow::selectSectorInterval(const int &index, const bool &draw )
 		_contourBillon->compute( *_knotBillon, *_componentBillon, 0, _ui->_spinContourSmoothingRadius->value(), _ui->_spinCurvatureWidth->value(),
 								 -_ui->_spinCurvatureThreshold->value(), _nearestPointsHistogram->intervals(), angularInterval, _ui->_spinMinimumDistanceFromContourOrigin->value() );
 
+		if (execTime) (*execTime) += std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - start).count();
 	}
 	if (draw)
 	{
@@ -1990,10 +1994,11 @@ void MainWindow::exportSegmentedKnotsOfCurrentSliceIntervalToSdp()
 
 				int sectorIndex;
 				uint k;
+				double execTime = 0.;
 
 				for ( sectorIndex=1 ; sectorIndex< _ui->_comboSelectSectorInterval->count() ; ++sectorIndex )
 				{
-					_ui->_comboSelectSectorInterval->setCurrentIndex(sectorIndex);
+					selectSectorInterval( sectorIndex, false, &execTime );
 					if ( _knotBillon )
 					{
 						for ( k=0 ; k<_knotBillon->n_slices ; ++k )
@@ -2002,6 +2007,8 @@ void MainWindow::exportSegmentedKnotsOfCurrentSliceIntervalToSdp()
 						}
 					}
 				}
+
+				qDebug() << "Temps d'exécutiuon : " << execTime << "ms";
 
 				file.close();
 
@@ -2034,7 +2041,7 @@ void MainWindow::exportAllSegmentedKnotsOfBillonToSdp()
 					_ui->_comboSelectSliceInterval->setCurrentIndex(intervalIndex);
 					for ( sectorIndex=1 ; sectorIndex< _ui->_comboSelectSectorInterval->count() ; ++sectorIndex )
 					{
-						_ui->_comboSelectSectorInterval->setCurrentIndex(sectorIndex);
+						selectSectorInterval(sectorIndex,false);
 						if ( _knotBillon )
 						{
 							for ( k=0 ; k<_knotBillon->n_slices ; ++k )
