@@ -146,7 +146,7 @@ namespace OfsExport
 			{
 				ofs = billon.pithCoord(k)/norm + ofsStart;
 				offsetsIterator = offsets.data();
-				if ( !qFuzzyCompare( sliceInterval.max()-sliceInterval.min(), TWO_PI ) ) stream << ofs.x << ' ' << ofs.y << ' ' << depth << endl;
+				if ( !qFuzzyCompare( angleInterval.max()-angleInterval.min(), TWO_PI ) ) stream << ofs.x << ' ' << ofs.y << ' ' << depth << endl;
 				for ( i=0 ; i<nbEdges ; ++i )
 				{
 					stream << ofs.x+offsetsIterator->x << ' ' << ofs.y+offsetsIterator->y << ' ' << depth << endl;
