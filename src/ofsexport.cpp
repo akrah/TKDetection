@@ -146,7 +146,7 @@ namespace OfsExport
 			{
 				ofs = billon.pithCoord(k)/norm + ofsStart;
 				offsetsIterator = offsets.data();
-				if ( !qFuzzyCompare( angleInterval.max()-angleInterval.min(), TWO_PI ) ) stream << ofs.x << ' ' << ofs.y << ' ' << depth << endl;
+				//if ( !qFuzzyCompare( angleInterval.max()-angleInterval.min(), TWO_PI ) ) stream << ofs.x << ' ' << ofs.y << ' ' << depth << endl;
 				for ( i=0 ; i<nbEdges ; ++i )
 				{
 					stream << ofs.x+offsetsIterator->x << ' ' << ofs.y+offsetsIterator->y << ' ' << depth << endl;
@@ -227,20 +227,20 @@ namespace OfsExport
 		{
 			const int width = billon.n_cols;
 			const int height = billon.n_rows;
-			const qreal nbSlices = sliceInterval.width();
+			const qreal nbSlices = sliceInterval.width()+1;
 			const qreal depthShift = 1./(normalized ? (qreal)nbSlices : 1.);
 			int pos=0;
 
-			const rCoord2D ofsStart = normalized ? rCoord2D(0.5,0.5) : rCoord2D(width/2,height/2);
+			const rCoord2D ofsStart = normalized ? rCoord2D(0.5,0.5) : rCoord2D(0,0);
 			const rCoord2D norm = normalized ? rCoord2D( width, height ) : rCoord2D(1.,1.);
-			qreal depth = normalized ? -0.5 : -(nbSlices/2.);
+			qreal depth = normalized ? -0.5 : 0.;
 			uint i, k;
 
 			stream << endl;
 			stream << resolutionCercle*nbSlices << endl;
+			pos = sliceInterval.min()*resolutionCercle;
 			for ( k=sliceInterval.min() ; k<=sliceInterval.max() ; ++k )
 			{
-				pos = k*resolutionCercle;
 				for ( i=0 ; i<resolutionCercle ; i++ )
 				{
 					if ( displayBegEndFaces && !i && (k==sliceInterval.min() || k==sliceInterval.max()) )
