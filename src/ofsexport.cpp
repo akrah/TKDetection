@@ -120,8 +120,8 @@ namespace OfsExport
 			const int width = billon.n_cols;
 			const int height = billon.n_rows;
 			const qreal nbSlices = sliceInterval.width()+1;
-			const qreal depthShift = 1./( normalized ? billon.n_slices : 1. );
-			const qreal angleShift = (angleInterval.min()<angleInterval.max()?angleInterval.max()-angleInterval.min():angleInterval.max()+(TWO_PI-angleInterval.min()))/(qreal)(nbEdges-1);
+			const qreal depthShift = 1./( normalized ? qreal(nbSlices-1) : 1. );
+			const qreal angleShift = (angleInterval.min()<angleInterval.max()?angleInterval.max()-angleInterval.min():angleInterval.max()+TWO_PI-angleInterval.min())/(qreal)(nbEdges);
 			const rCoord2D norm = normalized ? rCoord2D(width,height) : rCoord2D(1.,1.);
 			const rCoord2D ofsRadius = rCoord2D( radius, radius )/norm;
 			const rCoord2D ofsStart(normalized?-0.5:0,normalized?-0.5:0);
@@ -165,7 +165,7 @@ namespace OfsExport
 
 			const int width = billon.n_cols;
 			const int height = billon.n_rows;
-			const qreal depthShift = 1./(normalized?billon.n_slices:1.0);
+			const qreal depthShift = 1./(normalized?(billon.n_slices):1.0);
 			const rCoord2D norm = normalized ? rCoord2D(width,height) : rCoord2D(1.,1.);
 			const rCoord2D ofsRadius = rCoord2D( radius, radius )/norm;
 			const rCoord2D ofsStart(normalized?-0.5:0,normalized?-0.5:0);
@@ -187,7 +187,7 @@ namespace OfsExport
 				for ( j=0 ; j<angleIntervalsOfCurrentSliceInterval.size() ; j++ )
 				{
 					const Interval<qreal> &angleInterval = angleIntervalsOfCurrentSliceInterval[j];
-					const qreal angleShift = (angleInterval.min()<angleInterval.max()?angleInterval.max()-angleInterval.min():angleInterval.max()+(TWO_PI-angleInterval.min()))/(qreal)(nbEdges-1);
+					const qreal angleShift = (angleInterval.min()<angleInterval.max()?angleInterval.max()-angleInterval.min():angleInterval.max()+(TWO_PI-angleInterval.min()))/(qreal)(nbEdges);
 
 					sumOfnbEdges += nbEdges*nbSlices;
 
@@ -227,8 +227,8 @@ namespace OfsExport
 		{
 			const int width = billon.n_cols;
 			const int height = billon.n_rows;
-			const qreal nbSlices = sliceInterval.width()+1;
-			const qreal depthShift = 1./(normalized ? nbSlices : 1.);
+			const qreal nbSlices = sliceInterval.width();
+			const qreal depthShift = 1./(normalized ? (qreal)nbSlices : 1.);
 			int pos=0;
 
 			const rCoord2D ofsStart = normalized ? rCoord2D(0.5,0.5) : rCoord2D(width/2,height/2);
