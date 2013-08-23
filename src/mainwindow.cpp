@@ -1998,7 +1998,7 @@ void MainWindow::exportSegmentedKnotsOfCurrentSliceIntervalToSdp()
 					{
 						for ( k=0 ; k<_knotBillon->n_slices ; ++k )
 						{
-							SliceAlgorithm::writeInSDP( _knotBillon->slice(k) , stream, _knotBillon->zPos()-_componentBillon->zPos()+k, 0 );
+							SliceAlgorithm::writeInSDP( _knotBillon->slice(k) , stream, _componentBillon->zPos()+k, 0 );
 						}
 					}
 				}
