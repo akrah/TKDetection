@@ -116,7 +116,7 @@ private:
 
 	void exportContourToSdp();
 	void exportCurrentSegmentedKnotToSdp();
-	void exportSegmentedKnotsOfCurrentSliceIntervalToSdp();
+	void exportSegmentedKnotsOfCurrentSliceIntervalToSdp(bool keepBillonSliceNumber=false);
 	void exportAllSegmentedKnotsOfBillonToSdp();
 
 private:
