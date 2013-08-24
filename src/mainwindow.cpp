@@ -1112,7 +1112,7 @@ void MainWindow::exportToSdp()
 	{
 		case 0 : exportContourToSdp();	break;
 		case 1 : exportCurrentSegmentedKnotToSdp();	break;
-		case 2 : exportSegmentedKnotsOfCurrentSliceIntervalToSdp();	break;
+		case 2 : exportSegmentedKnotsOfCurrentSliceIntervalToSdp(_ui->_checkBoxKeepBillonSliceNumber->isChecked() );	break;
 		case 3 : exportAllSegmentedKnotsOfBillonToSdp(); break;
 		default : break;
 	}
@@ -1974,7 +1974,7 @@ void MainWindow::exportCurrentSegmentedKnotToSdp()
 	else QMessageBox::warning(this,tr("Exporter le nœud courant segmenté en SDP"),tr("L'export a échoué : le nœud n'est pas segmenté."));
 }
 
-void MainWindow::exportSegmentedKnotsOfCurrentSliceIntervalToSdp()
+void MainWindow::exportSegmentedKnotsOfCurrentSliceIntervalToSdp(bool keepBillonSliceNumber)
 {
 	if ( _billon && _billon->hasPith() )
 	{
@@ -1998,7 +1998,11 @@ void MainWindow::exportSegmentedKnotsOfCurrentSliceIntervalToSdp()
 					{
 						for ( k=0 ; k<_knotBillon->n_slices ; ++k )
 						{
-							SliceAlgorithm::writeInSDP( _knotBillon->slice(k) , stream, _componentBillon->zPos()+k, 0 );
+						  if(keepBillonSliceNumber){
+						    SliceAlgorithm::writeInSDP( _knotBillon->slice(k) , stream, _componentBillon->zPos()+k, 0 );
+						  }else{
+						    SliceAlgorithm::writeInSDP( _knotBillon->slice(k) , stream, _knotBillon->zPos()-_componentBillon->zPos()+k, 0 );
+						  }
 						}
 					}
 				}
