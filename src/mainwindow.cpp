@@ -2000,7 +2000,7 @@ void MainWindow::exportSegmentedKnotsOfCurrentSliceIntervalToSdp(bool keepBillon
 						for ( k=0 ; k<_knotBillon->n_slices ; ++k )
 						{
 						  if(keepBillonSliceNumber){
-						    SliceAlgorithm::writeInSDP( _knotBillon->slice(k) , stream, _componentBillon->zPos()+k, 0 );
+						    SliceAlgorithm::writeInSDP( _knotBillon->slice(k) , stream, _knotBillon->zPos()+k, 0 );
 						  }else{
 						    SliceAlgorithm::writeInSDP( _knotBillon->slice(k) , stream, _knotBillon->zPos()-_componentBillon->zPos()+k, 0 );
 						  }
