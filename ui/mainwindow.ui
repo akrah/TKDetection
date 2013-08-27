@@ -234,8 +234,8 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>455</width>
-              <height>234</height>
+              <width>386</width>
+              <height>168</height>
              </rect>
             </property>
             <attribute name="label">
@@ -1207,8 +1207,8 @@ résolution de l'image)</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>457</width>
-              <height>274</height>
+              <width>397</width>
+              <height>216</height>
              </rect>
             </property>
             <attribute name="label">
@@ -2120,8 +2120,8 @@ résolution de l'image)</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>457</width>
-              <height>308</height>
+              <width>330</width>
+              <height>188</height>
              </rect>
             </property>
             <attribute name="label">
@@ -2575,8 +2575,8 @@ l'intervalle angulaire</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>457</width>
-              <height>206</height>
+              <width>403</width>
+              <height>180</height>
              </rect>
             </property>
             <attribute name="label">
@@ -2789,8 +2789,8 @@ l'intervalle angulaire</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>457</width>
-              <height>206</height>
+              <width>343</width>
+              <height>163</height>
              </rect>
             </property>
             <attribute name="label">
@@ -2978,8 +2978,8 @@ l'intervalle angulaire</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>457</width>
-              <height>206</height>
+              <width>273</width>
+              <height>92</height>
              </rect>
             </property>
             <attribute name="label">
@@ -3078,6 +3078,11 @@ l'intervalle angulaire</string>
                <item>
                 <property name="text">
                  <string>Nœuds du billon</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>Nœuds de l'intervalle de coupes (old Method)</string>
                 </property>
                </item>
               </widget>
