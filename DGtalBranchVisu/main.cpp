@@ -22,6 +22,22 @@ using namespace Z3i;
 
 namespace po = boost::program_options;
 
+RealPoint
+getBarycenter(const KSpace &K,  const vector<SCell> &aScellVect){
+  RealPoint pointResu;
+  unsigned int nb=0;
+  for(vector<SCell>::const_iterator it = aScellVect.begin(); it!= aScellVect.end(); it++){
+    pointResu[0] += K.sCoord( *it, 0 );
+    pointResu[1] += K.sCoord( *it, 1 );
+    pointResu[2] += K.sCoord( *it, 2 );
+    nb++;
+  }
+  pointResu[0] /=nb;
+  pointResu[1] /=nb;
+  pointResu[2] /=nb;
+  return pointResu;
+}
+
 
 
 int main(int argc, char** argv)
@@ -37,7 +53,11 @@ int main(int argc, char** argv)
     	("scaleX,x",  po::value<float>()->default_value(1.0), "set the scale value in the X direction (default 1.0)" )
 	("scaleY,y",  po::value<float>()->default_value(1.0), "set the scale value in the Y direction (default 1.0)" )
 	("scaleZ,z",  po::value<float>()->default_value(1.0), "set the scale value in the Z direction (default 1.0)")
-	("transparency,T",  po::value<uint>()->default_value(100), "transparency") ;
+    ("filterMinSize,m",  po::value<int>(), "filter according min size of connected component. The CC is given only of its size is bigger or eq than [arg]  " )
+("filterMaxX",  po::value<int>(), "filter according maximal X coordinate of the barycenter connected component. The CC is given only of its barycenter is less or eq than [arg]  " )
+    ("filterMaxY",  po::value<int>(), "filter according maximal Y coordinate of the barycenter connected component. The CC is given only of its barycenter is less or eqthan [arg]  " )
+    ("filterMaxZ",  po::value<int>(), "filter according maximal Z coordinate of the barycenter connected component. The CC is given only of its barycenter is less or eq than [arg]  " )
+    ("transparency,T",  po::value<uint>()->default_value(100), "transparency") ;
   bool parseOK=true;
   po::variables_map vm;
   try{
@@ -130,7 +150,7 @@ int main(int argc, char** argv)
 
 
 
-	GradientColorMap<long> gradient( 0,vectConnectedSCell.size());
+	GradientColorMap<long> gradient( 0,6);
 	gradient.addColor(DGtal::Color::Red);
 	gradient.addColor(DGtal::Color::Yellow);
 	gradient.addColor(DGtal::Color::Green);
@@ -138,22 +158,41 @@ int main(int argc, char** argv)
 	gradient.addColor(DGtal::Color::Blue);
 	gradient.addColor(DGtal::Color::Magenta);
 	gradient.addColor(DGtal::Color::Red);
-
+	unsigned int cptComp=0;
 	viewer << SetMode3D(vectConnectedSCell.at(0).at(0).className(), "Basic");
 	for(uint i=0; i< vectConnectedSCell.size();i++){
-	  DGtal::Color c= gradient(i);
-	  viewer << CustomColors3D(Color(250, 0,0,transp), Color(c.red(),
-							  c.green(),
-							  c.blue(),120));
-
-	  for(uint j=0; j< vectConnectedSCell.at(i).size();j++){
-	viewer << vectConnectedSCell.at(i).at(j);
+	  DGtal::Color c= gradient(cptComp%7);
+	  bool display=true;
+	  if(vm.count("filterMinSize")){
+	    int minSize = vm["filterMinSize"].as<int>();
+	    display= display && (vectConnectedSCell.at(i).size()>=minSize);
+	  }
+	  if(vm.count("filterMaxZ") || vm.count("filterMaxY") || vm.count("filterMaxX")){
+	    RealPoint barycenter =  getBarycenter(K,vectConnectedSCell.at(i)); 	    
+	    if(vm.count("filterMaxZ")){
+	      int maxZ = vm["filterMaxZ"].as<int>();
+	      display=display && (barycenter[2]<= maxZ);
+	    }
+	    if(vm.count("filterMaxY")){
+	      int maxY = vm["filterMaxY"].as<int>();
+	      display=display && (barycenter[1]<= maxY);
+	    }
+	    if(vm.count("filterMaxX")){
+	      int maxY = vm["filterMaxX"].as<int>();
+	      display=display && (barycenter[0]<= maxY);
+	    }
+	    
+	  }
+	  if(display){
+	    cptComp++;
+	    viewer << CustomColors3D(Color(250, 0, 0, transp), Color(c.red(),
+								     c.green(),
+								     c.blue(),120));
+	    for(uint j=0; j< vectConnectedSCell.at(i).size();j++){
+	      viewer << vectConnectedSCell.at(i).at(j);
+	    }
 	  }
 	}
-
-
-
-
   }
 
   if(vm.count("trunkBark-mesh")){
