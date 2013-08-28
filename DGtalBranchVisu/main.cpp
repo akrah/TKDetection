@@ -11,6 +11,7 @@
 #include "DGtal/topology/helpers/Surfaces.h"
 #include "DGtal/images/imagesSetsUtils/SetFromImage.h"
 
+#include "DGtal/io/readers/GenericReader.h"
 
 
 #include "DGtal/io/readers/MeshReader.h"
@@ -27,17 +28,25 @@ namespace po = boost::program_options;
 int main(int argc, char** argv)
 {
 
+
+  typedef DGtal::ImageContainerBySTLVector<DGtal::Z2i::Domain,  unsigned char > Image2D;
+  typedef DGtal::ImageContainerBySTLVector<DGtal::Z3i::Domain,  unsigned char > Image3D;
+  typedef DGtal::ConstImageAdapter<Image3D, Image2D::Domain, DGtal::Projector< DGtal::Z3i::Space>,
+				   Image3D::Value,  DGtal::DefaultFunctor >  SliceImageAdapter;
   // parse command line ----------------------------------------------
   po::options_description general_opt("Allowed options are: ");
   general_opt.add_options()
 	("help,h", "display this message")
 	("input-file,i", po::value<std::string>(), "vol file (.vol) , pgm3d (.p3d or .pgm3d) file or sdp (sequence of discrete points)" )
-	("trunkBark-mesh,t", po::value<std::string>(), "mesh of the trunk bark in format OFS non normalized (.ofs)" )
-	("marrow-mesh,a", po::value<std::string>(), "mesh of trunk marrow  in format OFS non normalized (.ofs)" )
-    	("scaleX,x",  po::value<float>()->default_value(1.0), "set the scale value in the X direction (default 1.0)" )
-	("scaleY,y",  po::value<float>()->default_value(1.0), "set the scale value in the Y direction (default 1.0)" )
-	("scaleZ,z",  po::value<float>()->default_value(1.0), "set the scale value in the Z direction (default 1.0)")
-	("transparency,T",  po::value<uint>()->default_value(100), "transparency") ;
+    ("volImageName,s", po::value<std::string>(), "specify the 3D image name to be used to display slice image (.vol, pgm3D, ...)." )
+    ("sliceZ",po::value<unsigned int>(), "add a SliceZ image of number <arg>" )
+    ("sliceY",po::value<unsigned int>(), "add a SliceY image of number <arg>" )
+    ("trunkBark-mesh,t", po::value<std::string>(), "mesh of the trunk bark in format OFS non normalized (.ofs)" )
+    ("marrow-mesh,a", po::value<std::string>(), "mesh of trunk marrow  in format OFS non normalized (.ofs)" )
+    ("scaleX,x",  po::value<float>()->default_value(1.0), "set the scale value in the X direction (default 1.0)" )
+    ("scaleY,y",  po::value<float>()->default_value(1.0), "set the scale value in the Y direction (default 1.0)" )
+    ("scaleZ,z",  po::value<float>()->default_value(1.0), "set the scale value in the Z direction (default 1.0)")
+    ("transparency,T",  po::value<uint>()->default_value(100), "transparency") ;
   bool parseOK=true;
   po::variables_map vm;
   try{
@@ -78,6 +87,37 @@ int main(int argc, char** argv)
   viewer.setWindowTitle("simple Volume Viewer");
   viewer.show();
 
+
+  
+  if(vm.count("volImageName") &&(vm.count("sliceX")||vm.count("sliceY"))){
+    string imageName = vm["volImageName"].as<std::string>();
+    Image3D img = GenericReader<Image3D>::import(imageName);
+    unsigned int sliceNum = vm.count("sliceZ")? vm["sliceZ"].as<unsigned int>() : vm["sliceY"].as<unsigned int>();
+    
+    if(vm.count("sliceZ")){
+      DGtal::Projector<DGtal::Z2i::Space>  invFunctorZ; invFunctorZ.initRemoveOneDim(2);
+      DGtal::Z2i::Domain domain2DZ(invFunctorZ(img.domain().lowerBound()), 
+				   invFunctorZ(img.domain().upperBound()));
+      DGtal::Projector<DGtal::Z3i::Space> aSliceFunctorZ(sliceNum); aSliceFunctorZ.initAddOneDim(2);
+      SliceImageAdapter sliceImageZ(img, domain2DZ, aSliceFunctorZ, DGtal::DefaultFunctor());
+      viewer << sliceImageZ;
+      viewer << DGtal::UpdateImagePosition(0, DGtal::Display3D::zDirection,  0.0,0.0, sliceNum );
+    }
+
+    if(vm.count("sliceY")){      
+      DGtal::Projector<DGtal::Z2i::Space>  invFunctorY; invFunctorY.initRemoveOneDim(1);
+      DGtal::Z2i::Domain domain2DY(invFunctorY(img.domain().lowerBound()), 
+				   invFunctorY(img.domain().upperBound()));
+
+      DGtal::Projector<DGtal::Z3i::Space> aSliceFunctorY(sliceNum); aSliceFunctorY.initAddOneDim(1);
+      SliceImageAdapter sliceImageY(img, domain2DY, aSliceFunctorY, DGtal::DefaultFunctor());
+      viewer << sliceImageY;
+      viewer << DGtal::UpdateImagePosition(0, DGtal::Display3D::yDirection, 0.0, sliceNum,0.0 );
+
+      
+    }
+    
+  }
 
 
   // Point for the domain
@@ -144,7 +184,7 @@ int main(int argc, char** argv)
 	  DGtal::Color c= gradient(i);
 	  viewer << CustomColors3D(Color(250, 0,0,transp), Color(c.red(),
 							  c.green(),
-							  c.blue(),120));
+							  c.blue(),transp));
 
 	  for(uint j=0; j< vectConnectedSCell.at(i).size();j++){
 	viewer << vectConnectedSCell.at(i).at(j);
@@ -153,7 +193,7 @@ int main(int argc, char** argv)
 
 
 
-
+	
   }
 
   if(vm.count("trunkBark-mesh")){
@@ -175,6 +215,9 @@ int main(int argc, char** argv)
 	  viewer << anImportedMesh;
 	}
   }
+
+
+
 
   viewer << Viewer3D::updateDisplay;
 
