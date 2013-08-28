@@ -1256,7 +1256,7 @@ void MainWindow::exportPithToOfs( const bool &onCurrentSliceInterval )
 		QMessageBox::warning( this, tr("Export en .ofs"), tr("Aucun intervalle de coupes selectionné."));
 		return;
 	}
-	QString fileName = QFileDialog::getSaveFileName(this, tr("Exporter en .ofs"), "output.ofs", tr("Fichiers de données (*.ofs);;Tous les fichiers (*.*)"));
+	QString fileName = QFileDialog::getSaveFileName( this, tr("Exporter en .ofs"), "output.ofs", tr("Fichiers de données (*.ofs);;Tous les fichiers (*.*)"));
 	if ( !fileName.isEmpty() )
 	{
 		QFile file(fileName);
@@ -1679,7 +1679,7 @@ void MainWindow::exportImageSliceIntervalToPgm3d()
 									   Interval<int>(_ui->_spinMinIntensity->value(),_ui->_spinMaxIntensity->value()), _ui-> _spinPgm3dExportResolution->value(),
 									   (_ui->_spinPgm3dExportContrast->value()+100.)/100. );
 			file.close();
-			QMessageBox::information(this,tr("Export en .pgm3d"), tr("Terminé avec succés !"));
+			QMessageBox::information(this,tr("Exporter en PGM3D"), tr("Export réussi !"));
 		}
 		else QMessageBox::warning(this,tr("Export en .pgm3d"), tr("Impossible d'écrire le fichier."));
 	}
@@ -1705,7 +1705,7 @@ void MainWindow::exportImageCartesianSliceIntervalToPgm3d()
 												Interval<int>(_ui->_spinMinIntensity->value(),_ui->_spinMaxIntensity->value()),  _ui-> _spinPgm3dExportResolution->value(),
 												_ui-> _spinCartesianAngularResolution->value(), (_ui->_spinPgm3dExportContrast->value()+100.)/100. );
 			file.close();
-			QMessageBox::information(this,tr("Export en .pgm3d"), tr("Terminé avec succés !"));
+			QMessageBox::information(this,tr("Exporter en PGM3D"), tr("Export réussi !"));
 		}
 		else QMessageBox::warning(this,tr("Export en .pgm3d"), tr("Impossible d'écrire le fichier."));
 	}
@@ -1736,7 +1736,7 @@ void MainWindow::exportCurrentSegmentedKnotToPgm3d()
 				}
 
 				file.close();
-				QMessageBox::information(this,"Exporter le nœud courant segmenté en PGM3D", "Export réussi !");
+				QMessageBox::information(this,tr("Exporter le nœud courant segmenté en PGM3D"), tr("Export réussi !"));
 			}
 			else QMessageBox::warning(this,tr("Exporter le nœud courant segmenté en PGM3D"),tr("L'export a échoué : impossible de créer le ficher %1.").arg(fileName));
 		}
@@ -1799,7 +1799,7 @@ void MainWindow::exportSegmentedKnotsOfCurrentSliceIntervalToPgm3d()
 				}
 
 				file.close();
-				QMessageBox::information(this,"Exporter la zone de nœuds courante en PGM3D", "Export réussi !");
+				QMessageBox::information(this,tr("Exporter la zone de nœuds courante en PGM3D"), tr("Export réussi !"));
 			}
 			else QMessageBox::warning(this,tr("Exporter le nœud courant segmenté en PGM3D"),tr("L'export a échoué : impossible de créer le ficher %1.").arg(fileName));
 		}
@@ -1821,7 +1821,7 @@ void MainWindow::exportCurrentSegmentedKnotToV3D()
 				V3DExport::process( file, *_knotBillon );
 				file.close();
 
-				QMessageBox::information(this,"Exporter le nœud courant segmenté en V3D", "Export réussi !");
+				QMessageBox::information(this,tr("Exporter le nœud courant segmenté en V3D"), tr("Export réussi !"));
 			}
 			else QMessageBox::warning(this,tr("Exporter le nœud courant segmenté en V3D"),tr("L'export a échoué : impossible de créer le ficher %1.").arg(fileName));
 		}
@@ -1865,7 +1865,7 @@ void MainWindow::exportSegmentedKnotsOfCurrentSliceIntervalToV3D()
 
 				file.close();
 
-				QMessageBox::information(this,"Exporter les nœuds segmentés de l'intervalle de coupe courant en V3D", "Export réussi !");
+				QMessageBox::information(this,tr("Exporter les nœuds segmentés de l'intervalle de coupe courant en V3D"), tr("Export réussi !"));
 			}
 			else QMessageBox::warning(this,tr("Exporter les nœuds segmentés de l'intervalle de coupe courant en V3D"),tr("L'export a échoué : impossible de créer le ficher %1.").arg(fileName));
 		}
@@ -1911,7 +1911,7 @@ void MainWindow::exportAllSegmentedKnotsOfBillonToV3D()
 
 				file.close();
 
-				QMessageBox::information(this,"Exporter tous les nœuds segmentés du billon en V3D", "Export réussi !");
+				QMessageBox::information(this,tr("Exporter tous les nœuds segmentés du billon en V3D"), tr("Export réussi !"));
 			}
 			else QMessageBox::warning(this,tr("Exporter tous les nœuds segmentés du billon en V3D"),tr("L'export a échoué : impossible de créer le ficher %1.").arg(fileName));
 		}
@@ -1939,7 +1939,7 @@ void MainWindow::exportContourToSdp()
 				}
 				file.close();
 
-				QMessageBox::information(this,"Exporter le contour de la coupe courante en SDP", "Export réussi !");
+				QMessageBox::information(this,tr("Exporter le contour de la coupe courante en SDP"), tr("Export réussi !"));
 			}
 			else QMessageBox::warning(this,tr("Exporter le contour de la coupe courante en SDP"),tr("L'export a échoué : impossible de créer le ficher %1.").arg(fileName));
 		}
@@ -1967,6 +1967,7 @@ void MainWindow::exportCurrentSegmentedKnotToSdp()
 
 				file.close();
 
+				QMessageBox::information(this,tr("Exporter le nœud segmenté en SDP"), tr("Export réussi !"));
 				QMessageBox::information(this,"Exporter le nœud courant segmenté en SDP", "Export réussi !");
 			}
 			else QMessageBox::warning(this,tr("Exporter le nœud courant segmenté en SDP"),tr("L'export a échoué : impossible de créer le ficher %1.").arg(fileName));
@@ -1975,7 +1976,7 @@ void MainWindow::exportCurrentSegmentedKnotToSdp()
 	else QMessageBox::warning(this,tr("Exporter le nœud courant segmenté en SDP"),tr("L'export a échoué : le nœud n'est pas segmenté."));
 }
 
-void MainWindow::exportSegmentedKnotsOfCurrentSliceIntervalToSdp(bool keepBillonSliceNumber)
+void MainWindow::exportSegmentedKnotsOfCurrentSliceIntervalToSdp( bool keepBillonSliceNumber )
 {
 	if ( _billon && _billon->hasPith() )
 	{
@@ -1989,28 +1990,25 @@ void MainWindow::exportSegmentedKnotsOfCurrentSliceIntervalToSdp(bool keepBillon
 				QTextStream stream(&file);
 				stream << "#SDP (Sequence of Discrete Points)" << endl;
 
+				const bool coeffSliceNumber = !keepBillonSliceNumber;
 				int sectorIndex;
 				uint k;
 
 				for ( sectorIndex=1 ; sectorIndex< _ui->_comboSelectSectorInterval->count() ; ++sectorIndex )
 				{
-					_ui->_comboSelectSectorInterval->setCurrentIndex(sectorIndex);
+					selectSectorInterval(sectorIndex,false);
 					if ( _knotBillon )
 					{
 						for ( k=0 ; k<_knotBillon->n_slices ; ++k )
 						{
-						  if(keepBillonSliceNumber){
-						    SliceAlgorithm::writeInSDP( _knotBillon->slice(k) , stream, _knotBillon->zPos()+k, 0 );
-						  }else{
-						    SliceAlgorithm::writeInSDP( _knotBillon->slice(k) , stream, _knotBillon->zPos()-_componentBillon->zPos()+k, 0 );
-						  }
+							SliceAlgorithm::writeInSDP( _knotBillon->slice(k) , stream, _knotBillon->zPos()+k-_componentBillon->zPos()*coeffSliceNumber, 0 );
 						}
 					}
 				}
 
 				file.close();
 
-				QMessageBox::information(this,"Exporter les nœuds segmentés de l'intervalle de coupe courant en SDP", "Export réussi !");
+				QMessageBox::information(this,tr("Exporter les nœuds segmentés de l'intervalle de coupe courant en SDP"), tr("Export réussi !"));
 			}
 			else QMessageBox::warning(this,tr("Exporter les nœuds segmentés de l'intervalle de coupe courant en SDP"),tr("L'export a échoué : impossible de créer le ficher %1.").arg(fileName));
 		}
@@ -2020,11 +2018,11 @@ void MainWindow::exportSegmentedKnotsOfCurrentSliceIntervalToSdp(bool keepBillon
 
 
 
-void MainWindow::exportSegmentedKnotsOfCurrentSliceIntervalToSdpOldAlgo(bool keepBillonSliceNumber)
+void MainWindow::exportSegmentedKnotsOfCurrentSliceIntervalToSdpOldAlgo( bool keepBillonSliceNumber )
 {
 	if ( _billon && _billon->hasPith() )
 	  {
-		QString fileName = QFileDialog::getSaveFileName(this, tr("Exporter les nœuds segmentés de l'intervalle de coupe courant en SDP"), "output.sdp",
+		QString fileName = QFileDialog::getSaveFileName(this, tr("Exporter les nœuds segmentés de l'intervalle de coupe courant en SDP (old version)"), "output.sdp",
 														tr("Fichiers SDP (*.sdp);;Tous les fichiers (*.*)"));
 		if ( !fileName.isEmpty() )
 		{
@@ -2034,47 +2032,38 @@ void MainWindow::exportSegmentedKnotsOfCurrentSliceIntervalToSdpOldAlgo(bool kee
 				QTextStream stream(&file);
 				stream << "#SDP (Sequence of Discrete Points)" << endl;
 
+				const uint width = _billon->n_cols;
+				const uint height = _billon->n_rows;
+				const bool coeffSliceNumber = !keepBillonSliceNumber;
+
 				int sectorIndex;
-				uint k;
+				uint i,j,k;
 
 				for ( sectorIndex=1 ; sectorIndex< _ui->_comboSelectSectorInterval->count() ; ++sectorIndex )
 				{
-				  _ui->_comboSelectSectorInterval->setCurrentIndex(sectorIndex);
-				  if ( _knotBillon )
-				    {
-					  for ( k=0 ; k<_knotBillon->n_slices ; ++k )
+					selectSectorInterval(sectorIndex,false);
+					if ( _knotBillon )
+					{
+						for ( k=0 ; k<_knotBillon->n_slices ; ++k )
 						{
-				
-						  const Slice &componentSlice = _componentBillon->slice(_knotBillon->zPos()-_componentBillon->zPos()+k);
-						unsigned int width = _billon->n_cols;
-						unsigned int height = _billon->n_rows;
-						for (unsigned int j=0 ; j<height ; ++j )
-						  {
-						  for (unsigned int i=0 ; i<width ; ++i )
-						    {
-						      int val = componentSlice.at(j,i);
-						      if ( val )
+							const Slice &componentSlice = _componentBillon->slice(_knotBillon->zPos()-_componentBillon->zPos()+k);
+							for ( j=0 ; j<height ; ++j )
 							{
-							   if(keepBillonSliceNumber){
-							     stream << i << " "<< j << " " <<  _knotBillon->zPos()+k << endl ;
-							   }else{
-							     stream << i << " "<< j << " " <<  _knotBillon->zPos()-_componentBillon->zPos()+k << endl ;
-							   }
-							   
-							   
-							  
+								for ( i=0 ; i<width ; ++i )
+								{
+									if ( componentSlice.at(j,i) )
+									{
+										stream << i << " "<< j << " " <<  _knotBillon->zPos()+k-_componentBillon->zPos()*coeffSliceNumber << endl ;
+									}
+								}
 							}
-						    }
-
-						  }
-						
 						}
 					}
 				}
 
 				file.close();
 
-				QMessageBox::information(this,"Exporter les nœuds segmentés de l'intervalle de coupe courant en SDP", "Export réussi !");
+				QMessageBox::information(this,tr("Exporter les nœuds segmentés de l'intervalle de coupe courant en SDP"), tr("Export réussi !"));
 			}
 			else QMessageBox::warning(this,tr("Exporter les nœuds segmentés de l'intervalle de coupe courant en SDP"),tr("L'export a échoué : impossible de créer le ficher %1.").arg(fileName));
 		}
@@ -2106,7 +2095,7 @@ void MainWindow::exportAllSegmentedKnotsOfBillonToSdp()
 					_ui->_comboSelectSliceInterval->setCurrentIndex(intervalIndex);
 					for ( sectorIndex=1 ; sectorIndex< _ui->_comboSelectSectorInterval->count() ; ++sectorIndex )
 					{
-						_ui->_comboSelectSectorInterval->setCurrentIndex(sectorIndex);
+						selectSectorInterval(sectorIndex,false);
 						if ( _knotBillon )
 						{
 							for ( k=0 ; k<_knotBillon->n_slices ; ++k )
@@ -2119,7 +2108,7 @@ void MainWindow::exportAllSegmentedKnotsOfBillonToSdp()
 
 				file.close();
 
-				QMessageBox::information(this,"Exporter tous les nœuds segmentés du billon en SDP", "Export réussi !");
+				QMessageBox::information(this,tr("Exporter tous les nœuds segmentés du billon en SDP"), tr("Export réussi !"));
 			}
 			else QMessageBox::warning(this,tr("Exporter tous les nœuds segmentés du billon en SDP"),tr("L'export a échoué : impossible de créer le ficher %1.").arg(fileName));
 		}
