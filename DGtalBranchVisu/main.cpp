@@ -57,6 +57,7 @@ int main(int argc, char** argv)
 	("volImageName,s", po::value<std::string>(), "specify the 3D image name to be used to display slice image (.vol, pgm3D, ...)." )
     ("sliceZ",po::value<unsigned int>(), "add a SliceZ image of number <arg>" )
     ("sliceY",po::value<unsigned int>(), "add a SliceY image of number <arg>" )
+    ("sliceX",po::value<unsigned int>(), "add a SliceX image of number <arg>" )
 	
     ("trunkBark-mesh,t", po::value<std::string>(), "mesh of the trunk bark in format OFS non normalized (.ofs)" )
 	("marrow-mesh,a", po::value<std::string>(), "mesh of trunk marrow  in format OFS non normalized (.ofs)" )
@@ -110,22 +111,37 @@ int main(int argc, char** argv)
 
 
   
-  if(vm.count("volImageName") &&(vm.count("sliceX")||vm.count("sliceY"))){
+  if(vm.count("volImageName") &&(vm.count("sliceX")||vm.count("sliceY")||vm.count("sliceZ"))){
     string imageName = vm["volImageName"].as<std::string>();
     Image3D img = GenericReader<Image3D>::import(imageName);
-    unsigned int sliceNum = vm.count("sliceZ")? vm["sliceZ"].as<unsigned int>() : vm["sliceY"].as<unsigned int>();
+    
+    int nbImage=0;
+    if(vm.count("sliceX")){
+      unsigned int sliceNum = vm["sliceX"].as<unsigned int>();
+      DGtal::Projector<DGtal::Z2i::Space>  invFunctorX; invFunctorX.initRemoveOneDim(0);
+      DGtal::Z2i::Domain domain2DX(invFunctorX(img.domain().lowerBound()), 
+				   invFunctorX(img.domain().upperBound()));
+      DGtal::Projector<DGtal::Z3i::Space> aSliceFunctorX(sliceNum); aSliceFunctorX.initAddOneDim(0);
+      SliceImageAdapter sliceImageX(img, domain2DX, aSliceFunctorX, DGtal::DefaultFunctor());
+      viewer << sliceImageX;
+      viewer << DGtal::UpdateImagePosition(nbImage, DGtal::Display3D::xDirection, sliceNum, 0.0,0.0 );
+      nbImage++;
+    }
     
     if(vm.count("sliceZ")){
+      unsigned int sliceNum = vm["sliceZ"].as<unsigned int>();
       DGtal::Projector<DGtal::Z2i::Space>  invFunctorZ; invFunctorZ.initRemoveOneDim(2);
       DGtal::Z2i::Domain domain2DZ(invFunctorZ(img.domain().lowerBound()), 
 				   invFunctorZ(img.domain().upperBound()));
       DGtal::Projector<DGtal::Z3i::Space> aSliceFunctorZ(sliceNum); aSliceFunctorZ.initAddOneDim(2);
       SliceImageAdapter sliceImageZ(img, domain2DZ, aSliceFunctorZ, DGtal::DefaultFunctor());
       viewer << sliceImageZ;
-      viewer << DGtal::UpdateImagePosition(0, DGtal::Display3D::zDirection,  0.0,0.0, sliceNum );
+      viewer << DGtal::UpdateImagePosition(nbImage, DGtal::Display3D::zDirection,  0.0,0.0, sliceNum );
+      nbImage++;
     }
 
-    if(vm.count("sliceY")){      
+    if(vm.count("sliceY")){
+      unsigned int sliceNum = vm["sliceY"].as<unsigned int>();
       DGtal::Projector<DGtal::Z2i::Space>  invFunctorY; invFunctorY.initRemoveOneDim(1);
       DGtal::Z2i::Domain domain2DY(invFunctorY(img.domain().lowerBound()), 
 				   invFunctorY(img.domain().upperBound()));
@@ -133,8 +149,8 @@ int main(int argc, char** argv)
       DGtal::Projector<DGtal::Z3i::Space> aSliceFunctorY(sliceNum); aSliceFunctorY.initAddOneDim(1);
       SliceImageAdapter sliceImageY(img, domain2DY, aSliceFunctorY, DGtal::DefaultFunctor());
       viewer << sliceImageY;
-      viewer << DGtal::UpdateImagePosition(0, DGtal::Display3D::yDirection, 0.0, sliceNum,0.0 );
-
+      viewer << DGtal::UpdateImagePosition(nbImage, DGtal::Display3D::yDirection, 0.0, sliceNum,0.0 );
+      nbImage++;
       
     }
     
