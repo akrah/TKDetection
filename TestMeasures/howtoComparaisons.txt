@@ -1,0 +1,14 @@
+genImages generates two 3D test shapes: imageBallDecal.p3d  and imageBallReference.p3d.
+When generating the two two shapes should present such stats:
+Number True Positive:232514
+Number False Positive:34855
+Number False Negative:35247
+Number of reference voxel:267761
+Number of comp voxel:267369
+
+VolCompare you can check if the measure are ok:
+
+volCompare -a imageBallReference.p3d --aMin 1 --aMax 130 -b imageBallDecal.p3d --bMin 1 --bMax 130 --displayTFstats --exportSDP  > stat.txt
+
+And the set of voxels can be exported and visualized with for instance:
+3dImageViewer -i imageBallReference.p3d -s falseNeg.sdp 
