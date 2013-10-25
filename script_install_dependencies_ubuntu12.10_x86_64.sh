@@ -1,23 +1,23 @@
 #! /bin/bash
 
 ### Ensemble des paquets à installer pour l'ensemble des dépendances de TKDetection
-sudo apt-get install build-essential cmake qtcreator liblapack-dev libblas-dev libatlas-dev libboost-dev libqwt-dev libqxt-dev libqglviewer-dev-common libboost-program-options-dev libgmp-dev
+sudo apt-get install build-essential cmake qtcreator liblapack-dev libblas-dev libatlas-dev libboost-dev libqwt-dev libqxt-dev libqglviewer-dev-common libboost-program-options-dev libgmp-dev git
 
-### Armadillo v. 3.810.2
-wget "http://downloads.sourceforge.net/project/arma/armadillo-3.810.2.tar.gz"
-tar xvf armadillo-3.810.2.tar.gz
-cd armadillo-3.810.2/
+### Armadillo v. 3.920.2
+wget "http://downloads.sourceforge.net/project/arma/armadillo-3.920.2.tar.gz"
+tar xvf armadillo-3.920.2.tar.gz
+cd armadillo-3.920.2/
 ./configure
 make
 sudo make install
 cd -
 
-### InsightToolkit v. 4.3.2
-wget "http://sourceforge.net/projects/itk/files/itk/4.3/InsightToolkit-4.3.2.tar.gz"
-tar xvf InsightToolkit-4.3.2.tar.gz
-mkdir InsightToolkit-4.3.2/build
-cd InsightToolkit-4.3.2/build
-cmake -DBUILD_EXAMPLES=false -DBUILD_TESTING=false -DITK_BUILD_ALL_MODULES=false -DITKGroup_Core=true -DITKGroup_IO=true ..
+### InsightToolkit v. 4.4.2
+wget "http://sourceforge.net/projects/itk/files/itk/4.3/InsightToolkit-4.4.2.tar.gz"
+tar xvf InsightToolkit-4.4.2.tar.gz
+mkdir InsightToolkit-4.4.2/build
+cd InsightToolkit-4.4.2/build
+cmake .. -DCMAKE_CXX_FLAGS="-std=c++0x" -DCMAKE_BUILD_TYPE="Release" -DBUILD_EXAMPLES=false -DBUILD_TESTING=false -DITK_BUILD_ALL_MODULES=false -DITKGroup_Core=true -DITKGroup_IO=true
 make
 sudo make install
 cd -
@@ -44,7 +44,7 @@ sudo cp /usr/local/qwtpolar-1.0.0/plugins/designer/libqwt_polar_designer_plugin.
 git clone git://github.com/DGtal-team/DGtal.git DGtal
 mkdir DGtal/build
 cd DGtal/build
-cmake .. -DWITH_GMP=true -DWITH_ITK=true -DWITH_QGLVIEWER=true -DBUILD_EXAMPLES=false
+cmake .. -DWITH_GMP=true -DWITH_ITK=true -DWITH_C11=true -DWITH_QGLVIEWER=true -DBUILD_EXAMPLES=false -DBUILD_TESTING=false -DCMAKE_BUILD_TYPE="Release"
 make
 sudo make install
 cd -
@@ -53,26 +53,26 @@ cd -
 git clone git://github.com/DGtal-team/DGtalTools.git DGtalTools
 mkdir DGtalTools/build
 cd DGtalTools/build
-cmake .. -DWITH_VISU3D_QGLVIEWER=true
+cmake .. -DWITH_VISU3D_QGLVIEWER=true -DCMAKE_BUILD_TYPE="Release"
 make
 sudo make install
 cd -
 
 ### ImaGene
 git clone git://github.com/kerautret/ImaGene-forIPOL.git
-mkdir ImaGeneNoDep/build
-cd ImaGeneNoDep/build
-cmake ..
+mkdir ImaGene-forIPOL/build
+cd ImaGene-forIPOL/build
+cmake .. -DCMAKE_BUILD_TYPE="Release" -BUILD_TESTING=false
 make
 sudo make install
 cd -
 
-### DGLib
+### KerUtils
 wget "http://www.loria.fr/~krahenbu/TKDetection/KerUtils.zip"
 unzip KerUtils.zip
 mkdir KerUtils/build
 cd KerUtils/build
-cmake .. -DCMAKE_BUILD_TYPE=Release
+cmake .. -DCMAKE_BUILD_TYPE="Release"
 make
 sudo make install
 cd -

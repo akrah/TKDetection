@@ -14,8 +14,8 @@ Dependencies list
 |   |            Library                  |  Tested version  |   |          Library            |  Tested version  |   |        Library              |  Tested version  |
 |:-:|:-----------------------------------:|:----------------:|---|:---------------------------:|:----------------:|---|:---------------------------:|:----------------:|
 | 1 | [Qt](#1-qt)                         |       4.8        | 4 | [Qwt](#4-qwt)               |      6.0.2       | 7 | [DGtalTools](#7-dgtaltools) |       0.6        |
-| 2 | [Armadillo](#2-armadillo)           |     3.800.2      | 5 | [Qxt](#5-qxt)               |      0.6.2       | 8 | [ImaGene](#8-imagene)       |      online      |
-| 3 | [InsightToolkit](#3-insighttoolkit) |      4.3.1       | 6 | [QwtPolar](#6-qwtpolar)     |      1.0.1       | 9 | [KerUtils](#9-kerutils)     |      online      |
+| 2 | [Armadillo](#2-armadillo)           |     3.920.2      | 5 | [Qxt](#5-qxt)               |      0.6.2       | 8 | [ImaGene](#8-imagene)       |      online      |
+| 3 | [InsightToolkit](#3-insighttoolkit) |      4.4.2       | 6 | [QwtPolar](#6-qwtpolar)     |      1.0.1       | 9 | [KerUtils](#9-kerutils)     |      online      |
 
 
 
@@ -37,11 +37,11 @@ On another plateform, you must apply the following steps.
 
 ### Preliminaries
 
-Install "build-essential" and "cmake" packages.
+Install "build-essential", "cmake" and "git" packages.
 
 
 ~~~
-  sudo apt-get install build-essential cmake
+  sudo apt-get install build-essential cmake git
 ~~~
 
 
@@ -99,7 +99,7 @@ Replace *x.y.z* by the downloaded version number:
   tar xvf InsightToolkit-x.y.z.tar.gz
   mkdir InsightToolkit-x.y.z/build
   cd InsightToolkit-x.y.z/build
-  cmake -DBUILD_EXAMPLES=false -DBUILD_TESTING=false -DITK_BUILD_ALL_MODULES=false -DITKGroup_Core=true -DITKGroup_IO=true ..
+  cmake .. -DCMAKE_CXX_FLAGS="-std=c++0x" -DCMAKE_BUILD_TYPE="Release" -DBUILD_EXAMPLES=false -DBUILD_TESTING=false -DITK_BUILD_ALL_MODULES=false -DITKGroup_Core=true -DITKGroup_IO=true
   make
   sudo make install
 ~~~
@@ -231,7 +231,7 @@ Now you can clone and install DGtal from the main repository:
   git clone git://github.com/DGtal-team/DGtal.git DGtal
   mkdir DGtal/build
   cd DGtal/build
-  cmake .. -DWITH_GMP=true -DWITH_ITK=true -DWITH_QGLVIEWER=true -DBUILD_EXAMPLES=false
+  cmake .. -DWITH_GMP=true -DWITH_ITK=true -DWITH_C11=true -DWITH_QGLVIEWER=true -DBUILD_EXAMPLES=false -DBUILD_TESTING=false -DCMAKE_BUILD_TYPE="Release"
   make
   sudo make install
 ~~~
@@ -239,7 +239,7 @@ Now you can clone and install DGtal from the main repository:
 If a problem appear during the cmake step, add an ITK parameter to the command with the version number of ITK (x.y below):
 
 ~~~
-  cmake .. -DWITH_GMP=true -DWITH_ITK=true -DWITH_QGLVIEWER=true -DBUILD_EXAMPLES=false -DITK_DIR=/usr/local/lib/cmake/ITK-x.y/
+  cmake .. -DWITH_GMP=true -DWITH_ITK=true -DWITH_C11=true -DWITH_QGLVIEWER=true -DBUILD_EXAMPLES=false -DBUILD_TESTING=false -DCMAKE_BUILD_TYPE="Release" -DITK_DIR=/usr/local/lib/cmake/ITK-x.y/
 ~~~
 
 Install then DGtalTools:
@@ -248,7 +248,7 @@ Install then DGtalTools:
   git clone git://github.com/DGtal-team/DGtalTools.git DGtalTools
   mkdir DGtalTools/build
   cd DGtalTools/build
-  cmake .. -DWITH_VISU3D_QGLVIEWER=true
+  cmake .. -DWITH_VISU3D_QGLVIEWER=true -DCMAKE_BUILD_TYPE="Release"
   make
   sudo make install
 ~~~
@@ -256,7 +256,7 @@ Install then DGtalTools:
 If a problem appear, use the same tips than the DGtal installation:
 
 ~~~
-  cmake .. -DWITH_VISU3D_QGLVIEWER=true -DWITH_QGLVIEWER=true -DITK_DIR=/usr/local/lib/cmake/ITK-x.y/
+  cmake .. -DWITH_VISU3D_QGLVIEWER=true -DCMAKE_BUILD_TYPE="Release" -DITK_DIR=/usr/local/lib/cmake/ITK-x.y/
 ~~~
 
 ### 8. ImaGene
@@ -268,9 +268,9 @@ Install ImaGene by using the version without dependencies:
 
 ~~~
   git clone git://github.com/kerautret/ImaGene-forIPOL.git
-  mkdir ImaGeneNoDep/build
-  cd ImaGeneNoDep/build
-  cmake ..
+  mkdir ImaGene-forIPOL/build
+  cd ImaGene-forIPOL/build
+  cmake .. -DCMAKE_BUILD_TYPE="Release" -BUILD_TESTING=false
   make
   sudo make install
 ~~~
@@ -286,7 +286,7 @@ KerUtils should be downloaded here: http://www.loria.fr/~krahenbu/TKDetection/Ke
 ~~~
   unzip KerUtils.zip
   mkdir KerUtils/build && cd KerUtils/build
-  cmake .. -DCMAKE_BUILD_TYPE=Release
+  cmake .. -DCMAKE_BUILD_TYPE="Release"
   make
   sudo make install
 ~~~
@@ -296,12 +296,15 @@ TKDetection installation
 [Top](#tkdetection)
 
 
-Begin by check the ITK_NUMBER variable in the TKDetection.pro file (line 13).
-
-Clone the project from the Github repository of this webpage and compile:
+Clone the project from the Github repository of this webpage.
 
 ~~~
-  git clone https://github.com/adrien057/TKDetection.git
+  git clone https://github.com/akrah/TKDetection.git
+~~~
+
+Check the ITK_NUMBER variable in the TKDetection.pro file (line 13) and compile:
+
+~~~
   cd TKDetection
   mkdir build && cd build
   qmake ..

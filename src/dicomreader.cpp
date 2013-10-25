@@ -16,7 +16,6 @@ namespace DicomReader
 	namespace
 	{
 		Billon* makeBillonFromDicomWithITK(const QString &repository , const bool &sliceOrderInversed);
-		QString getTag( const QString &entryId, const itk::MetaDataDictionary &dictionary );
 	}
 
 	Billon* read( const QString &repository, const bool &sliceOrderInversed )
@@ -33,7 +32,7 @@ namespace DicomReader
 		{
 			// Définition des type de l'image
 			const unsigned int InputDimension = 3;
-			typedef int PixelType; // INT à la base marchais bien.
+			typedef int PixelType;
 			typedef itk::Image<PixelType,InputDimension> ImageType;
 			typedef itk::ImageSeriesReader<ImageType> ReaderType;
 			ReaderType::Pointer reader = ReaderType::New();
@@ -59,34 +58,22 @@ namespace DicomReader
 				return 0;
 			}
 
-			// Dictionnaire
-			const itk::MetaDataDictionary &dictionary = dicomIO->GetMetaDataDictionary();
+			// Pointeur sur l'image obtenu par ITK
+			const ImageType::Pointer &image = reader->GetOutput();
 
 			// Recherche de tag dans le fichier
-			bool size_ok;
+			const typename ImageType::SizeType& inputSize = image->GetLargestPossibleRegion().GetSize();
+			const uint &width = inputSize[0];
+			const uint &height = inputSize[1];
+			const uint &depth = inputSize[2];
 
-			const uint height = getTag("0028|0010",dictionary).toUInt(&size_ok);
-			if ( !size_ok )
-			{
-				qWarning() << QObject::tr("ERREUR : Lecture des dimensions de l'image impossible.");
-				return 0;
-			}
-			const uint width = getTag("0028|0011",dictionary).toUInt(&size_ok);
-			if ( !size_ok )
-			{
-				qWarning() << QObject::tr("ERREUR : Lecture des dimensions de l'image impossible.");
-				return 0;
-			}
-			const uint depth = reader->GetFileNames().size();
-
-			// Création d'une matrice aux dimensions de l'image
+			// Création d'un billon aux dimensions de l'image
 			Billon * const billon = new Billon( height, width, depth );
 
-			const ImageType::Pointer &image = reader->GetOutput();
+			// Copie de l'image ITK dans le billon
 			itk::ImageRegionConstIterator< ImageType > in( image,image->GetBufferedRegion() );
 			int max, min;
 			max = min = in.Value();
-
 			for ( uint k=0; k<depth; k++ )
 			{
 				Slice &slice = billon->slice(sliceOrderInversed?depth-1-k:k);
@@ -106,28 +93,11 @@ namespace DicomReader
 			billon->setMaxValue(max);
 			billon->setMinValue(min);
 
+			// Espacement des coupes et tailles des pixels en mm.
 			const ImageType::SpacingType &spacing = image->GetSpacing();
 			billon->setVoxelSize(spacing[0],spacing[1],spacing[2]);
 
 			return billon;
-		}
-
-		QString getTag( const QString &entryId, const itk::MetaDataDictionary &dictionary )
-		{
-			QString value = QObject::tr("indéfinie");
-
-			itk::MetaDataObject<std::string>::ConstPointer entryValue = 0;
-			const itk::MetaDataDictionary::ConstIterator tagItr = dictionary.Find(entryId.toStdString());
-
-			if( tagItr != dictionary.End ())
-			{
-				entryValue = dynamic_cast<itk::MetaDataObject<std::string> *> (tagItr->second.GetPointer());
-				if ( entryValue )
-				{
-					value = QString::fromStdString(entryValue->GetMetaDataObjectValue());
-				}
-			}
-			return value;
 		}
 	}
 }

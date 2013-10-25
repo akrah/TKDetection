@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>795</width>
+    <width>710</width>
     <height>710</height>
    </rect>
   </property>
@@ -119,8 +119,8 @@
         <widget class="QWidget" name="scrollAreaWidgetContents">
          <property name="geometry">
           <rect>
-           <x>93</x>
-           <y>271</y>
+           <x>129</x>
+           <y>273</y>
            <width>0</width>
            <height>0</height>
           </rect>
@@ -150,8 +150,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>795</width>
-     <height>22</height>
+     <width>710</width>
+     <height>25</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFichier">
@@ -187,7 +187,7 @@
      <item row="0" column="0">
       <widget class="QTabWidget" name="_tabs">
        <property name="currentIndex">
-        <number>5</number>
+        <number>0</number>
        </property>
        <widget class="QWidget" name="_tabAffichage">
         <attribute name="title">
@@ -234,8 +234,8 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>386</width>
-              <height>168</height>
+              <width>378</width>
+              <height>221</height>
              </rect>
             </property>
             <attribute name="label">
@@ -437,8 +437,8 @@ zone restreinte</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>299</width>
-              <height>241</height>
+              <width>441</width>
+              <height>234</height>
              </rect>
             </property>
             <attribute name="label">
@@ -632,8 +632,8 @@ zone restreinte</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>317</width>
-              <height>169</height>
+              <width>441</width>
+              <height>234</height>
              </rect>
             </property>
             <attribute name="label">
@@ -1207,8 +1207,8 @@ résolution de l'image)</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>397</width>
-              <height>216</height>
+              <width>443</width>
+              <height>271</height>
              </rect>
             </property>
             <attribute name="label">
@@ -1427,8 +1427,8 @@ résolution de l'image)</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>397</width>
-              <height>253</height>
+              <width>398</width>
+              <height>242</height>
              </rect>
             </property>
             <attribute name="label">
@@ -1698,8 +1698,8 @@ résolution de l'image)</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>397</width>
-              <height>206</height>
+              <width>398</width>
+              <height>199</height>
              </rect>
             </property>
             <attribute name="label">
@@ -1934,15 +1934,15 @@ résolution de l'image)</string>
             </font>
            </property>
            <property name="currentIndex">
-            <number>1</number>
+            <number>0</number>
            </property>
            <widget class="QWidget" name="page_8">
             <property name="geometry">
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>258</width>
-              <height>135</height>
+              <width>443</width>
+              <height>302</height>
              </rect>
             </property>
             <attribute name="label">
@@ -2120,8 +2120,8 @@ résolution de l'image)</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>330</width>
-              <height>188</height>
+              <width>443</width>
+              <height>302</height>
              </rect>
             </property>
             <attribute name="label">
@@ -2472,15 +2472,15 @@ l'intervalle angulaire</string>
             </font>
            </property>
            <property name="currentIndex">
-            <number>4</number>
+            <number>0</number>
            </property>
            <widget class="QWidget" name="page">
             <property name="geometry">
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>380</width>
-              <height>96</height>
+              <width>443</width>
+              <height>209</height>
              </rect>
             </property>
             <attribute name="label">
@@ -2575,8 +2575,8 @@ l'intervalle angulaire</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>403</width>
-              <height>180</height>
+              <width>395</width>
+              <height>181</height>
              </rect>
             </property>
             <attribute name="label">
@@ -2789,8 +2789,8 @@ l'intervalle angulaire</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>343</width>
-              <height>163</height>
+              <width>334</width>
+              <height>157</height>
              </rect>
             </property>
             <attribute name="label">
@@ -2978,8 +2978,8 @@ l'intervalle angulaire</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>273</width>
-              <height>92</height>
+              <width>261</width>
+              <height>84</height>
              </rect>
             </property>
             <attribute name="label">
@@ -3044,8 +3044,8 @@ l'intervalle angulaire</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>457</width>
-              <height>206</height>
+              <width>443</width>
+              <height>209</height>
              </rect>
             </property>
             <attribute name="label">
@@ -3088,6 +3088,19 @@ l'intervalle angulaire</string>
               </widget>
              </item>
              <item>
+              <widget class="QCheckBox" name="_checkBoxKeepBillonSliceNumber">
+               <property name="font">
+                <font>
+                 <weight>50</weight>
+                 <bold>false</bold>
+                </font>
+               </property>
+               <property name="text">
+                <string>keep billon slice number (else numbers starting by 0)</string>
+               </property>
+              </widget>
+             </item>
+             <item>
               <widget class="QPushButton" name="_buttonExportToSDP">
                <property name="font">
                 <font>
@@ -3112,13 +3125,6 @@ l'intervalle angulaire</string>
                 </size>
                </property>
               </spacer>
-             </item>
-             <item>
-              <widget class="QCheckBox" name="_checkBoxKeepBillonSliceNumber">
-               <property name="text">
-                <string>keep billon slice number (else is numbered starting by 0)</string>
-               </property>
-              </widget>
              </item>
             </layout>
            </widget>
@@ -3146,7 +3152,7 @@ l'intervalle angulaire</string>
         <enum>QTabWidget::South</enum>
        </property>
        <property name="currentIndex">
-        <number>5</number>
+        <number>1</number>
        </property>
        <widget class="QWidget" name="tab_2">
         <attribute name="title">
@@ -3302,7 +3308,7 @@ l'intervalle angulaire</string>
          </item>
          <item>
           <widget class="QwtPolarPlot" name="_polarSectorHistogram">
-           <property name="plotBackground" stdset="0">
+           <property name="plotBackground">
             <brush brushstyle="SolidPattern">
              <color alpha="0">
               <red>255</red>
@@ -3392,11 +3398,6 @@ l'intervalle angulaire</string>
  <layoutdefault spacing="6" margin="6"/>
  <customwidgets>
   <customwidget>
-   <class>QxtSpanSlider</class>
-   <extends>QSlider</extends>
-   <header>QxtSpanSlider</header>
-  </customwidget>
-  <customwidget>
    <class>QwtPlot</class>
    <extends>QFrame</extends>
    <header>qwt_plot.h</header>
@@ -3407,6 +3408,11 @@ l'intervalle angulaire</string>
    <extends>QFrame</extends>
    <header>qwt_polar_plot.h</header>
    <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>QxtSpanSlider</class>
+   <extends>QSlider</extends>
+   <header>QxtSpanSlider</header>
   </customwidget>
  </customwidgets>
  <tabstops>
