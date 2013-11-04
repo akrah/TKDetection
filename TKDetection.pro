@@ -126,7 +126,7 @@ FORMS =	ui/mainwindow.ui
 
 # Directives compilateur
 #-----------------------#
-CXXFLAGS *= -std=c++0x
+QMAKE_CXXFLAGS *= -std=c++0x
 macx:QMAKE_CC=/usr/bin/gcc
 macx:QMAKE_CXX=/usr/bin/g++
 
