@@ -7,7 +7,7 @@ TARGET =
 
 macx:QMAKE_CC=/opt/local/bin/llvm-gcc-4.2
 macx:QMAKE_CXX=/opt/local/bin/llvm-g++-4.2
-macx: NCLUDEPATH += -F$$(HOME)/Library/Frameworks
+macx: INCLUDEPATH += -F$$(HOME)/Library/Frameworks
 macx: LIBS += -F$$(HOME)/Library/Frameworks -framework QGLViewer
 
 
@@ -19,7 +19,9 @@ CONFIG += qt  warn_on  boost
 
 DEFINES += WITH_VISU3D_QGLVIEWER 
 
-LIBS += -lDGtal -lDGtalIO  -lboost_program_options  
+!macx: LIBS += -lDGtal -lDGtalIO  -lboost_program_options  -lQGLViewer 
+macx: LIBS += -F$$(HOME)/Library/Frameworks -framework QGLViewer  -lDGtal -lDGtalIO  -lboost_program_options  
+
 
 # Input
 
