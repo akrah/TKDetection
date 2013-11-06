@@ -49,6 +49,8 @@ int main(int argc, char** argv)
   typedef DGtal::ImageContainerBySTLVector<DGtal::Z3i::Domain,  unsigned char > Image3D;
   typedef DGtal::ConstImageAdapter<Image3D, Image2D::Domain, DGtal::Projector< DGtal::Z3i::Space>,
 				   Image3D::Value,  DGtal::DefaultFunctor >  SliceImageAdapter;
+
+  typedef DGtal::Viewer3D<Z3i::Space, Z3i::KSpace> My3DViewer;  
   // parse command line ----------------------------------------------
   po::options_description general_opt("Allowed options are: ");
   general_opt.add_options()
@@ -103,9 +105,9 @@ int main(int argc, char** argv)
   float sz = vm["scaleZ"].as<float>();
 
   QApplication application(argc,argv);
-  Viewer3D viewer;
+  My3DViewer viewer;
 
-  viewer.setScale(sx,sy,sz);
+  viewer.setGLScale(sx,sy,sz);
   viewer.setWindowTitle("simple Volume Viewer");
   viewer.show();
 
@@ -124,7 +126,7 @@ int main(int argc, char** argv)
       DGtal::Projector<DGtal::Z3i::Space> aSliceFunctorX(sliceNum); aSliceFunctorX.initAddOneDim(0);
       SliceImageAdapter sliceImageX(img, domain2DX, aSliceFunctorX, DGtal::DefaultFunctor());
       viewer << sliceImageX;
-      viewer << DGtal::UpdateImagePosition(nbImage, DGtal::Display3D::xDirection, sliceNum, 0.0,0.0 );
+      viewer << DGtal::UpdateImagePosition<Z3i::Space, Z3i::KSpace>(nbImage, My3DViewer::xDirection, sliceNum, 0.0,0.0 );
       nbImage++;
     }
     
@@ -136,7 +138,7 @@ int main(int argc, char** argv)
       DGtal::Projector<DGtal::Z3i::Space> aSliceFunctorZ(sliceNum); aSliceFunctorZ.initAddOneDim(2);
       SliceImageAdapter sliceImageZ(img, domain2DZ, aSliceFunctorZ, DGtal::DefaultFunctor());
       viewer << sliceImageZ;
-      viewer << DGtal::UpdateImagePosition(nbImage, DGtal::Display3D::zDirection,  0.0,0.0, sliceNum );
+      viewer << DGtal::UpdateImagePosition<Z3i::Space, Z3i::KSpace>(nbImage, My3DViewer::zDirection,  0.0,0.0, sliceNum );
       nbImage++;
     }
 
@@ -149,7 +151,7 @@ int main(int argc, char** argv)
       DGtal::Projector<DGtal::Z3i::Space> aSliceFunctorY(sliceNum); aSliceFunctorY.initAddOneDim(1);
       SliceImageAdapter sliceImageY(img, domain2DY, aSliceFunctorY, DGtal::DefaultFunctor());
       viewer << sliceImageY;
-      viewer << DGtal::UpdateImagePosition(nbImage, DGtal::Display3D::yDirection, 0.0, sliceNum,0.0 );
+      viewer << DGtal::UpdateImagePosition<Z3i::Space, Z3i::KSpace>(nbImage, My3DViewer::yDirection, 0.0, sliceNum,0.0 );
       nbImage++;
       
     }
@@ -221,7 +223,7 @@ int main(int argc, char** argv)
 	  DGtal::Color c= gradient(cptComp%7);
 	  bool display=true;
 	  if(vm.count("filterMinSize")){
-	    int minSize = vm["filterMinSize"].as<int>();
+	    unsigned int minSize = vm["filterMinSize"].as<int>();
 	    display= display && (vectConnectedSCell.at(i).size()>=minSize);
 	  }
 	  if(vm.count("filterMaxZ") || vm.count("filterMaxY") || vm.count("filterMaxX")){
@@ -254,7 +256,7 @@ int main(int argc, char** argv)
 
   if(vm.count("trunkBark-mesh")){
 	string meshFilename = vm["trunkBark-mesh"].as<std::string>();
-	Mesh<Display3D::pointD3D> anImportedMesh(DGtal::Color(160, 30, 30,20));
+	DGtal::Mesh<Z3i::RealPoint> anImportedMesh(DGtal::Color(160, 30, 30,20));
 	anImportedMesh.invertVertexFaceOrder();
 	bool import = anImportedMesh << meshFilename;
 	if(import){
@@ -265,7 +267,7 @@ int main(int argc, char** argv)
 
   if(vm.count("marrow-mesh")){
 	string meshFilename = vm["marrow-mesh"].as<std::string>();
-	Mesh<Display3D::pointD3D> anImportedMesh(DGtal::Color(70,70,70,255));
+	Mesh<Z3i::RealPoint> anImportedMesh(DGtal::Color(70,70,70,255));
 	bool import = anImportedMesh << meshFilename;
 	if(import){
 	  viewer << anImportedMesh;
@@ -275,7 +277,7 @@ int main(int argc, char** argv)
 
 
 
-  viewer << Viewer3D::updateDisplay;
+  viewer << My3DViewer::updateDisplay;
 
 
 

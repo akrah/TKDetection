@@ -5,8 +5,13 @@
 TEMPLATE = app
 TARGET = 
 
-macx:QMAKE_CC=/usr/bin/clang
-macx:QMAKE_CXX=/usr/bin/clang++
+macx:QMAKE_CC=/opt/local/bin/llvm-gcc-4.2
+macx:QMAKE_CXX=/opt/local/bin/llvm-g++-4.2
+macx: NCLUDEPATH += -F$$(HOME)/Library/Frameworks
+macx: LIBS += -F$$(HOME)/Library/Frameworks -framework QGLViewer
+
+
+
 
 QT *= opengl xml 
 CONFIG += qt  warn_on  boost
@@ -14,7 +19,7 @@ CONFIG += qt  warn_on  boost
 
 DEFINES += WITH_VISU3D_QGLVIEWER 
 
-LIBS += -lDGtal -lDGtalIO  -lboost_program_options  -lQGLViewer 
+LIBS += -lDGtal -lDGtalIO  -lboost_program_options  
 
 # Input
 
