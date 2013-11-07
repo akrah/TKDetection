@@ -17,6 +17,7 @@ public:
 
 	const T &min() const;
 	const T &max() const;
+	const T mid() const;
 	T size() const;
 	T width() const;
 	bool containsClosed( const T & value ) const;
@@ -83,6 +84,12 @@ template <typename T>
 inline const T & Interval<T>::max() const
 {
 	return _max;
+}
+
+template <typename T>
+inline const T Interval<T>::mid() const
+{
+	return (_min + _max)/2.;
 }
 
 template <typename T>

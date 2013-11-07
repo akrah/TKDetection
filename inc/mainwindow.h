@@ -49,6 +49,7 @@ private slots:
 	void closeImage();
 
 	void drawSlice();
+	void drawTangentialView();
 	void setTypeOfView( const int &type );
 	void zoomInSliceView( const qreal &zoomFactor, const qreal &zoomCoefficient );
 	void dragInSliceView( const QPoint &movementVector );
@@ -68,7 +69,7 @@ private slots:
 	void updateSliceHistogram();
 	void updateSectorHistogram( const Interval<uint> &interval );
 	void updateContourHistograms( const int &sliceIndex );
-	void updateConcavitypointSerieCurve();
+	void updateConcavityPointSerieCurve();
 	void updateIntensityDistributionHistogram();
 	void updateIntensityDistributionHistogramOnKnotArea();
 
@@ -123,13 +124,18 @@ private:
 private:
 	Ui::MainWindow *_ui;
 	QLabel *_labelSliceView;
+	QLabel *_labelTangentialView;
 
 	Billon *_billon;
 	Billon *_componentBillon;
 	Billon *_knotBillon;
+	Billon *_tangentialBillon;
 
 	QImage _mainPix;
 	SliceZoomer _sliceZoomer;
+
+	QImage _tangentialPix;
+	SliceZoomer _tangentialZoomer;
 
 	SliceView *_sliceView;
 

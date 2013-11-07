@@ -1,6 +1,7 @@
 #include "inc/billonalgorithms.h"
 
 #include "inc/billon.h"
+#include "inc/piechart.h"
 
 namespace BillonAlgorithms
 {
@@ -79,4 +80,55 @@ namespace BillonAlgorithms
 		}
 		return vectAllVertex;
 	}
+
+	Billon * tangentialTransform( const Billon &billon, const Interval<uint> &sliceInterval, const Interval<uint> &angularInterval,
+								  const qreal &length, const uint &nbSlices, const int &minIntensity )
+	{
+		const qreal zPithCoord = sliceInterval.mid();
+		const rCoord2D &originPith = billon.pithCoord(zPithCoord);
+
+		const int width = sliceInterval.size()+1;
+		const int height = length * qCos(angularInterval.size()*PieChartSingleton::getInstance()->sectorAngle());
+
+		Billon * tangentialBillon = new Billon(width,height,nbSlices);
+		tangentialBillon->fill(minIntensity);
+
+		const qreal alpha = PI_ON_TWO;
+		const qreal cosAlpha = qCos(alpha);
+		const qreal sinAlpha = qSin(alpha);
+		const arma::Mat<qreal>::fixed<3,3> rotationMatY = { cosAlpha, 0, -sinAlpha, 0, 1, 0, sinAlpha, 0, cosAlpha };
+
+		const qreal beta = (PieChartSingleton::getInstance()->sector(angularInterval.min()).minAngle()+PieChartSingleton::getInstance()->sector(angularInterval.max()).maxAngle())/2.;
+		const qreal cosBeta = qCos(beta);
+		const qreal sinBeta = qSin(beta);
+		const arma::Mat<qreal>::fixed<3,3> rotationMatX = { 1, 0, 0, 0, cosBeta, -sinBeta, 0, sinBeta, cosBeta };
+
+		const qreal shiftStep = length/(1.*nbSlices);
+		const arma::Col<qreal>::fixed<3> originShift = { -sinAlpha*shiftStep, -sinBeta*shiftStep, cosAlpha*cosBeta*shiftStep };
+
+
+		arma::Col<qreal>::fixed<3> origin = { originPith.x, originPith.y, zPithCoord };
+		arma::Col<qreal>::fixed<3> initial, destination;
+		initial(2) = 0.;
+
+		for ( uint k=0 ; k<nbSlices ; ++k )
+		{
+			Slice &slice = tangentialBillon->slice(k);
+			for ( int j=-height/2. ; j<height/2. ; ++j )
+			{
+				initial(1) = j;
+				for ( int i=-width/2. ; i<width/2. ; ++i )
+				{
+					initial(0) = i;
+					destination = (rotationMatY * rotationMatX * initial) + origin;
+					slice(j+slice.n_rows/2.,i+slice.n_cols/2.) = destination(0)>=0 && destination(0)<billon.n_cols && destination(1)>=0 && destination(1)<billon.n_rows && destination(2)>=0 && destination(2)<billon.n_slices ?
+																	 billon(destination(1),destination(0),destination(2)) : minIntensity;
+				}
+			}
+			origin += originShift;
+		}
+
+		return tangentialBillon;
+	}
+
 }

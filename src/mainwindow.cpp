@@ -47,8 +47,9 @@
 #include <qwt_polar_renderer.h>
 #include <qwt_polar_grid.h>
 
-MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::MainWindow), _labelSliceView(new QLabel), _billon(0), _componentBillon(0), _knotBillon(0),
-	_sliceView(new SliceView()), _sliceHistogram(new SliceHistogram()), _plotSliceHistogram(new PlotSliceHistogram()),
+MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::MainWindow), _labelSliceView(new QLabel), _labelTangentialView(new QLabel),
+	_billon(0), _componentBillon(0), _knotBillon(0), _tangentialBillon(0), _sliceView(new SliceView()),
+	_sliceHistogram(new SliceHistogram()), _plotSliceHistogram(new PlotSliceHistogram()),
 	_sectorHistogram(new SectorHistogram()), _plotSectorHistogram(new PlotSectorHistogram()),
 	_nearestPointsHistogram(new NearestPointsHistogram()), _plotNearestPointsHistogram(new PlotNearestPointsHistogram()),
 	_plotCurvatureHistogram(new PlotCurvatureHistogram()), _plotContourDistancesHistogram(new PlotContourDistancesHistogram()),
@@ -68,6 +69,13 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 
 	_ui->_scrollSliceView->setBackgroundRole(QPalette::Dark);
 	_ui->_scrollSliceView->setWidget(_labelSliceView);
+
+	_labelTangentialView->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
+	_labelTangentialView->setScaledContents(true);
+	_labelTangentialView->installEventFilter(&_tangentialZoomer);
+
+	_ui->_scrollTangentialView->setBackgroundRole(QPalette::Dark);
+	_ui->_scrollTangentialView->setWidget(_labelTangentialView);
 
 	_ui->_comboViewType->insertItem(TKD::CLASSIC,tr("Originale"));
 	_ui->_comboViewType->insertItem(TKD::Z_MOTION,tr("Z-mouvements"));
@@ -224,6 +232,7 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 	QObject::connect(_ui->_buttonSelectSliceIntervalUpdate, SIGNAL(clicked()), this, SLOT(selectCurrentSliceInterval()));
 	QObject::connect(_ui->_comboSelectSectorInterval, SIGNAL(currentIndexChanged(int)), this, SLOT(selectSectorInterval(int)));
 	QObject::connect(_ui->_buttonSelectSectorIntervalUpdate, SIGNAL(clicked()), this, SLOT(selectCurrentSectorInterval()));
+	QObject::connect(_ui->_sliderSelectTangentialSlice, SIGNAL(valueChanged(int)), this, SLOT(drawTangentialView()));
 
 	/********************************
 	* Évènements de l'onglet "Export"
@@ -298,6 +307,7 @@ MainWindow::~MainWindow()
 	delete _plotSliceHistogram;
 	delete _sliceHistogram;
 	delete _sliceView;
+	if ( _tangentialBillon ) delete _tangentialBillon;
 	if ( _knotBillon ) delete _knotBillon;
 	if ( _componentBillon ) delete _componentBillon;
 	if ( _billon ) delete _billon;
@@ -396,7 +406,14 @@ void MainWindow::closeImage()
 	}
 	_contourBillon->clear();
 
+	if ( _tangentialBillon )
+	{
+		delete _tangentialBillon;
+		_tangentialBillon = 0;
+	}
+
 	_mainPix = QImage(0,0,QImage::Format_ARGB32);
+	_tangentialPix = QImage(0,0,QImage::Format_ARGB32);
 	_treeRadius = 133.33;
 	_ui->_checkRadiusAroundPith->setText( QString::number(_treeRadius) );
 	updateSliceHistogram();
@@ -549,6 +566,35 @@ void MainWindow::drawSlice()
 	_labelSliceView->resize(_sliceZoomer.factor() * _mainPix.size());
 }
 
+void MainWindow::drawTangentialView()
+{
+	if ( _tangentialBillon )
+	{
+		const uint &currentSlice = _ui->_sliderSelectTangentialSlice->value();
+		const uint length = 200;
+
+		const uint width = _sliceHistogram->interval(_ui->_comboSelectSliceInterval->currentIndex()-1).size()+1;
+		const uint height = length * qCos(_sectorHistogram->interval(_ui->_comboSelectSectorInterval->currentIndex()-1).size()*PieChartSingleton::getInstance()->sectorAngle());
+
+		_tangentialPix = QImage(width,height,QImage::Format_ARGB32);
+		_tangentialPix.fill(0xff000000);
+
+		_sliceView->drawSlice( _tangentialPix, *_tangentialBillon, TKD::CLASSIC, uiCoord2D(0,0), currentSlice, Interval<int>(_ui->_spinMinIntensity->value(), _ui->_spinMaxIntensity->value()),
+					  _ui->_spinZMotionMin->value(), _ui->_spinCartesianAngularResolution->value(), TKD::Z_PROJECTION,
+					  TKD::OpticalFlowParameters(_ui->_spinFlowAlpha->value(),_ui->_spinFlowEpsilon->value(),_ui->_spinFlowMaximumIterations->value()),
+					  TKD::EdgeDetectionParameters(static_cast<const TKD::EdgeDetectionType>(_ui->_comboEdgeDetectionType->currentIndex()),_ui->_spinCannyRadiusOfGaussianMask->value(),
+												   _ui->_spinCannySigmaOfGaussianMask->value(), _ui->_spinCannyMinimumGradient->value(), _ui->_spinCannyMinimumDeviation->value()),
+							  TKD::GrayScale);
+	}
+	else
+	{
+		_tangentialPix = QImage(1,1,QImage::Format_ARGB32);
+	}
+
+	_labelTangentialView->setPixmap( QPixmap::fromImage(_tangentialPix) );
+	_labelTangentialView->resize(_tangentialZoomer.factor() * _tangentialPix.size());
+}
+
 
 void MainWindow::setTypeOfView( const int &type )
 {
@@ -660,6 +706,12 @@ void MainWindow::selectSliceInterval( const int &index )
 		_knotBillon = 0;
 	}
 
+	if ( _tangentialBillon )
+	{
+		delete _tangentialBillon;
+		_tangentialBillon = 0;
+	}
+
 	_contourBillon->clear();
 
 	_ui->_comboSelectSectorInterval->blockSignals(true);
@@ -706,6 +758,12 @@ void MainWindow::selectSectorInterval(const int &index, const bool &draw )
 	{
 		delete _knotBillon;
 		_knotBillon = 0;
+	}
+
+	if ( _tangentialBillon )
+	{
+		delete _tangentialBillon;
+		_tangentialBillon = 0;
 	}
 
 	_contourBillon->clear();
@@ -762,15 +820,23 @@ void MainWindow::selectSectorInterval(const int &index, const bool &draw )
 		_contourBillon->compute( *_knotBillon, *_componentBillon, 0, _ui->_spinContourSmoothingRadius->value(), _ui->_spinCurvatureWidth->value(),
 								 -_ui->_spinCurvatureThreshold->value(), _nearestPointsHistogram->intervals(), angularInterval, _ui->_spinMinimumDistanceFromContourOrigin->value() );
 
+
+		_tangentialBillon = BillonAlgorithms::tangentialTransform( *_billon, sliceInterval, _sectorHistogram->interval(_ui->_comboSelectSectorInterval->currentIndex()-1),
+																   _ui->_spinTangentialDepth->value(), _ui->_spinTangentialNbSlices->value(), intensityInterval.min() );
+		_ui->_sliderSelectTangentialSlice->blockSignals(true);
+		_ui->_sliderSelectTangentialSlice->setMaximum(_ui->_spinTangentialNbSlices->value()-1);
+		_ui->_sliderSelectTangentialSlice->setValue(0);
+		_ui->_sliderSelectTangentialSlice->blockSignals(false);
 	}
 	if (draw)
 	{
 		updateContourHistograms( _currentSlice );
-		updateConcavitypointSerieCurve();
+		updateConcavityPointSerieCurve();
 		_plotNearestPointsHistogram->update( *_nearestPointsHistogram );
 		_ui->_plotNearestPointsHistogram->setAxisScale(QwtPlot::xBottom,0,_nearestPointsHistogram->size());
 		_ui->_plotNearestPointsHistogram->replot();
 		drawSlice();
+		drawTangentialView();
 	}
 }
 
@@ -876,7 +942,7 @@ void MainWindow::updateContourHistograms( const int &sliceIndex )
 	_ui->_plotContourDistancesHistogram->replot();
 }
 
-void MainWindow::updateConcavitypointSerieCurve()
+void MainWindow::updateConcavityPointSerieCurve()
 {
 	_concavityPointSerieCurve->clear();
 	_plotConcavityPointSerieCurve->clear();
@@ -1142,6 +1208,7 @@ void MainWindow::openNewBillon( const QString &fileName )
 	{
 		_mainPix = QImage(0,0,QImage::Format_ARGB32);
 	}
+	_tangentialPix = QImage(0,0,QImage::Format_ARGB32);
 }
 
 void MainWindow::initComponentsValues() {
