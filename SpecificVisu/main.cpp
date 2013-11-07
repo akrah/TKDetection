@@ -33,8 +33,10 @@ int main(int argc, char** argv)
   typedef DGtal::ConstImageAdapter<Image3D, Image2D::Domain, DGtal::Projector< DGtal::Z3i::Space>,
 				   Image3D::Value,  DGtal::DefaultFunctor >  SliceImageAdapter;
 
+  typedef DGtal::Viewer3D<Z3i::Space, Z3i::KSpace> My3DViewer;  
+
   QApplication application(argc,argv);
-  Viewer3D viewer;
+  My3DViewer viewer;
    
   viewer.setWindowTitle("specific view");
   viewer.show();
@@ -52,7 +54,7 @@ int main(int argc, char** argv)
   DGtal::Projector<DGtal::Z3i::Space> aSliceFunctorZ(slicePosZ); aSliceFunctorZ.initAddOneDim(1);
   SliceImageAdapter sliceImageZ(img, domain2DZ, aSliceFunctorZ, DGtal::DefaultFunctor());
   viewer << sliceImageZ;
-  viewer << DGtal::UpdateImagePosition(0, DGtal::Display3D::yDirection, 0.0, slicePosZ,0.0 );
+  viewer << DGtal::UpdateImagePosition<Z3i::Space, Z3i::KSpace> (0, My3DViewer::yDirection, 0.0, slicePosZ,0.0 );
 
 
 
@@ -64,7 +66,7 @@ int main(int argc, char** argv)
   DGtal::Projector<DGtal::Z3i::Space> aSliceFunctorX(slicePosX); aSliceFunctorX.initAddOneDim(2);
   SliceImageAdapter sliceImageX(img, domain2DX, aSliceFunctorX, DGtal::DefaultFunctor());
   viewer << sliceImageX;
-  viewer << DGtal::UpdateImagePosition(1, DGtal::Display3D::zDirection,  0.0,0.0, slicePosX );
+  viewer << DGtal::UpdateImagePosition<Z3i::Space, Z3i::KSpace> (1, My3DViewer::zDirection,  0.0,0.0, slicePosX );
 
 
 
@@ -83,7 +85,7 @@ int main(int argc, char** argv)
 
   // Display mesh of center trunk
   
-  Mesh<Display3D::pointD3D> anImportedMesh(DGtal::Color(250,200,200,255));
+  Mesh<Z3i::RealPoint> anImportedMesh(DGtal::Color(250,200,200,255));
   viewer.setLineColor(DGtal::Color(250,200,200,255));
   anImportedMesh <<"moelleSPR1T.ofs";
   viewer << anImportedMesh;
@@ -91,7 +93,7 @@ int main(int argc, char** argv)
 
   
     
-  viewer << Viewer3D::updateDisplay;
+  viewer << My3DViewer::updateDisplay;
  
 
 
