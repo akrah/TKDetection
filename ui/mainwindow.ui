@@ -119,7 +119,7 @@
         <widget class="QWidget" name="scrollAreaWidgetContents">
          <property name="geometry">
           <rect>
-           <x>129</x>
+           <x>94</x>
            <y>273</y>
            <width>0</width>
            <height>0</height>
@@ -187,7 +187,7 @@
      <item row="0" column="0">
       <widget class="QTabWidget" name="_tabs">
        <property name="currentIndex">
-        <number>0</number>
+        <number>4</number>
        </property>
        <widget class="QWidget" name="_tabAffichage">
         <attribute name="title">
@@ -234,8 +234,8 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>378</width>
-              <height>221</height>
+              <width>403</width>
+              <height>234</height>
              </rect>
             </property>
             <attribute name="label">
@@ -437,8 +437,8 @@ zone restreinte</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>441</width>
-              <height>234</height>
+              <width>297</width>
+              <height>221</height>
              </rect>
             </property>
             <attribute name="label">
@@ -632,8 +632,8 @@ zone restreinte</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>441</width>
-              <height>234</height>
+              <width>321</width>
+              <height>152</height>
              </rect>
             </property>
             <attribute name="label">
@@ -1207,7 +1207,7 @@ résolution de l'image)</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>443</width>
+              <width>405</width>
               <height>271</height>
              </rect>
             </property>
@@ -1941,7 +1941,7 @@ résolution de l'image)</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>443</width>
+              <width>405</width>
               <height>302</height>
              </rect>
             </property>
@@ -2120,8 +2120,8 @@ résolution de l'image)</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>443</width>
-              <height>302</height>
+              <width>330</width>
+              <height>183</height>
              </rect>
             </property>
             <attribute name="label">
@@ -2361,96 +2361,198 @@ premier point de contour (en px)</string>
         <attribute name="title">
          <string>Processus</string>
         </attribute>
-        <layout class="QFormLayout" name="formLayout_19">
-         <item row="0" column="0">
-          <widget class="QLabel" name="label_11">
-           <property name="text">
-            <string>1. Moelle</string>
+        <layout class="QVBoxLayout" name="verticalLayout_15">
+         <item>
+          <layout class="QFormLayout" name="formLayout_6">
+           <property name="sizeConstraint">
+            <enum>QLayout::SetNoConstraint</enum>
            </property>
-          </widget>
-         </item>
-         <item row="0" column="1">
-          <widget class="QPushButton" name="_buttonComputePith">
-           <property name="text">
-            <string>Calculer la moelle</string>
-           </property>
-          </widget>
-         </item>
-         <item row="1" column="0">
-          <widget class="QLabel" name="label_28">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="text">
-            <string>2. Sélection de
-l'intervalle de coupes</string>
-           </property>
-          </widget>
-         </item>
-         <item row="1" column="1">
-          <layout class="QHBoxLayout" name="horizontalLayout_15">
-           <item>
-            <widget class="QComboBox" name="_comboSelectSliceInterval">
-             <item>
-              <property name="text">
-               <string>Aucun</string>
-              </property>
-             </item>
+           <item row="0" column="0">
+            <widget class="QLabel" name="label_11">
+             <property name="text">
+              <string>1. Moelle</string>
+             </property>
             </widget>
            </item>
-           <item>
-            <widget class="QPushButton" name="_buttonSelectSliceIntervalUpdate">
+           <item row="0" column="1">
+            <widget class="QPushButton" name="_buttonComputePith">
+             <property name="text">
+              <string>Calculer la moelle</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="0">
+            <widget class="QLabel" name="label_28">
              <property name="sizePolicy">
-              <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+              <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
                <horstretch>0</horstretch>
                <verstretch>0</verstretch>
               </sizepolicy>
              </property>
              <property name="text">
-              <string>Mettre à jour</string>
+              <string>2. Sélection de
+l'intervalle de coupes</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="1">
+            <layout class="QHBoxLayout" name="horizontalLayout_15">
+             <item>
+              <widget class="QComboBox" name="_comboSelectSliceInterval">
+               <item>
+                <property name="text">
+                 <string>Aucun</string>
+                </property>
+               </item>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="_buttonSelectSliceIntervalUpdate">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="text">
+                <string>Mettre à jour</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item row="2" column="0">
+            <widget class="QLabel" name="label_4">
+             <property name="text">
+              <string>3. Sélection de
+l'intervalle angulaire</string>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="1">
+            <layout class="QHBoxLayout" name="horizontalLayout_19">
+             <item>
+              <widget class="QComboBox" name="_comboSelectSectorInterval">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <item>
+                <property name="text">
+                 <string>Aucun</string>
+                </property>
+               </item>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="_buttonSelectSectorIntervalUpdate">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="text">
+                <string>Mettre à jour</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+          </layout>
+         </item>
+         <item>
+          <widget class="Line" name="line">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <layout class="QFormLayout" name="formLayout_4">
+           <item row="0" column="0">
+            <widget class="QLabel" name="label_7">
+             <property name="text">
+              <string>Longueur depuis la moelle
+en pixels</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="1">
+            <widget class="QSpinBox" name="_spinTangentialDepth">
+             <property name="maximum">
+              <number>255</number>
+             </property>
+             <property name="value">
+              <number>200</number>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="0">
+            <widget class="QLabel" name="label_12">
+             <property name="text">
+              <string>Nombre de coupes tangentielles</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="1">
+            <widget class="QSpinBox" name="_spinTangentialNbSlices">
+             <property name="value">
+              <number>20</number>
              </property>
             </widget>
            </item>
           </layout>
          </item>
-         <item row="2" column="0">
-          <widget class="QLabel" name="label_4">
-           <property name="text">
-            <string>3. Sélection de
-l'intervalle angulaire</string>
-           </property>
-          </widget>
-         </item>
-         <item row="2" column="1">
-          <layout class="QHBoxLayout" name="horizontalLayout_19">
-           <item>
-            <widget class="QComboBox" name="_comboSelectSectorInterval">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
+         <item>
+          <layout class="QGridLayout" name="gridLayout_2">
+           <item row="0" column="0">
+            <widget class="QScrollArea" name="_scrollTangentialView">
+             <property name="frameShape">
+              <enum>QFrame::NoFrame</enum>
              </property>
-             <item>
-              <property name="text">
-               <string>Aucun</string>
+             <property name="frameShadow">
+              <enum>QFrame::Plain</enum>
+             </property>
+             <property name="lineWidth">
+              <number>0</number>
+             </property>
+             <property name="verticalScrollBarPolicy">
+              <enum>Qt::ScrollBarAlwaysOn</enum>
+             </property>
+             <property name="horizontalScrollBarPolicy">
+              <enum>Qt::ScrollBarAlwaysOn</enum>
+             </property>
+             <property name="widgetResizable">
+              <bool>false</bool>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignCenter</set>
+             </property>
+             <widget class="QWidget" name="scrollAreaWidgetContents_2">
+              <property name="geometry">
+               <rect>
+                <x>0</x>
+                <y>0</y>
+                <width>390</width>
+                <height>234</height>
+               </rect>
               </property>
-             </item>
+             </widget>
             </widget>
            </item>
-           <item>
-            <widget class="QPushButton" name="_buttonSelectSectorIntervalUpdate">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
+           <item row="1" column="0">
+            <widget class="QSlider" name="_sliderSelectTangentialSlice">
+             <property name="maximum">
+              <number>20</number>
              </property>
-             <property name="text">
-              <string>Mettre à jour</string>
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="tickPosition">
+              <enum>QSlider::TicksAbove</enum>
              </property>
             </widget>
            </item>
@@ -2479,7 +2581,7 @@ l'intervalle angulaire</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>443</width>
+              <width>405</width>
               <height>209</height>
              </rect>
             </property>
@@ -3044,8 +3146,8 @@ l'intervalle angulaire</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>443</width>
-              <height>209</height>
+              <width>398</width>
+              <height>112</height>
              </rect>
             </property>
             <attribute name="label">
@@ -3473,7 +3575,6 @@ l'intervalle angulaire</string>
   <tabstop>_spinCurvatureWidth</tabstop>
   <tabstop>_sliderCurvatureThreshold</tabstop>
   <tabstop>_spinCurvatureThreshold</tabstop>
-  <tabstop>_buttonComputePith</tabstop>
   <tabstop>_comboSelectSliceInterval</tabstop>
   <tabstop>_buttonSelectSliceIntervalUpdate</tabstop>
   <tabstop>_comboSelectSectorInterval</tabstop>
