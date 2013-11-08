@@ -53,6 +53,8 @@ private slots:
 	void setTypeOfView( const int &type );
 	void zoomInSliceView( const qreal &zoomFactor, const qreal &zoomCoefficient );
 	void dragInSliceView( const QPoint &movementVector );
+	void zoomInTangentialView( const qreal &zoomFactor, const qreal &zoomCoefficient );
+	void dragInTangentialView( const QPoint &movementVector );
 	void previousMaximumInSliceHistogram();
 	void nextMaximumInSliceHistogram();
 

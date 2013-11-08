@@ -86,26 +86,34 @@ namespace BillonAlgorithms
 	{
 		const qreal zPithCoord = sliceInterval.mid();
 		const rCoord2D &originPith = billon.pithCoord(zPithCoord);
+		const uint angularRange = (angularInterval.max() + (angularInterval.max()>angularInterval.min() ? 0. : PieChartSingleton::getInstance()->nbSectors())) - angularInterval.min();
 
-		const int width = sliceInterval.size()+1;
-		const int height = length * qCos(angularInterval.size()*PieChartSingleton::getInstance()->sectorAngle());
+		// Dimensions des coupes tangentielles
+		const uint width = sliceInterval.size()+1;
+		const uint height = 2 * qTan(angularRange*PieChartSingleton::getInstance()->sectorAngle()/2.) * length;
+		const int widthOnTWo = width/2.;
+		const int heightOnTWo = height/2.;
 
 		Billon * tangentialBillon = new Billon(width,height,nbSlices);
 		tangentialBillon->fill(minIntensity);
 
+		// Rotation autour de l'axe Y
 		const qreal alpha = PI_ON_TWO;
 		const qreal cosAlpha = qCos(alpha);
 		const qreal sinAlpha = qSin(alpha);
 		const arma::Mat<qreal>::fixed<3,3> rotationMatY = { cosAlpha, 0, -sinAlpha, 0, 1, 0, sinAlpha, 0, cosAlpha };
 
-		const qreal beta = (PieChartSingleton::getInstance()->sector(angularInterval.min()).minAngle()+PieChartSingleton::getInstance()->sector(angularInterval.max()).maxAngle())/2.;
+		// Rotation selon l'angle de la zone de nœuds
+		const qreal beta = (angularInterval.min()+angularRange/2.)*PieChartSingleton::getInstance()->sectorAngle();
 		const qreal cosBeta = qCos(beta);
 		const qreal sinBeta = qSin(beta);
 		const arma::Mat<qreal>::fixed<3,3> rotationMatX = { 1, 0, 0, 0, cosBeta, -sinBeta, 0, sinBeta, cosBeta };
 
-		const qreal shiftStep = length/(1.*nbSlices);
-		const arma::Col<qreal>::fixed<3> originShift = { -sinAlpha*shiftStep, -sinBeta*shiftStep, cosAlpha*cosBeta*shiftStep };
+		const arma::Mat<qreal>::fixed<3,3> rotationMat = rotationMatY*rotationMatX;
 
+		// Vecteur de déplacement entre deux coupes tangentielles successives
+		const arma::Col<qreal>::fixed<3> shiftStep = { 0., 0., length/(1.*nbSlices) };
+		const arma::Col<qreal>::fixed<3> originShift = rotationMat * shiftStep;
 
 		arma::Col<qreal>::fixed<3> origin = { originPith.x, originPith.y, zPithCoord };
 		arma::Col<qreal>::fixed<3> initial, destination;
@@ -114,15 +122,18 @@ namespace BillonAlgorithms
 		for ( uint k=0 ; k<nbSlices ; ++k )
 		{
 			Slice &slice = tangentialBillon->slice(k);
-			for ( int j=-height/2. ; j<height/2. ; ++j )
+			for ( int j=-heightOnTWo ; j<heightOnTWo ; ++j )
 			{
 				initial(1) = j;
-				for ( int i=-width/2. ; i<width/2. ; ++i )
+				for ( int i=-widthOnTWo ; i<widthOnTWo ; ++i )
 				{
 					initial(0) = i;
-					destination = (rotationMatY * rotationMatX * initial) + origin;
-					slice(j+slice.n_rows/2.,i+slice.n_cols/2.) = destination(0)>=0 && destination(0)<billon.n_cols && destination(1)>=0 && destination(1)<billon.n_rows && destination(2)>=0 && destination(2)<billon.n_slices ?
-																	 billon(destination(1),destination(0),destination(2)) : minIntensity;
+					destination = (rotationMat * initial) + origin;
+//					if ( (k==0||k==nbSlices-1) && (j==-heightOnTWo||j==heightOnTWo-1) && (i==-widthOnTWo||i==widthOnTWo-1) )
+//						std::cout << "( " << i << ", " << j << ", " << k << " ) => ( " << destination(0) << ", " << destination(1) << ", " << destination(2) << " )" << std::endl;
+					slice(j+heightOnTWo,i+widthOnTWo) =
+							destination(0)>=0 && destination(0)<billon.n_cols && destination(1)>=0 && destination(1)<billon.n_rows && destination(2)>=0 && destination(2)<billon.n_slices ?
+								billon(destination(1),destination(0),destination(2)) : minIntensity;
 				}
 			}
 			origin += originShift;

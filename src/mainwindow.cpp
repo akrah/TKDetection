@@ -274,6 +274,8 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 	********************/
 	QObject::connect(&_sliceZoomer, SIGNAL(zoomFactorChanged(qreal,qreal)), this, SLOT(zoomInSliceView(qreal,qreal)));
 	QObject::connect(&_sliceZoomer, SIGNAL(isMovedFrom(QPoint)), this, SLOT(dragInSliceView(QPoint)));
+	QObject::connect(&_tangentialZoomer, SIGNAL(zoomFactorChanged(qreal,qreal)), this, SLOT(zoomInTangentialView(qreal,qreal)));
+	QObject::connect(&_tangentialZoomer, SIGNAL(isMovedFrom(QPoint)), this, SLOT(dragInTangentialView(QPoint)));
 
 
 	// Raccourcis des actions du menu
@@ -571,10 +573,8 @@ void MainWindow::drawTangentialView()
 	if ( _tangentialBillon )
 	{
 		const uint &currentSlice = _ui->_sliderSelectTangentialSlice->value();
-		const uint length = 200;
-
-		const uint width = _sliceHistogram->interval(_ui->_comboSelectSliceInterval->currentIndex()-1).size()+1;
-		const uint height = length * qCos(_sectorHistogram->interval(_ui->_comboSelectSectorInterval->currentIndex()-1).size()*PieChartSingleton::getInstance()->sectorAngle());
+		const uint &width = _tangentialBillon->n_cols;
+		const uint &height = _tangentialBillon->n_rows;
 
 		_tangentialPix = QImage(width,height,QImage::Format_ARGB32);
 		_tangentialPix.fill(0xff000000);
@@ -585,6 +585,20 @@ void MainWindow::drawTangentialView()
 					  TKD::EdgeDetectionParameters(static_cast<const TKD::EdgeDetectionType>(_ui->_comboEdgeDetectionType->currentIndex()),_ui->_spinCannyRadiusOfGaussianMask->value(),
 												   _ui->_spinCannySigmaOfGaussianMask->value(), _ui->_spinCannyMinimumGradient->value(), _ui->_spinCannyMinimumDeviation->value()),
 							  TKD::GrayScale);
+
+		const qreal currentDistFromPith = currentSlice * static_cast<qreal>(_ui->_spinTangentialDepth->value()) / static_cast<qreal>( _ui->_spinTangentialNbSlices->value());
+		const qreal knotAreaLine = currentDistFromPith * (height/2.) / static_cast<qreal>(_ui->_spinTangentialDepth->value());
+
+		static const QVector<QColor> colors = { Qt::blue, Qt::yellow, Qt::green, Qt::magenta, Qt::cyan, Qt::white };
+		const int nbKnotAreas = _sectorHistogram->intervals().size();
+		const int nbColorsToUse = qMax( nbKnotAreas>colors.size() ? ((nbKnotAreas+1)/2)%colors.size() : colors.size() , 1 );
+		const QColor currentColor = colors[(_ui->_comboSelectSectorInterval->currentIndex()-1)%nbColorsToUse];
+
+		QPainter painter(&_tangentialPix);
+		painter.setPen(currentColor);
+		painter.drawLine(0,height/2.-knotAreaLine,width,height/2.-knotAreaLine);
+		painter.drawLine(0,height/2.+knotAreaLine,width,height/2.+knotAreaLine);
+		painter.end();
 	}
 	else
 	{
@@ -625,6 +639,22 @@ void MainWindow::zoomInSliceView( const qreal &zoomFactor, const qreal &zoomCoef
 void MainWindow::dragInSliceView( const QPoint &movementVector )
 {
 	QScrollArea &scrollArea = *(_ui->_scrollSliceView);
+	if ( movementVector.x() ) scrollArea.horizontalScrollBar()->setValue(scrollArea.horizontalScrollBar()->value()-movementVector.x());
+	if ( movementVector.y() ) scrollArea.verticalScrollBar()->setValue(scrollArea.verticalScrollBar()->value()-movementVector.y());
+}
+
+void MainWindow::zoomInTangentialView( const qreal &zoomFactor, const qreal &zoomCoefficient )
+{
+	_labelTangentialView->resize(zoomFactor * _tangentialPix.size());
+	QScrollBar *hBar = _ui->_scrollTangentialView->horizontalScrollBar();
+	hBar->setValue(int(zoomCoefficient * hBar->value() + ((zoomCoefficient - 1) * hBar->pageStep()/2)));
+	QScrollBar *vBar = _ui->_scrollTangentialView->verticalScrollBar();
+	vBar->setValue(int(zoomCoefficient * vBar->value() + ((zoomCoefficient - 1) * vBar->pageStep()/2)));
+}
+
+void MainWindow::dragInTangentialView( const QPoint &movementVector )
+{
+	QScrollArea &scrollArea = *(_ui->_scrollTangentialView);
 	if ( movementVector.x() ) scrollArea.horizontalScrollBar()->setValue(scrollArea.horizontalScrollBar()->value()-movementVector.x());
 	if ( movementVector.y() ) scrollArea.verticalScrollBar()->setValue(scrollArea.verticalScrollBar()->value()-movementVector.y());
 }
@@ -821,8 +851,8 @@ void MainWindow::selectSectorInterval(const int &index, const bool &draw )
 								 -_ui->_spinCurvatureThreshold->value(), _nearestPointsHistogram->intervals(), angularInterval, _ui->_spinMinimumDistanceFromContourOrigin->value() );
 
 
-		_tangentialBillon = BillonAlgorithms::tangentialTransform( *_billon, sliceInterval, _sectorHistogram->interval(_ui->_comboSelectSectorInterval->currentIndex()-1),
-																   _ui->_spinTangentialDepth->value(), _ui->_spinTangentialNbSlices->value(), intensityInterval.min() );
+		_tangentialBillon = BillonAlgorithms::tangentialTransform( *_billon, sliceInterval, sectorInterval, _ui->_spinTangentialDepth->value(),
+																   _ui->_spinTangentialNbSlices->value(), intensityInterval.min() );
 		_ui->_sliderSelectTangentialSlice->blockSignals(true);
 		_ui->_sliderSelectTangentialSlice->setMaximum(_ui->_spinTangentialNbSlices->value()-1);
 		_ui->_sliderSelectTangentialSlice->setValue(0);
