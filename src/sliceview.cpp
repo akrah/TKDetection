@@ -87,47 +87,6 @@ void SliceView::drawCurrentSlice( QImage &image, const Billon &billon,
 				  const uint &sliceIndex, const Interval<int> &intensityInterval,
 				  const uint &angularResolution, const TKD::ImageViewRender &aRender, const TKD::ProjectionType &axe)
 {
-//	const int widthDest = billon.n_cols;
-//	const int heighthDest = billon.n_rows;
-
-//	Slice slice(billon.n_rows,billon.n_cols);
-//	slice.fill(intensityInterval.min());
-
-//	const qreal alpha = PI_ON_TWO;
-//	const qreal cosAlpha = qCos(alpha);
-//	const qreal sinAlpha = qSin(alpha);
-//	const arma::Mat<qreal>::fixed<3,3> rotationMatY = { cosAlpha, 0, -sinAlpha, 0, 1, 0, sinAlpha, 0, cosAlpha };
-
-//	const qreal beta = PI_ON_FOUR;
-//	const qreal cosBeta = qCos(beta);
-//	const qreal sinBeta = qSin(beta);
-//	const arma::Mat<qreal>::fixed<3,3> rotationMatX = { 1, 0, 0, 0, cosBeta, -sinBeta, 0, sinBeta, cosBeta };
-
-//	const arma::Col<qreal>::fixed<3> origin = { widthDest/2., heighthDest/2., 0. };
-//	//arma::Col<qreal>::fixed<3> originShift = { sinAlpha*sliceIndex/2., 0., cosAlpha*sliceIndex/2. };
-//	//arma::Col<qreal>::fixed<3> originShift = { 0., cosBeta*sliceIndex/2., sinBeta*sliceIndex/2. };
-//	arma::Col<qreal>::fixed<3> originShift = { -sinAlpha*sliceIndex/2., -sinBeta*sliceIndex/2., cosAlpha*cosBeta*sliceIndex/2. };
-//	originShift += origin;
-
-//	arma::Col<qreal>::fixed<3> initial, destination;
-
-//	for ( int j=-heighthDest/2. ; j<heighthDest/2. ; ++j )
-//	{
-//		for ( int i=-widthDest/2. ; i<widthDest/2. ; ++i )
-//		{
-//			initial(0) = i;
-//			initial(1) = j;
-//			initial(2) = 0;
-
-//			destination = (rotationMatY * rotationMatX * initial) + originShift;
-//			//if (j==0) std::cout << "( " << i << ", " << j << ", 0 ) => ( " << destination(0) << ", " << destination(1) << ", " << destination(2) << " )" << std::endl;
-//			if ( j+slice.n_rows/2. < 0 || j+slice.n_rows/2. >= billon.n_rows || i+slice.n_cols/2. < 0 || i+slice.n_cols/2. >= billon.n_cols )
-//				std::cout << "slice( " << j+slice.n_rows/2. << ", " <<  i+slice.n_cols/2. << " ) avec i=" << i << "and j=" << j << std::endl;
-//			slice(j+slice.n_rows/2.,i+slice.n_cols/2.) = destination(0)>=0 && destination(0)<billon.n_cols && destination(1)>=0 && destination(1)<billon.n_rows && destination(2)>=0 && destination(2)<billon.n_slices ?
-//							 billon(destination(1),destination(0),destination(2)) : intensityInterval.min();
-//		}
-//	}
-
 	const Slice &slice = billon.slice(sliceIndex);
 
 	const uint &width = billon.n_cols;
