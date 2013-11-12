@@ -19,6 +19,7 @@ template< typename T >
 class BillonTpl : public arma::Cube<T>
 {
 	friend class PithExtractor;
+	friend class PithExtractorBoukadida;
 
 public:
 	BillonTpl();

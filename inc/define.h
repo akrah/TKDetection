@@ -55,6 +55,7 @@ namespace TKD
 #define NEIGHBORHOOD_WINDOW_HEIGHT NEIGHBORHOOD_WINDOW_WIDTH
 #define BINARIZATION_THRESHOLD 90
 #define PITH_LAG NEIGHBORHOOD_WINDOW_WIDTH/2
+#define PITH_SMOOTHING 5
 
 // Paramètres de flots optiques
 #define FLOW_ALPHA_DEFAULT 7
@@ -76,19 +77,7 @@ namespace TKD
 		_VIEW_TYPE_MIN_ = -1,
 		CLASSIC,
 		Z_MOTION,
-		EDGE_DETECTION,
-		OPTICAL_FLOWS,
 		_VIEW_TYPE_MAX_
-	};
-
-	// Type de detection de contours
-	enum EdgeDetectionType
-	{
-		_EDGE_DETECTION_MIN_ = -1,
-		SOBEL,
-		LAPLACIAN,
-		CANNY,
-		_EDGE_DETECTION_MAX_
 	};
 
 	// Type d'export OFS
@@ -110,7 +99,6 @@ namespace TKD
 		_HISTOGRAM_TYPE_MIN_ = -1,
 		SLICE_HISTOGRAM,
 		SECTOR_HISTOGRAM,
-		PITH_KNOT_DISTANCE_HISTOGRAM,
 		_HISTOGRAM_TYPE_MAX_
 	};
 
@@ -139,27 +127,6 @@ namespace TKD
 /*************************************
  * Enumerations
  *************************************/
-
-	struct OpticalFlowParameters
-	{
-		qreal alpha;
-		qreal epsilon;
-		int maximumIterations;
-		OpticalFlowParameters( const qreal &alpha, const qreal &epsilon, const qreal &maximumIterations ) :
-			alpha(alpha), epsilon(epsilon), maximumIterations(maximumIterations) {}
-	};
-
-	struct EdgeDetectionParameters
-	{
-		EdgeDetectionType type;
-		int radiusOfGaussianMask;
-		qreal sigmaOfGaussianMask;
-		qreal minimumGradient;
-		qreal minimumDeviation;
-		EdgeDetectionParameters( const EdgeDetectionType &type,  const int &radiusOfGaussianMask,  const qreal &sigmaOfGaussianMask,
-								 const qreal &minimumGradient,  const qreal &minimumDeviation ) :
-			type(type), radiusOfGaussianMask(radiusOfGaussianMask),	sigmaOfGaussianMask(sigmaOfGaussianMask), minimumGradient(minimumGradient), minimumDeviation(minimumDeviation) {}
-	};
 
 	struct HistogramParameters
 	{
