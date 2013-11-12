@@ -94,7 +94,7 @@ namespace Pgm3dExport
 		for ( int k=firstSlice ; k<=lastSlice ; ++k )
 		{
 			const Slice &slice = billon.slice(k);
-			const uiCoord2D &pithCoord = billon.hasPith()?billon.pithCoord(k):uiCoord2D(billon.n_cols/2,billon.n_rows/2);
+			const iCoord2D &pithCoord = billon.hasPith()?billon.pithCoord(k):iCoord2D(billon.n_cols/2,billon.n_rows/2);
 			unsigned int x, y;
 
 			for ( unsigned int j=0 ; j<height-shift ; j+=resolution )

@@ -4,15 +4,15 @@
 
 #include <QPainter>
 
-Pith::Pith(const int size) : QVector<uiCoord2D>(size)
+Pith::Pith(const int size) : QVector<iCoord2D>(size)
 {
 }
 
-Pith::Pith( const Pith &pith ) : QVector<uiCoord2D>(pith)
+Pith::Pith( const Pith &pith ) : QVector<iCoord2D>(pith)
 {
 }
 
-Pith::Pith( const QVector<uiCoord2D> &coordinates ) : QVector<uiCoord2D>(coordinates)
+Pith::Pith( const QVector<iCoord2D> &coordinates ) : QVector<iCoord2D>(coordinates)
 {
 }
 

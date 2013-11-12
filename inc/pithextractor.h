@@ -165,7 +165,7 @@ private:
 	 * \fn		void corrigeMoelle(QVector<Coord> *moelle, float *listMax, float seuilHough);
 	 * \brief	Corrige les valeur erronées de la moelle
 	 */
-	void correctPith(QVector<uiCoord2D> &pith, float *listMax, float seuilHough ) const;
+	void correctPith(QVector<iCoord2D> &pith, float *listMax, float seuilHough ) const;
 
 private:
 

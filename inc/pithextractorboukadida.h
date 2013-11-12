@@ -4,9 +4,11 @@
 #include "def/def_billon.h"
 #include "def/def_coordinate.h"
 #include "inc/define.h"
+#include "inc/interval.h"
 
 #include <armadillo>
 
+template <typename T> class QVector;
 class Pith;
 
 class PithExtractorBoukadida {
@@ -14,7 +16,8 @@ class PithExtractorBoukadida {
 public:
 
 	PithExtractorBoukadida( const int &subWindowWidth = NEIGHBORHOOD_WINDOW_WIDTH, const int &subWindowHeight = NEIGHBORHOOD_WINDOW_HEIGHT,
-							const qreal &pithShift = PITH_LAG, const uint smoothingRadius = PITH_SMOOTHING );
+							const qreal &pithShift = PITH_LAG, const uint &smoothingRadius = PITH_SMOOTHING,
+							const qreal &minWoodPercentage = MIN_WOOD_PERCENTAGE, const Interval<int> &intensityInterval = Interval<int>(MINIMUM_INTENSITY,MAXIMUM_INTENSITY) );
 
 	~PithExtractorBoukadida();
 
@@ -55,6 +58,18 @@ public:
 	 */
 	uint smoothingRadius() const;
 
+	/**
+	 * \fn		qreal minPercentageOfWood()
+	 * \return	Pourcentage de bois minimum présent sur une coupe pour la considérer comme valide
+	 */
+	qreal minWoodPercentage() const;
+
+	/**
+	 * \fn		Interval<int> intensityInterval()
+	 * \return	Interval d'intensité à prednre en compte pour la transformée de Hough
+	 */
+	Interval<int> intensityInterval() const;
+
 	/********************************************************
 	 * Set functions
 	 ********************************************************/
@@ -82,6 +97,18 @@ public:
 	 */
 	void setSmoothingRadius( const uint &radius );
 
+	/**
+	 * \fn		void setMinWoodPercentage( const qreal &percentage )
+	 * \param	percentage Pourcentage de bois minimum présent sur une coupe pour la considérer comme valide
+	 */
+	void setMinWoodPercentage( const qreal &percentage );
+
+	/**
+	 * \fn		void setIntensityInterval( const Interval<int> &interval )
+	 * \param	interval Interval d'intensité à prednre en compte pour la transformée de Hough
+	 */
+	void setIntensityInterval( const Interval<int> &interval );
+
 private:
 	/**
 	 * \fn		Coord transHough(const Slice &slice, uint &nbContourPoints );
@@ -102,15 +129,23 @@ private:
 	 */
 	uint contour(const Slice &slice, arma::Mat<qreal> &orientations, arma::Mat<char> & hasContour ) const;
 
-	void drawLine( arma::Mat<int> &slice, const uiCoord2D &origin, const qreal &orientationOrig ) const;
+	void drawLine( arma::Mat<int> &slice, const iCoord2D &origin, const qreal &orientationOrig ) const;
 
+	void interpolation( Pith &pith, const QVector<qreal> &nbLineByMaxRatio , const Interval<uint> &sliceIntervalToInterpolate ) const;
 
+	void smoothing( Pith &pith, const uint &smoothingRadius, const Interval<uint> &sliceIntervalToSmooth ) const;
+
+	void fillBillonBackground( Billon &billonToFill, QVector<qreal> &backgroundProportions, const Interval<int> &intensityInterval ) const;
+
+	Interval<uint> detectValidSliceInterval( const QVector<qreal> &backgroundProportions ) const;
 
 private:
-	int _subWindowWidth;	/*!< Largeur de la fenêtre de voisinage */
-	int _subWindowHeight;	/*!< Hauteur de la fenêtre de voisinage */
-	qreal _pithShift;		/*!< Décalage autorisé de la moelle entre deux coupes consécutives */
-	uint _smoothingRadius;	/*!< Rayon de lissage de la moelle (en nombre de coupes) */
+	int _subWindowWidth;				/*!< Largeur de la fenêtre de voisinage */
+	int _subWindowHeight;				/*!< Hauteur de la fenêtre de voisinage */
+	qreal _pithShift;					/*!< Décalage autorisé de la moelle entre deux coupes consécutives */
+	uint _smoothingRadius;				/*!< Rayon de lissage de la moelle (en nombre de coupes) */
+	qreal _minWoodPercentage;			/*!< Proportion de bois minimum sur une coupe pour la considérer comme valide */
+	Interval<int> _intensityInterval;	/*!< Interval d'intensité à prednre en compte pour la transformée de Hough */
 };
 
 #endif // PITHEXTRACTORBOUKADIDA_H

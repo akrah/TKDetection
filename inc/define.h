@@ -56,6 +56,7 @@ namespace TKD
 #define BINARIZATION_THRESHOLD 90
 #define PITH_LAG NEIGHBORHOOD_WINDOW_WIDTH/2
 #define PITH_SMOOTHING 5
+#define MIN_WOOD_PERCENTAGE 25
 
 // Paramètres de flots optiques
 #define FLOW_ALPHA_DEFAULT 7

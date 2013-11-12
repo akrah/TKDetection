@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>721</width>
-    <height>810</height>
+    <width>640</width>
+    <height>586</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -119,8 +119,8 @@
         <widget class="QWidget" name="scrollAreaWidgetContents">
          <property name="geometry">
           <rect>
-           <x>91</x>
-           <y>318</y>
+           <x>94</x>
+           <y>211</y>
            <width>0</width>
            <height>0</height>
           </rect>
@@ -150,8 +150,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>721</width>
-     <height>29</height>
+     <width>640</width>
+     <height>25</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFichier">
@@ -187,7 +187,7 @@
      <item row="1" column="0">
       <widget class="QTabWidget" name="_tabs">
        <property name="currentIndex">
-        <number>0</number>
+        <number>3</number>
        </property>
        <widget class="QWidget" name="tab_4">
         <attribute name="title">
@@ -257,6 +257,14 @@
             <number>0</number>
            </property>
            <widget class="QWidget" name="page_10">
+            <property name="geometry">
+             <rect>
+              <x>0</x>
+              <y>0</y>
+              <width>378</width>
+              <height>148</height>
+             </rect>
+            </property>
             <attribute name="label">
              <string>Affichage</string>
             </attribute>
@@ -446,8 +454,8 @@ du repère polaire</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>421</width>
-              <height>322</height>
+              <width>259</width>
+              <height>223</height>
              </rect>
             </property>
             <attribute name="label">
@@ -760,8 +768,8 @@ zone restreinte</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>421</width>
-              <height>322</height>
+              <width>388</width>
+              <height>248</height>
              </rect>
             </property>
             <attribute name="label">
@@ -1028,8 +1036,8 @@ zone restreinte</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>421</width>
-              <height>322</height>
+              <width>388</width>
+              <height>285</height>
              </rect>
             </property>
             <attribute name="label">
@@ -1371,8 +1379,8 @@ zone restreinte</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>410</width>
-              <height>343</height>
+              <width>250</width>
+              <height>129</height>
              </rect>
             </property>
             <attribute name="label">
@@ -1546,41 +1554,22 @@ zone restreinte</string>
             </layout>
            </widget>
            <widget class="QWidget" name="page_2">
+            <property name="geometry">
+             <rect>
+              <x>0</x>
+              <y>0</y>
+              <width>335</width>
+              <height>167</height>
+             </rect>
+            </property>
             <attribute name="label">
              <string>Coupes tangentielles</string>
             </attribute>
             <layout class="QFormLayout" name="formLayout_3">
+             <property name="fieldGrowthPolicy">
+              <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
+             </property>
              <item row="0" column="0">
-              <widget class="QLabel" name="label_7">
-               <property name="font">
-                <font>
-                 <weight>50</weight>
-                 <bold>false</bold>
-                </font>
-               </property>
-               <property name="text">
-                <string>Longueur depuis la moelle
-en pixels</string>
-               </property>
-              </widget>
-             </item>
-             <item row="0" column="1">
-              <widget class="QSpinBox" name="_spinTangentialDepth">
-               <property name="font">
-                <font>
-                 <weight>50</weight>
-                 <bold>false</bold>
-                </font>
-               </property>
-               <property name="maximum">
-                <number>255</number>
-               </property>
-               <property name="value">
-                <number>200</number>
-               </property>
-              </widget>
-             </item>
-             <item row="1" column="0">
               <widget class="QLabel" name="label_12">
                <property name="font">
                 <font>
@@ -1593,7 +1582,7 @@ en pixels</string>
                </property>
               </widget>
              </item>
-             <item row="1" column="1">
+             <item row="0" column="1">
               <widget class="QSpinBox" name="_spinTangentialNbSlices">
                <property name="font">
                 <font>
@@ -1602,7 +1591,7 @@ en pixels</string>
                 </font>
                </property>
                <property name="value">
-                <number>20</number>
+                <number>50</number>
                </property>
               </widget>
              </item>
@@ -1734,8 +1723,8 @@ l'intervalle angulaire</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>358</width>
-              <height>94</height>
+              <width>374</width>
+              <height>86</height>
              </rect>
             </property>
             <attribute name="label">
@@ -1830,8 +1819,8 @@ l'intervalle angulaire</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>389</width>
-              <height>193</height>
+              <width>395</width>
+              <height>181</height>
              </rect>
             </property>
             <attribute name="label">
@@ -2044,8 +2033,8 @@ l'intervalle angulaire</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>326</width>
-              <height>174</height>
+              <width>334</width>
+              <height>157</height>
              </rect>
             </property>
             <attribute name="label">
@@ -2233,8 +2222,8 @@ l'intervalle angulaire</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>421</width>
-              <height>258</height>
+              <width>261</width>
+              <height>84</height>
              </rect>
             </property>
             <attribute name="label">
@@ -2299,8 +2288,8 @@ l'intervalle angulaire</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>397</width>
-              <height>124</height>
+              <width>398</width>
+              <height>112</height>
              </rect>
             </property>
             <attribute name="label">
@@ -2489,7 +2478,7 @@ l'intervalle angulaire</string>
          </item>
          <item>
           <widget class="QwtPolarPlot" name="_polarSectorHistogram">
-           <property name="plotBackground" stdset="0">
+           <property name="plotBackground">
             <brush brushstyle="SolidPattern">
              <color alpha="0">
               <red>255</red>
@@ -2546,7 +2535,7 @@ l'intervalle angulaire</string>
            <widget class="QWidget" name="scrollAreaWidgetContents_2">
             <property name="geometry">
              <rect>
-              <x>7</x>
+              <x>0</x>
               <y>0</y>
               <width>390</width>
               <height>234</height>
@@ -2556,9 +2545,6 @@ l'intervalle angulaire</string>
           </widget>
          </item>
         </layout>
-        <zorder>_sliderSelectTangentialSlice</zorder>
-        <zorder>_sliderSelectTangentialSlice</zorder>
-        <zorder>_scrollTangentialView</zorder>
        </widget>
       </widget>
      </item>
