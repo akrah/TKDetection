@@ -14,17 +14,7 @@ namespace Ui
 
 class QLabel;
 
-class ConcavityPointSerieCurve;
-class ContourBillon;
-class CurvatureHistogram;
-class IntensityDistributionHistogram;
-class NearestPointsHistogram;
 class PieChart;
-class PlotConcavityPointSerieCurve;
-class PlotContourDistancesHistogram;
-class PlotCurvatureHistogram;
-class PlotIntensityDistributionHistogram;
-class PlotNearestPointsHistogram;
 class PlotSectorHistogram;
 class PlotSliceHistogram;
 class SectorHistogram;
@@ -50,7 +40,6 @@ private slots:
 
 	void drawSlice();
 	void drawTangentialView();
-	void setTypeOfView( const int &type );
 	void zoomInSliceView( const qreal &zoomFactor, const qreal &zoomCoefficient );
 	void dragInSliceView( const QPoint &movementVector );
 	void zoomInTangentialView( const qreal &zoomFactor, const qreal &zoomCoefficient );
@@ -70,18 +59,9 @@ private slots:
 	void updatePith();
 	void updateSliceHistogram();
 	void updateSectorHistogram( const Interval<uint> &interval );
-	void updateContourHistograms( const int &sliceIndex );
-	void updateConcavityPointSerieCurve();
-	void updateIntensityDistributionHistogram();
-	void updateIntensityDistributionHistogramOnKnotArea();
 
-	void updateCurvatureThreshold( const int &value );
-	void updateCurvatureThreshold( const double &value );
 	void resetHistogramDefaultValuesZMotion();
 	void resetHistogramDefaultValuesZMotionAngular();
-	void resetHistogramDefaultValuesNearestDistance();
-	void moveNearestPointsCursor( const int &position );
-	void moveContourCursor( const int &position );
 
 	void exportToOfs();
 	void exportHistograms();
@@ -97,31 +77,30 @@ private:
 
 	void exportPithToOfs( const bool &onCurrentSliceInterval );
 	void exportCompleteBillonToOfs();
-	void exportCurrentKnotAreaToOfs();
-	void exportAllKnotAreasOfCurrentSliceIntervalToOfs();
-	void exportAllKnotAreasToOfs();
+//	void exportCurrentKnotAreaToOfs();
+//	void exportAllKnotAreasOfCurrentSliceIntervalToOfs();
+//	void exportAllKnotAreasToOfs();
 
 	void exportSliceHistogramToSep();
 	void exportSectorHistogramToSep();
-	void exportKnotHistogramToSep();
 	void exportSliceHistogramToImage();
 	void exportSectorHistogramToImage();
-	void exportknotHistogramToImage();
+//	void exportknotHistogramToImage();
 
 	void exportImageSliceIntervalToPgm3d();
 	void exportImageCartesianSliceIntervalToPgm3d();
-	void exportCurrentSegmentedKnotToPgm3d();
-	void exportSegmentedKnotsOfCurrentSliceIntervalToPgm3d();
+//	void exportCurrentSegmentedKnotToPgm3d();
+//	void exportSegmentedKnotsOfCurrentSliceIntervalToPgm3d();
 
-	void exportCurrentSegmentedKnotToV3D();
-	void exportSegmentedKnotsOfCurrentSliceIntervalToV3D();
-	void exportAllSegmentedKnotsOfBillonToV3D();
+//	void exportCurrentSegmentedKnotToV3D();
+//	void exportSegmentedKnotsOfCurrentSliceIntervalToV3D();
+//	void exportAllSegmentedKnotsOfBillonToV3D();
 
-	void exportContourToSdp();
-	void exportCurrentSegmentedKnotToSdp();
-	void exportSegmentedKnotsOfCurrentSliceIntervalToSdp( bool keepBillonSliceNumber = false );
-	void exportSegmentedKnotsOfCurrentSliceIntervalToSdpOldAlgo( bool keepBillonSliceNumber = false );
-	void exportAllSegmentedKnotsOfBillonToSdp();
+//	void exportContourToSdp();
+//	void exportCurrentSegmentedKnotToSdp();
+//	void exportSegmentedKnotsOfCurrentSliceIntervalToSdp( bool keepBillonSliceNumber = false );
+//	void exportSegmentedKnotsOfCurrentSliceIntervalToSdpOldAlgo( bool keepBillonSliceNumber = false );
+//	void exportAllSegmentedKnotsOfBillonToSdp();
 
 private:
 	Ui::MainWindow *_ui;
@@ -129,8 +108,6 @@ private:
 	QLabel *_labelTangentialView;
 
 	Billon *_billon;
-	Billon *_componentBillon;
-	Billon *_knotBillon;
 	Billon *_tangentialBillon;
 
 	QImage _mainPix;
@@ -146,23 +123,6 @@ private:
 
 	SectorHistogram *_sectorHistogram;
 	PlotSectorHistogram * _plotSectorHistogram;
-
-	NearestPointsHistogram *_nearestPointsHistogram;
-	PlotNearestPointsHistogram *_plotNearestPointsHistogram;
-
-	PlotCurvatureHistogram *_plotCurvatureHistogram;
-	PlotContourDistancesHistogram *_plotContourDistancesHistogram;
-
-	IntensityDistributionHistogram *_intensityDistributionHistogram;
-	PlotIntensityDistributionHistogram *_plotIntensityDistributionHistogram;
-
-	IntensityDistributionHistogram *_intensityDistributionHistogramOnKnotArea;
-	PlotIntensityDistributionHistogram *_plotIntensityDistributionHistogramOnKnotArea;
-
-	ConcavityPointSerieCurve * _concavityPointSerieCurve;
-	PlotConcavityPointSerieCurve * _plotConcavityPointSerieCurve;
-
-	ContourBillon *_contourBillon;
 
 	uint _currentSlice;
 	uint _currentYSlice;

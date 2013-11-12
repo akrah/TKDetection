@@ -3,7 +3,6 @@
 #include "def/def_opticalflow.h"
 #include "inc/billon.h"
 #include "inc/globalfunctions.h"
-#include "inc/opticalflow.h"
 #include "inc/slicealgorithm.h"
 
 #include "DGtal/io/colormaps/HueShadeColorMap.h"
@@ -22,9 +21,8 @@ SliceView::SliceView()
  * Public setters
  *******************************/
 
-void SliceView::drawSlice(QImage &image, const Billon &billon, const TKD::ViewType &sliceType, const uiCoord2D &center, const uint &sliceIndex, const Interval<int> &intensityInterval,
-			  const uint &zMotionMin, const uint &angularResolution, const TKD::ProjectionType &axe, const TKD::OpticalFlowParameters &opticalFlowParameters,
-			  const TKD::EdgeDetectionParameters &edgeDetectionParameters, const TKD::ImageViewRender &imageRender )
+void SliceView::drawSlice(QImage &image, const Billon &billon, const TKD::ViewType &sliceType, const uint &sliceIndex, const Interval<int> &intensityInterval,
+			  const uint &zMotionMin, const uint &angularResolution, const TKD::ProjectionType &axe, const TKD::ImageViewRender &imageRender )
 {
 	switch (axe)
 	{
@@ -34,14 +32,6 @@ void SliceView::drawSlice(QImage &image, const Billon &billon, const TKD::ViewTy
 				// Affichage de la coupe de mouvements
 				case TKD::Z_MOTION :
 					drawMovementSlice( image, billon, sliceIndex, intensityInterval, zMotionMin, angularResolution, axe );
-					break;
-				// Affichage de la coupe de détection de mouvements
-				case TKD::EDGE_DETECTION :
-					drawEdgeDetectionSlice( image, billon, center, sliceIndex, intensityInterval, edgeDetectionParameters );
-					break;
-				// Affichage de la coupe de flot optique
-				case TKD::OPTICAL_FLOWS :
-					drawFlowSlice( image, billon, sliceIndex, opticalFlowParameters );
 					break;
 				// Affichage de la coupe originale
 				case TKD::CLASSIC:
@@ -103,6 +93,7 @@ void SliceView::drawCurrentSlice( QImage &image, const Billon &billon,
 	customShade.addColor( DGtal::Color::Red );
 	customShade.addColor( DGtal::Color::Green );
 	customShade.addColor( DGtal::Color::White );
+
 
 	QRgb * line = (QRgb *) image.bits();
 	int color;
@@ -210,209 +201,4 @@ void SliceView::drawMovementSlice( QImage &image, const Billon &billon, const ui
 			}
 		}
 	}
-}
-
-void SliceView::drawEdgeDetectionSlice(QImage &image, const Billon &billon, const iCoord2D &center, const uint &sliceIndex,
-									   const Interval<int> &intensityInterval , const TKD::EdgeDetectionParameters &edgeDetectionParameters)
-{
-	const Slice &slice = billon.slice(sliceIndex);
-	const int width = slice.n_cols;
-	const int height = slice.n_rows;
-	const int minValue = intensityInterval.min();
-	const int maxValue = intensityInterval.max();
-
-	QRgb * line = (QRgb *) image.bits();
-	int color, gNorme;
-	int i,j,ki,kj;
-	qreal nbValues, fact;
-
-	arma::Mat<qreal> gaussianMask;
-	arma::Mat<int> gaussianMat(billon.n_rows,billon.n_cols);
-	gaussianMat.fill(0);
-	arma::Mat<qreal> gradientMat(billon.n_rows,billon.n_cols);
-	gradientMat.fill(0);
-	arma::Mat<qreal> directionMat(billon.n_rows,billon.n_cols);
-	directionMat.fill(0);
-	const qreal radius = edgeDetectionParameters.radiusOfGaussianMask;
-	const qreal diameter = 2*radius+1;
-	const qreal sigma = edgeDetectionParameters.sigmaOfGaussianMask;
-	const qreal sigmaDiv = 2*sigma*sigma;
-	qreal gaussianFactor, e, cannyValue, gx, gy, grad, distX, distY;
-	QPainter painter;
-
-	switch (edgeDetectionParameters.type) {
-		case TKD::SOBEL :
-			// Gaussian filter construction
-			gaussianMask.resize(2*radius+1,2*radius+1);
-			gaussianFactor = 0;
-			for ( kj=-radius ; kj<=radius ; ++kj ) {
-				for ( ki=-radius ; ki<=radius ; ++ki ) {
-					e = qExp( -(kj*kj+ki*ki) / sigmaDiv );
-					gaussianFactor += e;
-					gaussianMask.at(kj+radius,ki+radius) = e;
-				}
-			}
-			for ( kj=0 ; kj<diameter ; ++kj ) {
-				for ( ki=0 ; ki<diameter ; ++ki ) {
-					gaussianMask.at(kj,ki) /= gaussianFactor;
-				}
-			}
-			// Gaussian filter
-			for ( j=radius ; j<height-radius ; j++ )
-			{
-				for ( i=radius ; i<width-radius ; i++ )
-				{
-					cannyValue = 0;
-					for ( kj=-radius ; kj<radius ; ++kj )
-					{
-						for ( ki=-radius ; ki<radius ; ++ki )
-						{
-							if ( intensityInterval.containsClosed(slice.at(j+kj,i+ki)) )
-							{
-								cannyValue += gaussianMask.at(kj+radius,ki+radius)*slice.at(j+kj,i+ki);
-							}
-						}
-					}
-					gaussianMat.at(j,i) = cannyValue;
-				}
-			}
-			nbValues = intensityInterval.size();
-			fact = 255./nbValues;
-			line += width + 1;
-			for ( j=1 ; j<height-1 ; j++)
-			{
-				for ( i=1 ; i<width-1 ; i++)
-				{
-					gx = gy = qMax(qMin(gaussianMat.at(j-1,i-1),maxValue),minValue) - qMax(qMin(gaussianMat.at(j+1,i+1),maxValue),minValue);
-					gx += 2.*qMax(qMin(gaussianMat.at(j,i-1),maxValue),minValue) + qMax(qMin(gaussianMat.at(j+1,i-1),maxValue),minValue)
-						  - qMax(qMin(gaussianMat.at(j-1,i+1),maxValue),minValue) - 2.*qMax(qMin(gaussianMat.at(j,i+1),maxValue),minValue);
-					gy += 2.*qMax(qMin(gaussianMat.at(j-1,i),maxValue),minValue) + qMax(qMin(gaussianMat.at(j-1,i+1),maxValue),minValue)
-						  - qMax(qMin(gaussianMat.at(j+1,i-1),maxValue),minValue) - 2.*qMax(qMin(gaussianMat.at(j+1,i),maxValue),minValue);
-					gNorme = qSqrt(gx*gx+gy*gy);
-					color = qBound(0.,gNorme*fact,255.);
-					*(line++) = qRgb(color,color,color);
-				}
-				line+=2;
-			}
-			break;
-		case TKD::LAPLACIAN :
-			nbValues = intensityInterval.size()*8;
-			fact = 255./nbValues;
-			line += width + 1;
-			for ( j=1 ; j<height-1 ; j++)
-			{
-				for ( i=1 ; i<width-1 ; i++)
-				{
-					color = qBound(0,
-								   static_cast<int>(-6*qMax(qMin(slice.at(j,i),maxValue),minValue) + qMax(qMin(slice.at(j-1,i),maxValue),minValue)
-													+ qMax(qMin(slice.at(j+1,i),maxValue),minValue) +
-								   qMax(qMin(slice.at(j,i-1),maxValue),minValue) + qMax(qMin(slice.at(j,i+1),maxValue),minValue) + 0.5*qMax(qMin(slice.at(j+1,i+1),maxValue),minValue) +
-								   0.5*qMax(qMin(slice.at(j+1,i-1),maxValue),minValue) + 0.5*qMax(qMin(slice.at(j-1,i+1),maxValue),minValue)
-													+ 0.5*qMax(qMin(slice.at(j-1,i-1),maxValue),minValue)),
-								   255);
-					*(line++) = qRgb(color,color,color);
-				}
-				line+=2;
-			}
-			break;
-		case TKD::CANNY :
-			// Gaussian filter construction
-			gaussianMask.resize(2*radius+1,2*radius+1);
-			gaussianFactor = 0;
-			for ( kj=-radius ; kj<=radius ; ++kj ) {
-				for ( ki=-radius ; ki<=radius ; ++ki ) {
-					e = qExp( -(kj*kj+ki*ki) / sigmaDiv );
-					gaussianFactor += e;
-					gaussianMask.at(kj+radius,ki+radius) = e;
-				}
-			}
-			for ( kj=0 ; kj<diameter ; ++kj ) {
-				for ( ki=0 ; ki<diameter ; ++ki ) {
-					gaussianMask.at(kj,ki) /= gaussianFactor;
-				}
-			}
-			// Gaussian filter
-			for ( j=radius ; j<height-radius ; j++ )
-			{
-				for ( i=radius ; i<width-radius ; i++ )
-				{
-					cannyValue = 0;
-					for ( kj=-radius ; kj<radius ; ++kj ) {
-						for ( ki=-radius ; ki<radius ; ++ki ) {
-							cannyValue += gaussianMask.at(kj+radius,ki+radius)*qMax(qMin(slice.at(j+kj,i+ki),maxValue),minValue);
-						}
-					}
-					gaussianMat.at(j,i) = cannyValue-minValue;
-				}
-			}
-			// Intensity gradient
-			for ( j=radius ; j<height-radius ; j++ )
-			{
-				for ( i=radius ; i<width-radius ; i++ )
-				{
-					gx = gaussianMat.at(j,i+1) - gaussianMat.at(j,i-1);
-					gy = gaussianMat.at(j-1,i) - gaussianMat.at(j+1,i);
-					gradientMat.at(j,i) = qAbs(gx) + qAbs(gy);
-					directionMat.at(j,i) = qAtan(gx/gy);
-				}
-			}
-			painter.begin(&image);
-			painter.setPen(Qt::white);
-			for ( j=radius ; j<height-radius ; j++)
-			{
-				for ( i=radius ; i<width-radius ; i++)
-				{
-					grad = gradientMat.at(j,i);
-					distX = qCos(directionMat.at(j,i));
-					distY = qSin(directionMat.at(j,i));
-					if ( grad > edgeDetectionParameters.minimumGradient &&
-						 qAbs(qSqrt((center.x-i)*(center.x-i) + (center.y-j)*(center.y-j)) -
-							  qSqrt((center.x-i-distX)*(center.x-i-distX) + (center.y-j-distY)*(center.y-j-distY))) > edgeDetectionParameters.minimumDeviation ) {
-						//painter.drawLine(i,j,i+distX,j+distY);
-						painter.drawPoint(i,j);
-					}
-				}
-			}
-			break;
-		default :
-			break;
-	}
-}
-
-void SliceView::drawFlowSlice( QImage &image, const Billon &billon, const uint &sliceIndex, const TKD::OpticalFlowParameters &opticalFlowParameters )
-{
-	VectorsField *field = OpticalFlow::compute(billon,sliceIndex,opticalFlowParameters.alpha,opticalFlowParameters.epsilon,opticalFlowParameters.maximumIterations);
-
-	QRgb * line =(QRgb *) image.bits();
-	qreal angle, norme;
-	QColor color;
-	rCoord2D origin(0,0);
-	rVec2D currentCoord;
-
-	QVector< QVector< QVector2D > >::const_iterator iterLine;
-	QVector< QVector2D >::const_iterator iterCol;
-	for ( iterLine = (*field).constBegin() ; iterLine != (*field).constEnd() ; ++iterLine )
-	{
-		for ( iterCol = (*iterLine).constBegin() ; iterCol != (*iterLine).constEnd() ; ++iterCol )
-		{
-			currentCoord = rCoord2D( (*iterCol).x(), (*iterCol).y() );
-			angle = (TWO_PI-origin.angle(currentCoord))*RAD_TO_DEG_FACT;
-			while (angle>360.) angle -= 360.;
-			norme = qMin(currentCoord.norm()*20.,255.);
-			color.setHsv(angle,norme,norme);
-			*(line++) = color.rgb();
-		}
-	}
-
-//	QPainter painter(&image);
-//	painter.setPen(Qt::white);
-//	for ( j=5 ; j<height-1 ; j+=5 )
-//	{
-//		for ( i=5 ; i<width-1 ; i+=5 )
-//		{
-//			painter.drawLine(i,j,i+(*field)[j][i].x(),j+(*field)[j][i].y());
-//		}
-//	}
-
-	delete field;
 }

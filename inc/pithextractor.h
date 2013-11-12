@@ -26,7 +26,6 @@ public:
 	 * \param	image Image 2D
 	 * \param	sliceMin Première coupe à traiter
 	 * \param	sliceMax Dernière coupe à traiter
-	 * \return	la liste des coordonnées de la moelle
 	 */
 	void process( Billon &billon ) const;
 
