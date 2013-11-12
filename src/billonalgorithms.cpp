@@ -12,9 +12,9 @@ namespace BillonAlgorithms
 		qreal radius = billon.n_cols/2.;
 		if ( billon.hasPith() )
 		{
-			const int width = billon.n_cols;
-			const int height = billon.n_rows;
-			const int depth = billon.n_slices-nbSlicesToIgnore;
+			const int &width = billon.n_cols;
+			const int &height = billon.n_rows;
+			const int &depth = billon.n_slices-nbSlicesToIgnore;
 			const qreal angleIncrement = TWO_PI/static_cast<qreal>(nbDirections);
 
 			rCoord2D center, edge;
@@ -81,16 +81,29 @@ namespace BillonAlgorithms
 		return vectAllVertex;
 	}
 
-	Billon * tangentialTransform( const Billon &billon, const Interval<uint> &sliceInterval, const Interval<uint> &angularInterval,
-								  const qreal &length, const uint &nbSlices, const int &minIntensity )
+	Billon * tangentialTransform( const Billon &billon, const Interval<uint> &sliceInterval, const Interval<uint> &angularInterval, const uint &nbSlices, const int &minIntensity )
 	{
 		const qreal zPithCoord = sliceInterval.mid();
 		const rCoord2D &originPith = billon.pithCoord(zPithCoord);
 		const uint angularRange = (angularInterval.max() + (angularInterval.max()>angularInterval.min() ? 0. : PieChartSingleton::getInstance()->nbSectors())) - angularInterval.min();
 
+		const qreal bisectorOrientation = (angularInterval.min()+angularRange/2.)*PieChartSingleton::getInstance()->sectorAngle();
+		const qreal cosBisector = qCos(bisectorOrientation);
+		const qreal sinBisector = qSin(bisectorOrientation);
+
 		// Dimensions des coupes tangentielles
+		/* Recherche de l'écorce dans la direction de la bissectrice du secteur angulaire sur la coupe au milieu de l'intervalle de coupes */
+		const Slice &midSlice = billon.slice(zPithCoord);
+		const rVec2D direction(cosBisector,sinBisector);
+		rCoord2D edge = originPith + direction*30;
+		while ( edge.x>0 && edge.y>0 && edge.x<billon.n_cols && edge.y<billon.n_rows && midSlice.at(edge.y,edge.x) > minIntensity )
+		{
+			edge += direction;
+		}
+		const qreal depth = rVec2D(edge-originPith).norm();
+		/* Hauteur et largeur des coueps tangentielles */
 		const uint width = sliceInterval.size()+1;
-		const uint height = 2 * qTan(angularRange*PieChartSingleton::getInstance()->sectorAngle()/2.) * length;
+		const uint height = 2 * qTan(angularRange*PieChartSingleton::getInstance()->sectorAngle()/2.) * depth;
 		const int widthOnTWo = width/2.;
 		const int heightOnTWo = height/2.;
 
@@ -104,15 +117,12 @@ namespace BillonAlgorithms
 		const arma::Mat<qreal>::fixed<3,3> rotationMatY = { cosAlpha, 0, -sinAlpha, 0, 1, 0, sinAlpha, 0, cosAlpha };
 
 		// Rotation selon l'angle de la zone de nœuds
-		const qreal beta = (angularInterval.min()+angularRange/2.)*PieChartSingleton::getInstance()->sectorAngle();
-		const qreal cosBeta = qCos(beta);
-		const qreal sinBeta = qSin(beta);
-		const arma::Mat<qreal>::fixed<3,3> rotationMatX = { 1, 0, 0, 0, cosBeta, -sinBeta, 0, sinBeta, cosBeta };
+		const arma::Mat<qreal>::fixed<3,3> rotationMatX = { 1, 0, 0, 0, cosBisector, -sinBisector, 0, sinBisector, cosBisector };
 
 		const arma::Mat<qreal>::fixed<3,3> rotationMat = rotationMatY*rotationMatX;
 
 		// Vecteur de déplacement entre deux coupes tangentielles successives
-		const arma::Col<qreal>::fixed<3> shiftStep = { 0., 0., length/(1.*nbSlices) };
+		const arma::Col<qreal>::fixed<3> shiftStep = { 0., 0., depth/(1.*nbSlices) };
 		const arma::Col<qreal>::fixed<3> originShift = rotationMat * shiftStep;
 
 		arma::Col<qreal>::fixed<3> origin = { originPith.x, originPith.y, zPithCoord };
@@ -129,8 +139,6 @@ namespace BillonAlgorithms
 				{
 					initial(0) = i;
 					destination = (rotationMat * initial) + origin;
-//					if ( (k==0||k==nbSlices-1) && (j==-heightOnTWo||j==heightOnTWo-1) && (i==-widthOnTWo||i==widthOnTWo-1) )
-//						std::cout << "( " << i << ", " << j << ", " << k << " ) => ( " << destination(0) << ", " << destination(1) << ", " << destination(2) << " )" << std::endl;
 					slice(j+heightOnTWo,i+widthOnTWo) =
 							destination(0)>=0 && destination(0)<billon.n_cols && destination(1)>=0 && destination(1)<billon.n_rows && destination(2)>=0 && destination(2)<billon.n_slices ?
 								billon(destination(1),destination(0),destination(2)) : minIntensity;

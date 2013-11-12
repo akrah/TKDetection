@@ -12,8 +12,7 @@ namespace BillonAlgorithms
 {
 	qreal restrictedAreaMeansRadius(const Billon &billon, const uint &nbDirections, const int &intensityThreshold, const uint &minimumRadius, const uint &nbSlicesToIgnore );
 	QVector<rCoord2D> restrictedAreaVertex( const Billon &billon, const Interval<uint> &sliceInterval, const uint &nbPolygonVertex, const int &intensityThreshold );
-	Billon * tangentialTransform(const Billon &billon, const Interval<uint> &sliceInterval, const Interval<uint> &angularInterval,
-								 const qreal &length, const uint &nbSlices , const int &minIntensity);
+	Billon * tangentialTransform( const Billon &billon, const Interval<uint> &sliceInterval, const Interval<uint> &angularInterval, const uint &nbSlices , const int &minIntensity );
 }
 
 #endif // BILLONALGORITHMS_H

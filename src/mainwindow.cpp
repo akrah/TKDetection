@@ -361,14 +361,14 @@ void MainWindow::drawSlice()
 		const TKD::ViewType viewType = static_cast<const TKD::ViewType>(_ui->_comboViewType->currentIndex());
 		const TKD::ProjectionType projectionType = _ui->_radioYProjection->isChecked()?TKD::Y_PROJECTION:_ui->_radioZProjection->isChecked()?TKD::Z_PROJECTION:TKD::CARTESIAN_PROJECTION;
 		const uint &currentSlice = _ui->_radioYProjection->isChecked()?_currentYSlice:_currentSlice;
-		const uiCoord2D &pithCoord = _billon->hasPith()?_billon->pithCoord(_currentSlice):uiCoord2D(_billon->n_cols/2,_billon->n_rows/2);
+		const iCoord2D &pithCoord = _billon->hasPith()?_billon->pithCoord(_currentSlice):iCoord2D(_billon->n_cols/2,_billon->n_rows/2);
 		uint width, height;
 
 		switch (projectionType)
 		{
 			case TKD::CARTESIAN_PROJECTION :
 				if (_billon->hasPith() ) {
-					height = qMin(qMin(pithCoord.x,_billon->n_cols-pithCoord.x),qMin(pithCoord.y,_billon->n_rows-pithCoord.y));
+					height = qMin(qMin(pithCoord.x,static_cast<int>(_billon->n_cols-pithCoord.x)),qMin(pithCoord.y,static_cast<int>(_billon->n_rows-pithCoord.y)));
 				}
 				else {
 					height = qMin(_billon->n_cols/2,_billon->n_rows/2);
@@ -437,13 +437,12 @@ void MainWindow::drawTangentialView()
 		_sliceView->drawSlice( _tangentialPix, *_tangentialBillon, TKD::CLASSIC, currentSlice, Interval<int>(_ui->_spinMinIntensity->value(), _ui->_spinMaxIntensity->value()),
 					  _ui->_spinZMotionMin->value(), _ui->_spinCartesianAngularResolution->value(), TKD::Z_PROJECTION, TKD::ImageViewRender(_ui->_comboViewRender->currentIndex()));
 
-		const qreal currentDistFromPith = currentSlice * static_cast<qreal>(_ui->_spinTangentialDepth->value()) / static_cast<qreal>( _ui->_spinTangentialNbSlices->value());
-		const qreal knotAreaLine = currentDistFromPith * (height/2.) / static_cast<qreal>(_ui->_spinTangentialDepth->value());
-
 		static const QVector<QColor> colors = { Qt::blue, Qt::yellow, Qt::green, Qt::magenta, Qt::cyan, Qt::white };
 		const int nbKnotAreas = _sectorHistogram->intervals().size();
 		const int nbColorsToUse = qMax( nbKnotAreas>colors.size() ? ((nbKnotAreas+1)/2)%colors.size() : colors.size() , 1 );
 		const QColor currentColor = colors[(_ui->_comboSelectSectorInterval->currentIndex()-1)%nbColorsToUse];
+
+		const qreal knotAreaLine = currentSlice * (height/2.) / static_cast<qreal>( _ui->_spinTangentialNbSlices->value());
 
 		QPainter painter(&_tangentialPix);
 		painter.setPen(currentColor);
@@ -605,10 +604,9 @@ void MainWindow::selectSectorInterval(const int &index, const bool &draw )
 	{
 		const Interval<uint> &sectorInterval = _sectorHistogram->interval(index-1);
 		const Interval<uint> &sliceInterval = _sliceHistogram->interval(_ui->_comboSelectSliceInterval->currentIndex()-1);
-		const Interval<int> intensityInterval(_ui->_spinSectorThresholding->value(), _ui->_spinMaxIntensity->value());
+		const int &minimumIntensity = _ui->_spinMinIntensity->value();
 
-		_tangentialBillon = BillonAlgorithms::tangentialTransform( *_billon, sliceInterval, sectorInterval, _ui->_spinTangentialDepth->value(),
-																   _ui->_spinTangentialNbSlices->value(), intensityInterval.min() );
+		_tangentialBillon = BillonAlgorithms::tangentialTransform( *_billon, sliceInterval, sectorInterval, _ui->_spinTangentialNbSlices->value(), minimumIntensity );
 		_ui->_sliderSelectTangentialSlice->blockSignals(true);
 		_ui->_sliderSelectTangentialSlice->setMaximum(_ui->_spinTangentialNbSlices->value()-1);
 		_ui->_sliderSelectTangentialSlice->setValue(0);
@@ -632,6 +630,7 @@ void MainWindow::updatePith()
 	{
 //		PithExtractor pithExtractor;
 		PithExtractorBoukadida pithExtractor;
+		pithExtractor.setIntensityInterval( Interval<int>(_ui->_spinSectorThresholding->value(), _ui->_spinMaxIntensity->value()) );
 		pithExtractor.process(*_billon);
 		_treeRadius = BillonAlgorithms::restrictedAreaMeansRadius(*_billon,_ui->_spinRestrictedAreaResolution->value(),_ui->_spinRestrictedAreaThreshold->value(),_ui->_spinRestrictedAreaMinimumRadius->value()*_billon->n_cols/100., _ui->_spinPercentageOfSlicesToIgnore->value()*_billon->n_slices/100.);
 		_ui->_checkRadiusAroundPith->setText( QString::number(_treeRadius) );
