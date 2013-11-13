@@ -44,6 +44,7 @@ SOURCES	=	src/main.cpp \
 			src/connexcomponentextractor.cpp \
 			src/dicomreader.cpp \
 			src/globalfunctions.cpp \
+			src/knotpithprofile.cpp \
 			src/mainwindow.cpp \
 			src/ofsexport.cpp \
 			src/pgm3dexport.cpp \
@@ -51,6 +52,8 @@ SOURCES	=	src/main.cpp \
 			src/piepart.cpp \
 			src/pith.cpp \
 			src/pithextractor.cpp \
+			src/pithextractorboukadida.cpp \
+			src/plotknotpithprofile.cpp \
 			src/plotsectorhistogram.cpp \
 			src/plotslicehistogram.cpp \
 			src/pointpolarseriesdata.cpp \
@@ -62,7 +65,6 @@ SOURCES	=	src/main.cpp \
 			tst/test_intervalshistogram.cpp \
 			src/tiffreader.cpp \
 			src/v3dexport.cpp \
-    src/pithextractorboukadida.cpp
 
 HEADERS	=	inc/billon.h \
 			inc/billonalgorithms.h \
@@ -76,6 +78,7 @@ HEADERS	=	inc/billon.h \
 			inc/globalfunctions.h \
 			inc/histogram.h \
 			inc/interval.h \
+			inc/knotpithprofile.h \
 			inc/mainwindow.h \
 			inc/ofsexport.h \
 			inc/pgm3dexport.h \
@@ -83,6 +86,8 @@ HEADERS	=	inc/billon.h \
 			inc/piechart.h \
 			inc/pith.h \
 			inc/pithextractor.h \
+			inc/pithextractorboukadida.h \
+			inc/plotknotpithprofile.h \
 			inc/plotsectorhistogram.h \
 			inc/plotslicehistogram.h \
 			inc/pointpolarseriesdata.h \
@@ -94,7 +99,6 @@ HEADERS	=	inc/billon.h \
 			tst/test_intervalshistogram.h \
 			inc/tiffreader.h \
 			inc/v3dexport.h \
-    inc/pithextractorboukadida.h
 
 FORMS =	ui/mainwindow.ui
 

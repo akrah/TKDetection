@@ -6,13 +6,14 @@
 #include "inc/billonalgorithms.h"
 #include "inc/define.h"
 #include "inc/dicomreader.h"
+#include "inc/knotpithprofile.h"
 #include "inc/pith.h"
-#include "inc/pithextractor.h"
 #include "inc/pithextractorboukadida.h"
 #include "inc/ofsexport.h"
 #include "inc/pgm3dexport.h"
 #include "inc/piechart.h"
 #include "inc/piepart.h"
+#include "inc/plotknotpithprofile.h"
 #include "inc/plotsectorhistogram.h"
 #include "inc/plotslicehistogram.h"
 #include "inc/sectorhistogram.h"
@@ -40,6 +41,7 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 	_billon(0), _tangentialBillon(0), _sliceView(new SliceView()),
 	_sliceHistogram(new SliceHistogram()), _plotSliceHistogram(new PlotSliceHistogram()),
 	_sectorHistogram(new SectorHistogram()), _plotSectorHistogram(new PlotSectorHistogram()),
+	_knotPithProfile(new KnotPithProfile()), _plotKnotPithProfile(new PlotKnotPithProfile()),
 	_currentSlice(0), _currentYSlice(0), _currentMaximum(0), _currentSector(0), _treeRadius(0)
 {
 	_ui->setupUi(this);
@@ -72,6 +74,8 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 	_ui->_polarSectorHistogram->setScale( QwtPolar::Azimuth, TWO_PI, 0.0 );
 	_plotSectorHistogram->attach(_ui->_polarSectorHistogram);
 	_plotSectorHistogram->attach(_ui->_plotSectorHistogram);
+
+	_plotKnotPithProfile->attach(_ui->_plotKnotPithProfile);
 
 	QwtPolarGrid *grid = new QwtPolarGrid();
 	grid->showAxis(QwtPolar::AxisBottom,false);
@@ -121,10 +125,6 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 	QObject::connect(_ui->_sliderRestrictedAreaMinimumRadius, SIGNAL(valueChanged(int)), _ui->_spinRestrictedAreaMinimumRadius, SLOT(setValue(int)));
 	QObject::connect(_ui->_spinRestrictedAreaMinimumRadius, SIGNAL(valueChanged(int)), _ui->_sliderRestrictedAreaMinimumRadius, SLOT(setValue(int)));
 	QObject::connect(_ui->_checkRadiusAroundPith, SIGNAL(clicked()), this, SLOT(drawSlice()));
-
-	/*********************************************
-	* Évènements de l'onglet "Paramètres généraux"
-	**********************************************/
 
 	/**************************************
 	* Évènements de l'onglet "Histogrammes"
@@ -179,7 +179,6 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 	QObject::connect(_ui->_buttonSelectSliceIntervalUpdate, SIGNAL(clicked()), this, SLOT(selectCurrentSliceInterval()));
 	QObject::connect(_ui->_comboSelectSectorInterval, SIGNAL(currentIndexChanged(int)), this, SLOT(selectSectorInterval(int)));
 	QObject::connect(_ui->_buttonSelectSectorIntervalUpdate, SIGNAL(clicked()), this, SLOT(selectCurrentSectorInterval()));
-	QObject::connect(_ui->_sliderSelectTangentialSlice, SIGNAL(valueChanged(int)), this, SLOT(drawTangentialView()));
 
 	/********************************
 	* Évènements de l'onglet "Export"
@@ -210,6 +209,8 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 	QObject::connect(_ui->_buttonPreviousMaximum, SIGNAL(clicked()), this, SLOT(previousMaximumInSliceHistogram()));
 	QObject::connect(_ui->_buttonNextMaximum, SIGNAL(clicked()), this, SLOT(nextMaximumInSliceHistogram()));
 	QObject::connect(_ui->_buttonUpdateSliceHistogram, SIGNAL(clicked()), this, SLOT(updateSliceHistogram()));
+	// Onglet "3. Vue tangentielle"
+	QObject::connect(_ui->_sliderSelectTangentialSlice, SIGNAL(valueChanged(int)), this, SLOT(setTangentialSlice(int)));
 
 	/*******************
 	* Évènements du zoom
@@ -235,6 +236,8 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 
 MainWindow::~MainWindow()
 {
+	delete _plotKnotPithProfile;
+	delete _knotPithProfile;
 	delete _plotSectorHistogram;
 	delete _sectorHistogram;
 	delete _plotSliceHistogram;
@@ -342,6 +345,8 @@ void MainWindow::closeImage()
 	_ui->_plotSectorHistogram->replot();
 	_ui->_polarSectorHistogram->replot();
 
+	updateKnotPithProfile();
+
 	selectSectorInterval(0);
 	updateUiComponentsValues();
 	enabledComponents();
@@ -361,14 +366,14 @@ void MainWindow::drawSlice()
 		const TKD::ViewType viewType = static_cast<const TKD::ViewType>(_ui->_comboViewType->currentIndex());
 		const TKD::ProjectionType projectionType = _ui->_radioYProjection->isChecked()?TKD::Y_PROJECTION:_ui->_radioZProjection->isChecked()?TKD::Z_PROJECTION:TKD::CARTESIAN_PROJECTION;
 		const uint &currentSlice = _ui->_radioYProjection->isChecked()?_currentYSlice:_currentSlice;
-		const iCoord2D &pithCoord = _billon->hasPith()?_billon->pithCoord(_currentSlice):iCoord2D(_billon->n_cols/2,_billon->n_rows/2);
+		const rCoord2D &pithCoord = _billon->hasPith()?_billon->pithCoord(_currentSlice):rCoord2D(_billon->n_cols/2,_billon->n_rows/2);
 		uint width, height;
 
 		switch (projectionType)
 		{
 			case TKD::CARTESIAN_PROJECTION :
 				if (_billon->hasPith() ) {
-					height = qMin(qMin(pithCoord.x,static_cast<int>(_billon->n_cols-pithCoord.x)),qMin(pithCoord.y,static_cast<int>(_billon->n_rows-pithCoord.y)));
+					height = qMin(qMin(pithCoord.x,_billon->n_cols-pithCoord.x),qMin(pithCoord.y,_billon->n_rows-pithCoord.y));
 				}
 				else {
 					height = qMin(_billon->n_cols/2,_billon->n_rows/2);
@@ -396,7 +401,7 @@ void MainWindow::drawSlice()
 				QPainter painter(&_mainPix);
 				painter.setPen(Qt::yellow);
 				if ( projectionType == TKD::Z_PROJECTION )
-					painter.drawEllipse(QPointF(pithCoord.x,pithCoord.y),restrictedRadius,restrictedRadius);
+					painter.drawEllipse(pithCoord.x,pithCoord.y,restrictedRadius,restrictedRadius);
 				else
 					painter.drawLine(0,restrictedRadius,width,restrictedRadius);
 			}
@@ -529,12 +534,12 @@ void MainWindow::nextMaximumInSliceHistogram()
 /*******************************************/
 /*******/
 
-void MainWindow::setSlice( const int &sliceNumber )
+void MainWindow::setSlice( const int &sliceIndex )
 {
-	_currentSlice = sliceNumber;
-	_ui->_labelSliceNumber->setNum(sliceNumber);
+	_currentSlice = sliceIndex;
+	_ui->_labelSliceNumber->setNum(sliceIndex);
 
-	_plotSliceHistogram->moveCursor(sliceNumber);
+	_plotSliceHistogram->moveCursor(sliceIndex);
 	_ui->_plotSliceHistogram->replot();
 
 	drawSlice();
@@ -544,6 +549,14 @@ void MainWindow::setYSlice( const int &yPosition )
 {
 	_currentYSlice = yPosition;
 	drawSlice();
+}
+
+void MainWindow::setTangentialSlice( const int &sliceIndex )
+{
+	_plotKnotPithProfile->moveCursor(sliceIndex);
+	_ui->_plotKnotPithProfile->replot();
+
+	drawTangentialView();
 }
 
 void MainWindow::setSectorNumber( const int &value )
@@ -562,6 +575,7 @@ void MainWindow::selectSliceInterval( const int &index )
 	{
 		delete _tangentialBillon;
 		_tangentialBillon = 0;
+		updateKnotPithProfile();
 	}
 	_ui->_sliderSelectTangentialSlice->setValue(0);
 
@@ -623,8 +637,10 @@ void MainWindow::selectSectorInterval(const int &index, const bool &draw )
 											  _ui->_chechPithAscendingOrder_knot->isChecked());
 		pithExtractor.process(*_tangentialBillon);
 	}
+
 	if (draw)
 	{
+		updateKnotPithProfile();
 		drawSlice();
 		drawTangentialView();
 	}
@@ -704,6 +720,21 @@ void MainWindow::updateSectorHistogram( const Interval<uint> &interval )
 	_ui->_plotSectorHistogram->replot();
 	_ui->_polarSectorHistogram->replot();
 	drawSlice();
+}
+
+void MainWindow::updateKnotPithProfile()
+{
+	_knotPithProfile->clear();
+
+	if ( _tangentialBillon && _tangentialBillon->hasPith() )
+	{
+		_knotPithProfile->construct( _tangentialBillon->pith() );
+	}
+
+	_plotKnotPithProfile->update( *_knotPithProfile );
+	_plotKnotPithProfile->moveCursor( _ui->_sliderSelectTangentialSlice->value() );
+	_ui->_plotKnotPithProfile->setAxisScale(QwtPlot::xBottom,0,_knotPithProfile->size());
+	_ui->_plotKnotPithProfile->replot();
 }
 
 /********/

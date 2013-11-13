@@ -125,8 +125,8 @@ void SliceView::drawCurrentSlice( QImage &image, const Billon &billon,
 	}
 	else if ( axe == TKD::CARTESIAN_PROJECTION )
 	{
-		const iCoord2D &pithCoord = billon.hasPith()?billon.pithCoord(sliceIndex):iCoord2D(width/2,height/2);
-		const uint radialResolution = qMin(qMin(pithCoord.x,static_cast<int>(width-pithCoord.x)),qMin(pithCoord.y,static_cast<int>(height-pithCoord.y)));
+		const rCoord2D &pithCoord = billon.hasPith()?billon.pithCoord(sliceIndex):rCoord2D(width/2,height/2);
+		const uint radialResolution = qMin(qMin(pithCoord.x,width-pithCoord.x),qMin(pithCoord.y,height-pithCoord.y));
 		const qreal angularIncrement = TWO_PI/(qreal)(angularResolution);
 
 		int x, y;
@@ -178,8 +178,8 @@ void SliceView::drawMovementSlice( QImage &image, const Billon &billon, const ui
 	}
 	else if ( axe == TKD::CARTESIAN_PROJECTION )
 	{
-		const iCoord2D &pithCoord = billon.hasPith()?billon.pithCoord(sliceIndex):iCoord2D(width/2,height/2);
-		const uint radialResolution = qMin(qMin(pithCoord.x,static_cast<int>(width-pithCoord.x)),qMin(pithCoord.y,static_cast<int>(height-pithCoord.y)));
+		const rCoord2D &pithCoord = billon.hasPith()?billon.pithCoord(sliceIndex):rCoord2D(width/2,height/2);
+		const uint radialResolution = qMin(qMin(pithCoord.x,width-pithCoord.x),qMin(pithCoord.y,height-pithCoord.y));
 		const qreal angularIncrement = TWO_PI/(qreal)(angularResolution);
 
 		int x, y;

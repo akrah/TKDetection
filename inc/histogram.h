@@ -294,7 +294,8 @@ void Histogram<T>::computeIntervals( const int & derivativesPercentage, const ui
 	_intervals.clear();
 	if ( _maximums.isEmpty() ) return;
 
-	uint cursorMax, cursorMin, cursorStart, derivativeThreshold;
+	uint cursorMax, cursorMin, cursorStart;
+	T derivativeThreshold;
 	Interval<uint> cursor;
 	const uint histoSize = this->size();
 	const uint histoSizeMinusOne = histoSize - 1;

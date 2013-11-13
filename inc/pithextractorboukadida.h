@@ -140,7 +140,7 @@ private:
 	 * \param   hasContour Matrice de booleen qui précise pour chaque pixel de Slice s'il est un point de contour
 	 * \return	le nombre d'orientations prises en compte
 	 */
-	uint contour(const Slice &slice, arma::Mat<qreal> &orientations, arma::Mat<char> & hasContour ) const;
+	uint contour( const Slice &slice, arma::Mat<qreal> &orientations, arma::Mat<char> & hasContour ) const;
 
 	void drawLine( arma::Mat<int> &slice, const iCoord2D &origin, const qreal &orientationOrig ) const;
 
