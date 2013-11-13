@@ -14,9 +14,9 @@ class PithExtractor {
 
 public:
 
-	PithExtractor( const int &falseCutPercent = FALSE_CUT_PERCENT, const int &windowWidth = NEIGHBORHOOD_WINDOW_WIDTH,
-				   const int &windowHeight = NEIGHBORHOOD_WINDOW_HEIGHT, const int &binarizationThreshold = BINARIZATION_THRESHOLD,
-				   const int &pithLag = PITH_LAG );
+	PithExtractor( const int &falseCutPercent = FALSE_CUT_PERCENT_BILLON, const int &windowWidth = NEIGHBORHOOD_WINDOW_WIDTH_BILLON,
+				   const int &windowHeight = NEIGHBORHOOD_WINDOW_HEIGHT_BILLON, const int &binarizationThreshold = BINARIZATION_THRESHOLD_BILLON,
+				   const int &pithLag = PITH_LAG_BILLON );
 	~PithExtractor();
 
 

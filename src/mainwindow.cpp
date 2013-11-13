@@ -141,13 +141,13 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 	QObject::connect(_ui->_spinHistogramMinimumWidthOfInterval_zMotion, SIGNAL(valueChanged(int)), _ui->_sliderHistogramMinimumWidthOfInterval_zMotion, SLOT(setValue(int)));
 	QObject::connect(_ui->_sliderHistogramDerivativeSearchPercentage_zMotion, SIGNAL(valueChanged(int)), _ui->_spinHistogramDerivativeSearchPercentage_zMotion, SLOT(setValue(int)));
 	QObject::connect(_ui->_spinHistogramDerivativeSearchPercentage_zMotion, SIGNAL(valueChanged(int)), _ui->_sliderHistogramDerivativeSearchPercentage_zMotion, SLOT(setValue(int)));
-	QObject::connect(_ui->_sliderPercentageOfSlicesToIgnore, SIGNAL(valueChanged(int)), _ui->_spinPercentageOfSlicesToIgnore, SLOT(setValue(int)));
-	QObject::connect(_ui->_spinPercentageOfSlicesToIgnore, SIGNAL(valueChanged(int)), _ui->_sliderPercentageOfSlicesToIgnore, SLOT(setValue(int)));
+	QObject::connect(_ui->_sliderHistogramPercentageOfSlicesToIgnore_zMotion, SIGNAL(valueChanged(int)), _ui->_spinHistogramPercentageOfSlicesToIgnore_zMotion, SLOT(setValue(int)));
+	QObject::connect(_ui->_spinHistogramPercentageOfSlicesToIgnore_zMotion, SIGNAL(valueChanged(int)), _ui->_sliderHistogramPercentageOfSlicesToIgnore_zMotion, SLOT(setValue(int)));
 	QObject::connect(_ui->_buttonHistogramResetDefaultValuesZMotion, SIGNAL(clicked()), this, SLOT(resetHistogramDefaultValuesZMotion()));
 	// Onglet "Z-Mouvement par secteur angulaire"
-	QObject::connect(_ui->_sliderNumberOfAngularSectors_zMotionAngular, SIGNAL(valueChanged(int)), _ui->_spinNumberOfAngularSectors_zMotionAngular, SLOT(setValue(int)));
-	QObject::connect(_ui->_spinNumberOfAngularSectors_zMotionAngular, SIGNAL(valueChanged(int)), _ui->_sliderNumberOfAngularSectors_zMotionAngular, SLOT(setValue(int)));
-	QObject::connect(_ui->_spinNumberOfAngularSectors_zMotionAngular, SIGNAL(valueChanged(int)), this, SLOT(setSectorNumber(int)));
+	QObject::connect(_ui->_sliderHistogramNumberOfAngularSectors_zMotionAngular, SIGNAL(valueChanged(int)), _ui->_spinHistogramNumberOfAngularSectors_zMotionAngular, SLOT(setValue(int)));
+	QObject::connect(_ui->_spinHistogramNumberOfAngularSectors_zMotionAngular, SIGNAL(valueChanged(int)), _ui->_sliderHistogramNumberOfAngularSectors_zMotionAngular, SLOT(setValue(int)));
+	QObject::connect(_ui->_spinHistogramNumberOfAngularSectors_zMotionAngular, SIGNAL(valueChanged(int)), this, SLOT(setSectorNumber(int)));
 	QObject::connect(_ui->_sliderHistogramSmoothingRadius_zMotionAngular, SIGNAL(valueChanged(int)), _ui->_spinHistogramSmoothingRadius_zMotionAngular, SLOT(setValue(int)));
 	QObject::connect(_ui->_spinHistogramSmoothingRadius_zMotionAngular, SIGNAL(valueChanged(int)), _ui->_sliderHistogramSmoothingRadius_zMotionAngular, SLOT(setValue(int)));
 	QObject::connect(_ui->_sliderHistogramMinimumHeightOfMaximum_zMotionAngular, SIGNAL(valueChanged(int)), _ui->_spinHistogramMinimumHeightOfMaximum_zMotionAngular, SLOT(setValue(int)));
@@ -156,8 +156,8 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 	QObject::connect(_ui->_spinHistogramMinimumWidthOfInterval_zMotionAngular, SIGNAL(valueChanged(int)), _ui->_sliderHistogramMinimumWidthOfInterval_zMotionAngular, SLOT(setValue(int)));
 	QObject::connect(_ui->_sliderHistogramDerivativeSearchPercentage_zMotionAngular, SIGNAL(valueChanged(int)), _ui->_spinHistogramDerivativeSearchPercentage_zMotionAngular, SLOT(setValue(int)));
 	QObject::connect(_ui->_spinHistogramDerivativeSearchPercentage_zMotionAngular, SIGNAL(valueChanged(int)), _ui->_sliderHistogramDerivativeSearchPercentage_zMotionAngular, SLOT(setValue(int)));
-	QObject::connect(_ui->_sliderSectorHistogramIntervalGap, SIGNAL(valueChanged(int)), _ui->_spinSectorHistogramIntervalGap, SLOT(setValue(int)));
-	QObject::connect(_ui->_spinSectorHistogramIntervalGap, SIGNAL(valueChanged(int)), _ui->_sliderSectorHistogramIntervalGap, SLOT(setValue(int)));
+	QObject::connect(_ui->_sliderHistogramIntervalGap_zMotionAngular, SIGNAL(valueChanged(int)), _ui->_spinHistogramIntervalGap_zMotionAngular, SLOT(setValue(int)));
+	QObject::connect(_ui->_spinHistogramIntervalGap_zMotionAngular, SIGNAL(valueChanged(int)), _ui->_sliderHistogramIntervalGap_zMotionAngular, SLOT(setValue(int)));
 	QObject::connect(_ui->_buttonHistogramResetDefaultValuesZMotionAngular, SIGNAL(clicked()), this, SLOT(resetHistogramDefaultValuesZMotionAngular()));
 
 	/**************************************
@@ -174,7 +174,7 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 	/***********************************
 	* Évènements de l'onglet "Processus"
 	************************************/
-	QObject::connect(_ui->_buttonComputePith, SIGNAL(clicked()), this, SLOT(updatePith()));
+	QObject::connect(_ui->_buttonComputePith, SIGNAL(clicked()), this, SLOT(updateBillonPith()));
 	QObject::connect(_ui->_comboSelectSliceInterval, SIGNAL(currentIndexChanged(int)), this, SLOT(selectSliceInterval(int)));
 	QObject::connect(_ui->_buttonSelectSliceIntervalUpdate, SIGNAL(clicked()), this, SLOT(selectCurrentSliceInterval()));
 	QObject::connect(_ui->_comboSelectSectorInterval, SIGNAL(currentIndexChanged(int)), this, SLOT(selectSectorInterval(int)));
@@ -449,6 +449,11 @@ void MainWindow::drawTangentialView()
 		painter.drawLine(0,height/2.-knotAreaLine,width,height/2.-knotAreaLine);
 		painter.drawLine(0,height/2.+knotAreaLine,width,height/2.+knotAreaLine);
 		painter.end();
+
+		if ( _tangentialBillon->hasPith() )
+		{
+			_tangentialBillon->pith().draw(_tangentialPix,currentSlice);
+		}
 	}
 	else
 	{
@@ -604,13 +609,19 @@ void MainWindow::selectSectorInterval(const int &index, const bool &draw )
 	{
 		const Interval<uint> &sectorInterval = _sectorHistogram->interval(index-1);
 		const Interval<uint> &sliceInterval = _sliceHistogram->interval(_ui->_comboSelectSliceInterval->currentIndex()-1);
-		const int &minimumIntensity = _ui->_spinMinIntensity->value();
+		const Interval<int> intensityInterval(_ui->_spinMinIntensity->value(), _ui->_spinMaxIntensity->value());
 
-		_tangentialBillon = BillonAlgorithms::tangentialTransform( *_billon, sliceInterval, sectorInterval, _ui->_spinTangentialNbSlices->value(), minimumIntensity );
+		_tangentialBillon = BillonAlgorithms::tangentialTransform( *_billon, sliceInterval, sectorInterval, _ui->_spinTangentialNbSlices->value(), intensityInterval.min() );
 		_ui->_sliderSelectTangentialSlice->blockSignals(true);
 		_ui->_sliderSelectTangentialSlice->setMaximum(_ui->_spinTangentialNbSlices->value()-1);
 		_ui->_sliderSelectTangentialSlice->setValue(0);
 		_ui->_sliderSelectTangentialSlice->blockSignals(false);
+
+		PithExtractorBoukadida pithExtractor( _ui->_spinPithSubWindowWidth_knot->value(), _ui->_spinPithSubWindowHeight_knot->value(),
+											  _ui->_spinPithMaximumShift_knot->value(), _ui->_spinPithSmoothingRadius_knot->value(),
+											  _ui->_spinPithMinimumWoodPercentage_knot->value(), Interval<int>( _ui->_spinPithMinIntensity_knot->value(), _ui->_spinPithMaxIntensity_knot->value() ),
+											  _ui->_chechPithAscendingOrder_knot->isChecked());
+		pithExtractor.process(*_tangentialBillon);
 	}
 	if (draw)
 	{
@@ -624,17 +635,18 @@ void MainWindow::selectCurrentSectorInterval()
 	selectSectorInterval(_ui->_comboSelectSectorInterval->currentIndex());
 }
 
-void MainWindow::updatePith()
+void MainWindow::updateBillonPith()
 {
 	if ( _billon )
 	{
-//		PithExtractor pithExtractor;
-		PithExtractorBoukadida pithExtractor;
-		pithExtractor.setIntensityInterval( Interval<int>(_ui->_spinSectorThresholding->value(), _ui->_spinMaxIntensity->value()) );
+		PithExtractorBoukadida pithExtractor( _ui->_spinPithSubWindowWidth_billon->value(), _ui->_spinPithSubWindowHeight_billon->value(),
+											  _ui->_spinPithMaximumShift_billon->value(), _ui->_spinPithSmoothingRadius_billon->value(),
+											  _ui->_spinPithMinimumWoodPercentage_billon->value(), Interval<int>( _ui->_spinPithMinIntensity_billon->value(), _ui->_spinPithMaxnIntensity_billon->value() ),
+											  _ui->_chechPithAscendingOrder_billon->isChecked());
 		pithExtractor.process(*_billon);
-		_treeRadius = BillonAlgorithms::restrictedAreaMeansRadius(*_billon,_ui->_spinRestrictedAreaResolution->value(),_ui->_spinRestrictedAreaThreshold->value(),_ui->_spinRestrictedAreaMinimumRadius->value()*_billon->n_cols/100., _ui->_spinPercentageOfSlicesToIgnore->value()*_billon->n_slices/100.);
+		_treeRadius = BillonAlgorithms::restrictedAreaMeansRadius(*_billon,_ui->_spinRestrictedAreaResolution->value(),_ui->_spinRestrictedAreaThreshold->value(),_ui->_spinRestrictedAreaMinimumRadius->value()*_billon->n_cols/100., _ui->_spinHistogramPercentageOfSlicesToIgnore_zMotion->value()*_billon->n_slices/100.);
 		_ui->_checkRadiusAroundPith->setText( QString::number(_treeRadius) );
-		_ui->_spinNumberOfAngularSectors_zMotionAngular->setValue(TWO_PI*_treeRadius);
+		_ui->_spinHistogramNumberOfAngularSectors_zMotionAngular->setValue(TWO_PI*_treeRadius);
 	}
 	drawSlice();
 	updateSliceHistogram();
@@ -647,7 +659,7 @@ void MainWindow::updateSliceHistogram()
 	if ( _billon && _billon->hasPith() )
 	{
 		_sliceHistogram->construct(*_billon, Interval<int>(_ui->_spinMinIntensity->value(),_ui->_spinMaxIntensity->value()),
-								   _ui->_spinZMotionMin->value(), _ui->_spinPercentageOfSlicesToIgnore->value()*_billon->n_slices/100., _treeRadius*_ui->_spinRestrictedAreaPercentage->value()/100.);
+								   _ui->_spinZMotionMin->value(), _ui->_spinHistogramPercentageOfSlicesToIgnore_zMotion->value()*_billon->n_slices/100., _treeRadius*_ui->_spinRestrictedAreaPercentage->value()/100.);
 		_sliceHistogram->computeMaximumsAndIntervals( _ui->_spinHistogramSmoothingRadius_zMotion->value(), _ui->_spinHistogramMinimumHeightOfMaximum_zMotion->value(),
 													  _ui->_spinHistogramDerivativeSearchPercentage_zMotion->value(), _ui->_spinHistogramMinimumWidthOfInterval_zMotion->value(), false);
 	}
@@ -680,12 +692,12 @@ void MainWindow::updateSectorHistogram( const Interval<uint> &interval )
 	{
 		_sectorHistogram->construct( *_billon, interval, Interval<int>(_ui->_spinMinIntensity->value(),_ui->_spinMaxIntensity->value()),
 									 _ui->_spinZMotionMin->value(), _treeRadius*_ui->_spinRestrictedAreaPercentage->value()/100.);
-		qreal coeffDegToSize = _ui->_spinNumberOfAngularSectors_zMotionAngular->value()/360.;
+		qreal coeffDegToSize = _ui->_spinHistogramNumberOfAngularSectors_zMotionAngular->value()/360.;
 		_sectorHistogram->computeMaximumsAndIntervals( _ui->_spinHistogramSmoothingRadius_zMotionAngular->value()*coeffDegToSize,
 													   _ui->_spinHistogramMinimumHeightOfMaximum_zMotionAngular->value(),
 													   _ui->_spinHistogramDerivativeSearchPercentage_zMotionAngular->value(),
 													   _ui->_spinHistogramMinimumWidthOfInterval_zMotionAngular->value()*coeffDegToSize,
-													   _ui->_spinSectorHistogramIntervalGap->value()*coeffDegToSize, true );
+													   _ui->_spinHistogramIntervalGap_zMotionAngular->value(), true );
 	}
 
 	_plotSectorHistogram->update(*_sectorHistogram);
@@ -704,14 +716,17 @@ void MainWindow::resetHistogramDefaultValuesZMotion()
 	_ui->_spinHistogramMinimumHeightOfMaximum_zMotion->setValue(HISTOGRAM_PERCENTAGE_OF_MINIMUM_HEIGHT_OF_MAXIMUM);
 	_ui->_spinHistogramMinimumWidthOfInterval_zMotion->setValue(HISTOGRAM_MINIMUM_WIDTH_OF_INTERVALS);
 	_ui->_spinHistogramDerivativeSearchPercentage_zMotion->setValue(HISTOGRAM_DERIVATIVE_SEARCH_PERCENTAGE);
+	_ui->_spinHistogramPercentageOfSlicesToIgnore_zMotion->setValue(HISTOGRAM_PERCENTAGE_OF_SLICES_TO_IGNORE);
 }
 
 void MainWindow::resetHistogramDefaultValuesZMotionAngular()
 {
+	_ui->_spinHistogramNumberOfAngularSectors_zMotionAngular->setValue(TWO_PI*_treeRadius);
 	_ui->_spinHistogramSmoothingRadius_zMotionAngular->setValue(HISTOGRAM_ANGULAR_SMOOTHING_RADIUS);
 	_ui->_spinHistogramMinimumHeightOfMaximum_zMotionAngular->setValue(HISTOGRAM_ANGULAR_PERCENTAGE_OF_MINIMUM_HEIGHT_OF_MAXIMUM);
 	_ui->_spinHistogramMinimumWidthOfInterval_zMotionAngular->setValue(HISTOGRAM_ANGULAR_MINIMUM_WIDTH_OF_INTERVALS);
 	_ui->_spinHistogramDerivativeSearchPercentage_zMotionAngular->setValue(HISTOGRAM_ANGULAR_DERIVATIVE_SEARCH_PERCENTAGE);
+	_ui->_spinHistogramIntervalGap_zMotionAngular->setValue(HISTOGRAM_ANGULAR_INTERVAL_GAP);
 }
 
 

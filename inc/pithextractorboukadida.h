@@ -15,9 +15,10 @@ class PithExtractorBoukadida {
 
 public:
 
-	PithExtractorBoukadida( const int &subWindowWidth = NEIGHBORHOOD_WINDOW_WIDTH, const int &subWindowHeight = NEIGHBORHOOD_WINDOW_HEIGHT,
-							const qreal &pithShift = PITH_LAG, const uint &smoothingRadius = PITH_SMOOTHING,
-							const qreal &minWoodPercentage = MIN_WOOD_PERCENTAGE, const Interval<int> &intensityInterval = Interval<int>(MINIMUM_INTENSITY,MAXIMUM_INTENSITY) );
+	PithExtractorBoukadida( const int &subWindowWidth = NEIGHBORHOOD_WINDOW_WIDTH_BILLON, const int &subWindowHeight = NEIGHBORHOOD_WINDOW_HEIGHT_BILLON,
+							const qreal &pithShift = PITH_LAG_BILLON, const uint &smoothingRadius = PITH_SMOOTHING_BILLON,
+							const qreal &minWoodPercentage = MIN_WOOD_PERCENTAGE_BILLON, const Interval<int> &intensityInterval = Interval<int>(MINIMUM_INTENSITY,MAXIMUM_INTENSITY),
+							const bool &ascendingOrder = ASCENDING_ORDER_BILLON );
 
 	~PithExtractorBoukadida();
 
@@ -70,6 +71,12 @@ public:
 	 */
 	Interval<int> intensityInterval() const;
 
+	/**
+	 * \fn		bool ascendingOrder();
+	 * \return	True if pith extraction on slices taken in ascending order, false otherwise
+	 */
+	bool ascendingOrder() const;
+
 	/********************************************************
 	 * Set functions
 	 ********************************************************/
@@ -109,6 +116,12 @@ public:
 	 */
 	void setIntensityInterval( const Interval<int> &interval );
 
+	/**
+	 * \fn		void setAscendingOrder( const bool &order );
+	 * \param	order True if pith extraction on slices taken in ascending order, false otherwise
+	 */
+	void setAscendingOrder( const bool &order );
+
 private:
 	/**
 	 * \fn		Coord transHough(const Slice &slice, uint &nbContourPoints );
@@ -146,6 +159,7 @@ private:
 	uint _smoothingRadius;				/*!< Rayon de lissage de la moelle (en nombre de coupes) */
 	qreal _minWoodPercentage;			/*!< Proportion de bois minimum sur une coupe pour la considérer comme valide */
 	Interval<int> _intensityInterval;	/*!< Interval d'intensité à prednre en compte pour la transformée de Hough */
+	bool _ascendingOrder;				/*!< Ordre de traitement des coupes (ascending order if true, descending order otherwise */
 };
 
 #endif // PITHEXTRACTORBOUKADIDA_H
