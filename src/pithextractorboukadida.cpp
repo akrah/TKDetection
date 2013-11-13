@@ -125,7 +125,7 @@ void PithExtractorBoukadida::process( Billon &billon ) const
 	for ( k=firstSliceOrdered+kIncrement ; k<=lastValideSliceIndex && k>=firstValideSliceIndex ; k += kIncrement )
 	{
 		std::cout << k << "  ";
-		const Slice &currentSlice = billon.slice(k);
+		const Slice &currentSlice = billonFillBackground.slice(k);
 		const iCoord2D &previousPith = pith[k-kIncrement];
 
 		subWindowStart.x = qMax(qMin(previousPith.x-semiSubWindowWidth,width),0);
@@ -147,12 +147,12 @@ void PithExtractorBoukadida::process( Billon &billon ) const
 
 	// Extrapolation des coupes invalides
 	std::cout << "Step 6] Extrapolation of unvali slices" << std::endl;
-	const iCoord2D &firstValidCoord = pith[firstValideSliceIndex];
+	const rCoord2D &firstValidCoord = pith[firstValideSliceIndex];
 	for ( k=0 ; k<firstValideSliceIndex ; ++k )
 	{
 		pith[k] = firstValidCoord;
 	}
-	const iCoord2D &lastValidCoord = pith[lastValideSliceIndex];
+	const rCoord2D &lastValidCoord = pith[lastValideSliceIndex];
 	for ( k=lastValideSliceIndex+1 ; k<depth ; ++k )
 	{
 		pith[k] = lastValidCoord;
@@ -345,21 +345,22 @@ void PithExtractorBoukadida::smoothing( Pith &pith, const uint &smoothingRadius,
 {
 	const uint &firstSliceToSmooth = sliceIntervalToSmooth.min();
 	const uint &lastSliceToSmooth = sliceIntervalToSmooth.max();
-	const uint indexEnd = lastSliceToSmooth - smoothingRadius - 1;
+	const uint indexEnd = lastSliceToSmooth - smoothingRadius;
 	const qreal smoothingMaskSize = 2.*smoothingRadius+1.;
+	const Pith pithCopy(pith);
 
 	uint k;
 
 	rCoord2D smoothingSum( 0., 0. );
 	for ( k=firstSliceToSmooth ; k<firstSliceToSmooth+smoothingMaskSize ; ++k )
 	{
-		smoothingSum += pith[k];
+		smoothingSum += pithCopy[k];
 	}
 
 	pith[firstSliceToSmooth+smoothingRadius] = smoothingSum / smoothingMaskSize;
-	for ( k=firstSliceToSmooth+smoothingRadius+1 ; k<indexEnd ; ++k )
+	for ( k=firstSliceToSmooth+smoothingRadius+1 ; k<=indexEnd ; ++k )
 	{
-		smoothingSum += pith[k+smoothingRadius] - pith[k-smoothingRadius-1];
+		smoothingSum += pithCopy[k+smoothingRadius] - pithCopy[k-smoothingRadius-1];
 		pith[k] = smoothingSum / smoothingMaskSize;
 	}
 }

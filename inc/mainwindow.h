@@ -17,8 +17,10 @@ class QLabel;
 class PieChart;
 class PlotSectorHistogram;
 class PlotSliceHistogram;
+class PlotKnotPithProfile;
 class SectorHistogram;
 class SliceHistogram;
+class KnotPithProfile;
 class SliceView;
 
 template <typename T> class Interval;
@@ -47,8 +49,9 @@ private slots:
 	void previousMaximumInSliceHistogram();
 	void nextMaximumInSliceHistogram();
 
-	void setSlice( const int &sliceNumber );
+	void setSlice( const int &sliceIndex );
 	void setYSlice( const int &yPosition );
+	void setTangentialSlice( const int &sliceIndex );
 	void setSectorNumber( const int &value );
 
 	void selectSliceInterval( const int &index );
@@ -59,6 +62,7 @@ private slots:
 	void updateBillonPith();
 	void updateSliceHistogram();
 	void updateSectorHistogram( const Interval<uint> &interval );
+	void updateKnotPithProfile();
 
 	void resetHistogramDefaultValuesZMotion();
 	void resetHistogramDefaultValuesZMotionAngular();
@@ -123,6 +127,9 @@ private:
 
 	SectorHistogram *_sectorHistogram;
 	PlotSectorHistogram * _plotSectorHistogram;
+
+	KnotPithProfile *_knotPithProfile;
+	PlotKnotPithProfile *_plotKnotPithProfile;
 
 	uint _currentSlice;
 	uint _currentYSlice;

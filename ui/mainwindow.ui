@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>640</width>
-    <height>622</height>
+    <height>703</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -132,8 +132,8 @@
         <widget class="QWidget" name="scrollAreaWidgetContents">
          <property name="geometry">
           <rect>
-           <x>91</x>
-           <y>224</y>
+           <x>94</x>
+           <y>269</y>
            <width>0</width>
            <height>0</height>
           </rect>
@@ -151,7 +151,7 @@
      <x>0</x>
      <y>0</y>
      <width>640</width>
-     <height>29</height>
+     <height>25</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFichier">
@@ -261,8 +261,8 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>368</width>
-              <height>167</height>
+              <width>378</width>
+              <height>148</height>
              </rect>
             </property>
             <attribute name="label">
@@ -454,8 +454,8 @@ du repère polaire</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>255</width>
-              <height>251</height>
+              <width>259</width>
+              <height>223</height>
              </rect>
             </property>
             <attribute name="label">
@@ -705,15 +705,15 @@ zone restreinte</string>
          <item>
           <widget class="QToolBox" name="toolBox_4">
            <property name="currentIndex">
-            <number>1</number>
+            <number>0</number>
            </property>
            <widget class="QWidget" name="page_7">
             <property name="geometry">
              <rect>
-              <x>-74</x>
-              <y>-117</y>
-              <width>401</width>
-              <height>283</height>
+              <x>0</x>
+              <y>-71</y>
+              <width>415</width>
+              <height>253</height>
              </rect>
             </property>
             <attribute name="label">
@@ -876,9 +876,9 @@ sur une coupe valide</string>
             <property name="geometry">
              <rect>
               <x>0</x>
-              <y>-117</y>
-              <width>401</width>
-              <height>283</height>
+              <y>-71</y>
+              <width>415</width>
+              <height>253</height>
              </rect>
             </property>
             <attribute name="label">
@@ -904,7 +904,7 @@ sur une coupe valide</string>
                 <number>200</number>
                </property>
                <property name="value">
-                <number>59</number>
+                <number>30</number>
                </property>
               </widget>
              </item>
@@ -924,7 +924,7 @@ sur une coupe valide</string>
                 <number>200</number>
                </property>
                <property name="value">
-                <number>59</number>
+                <number>30</number>
                </property>
               </widget>
              </item>
@@ -942,7 +942,7 @@ deux coordonnées successives</string>
                 <number>100</number>
                </property>
                <property name="value">
-                <number>29</number>
+                <number>15</number>
                </property>
               </widget>
              </item>
@@ -977,7 +977,7 @@ sur une coupe valide</string>
                 <number>100</number>
                </property>
                <property name="value">
-                <number>5</number>
+                <number>10</number>
                </property>
               </widget>
              </item>
@@ -999,7 +999,7 @@ sur une coupe valide</string>
                   <number>3024</number>
                  </property>
                  <property name="value">
-                  <number>-900</number>
+                  <number>-700</number>
                  </property>
                 </widget>
                </item>
@@ -1012,7 +1012,7 @@ sur une coupe valide</string>
                   <number>3024</number>
                  </property>
                  <property name="value">
-                  <number>530</number>
+                  <number>400</number>
                  </property>
                 </widget>
                </item>
@@ -1112,8 +1112,8 @@ sur une coupe valide</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>380</width>
-              <height>282</height>
+              <width>388</width>
+              <height>248</height>
              </rect>
             </property>
             <attribute name="label">
@@ -1380,8 +1380,8 @@ sur une coupe valide</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>375</width>
-              <height>321</height>
+              <width>388</width>
+              <height>285</height>
              </rect>
             </property>
             <attribute name="label">
@@ -1723,8 +1723,8 @@ sur une coupe valide</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>253</width>
-              <height>145</height>
+              <width>250</width>
+              <height>129</height>
              </rect>
             </property>
             <attribute name="label">
@@ -1902,8 +1902,8 @@ sur une coupe valide</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>340</width>
-              <height>179</height>
+              <width>335</width>
+              <height>195</height>
              </rect>
             </property>
             <attribute name="label">
@@ -2067,8 +2067,8 @@ l'intervalle angulaire</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>358</width>
-              <height>94</height>
+              <width>374</width>
+              <height>86</height>
              </rect>
             </property>
             <attribute name="label">
@@ -2163,8 +2163,8 @@ l'intervalle angulaire</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>389</width>
-              <height>193</height>
+              <width>395</width>
+              <height>181</height>
              </rect>
             </property>
             <attribute name="label">
@@ -2377,8 +2377,8 @@ l'intervalle angulaire</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>326</width>
-              <height>174</height>
+              <width>334</width>
+              <height>157</height>
              </rect>
             </property>
             <attribute name="label">
@@ -2566,8 +2566,8 @@ l'intervalle angulaire</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>327</width>
-              <height>92</height>
+              <width>335</width>
+              <height>102</height>
              </rect>
             </property>
             <attribute name="label">
@@ -2632,8 +2632,8 @@ l'intervalle angulaire</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>397</width>
-              <height>124</height>
+              <width>398</width>
+              <height>112</height>
              </rect>
             </property>
             <attribute name="label">
@@ -2822,7 +2822,7 @@ l'intervalle angulaire</string>
          </item>
          <item>
           <widget class="QwtPolarPlot" name="_polarSectorHistogram">
-           <property name="plotBackground" stdset="0">
+           <property name="plotBackground">
             <brush brushstyle="SolidPattern">
              <color alpha="0">
               <red>255</red>
@@ -2843,7 +2843,7 @@ l'intervalle angulaire</string>
          <item row="1" column="0">
           <widget class="QSlider" name="_sliderSelectTangentialSlice">
            <property name="maximum">
-            <number>20</number>
+            <number>0</number>
            </property>
            <property name="orientation">
             <enum>Qt::Horizontal</enum>
@@ -2887,6 +2887,16 @@ l'intervalle angulaire</string>
             </property>
            </widget>
           </widget>
+         </item>
+        </layout>
+       </widget>
+       <widget class="QWidget" name="tab_3">
+        <attribute name="title">
+         <string>4. Profil de la moelle du nœud</string>
+        </attribute>
+        <layout class="QVBoxLayout" name="verticalLayout_6">
+         <item>
+          <widget class="QwtPlot" name="_plotKnotPithProfile"/>
          </item>
         </layout>
        </widget>

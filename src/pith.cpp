@@ -4,15 +4,15 @@
 
 #include <QPainter>
 
-Pith::Pith(const int size) : QVector<iCoord2D>(size)
+Pith::Pith(const int size) : QVector<rCoord2D>(size)
 {
 }
 
-Pith::Pith( const Pith &pith ) : QVector<iCoord2D>(pith)
+Pith::Pith( const Pith &pith ) : QVector<rCoord2D>(pith)
 {
 }
 
-Pith::Pith( const QVector<iCoord2D> &coordinates ) : QVector<iCoord2D>(coordinates)
+Pith::Pith( const QVector<rCoord2D> &coordinates ) : QVector<rCoord2D>(coordinates)
 {
 }
 
@@ -24,13 +24,14 @@ Pith::Pith( const QVector<iCoord2D> &coordinates ) : QVector<iCoord2D>(coordinat
 /*******************************
  * Public setters
  *******************************/
-void Pith::draw( QImage &image, const int &sliceIdx ) const
+void Pith::draw( QImage &image, const int &sliceIdx, const int &radius ) const
 {
 	if ( sliceIdx < size() )
 	{
+		const int diameter = 2*radius;
 		QPainter painter(&image);
 		painter.setBrush(Qt::red);
 		painter.setPen(Qt::red);
-		painter.drawEllipse((*this)[sliceIdx].x-5,(*this)[sliceIdx].y-5,10,10);
+		painter.drawEllipse((*this)[sliceIdx].x-radius,(*this)[sliceIdx].y-radius,diameter,diameter);
 	}
 }
