@@ -3,10 +3,10 @@
 #include "inc/billon.h"
 #include "inc/coordinate.h"
 
-PithExtractorBoukadida::PithExtractorBoukadida( const int &subWindowWidth, const int &subWindowHeight, const qreal &pithShift,
-												const uint &smoothingRadius , const qreal &minWoodPercentage, const Interval<int> &intensityInterval ) :
-	_subWindowWidth(subWindowWidth), _subWindowHeight(subWindowHeight), _pithShift(pithShift),
-	_smoothingRadius(smoothingRadius), _minWoodPercentage(minWoodPercentage), _intensityInterval(intensityInterval)
+PithExtractorBoukadida::PithExtractorBoukadida( const int &subWindowWidth, const int &subWindowHeight, const qreal &pithShift, const uint &smoothingRadius ,
+												const qreal &minWoodPercentage, const Interval<int> &intensityInterval, const bool &ascendingOrder ) :
+	_subWindowWidth(subWindowWidth), _subWindowHeight(subWindowHeight), _pithShift(pithShift), _smoothingRadius(smoothingRadius),
+	_minWoodPercentage(minWoodPercentage), _intensityInterval(intensityInterval), _ascendingOrder(ascendingOrder)
 {
 }
 
@@ -44,6 +44,11 @@ Interval<int> PithExtractorBoukadida::intensityInterval() const
 	return _intensityInterval;
 }
 
+bool PithExtractorBoukadida::ascendingOrder() const
+{
+	return _ascendingOrder;
+}
+
 void PithExtractorBoukadida::setSubWindowWidth( const int &width )
 {
 	_subWindowWidth = width;
@@ -74,6 +79,11 @@ void PithExtractorBoukadida::setIntensityInterval( const Interval<int> &interval
 	_intensityInterval = interval;
 }
 
+void PithExtractorBoukadida::setAscendingOrder( const bool &order )
+{
+	_ascendingOrder = order;
+}
+
 void PithExtractorBoukadida::process( Billon &billon ) const
 {
 	const int &width = billon.n_cols-1;
@@ -81,6 +91,7 @@ void PithExtractorBoukadida::process( Billon &billon ) const
 	const uint &depth = billon.n_slices;
 	const int semiSubWindowWidth = _subWindowWidth/2;
 	const int semiSubWindowHeight = _subWindowHeight/2;
+	const uint kIncrement = (_ascendingOrder?1:-1);
 	Pith &pith = billon._pith;
 
 	uint k;
@@ -100,21 +111,22 @@ void PithExtractorBoukadida::process( Billon &billon ) const
 	std::cout << "Step 3] Detect interval of valid slices" << std::endl;
 	const Interval<uint> validSliceInterval = detectValidSliceInterval( backgroundProportions );
 	const uint &firstValideSliceIndex = validSliceInterval.min();
-	const uint &lastValideSliceIndex = validSliceInterval.max()+1;
+	const uint &lastValideSliceIndex = validSliceInterval.max();
+	const uint firstSliceOrdered = _ascendingOrder?firstValideSliceIndex:lastValideSliceIndex;
 
 	// Calcul de la moelle sur la première coupe valide
 	std::cout << "Step 4] Hough transform on first valid slice" << std::endl;
-	pith[firstValideSliceIndex] = transHough( billonFillBackground.slice(firstValideSliceIndex), nbLineByMaxRatio[firstValideSliceIndex] );
+	pith[firstSliceOrdered] = transHough( billonFillBackground.slice(firstSliceOrdered), nbLineByMaxRatio[firstSliceOrdered] );
 
 	// Calcul de la moelle sur les coupes suivantes
 	std::cout << "Step 5] Hough transform on next valid slices" << std::endl;
 	uiCoord2D currentPithCoord;
 	uiCoord2D subWindowStart, subWindowEnd;
-	for ( k=firstValideSliceIndex+1 ; k<lastValideSliceIndex ; ++k )
+	for ( k=firstSliceOrdered+kIncrement ; k<=lastValideSliceIndex && k>=firstValideSliceIndex ; k += kIncrement )
 	{
 		std::cout << k << "  ";
 		const Slice &currentSlice = billon.slice(k);
-		const iCoord2D &previousPith = pith[k-1];
+		const iCoord2D &previousPith = pith[k-kIncrement];
 
 		subWindowStart.x = qMax(qMin(previousPith.x-semiSubWindowWidth,width),0);
 		subWindowEnd.x = qMax(qMin(previousPith.x+semiSubWindowWidth,width),0);
@@ -140,8 +152,8 @@ void PithExtractorBoukadida::process( Billon &billon ) const
 	{
 		pith[k] = firstValidCoord;
 	}
-	const iCoord2D &lastValidCoord = pith[lastValideSliceIndex-1];
-	for ( k=lastValideSliceIndex ; k<depth ; ++k )
+	const iCoord2D &lastValidCoord = pith[lastValideSliceIndex];
+	for ( k=lastValideSliceIndex+1 ; k<depth ; ++k )
 	{
 		pith[k] = lastValidCoord;
 	}
@@ -309,7 +321,7 @@ void PithExtractorBoukadida::interpolation( Pith &pith, const QVector<qreal> &nb
 
 	uint startSliceIndex, newK, startSliceIndexMinusOne;
 	rCoord2D interpolationStep, currentInterpolatePithCoord;
-	for ( uint k=firstSlice ; k<=lastSlice ; ++k )
+	for ( uint k=firstSlice ; k<lastSlice-2 ; ++k )
 	{
 		if ( nbLineByMaxRatio[k] < interpolationThreshold )
 		{
@@ -355,8 +367,8 @@ void PithExtractorBoukadida::smoothing( Pith &pith, const uint &smoothingRadius,
 void PithExtractorBoukadida::fillBillonBackground( Billon &billonToFill, QVector<qreal> &backgroundProportions, const Interval<int> &intensityInterval ) const
 {
 	const uint &nbSlices = billonToFill.n_slices;
-	const int &minIntensity = intensityInterval.min();
-	const int &maxIntensity = intensityInterval.max();
+	const int &minIntensity = intensityInterval.min()+1;
+	const int &maxIntensity = intensityInterval.max()-1;
 	const qreal nbVoxelsBySlice = billonToFill.n_cols * billonToFill.n_rows;
 
 	backgroundProportions.resize(nbSlices);
@@ -373,7 +385,7 @@ void PithExtractorBoukadida::fillBillonBackground( Billon &billonToFill, QVector
 		while ( startSlice != endSlice )
 		{
 			val = *startSlice;
-			*startSlice++ = qMax( qMin( val, maxIntensity ), minIntensity );
+			*startSlice = qMax( qMin( val, maxIntensity ), minIntensity );
 			currentProp += (val != *startSlice++);
 		}
 		backgroundProportions[k] = currentProp / nbVoxelsBySlice;
@@ -390,11 +402,11 @@ Interval<uint> PithExtractorBoukadida::detectValidSliceInterval( const QVector<q
 
 	sliceIndex = 0;
 	while ( sliceIndex<nbSlices && backgroundProportions[sliceIndex] > backgroundPercentage ) sliceIndex++;
-	validSliceInterval.setMin(sliceIndex);
+	validSliceInterval.setMin(qMin(sliceIndex,nbSlices-1));
 
 	sliceIndex = nbSlices-1;
 	while ( sliceIndex>0 && backgroundProportions[sliceIndex] > backgroundPercentage ) sliceIndex--;
-	validSliceInterval.setMax(sliceIndex);
+	validSliceInterval.setMax(qMax(sliceIndex,validSliceInterval.min()));
 
 	return validSliceInterval;
 }

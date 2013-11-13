@@ -56,7 +56,7 @@ private slots:
 	void selectSectorInterval( const int &index, const bool &draw = true );
 	void selectCurrentSectorInterval();
 
-	void updatePith();
+	void updateBillonPith();
 	void updateSliceHistogram();
 	void updateSectorHistogram( const Interval<uint> &interval );
 

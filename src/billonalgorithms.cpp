@@ -129,19 +129,25 @@ namespace BillonAlgorithms
 		arma::Col<qreal>::fixed<3> initial, destination;
 		initial(2) = 0.;
 
+		const qreal semiKnotAreaHeightCoeff = heightOnTWo / static_cast<qreal>( nbSlices );
+		int i, j, jStart, jEnd;
+		jStart = jEnd = 0;
 		for ( uint k=0 ; k<nbSlices ; ++k )
 		{
 			Slice &slice = tangentialBillon->slice(k);
-			for ( int j=-heightOnTWo ; j<heightOnTWo ; ++j )
+			jStart = -qMin(k*semiKnotAreaHeightCoeff,heightOnTWo*1.);
+			jEnd = qMin(k*semiKnotAreaHeightCoeff,heightOnTWo*1.);
+			for ( j=jStart ; j<jEnd ; ++j )
 			{
-				initial(1) = j;
-				for ( int i=-widthOnTWo ; i<widthOnTWo ; ++i )
+				initial.at(1) = j;
+				for ( i=-widthOnTWo ; i<widthOnTWo ; ++i )
 				{
-					initial(0) = i;
+					initial.at(0) = i;
 					destination = (rotationMat * initial) + origin;
 					slice(j+heightOnTWo,i+widthOnTWo) =
-							destination(0)>=0 && destination(0)<billon.n_cols && destination(1)>=0 && destination(1)<billon.n_rows && destination(2)>=0 && destination(2)<billon.n_slices ?
-								billon(destination(1),destination(0),destination(2)) : minIntensity;
+							destination.at(0)>=0 && destination.at(0)<billon.n_cols && destination.at(1)>=0 &&
+							destination.at(1)<billon.n_rows && destination.at(2)>=0 && destination.at(2)<billon.n_slices ?
+								billon(destination.at(1),destination.at(0),destination.at(2)) : minIntensity;
 				}
 			}
 			origin += originShift;
