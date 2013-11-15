@@ -296,7 +296,7 @@ void Histogram<T>::computeIntervals( const int & derivativesPercentage, const ui
 	const uint histoSize = this->size();
 	const uint histoSizeMinusOne = histoSize - 1;
 
-	for ( uint i=0 ; i<nbMaximums() ; ++i )
+	for ( int i=0 ; i<static_cast<int>(nbMaximums()) ; ++i )
 	{
 		// Detection des bornes de l'intervalle courant
 		cursorMin = cursorMax =_maximums[i];
@@ -359,7 +359,11 @@ void Histogram<T>::computeIntervals( const int & derivativesPercentage, const ui
 		cursor.setBounds(cursorMin,cursorMax);
 
 		// Ajout et fusion de l'intervalle courant
-		if ( _intervals.isEmpty() ) _intervals.append(cursor);
+		if ( _intervals.isEmpty() )
+		{
+			if ( (cursor.isValid() ? cursor.width() : histoSize-(cursor.min()-cursor.max())) > minimumWidthOfIntervals ) _intervals.append(cursor);
+			else _maximums.remove(i--);
+		}
 		else
 		{
 			const Interval<uint> &last = _intervals.last();
@@ -368,6 +372,7 @@ void Histogram<T>::computeIntervals( const int & derivativesPercentage, const ui
 				cursor = last;
 				cursorMin = last.min();
 				cursorMax = last.max();
+				_maximums.remove(i--);
 			}
 			else
 			{
@@ -377,6 +382,7 @@ void Histogram<T>::computeIntervals( const int & derivativesPercentage, const ui
 					cursor.setMin(cursorMin);
 				}
 				if ( (cursor.isValid() ? cursor.width() : histoSize-(cursor.min()-cursor.max())) > minimumWidthOfIntervals ) _intervals.append(cursor);
+				else _maximums.remove(i--);
 			}
 		}
 	}
