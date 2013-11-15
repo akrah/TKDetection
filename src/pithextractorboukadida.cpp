@@ -343,25 +343,34 @@ void PithExtractorBoukadida::interpolation( Pith &pith, const QVector<qreal> &nb
 
 void PithExtractorBoukadida::smoothing( Pith &pith, const uint &smoothingRadius, const Interval<uint> &sliceIntervalToSmooth ) const
 {
+	if ( !smoothingRadius || sliceIntervalToSmooth.size() < 1 || pith.size() < static_cast<int>(2*smoothingRadius+1) )
+		return;
+
 	const uint &firstSliceToSmooth = sliceIntervalToSmooth.min();
 	const uint &lastSliceToSmooth = sliceIntervalToSmooth.max();
-	const uint indexEnd = lastSliceToSmooth - smoothingRadius;
+	const uint nbSlicesToSmooth = sliceIntervalToSmooth.size()+1;
 	const qreal smoothingMaskSize = 2.*smoothingRadius+1.;
-	const Pith pithCopy(pith);
 
-	uint k;
+	uint i;
 
-	rCoord2D smoothingSum( 0., 0. );
-	for ( k=firstSliceToSmooth ; k<firstSliceToSmooth+smoothingMaskSize ; ++k )
+	Pith pithCopy;
+	pithCopy.reserve( nbSlicesToSmooth + 2*smoothingRadius );
+	for ( i=0 ; i<smoothingRadius ; ++i ) pithCopy << pith[firstSliceToSmooth];
+	pithCopy << pith.mid(firstSliceToSmooth, nbSlicesToSmooth);
+	for ( i=0 ; i<smoothingRadius ; ++i ) pithCopy << pith[lastSliceToSmooth];
+
+	Pith::ConstIterator copyIterBegin = pithCopy.constBegin();
+	Pith::ConstIterator copyIterEnd = pithCopy.constBegin() + static_cast<int>(smoothingMaskSize);
+
+	Pith::Iterator pithIter = pith.begin()+firstSliceToSmooth;
+	const Pith::ConstIterator pithEnd = pith.begin()+lastSliceToSmooth+1;
+
+	rCoord2D currentValue = std::accumulate( copyIterBegin, copyIterEnd, rCoord2D(0.,0.) );
+	*pithIter++ = currentValue/smoothingMaskSize;
+	while ( pithIter != pithEnd )
 	{
-		smoothingSum += pithCopy[k];
-	}
-
-	pith[firstSliceToSmooth+smoothingRadius] = smoothingSum / smoothingMaskSize;
-	for ( k=firstSliceToSmooth+smoothingRadius+1 ; k<=indexEnd ; ++k )
-	{
-		smoothingSum += pithCopy[k+smoothingRadius] - pithCopy[k-smoothingRadius-1];
-		pith[k] = smoothingSum / smoothingMaskSize;
+		currentValue += (*copyIterEnd++ - *copyIterBegin++);
+		*pithIter++ = currentValue/smoothingMaskSize;
 	}
 }
 
