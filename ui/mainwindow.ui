@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>640</width>
-    <height>703</height>
+    <height>586</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -133,7 +133,7 @@
          <property name="geometry">
           <rect>
            <x>94</x>
-           <y>269</y>
+           <y>211</y>
            <width>0</width>
            <height>0</height>
           </rect>
@@ -187,7 +187,7 @@
      <item row="1" column="0">
       <widget class="QTabWidget" name="_tabs">
        <property name="currentIndex">
-        <number>4</number>
+        <number>1</number>
        </property>
        <widget class="QWidget" name="tab_4">
         <attribute name="title">
@@ -705,13 +705,13 @@ zone restreinte</string>
          <item>
           <widget class="QToolBox" name="toolBox_4">
            <property name="currentIndex">
-            <number>0</number>
+            <number>1</number>
            </property>
            <widget class="QWidget" name="page_7">
             <property name="geometry">
              <rect>
               <x>0</x>
-              <y>-71</y>
+              <y>0</y>
               <width>415</width>
               <height>253</height>
              </rect>
@@ -959,7 +959,7 @@ deux coordonnées successives</string>
                 <number>50</number>
                </property>
                <property name="value">
-                <number>5</number>
+                <number>10</number>
                </property>
               </widget>
              </item>
@@ -977,7 +977,7 @@ sur une coupe valide</string>
                 <number>100</number>
                </property>
                <property name="value">
-                <number>10</number>
+                <number>8</number>
                </property>
               </widget>
              </item>
@@ -999,7 +999,7 @@ sur une coupe valide</string>
                   <number>3024</number>
                  </property>
                  <property name="value">
-                  <number>-700</number>
+                  <number>-900</number>
                  </property>
                 </widget>
                </item>
@@ -1012,7 +1012,7 @@ sur une coupe valide</string>
                   <number>3024</number>
                  </property>
                  <property name="value">
-                  <number>400</number>
+                  <number>530</number>
                  </property>
                 </widget>
                </item>
@@ -1716,15 +1716,15 @@ sur une coupe valide</string>
             </font>
            </property>
            <property name="currentIndex">
-            <number>1</number>
+            <number>0</number>
            </property>
            <widget class="QWidget" name="page_8">
             <property name="geometry">
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>250</width>
-              <height>129</height>
+              <width>335</width>
+              <height>226</height>
              </rect>
             </property>
             <attribute name="label">
@@ -1894,50 +1894,6 @@ sur une coupe valide</string>
                 </widget>
                </item>
               </layout>
-             </item>
-            </layout>
-           </widget>
-           <widget class="QWidget" name="page_2">
-            <property name="geometry">
-             <rect>
-              <x>0</x>
-              <y>0</y>
-              <width>335</width>
-              <height>195</height>
-             </rect>
-            </property>
-            <attribute name="label">
-             <string>Coupes tangentielles</string>
-            </attribute>
-            <layout class="QFormLayout" name="formLayout_3">
-             <property name="fieldGrowthPolicy">
-              <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
-             </property>
-             <item row="0" column="0">
-              <widget class="QLabel" name="label_12">
-               <property name="font">
-                <font>
-                 <weight>50</weight>
-                 <bold>false</bold>
-                </font>
-               </property>
-               <property name="text">
-                <string>Nombre de coupes tangentielles</string>
-               </property>
-              </widget>
-             </item>
-             <item row="0" column="1">
-              <widget class="QSpinBox" name="_spinTangentialNbSlices">
-               <property name="font">
-                <font>
-                 <weight>50</weight>
-                 <bold>false</bold>
-                </font>
-               </property>
-               <property name="value">
-                <number>50</number>
-               </property>
-              </widget>
              </item>
             </layout>
            </widget>

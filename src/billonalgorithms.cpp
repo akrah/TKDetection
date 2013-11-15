@@ -81,13 +81,13 @@ namespace BillonAlgorithms
 		return vectAllVertex;
 	}
 
-	Billon * tangentialTransform( const Billon &billon, const Interval<uint> &sliceInterval, const Interval<uint> &angularInterval, const uint &nbSlices, const int &minIntensity )
+	Billon * tangentialTransform( const Billon &billon, const Interval<uint> &sliceInterval, const Interval<uint> &angularInterval, const int &minIntensity )
 	{
 		const qreal zPithCoord = sliceInterval.mid();
 		const rCoord2D &originPith = billon.pithCoord(zPithCoord);
-		const uint angularRange = (angularInterval.max() + (angularInterval.max()>angularInterval.min() ? 0. : PieChartSingleton::getInstance()->nbSectors())) - angularInterval.min();
+		const uint angularRange = (angularInterval.max() + (angularInterval.isValid() ? 0. : PieChartSingleton::getInstance()->nbSectors())) - angularInterval.min();
 
-		const qreal bisectorOrientation = (angularInterval.min()+angularRange/2.)*PieChartSingleton::getInstance()->sectorAngle();
+		const qreal bisectorOrientation = (angularInterval.min()+angularRange/2.)*PieChartSingleton::getInstance()->angleStep();
 		const qreal cosBisector = qCos(bisectorOrientation);
 		const qreal sinBisector = qSin(bisectorOrientation);
 
@@ -103,11 +103,14 @@ namespace BillonAlgorithms
 		const qreal depth = rVec2D(edge-originPith).norm();
 		/* Hauteur et largeur des coueps tangentielles */
 		const uint width = sliceInterval.size()+1;
-		const uint height = 2 * qTan(angularRange*PieChartSingleton::getInstance()->sectorAngle()/2.) * depth;
+		const uint height = 2 * qTan(angularRange*PieChartSingleton::getInstance()->angleStep()/2.) * depth;
 		const int widthOnTWo = width/2.;
-		const int heightOnTWo = height/2.;
+		const int heightOnTwo = height/2.;
+
+		const uint nbSlices = depth;
 
 		Billon * tangentialBillon = new Billon(width,height,nbSlices);
+		tangentialBillon->setVoxelSize( billon.voxelDepth(), billon.voxelWidth(), billon.voxelWidth() );
 		tangentialBillon->fill(minIntensity);
 
 		// Rotation autour de l'axe Y
@@ -129,14 +132,14 @@ namespace BillonAlgorithms
 		arma::Col<qreal>::fixed<3> initial, destination;
 		initial(2) = 0.;
 
-		const qreal semiKnotAreaHeightCoeff = heightOnTWo / static_cast<qreal>( nbSlices );
+		const qreal semiKnotAreaHeightCoeff = heightOnTwo / static_cast<qreal>( nbSlices );
 		int i, j, jStart, jEnd;
 		jStart = jEnd = 0;
 		for ( uint k=0 ; k<nbSlices ; ++k )
 		{
 			Slice &slice = tangentialBillon->slice(k);
-			jStart = -qMin(k*semiKnotAreaHeightCoeff,heightOnTWo*1.);
-			jEnd = qMin(k*semiKnotAreaHeightCoeff,heightOnTWo*1.);
+			jStart = -qMin(k*semiKnotAreaHeightCoeff,heightOnTwo*1.);
+			jEnd = qMin(k*semiKnotAreaHeightCoeff,heightOnTwo*1.);
 			for ( j=jStart ; j<jEnd ; ++j )
 			{
 				initial.at(1) = j;
@@ -144,7 +147,7 @@ namespace BillonAlgorithms
 				{
 					initial.at(0) = i;
 					destination = (rotationMat * initial) + origin;
-					slice(j+heightOnTWo,i+widthOnTWo) =
+					slice(j+heightOnTwo,i+widthOnTWo) =
 							destination.at(0)>=0 && destination.at(0)<billon.n_cols && destination.at(1)>=0 &&
 							destination.at(1)<billon.n_rows && destination.at(2)>=0 && destination.at(2)<billon.n_slices ?
 								billon(destination.at(1),destination.at(0),destination.at(2)) : minIntensity;

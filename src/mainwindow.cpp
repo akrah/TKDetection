@@ -435,6 +435,7 @@ void MainWindow::drawTangentialView()
 		const uint &currentSlice = _ui->_sliderSelectTangentialSlice->value();
 		const uint &width = _tangentialBillon->n_cols;
 		const uint &height = _tangentialBillon->n_rows;
+		const uint &depth = _tangentialBillon->n_slices;
 
 		_tangentialPix = QImage(width,height,QImage::Format_ARGB32);
 		_tangentialPix.fill(0xff000000);
@@ -447,7 +448,7 @@ void MainWindow::drawTangentialView()
 		const int nbColorsToUse = qMax( nbKnotAreas>colors.size() ? ((nbKnotAreas+1)/2)%colors.size() : colors.size() , 1 );
 		const QColor currentColor = colors[(_ui->_comboSelectSectorInterval->currentIndex()-1)%nbColorsToUse];
 
-		const qreal knotAreaLine = currentSlice * (height/2.) / static_cast<qreal>( _ui->_spinTangentialNbSlices->value());
+		const qreal knotAreaLine = currentSlice * (height/2.) / static_cast<qreal>(depth);
 
 		QPainter painter(&_tangentialPix);
 		painter.setPen(currentColor);
@@ -588,7 +589,7 @@ void MainWindow::selectSliceInterval( const int &index )
 	{
 		const Interval<uint> &sliceInterval = _sliceHistogram->interval(index-1);
 		updateSectorHistogram(sliceInterval);
-		_ui->_sliderSelectSlice->setValue(_sliceHistogram->intervalIndex(index-1));
+		_ui->_sliderSelectSlice->setValue(_sliceHistogram->interval(index-1).mid());
 
 		const QVector< Interval<uint> > &angularIntervals = _sectorHistogram->intervals();
 		if ( !angularIntervals.isEmpty() )
@@ -621,13 +622,19 @@ void MainWindow::selectSectorInterval(const int &index, const bool &draw )
 
 	if ( index > 0 && index <= static_cast<int>(_sectorHistogram->nbIntervals()) && _billon->hasPith() )
 	{
+		const uint nbAngularSectors = PieChartSingleton::getInstance()->nbSectors();
 		const Interval<uint> &sectorInterval = _sectorHistogram->interval(index-1);
+		const uint semiAngularRange = ((sectorInterval.max() + (sectorInterval.isValid() ? 0. : nbAngularSectors)) - sectorInterval.min())/2;
+		const uint &maximumIndex = _sectorHistogram->maximumIndex(index-1);
+		Interval<uint> centeredSectorInterval( maximumIndex-semiAngularRange, maximumIndex+semiAngularRange );
+		if ( maximumIndex<semiAngularRange ) centeredSectorInterval.setMin( nbAngularSectors + centeredSectorInterval.min() - 1 );
+		if ( centeredSectorInterval.max() > nbAngularSectors-1 ) centeredSectorInterval.setMax( centeredSectorInterval.max() - nbAngularSectors + 1 );
 		const Interval<uint> &sliceInterval = _sliceHistogram->interval(_ui->_comboSelectSliceInterval->currentIndex()-1);
 		const Interval<int> intensityInterval(_ui->_spinMinIntensity->value(), _ui->_spinMaxIntensity->value());
 
-		_tangentialBillon = BillonAlgorithms::tangentialTransform( *_billon, sliceInterval, sectorInterval, _ui->_spinTangentialNbSlices->value(), intensityInterval.min() );
+		_tangentialBillon = BillonAlgorithms::tangentialTransform( *_billon, sliceInterval, centeredSectorInterval, intensityInterval.min() );
 		_ui->_sliderSelectTangentialSlice->blockSignals(true);
-		_ui->_sliderSelectTangentialSlice->setMaximum(_ui->_spinTangentialNbSlices->value()-1);
+		_ui->_sliderSelectTangentialSlice->setMaximum(_tangentialBillon->n_slices>0?_tangentialBillon->n_slices-1:0);
 		_ui->_sliderSelectTangentialSlice->setValue(0);
 		_ui->_sliderSelectTangentialSlice->blockSignals(false);
 
