@@ -25,7 +25,7 @@ PieChart::PieChart( const PieChart &pieChart ) : _sectors(pieChart._sectors)
  * Public getters
  *******************************/
 
-qreal PieChart::sectorAngle() const
+qreal PieChart::angleStep() const
 {
 	return TWO_PI/static_cast<qreal>(_sectors.size());
 }
