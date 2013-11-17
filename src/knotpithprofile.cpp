@@ -17,13 +17,18 @@ KnotPithProfile::~KnotPithProfile()
 
 void KnotPithProfile::construct( const Pith &pith )
 {
-	const int &size = pith.size()-1;
-
+	int size = pith.size();
 	clear();
-	resize(size+1);
 
+	if (!size) return;
+
+	resize(size);
+
+	size--;
 	for ( int k=1 ; k<size ; ++k )
 	{
-		(*this)[k] = (pith[k+1].x-pith[k-1].x)/2.;
+		(*this)[k] = qAtan((pith[k+1].x-pith[k-1].x)/2.);
 	}
+	(*this)[0] = (*this)[1];
+	(*this)[size] = (*this)[size-1];
 }
