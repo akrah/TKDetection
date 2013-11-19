@@ -108,10 +108,15 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 	QObject::connect(_ui->_comboViewType, SIGNAL(currentIndexChanged(int)), this, SLOT(drawSlice()));
 	QObject::connect(_ui->_radioYProjection, SIGNAL(clicked()), this, SLOT(drawSlice()));
 	QObject::connect(_ui->_radioZProjection, SIGNAL(clicked()), this, SLOT(drawSlice()));
-	QObject::connect(_ui->_radioCartesianProjection, SIGNAL(clicked()), this, SLOT(drawSlice()));
+	QObject::connect(_ui->_radioZProjection, SIGNAL(clicked()), this, SLOT(drawTangentialView()));
+	QObject::connect(_ui->_radioPolarProjection, SIGNAL(clicked()), this, SLOT(drawSlice()));
+	QObject::connect(_ui->_radioPolarProjection, SIGNAL(clicked()), this, SLOT(drawTangentialView()));
+	QObject::connect(_ui->_radioEllipticProjection, SIGNAL(clicked()), this, SLOT(drawSlice()));
+	QObject::connect(_ui->_radioEllipticProjection, SIGNAL(clicked()), this, SLOT(drawTangentialView()));
 	QObject::connect(_ui->_sliderCartesianAngularResolution, SIGNAL(valueChanged(int)), _ui->_spinCartesianAngularResolution, SLOT(setValue(int)));
 	QObject::connect(_ui->_spinCartesianAngularResolution, SIGNAL(valueChanged(int)), _ui->_sliderCartesianAngularResolution, SLOT(setValue(int)));
 	QObject::connect(_ui->_spinCartesianAngularResolution, SIGNAL(valueChanged(int)), this, SLOT(drawSlice()));
+	QObject::connect(_ui->_spinCartesianAngularResolution, SIGNAL(valueChanged(int)), this, SLOT(drawTangentialView()));
 	QObject::connect(_ui->_comboViewRender, SIGNAL(currentIndexChanged(int)), this, SLOT(drawSlice()));
 	QObject::connect(_ui->_comboViewRender, SIGNAL(currentIndexChanged(int)), this, SLOT(drawTangentialView()));
 	// Onglet "Paramètres de la zone restreinte"
@@ -364,16 +369,16 @@ void MainWindow::drawSlice()
 	if ( _billon )
 	{
 		const TKD::ViewType viewType = static_cast<const TKD::ViewType>(_ui->_comboViewType->currentIndex());
-		const TKD::ProjectionType projectionType = _ui->_radioYProjection->isChecked()?TKD::Y_PROJECTION:_ui->_radioZProjection->isChecked()?TKD::Z_PROJECTION:TKD::CARTESIAN_PROJECTION;
-		const uint &currentSlice = _ui->_radioYProjection->isChecked()?_currentYSlice:_currentSlice;
+		const TKD::ProjectionType projectionType = _ui->_radioYProjection->isChecked()?TKD::Y_PROJECTION:_ui->_radioZProjection->isChecked()?TKD::Z_PROJECTION:TKD::POLAR_PROJECTION;
+		const uint &currentSlice = _ui->_radioYProjection->isChecked()?_billon->n_rows-_currentYSlice-1:_currentSlice;
 		const rCoord2D &pithCoord = _billon->hasPith()?_billon->pithCoord(_currentSlice):rCoord2D(_billon->n_cols/2,_billon->n_rows/2);
 		uint width, height;
 
 		switch (projectionType)
 		{
-			case TKD::CARTESIAN_PROJECTION :
+			case TKD::POLAR_PROJECTION :
 				if (_billon->hasPith() ) {
-					height = qMin(qMin(pithCoord.x,_billon->n_cols-pithCoord.x),qMin(pithCoord.y,_billon->n_rows-pithCoord.y));
+					height = qMin(qMin(pithCoord.x,_billon->n_cols-pithCoord.x-1),qMin(pithCoord.y,_billon->n_rows-pithCoord.y-1));
 				}
 				else {
 					height = qMin(_billon->n_cols/2,_billon->n_rows/2);
@@ -391,9 +396,9 @@ void MainWindow::drawSlice()
 		_sliceView->drawSlice(_mainPix, *_billon, viewType, currentSlice, Interval<int>(_ui->_spinMinIntensity->value(), _ui->_spinMaxIntensity->value()),
 					  _ui->_spinZMotionMin->value(), _ui->_spinCartesianAngularResolution->value(), projectionType, TKD::ImageViewRender(_ui->_comboViewRender->currentIndex()));
 
-		if ( (projectionType == TKD::Z_PROJECTION || projectionType == TKD::CARTESIAN_PROJECTION) && _billon->hasPith() )
+		if ( (projectionType == TKD::Z_PROJECTION || projectionType == TKD::POLAR_PROJECTION) && _billon->hasPith() )
 		{
-			_billon->pith().draw(_mainPix,_currentSlice);
+			if ( projectionType == TKD::Z_PROJECTION )  _billon->pith().draw(_mainPix,_currentSlice);
 
 			if ( _ui->_checkRadiusAroundPith->isChecked() && _treeRadius > 0 )
 			{
@@ -433,32 +438,57 @@ void MainWindow::drawTangentialView()
 	if ( _tangentialBillon )
 	{
 		const uint &currentSlice = _ui->_sliderSelectTangentialSlice->value();
-		const uint &width = _tangentialBillon->n_cols;
-		const uint &height = _tangentialBillon->n_rows;
 		const uint &depth = _tangentialBillon->n_slices;
+
+		uint width = _tangentialBillon->n_cols;
+		uint height = _tangentialBillon->n_rows;
+
+		const rCoord2D &pithCoord = _tangentialBillon->hasPith()?_tangentialBillon->pithCoord(currentSlice):rCoord2D(width/2,height/2);
+		const TKD::ProjectionType projectionType = _ui->_radioPolarProjection->isChecked()?TKD::POLAR_PROJECTION:
+																						   _ui->_radioEllipticProjection->isChecked()?TKD::ELLIPTIC_PROJECTION:
+																																	  TKD::Z_PROJECTION;
+		switch (projectionType)
+		{
+			case TKD::POLAR_PROJECTION :
+				if (_tangentialBillon->hasPith() ) {
+					height = qMin(qMin(pithCoord.x,width-pithCoord.x),qMin(pithCoord.y,height-pithCoord.y));
+				}
+				else {
+					height = qMin(width/2,height/2);
+				}
+				width = _ui->_spinCartesianAngularResolution->value();
+				break;
+			case TKD::Z_PROJECTION :
+			default :
+				break;
+		}
 
 		_tangentialPix = QImage(width,height,QImage::Format_ARGB32);
 		_tangentialPix.fill(0xff000000);
 
 		_sliceView->drawSlice( _tangentialPix, *_tangentialBillon, TKD::CLASSIC, currentSlice, Interval<int>(_ui->_spinMinIntensity->value(), _ui->_spinMaxIntensity->value()),
-					  _ui->_spinZMotionMin->value(), _ui->_spinCartesianAngularResolution->value(), TKD::Z_PROJECTION, TKD::ImageViewRender(_ui->_comboViewRender->currentIndex()));
+							   _ui->_spinZMotionMin->value(), _ui->_spinCartesianAngularResolution->value(), projectionType, TKD::ImageViewRender(_ui->_comboViewRender->currentIndex()),
+							   _knotPithProfile->size()?qCos((*_knotPithProfile)[currentSlice]):1.);
 
-		static const QVector<QColor> colors = { Qt::blue, Qt::yellow, Qt::green, Qt::magenta, Qt::cyan, Qt::white };
-		const int nbKnotAreas = _sectorHistogram->intervals().size();
-		const int nbColorsToUse = qMax( nbKnotAreas>colors.size() ? ((nbKnotAreas+1)/2)%colors.size() : colors.size() , 1 );
-		const QColor currentColor = colors[(_ui->_comboSelectSectorInterval->currentIndex()-1)%nbColorsToUse];
-
-		const qreal knotAreaLine = currentSlice * (height/2.) / static_cast<qreal>(depth);
-
-		QPainter painter(&_tangentialPix);
-		painter.setPen(currentColor);
-		painter.drawLine(0,height/2.-knotAreaLine,width,height/2.-knotAreaLine);
-		painter.drawLine(0,height/2.+knotAreaLine,width,height/2.+knotAreaLine);
-		painter.end();
-
-		if ( _tangentialBillon->hasPith() )
+		if ( projectionType == TKD::Z_PROJECTION )
 		{
-			_tangentialBillon->pith().draw(_tangentialPix,currentSlice, 3);
+			static const QVector<QColor> colors = { Qt::blue, Qt::yellow, Qt::green, Qt::magenta, Qt::cyan, Qt::white };
+			const int nbKnotAreas = _sectorHistogram->intervals().size();
+			const int nbColorsToUse = qMax( nbKnotAreas>colors.size() ? ((nbKnotAreas+1)/2)%colors.size() : colors.size() , 1 );
+			const QColor currentColor = colors[(_ui->_comboSelectSectorInterval->currentIndex()-1)%nbColorsToUse];
+
+			const qreal knotAreaLine = currentSlice * (width/2.) / static_cast<qreal>(depth);
+
+			QPainter painter(&_tangentialPix);
+			painter.setPen(currentColor);
+			painter.drawLine(width/2.-knotAreaLine,0,width/2.-knotAreaLine,height);
+			painter.drawLine(width/2.+knotAreaLine,0,width/2.+knotAreaLine,height);
+			painter.end();
+
+			if ( _tangentialBillon->hasPith() )
+			{
+				_tangentialBillon->pith().draw(_tangentialPix,currentSlice, 3);
+			}
 		}
 	}
 	else
@@ -638,7 +668,8 @@ void MainWindow::selectSectorInterval(const int &index, const bool &draw )
 		_ui->_sliderSelectTangentialSlice->setValue(0);
 		_ui->_sliderSelectTangentialSlice->blockSignals(false);
 
-		PithExtractorBoukadida pithExtractor( _ui->_spinPithSubWindowWidth_knot->value(), _ui->_spinPithSubWindowHeight_knot->value(),
+		PithExtractorBoukadida pithExtractor( _ui->_spinPithSubWindowWidth_knot->value()/_tangentialBillon->voxelWidth(),
+											  _ui->_spinPithSubWindowHeight_knot->value()/_tangentialBillon->voxelHeight(),
 											  _ui->_spinPithMaximumShift_knot->value(), _ui->_spinPithSmoothingRadius_knot->value(),
 											  _ui->_spinPithMinimumWoodPercentage_knot->value(), Interval<int>( _ui->_spinPithMinIntensity_knot->value(), _ui->_spinPithMaxIntensity_knot->value() ),
 											  _ui->_chechPithAscendingOrder_knot->isChecked());
@@ -735,7 +766,7 @@ void MainWindow::updateKnotPithProfile()
 
 	if ( _tangentialBillon && _tangentialBillon->hasPith() )
 	{
-		_knotPithProfile->construct( _tangentialBillon->pith() );
+		_knotPithProfile->construct( _tangentialBillon->pith(), _tangentialBillon->voxelDims() );
 	}
 
 	_plotKnotPithProfile->update( *_knotPithProfile );
@@ -933,7 +964,7 @@ void MainWindow::updateUiComponentsValues()
 		minValue = _billon->minValue();
 		maxValue = _billon->maxValue();
 		nbSlices = _billon->n_slices-1;
-		height = _billon->n_rows-1;
+		height = _billon->n_rows;
 		angularResolution = (height+_billon->n_cols)*2;
 		_ui->_labelSliceNumber->setNum(0);
 		_ui->_statusBar->showMessage( tr("Dimensions de voxels (largeur, hauteur, profondeur) : ( %1, %2, %3 )")
@@ -952,7 +983,7 @@ void MainWindow::updateUiComponentsValues()
 	_ui->_sliderSelectSlice->setRange(0,nbSlices);
 
 	_ui->_sliderSelectYSlice->setValue(0);
-	_ui->_sliderSelectYSlice->setRange(0,height);
+	_ui->_sliderSelectYSlice->setRange(0,height-1);
 
 	_ui->_spinMinIntensity->setMinimum(minValue);
 	_ui->_spinMinIntensity->setMaximum(maxValue);

@@ -261,7 +261,7 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>378</width>
+              <width>434</width>
               <height>148</height>
              </rect>
             </property>
@@ -331,7 +331,7 @@
                 </widget>
                </item>
                <item>
-                <widget class="QRadioButton" name="_radioCartesianProjection">
+                <widget class="QRadioButton" name="_radioPolarProjection">
                  <property name="font">
                   <font>
                    <weight>50</weight>
@@ -340,6 +340,13 @@
                  </property>
                  <property name="text">
                   <string>Polaire</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QRadioButton" name="_radioEllipticProjection">
+                 <property name="text">
+                  <string>Elliptique</string>
                  </property>
                 </widget>
                </item>
@@ -876,7 +883,7 @@ sur une coupe valide</string>
             <property name="geometry">
              <rect>
               <x>0</x>
-              <y>-71</y>
+              <y>-99</y>
               <width>415</width>
               <height>253</height>
              </rect>
@@ -959,7 +966,7 @@ deux coordonnées successives</string>
                 <number>50</number>
                </property>
                <property name="value">
-                <number>10</number>
+                <number>15</number>
                </property>
               </widget>
              </item>
@@ -977,7 +984,7 @@ sur une coupe valide</string>
                 <number>100</number>
                </property>
                <property name="value">
-                <number>8</number>
+                <number>1</number>
                </property>
               </widget>
              </item>
@@ -999,7 +1006,7 @@ sur une coupe valide</string>
                   <number>3024</number>
                  </property>
                  <property name="value">
-                  <number>-900</number>
+                  <number>-300</number>
                  </property>
                 </widget>
                </item>
@@ -1723,8 +1730,8 @@ sur une coupe valide</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>335</width>
-              <height>226</height>
+              <width>250</width>
+              <height>129</height>
              </rect>
             </property>
             <attribute name="label">
@@ -2522,8 +2529,8 @@ l'intervalle angulaire</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>335</width>
-              <height>102</height>
+              <width>261</width>
+              <height>84</height>
              </rect>
             </property>
             <attribute name="label">
@@ -2910,7 +2917,7 @@ l'intervalle angulaire</string>
  <tabstops>
   <tabstop>_radioZProjection</tabstop>
   <tabstop>_radioYProjection</tabstop>
-  <tabstop>_radioCartesianProjection</tabstop>
+  <tabstop>_radioPolarProjection</tabstop>
   <tabstop>_sliderCartesianAngularResolution</tabstop>
   <tabstop>_spinCartesianAngularResolution</tabstop>
   <tabstop>_sliderRestrictedAreaResolution</tabstop>
