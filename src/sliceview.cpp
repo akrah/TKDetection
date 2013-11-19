@@ -22,7 +22,7 @@ SliceView::SliceView()
  *******************************/
 
 void SliceView::drawSlice(QImage &image, const Billon &billon, const TKD::ViewType &sliceType, const uint &sliceIndex, const Interval<int> &intensityInterval,
-			  const uint &zMotionMin, const uint &angularResolution, const TKD::ProjectionType &axe, const TKD::ImageViewRender &imageRender )
+			  const uint &zMotionMin, const uint &angularResolution, const TKD::ProjectionType &axe, const TKD::ImageViewRender &imageRender, const qreal &ellipticityRate )
 {
 	switch (axe)
 	{
@@ -46,10 +46,10 @@ void SliceView::drawSlice(QImage &image, const Billon &billon, const TKD::ViewTy
 				// Affichage de la coupe originale
 				case TKD::CLASSIC:
 				default :
-				  drawCurrentSlice( image, billon, sliceIndex, intensityInterval, angularResolution, imageRender, axe  );
+				  drawCurrentSlice( image, billon, sliceIndex, intensityInterval, angularResolution, imageRender, axe );
 					break;
 			}
-		case TKD::CARTESIAN_PROJECTION:
+		case TKD::POLAR_PROJECTION:
 			switch (sliceType)
 			{
 				// Affichage de la coupe de mouvements
@@ -59,7 +59,17 @@ void SliceView::drawSlice(QImage &image, const Billon &billon, const TKD::ViewTy
 				// Affichage de la coupe originale
 				case TKD::CLASSIC:
 				default :
-				  drawCurrentSlice( image, billon, sliceIndex, intensityInterval, angularResolution, imageRender, axe  );
+				  drawCurrentSlice( image, billon, sliceIndex, intensityInterval, angularResolution, imageRender, axe );
+					break;
+			}
+			break;
+		case TKD::ELLIPTIC_PROJECTION:
+			switch (sliceType)
+			{
+				// Affichage de la coupe originale
+				case TKD::CLASSIC:
+				default :
+				  drawCurrentSlice( image, billon, sliceIndex, intensityInterval, angularResolution, imageRender, axe, ellipticityRate );
 					break;
 			}
 			break;
@@ -75,19 +85,18 @@ void SliceView::drawSlice(QImage &image, const Billon &billon, const TKD::ViewTy
 
 void SliceView::drawCurrentSlice( QImage &image, const Billon &billon,
 				  const uint &sliceIndex, const Interval<int> &intensityInterval,
-				  const uint &angularResolution, const TKD::ImageViewRender &aRender, const TKD::ProjectionType &axe)
+				  const uint &angularResolution, const TKD::ImageViewRender &aRender, const TKD::ProjectionType &axe,
+				  const qreal &ellipticityRate )
 {
-	const Slice &slice = billon.slice(sliceIndex);
-
 	const uint &width = billon.n_cols;
 	const uint &height = billon.n_rows;
-	const uint &depth = billon.n_slices;
+	const int &depth = billon.n_slices;
 	const int &minIntensity = intensityInterval.min();
 	const qreal fact = 255.0/intensityInterval.size();
 
-	DGtal::HueShadeColorMap<unsigned char> hueShade (0, 255);
-	DGtal::HueShadeColorMap<unsigned char> hueShadeLog (log(1), log(1+255));
-	DGtal::GrayscaleColorMap<unsigned char> grayShade (0, 255);
+	static DGtal::HueShadeColorMap<unsigned char> hueShade (0, 255);
+	static DGtal::HueShadeColorMap<unsigned char> hueShadeLog (log(1), log(1+255));
+	static DGtal::GrayscaleColorMap<unsigned char> grayShade (0, 255);
 	DGtal::GradientColorMap<unsigned char> customShade(0,255);
 	customShade.addColor( DGtal::Color::Blue );
 	customShade.addColor( DGtal::Color::Red );
@@ -97,34 +106,38 @@ void SliceView::drawCurrentSlice( QImage &image, const Billon &billon,
 
 	QRgb * line = (QRgb *) image.bits();
 	int color;
-	uint i,j,k;
+	DGtal::Color dgtalColor;
+	uint i,j;
+	int k;
 
 	if ( axe == TKD::Y_PROJECTION )
 	{
-		for ( k=0 ; k<depth ; ++k)
+		for ( k=depth-1 ; k>=0 ; --k)
 		{
 			for ( i=0 ; i<width ; ++i)
 			{
 				color = (TKD::restrictedValue(billon.at(sliceIndex,i,k),intensityInterval)-minIntensity)*fact;
-				DGtal::Color col= ((aRender== TKD::HueScale) ? hueShade( color): (aRender==TKD::GrayScale)? grayShade(color): customShade(color));
-				*(line++) = qRgb(col.red(),col.green(),col.blue());
+				dgtalColor = ((aRender== TKD::HueScale) ? hueShade( color): (aRender==TKD::GrayScale)? grayShade(color): customShade(color));
+				*(line++) = qRgb(dgtalColor.red(),dgtalColor.green(),dgtalColor.blue());
 			}
 		}
 	}
 	else if ( axe == TKD::Z_PROJECTION )
 	{
+		const Slice &slice = billon.slice(sliceIndex);
 		for ( j=0 ; j<height ; ++j)
 		{
 			for ( i=0 ; i<width ; ++i)
 			{
 				color = (TKD::restrictedValue(slice.at(j,i),intensityInterval)-minIntensity)*fact;
-				DGtal::Color col= ((aRender== TKD::HueScale) ? hueShade( color): (aRender==TKD::GrayScale)? grayShade(color): (aRender==TKD::HueScaleLog)? hueShadeLog(log(1+color)):customShade(color));
-				*(line++) = qRgb(col.red(),col.green(),col.blue());
+				dgtalColor= ((aRender== TKD::HueScale) ? hueShade( color): (aRender==TKD::GrayScale)? grayShade(color): (aRender==TKD::HueScaleLog)? hueShadeLog(log(1+color)):customShade(color));
+				*(line++) = qRgb(dgtalColor.red(),dgtalColor.green(),dgtalColor.blue());
 			}
 		}
 	}
-	else if ( axe == TKD::CARTESIAN_PROJECTION )
+	else if ( axe == TKD::POLAR_PROJECTION )
 	{
+		const Slice &slice = billon.slice(sliceIndex);
 		const rCoord2D &pithCoord = billon.hasPith()?billon.pithCoord(sliceIndex):rCoord2D(width/2,height/2);
 		const uint radialResolution = qMin(qMin(pithCoord.x,width-pithCoord.x),qMin(pithCoord.y,height-pithCoord.y));
 		const qreal angularIncrement = TWO_PI/(qreal)(angularResolution);
@@ -134,12 +147,31 @@ void SliceView::drawCurrentSlice( QImage &image, const Billon &billon,
 		{
 			for ( i=0 ; i<angularResolution ; ++i )
 			{
-				x = pithCoord.x + j * qCos(i*angularIncrement);
-				y = pithCoord.y + j * qSin(i*angularIncrement);
+				x = qRound(pithCoord.x + j * qCos(i*angularIncrement));
+				y = qRound(pithCoord.y + j * qSin(i*angularIncrement));
 				color = (TKD::restrictedValue(slice.at(y,x),intensityInterval)-minIntensity)*fact;
-				DGtal::Color col= ((aRender== TKD::HueScale) ? hueShade( color): (aRender==TKD::GrayScale)? grayShade(color): (aRender==TKD::HueScaleLog)? hueShadeLog(log(1+color)):customShade(color));
-				*(line++) = qRgb(col.red(),col.green(),col.blue());
+				dgtalColor= ((aRender== TKD::HueScale) ? hueShade( color): (aRender==TKD::GrayScale)? grayShade(color): (aRender==TKD::HueScaleLog)? hueShadeLog(log(1+color)):customShade(color));
+				*(line++) = qRgb(dgtalColor.red(),dgtalColor.green(),dgtalColor.blue());
+			}
+		}
+	}
+	else if ( axe == TKD::ELLIPTIC_PROJECTION )
+	{
+		const Slice &slice = billon.slice(sliceIndex);
+		const rCoord2D &pithCoord = billon.hasPith()?billon.pithCoord(sliceIndex):rCoord2D(width/2,height/2);
+		const uint radialResolution = qMin(qMin(pithCoord.x,width-pithCoord.x),qMin(pithCoord.y,height-pithCoord.y));
+		const qreal angularIncrement = TWO_PI/(qreal)(angularResolution);
 
+		int x, y;
+		for ( j=0 ; j<radialResolution ; ++j)
+		{
+			for ( i=0 ; i<angularResolution ; ++i )
+			{
+				x = pithCoord.x + j * qCos(i*angularIncrement) * ellipticityRate;
+				y = pithCoord.y + j * qSin(i*angularIncrement) * 1/ellipticityRate;
+				color = (TKD::restrictedValue(slice.at(y,x),intensityInterval)-minIntensity)*fact;
+				dgtalColor= ((aRender== TKD::HueScale) ? hueShade( color): (aRender==TKD::GrayScale)? grayShade(color): (aRender==TKD::HueScaleLog)? hueShadeLog(log(1+color)):customShade(color));
+				*(line++) = qRgb(dgtalColor.red(),dgtalColor.green(),dgtalColor.blue());
 			}
 		}
 	}
@@ -176,7 +208,7 @@ void SliceView::drawMovementSlice( QImage &image, const Billon &billon, const ui
 			}
 		}
 	}
-	else if ( axe == TKD::CARTESIAN_PROJECTION )
+	else if ( axe == TKD::POLAR_PROJECTION )
 	{
 		const rCoord2D &pithCoord = billon.hasPith()?billon.pithCoord(sliceIndex):rCoord2D(width/2,height/2);
 		const uint radialResolution = qMin(qMin(pithCoord.x,width-pithCoord.x),qMin(pithCoord.y,height-pithCoord.y));

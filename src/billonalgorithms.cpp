@@ -106,11 +106,13 @@ namespace BillonAlgorithms
 		const uint height = 2 * qTan(angularRange*PieChartSingleton::getInstance()->angleStep()/2.) * depth;
 		const int widthOnTWo = width/2.;
 		const int heightOnTwo = height/2.;
+		const int heightOnTwoMinusOne = height/2.-1;
 
 		const uint nbSlices = depth;
 
-		Billon * tangentialBillon = new Billon(width,height,nbSlices);
-		tangentialBillon->setVoxelSize( billon.voxelDepth(), billon.voxelWidth(), billon.voxelWidth() );
+		// Inversion width et height pour correspondre à la ratation de 90°
+		Billon * tangentialBillon = new Billon(height,width,nbSlices);
+		tangentialBillon->setVoxelSize( billon.voxelWidth(), billon.voxelDepth(), billon.voxelWidth() );
 		tangentialBillon->fill(minIntensity);
 
 		// Rotation autour de l'axe Y
@@ -147,10 +149,11 @@ namespace BillonAlgorithms
 				{
 					initial.at(0) = i;
 					destination = (rotationMat * initial) + origin;
-					slice(j+heightOnTwo,i+widthOnTWo) =
+					// Rotation de 90° dans le sens horaire pour correspondre à l'orientation de l'article
+					slice(i+widthOnTWo,heightOnTwoMinusOne-j) =
 							destination.at(0)>=0 && destination.at(0)<billon.n_cols && destination.at(1)>=0 &&
 							destination.at(1)<billon.n_rows && destination.at(2)>=0 && destination.at(2)<billon.n_slices ?
-								billon(destination.at(1),destination.at(0),destination.at(2)) : minIntensity;
+								billon(qRound(destination.at(1)),qRound(destination.at(0)),qRound(destination.at(2))) : minIntensity;
 				}
 			}
 			origin += originShift;

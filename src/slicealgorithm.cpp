@@ -157,7 +157,7 @@ namespace SliceAlgorithm
 				}
 			}
 		}
-		else if ( view == TKD::CARTESIAN_PROJECTION )
+		else if ( view == TKD::POLAR_PROJECTION )
 		{
 			for ( j=0 ; j<height ; ++j )
 			{

@@ -99,7 +99,7 @@ void PieChart::draw( QImage &image, const uiCoord2D &center, const uint &sectorI
 			painter.drawLine(center.x,center.y,end.x,end.y);
 		}
 	}
-	else if ( viewType == TKD::CARTESIAN_PROJECTION )
+	else if ( viewType == TKD::POLAR_PROJECTION )
 	{
 		for ( side = twoSides.constBegin() ; side < twoSides.constEnd() ; ++side )
 		{
@@ -162,7 +162,7 @@ void PieChart::draw( QImage &image, const uiCoord2D &center, const QVector< Inte
 				painter.drawLine(center.x,center.y,end.x,end.y);
 			}
 		}
-		else if ( viewType == TKD::CARTESIAN_PROJECTION )
+		else if ( viewType == TKD::POLAR_PROJECTION )
 		{
 			for ( side = twoSides.constBegin() ; side != twoSides.constEnd() ; ++side )
 			{
