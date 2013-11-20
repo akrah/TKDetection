@@ -89,6 +89,7 @@ void PithExtractorBoukadida::process( Billon &billon ) const
 	const int &width = billon.n_cols-1;
 	const int &height = billon.n_rows-1;
 	const uint &depth = billon.n_slices;
+	const rCoord3D &voxelDims = billon.voxelDims();
 	const int semiSubWindowWidth = _subWindowWidth/2;
 	const int semiSubWindowHeight = _subWindowHeight/2;
 	const uint kIncrement = (_ascendingOrder?1:-1);
@@ -116,7 +117,7 @@ void PithExtractorBoukadida::process( Billon &billon ) const
 
 	// Calcul de la moelle sur la première coupe valide
 	std::cout << "Step 4] Hough transform on first valid slice" << std::endl;
-	pith[firstSliceOrdered] = transHough( billonFillBackground.slice(firstSliceOrdered), nbLineByMaxRatio[firstSliceOrdered] );
+	pith[firstSliceOrdered] = transHough( billonFillBackground.slice(firstSliceOrdered), nbLineByMaxRatio[firstSliceOrdered], voxelDims );
 
 	// Calcul de la moelle sur les coupes suivantes
 	std::cout << "Step 5] Hough transform on next valid slices" << std::endl;
@@ -132,13 +133,13 @@ void PithExtractorBoukadida::process( Billon &billon ) const
 		subWindowEnd.x = qMax(qMin(static_cast<int>(previousPith.x+semiSubWindowWidth),width),0);
 		subWindowStart.y = qMax(qMin(static_cast<int>(previousPith.y-semiSubWindowHeight),height),0);
 		subWindowEnd.y = qMax(qMin(static_cast<int>(previousPith.y+semiSubWindowHeight),height),0);
-		currentPithCoord = transHough( currentSlice.submat( subWindowStart.y, subWindowStart.x, subWindowEnd.y, subWindowEnd.x ), nbLineByMaxRatio[k] )
+		currentPithCoord = transHough( currentSlice.submat( subWindowStart.y, subWindowStart.x, subWindowEnd.y, subWindowEnd.x ), nbLineByMaxRatio[k], voxelDims )
 						   + subWindowStart;
 
 		if ( currentPithCoord.euclideanDistance(previousPith) > _pithShift )
 		{
 			std::cout << "...  " << std::endl;
-			currentPithCoord = transHough( currentSlice, nbLineByMaxRatio[k] );
+			currentPithCoord = transHough( currentSlice, nbLineByMaxRatio[k], voxelDims );
 		}
 
 		pith[k] = currentPithCoord;
@@ -168,7 +169,7 @@ void PithExtractorBoukadida::process( Billon &billon ) const
 }
 
 
-uiCoord2D PithExtractorBoukadida::transHough( const Slice &slice, qreal &lineOnMaxRatio ) const
+uiCoord2D PithExtractorBoukadida::transHough( const Slice &slice, qreal &lineOnMaxRatio, const rCoord3D &voxelDims ) const
 {
 	const uint &width = slice.n_cols;
 	const uint &height = slice.n_rows;
@@ -176,7 +177,7 @@ uiCoord2D PithExtractorBoukadida::transHough( const Slice &slice, qreal &lineOnM
 	// Calcul des orientations en chaque pixel avec les filtres de Sobel
 	arma::Mat<qreal> orientations( height, width );
 	arma::Mat<char> hasContour( height, width );
-	uint nbContourPoints = contour( slice, orientations, hasContour );
+	uint nbContourPoints = contour( slice, orientations, hasContour, voxelDims );
 
 	// Calcul des accumulation des droites suivant les orientations
 	arma::Mat<int> accuSlice( height, width );
@@ -200,10 +201,13 @@ uiCoord2D PithExtractorBoukadida::transHough( const Slice &slice, qreal &lineOnM
 	return pithCoord;
 }
 
-uint PithExtractorBoukadida::contour( const Slice &slice, arma::Mat<qreal> & orientations, arma::Mat<char> &hasContour ) const
+uint PithExtractorBoukadida::contour( const Slice &slice, arma::Mat<qreal> & orientations, arma::Mat<char> &hasContour, const rCoord3D &voxelDims ) const
 {
 	const uint &width = slice.n_cols-1;
 	const uint &height = slice.n_rows-1;
+	const qreal &xDim = voxelDims.x;
+	const qreal &yDim = voxelDims.y;
+	const qreal voxelRatio = xDim/yDim;
 
 	arma::Mat<qreal> sobelNorm(slice.n_rows,slice.n_cols);
 	sobelNorm.fill(0.);
@@ -225,8 +229,8 @@ uint PithExtractorBoukadida::contour( const Slice &slice, arma::Mat<qreal> & ori
 			sobelY = slice.at( j+1, i-1 ) - slice.at( j-1, i-1 ) +
 					 2 * (slice.at( j+1, i ) - slice.at( j-1, i )) +
 					 slice.at( j+1, i+1 ) - slice.at( j-1, i+1 );
-			orientations.at(j,i) = qFuzzyIsNull(sobelX) ? 9999999999./1. : sobelY/sobelX;
-			sobelNorm.at(j,i) = qSqrt( qPow(sobelX,2) + qPow(sobelY,2) )/4.;
+			orientations.at(j,i) = qFuzzyIsNull(sobelX) ? 9999999999./1. : sobelY/sobelX*voxelRatio;
+			sobelNorm.at(j,i) = qSqrt( qPow(sobelX*yDim,2) + qPow(sobelY*xDim,2) )/4.;
 			*(sobelNormVecIt++) = sobelNorm.at(j,i);
 		}
 	}

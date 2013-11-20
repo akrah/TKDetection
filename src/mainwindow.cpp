@@ -487,7 +487,7 @@ void MainWindow::drawTangentialView()
 
 			if ( _tangentialBillon->hasPith() )
 			{
-				_tangentialBillon->pith().draw(_tangentialPix,currentSlice, 3);
+				_tangentialBillon->pith().draw(_tangentialPix,currentSlice, 2);
 			}
 		}
 	}

@@ -130,7 +130,7 @@ private:
 	 * \param   nbContourPoints nombre de points utilisés pour tracer les droites
 	 * \return	les coordonnées de la moelle pour la coupe traitée
 	 */
-	uiCoord2D transHough( const Slice &slice, qreal & lineOnMaxRatio ) const;
+	uiCoord2D transHough( const Slice &slice, qreal & lineOnMaxRatio, const rCoord3D &voxelDims ) const;
 
 	/**
 	 * \fn		uint contour( const Slice &slice, arma::Mat<qreal> &orientations )
@@ -140,7 +140,7 @@ private:
 	 * \param   hasContour Matrice de booleen qui précise pour chaque pixel de Slice s'il est un point de contour
 	 * \return	le nombre d'orientations prises en compte
 	 */
-	uint contour( const Slice &slice, arma::Mat<qreal> &orientations, arma::Mat<char> & hasContour ) const;
+	uint contour( const Slice &slice, arma::Mat<qreal> &orientations, arma::Mat<char> & hasContour, const rCoord3D &voxelDims ) const;
 
 	void drawLine( arma::Mat<int> &slice, const iCoord2D &origin, const qreal &orientationOrig ) const;
 

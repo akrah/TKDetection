@@ -137,6 +137,9 @@ namespace BillonAlgorithms
 		const qreal semiKnotAreaHeightCoeff = heightOnTwo / static_cast<qreal>( nbSlices );
 		int i, j, jStart, jEnd;
 		jStart = jEnd = 0;
+		int x0,y0,z0;
+		qreal x0Dist, y0Dist, z0Dist;
+		qreal xFrontTop, xFrontBottom, xBackTop, xBackBottom, yFront, yBack;
 		for ( uint k=0 ; k<nbSlices ; ++k )
 		{
 			Slice &slice = tangentialBillon->slice(k);
@@ -149,11 +152,25 @@ namespace BillonAlgorithms
 				{
 					initial.at(0) = i;
 					destination = (rotationMat * initial) + origin;
+					x0 = qFloor(destination.at(1));
+					y0 = qFloor(destination.at(0));
+					z0 = qFloor(destination.at(2));
+					x0Dist = destination.at(1)-x0;
+					y0Dist = destination.at(0)-y0;
+					z0Dist = destination.at(2)-z0;
+					xFrontTop = (1.-x0Dist)*billon.at(x0-1,y0+1,z0-1) + x0Dist*billon.at(x0+1,y0+1,z0-1);
+					xFrontBottom = (1.-x0Dist)*billon.at(x0-1,y0-1,z0-1) + x0Dist*billon.at(x0+1,y0-1,z0-1);
+					xBackTop = (1.-x0Dist)*billon.at(x0-1,y0+1,z0+1) + x0Dist*billon.at(x0+1,y0+1,z0+1);
+					xBackBottom = (1.-x0Dist)*billon.at(x0-1,y0-1,z0+1) + x0Dist*billon.at(x0+1,y0-1,z0+1);
+					yFront = (1.-y0Dist)*xFrontBottom + y0Dist*xFrontTop;
+					yBack = (1.-y0Dist)*xBackBottom + y0Dist*xBackTop;
 					// Rotation de 90° dans le sens horaire pour correspondre à l'orientation de l'article
-					slice(i+widthOnTWo,heightOnTwoMinusOne-j) =
-							destination.at(0)>=0 && destination.at(0)<billon.n_cols && destination.at(1)>=0 &&
-							destination.at(1)<billon.n_rows && destination.at(2)>=0 && destination.at(2)<billon.n_slices ?
-								billon(qRound(destination.at(1)),qRound(destination.at(0)),qRound(destination.at(2))) : minIntensity;
+					slice(i+widthOnTWo,heightOnTwoMinusOne-j) = (billon.at(x0,y0,z0)+2.*((1.-z0Dist)*yFront + z0Dist*yBack))/3.;
+							//destination.at(0)>=0 && destination.at(0)<billon.n_cols && destination.at(1)>=0 &&
+							//destination.at(1)<billon.n_rows && destination.at(2)>=0 && destination.at(2)<billon.n_slices ?
+							//	(1.-z0Dist)*yFront + z0Dist*yBack : minIntensity;
+								//(billon.at(x0,y0,z0) + billon.at(x0+(x0Dist>0.5?1:-1),y0,z0) + billon.at(x0,y0+(y0Dist>0.5?1:-1),z0) + billon.at(x0,y0,z0+(z0Dist>0.5?1:-1)))/4.:minIntensity;
+								//billon.at(qRound(destination.at(1)),qRound(destination.at(0)),qRound(destination.at(2))) : minIntensity;
 				}
 			}
 			origin += originShift;
