@@ -103,12 +103,135 @@ void SliceView::drawCurrentSlice( QImage &image, const Billon &billon,
 	customShade.addColor( DGtal::Color::Green );
 	customShade.addColor( DGtal::Color::White );
 
-
 	QRgb * line = (QRgb *) image.bits();
 	int color;
 	DGtal::Color dgtalColor;
 	uint i,j;
 	int k;
+
+
+	/********************************************************************/
+
+//	const Slice &slice = billon.slice(sliceIndex);
+
+//	// Calcul des orientations en chaque pixel avec les filtres de Sobel
+//	arma::Mat<qreal> orientations( height, width );
+//	arma::Mat<qreal> sobelNorm( height, width );
+//	arma::Mat<char> hasContour( height, width );
+
+//	arma::Col<qreal> sobelNormVec((width-2)*(height-2));
+//	arma::Col<qreal>::iterator sobelNormVecIt = sobelNormVec.begin();
+
+//	qreal sobelX, sobelY;
+
+//	const qreal &xDim = billon.voxelWidth();
+//	const qreal &yDim = billon.voxelHeight();
+//	const qreal voxelRatio = xDim/yDim;
+
+//	orientations.fill(0);
+//	sobelNorm.fill(0.);
+//	for ( j=1 ; j<height-1 ; ++j )
+//	{
+//		for ( i=1 ; i<width-1 ; ++i )
+//		{
+//			sobelX = slice.at( j-1, i-1 ) - slice.at( j-1, i+1 ) +
+//					 2* (slice.at( j, i-1 ) - slice.at( j, i+1 )) +
+//					 slice.at( j+1, i-1 ) - slice.at( j+1, i+1 );
+//			sobelY = slice.at( j+1, i-1 ) - slice.at( j-1, i-1 ) +
+//					 2 * (slice.at( j+1, i ) - slice.at( j-1, i )) +
+//					 slice.at( j+1, i+1 ) - slice.at( j-1, i+1 );
+//			orientations.at(j,i) = qFuzzyIsNull(sobelX) ? 9999999999./1. : sobelY/sobelX*voxelRatio;
+//			sobelNorm.at(j,i) = qSqrt( qPow(sobelX*yDim,2) + qPow(sobelY*xDim,2) )/4.;
+//			*(sobelNormVecIt++) = sobelNorm.at(j,i);
+//		}
+//	}
+
+//	const arma::Col<qreal> sobelNormSort = arma::sort( sobelNormVec );
+//	const qreal &medianVal = sobelNormSort.at( sobelNormSort.n_elem/2 );
+
+//	uint nbContourPoints = 0;
+//	hasContour.fill(false);
+//	for ( j=1 ; j<height-1 ; ++j )
+//	{
+//		for ( i=1 ; i<width ; ++i )
+//		{
+//			if ( sobelNorm.at(j,i) > medianVal )
+//			{
+//				nbContourPoints++;
+//				hasContour.at(j,i) = true;
+//			}
+//		}
+//	}
+
+//	// Calcul des accumulation des droites suivant les orientations
+//	arma::Mat<int> accuSlice( height, width );
+//	accuSlice.fill(0);
+
+//	qreal x, y;
+//	for ( j=1 ; j<height-1 ; ++j )
+//	{
+//		for ( i=1 ; i<width-1 ; ++i )
+//		{
+//			if ( hasContour.at(j,i) )
+//			{
+//				const int originX = i;
+//				const int originY = j;
+//				const qreal orientation = -orientations.at(j,i);
+//				const qreal orientationInv = 1./orientation;
+
+//				if ( orientation >= 1. )
+//				{
+//					for ( x = originX , y=originY; x<width && y<height ; x += orientationInv, y += 1. )
+//					{
+//						accuSlice.at(y,x) += 1;
+//					}
+//					for ( x = originX-orientationInv , y=originY-1; x>=0. && y>=0. ; x -= orientationInv, y -= 1. )
+//					{
+//						accuSlice.at(y,x) += 1;
+//					}
+//				}
+//				else if ( orientation > 0. )
+//				{
+//					for ( x = originX, y=originY ; x<width && y<height ; x += 1., y += orientation )
+//					{
+//						accuSlice.at(y,x) += 1;
+//					}
+//					for ( x = originX-1., y=originY-orientation ; x>=0 && y>=0 ; x -= 1., y -= orientation )
+//					{
+//						accuSlice.at(y,x) += 1;
+//					}
+//				}
+//				else if ( orientation > -1. )
+//				{
+//					for ( x = originX, y=originY ; x<width && y>=0 ; x += 1., y += orientation )
+//					{
+//						accuSlice.at(y,x) += 1;
+//					}
+//					for ( x = originX-1., y=originY-orientation ; x>=0 && y<height ; x -= 1., y -= orientation )
+//					{
+//						accuSlice.at(y,x) += 1;
+//					}
+//				}
+//				else
+//				{
+//					for ( x = originX , y=originY; x>=0 && y<height ; x += orientationInv, y += 1. )
+//					{
+//						accuSlice.at(y,x) += 1;
+//					}
+//					for ( x = originX-orientationInv , y=originY-1.; x<width && y>=0 ; x -= orientationInv, y -= 1. )
+//					{
+//						accuSlice.at(y,x) += 1;
+//					}
+//				}
+//			}
+//		}
+//	}
+
+//	const qreal fact = 255.0/sobelNormSort.at(((height-2)*(width-2)-1)*0.9);
+
+
+	/********************************************************************/
+
 
 	if ( axe == TKD::Y_PROJECTION )
 	{
@@ -130,6 +253,7 @@ void SliceView::drawCurrentSlice( QImage &image, const Billon &billon,
 			for ( i=0 ; i<width ; ++i)
 			{
 				color = (TKD::restrictedValue(slice.at(j,i),intensityInterval)-minIntensity)*fact;
+				//color = accuSlice.at(j,i)*fact;
 				dgtalColor= ((aRender== TKD::HueScale) ? hueShade( color): (aRender==TKD::GrayScale)? grayShade(color): (aRender==TKD::HueScaleLog)? hueShadeLog(log(1+color)):customShade(color));
 				*(line++) = qRgb(dgtalColor.red(),dgtalColor.green(),dgtalColor.blue());
 			}

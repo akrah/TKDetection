@@ -28,10 +28,12 @@ void Pith::draw( QImage &image, const int &sliceIdx, const int &radius ) const
 {
 	if ( sliceIdx < size() )
 	{
-		const int diameter = 2*radius;
+		//const int diameter = 2*radius;
 		QPainter painter(&image);
 		painter.setBrush(Qt::red);
 		painter.setPen(Qt::red);
-		painter.drawEllipse((*this)[sliceIdx].x-radius,(*this)[sliceIdx].y-radius,diameter,diameter);
+		painter.drawLine((*this)[sliceIdx].x-radius,(*this)[sliceIdx].y,(*this)[sliceIdx].x+radius,(*this)[sliceIdx].y);
+		painter.drawLine((*this)[sliceIdx].x,(*this)[sliceIdx].y-radius,(*this)[sliceIdx].x,(*this)[sliceIdx].y+radius);
+		//painter.drawEllipse((*this)[sliceIdx].x-radius,(*this)[sliceIdx].y-radius,diameter,diameter);
 	}
 }
