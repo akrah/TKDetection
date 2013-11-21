@@ -128,7 +128,8 @@ void PieChart::draw( QImage &image, const uiCoord2D &center, const QVector< Inte
 		const int &width = image.width();
 		const int &height = image.height();
 
-		static const QVector<QColor> colors = { Qt::blue, Qt::yellow, Qt::green, Qt::magenta, Qt::cyan, Qt::white };
+		QVector<QColor> colors;
+		colors << Qt::blue << Qt::yellow << Qt::green << Qt::magenta << Qt::cyan << Qt::white;
 
 		const int nbColorsToUse = qMax( angleIntervals.size()>colors.size() ? ((angleIntervals.size()+1)/2)%colors.size() : colors.size() , 1 );
 
