@@ -223,14 +223,14 @@ uint PithExtractorBoukadida::contour( const Slice &slice, arma::Mat<qreal> & ori
 	{
 		for ( i=1 ; i<width ; ++i )
 		{
-			sobelX = slice.at( j-1, i-1 ) - slice.at( j-1, i+1 ) +
-					 2* (slice.at( j, i-1 ) - slice.at( j, i+1 )) +
-					 slice.at( j+1, i-1 ) - slice.at( j+1, i+1 );
-			sobelY = slice.at( j+1, i-1 ) - slice.at( j-1, i-1 ) +
+			sobelX = slice.at( j+1, i-1 ) - slice.at( j-1, i-1 ) +
 					 2 * (slice.at( j+1, i ) - slice.at( j-1, i )) +
 					 slice.at( j+1, i+1 ) - slice.at( j-1, i+1 );
-			orientations.at(j,i) = qFuzzyIsNull(sobelX) ? 9999999999./1. : sobelY/sobelX*voxelRatio;
-			sobelNorm.at(j,i) = qSqrt( qPow(sobelX*yDim,2) + qPow(sobelY*xDim,2) )/4.;
+			sobelY = slice.at( j-1, i-1 ) - slice.at( j-1, i+1 ) +
+					 2* (slice.at( j, i-1 ) - slice.at( j, i+1 )) +
+					 slice.at( j+1, i-1 ) - slice.at( j+1, i+1 );
+			orientations.at(j,i) = qFuzzyIsNull(sobelX) ? 9999999999./1. : sobelX/sobelY*voxelRatio;
+			sobelNorm.at(j,i) = qSqrt( qPow(sobelX*xDim,2) + qPow(sobelY*yDim,2) )/4.;
 			*(sobelNormVecIt++) = sobelNorm.at(j,i);
 		}
 	}

@@ -472,7 +472,8 @@ void MainWindow::drawTangentialView()
 
 		if ( projectionType == TKD::Z_PROJECTION )
 		{
-			static const QVector<QColor> colors = { Qt::blue, Qt::yellow, Qt::green, Qt::magenta, Qt::cyan, Qt::white };
+			QVector<QColor> colors;
+			colors << Qt::blue << Qt::yellow << Qt::green << Qt::magenta << Qt::cyan << Qt::white;
 			const int nbKnotAreas = _sectorHistogram->intervals().size();
 			const int nbColorsToUse = qMax( nbKnotAreas>colors.size() ? ((nbKnotAreas+1)/2)%colors.size() : colors.size() , 1 );
 			const QColor currentColor = colors[(_ui->_comboSelectSectorInterval->currentIndex()-1)%nbColorsToUse];
