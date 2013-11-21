@@ -41,30 +41,19 @@ TRANSLATIONS = TKDetection_en.ts
 #---------#
 SOURCES	=	src/main.cpp \
 			src/billonalgorithms.cpp \
-			src/concavitypointseriecurve.cpp \
 			src/connexcomponentextractor.cpp \
-			src/contour.cpp \
-			src/contourbillon.cpp \
-			src/contourdistanceshistogram.cpp \
-			src/contourslice.cpp \
-			src/curvaturehistogram.cpp \
 			src/dicomreader.cpp \
 			src/globalfunctions.cpp \
-			src/intensitydistributionhistogram.cpp \
-			src/nearestpointshistogram.cpp \
+			src/knotpithprofile.cpp \
 			src/mainwindow.cpp \
 			src/ofsexport.cpp \
-			src/opticalflow.cpp \
 			src/pgm3dexport.cpp \
 			src/piechart.cpp \
 			src/piepart.cpp \
 			src/pith.cpp \
 			src/pithextractor.cpp \
-			src/plotconcavitypointseriecurve.cpp \
-			src/plotcontourdistanceshistogram.cpp \
-			src/plotcurvaturehistogram.cpp \
-			src/plotintensitydistributionhistogram.cpp \
-			src/plotnearestpointshistogram.cpp \
+			src/pithextractorboukadida.cpp \
+			src/plotknotpithprofile.cpp \
 			src/plotsectorhistogram.cpp \
 			src/plotslicehistogram.cpp \
 			src/pointpolarseriesdata.cpp \
@@ -79,14 +68,8 @@ SOURCES	=	src/main.cpp \
 
 HEADERS	=	inc/billon.h \
 			inc/billonalgorithms.h \
-			inc/concavitypointseriecurve.h \
 			inc/connexcomponentextractor.h \
-			inc/contour.h \
-			inc/contourbillon.h \
-			inc/contourdistanceshistogram.h \
-			inc/contourslice.h \
 			inc/coordinate.h \
-			inc/curvaturehistogram.h \
 			inc/define.h \
 			def/def_billon.h \
 			def/def_coordinate.h \
@@ -94,22 +77,17 @@ HEADERS	=	inc/billon.h \
 			inc/dicomreader.h \
 			inc/globalfunctions.h \
 			inc/histogram.h \
-			inc/intensitydistributionhistogram.h \
 			inc/interval.h \
-			inc/nearestpointshistogram.h \
+			inc/knotpithprofile.h \
 			inc/mainwindow.h \
 			inc/ofsexport.h \
-			inc/opticalflow.h \
 			inc/pgm3dexport.h \
 			inc/piepart.h \
 			inc/piechart.h \
 			inc/pith.h \
 			inc/pithextractor.h \
-			inc/plotconcavitypointseriecurve.h \
-			inc/plotcontourdistanceshistogram.h \
-			inc/plotcurvaturehistogram.h \
-			inc/plotintensitydistributionhistogram.h \
-			inc/plotnearestpointshistogram.h \
+			inc/pithextractorboukadida.h \
+			inc/plotknotpithprofile.h \
 			inc/plotsectorhistogram.h \
 			inc/plotslicehistogram.h \
 			inc/pointpolarseriesdata.h \

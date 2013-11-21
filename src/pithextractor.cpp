@@ -469,7 +469,7 @@ void PithExtractor::minSlice(const Slice &slice, int *minValue, int *maxValue, u
 	}
 }
 
-void PithExtractor::correctPith( QVector<uiCoord2D> &moelle, float *listMax, float seuilHough ) const {
+void PithExtractor::correctPith( QVector<rCoord2D> &moelle, float *listMax, float seuilHough ) const {
 	const int pithSize = moelle.size();
 	if ( pithSize < 3 ) return;
 	int startSlice, endSlice, i=0, x1, y1, x2, y2, newx, newy;
@@ -525,7 +525,7 @@ void PithExtractor::correctPith( QVector<uiCoord2D> &moelle, float *listMax, flo
 				}else{
 					newy = y1;
 				}
-				moelle.replace(j, uiCoord2D(newx, newy));
+				moelle.replace(j, rCoord2D(newx, newy));
 			}
 		}
 		i++;

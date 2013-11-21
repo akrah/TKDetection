@@ -4,15 +4,15 @@
 
 #include <QPainter>
 
-Pith::Pith(const int size) : QVector<uiCoord2D>(size)
+Pith::Pith(const int size) : QVector<rCoord2D>(size)
 {
 }
 
-Pith::Pith( const Pith &pith ) : QVector<uiCoord2D>(pith)
+Pith::Pith( const Pith &pith ) : QVector<rCoord2D>(pith)
 {
 }
 
-Pith::Pith( const QVector<uiCoord2D> &coordinates ) : QVector<uiCoord2D>(coordinates)
+Pith::Pith( const QVector<rCoord2D> &coordinates ) : QVector<rCoord2D>(coordinates)
 {
 }
 
@@ -24,13 +24,16 @@ Pith::Pith( const QVector<uiCoord2D> &coordinates ) : QVector<uiCoord2D>(coordin
 /*******************************
  * Public setters
  *******************************/
-void Pith::draw( QImage &image, const int &sliceIdx ) const
+void Pith::draw( QImage &image, const int &sliceIdx, const int &radius ) const
 {
 	if ( sliceIdx < size() )
 	{
+		//const int diameter = 2*radius;
 		QPainter painter(&image);
 		painter.setBrush(Qt::red);
 		painter.setPen(Qt::red);
-		painter.drawEllipse((*this)[sliceIdx].x-5,(*this)[sliceIdx].y-5,10,10);
+		painter.drawLine((*this)[sliceIdx].x-radius,(*this)[sliceIdx].y,(*this)[sliceIdx].x+radius,(*this)[sliceIdx].y);
+		painter.drawLine((*this)[sliceIdx].x,(*this)[sliceIdx].y-radius,(*this)[sliceIdx].x,(*this)[sliceIdx].y+radius);
+		//painter.drawEllipse((*this)[sliceIdx].x-radius,(*this)[sliceIdx].y-radius,diameter,diameter);
 	}
 }

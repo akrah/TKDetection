@@ -14,9 +14,9 @@ class PithExtractor {
 
 public:
 
-	PithExtractor( const int &falseCutPercent = FALSE_CUT_PERCENT, const int &windowWidth = NEIGHBORHOOD_WINDOW_WIDTH,
-				   const int &windowHeight = NEIGHBORHOOD_WINDOW_HEIGHT, const int &binarizationThreshold = BINARIZATION_THRESHOLD,
-				   const int &pithLag = PITH_LAG );
+	PithExtractor( const int &falseCutPercent = FALSE_CUT_PERCENT_BILLON, const int &windowWidth = NEIGHBORHOOD_WINDOW_WIDTH_BILLON,
+				   const int &windowHeight = NEIGHBORHOOD_WINDOW_HEIGHT_BILLON, const int &binarizationThreshold = BINARIZATION_THRESHOLD_BILLON,
+				   const int &pithLag = PITH_LAG_BILLON );
 	~PithExtractor();
 
 
@@ -26,7 +26,6 @@ public:
 	 * \param	image Image 2D
 	 * \param	sliceMin Première coupe à traiter
 	 * \param	sliceMax Dernière coupe à traiter
-	 * \return	la liste des coordonnées de la moelle
 	 */
 	void process( Billon &billon ) const;
 
@@ -166,7 +165,7 @@ private:
 	 * \fn		void corrigeMoelle(QVector<Coord> *moelle, float *listMax, float seuilHough);
 	 * \brief	Corrige les valeur erronées de la moelle
 	 */
-	void correctPith(QVector<uiCoord2D> &pith, float *listMax, float seuilHough ) const;
+	void correctPith(QVector<rCoord2D> &pith, float *listMax, float seuilHough ) const;
 
 private:
 

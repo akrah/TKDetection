@@ -103,7 +103,7 @@ namespace SliceAlgorithm
 		}
 	}
 
-	qreal restrictedAreaRadius( const Slice &slice, const iCoord2D &pithCoord, const uint &nbPolygonPoints, const int &intensityThreshold )
+	qreal restrictedAreaRadius( const Slice &slice, const uiCoord2D &pithCoord, const uint &nbPolygonPoints, const int &intensityThreshold )
 	{
 		Q_ASSERT_X( nbPolygonPoints>0 , "BillonTpl<T>::getRestrictedAreaMeansRadius", "nbPolygonPoints arguments equals to 0 => division by zero" );
 
@@ -157,7 +157,7 @@ namespace SliceAlgorithm
 				}
 			}
 		}
-		else if ( view == TKD::CARTESIAN_PROJECTION )
+		else if ( view == TKD::POLAR_PROJECTION )
 		{
 			for ( j=0 ; j<height ; ++j )
 			{
