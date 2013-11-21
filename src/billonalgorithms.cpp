@@ -3,6 +3,8 @@
 #include "inc/billon.h"
 #include "inc/piechart.h"
 
+#include <QQuaternion>
+
 namespace BillonAlgorithms
 {
 	qreal restrictedAreaMeansRadius(const Billon &billon, const uint &nbDirections, const int &intensityThreshold, const uint &minimumRadius, const uint &nbSlicesToIgnore )
@@ -117,47 +119,45 @@ namespace BillonAlgorithms
 
 		// Rotation autour de l'axe Y
 		const qreal alpha = PI_ON_TWO;
-		const qreal cosAlpha = qCos(alpha);
-		const qreal sinAlpha = qSin(alpha);
-		const arma::Mat<qreal>::fixed<3,3> rotationMatY = { cosAlpha, 0, -sinAlpha, 0, 1, 0, sinAlpha, 0, cosAlpha };
+		const QQuaternion quaterY = QQuaternion::fromAxisAndAngle( 0, 1, 0, alpha*RAD_TO_DEG_FACT );
 
 		// Rotation selon l'angle de la zone de nœuds
-		const arma::Mat<qreal>::fixed<3,3> rotationMatX = { 1, 0, 0, 0, cosBisector, -sinBisector, 0, sinBisector, cosBisector };
+		const QQuaternion quaterZ = QQuaternion::fromAxisAndAngle( 0, 0, 1, bisectorOrientation*RAD_TO_DEG_FACT );
 
-		const arma::Mat<qreal>::fixed<3,3> rotationMat = rotationMatY*rotationMatX;
+		// Combinaisons des rotations
+		const QQuaternion quaterRot = quaterZ * quaterY;
 
 		// Vecteur de déplacement entre deux coupes tangentielles successives
-		const arma::Col<qreal>::fixed<3> shiftStep = { 0., 0., depth/(1.*nbSlices) };
-		const arma::Col<qreal>::fixed<3> originShift = rotationMat * shiftStep;
+		const QVector3D shiftStep = quaterRot.rotatedVector( QVector3D( 0., 0., depth/(1.*nbSlices) ) );
 
-		arma::Col<qreal>::fixed<3> origin = { originPith.x, originPith.y, zPithCoord };
-		arma::Col<qreal>::fixed<3> initial, destination;
-		initial(2) = 0.;
+		QVector3D origin( originPith.x, originPith.y, zPithCoord );
+		QVector3D initial, destination;
 
 		const qreal semiKnotAreaHeightCoeff = heightOnTwo / static_cast<qreal>( nbSlices );
 		int i, j, jStart, jEnd;
-		jStart = jEnd = 0;
 		int x0,y0,z0;
 		qreal x0Dist, y0Dist, z0Dist;
 		qreal xFrontTop, xFrontBottom, xBackTop, xBackBottom, yFront, yBack;
+		jStart = jEnd = 0;
+		initial.setZ(0.);
 		for ( uint k=0 ; k<nbSlices ; ++k )
 		{
 			Slice &slice = tangentialBillon->slice(k);
-			jStart = -qMin(k*semiKnotAreaHeightCoeff,heightOnTwo*1.);
-			jEnd = qMin(k*semiKnotAreaHeightCoeff,heightOnTwo*1.);
+			jStart = -qMin(qRound(k*semiKnotAreaHeightCoeff),heightOnTwo);
+			jEnd = qMin(qRound(k*semiKnotAreaHeightCoeff),heightOnTwo);
 			for ( j=jStart ; j<jEnd ; ++j )
 			{
-				initial.at(1) = j;
+				initial.setY(j);
 				for ( i=-widthOnTWo ; i<widthOnTWo ; ++i )
 				{
-					initial.at(0) = i;
-					destination = (rotationMat * initial) + origin;
-					x0 = qFloor(destination.at(1));
-					y0 = qFloor(destination.at(0));
-					z0 = qFloor(destination.at(2));
-					x0Dist = destination.at(1)-x0;
-					y0Dist = destination.at(0)-y0;
-					z0Dist = destination.at(2)-z0;
+					initial.setX(i);
+					destination = quaterRot.rotatedVector(initial) + origin;
+					x0 = qFloor(destination.y());
+					y0 = qFloor(destination.x());
+					z0 = qFloor(destination.z());
+					x0Dist = destination.y()-x0;
+					y0Dist = destination.x()-y0;
+					z0Dist = destination.z()-z0;
 					xFrontTop = (1.-x0Dist)*billon.at(x0-1,y0+1,z0-1) + x0Dist*billon.at(x0+1,y0+1,z0-1);
 					xFrontBottom = (1.-x0Dist)*billon.at(x0-1,y0-1,z0-1) + x0Dist*billon.at(x0+1,y0-1,z0-1);
 					xBackTop = (1.-x0Dist)*billon.at(x0-1,y0+1,z0+1) + x0Dist*billon.at(x0+1,y0+1,z0+1);
@@ -165,18 +165,13 @@ namespace BillonAlgorithms
 					yFront = (1.-y0Dist)*xFrontBottom + y0Dist*xFrontTop;
 					yBack = (1.-y0Dist)*xBackBottom + y0Dist*xBackTop;
 					// Rotation de 90° dans le sens horaire pour correspondre à l'orientation de l'article
+					//slice(i+widthOnTWo,heightOnTwoMinusOne-j) =	billon.at(qRound(destination.y()),qRound(destination.x()),qRound(destination.z()));
 					slice(i+widthOnTWo,heightOnTwoMinusOne-j) = (billon.at(x0,y0,z0)+2.*((1.-z0Dist)*yFront + z0Dist*yBack))/3.;
-							//destination.at(0)>=0 && destination.at(0)<billon.n_cols && destination.at(1)>=0 &&
-							//destination.at(1)<billon.n_rows && destination.at(2)>=0 && destination.at(2)<billon.n_slices ?
-							//	(1.-z0Dist)*yFront + z0Dist*yBack : minIntensity;
-								//(billon.at(x0,y0,z0) + billon.at(x0+(x0Dist>0.5?1:-1),y0,z0) + billon.at(x0,y0+(y0Dist>0.5?1:-1),z0) + billon.at(x0,y0,z0+(z0Dist>0.5?1:-1)))/4.:minIntensity;
-								//billon.at(qRound(destination.at(1)),qRound(destination.at(0)),qRound(destination.at(2))) : minIntensity;
 				}
 			}
-			origin += originShift;
+			origin += shiftStep;
 		}
 
 		return tangentialBillon;
 	}
-
 }
