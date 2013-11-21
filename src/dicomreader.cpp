@@ -62,7 +62,7 @@ namespace DicomReader
 			const ImageType::Pointer &image = reader->GetOutput();
 
 			// Recherche de tag dans le fichier
-			const typename ImageType::SizeType& inputSize = image->GetLargestPossibleRegion().GetSize();
+			const ImageType::SizeType& inputSize = image->GetLargestPossibleRegion().GetSize();
 			const uint &width = inputSize[0];
 			const uint &height = inputSize[1];
 			const uint &depth = inputSize[2];
