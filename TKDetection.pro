@@ -43,6 +43,7 @@ SOURCES	=	src/main.cpp \
 			src/billonalgorithms.cpp \
 			src/connexcomponentextractor.cpp \
 			src/dicomreader.cpp \
+			src/ellipticalaccumulationhistogram.cpp \
 			src/globalfunctions.cpp \
 			src/knotpithprofile.cpp \
 			src/mainwindow.cpp \
@@ -53,6 +54,7 @@ SOURCES	=	src/main.cpp \
 			src/pith.cpp \
 			src/pithextractor.cpp \
 			src/pithextractorboukadida.cpp \
+			src/plotellipticalaccumulationhistogram.cpp \
 			src/plotknotpithprofile.cpp \
 			src/plotsectorhistogram.cpp \
 			src/plotslicehistogram.cpp \
@@ -75,6 +77,7 @@ HEADERS	=	inc/billon.h \
 			def/def_coordinate.h \
 			def/def_opticalflow.h \
 			inc/dicomreader.h \
+			inc/ellipticalaccumulationhistogram.h \
 			inc/globalfunctions.h \
 			inc/histogram.h \
 			inc/interval.h \
@@ -87,6 +90,7 @@ HEADERS	=	inc/billon.h \
 			inc/pith.h \
 			inc/pithextractor.h \
 			inc/pithextractorboukadida.h \
+			inc/plotellipticalaccumulationhistogram.h \
 			inc/plotknotpithprofile.h \
 			inc/plotsectorhistogram.h \
 			inc/plotslicehistogram.h \

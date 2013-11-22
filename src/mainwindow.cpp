@@ -6,6 +6,7 @@
 #include "inc/billonalgorithms.h"
 #include "inc/define.h"
 #include "inc/dicomreader.h"
+#include "inc/ellipticalaccumulationhistogram.h"
 #include "inc/knotpithprofile.h"
 #include "inc/pith.h"
 #include "inc/pithextractorboukadida.h"
@@ -13,6 +14,7 @@
 #include "inc/pgm3dexport.h"
 #include "inc/piechart.h"
 #include "inc/piepart.h"
+#include "inc/plotellipticalaccumulationhistogram.h"
 #include "inc/plotknotpithprofile.h"
 #include "inc/plotsectorhistogram.h"
 #include "inc/plotslicehistogram.h"
@@ -43,6 +45,7 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 	_sliceHistogram(new SliceHistogram()), _plotSliceHistogram(new PlotSliceHistogram()),
 	_sectorHistogram(new SectorHistogram()), _plotSectorHistogram(new PlotSectorHistogram()),
 	_knotPithProfile(new KnotPithProfile()), _plotKnotPithProfile(new PlotKnotPithProfile()),
+	_ellipticalAccumulationHistogram(new EllipticalAccumulationHistogram()), _plotEllipticalAccumulationHistogram(new PlotEllipticalAccumulationHistogram()),
 	_currentSlice(0), _currentYSlice(0), _currentMaximum(0), _currentSector(0), _treeRadius(0)
 {
 	_ui->setupUi(this);
@@ -77,6 +80,8 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 	_plotSectorHistogram->attach(_ui->_plotSectorHistogram);
 
 	_plotKnotPithProfile->attach(_ui->_plotKnotPithProfile);
+
+	_plotEllipticalAccumulationHistogram->attach(_ui->_plotEllipticalAccumulationHistogram);
 
 	QwtPolarGrid *grid = new QwtPolarGrid();
 	grid->showAxis(QwtPolar::AxisBottom,false);
@@ -242,6 +247,8 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 
 MainWindow::~MainWindow()
 {
+	delete _plotEllipticalAccumulationHistogram;
+	delete _ellipticalAccumulationHistogram;
 	delete _plotKnotPithProfile;
 	delete _knotPithProfile;
 	delete _plotSectorHistogram;
@@ -352,6 +359,7 @@ void MainWindow::closeImage()
 	_ui->_polarSectorHistogram->replot();
 
 	updateKnotPithProfile();
+	updateEllipticalAccumulationHistogram();
 
 	selectSectorInterval(0);
 	updateUiComponentsValues();
@@ -448,6 +456,8 @@ void MainWindow::drawTangentialView()
 		const TKD::ProjectionType projectionType = _ui->_radioPolarProjection->isChecked()?TKD::POLAR_PROJECTION:
 																						   _ui->_radioEllipticProjection->isChecked()?TKD::ELLIPTIC_PROJECTION:
 																																	  TKD::Z_PROJECTION;
+		const qreal ellipticityRate = (_tangentialBillon->voxelWidth()/_tangentialBillon->voxelHeight()) / qCos(_knotPithProfile->at(currentSlice));
+
 		switch (projectionType)
 		{
 			case TKD::POLAR_PROJECTION :
@@ -456,6 +466,15 @@ void MainWindow::drawTangentialView()
 				}
 				else {
 					height = qMin(width/2,height/2);
+				}
+				width = _ui->_spinCartesianAngularResolution->value();
+				break;
+			case TKD::ELLIPTIC_PROJECTION :
+				if (_tangentialBillon->hasPith() ) {
+					height = qMin(qMin(pithCoord.x,width-pithCoord.x),qMin(pithCoord.y/ellipticityRate,(height-pithCoord.y)/ellipticityRate));
+				}
+				else {
+					height = qMin(width/2.,height/(2.*ellipticityRate));
 				}
 				width = _ui->_spinCartesianAngularResolution->value();
 				break;
@@ -469,7 +488,7 @@ void MainWindow::drawTangentialView()
 
 		_sliceView->drawSlice( _tangentialPix, *_tangentialBillon, TKD::CLASSIC, currentSlice, Interval<int>(_ui->_spinMinIntensity->value(), _ui->_spinMaxIntensity->value()),
 							   _ui->_spinZMotionMin->value(), _ui->_spinCartesianAngularResolution->value(), projectionType, TKD::ImageViewRender(_ui->_comboViewRender->currentIndex()),
-							   _knotPithProfile->size()?qCos((*_knotPithProfile)[currentSlice]):1.);
+							   ellipticityRate);
 
 		if ( projectionType == TKD::Z_PROJECTION )
 		{
@@ -491,10 +510,19 @@ void MainWindow::drawTangentialView()
 			{
 				_tangentialBillon->pith().draw(_tangentialPix,currentSlice, 2);
 			}
+
+			const qreal ellipseWidth = _ellipticalAccumulationHistogram->maximumIndex(2);
+			const qreal ellipseHeight = ellipseWidth*ellipticityRate;
+
+			painter.begin(&_tangentialPix);
+			painter.setPen(currentColor);
+			painter.drawEllipse(QPointF(pithCoord.x,pithCoord.y),ellipseWidth,ellipseHeight);
+			painter.end();
 		}
 	}
 	else
 	{
+		_ui->_labelTangentialSliceNumber->setText(tr("Aucune"));
 		_tangentialPix = QImage(1,1,QImage::Format_ARGB32);
 	}
 
@@ -586,8 +614,12 @@ void MainWindow::setYSlice( const int &yPosition )
 
 void MainWindow::setTangentialSlice( const int &sliceIndex )
 {
+	_ui->_labelTangentialSliceNumber->setNum(sliceIndex);
+
 	_plotKnotPithProfile->moveCursor(sliceIndex);
 	_ui->_plotKnotPithProfile->replot();
+
+	updateEllipticalAccumulationHistogram();
 
 	drawTangentialView();
 }
@@ -682,6 +714,7 @@ void MainWindow::selectSectorInterval(const int &index, const bool &draw )
 	if (draw)
 	{
 		updateKnotPithProfile();
+		updateEllipticalAccumulationHistogram();
 		drawSlice();
 		drawTangentialView();
 	}
@@ -776,6 +809,22 @@ void MainWindow::updateKnotPithProfile()
 	_plotKnotPithProfile->moveCursor( _ui->_sliderSelectTangentialSlice->value() );
 	_ui->_plotKnotPithProfile->setAxisScale(QwtPlot::xBottom,0,_knotPithProfile->size());
 	_ui->_plotKnotPithProfile->replot();
+}
+
+void MainWindow::updateEllipticalAccumulationHistogram()
+{
+	_ellipticalAccumulationHistogram->clear();
+
+	if ( _tangentialBillon && _tangentialBillon->hasPith() && !_knotPithProfile->isEmpty() )
+	{
+		const uint &currentSliceIndex = _ui->_sliderSelectTangentialSlice->value();
+		const qreal ellipticityRate = (_tangentialBillon->voxelWidth()/_tangentialBillon->voxelHeight()) / qCos(_knotPithProfile->at(currentSliceIndex));
+		_ellipticalAccumulationHistogram->construct( _tangentialBillon->slice(currentSliceIndex), _tangentialBillon->pithCoord(currentSliceIndex), ellipticityRate );
+	}
+
+	_plotEllipticalAccumulationHistogram->update( *_ellipticalAccumulationHistogram );
+	_ui->_plotEllipticalAccumulationHistogram->setAxisScale(QwtPlot::xBottom,0,_ellipticalAccumulationHistogram->size());
+	_ui->_plotEllipticalAccumulationHistogram->replot();
 }
 
 /********/
@@ -979,6 +1028,8 @@ void MainWindow::updateUiComponentsValues()
 		_ui->_labelSliceNumber->setText(tr("Aucune coupe présente."));
 		_ui->_statusBar->clearMessage();
 	}
+
+	_ui->_labelTangentialSliceNumber->setText(tr("Aucune coupe présente."));
 
 	_ui->_sliderSelectSlice->setValue(0);
 	_ui->_sliderSelectSlice->setRange(0,nbSlices);
