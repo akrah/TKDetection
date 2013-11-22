@@ -32,6 +32,7 @@
 #include <QMessageBox>
 #include <QInputDialog>
 #include <QXmlStreamWriter>
+#include <QQuaternion>
 
 #include <qwt_plot_renderer.h>
 #include <qwt_polar_renderer.h>
@@ -660,6 +661,7 @@ void MainWindow::selectSectorInterval(const int &index, const bool &draw )
 		Interval<uint> centeredSectorInterval( maximumIndex-semiAngularRange, maximumIndex+semiAngularRange );
 		if ( maximumIndex<semiAngularRange ) centeredSectorInterval.setMin( nbAngularSectors + centeredSectorInterval.min() - 1 );
 		if ( centeredSectorInterval.max() > nbAngularSectors-1 ) centeredSectorInterval.setMax( centeredSectorInterval.max() - nbAngularSectors + 1 );
+
 		const Interval<uint> &sliceInterval = _sliceHistogram->interval(_ui->_comboSelectSliceInterval->currentIndex()-1);
 		const Interval<int> intensityInterval(_ui->_spinMinIntensity->value(), _ui->_spinMaxIntensity->value());
 
@@ -820,9 +822,7 @@ void MainWindow::exportToOfs()
 				exportCompleteBillonToOfs();
 				break;
 			case TKD::ALL_KNOT_AREAS:
-//				exportAllKnotAreasToOfs();
-				break;
-			case TKD::ALL_KNOT_AREAS_OF_CURRENT_SLICE_INTERVAL:
+				exportAllKnotAreasToOfs();
 				break;
 			case TKD::CURRENT_KNOT_AREA:
 //				exportCurrentKnotAreaToOfs();
@@ -892,7 +892,7 @@ void MainWindow::exportToSdp()
 {
 	switch ( _ui->_comboExportToSdpType->currentIndex() )
 	{
-//		case 0 : exportContourToSdp();	break;
+		case 0 : exportPithOfCurrentKnotAreaToSdp(); break;
 //		case 1 : exportCurrentSegmentedKnotToSdp();	break;
 //		case 2 : exportSegmentedKnotsOfCurrentSliceIntervalToSdp(_ui->_checkBoxKeepBillonSliceNumber->isChecked() );	break;
 //		case 3 : exportAllSegmentedKnotsOfBillonToSdp(); break;
@@ -1088,45 +1088,45 @@ void MainWindow::exportCompleteBillonToOfs()
 	}
 }
 
-//void MainWindow::exportAllKnotAreasToOfs()
-//{
-//	if ( !_billon )
-//	{
-//		QMessageBox::warning( this, tr("Export en .ofs"), tr("Aucun billon ouvert."));
-//		return;
-//	}
-//	if ( !_billon->hasPith() )
-//	{
-//		QMessageBox::warning( this, tr("Export en .ofs"), tr("La moelle n'est pas calculée."));
-//		return;
-//	}
-//	QString fileName = QFileDialog::getSaveFileName(this, tr("Exporter en .ofs"), "output.ofs", tr("Fichiers de données (*.ofs);;Tous les fichiers (*.*)"));
-//	if ( !fileName.isEmpty() )
-//	{
-//		const QVector< Interval<uint> > &sliceIntervals = _sliceHistogram->intervals();
-//		QVector< QVector< Interval<qreal> > > angleIntervals(sliceIntervals.size());
-//		for ( int i=0 ; i<sliceIntervals.size() ; ++i )
-//		{
-//			_ui->_comboSelectSliceInterval->setCurrentIndex(i+1);
-//			for ( int j=0 ; j<_sectorHistogram->intervals().size() ; ++j )
-//			{
-//				const Interval<uint> &sectorInterval = _sectorHistogram->interval(j);
-//				angleIntervals[i].append( Interval<qreal>( PieChartSingleton::getInstance()->sector(sectorInterval.min()).minAngle(), PieChartSingleton::getInstance()->sector(sectorInterval.max()).maxAngle() ) );
-//			}
-//		}
+void MainWindow::exportAllKnotAreasToOfs()
+{
+	if ( !_billon )
+	{
+		QMessageBox::warning( this, tr("Export en .ofs"), tr("Aucun billon ouvert."));
+		return;
+	}
+	if ( !_billon->hasPith() )
+	{
+		QMessageBox::warning( this, tr("Export en .ofs"), tr("La moelle n'est pas calculée."));
+		return;
+	}
+	QString fileName = QFileDialog::getSaveFileName(this, tr("Exporter en .ofs"), "output.ofs", tr("Fichiers de données (*.ofs);;Tous les fichiers (*.*)"));
+	if ( !fileName.isEmpty() )
+	{
+		const QVector< Interval<uint> > &sliceIntervals = _sliceHistogram->intervals();
+		QVector< QVector< Interval<qreal> > > angleIntervals(sliceIntervals.size());
+		for ( int i=0 ; i<sliceIntervals.size() ; ++i )
+		{
+			_ui->_comboSelectSliceInterval->setCurrentIndex(i+1);
+			for ( int j=0 ; j<_sectorHistogram->intervals().size() ; ++j )
+			{
+				const Interval<uint> &sectorInterval = _sectorHistogram->interval(j);
+				angleIntervals[i].append( Interval<qreal>( PieChartSingleton::getInstance()->sector(sectorInterval.min()).minAngle(), PieChartSingleton::getInstance()->sector(sectorInterval.max()).maxAngle() ) );
+			}
+		}
 
-//		QFile file(fileName);
-//		if ( file.open(QIODevice::WriteOnly) )
-//		{
-//			QTextStream stream(&file);
-//			OfsExport::writeHeader( stream );
-//			OfsExport::processOnAllSectorInAllIntervals( stream, *_billon, _ui->_spinExportNbEdges->value(), _treeRadius, sliceIntervals, angleIntervals, false );
-//			QMessageBox::information(this,tr("Export en .ofs"), tr("Terminé avec succés !"));
-//			file.close();
-//		}
-//		else QMessageBox::warning( this, tr("Export en .ofs"), tr("Impossible d'écrire le fichier."));
-//	}
-//}
+		QFile file(fileName);
+		if ( file.open(QIODevice::WriteOnly) )
+		{
+			QTextStream stream(&file);
+			OfsExport::writeHeader( stream );
+			OfsExport::processOnAllSectorInAllIntervals( stream, *_billon, _ui->_spinExportNbEdges->value(), _treeRadius, sliceIntervals, angleIntervals, false );
+			QMessageBox::information(this,tr("Export en .ofs"), tr("Terminé avec succés !"));
+			file.close();
+		}
+		else QMessageBox::warning( this, tr("Export en .ofs"), tr("Impossible d'écrire le fichier."));
+	}
+}
 
 //void MainWindow::exportCurrentKnotAreaToOfs()
 //{
@@ -1609,6 +1609,107 @@ void MainWindow::exportImageCartesianSliceIntervalToPgm3d()
 //	}
 //	else QMessageBox::warning(this,tr("Exporter tous les nœuds segmentés du billon en V3D"),tr("L'export a échoué : la moelle n'est pas calculée."));
 //}
+
+void MainWindow::exportPithOfCurrentKnotAreaToSdp()
+{
+	if ( _tangentialBillon && _tangentialBillon->hasPith() )
+	{
+		QString fileName = QFileDialog::getSaveFileName(this, tr("Exporter la moelle de la zone de nœud courante en SDP"), "pith.sdp",
+														tr("Fichiers SDP (*.sdp);;Tous les fichiers (*.*)"));
+		if ( !fileName.isEmpty() )
+		{
+			QFile file(fileName);
+			if ( file.open(QIODevice::WriteOnly) )
+			{
+				QTextStream stream(&file);
+				stream << "# SDP (Sequence of Discrete Points)" << endl;
+				stream << "#" << endl;
+				stream << "# Pith  |                 Window size" << endl;
+				stream << "# Coord | Top Left | Top Right | Bottom Right | Bottom Left" << endl;
+				stream << "# x y z    x y z       x y z        x y z         x y z" << endl;
+
+				const Interval<uint> &sliceInterval = _sliceHistogram->interval(_ui->_comboSelectSliceInterval->currentIndex()-1);
+				const qreal zPithCoord = sliceInterval.mid();
+				const rCoord2D &originPith = _billon->pithCoord(zPithCoord);
+
+
+				const uint &width = _tangentialBillon->n_cols;
+				const uint &height = _tangentialBillon->n_rows;
+				const uint &depth = _tangentialBillon->n_slices;
+				const int widthOnTwo = width/2.;
+				const int heightOnTwo = height/2.;
+				const int widthOnTwoMinusOne = widthOnTwo-1;
+
+				// Rotation autour de l'axe Y
+				const qreal alpha = PI_ON_TWO;
+				const QQuaternion quaterY = QQuaternion::fromAxisAndAngle( 0, 1, 0, alpha*RAD_TO_DEG_FACT );
+
+				// Rotation selon l'angle de la zone de nœuds
+				const Interval<uint> &angularInterval = _sectorHistogram->interval(_ui->_comboSelectSectorInterval->currentIndex()-1);
+				const uint angularRange = (angularInterval.max() + (angularInterval.isValid() ? 0. : PieChartSingleton::getInstance()->nbSectors())) - angularInterval.min();
+				const qreal bisectorOrientation = (angularInterval.min()+angularRange/2.)*PieChartSingleton::getInstance()->angleStep();
+				const QQuaternion quaterZ = QQuaternion::fromAxisAndAngle( 0, 0, 1, bisectorOrientation*RAD_TO_DEG_FACT );
+
+				// Combinaisons des rotations
+				const QQuaternion quaterRot = quaterZ * quaterY;
+
+				// Vecteur de déplacement entre deux coupes tangentielles successives
+				const QVector3D shiftStep = quaterRot.rotatedVector( QVector3D( 0., 0., 1. ) );
+
+				QVector3D origin( originPith.x, originPith.y, zPithCoord );
+				QVector3D initial, destination;
+
+				const qreal semiKnotAreaWidthCoeff = widthOnTwo / static_cast<qreal>( depth );
+				int jStart, jEnd, iStart, iEnd;
+
+				initial.setZ(0.);
+
+				for ( uint k=0 ; k<depth ; ++k )
+				{
+					iStart = -qMin(qRound(k*semiKnotAreaWidthCoeff),widthOnTwo);
+					iEnd = qMin(qRound(k*semiKnotAreaWidthCoeff),widthOnTwo);
+					jStart = -heightOnTwo;
+					jEnd = heightOnTwo;
+
+					initial.setX( _tangentialBillon->pithCoord(k).y-heightOnTwo );
+					initial.setY( widthOnTwoMinusOne-_tangentialBillon->pithCoord(k).x );
+					destination = quaterRot.rotatedVector(initial) + origin;
+
+					stream << destination.x() << " "<< destination.y() << " " << destination.z() << " ";
+
+					initial.setX( iStart );
+					initial.setY( jStart );
+					destination = quaterRot.rotatedVector(initial) + origin;
+
+					stream << destination.x() << " "<< destination.y() << " " << destination.z() << " ";
+
+					initial.setX( iEnd );
+					destination = quaterRot.rotatedVector(initial) + origin;
+
+					stream << destination.x() << " "<< destination.y() << " " << destination.z() << " ";
+
+					initial.setY( jEnd );
+					destination = quaterRot.rotatedVector(initial) + origin;
+
+					stream << destination.x() << " "<< destination.y() << " " << destination.z() << " ";
+
+					initial.setX( iStart );
+					destination = quaterRot.rotatedVector(initial) + origin;
+
+					stream << destination.x() << " "<< destination.y() << " " << destination.z() << endl;
+
+					origin += shiftStep;
+				}
+
+				file.close();
+
+				QMessageBox::information(this,tr("Exporter la moelle de la zone de nœud courante en SDP"), tr("Export réussi !"));
+			}
+			else QMessageBox::warning(this,tr("Exporter la moelle de la zone de nœud courante en SDP"),tr("L'export a échoué : impossible de créer le ficher %1.").arg(fileName));
+		}
+	}
+	else QMessageBox::warning(this,tr("Exporter la moelle de la zone de nœud courante en SDP"),tr("L'export a échoué : la moelle n'existe pas."));
+}
 
 
 //void MainWindow::exportCurrentSegmentedKnotToSdp()
