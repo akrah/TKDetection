@@ -14,13 +14,15 @@ namespace Ui
 
 class QLabel;
 
+class EllipticalAccumulationHistogram;
+class KnotPithProfile;
 class PieChart;
+class PlotEllipticalAccumulationHistogram;
+class PlotKnotPithProfile;
 class PlotSectorHistogram;
 class PlotSliceHistogram;
-class PlotKnotPithProfile;
 class SectorHistogram;
 class SliceHistogram;
-class KnotPithProfile;
 class SliceView;
 
 template <typename T> class Interval;
@@ -63,6 +65,7 @@ private slots:
 	void updateSliceHistogram();
 	void updateSectorHistogram( const Interval<uint> &interval );
 	void updateKnotPithProfile();
+	void updateEllipticalAccumulationHistogram();
 
 	void resetHistogramDefaultValuesZMotion();
 	void resetHistogramDefaultValuesZMotionAngular();
@@ -129,6 +132,9 @@ private:
 
 	KnotPithProfile *_knotPithProfile;
 	PlotKnotPithProfile *_plotKnotPithProfile;
+
+	EllipticalAccumulationHistogram * _ellipticalAccumulationHistogram;
+	PlotEllipticalAccumulationHistogram * _plotEllipticalAccumulationHistogram;
 
 	uint _currentSlice;
 	uint _currentYSlice;

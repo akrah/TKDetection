@@ -258,6 +258,71 @@ void SliceView::drawCurrentSlice( QImage &image, const Billon &billon,
 				*(line++) = qRgb(dgtalColor.red(),dgtalColor.green(),dgtalColor.blue());
 			}
 		}
+
+//		QPainter painter(&image);
+
+//		QVector<QColor> colors;
+//		colors << Qt::blue << Qt::yellow << Qt::green << Qt::magenta << Qt::cyan << Qt::white;
+
+//		const qreal &pithCoordX = billon.hasPith()?billon.pithCoord(sliceIndex).x:width/2.;
+//		const qreal &pithCoordY = billon.hasPith()?billon.pithCoord(sliceIndex).y:height/2.;
+
+//		int x,y ;
+//		qreal a,b,d1,d2,aSquare,bSquare ;
+
+//		for ( a=1 ; a<20 ; a+=2 )
+//		{
+//			painter.setPen(colors[((int)a/2)%6]);
+//			b = a/2;
+//			aSquare = a*a;
+//			bSquare = b*b;
+//			x = 0;
+//			y = b;
+//			d1 = bSquare - aSquare*b + aSquare/4. ;
+//			painter.drawPoint(qRound(pithCoordX+x),qRound(pithCoordY+y));
+//			painter.drawPoint(qRound(pithCoordX+x),qRound(pithCoordY-y));
+//			painter.drawPoint(qRound(pithCoordX-x),qRound(pithCoordY-y));
+//			painter.drawPoint(qRound(pithCoordX-x),qRound(pithCoordY+y));
+//			while ( aSquare*(y-.5) > bSquare*(x+1) )
+//			{
+//				if ( d1 < 0 )
+//				{
+//					d1 += bSquare*(2*x+3) ;
+//					x++ ;
+//				}
+//				else
+//				{
+//					d1 += bSquare*(2*x+3) + aSquare*(-2*y+2) ;
+//					x++ ;
+//					y-- ;
+//				}
+//				painter.drawPoint(qRound(pithCoordX+x),qRound(pithCoordY+y));
+//				painter.drawPoint(qRound(pithCoordX+x),qRound(pithCoordY-y));
+//				painter.drawPoint(qRound(pithCoordX-x),qRound(pithCoordY-y));
+//				painter.drawPoint(qRound(pithCoordX-x),qRound(pithCoordY+y));
+//			}
+//			d2 = bSquare*(x+.5)*(x+.5) + aSquare*(y-1)*(y-1) - aSquare*bSquare ;
+//			while ( y > 0 )
+//			{
+//				if ( d2 < 0 )
+//				{
+//					d2 += bSquare*(2*x+2) + aSquare*(-2*y+3) ;
+//					y-- ;
+//					x++ ;
+//				}
+//				else
+//				{
+//					d2 += aSquare*(-2*y+3) ;
+//					y-- ;
+//				}
+//				painter.drawPoint(qRound(pithCoordX+x),qRound(pithCoordY+y));
+//				painter.drawPoint(qRound(pithCoordX+x),qRound(pithCoordY-y));
+//				painter.drawPoint(qRound(pithCoordX-x),qRound(pithCoordY-y));
+//				painter.drawPoint(qRound(pithCoordX-x),qRound(pithCoordY+y));
+//			}
+//		}
+
+//		painter.end();
 	}
 	else if ( axe == TKD::POLAR_PROJECTION )
 	{
@@ -283,7 +348,7 @@ void SliceView::drawCurrentSlice( QImage &image, const Billon &billon,
 	{
 		const Slice &slice = billon.slice(sliceIndex);
 		const rCoord2D &pithCoord = billon.hasPith()?billon.pithCoord(sliceIndex):rCoord2D(width/2,height/2);
-		const uint radialResolution = qMin(qMin(pithCoord.x,width-pithCoord.x),qMin(pithCoord.y,height-pithCoord.y));
+		const uint radialResolution = qMin(qMin(pithCoord.x,width-pithCoord.x),qMin(pithCoord.y/ellipticityRate,(height-pithCoord.y)/ellipticityRate));
 		const qreal angularIncrement = TWO_PI/(qreal)(angularResolution);
 
 		int x, y;
@@ -291,8 +356,8 @@ void SliceView::drawCurrentSlice( QImage &image, const Billon &billon,
 		{
 			for ( i=0 ; i<angularResolution ; ++i )
 			{
-				x = pithCoord.x + j * qCos(i*angularIncrement) * ellipticityRate;
-				y = pithCoord.y + j * qSin(i*angularIncrement) * 1/ellipticityRate;
+				x = pithCoord.x + j * qCos(i*angularIncrement);
+				y = pithCoord.y + j * qSin(i*angularIncrement) * ellipticityRate;
 				color = (TKD::restrictedValue(slice.at(y,x),intensityInterval)-minIntensity)*fact;
 				dgtalColor= ((aRender== TKD::HueScale) ? hueShade( color): (aRender==TKD::GrayScale)? grayShade(color): (aRender==TKD::HueScaleLog)? hueShadeLog(log(1+color)):customShade(color));
 				*(line++) = qRgb(dgtalColor.red(),dgtalColor.green(),dgtalColor.blue());
