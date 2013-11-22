@@ -81,9 +81,8 @@ private:
 
 	void exportPithToOfs( const bool &onCurrentSliceInterval );
 	void exportCompleteBillonToOfs();
-//	void exportCurrentKnotAreaToOfs();
-//	void exportAllKnotAreasOfCurrentSliceIntervalToOfs();
-//	void exportAllKnotAreasToOfs();
+	void exportCurrentKnotAreaToOfs();
+	void exportAllKnotAreasToOfs();
 
 	void exportSliceHistogramToSep();
 	void exportSectorHistogramToSep();
@@ -100,7 +99,7 @@ private:
 //	void exportSegmentedKnotsOfCurrentSliceIntervalToV3D();
 //	void exportAllSegmentedKnotsOfBillonToV3D();
 
-//	void exportContourToSdp();
+	void exportPithOfCurrentKnotAreaToSdp();
 //	void exportCurrentSegmentedKnotToSdp();
 //	void exportSegmentedKnotsOfCurrentSliceIntervalToSdp( bool keepBillonSliceNumber = false );
 //	void exportSegmentedKnotsOfCurrentSliceIntervalToSdpOldAlgo( bool keepBillonSliceNumber = false );

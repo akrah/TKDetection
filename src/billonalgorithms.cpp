@@ -106,11 +106,11 @@ namespace BillonAlgorithms
 		/* Hauteur et largeur des coueps tangentielles */
 		const uint width = sliceInterval.size()+1;
 		const uint height = 2 * qTan(angularRange*PieChartSingleton::getInstance()->angleStep()/2.) * depth;
-		const int widthOnTWo = width/2.;
+		const int widthOnTwo = width/2.;
 		const int heightOnTwo = height/2.;
-		const int heightOnTwoMinusOne = height/2.-1;
+		const int heightOnTwoMinusOne = heightOnTwo-1;
 
-		const uint nbSlices = depth;
+		const uint nbSlices = qRound(depth);
 
 		// Inversion width et height pour correspondre à la ratation de 90°
 		Billon * tangentialBillon = new Billon(height,width,nbSlices);
@@ -128,7 +128,7 @@ namespace BillonAlgorithms
 		const QQuaternion quaterRot = quaterZ * quaterY;
 
 		// Vecteur de déplacement entre deux coupes tangentielles successives
-		const QVector3D shiftStep = quaterRot.rotatedVector( QVector3D( 0., 0., depth/(1.*nbSlices) ) );
+		const QVector3D shiftStep = quaterRot.rotatedVector( QVector3D( 0., 0., 1. ) );
 
 		QVector3D origin( originPith.x, originPith.y, zPithCoord );
 		QVector3D initial, destination;
@@ -148,7 +148,7 @@ namespace BillonAlgorithms
 			for ( j=jStart ; j<jEnd ; ++j )
 			{
 				initial.setY(j);
-				for ( i=-widthOnTWo ; i<widthOnTWo ; ++i )
+				for ( i=-widthOnTwo ; i<widthOnTwo ; ++i )
 				{
 					initial.setX(i);
 					destination = quaterRot.rotatedVector(initial) + origin;
@@ -166,7 +166,7 @@ namespace BillonAlgorithms
 					yBack = (1.-y0Dist)*xBackBottom + y0Dist*xBackTop;
 					// Rotation de 90° dans le sens horaire pour correspondre à l'orientation de l'article
 					//slice(i+widthOnTWo,heightOnTwoMinusOne-j) =	billon.at(qRound(destination.y()),qRound(destination.x()),qRound(destination.z()));
-					slice(i+widthOnTWo,heightOnTwoMinusOne-j) = (billon.at(x0,y0,z0)+2.*((1.-z0Dist)*yFront + z0Dist*yBack))/3.;
+					slice(i+widthOnTwo,heightOnTwoMinusOne-j) = (billon.at(x0,y0,z0)+2.*((1.-z0Dist)*yFront + z0Dist*yBack))/3.;
 				}
 			}
 			origin += shiftStep;
