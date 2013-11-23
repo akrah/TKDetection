@@ -12,6 +12,8 @@ public:
 	EllipticalAccumulationHistogram();
 	virtual ~EllipticalAccumulationHistogram();
 
+	const uint & detectedRadius() const;
+
 	void construct( const Slice &slice, const uiCoord2D &origin, const qreal &ellipticityRate );
 
 private:

@@ -4,11 +4,17 @@
 
 EllipticalAccumulationHistogram::EllipticalAccumulationHistogram() : Histogram<qreal>()
 {
+	_maximums.resize(3);
 }
 
 
 EllipticalAccumulationHistogram::~EllipticalAccumulationHistogram()
 {
+}
+
+const uint &EllipticalAccumulationHistogram::detectedRadius() const
+{
+	return _maximums[1];
 }
 
 /**********************************
@@ -28,7 +34,8 @@ void EllipticalAccumulationHistogram::construct( const Slice &slice, const uiCoo
 
 	resize(nbEllipses);
 
-	for ( a=0 ; a<nbEllipses ; a++ )
+	(*this)[0] = slice.at( qRound(pithCoordY), qRound(pithCoordX) );
+	for ( a=1 ; a<nbEllipses ; a++ )
 	{
 		nbPixelOnEllipse = 0;
 		b = a*ellipticityRate;
@@ -44,17 +51,13 @@ void EllipticalAccumulationHistogram::construct( const Slice &slice, const uiCoo
 		nbPixelOnEllipse += 4;
 		while ( aSquare*(y-.5) > bSquare*(x+1) )
 		{
-			if ( d1 < 0 )
+			if ( d1 >= 0 )
 			{
-				d1 += bSquare*(2*x+3) ;
-				x++ ;
-			}
-			else
-			{
-				d1 += bSquare*(2*x+3) + aSquare*(-2*y+2) ;
-				x++ ;
+				d1 += aSquare*(-2*y+2) ;
 				y-- ;
 			}
+			d1 += bSquare*(2*x+3) ;
+			x++ ;
 			(*this)[a] += slice.at( qRound(pithCoordY+y), qRound(pithCoordX+x) ) +
 						  slice.at( qRound(pithCoordY+y), qRound(pithCoordX-x) ) +
 						  slice.at( qRound(pithCoordY-y), qRound(pithCoordX-x) ) +
@@ -66,15 +69,11 @@ void EllipticalAccumulationHistogram::construct( const Slice &slice, const uiCoo
 		{
 			if ( d2 < 0 )
 			{
-				d2 += bSquare*(2*x+2) + aSquare*(-2*y+3) ;
-				y-- ;
+				d2 += bSquare*(2*x+2);
 				x++ ;
 			}
-			else
-			{
-				d2 += aSquare*(-2*y+3) ;
-				y-- ;
-			}
+			d2 += aSquare*(-2*y+3);
+			y-- ;
 			(*this)[a] += slice.at( qRound(pithCoordY+y), qRound(pithCoordX+x) ) +
 						  slice.at( qRound(pithCoordY+y), qRound(pithCoordX-x) ) +
 						  slice.at( qRound(pithCoordY-y), qRound(pithCoordX-x) ) +
@@ -90,30 +89,29 @@ void EllipticalAccumulationHistogram::construct( const Slice &slice, const uiCoo
 void EllipticalAccumulationHistogram::findFirstMaximumAndNextMinimum()
 {
 	_maximums.clear();
+	_maximums.resize(3);
 
 	const uint &size = this->size();
 
 	if ( !size ) return;
 
-	uint maximumIndex = 3;
-	while ( maximumIndex<size && (*this)[maximumIndex] >= (*this)[maximumIndex-2] ) maximumIndex++;
+	uint maximumIndex = 2;
+	while ( maximumIndex<size && (*this)[maximumIndex] <= (*this)[maximumIndex-2] ) maximumIndex++;
+	while ( maximumIndex<size && (*this)[maximumIndex] > (*this)[maximumIndex-2] ) maximumIndex++;
 
 	if ( maximumIndex==size )
 	{
-		_maximums.append(0);
-		_maximums.append(0);
-		_maximums.append(0);
 		return;
 	}
 
 	maximumIndex--;
-	_maximums.append(maximumIndex);
+	_maximums[0] = maximumIndex;
 
 	uint minimumIndex = maximumIndex+2;
-	while ( minimumIndex<size && (*this)[minimumIndex] <= (*this)[minimumIndex-2]-3 ) minimumIndex++;
+	while ( minimumIndex<size && (*this)[minimumIndex] < (*this)[minimumIndex-2]-3 ) minimumIndex++;
 	minimumIndex--;
 	minimumIndex = qMax(qMin(minimumIndex,size-1),maximumIndex);
-	_maximums.append(minimumIndex);
+	_maximums[2] = minimumIndex;
 
 
 	const qreal &maximumValue = (*this)[maximumIndex];
@@ -122,27 +120,5 @@ void EllipticalAccumulationHistogram::findFirstMaximumAndNextMinimum()
 
 	while ( (*this)[maximumIndex++] > meanValue );
 
-	_maximums.append(maximumIndex-1);
+	_maximums[1] = maximumIndex-1;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
