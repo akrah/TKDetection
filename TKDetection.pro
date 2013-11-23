@@ -45,6 +45,7 @@ SOURCES	=	src/main.cpp \
 			src/dicomreader.cpp \
 			src/ellipticalaccumulationhistogram.cpp \
 			src/globalfunctions.cpp \
+			src/knotellipseradiihistogram.cpp \
 			src/knotpithprofile.cpp \
 			src/mainwindow.cpp \
 			src/ofsexport.cpp \
@@ -67,6 +68,7 @@ SOURCES	=	src/main.cpp \
 			tst/test_intervalshistogram.cpp \
 			src/tiffreader.cpp \
 			src/v3dexport.cpp \
+    src/plotknotellipseradiihistogram.cpp
 
 HEADERS	=	inc/billon.h \
 			inc/billonalgorithms.h \
@@ -81,6 +83,7 @@ HEADERS	=	inc/billon.h \
 			inc/globalfunctions.h \
 			inc/histogram.h \
 			inc/interval.h \
+			inc/knotellipseradiihistogram.h \
 			inc/knotpithprofile.h \
 			inc/mainwindow.h \
 			inc/ofsexport.h \
@@ -103,6 +106,7 @@ HEADERS	=	inc/billon.h \
 			tst/test_intervalshistogram.h \
 			inc/tiffreader.h \
 			inc/v3dexport.h \
+    inc/plotknotellipseradiihistogram.h
 
 FORMS =	ui/mainwindow.ui
 
