@@ -626,7 +626,7 @@ void MainWindow::setTangentialSlice( const int &sliceIndex )
 	_ui->_plotKnotPithProfile->replot();
 
 	_plotKnotEllipseRadiiHistogram->moveCursor(sliceIndex);
-	//_plotKnotPithProfile->replot();
+	_plotKnotEllipseRadiiHistogram->replot();
 
 	updateEllipticalAccumulationHistogram();
 
@@ -1750,23 +1750,23 @@ void MainWindow::exportPithOfCurrentKnotAreaToSdp()
 
 					stream << destination.x() << " "<< destination.y() << " " << destination.z() << " ";
 
-					initial.setX( iStart );
-					initial.setY( jStart );
+					initial.setX( jStart );
+					initial.setY( iStart );
 					destination = quaterRot.rotatedVector(initial) + origin;
 
 					stream << destination.x() << " "<< destination.y() << " " << destination.z() << " ";
 
-					initial.setX( iEnd );
+					initial.setX( jEnd );
 					destination = quaterRot.rotatedVector(initial) + origin;
 
 					stream << destination.x() << " "<< destination.y() << " " << destination.z() << " ";
 
-					initial.setY( jEnd );
+					initial.setY( iEnd );
 					destination = quaterRot.rotatedVector(initial) + origin;
 
 					stream << destination.x() << " "<< destination.y() << " " << destination.z() << " ";
 
-					initial.setX( iStart );
+					initial.setX( jStart );
 					destination = quaterRot.rotatedVector(initial) + origin;
 
 					stream << destination.x() << " "<< destination.y() << " " << destination.z() << endl;
