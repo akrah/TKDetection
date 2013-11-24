@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>692</width>
-    <height>537</height>
+    <width>683</width>
+    <height>555</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -148,8 +148,8 @@
             <widget class="QWidget" name="scrollAreaWidgetContents">
              <property name="geometry">
               <rect>
-               <x>96</x>
-               <y>177</y>
+               <x>93</x>
+               <y>182</y>
                <width>0</width>
                <height>0</height>
               </rect>
@@ -211,7 +211,7 @@
            <property name="geometry">
             <rect>
              <x>0</x>
-             <y>63</y>
+             <y>66</y>
              <width>390</width>
              <height>234</height>
             </rect>
@@ -243,8 +243,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>692</width>
-     <height>25</height>
+     <width>683</width>
+     <height>29</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFichier">
@@ -354,8 +354,8 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>434</width>
-              <height>148</height>
+              <width>422</width>
+              <height>167</height>
              </rect>
             </property>
             <attribute name="label">
@@ -554,8 +554,8 @@ du repère polaire</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>259</width>
-              <height>223</height>
+              <width>255</width>
+              <height>251</height>
              </rect>
             </property>
             <attribute name="label">
@@ -812,8 +812,8 @@ zone restreinte</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>415</width>
-              <height>253</height>
+              <width>401</width>
+              <height>283</height>
              </rect>
             </property>
             <attribute name="label">
@@ -977,8 +977,8 @@ sur une coupe valide</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>415</width>
-              <height>253</height>
+              <width>401</width>
+              <height>283</height>
              </rect>
             </property>
             <attribute name="label">
@@ -1212,8 +1212,8 @@ sur une coupe valide</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>388</width>
-              <height>248</height>
+              <width>380</width>
+              <height>282</height>
              </rect>
             </property>
             <attribute name="label">
@@ -1480,8 +1480,8 @@ sur une coupe valide</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>388</width>
-              <height>285</height>
+              <width>375</width>
+              <height>321</height>
              </rect>
             </property>
             <attribute name="label">
@@ -1823,8 +1823,8 @@ sur une coupe valide</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>335</width>
-              <height>198</height>
+              <width>327</width>
+              <height>214</height>
              </rect>
             </property>
             <attribute name="label">
@@ -2123,8 +2123,8 @@ l'intervalle angulaire</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>374</width>
-              <height>86</height>
+              <width>358</width>
+              <height>94</height>
              </rect>
             </property>
             <attribute name="label">
@@ -2214,8 +2214,8 @@ l'intervalle angulaire</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>319</width>
-              <height>181</height>
+              <width>312</width>
+              <height>193</height>
              </rect>
             </property>
             <attribute name="label">
@@ -2423,8 +2423,8 @@ l'intervalle angulaire</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>334</width>
-              <height>157</height>
+              <width>326</width>
+              <height>174</height>
              </rect>
             </property>
             <attribute name="label">
@@ -2612,8 +2612,8 @@ l'intervalle angulaire</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>261</width>
-              <height>84</height>
+              <width>255</width>
+              <height>92</height>
              </rect>
             </property>
             <attribute name="label">
@@ -2678,8 +2678,8 @@ l'intervalle angulaire</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>398</width>
-              <height>112</height>
+              <width>397</width>
+              <height>124</height>
              </rect>
             </property>
             <attribute name="label">
@@ -2786,7 +2786,7 @@ l'intervalle angulaire</string>
         <enum>QTabWidget::South</enum>
        </property>
        <property name="currentIndex">
-        <number>3</number>
+        <number>4</number>
        </property>
        <widget class="QWidget" name="_tabSliceHistogram">
         <attribute name="title">
@@ -2868,7 +2868,7 @@ l'intervalle angulaire</string>
          </item>
          <item>
           <widget class="QwtPolarPlot" name="_polarSectorHistogram">
-           <property name="plotBackground">
+           <property name="plotBackground" stdset="0">
             <brush brushstyle="SolidPattern">
              <color alpha="0">
               <red>255</red>
@@ -2898,6 +2898,16 @@ l'intervalle angulaire</string>
         <layout class="QVBoxLayout" name="verticalLayout_7">
          <item>
           <widget class="QwtPlot" name="_plotEllipticalAccumulationHistogram"/>
+         </item>
+        </layout>
+       </widget>
+       <widget class="QWidget" name="tab_7">
+        <attribute name="title">
+         <string>5. Histogramme des rayons d'ellipses</string>
+        </attribute>
+        <layout class="QVBoxLayout" name="verticalLayout_9">
+         <item>
+          <widget class="QwtPlot" name="_plotKnotEllipseRadiiHistogram"/>
          </item>
         </layout>
        </widget>

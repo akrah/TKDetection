@@ -14,10 +14,11 @@ namespace Ui
 
 class QLabel;
 
-class EllipticalAccumulationHistogram;
+class KnotEllipseRadiiHistogram;
 class KnotPithProfile;
 class PieChart;
 class PlotEllipticalAccumulationHistogram;
+class PlotKnotEllipseRadiiHistogram;
 class PlotKnotPithProfile;
 class PlotSectorHistogram;
 class PlotSliceHistogram;
@@ -65,6 +66,7 @@ private slots:
 	void updateSliceHistogram();
 	void updateSectorHistogram( const Interval<uint> &interval );
 	void updateKnotPithProfile();
+	void updateKnotEllipseRadiiHistogram();
 	void updateEllipticalAccumulationHistogram();
 
 	void resetHistogramDefaultValuesZMotion();
@@ -133,8 +135,10 @@ private:
 	KnotPithProfile *_knotPithProfile;
 	PlotKnotPithProfile *_plotKnotPithProfile;
 
-	EllipticalAccumulationHistogram * _ellipticalAccumulationHistogram;
-	PlotEllipticalAccumulationHistogram * _plotEllipticalAccumulationHistogram;
+	KnotEllipseRadiiHistogram * _knotEllipseRadiiHistogram;
+	PlotKnotEllipseRadiiHistogram * _plotKnotEllipseRadiiHistogram;
+
+	PlotEllipticalAccumulationHistogram *_plotEllipticalAccumulationHistogram;
 
 	uint _currentSlice;
 	uint _currentYSlice;

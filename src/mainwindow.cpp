@@ -7,6 +7,7 @@
 #include "inc/define.h"
 #include "inc/dicomreader.h"
 #include "inc/ellipticalaccumulationhistogram.h"
+#include "inc/knotellipseradiihistogram.h"
 #include "inc/knotpithprofile.h"
 #include "inc/pith.h"
 #include "inc/pithextractorboukadida.h"
@@ -15,6 +16,7 @@
 #include "inc/piechart.h"
 #include "inc/piepart.h"
 #include "inc/plotellipticalaccumulationhistogram.h"
+#include "inc/plotknotellipseradiihistogram.h"
 #include "inc/plotknotpithprofile.h"
 #include "inc/plotsectorhistogram.h"
 #include "inc/plotslicehistogram.h"
@@ -45,7 +47,8 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 	_sliceHistogram(new SliceHistogram()), _plotSliceHistogram(new PlotSliceHistogram()),
 	_sectorHistogram(new SectorHistogram()), _plotSectorHistogram(new PlotSectorHistogram()),
 	_knotPithProfile(new KnotPithProfile()), _plotKnotPithProfile(new PlotKnotPithProfile()),
-	_ellipticalAccumulationHistogram(new EllipticalAccumulationHistogram()), _plotEllipticalAccumulationHistogram(new PlotEllipticalAccumulationHistogram()),
+	_knotEllipseRadiiHistogram(new KnotEllipseRadiiHistogram), _plotKnotEllipseRadiiHistogram(new PlotKnotEllipseRadiiHistogram),
+	_plotEllipticalAccumulationHistogram(new PlotEllipticalAccumulationHistogram()),
 	_currentSlice(0), _currentYSlice(0), _currentMaximum(0), _currentSector(0), _treeRadius(0)
 {
 	_ui->setupUi(this);
@@ -82,6 +85,8 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 	_plotKnotPithProfile->attach(_ui->_plotKnotPithProfile);
 
 	_plotEllipticalAccumulationHistogram->attach(_ui->_plotEllipticalAccumulationHistogram);
+
+	_plotKnotEllipseRadiiHistogram->attach(_ui->_plotKnotEllipseRadiiHistogram);
 
 	QwtPolarGrid *grid = new QwtPolarGrid();
 	grid->showAxis(QwtPolar::AxisBottom,false);
@@ -248,7 +253,8 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 MainWindow::~MainWindow()
 {
 	delete _plotEllipticalAccumulationHistogram;
-	delete _ellipticalAccumulationHistogram;
+	delete _plotKnotEllipseRadiiHistogram;
+	delete _knotEllipseRadiiHistogram;
 	delete _plotKnotPithProfile;
 	delete _knotPithProfile;
 	delete _plotSectorHistogram;
@@ -511,7 +517,7 @@ void MainWindow::drawTangentialView()
 				_tangentialBillon->pith().draw(_tangentialPix,currentSlice, 2);
 			}
 
-			const qreal ellipseWidth = _ellipticalAccumulationHistogram->maximumIndex(2);
+			const qreal ellipseWidth = _knotEllipseRadiiHistogram->ellipticalHistogram(currentSlice).detectedRadius();
 			const qreal ellipseHeight = ellipseWidth*ellipticityRate;
 
 			painter.begin(&_tangentialPix);
@@ -619,6 +625,9 @@ void MainWindow::setTangentialSlice( const int &sliceIndex )
 	_plotKnotPithProfile->moveCursor(sliceIndex);
 	_ui->_plotKnotPithProfile->replot();
 
+	_plotKnotEllipseRadiiHistogram->moveCursor(sliceIndex);
+	_plotKnotEllipseRadiiHistogram->replot();
+
 	updateEllipticalAccumulationHistogram();
 
 	drawTangentialView();
@@ -714,7 +723,7 @@ void MainWindow::selectSectorInterval(const int &index, const bool &draw )
 	if (draw)
 	{
 		updateKnotPithProfile();
-		updateEllipticalAccumulationHistogram();
+		updateKnotEllipseRadiiHistogram();
 		drawSlice();
 		drawTangentialView();
 	}
@@ -811,19 +820,32 @@ void MainWindow::updateKnotPithProfile()
 	_ui->_plotKnotPithProfile->replot();
 }
 
-void MainWindow::updateEllipticalAccumulationHistogram()
+void MainWindow::updateKnotEllipseRadiiHistogram()
 {
-	_ellipticalAccumulationHistogram->clear();
+	_knotEllipseRadiiHistogram->clear();
 
-	if ( _tangentialBillon && _tangentialBillon->hasPith() && !_knotPithProfile->isEmpty() )
+	if ( _tangentialBillon && _tangentialBillon->hasPith() && _knotPithProfile->size() )
 	{
-		const uint &currentSliceIndex = _ui->_sliderSelectTangentialSlice->value();
-		const qreal ellipticityRate = (_tangentialBillon->voxelWidth()/_tangentialBillon->voxelHeight()) / qCos(_knotPithProfile->at(currentSliceIndex));
-		_ellipticalAccumulationHistogram->construct( _tangentialBillon->slice(currentSliceIndex), _tangentialBillon->pithCoord(currentSliceIndex), ellipticityRate );
+		_knotEllipseRadiiHistogram->construct( *_tangentialBillon, *_knotPithProfile );
 	}
 
-	_plotEllipticalAccumulationHistogram->update( *_ellipticalAccumulationHistogram );
-	_ui->_plotEllipticalAccumulationHistogram->setAxisScale(QwtPlot::xBottom,0,_ellipticalAccumulationHistogram->size());
+	_plotKnotEllipseRadiiHistogram->update( *_knotEllipseRadiiHistogram );
+	_plotKnotEllipseRadiiHistogram->moveCursor( _ui->_sliderSelectTangentialSlice->value() );
+	_ui->_plotKnotEllipseRadiiHistogram->setAxisScale(QwtPlot::xBottom,0,_knotEllipseRadiiHistogram->size());
+	_ui->_plotKnotEllipseRadiiHistogram->replot();
+
+	updateEllipticalAccumulationHistogram();
+}
+
+void MainWindow::updateEllipticalAccumulationHistogram()
+{
+	const uint &currentSliceIndex = _ui->_sliderSelectTangentialSlice->value();
+
+	if ( _knotEllipseRadiiHistogram->isEmpty() ) return;
+
+	const EllipticalAccumulationHistogram &ellipticalHistogram = _knotEllipseRadiiHistogram->ellipticalHistogram(currentSliceIndex);
+	_plotEllipticalAccumulationHistogram->update( ellipticalHistogram );
+	_ui->_plotEllipticalAccumulationHistogram->setAxisScale(QwtPlot::xBottom,0,ellipticalHistogram.size());
 	_ui->_plotEllipticalAccumulationHistogram->replot();
 }
 
@@ -1728,23 +1750,23 @@ void MainWindow::exportPithOfCurrentKnotAreaToSdp()
 
 					stream << destination.x() << " "<< destination.y() << " " << destination.z() << " ";
 
-					initial.setX( iStart );
-					initial.setY( jStart );
+					initial.setX( jStart );
+					initial.setY( iStart );
 					destination = quaterRot.rotatedVector(initial) + origin;
 
 					stream << destination.x() << " "<< destination.y() << " " << destination.z() << " ";
 
-					initial.setX( iEnd );
+					initial.setX( jEnd );
 					destination = quaterRot.rotatedVector(initial) + origin;
 
 					stream << destination.x() << " "<< destination.y() << " " << destination.z() << " ";
 
-					initial.setY( jEnd );
+					initial.setY( iEnd );
 					destination = quaterRot.rotatedVector(initial) + origin;
 
 					stream << destination.x() << " "<< destination.y() << " " << destination.z() << " ";
 
-					initial.setX( iStart );
+					initial.setX( jStart );
 					destination = quaterRot.rotatedVector(initial) + origin;
 
 					stream << destination.x() << " "<< destination.y() << " " << destination.z() << endl;
