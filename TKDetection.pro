@@ -47,6 +47,7 @@ SOURCES	=	src/main.cpp \
 			src/globalfunctions.cpp \
 			src/knotellipseradiihistogram.cpp \
 			src/knotpithprofile.cpp \
+			src/lowess.cpp \
 			src/mainwindow.cpp \
 			src/ofsexport.cpp \
 			src/pgm3dexport.cpp \
@@ -56,6 +57,7 @@ SOURCES	=	src/main.cpp \
 			src/pithextractor.cpp \
 			src/pithextractorboukadida.cpp \
 			src/plotellipticalaccumulationhistogram.cpp \
+			src/plotknotellipseradiihistogram.cpp \
 			src/plotknotpithprofile.cpp \
 			src/plotsectorhistogram.cpp \
 			src/plotslicehistogram.cpp \
@@ -68,7 +70,6 @@ SOURCES	=	src/main.cpp \
 			tst/test_intervalshistogram.cpp \
 			src/tiffreader.cpp \
 			src/v3dexport.cpp \
-    src/plotknotellipseradiihistogram.cpp
 
 HEADERS	=	inc/billon.h \
 			inc/billonalgorithms.h \
@@ -85,6 +86,7 @@ HEADERS	=	inc/billon.h \
 			inc/interval.h \
 			inc/knotellipseradiihistogram.h \
 			inc/knotpithprofile.h \
+			inc/lowess.h \
 			inc/mainwindow.h \
 			inc/ofsexport.h \
 			inc/pgm3dexport.h \
@@ -94,6 +96,7 @@ HEADERS	=	inc/billon.h \
 			inc/pithextractor.h \
 			inc/pithextractorboukadida.h \
 			inc/plotellipticalaccumulationhistogram.h \
+			inc/plotknotellipseradiihistogram.h \
 			inc/plotknotpithprofile.h \
 			inc/plotsectorhistogram.h \
 			inc/plotslicehistogram.h \
@@ -106,7 +109,6 @@ HEADERS	=	inc/billon.h \
 			tst/test_intervalshistogram.h \
 			inc/tiffreader.h \
 			inc/v3dexport.h \
-    inc/plotknotellipseradiihistogram.h
 
 FORMS =	ui/mainwindow.ui
 
@@ -123,7 +125,7 @@ INCLUDEPATH *=	/usr/include/ /usr/local/include/
 
 QMAKE_LIBDIR *=	/usr/local/lib/
 
-LIBS *= -lblas -llapack -larmadillo -lDGtal -lDGtalIO
+LIBS *= -lblas -llapack -larmadillo -lDGtal -lDGtalIO -lgsl -lgslcblas
 
 # ITK
 #----#

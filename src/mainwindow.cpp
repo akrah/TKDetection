@@ -176,16 +176,11 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 	QObject::connect(_ui->_spinHistogramIntervalGap_zMotionAngular, SIGNAL(valueChanged(int)), _ui->_sliderHistogramIntervalGap_zMotionAngular, SLOT(setValue(int)));
 	QObject::connect(_ui->_buttonHistogramResetDefaultValuesZMotionAngular, SIGNAL(clicked()), this, SLOT(resetHistogramDefaultValuesZMotionAngular()));
 
-	/**************************************
-	* Évènements de l'onglet "Segmentation"
-	***************************************/
-	// Onglet "Composantes connexes"
-	QObject::connect(_ui->_sliderSectorThresholding, SIGNAL(valueChanged(int)), _ui->_spinSectorThresholding, SLOT(setValue(int)));
-	QObject::connect(_ui->_spinSectorThresholding, SIGNAL(valueChanged(int)), _ui->_sliderSectorThresholding, SLOT(setValue(int)));
-	QObject::connect(_ui->_sliderMinimalSizeOf3DConnexComponents, SIGNAL(valueChanged(int)), _ui->_spinMinimalSizeOf3DConnexComponents, SLOT(setValue(int)));
-	QObject::connect(_ui->_spinMinimalSizeOf3DConnexComponents, SIGNAL(valueChanged(int)), _ui->_sliderMinimalSizeOf3DConnexComponents, SLOT(setValue(int)));
-	QObject::connect(_ui->_sliderMinimalSizeOf2DConnexComponents, SIGNAL(valueChanged(int)), _ui->_spinMinimalSizeOf2DConnexComponents, SLOT(setValue(int)));
-	QObject::connect(_ui->_spinMinimalSizeOf2DConnexComponents, SIGNAL(valueChanged(int)), _ui->_sliderMinimalSizeOf2DConnexComponents, SLOT(setValue(int)));
+	/**********************************
+	* Évènements de l'onglet "Ellipses"
+	***********************************/
+	QObject::connect(_ui->_spinLowessBandWidth, SIGNAL(valueChanged(double)), this, SLOT(updateKnotEllipseRadiiHistogram()));
+
 
 	/***********************************
 	* Évènements de l'onglet "Processus"
@@ -517,7 +512,7 @@ void MainWindow::drawTangentialView()
 				_tangentialBillon->pith().draw(_tangentialPix,currentSlice, 2);
 			}
 
-			const qreal ellipseWidth = _knotEllipseRadiiHistogram->ellipticalHistogram(currentSlice).detectedRadius();
+			const qreal ellipseWidth = _knotEllipseRadiiHistogram->lowessData()[currentSlice];
 			const qreal ellipseHeight = ellipseWidth*ellipticityRate;
 
 			painter.begin(&_tangentialPix);
@@ -626,7 +621,7 @@ void MainWindow::setTangentialSlice( const int &sliceIndex )
 	_ui->_plotKnotPithProfile->replot();
 
 	_plotKnotEllipseRadiiHistogram->moveCursor(sliceIndex);
-	_plotKnotEllipseRadiiHistogram->replot();
+	_ui->_plotKnotEllipseRadiiHistogram->replot();
 
 	updateEllipticalAccumulationHistogram();
 
@@ -826,7 +821,7 @@ void MainWindow::updateKnotEllipseRadiiHistogram()
 
 	if ( _tangentialBillon && _tangentialBillon->hasPith() && _knotPithProfile->size() )
 	{
-		_knotEllipseRadiiHistogram->construct( *_tangentialBillon, *_knotPithProfile );
+		_knotEllipseRadiiHistogram->construct( *_tangentialBillon, *_knotPithProfile, _ui->_spinLowessBandWidth->value() );
 	}
 
 	_plotKnotEllipseRadiiHistogram->update( *_knotEllipseRadiiHistogram );
