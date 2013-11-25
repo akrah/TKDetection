@@ -2,6 +2,7 @@
 
 #include "inc/billon.h"
 #include "inc/knotpithprofile.h"
+#include "inc/lowess.h"
 
 #include <QtGlobal>
 
@@ -19,7 +20,13 @@ const EllipticalAccumulationHistogram & KnotEllipseRadiiHistogram::ellipticalHis
 	return _ellipticalHistograms[sliceIndex];
 }
 
-void KnotEllipseRadiiHistogram::construct( const Billon &tangentialBillon, const KnotPithProfile &knotPithProfile )
+const QVector<qreal> &KnotEllipseRadiiHistogram::lowessData() const
+{
+	return _lowessData;
+}
+
+
+void KnotEllipseRadiiHistogram::construct( const Billon &tangentialBillon, const KnotPithProfile &knotPithProfile, const qreal &lowessBandWidth )
 {
 	const uint &nbSlices = tangentialBillon.n_slices;
 
@@ -40,4 +47,8 @@ void KnotEllipseRadiiHistogram::construct( const Billon &tangentialBillon, const
 		ellipticalHistogram.construct( tangentialBillon.slice(k), tangentialBillon.pithCoord(k), ellipticityRate );
 		(*this)[k] = ellipticalHistogram.detectedRadius();
 	}
+
+	// LOWESS
+	Lowess lowess(lowessBandWidth);
+	lowess.compute( *this, _lowessData );
 }
