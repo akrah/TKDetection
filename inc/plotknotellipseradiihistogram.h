@@ -2,6 +2,7 @@
 #define PLOTKNOTELLIPSERADIIHISTOGRAM_H
 
 #include <qwt_plot_histogram.h>
+#include <qwt_plot_curve.h>
 
 class QwtPlot;
 class KnotEllipseRadiiHistogram;
@@ -21,6 +22,7 @@ public:
 
 private:
 	QwtPlotHistogram _histogramData;
+	QwtPlotCurve _histogramSmoothed;
 	QwtPlotHistogram _histogramCursor;
 };
 
