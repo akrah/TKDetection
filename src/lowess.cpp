@@ -1,9 +1,14 @@
 #include "inc/lowess.h"
 
+#include "inc/interval.h"
+
 #include <QVector>
 #include <qmath.h>
 
 #include <gsl/gsl_multifit.h>
+#include <gsl/gsl_linalg.h>
+#include <gsl/gsl_blas.h>
+
 #include <armadillo>
 
 Lowess::Lowess( const qreal &bandwidth ) : _bandWidth(bandwidth)
@@ -20,10 +25,14 @@ void Lowess::setBandWidth( const qreal &bandwidth )
 	_bandWidth = bandwidth;
 }
 
-void Lowess::compute( const QVector<qreal> &datas, QVector<qreal> &interpolatedDatas ) const
+void Lowess::compute( const QVector<qreal> &datas, QVector<qreal> &interpolatedDatas, QVector<qreal> &residus ) const
 {
 	// Create test dataset.
-	const int size = datas.size();
+	const int &size = datas.size();
+	interpolatedDatas.resize(size);
+	residus.resize(size);
+
+	if ( !size ) return;
 
 	// Loess neighborhood parameter.
 	// XXX: Careful, alpha is assume to be <= 1 here.
@@ -31,7 +40,7 @@ void Lowess::compute( const QVector<qreal> &datas, QVector<qreal> &interpolatedD
 
 	// Working arrays. Yes we need both distances and sortedDistances.
 	gsl_matrix *X = gsl_matrix_alloc(size, 3);
-	gsl_matrix *cov = gsl_matrix_alloc(3, 3);
+	//gsl_matrix *cov = gsl_matrix_alloc(3, 3);
 	gsl_vector *weights = gsl_vector_alloc(size);
 	gsl_vector *c = gsl_vector_alloc(3);
 	gsl_vector *x = gsl_vector_alloc(3);
@@ -41,7 +50,7 @@ void Lowess::compute( const QVector<qreal> &datas, QVector<qreal> &interpolatedD
 	arma::Col<qreal> distances(size);
 	arma::Col<qreal> sortedDistances(size);
 
-	qreal y, yErr, chisq;
+	qreal y, yi, wi, alpha0, alpha;
 	int i, j;
 
 	// Setup the model matrix X for a quadratic fit.
@@ -52,7 +61,14 @@ void Lowess::compute( const QVector<qreal> &datas, QVector<qreal> &interpolatedD
 		gsl_matrix_set(X, i, 2, qPow(i,2));
 	}
 
-	interpolatedDatas.resize(size);
+	gsl_multifit_linear_workspace *work = gsl_multifit_linear_alloc(size, 3);
+	gsl_matrix *A = work->A;
+	gsl_matrix *Q = work->Q;
+	gsl_matrix *QSI = work->QSI;
+	gsl_vector *S = work->S;
+	gsl_vector *t = work->t;
+	gsl_vector *xt = work->xt;
+	gsl_vector *D = work->D;
 
 	for ( i=0 ; i<size ; ++i )
 	{
@@ -68,26 +84,74 @@ void Lowess::compute( const QVector<qreal> &datas, QVector<qreal> &interpolatedD
 		// Compute weights.
 		for ( j=0 ; j<size ; ++j )
 		{
-			//weights.at(j) = tricube(distances[j], sortedDistances[q]);
 			gsl_vector_set(weights, j, tricube(distances[j], sortedDistances[q]));
 		}
 
-		gsl_multifit_linear_workspace *work = gsl_multifit_linear_alloc(size, 3);
-		gsl_multifit_wlinear(X, weights, &(yValues.vector), c, cov, &chisq, work);
-		gsl_multifit_linear_free(work);
+/******************************/
+
+		/* Scale X, A = sqrt(w) X */
+		gsl_matrix_memcpy (A, X);
+		for ( j=0 ; j<size ; ++j )
+		{
+			wi = gsl_vector_get (weights, j);
+			if (wi < 0)	wi = 0;
+			{
+				gsl_vector_view row = gsl_matrix_row (A, j);
+				gsl_vector_scale (&row.vector, sqrt (wi));
+			}
+		}
+
+		/* Balance the columns of the matrix A if requested */
+		gsl_linalg_balance_columns (A, D);
+
+		/* Decompose A into U S Q^T */
+		gsl_linalg_SV_decomp_mod (A, QSI, Q, S, xt);
+
+		/* Solve sqrt(w) y = A c for c, by first computing t = sqrt(w) y */
+		for ( j=0 ; j<size ; ++j )
+		{
+			wi = gsl_vector_get (weights, j);
+			yi = gsl_vector_get (&(yValues.vector), j);
+			if (wi < 0)	wi = 0;
+			gsl_vector_set (t, j, sqrt (wi) * yi);
+		}
+		gsl_blas_dgemv (CblasTrans, 1.0, A, t, 0.0, xt);
+
+		/* Scale the matrix Q, Q' = Q S^-1 */
+		gsl_matrix_memcpy (QSI, Q);
+		alpha0 = gsl_vector_get (S, 0);
+		for ( j=0 ; j<3 ; ++j )
+		{
+			gsl_vector_view column = gsl_matrix_column (QSI, j);
+			alpha = gsl_vector_get (S, j);
+
+			if (alpha <= 2.2204460492503131e-16 * alpha0) alpha = 0.0;
+			else alpha = 1.0 / alpha;
+			gsl_vector_scale (&column.vector, alpha);
+		}
+
+		/* Solution */
+		gsl_blas_dgemv (CblasNoTrans, 1.0, QSI, xt, 0.0, c);
+
+		/* Unscale the balancing factors */
+		gsl_vector_div (c, D);
+
+/*****************************/
 
 		gsl_vector_set(x, 0, 1.0);
 		gsl_vector_set(x, 1, i);
 		gsl_vector_set(x, 2, qPow(i,2));
-		gsl_multifit_linear_est (x, c, cov, &y, &yErr);
+		gsl_blas_ddot(x, c, &y);
 
 		interpolatedDatas[i] = y;
+		residus[i] = y-datas[i];
 	}
 
+	gsl_multifit_linear_free(work);
 	gsl_matrix_free(X);
 	gsl_vector_free(weights);
 	gsl_vector_free(c);
-	gsl_matrix_free(cov);
+	gsl_vector_free(x);
 }
 
 qreal Lowess::tricube( const qreal &u, const qreal &t ) const
