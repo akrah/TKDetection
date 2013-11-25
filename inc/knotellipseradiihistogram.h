@@ -21,6 +21,9 @@ public:
 	void construct( const Billon &tangentialBillon, const KnotPithProfile &knotPithProfile , const qreal & lowessBandWidth );
 
 private:
+	void outlierInterpolation( const QVector<qreal> &residus, const qreal &iqrCoeff = 1.0 );
+
+private:
 	QVector<EllipticalAccumulationHistogram> _ellipticalHistograms;
 	QVector<qreal> _lowessData;
 };
