@@ -959,6 +959,7 @@ void MainWindow::exportToSdp()
 	switch ( _ui->_comboExportToSdpType->currentIndex() )
 	{
 		case 0 : exportPithOfCurrentKnotAreaToSdp(); break;
+        case 1 : exportPithOfAllKnotAreaToSdp(); break;
 //		case 1 : exportCurrentSegmentedKnotToSdp();	break;
 //		case 2 : exportSegmentedKnotsOfCurrentSliceIntervalToSdp(_ui->_checkBoxKeepBillonSliceNumber->isChecked() );	break;
 //		case 3 : exportAllSegmentedKnotsOfBillonToSdp(); break;
@@ -1678,25 +1679,82 @@ void MainWindow::exportImageCartesianSliceIntervalToPgm3d()
 //	else QMessageBox::warning(this,tr("Exporter tous les nœuds segmentés du billon en V3D"),tr("L'export a échoué : la moelle n'est pas calculée."));
 //}
 
-void MainWindow::exportPithOfCurrentKnotAreaToSdp()
+
+
+void  MainWindow::exportPithOfAllKnotAreaToSdp()
 {
-	if ( _tangentialBillon && _tangentialBillon->hasPith() )
-	{
-		QString fileName = QFileDialog::getSaveFileName(this, tr("Exporter la moelle de la zone de nœud courante en SDP"), "pith.sdp",
-														tr("Fichiers SDP (*.sdp);;Tous les fichiers (*.*)"));
-		if ( !fileName.isEmpty() )
-		{
-			QFile file(fileName);
-			if ( file.open(QIODevice::WriteOnly) )
-			{
-				QTextStream stream(&file);
+
+
+        QString fileName = QFileDialog::getSaveFileName(this, tr("Exporter la moelle de la zone de nœud courante en SDP"), "pith.sdp",
+                                                        tr("Fichiers SDP (*.sdp);;Tous les fichiers (*.*)"));
+        if ( !fileName.isEmpty() )
+        {
+            QFile file(fileName);
+            if ( file.open(QIODevice::WriteOnly) )
+            {
+                QTextStream stream(&file);
+
+
+                for (unsigned int intervalIndex=1 ; intervalIndex< _ui->_comboSelectSliceInterval->count() ; ++intervalIndex )
+                {
+                    qDebug() << "processing interval: " << intervalIndex;
+
+                    _ui->_comboSelectSliceInterval->setCurrentIndex(intervalIndex);
+                    for ( unsigned int sectorIndex=1 ; sectorIndex< _ui->_comboSelectSectorInterval->count() ; ++sectorIndex )
+                    {
+                        qDebug() << "processing sector: " << sectorIndex;
+                        _ui->_comboSelectSectorInterval->setCurrentIndex(sectorIndex);
+                        exportPithOfAKnotAreaToSdp(stream, intervalIndex-1, sectorIndex-1);
+                        qDebug() << "processing sector: " << sectorIndex << "/" <<_ui->_comboSelectSectorInterval->count()-1<< " [done]";
+                    }
+                    qDebug() << "processing interval: " << intervalIndex<< "/"<<_ui->_comboSelectSliceInterval->count()-1<<  " [done]";
+
+                }
+            }
+        }
+
+}
+
+void  MainWindow::exportPithOfCurrentKnotAreaToSdp()
+{
+    if ( _tangentialBillon && _tangentialBillon->hasPith() )
+    {
+        QString fileName = QFileDialog::getSaveFileName(this, tr("Exporter la moelle de la zone de nœud courante en SDP"), "pith.sdp",
+                                                        tr("Fichiers SDP (*.sdp);;Tous les fichiers (*.*)"));
+        if ( !fileName.isEmpty() )
+        {
+            QFile file(fileName);
+            if ( file.open(QIODevice::WriteOnly) )
+            {
+                QTextStream stream(&file);
+                exportPithOfAKnotAreaToSdp(stream, _ui->_comboSelectSliceInterval->currentIndex()-1, _ui->_comboSelectSectorInterval->currentIndex()-1);
+                file.close();
+                QMessageBox::information(this,tr("Exporter la moelle de la zone de nœud courante en SDP"), tr("Export réussi !"));
+
+            }else
+                QMessageBox::warning(this,tr("Exporter la moelle de la zone de nœud courante en SDP"),tr("L'export a échoué : impossible de créer le ficher %1.").arg(fileName));
+
+        }
+
+    }else QMessageBox::warning(this,tr("Exporter la moelle de la zone de nœud courante en SDP"),tr("L'export a échoué : la moelle n'existe pas."));
+
+
+
+
+}
+
+
+
+void MainWindow::exportPithOfAKnotAreaToSdp(QTextStream &stream, unsigned int numSliceInterval, unsigned int numAngularInterval)
+{
+
 				stream << "# SDP (Sequence of Discrete Points)" << endl;
 				stream << "#" << endl;
 				stream << "# Pith  |                 Window size" << endl;
 				stream << "# Coord | Top Left | Top Right | Bottom Right | Bottom Left" << endl;
 				stream << "# x y z    x y z       x y z        x y z         x y z" << endl;
 
-				const Interval<uint> &sliceInterval = _sliceHistogram->interval(_ui->_comboSelectSliceInterval->currentIndex()-1);
+                const Interval<uint> &sliceInterval = _sliceHistogram->interval(numSliceInterval);
 				const qreal zPithCoord = sliceInterval.mid();
 				const rCoord2D &originPith = _billon->pithCoord(zPithCoord);
 
@@ -1713,7 +1771,7 @@ void MainWindow::exportPithOfCurrentKnotAreaToSdp()
 				const QQuaternion quaterY = QQuaternion::fromAxisAndAngle( 0, 1, 0, alpha*RAD_TO_DEG_FACT );
 
 				// Rotation selon l'angle de la zone de nœuds
-				const Interval<uint> &angularInterval = _sectorHistogram->interval(_ui->_comboSelectSectorInterval->currentIndex()-1);
+                const Interval<uint> &angularInterval = _sectorHistogram->interval(numAngularInterval);
 				const uint angularRange = (angularInterval.max() + (angularInterval.isValid() ? 0. : PieChartSingleton::getInstance()->nbSectors())) - angularInterval.min();
 				const qreal bisectorOrientation = (angularInterval.min()+angularRange/2.)*PieChartSingleton::getInstance()->angleStep();
 				const QQuaternion quaterZ = QQuaternion::fromAxisAndAngle( 0, 0, 1, bisectorOrientation*RAD_TO_DEG_FACT );
@@ -1769,14 +1827,7 @@ void MainWindow::exportPithOfCurrentKnotAreaToSdp()
 					origin += shiftStep;
 				}
 
-				file.close();
 
-				QMessageBox::information(this,tr("Exporter la moelle de la zone de nœud courante en SDP"), tr("Export réussi !"));
-			}
-			else QMessageBox::warning(this,tr("Exporter la moelle de la zone de nœud courante en SDP"),tr("L'export a échoué : impossible de créer le ficher %1.").arg(fileName));
-		}
-	}
-	else QMessageBox::warning(this,tr("Exporter la moelle de la zone de nœud courante en SDP"),tr("L'export a échoué : la moelle n'existe pas."));
 }
 
 
