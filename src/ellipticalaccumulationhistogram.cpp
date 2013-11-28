@@ -12,9 +12,9 @@ EllipticalAccumulationHistogram::~EllipticalAccumulationHistogram()
 {
 }
 
-const uint &EllipticalAccumulationHistogram::detectedRadius() const
+uint EllipticalAccumulationHistogram::detectedRadius() const
 {
-	return _maximums[1];
+	return _maximums.size()?_maximums[1]:0;
 }
 
 /**********************************
@@ -34,7 +34,7 @@ void EllipticalAccumulationHistogram::construct( const Slice &slice, const uiCoo
 
 	resize(nbEllipses);
 
-	(*this)[0] = slice.at( qRound(pithCoordY), qRound(pithCoordX) );
+	if ( nbEllipses ) (*this)[0] = slice.at( 0,0 );
 	for ( a=1 ; a<nbEllipses ; a++ )
 	{
 		nbPixelOnEllipse = 0;
@@ -89,11 +89,11 @@ void EllipticalAccumulationHistogram::construct( const Slice &slice, const uiCoo
 void EllipticalAccumulationHistogram::findFirstMaximumAndNextMinimum()
 {
 	_maximums.clear();
-	_maximums.resize(3);
 
 	const uint &size = this->size();
+	if ( size<4 ) return;
 
-	if ( !size ) return;
+	_maximums.resize(3);
 
 	uint maximumIndex = 2;
 	while ( maximumIndex<size && (*this)[maximumIndex] <= (*this)[maximumIndex-2] ) maximumIndex++;

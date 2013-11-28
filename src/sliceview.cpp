@@ -90,7 +90,7 @@ void SliceView::drawCurrentSlice( QImage &image, const Billon &billon,
 {
 	const uint &width = billon.n_cols;
 	const uint &height = billon.n_rows;
-	const int &depth = billon.n_slices;
+	const uint &depth = billon.n_slices;
 	const int &minIntensity = intensityInterval.min();
 	const qreal fact = 255.0/intensityInterval.size();
 
@@ -106,8 +106,7 @@ void SliceView::drawCurrentSlice( QImage &image, const Billon &billon,
 	QRgb * line = (QRgb *) image.bits();
 	int color;
 	DGtal::Color dgtalColor;
-	uint i,j;
-	int k;
+	uint i,j, k;
 
 
 	/********************************************************************/
@@ -119,20 +118,26 @@ void SliceView::drawCurrentSlice( QImage &image, const Billon &billon,
 //	arma::Mat<qreal> sobelNorm( height, width );
 //	arma::Mat<char> hasContour( height, width );
 
-//	arma::Col<qreal> sobelNormVec((width-2)*(height-2));
+//	const int semiWidth = qFloor(width/2.);
+//	const int semiAdaptativeWidth = qFloor(semiWidth*(sliceIndex/static_cast<qreal>(depth)));
+//	const int iMin = qMax(semiWidth-semiAdaptativeWidth+1,0);
+//	const int iMax = semiWidth+semiAdaptativeWidth-1;
+
+//	arma::Col<qreal> sobelNormVec(qMax((2*semiAdaptativeWidth-2)*(height-2),0));
 //	arma::Col<qreal>::iterator sobelNormVecIt = sobelNormVec.begin();
 
 //	qreal sobelX, sobelY;
 
 //	const qreal &xDim = billon.voxelWidth();
 //	const qreal &yDim = billon.voxelHeight();
-//	const qreal voxelRatio = xDim/yDim;
+//	const qreal voxelRatio = qPow(xDim/yDim,2);
+
 
 //	orientations.fill(0);
 //	sobelNorm.fill(0.);
 //	for ( j=1 ; j<height-1 ; ++j )
 //	{
-//		for ( i=1 ; i<width-1 ; ++i )
+//		for ( i=iMin ; i<iMax ; ++i )
 //		{
 //			sobelX = slice.at( j-1, i-1 ) - slice.at( j-1, i+1 ) +
 //					 2* (slice.at( j, i-1 ) - slice.at( j, i+1 )) +
@@ -141,19 +146,19 @@ void SliceView::drawCurrentSlice( QImage &image, const Billon &billon,
 //					 2 * (slice.at( j+1, i ) - slice.at( j-1, i )) +
 //					 slice.at( j+1, i+1 ) - slice.at( j-1, i+1 );
 //			orientations.at(j,i) = qFuzzyIsNull(sobelX) ? 9999999999./1. : sobelY/sobelX*voxelRatio;
-//			sobelNorm.at(j,i) = qSqrt( qPow(sobelX*yDim,2) + qPow(sobelY*xDim,2) )/4.;
+//			sobelNorm.at(j,i) = qSqrt( qPow(sobelX*xDim,2) + qPow(sobelY*yDim,2) )/4.;
 //			*(sobelNormVecIt++) = sobelNorm.at(j,i);
 //		}
 //	}
 
 //	const arma::Col<qreal> sobelNormSort = arma::sort( sobelNormVec );
-//	const qreal &medianVal = sobelNormSort.at( sobelNormSort.n_elem/2 );
+//	const qreal &medianVal = sobelNormSort.n_elem?sobelNormSort.at( sobelNormSort.n_elem/2 ):0;
 
 //	uint nbContourPoints = 0;
 //	hasContour.fill(false);
 //	for ( j=1 ; j<height-1 ; ++j )
 //	{
-//		for ( i=1 ; i<width ; ++i )
+//		for ( i=iMin ; i<iMax ; ++i )
 //		{
 //			if ( sobelNorm.at(j,i) > medianVal )
 //			{
@@ -170,7 +175,7 @@ void SliceView::drawCurrentSlice( QImage &image, const Billon &billon,
 //	qreal x, y;
 //	for ( j=1 ; j<height-1 ; ++j )
 //	{
-//		for ( i=1 ; i<width-1 ; ++i )
+//		for ( i=iMin ; i<iMax ; ++i )
 //		{
 //			if ( hasContour.at(j,i) )
 //			{
@@ -227,7 +232,7 @@ void SliceView::drawCurrentSlice( QImage &image, const Billon &billon,
 //		}
 //	}
 
-//	const qreal fact = 255.0/sobelNormSort.at(((height-2)*(width-2)-1)*0.9);
+//	const qreal fact = 255.0/(sobelNormSort.n_elem?sobelNormSort.at((sobelNormSort.n_elem-1)*0.97):1.);
 
 
 	/********************************************************************/
@@ -235,11 +240,11 @@ void SliceView::drawCurrentSlice( QImage &image, const Billon &billon,
 
 	if ( axe == TKD::Y_PROJECTION )
 	{
-		for ( k=depth-1 ; k>=0 ; --k)
+		for ( k=0 ; k<depth ; ++k)
 		{
 			for ( i=0 ; i<width ; ++i)
 			{
-				color = (TKD::restrictedValue(billon.at(sliceIndex,i,k),intensityInterval)-minIntensity)*fact;
+				color = (TKD::restrictedValue(billon.at(sliceIndex,i,depth-k-1),intensityInterval)-minIntensity)*fact;
 				dgtalColor = ((aRender== TKD::HueScale) ? hueShade( color): (aRender==TKD::GrayScale)? grayShade(color): customShade(color));
 				*(line++) = qRgb(dgtalColor.red(),dgtalColor.green(),dgtalColor.blue());
 			}
@@ -258,71 +263,6 @@ void SliceView::drawCurrentSlice( QImage &image, const Billon &billon,
 				*(line++) = qRgb(dgtalColor.red(),dgtalColor.green(),dgtalColor.blue());
 			}
 		}
-
-//		QPainter painter(&image);
-
-//		QVector<QColor> colors;
-//		colors << Qt::blue << Qt::yellow << Qt::green << Qt::magenta << Qt::cyan << Qt::white;
-
-//		const qreal &pithCoordX = billon.hasPith()?billon.pithCoord(sliceIndex).x:width/2.;
-//		const qreal &pithCoordY = billon.hasPith()?billon.pithCoord(sliceIndex).y:height/2.;
-
-//		int x,y ;
-//		qreal a,b,d1,d2,aSquare,bSquare ;
-
-//		for ( a=1 ; a<20 ; a+=2 )
-//		{
-//			painter.setPen(colors[((int)a/2)%6]);
-//			b = a/2;
-//			aSquare = a*a;
-//			bSquare = b*b;
-//			x = 0;
-//			y = b;
-//			d1 = bSquare - aSquare*b + aSquare/4. ;
-//			painter.drawPoint(qRound(pithCoordX+x),qRound(pithCoordY+y));
-//			painter.drawPoint(qRound(pithCoordX+x),qRound(pithCoordY-y));
-//			painter.drawPoint(qRound(pithCoordX-x),qRound(pithCoordY-y));
-//			painter.drawPoint(qRound(pithCoordX-x),qRound(pithCoordY+y));
-//			while ( aSquare*(y-.5) > bSquare*(x+1) )
-//			{
-//				if ( d1 < 0 )
-//				{
-//					d1 += bSquare*(2*x+3) ;
-//					x++ ;
-//				}
-//				else
-//				{
-//					d1 += bSquare*(2*x+3) + aSquare*(-2*y+2) ;
-//					x++ ;
-//					y-- ;
-//				}
-//				painter.drawPoint(qRound(pithCoordX+x),qRound(pithCoordY+y));
-//				painter.drawPoint(qRound(pithCoordX+x),qRound(pithCoordY-y));
-//				painter.drawPoint(qRound(pithCoordX-x),qRound(pithCoordY-y));
-//				painter.drawPoint(qRound(pithCoordX-x),qRound(pithCoordY+y));
-//			}
-//			d2 = bSquare*(x+.5)*(x+.5) + aSquare*(y-1)*(y-1) - aSquare*bSquare ;
-//			while ( y > 0 )
-//			{
-//				if ( d2 < 0 )
-//				{
-//					d2 += bSquare*(2*x+2) + aSquare*(-2*y+3) ;
-//					y-- ;
-//					x++ ;
-//				}
-//				else
-//				{
-//					d2 += aSquare*(-2*y+3) ;
-//					y-- ;
-//				}
-//				painter.drawPoint(qRound(pithCoordX+x),qRound(pithCoordY+y));
-//				painter.drawPoint(qRound(pithCoordX+x),qRound(pithCoordY-y));
-//				painter.drawPoint(qRound(pithCoordX-x),qRound(pithCoordY-y));
-//				painter.drawPoint(qRound(pithCoordX-x),qRound(pithCoordY+y));
-//			}
-//		}
-
-//		painter.end();
 	}
 	else if ( axe == TKD::POLAR_PROJECTION )
 	{
