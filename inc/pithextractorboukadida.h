@@ -30,7 +30,7 @@ public:
 	 * \param	sliceMin Première coupe à traiter
 	 * \param	sliceMax Dernière coupe à traiter
 	 */
-	void process( Billon &billon ) const;
+	void process( Billon &billon , const bool &adaptativeWidth = false ) const;
 
 	/********************************************************
 	 * Get functions
@@ -130,7 +130,7 @@ private:
 	 * \param   nbContourPoints nombre de points utilisés pour tracer les droites
 	 * \return	les coordonnées de la moelle pour la coupe traitée
 	 */
-	uiCoord2D transHough( const Slice &slice, qreal & lineOnMaxRatio, const rCoord3D &voxelDims ) const;
+	uiCoord2D transHough( const Slice &slice, qreal & lineOnMaxRatio, const rCoord3D &voxelDims, const qreal &adaptativeWidthCoeff = 1.0 ) const;
 
 	/**
 	 * \fn		uint contour( const Slice &slice, arma::Mat<qreal> &orientations )
@@ -140,15 +140,14 @@ private:
 	 * \param   hasContour Matrice de booleen qui précise pour chaque pixel de Slice s'il est un point de contour
 	 * \return	le nombre d'orientations prises en compte
 	 */
-	uint contour( const Slice &slice, arma::Mat<qreal> &orientations, arma::Mat<char> & hasContour, const rCoord3D &voxelDims ) const;
+	uint contour( const Slice &slice, arma::Mat<qreal> &orientations, arma::Mat<char> & hasContour,
+				  const rCoord3D &voxelDims , const qreal & adaptativeWidthCoeff = 1.0 ) const;
 
 	void drawLine( arma::Mat<int> &slice, const iCoord2D &origin, const qreal &orientationOrig ) const;
 
 	void interpolation( Pith &pith, const QVector<qreal> &nbLineByMaxRatio , const Interval<uint> &sliceIntervalToInterpolate ) const;
 
-	void smoothing( Pith &pith, const uint &smoothingRadius, const Interval<uint> &sliceIntervalToSmooth ) const;
-
-	void fillBillonBackground( Billon &billonToFill, QVector<qreal> &backgroundProportions, const Interval<int> &intensityInterval ) const;
+	void fillBillonBackground( Billon &billonToFill, QVector<qreal> &backgroundProportions, const Interval<int> &intensityInterval, const bool &adaptativeWidth ) const;
 
 	Interval<uint> detectValidSliceInterval( const QVector<qreal> &backgroundProportions ) const;
 

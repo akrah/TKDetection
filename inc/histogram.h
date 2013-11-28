@@ -2,6 +2,8 @@
 #define HISTOGRAM_H
 
 #include "interval.h"
+#include "inc/globalfunctions.h"
+
 #include <numeric>
 #include <QVector>
 #include <QTextStream>
@@ -37,7 +39,6 @@ public:
 									  const int & derivativesPercentage, const int &minimumWidthOfIntervals, const bool & loop );
 
 protected:
-	virtual void meansSmoothing( const uint &smoothingRadius, const bool &loop );
 	virtual void computeMaximums( const int &minimumHeightPercentageOfMaximum, const int &neighborhoodOfMaximums, const bool &loop );
 	virtual void computeIntervals( const int &derivativesPercentage, const uint &minimumWidthOfIntervals, const bool &loop );
 
@@ -170,7 +171,14 @@ template <typename T>
 void Histogram<T>::computeMaximumsAndIntervals( const uint & smoothingRadius, const int & minimumHeightPercentageOfMaximum,
 												const int & derivativesPercentage, const int &minimumWidthOfIntervals, const bool & loop )
 {
-	meansSmoothing( smoothingRadius, loop );
+	TKD::meanSmoothing<T>( this->begin(), this->end(), smoothingRadius, loop );
+	/******************************************************/
+	/* Soustractiond e la valeur min à toutes les valeurs */
+	typename QVector<T>::iterator begin = this->begin();
+	typename QVector<T>::const_iterator end = this->end();
+	T min = this->min();
+	while ( begin != end ) (*begin++) -= min;
+	/******************************************************/
 	computeMaximums( minimumHeightPercentageOfMaximum, minimumWidthOfIntervals/2, loop );
 	computeIntervals( derivativesPercentage, minimumWidthOfIntervals, loop );
 }
@@ -178,50 +186,6 @@ void Histogram<T>::computeMaximumsAndIntervals( const uint & smoothingRadius, co
 /**********************************
  * Private setters
  **********************************/
-template <typename T>
-void Histogram<T>::meansSmoothing( const uint & smoothingRadius, const bool & loop )
-{
-	const uint histoSize = this->size();
-	if ( histoSize > 0 && smoothingRadius > 0 )
-	{
-		const T maskWidth = 2*smoothingRadius+1;
-		uint i;
-
-		QVector<T> copy;
-		copy.reserve( histoSize + 2*smoothingRadius );
-		if ( loop )
-		{
-			for ( i=histoSize-smoothingRadius ; i<histoSize ; ++i ) copy << this->at(i);
-			copy << (*this);
-			for ( i=0 ; i<smoothingRadius ; ++i ) copy << this->at(i);
-		}
-		else
-		{
-			for ( i=0 ; i<smoothingRadius ; ++i ) copy << this->at(0);
-			copy << (*this);
-			for ( i=histoSize-smoothingRadius ; i<histoSize ; ++i ) copy << this->at(histoSize-1);
-		}
-
-		typename QVector<T>::ConstIterator copyIterBegin = copy.constBegin();
-		typename QVector<T>::ConstIterator copyIterEnd = copy.constBegin() + static_cast<int>(maskWidth);
-
-		typename QVector<T>::Iterator histIter = this->begin();
-		const typename QVector<T>::ConstIterator histEnd = this->constEnd();
-
-		T currentValue = std::accumulate( copyIterBegin, copyIterEnd, T() );
-		*histIter++ = currentValue/maskWidth;
-		while ( histIter != histEnd )
-		{
-			currentValue += (*copyIterEnd++ - *copyIterBegin++);
-			*histIter++ = currentValue/maskWidth;
-		}
-	}
-	typename QVector<T>::iterator begin = this->begin();
-	typename QVector<T>::const_iterator end = this->end();
-	T min = this->min();
-	while ( begin != end ) (*begin++) -= min;
-}
-
 template <typename T>
 void Histogram<T>::computeMaximums( const int & minimumHeightPercentageOfMaximum, const int & neighborhoodOfMaximums, const bool & loop )
 {
