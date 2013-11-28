@@ -19,13 +19,72 @@
 #include "DGtal/io/readers/DicomReader.h"
 #include "DGtal/io/readers/PointListReader.h"
 #include "DGtal/kernel/BasicPointFunctors.h"
-
+#include "DGtal/shapes/Mesh.h"
 
 using namespace std;
 using namespace DGtal;
 using namespace Z3i;
 
 namespace po = boost::program_options;
+
+
+
+void 
+meshFromMarrow(DGtal::Mesh<DGtal::Z3i::RealPoint> &aMesh, unsigned int aRadius, 
+                  std::vector<DGtal::Z3i::RealPoint> anVector, unsigned int stepSample, unsigned int nbAngularStep=36)
+{
+  unsigned int nbVertex=0;
+ for (unsigned int i=0; i < anVector.size()-stepSample; i++)
+   {
+     DGtal::Z3i::RealPoint ptRefOrigin = anVector.at(i);
+     DGtal::Z3i::RealPoint ptOrigin = anVector.at(i);
+     DGtal::Z3i::RealPoint vectNormal = anVector.at(i+stepSample) - anVector.at(i);
+     double d = -vectNormal[0]*ptOrigin[0] - vectNormal[1]*ptOrigin[1] - vectNormal[2]*ptOrigin[2];
+       if(vectNormal[0]!=0){
+        ptRefOrigin [0]= -d/vectNormal[0];
+        ptRefOrigin [1]= 0.0;
+        ptRefOrigin [2]= 0.0;
+      }else if (vectNormal[1]!=0){
+        ptRefOrigin [0]= 0.0;
+        ptRefOrigin [1]= -d/vectNormal[1];
+        ptRefOrigin [2]= 0.0;
+      }else if (vectNormal[2]!=0){
+        ptRefOrigin [0]= 0.0;
+        ptRefOrigin [1]= 0.0;
+        ptRefOrigin [2]= -d/vectNormal[2];
+      }
+       DGtal::Z3i::RealPoint uDir1;
+       uDir1=(ptRefOrigin-ptOrigin)/((ptRefOrigin-ptOrigin).norm());
+       DGtal::Z3i::RealPoint uDir2;
+       uDir2[0] = uDir1[1]*vectNormal[2]-uDir1[2]*vectNormal[1];
+       uDir2[1] = uDir1[2]*vectNormal[0]-uDir1[0]*vectNormal[2];
+       uDir2[2] = uDir1[0]*vectNormal[1]-uDir1[1]*vectNormal[0];
+       uDir2/=uDir2.norm();
+       std::vector<DGtal::Z3i::RealPoint> vectRing1;
+       std::vector<DGtal::Z3i::RealPoint> vectRing2;
+       for (unsigned int j = 0; j< nbAngularStep; j++){
+         double angle = (6.28/nbAngularStep)*j;
+         DGtal::Z3i::RealPoint pt1 = ptOrigin+(uDir1*cos(angle)*aRadius)+(uDir2*sin(angle)*aRadius);
+         DGtal::Z3i::RealPoint pt2 = anVector.at(i+stepSample)+(uDir1*cos(angle)*aRadius)+(uDir2*sin(angle)*aRadius);
+      
+         aMesh.addVertex(pt1);
+         aMesh.addVertex(pt2);
+
+         vectRing1.push_back(pt1);
+         vectRing2.push_back(pt2);
+         nbVertex+=2;
+       }
+       // Generating mesh faces:
+       unsigned int posRef = nbVertex-nbAngularStep*2;
+       for (unsigned int j = 0; j< 2*nbAngularStep-4; j=j+2){
+         aMesh.addQuadFace(posRef+j, posRef+1+j, posRef+3+j, posRef+2+j);
+       }
+       
+   }
+
+}
+
+
 
 
 int main(int argc, char** argv)
@@ -46,7 +105,8 @@ int main(int argc, char** argv)
   general_opt.add_options()
     ("help,h", "display this message")
     ("volumeFile,v", po::value<std::string>(), "import volume image (dicom format)" )
-    ("tangentialView", "Use tangential view instead by default sectional view defined from set of points")
+    ("tangentialView", "Display tangential view defined from the set of the four imported points")
+    ("crossSectionView", "Display cross section view defined from the set of simple points and the normal direction")
     ("pointsPk,p", po::value<std::string>(), "import the set of points Pk used to determine the image position." )
     ("scaleX,x",  po::value<float>()->default_value(1.0), "set the scale value in the X direction (default 1.0)" )
     ("scaleY,y",  po::value<float>()->default_value(1.0), "set the scale value in the Y direction (default 1.0)" )
@@ -135,15 +195,19 @@ int main(int argc, char** argv)
   trace.info() << "list of bottom left point, contains " << vectPointsBottomLeft.size() << " points" << std::endl;
   trace.info() << "list of bottom right point, contains " << vectPointsBottomRight.size() << " points" << std::endl;
   
+
+  
+  
   DGtal::DefaultFunctor idV;
   unsigned k =0;
   for (unsigned int i =0; i< vectPointsCenter.size() - cutEnd; 
        i=i+1){
     viewer.setFillColor(DGtal::Color(250,20,20,255));
     viewer << vectPointsCenter.at(i);
+
     if(i%sampleStep==0&& i< vectPointsCenter.size()-sampleStep){
       
-      if(!vm.count("tangentialView")){
+      if(vm.count("crossSectionView")){
         unsigned int  width = (patchMaxWidth<(vectPointsTopRight.at(i) - vectPointsTopLeft.at(i)).norm()) ? patchMaxWidth:
           (vectPointsTopRight.at(i) - vectPointsTopLeft.at(i)).norm();
         DGtal::Z2i::Domain domainImage2D (DGtal::Z2i::Point(0,0), 
@@ -161,15 +225,15 @@ int main(int argc, char** argv)
                                                                          embedder(domainImage2D.upperBound(), false),
                                                                          embedder(Z2i::RealPoint(0, width), false));
         
-      }else{
-      
+      }else if (vm.count("tangentialView")){
+        
         DGtal::Z2i::Domain domainImage2D (DGtal::Z2i::Point(0,0), 
                                           DGtal::Z2i::Point((vectPointsTopRight.at(i) - vectPointsTopLeft.at(i)).norm(),
                                                             (vectPointsTopRight.at(i) - vectPointsBottomRight.at(i)).norm())); 
             
-         DGtal::Point2DEmbedderIn3D<DGtal::Z3i::Domain >  embedder(imageVol.domain(), 
+        DGtal::Point2DEmbedderIn3D<DGtal::Z3i::Domain >  embedder(imageVol.domain(), 
                                                                    vectPointsBottomLeft.at(i),vectPointsBottomRight.at(i), vectPointsTopLeft.at(i),
-                                                                   DGtal::Z3i::Point(0,0, 0));
+                                                                  DGtal::Z3i::Point(0,0, 0));
          ImageAdapterExtractor extractedImage(imageVol, domainImage2D, embedder, idV);        
          viewer << extractedImage;
          viewer << DGtal::UpdateImage3DEmbedding<Z3i::Space, Z3i::KSpace>(k, 
@@ -182,10 +246,13 @@ int main(int argc, char** argv)
       k++;
    
     }
-    
-  } 
+
+  }
+  DGtal::Mesh<Z3i::RealPoint> meshMoelle(true);
+  meshFromMarrow(meshMoelle, 10.0, vectPointsCenter, 10, 30);
   
   
+  viewer << meshMoelle;  
   viewer << My3DViewer::updateDisplay; 
   return application.exec();
 }
