@@ -144,7 +144,7 @@ void Lowess::compute( const QVector<qreal> &datas, QVector<qreal> &interpolatedD
 		gsl_blas_ddot(x, c, &y);
 
 		interpolatedDatas[i] = y;
-		residus[i] = y-datas[i];
+		residus[i] = datas[i]-y;
 	}
 
 	gsl_multifit_linear_free(work);
