@@ -1685,7 +1685,7 @@ void  MainWindow::exportPithOfAllKnotAreaToSdp()
 {
 
 
-        QString fileName = QFileDialog::getSaveFileName(this, tr("Exporter la moelle de la zone de nœud courante en SDP"), "pith.sdp",
+        QString fileName = QFileDialog::getSaveFileName(this, tr("Exporter la moelle de tous les nœuds du billon en SDP"), "pith.sdp",
                                                         tr("Fichiers SDP (*.sdp);;Tous les fichiers (*.*)"));
         if ( !fileName.isEmpty() )
         {
@@ -1710,6 +1710,9 @@ void  MainWindow::exportPithOfAllKnotAreaToSdp()
                     qDebug() << "processing interval: " << intervalIndex<< "/"<<_ui->_comboSelectSliceInterval->count()-1<<  " [done]";
 
                 }
+                file.close();
+
+                QMessageBox::information(this,tr("xporter la moelle de tous les nœuds du billon en SDP"), tr("Export réussi !"));
             }
         }
 
