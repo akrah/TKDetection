@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>683</width>
+    <width>692</width>
     <height>555</height>
    </rect>
   </property>
@@ -148,8 +148,8 @@
             <widget class="QWidget" name="scrollAreaWidgetContents">
              <property name="geometry">
               <rect>
-               <x>93</x>
-               <y>182</y>
+               <x>96</x>
+               <y>186</y>
                <width>0</width>
                <height>0</height>
               </rect>
@@ -211,7 +211,7 @@
            <property name="geometry">
             <rect>
              <x>0</x>
-             <y>0</y>
+             <y>72</y>
              <width>390</width>
              <height>234</height>
             </rect>
@@ -243,8 +243,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>683</width>
-     <height>29</height>
+     <width>692</width>
+     <height>25</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFichier">
@@ -354,8 +354,8 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>422</width>
-              <height>167</height>
+              <width>434</width>
+              <height>148</height>
              </rect>
             </property>
             <attribute name="label">
@@ -554,8 +554,8 @@ du repère polaire</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>255</width>
-              <height>251</height>
+              <width>259</width>
+              <height>223</height>
              </rect>
             </property>
             <attribute name="label">
@@ -812,8 +812,8 @@ zone restreinte</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>401</width>
-              <height>283</height>
+              <width>415</width>
+              <height>253</height>
              </rect>
             </property>
             <attribute name="label">
@@ -977,8 +977,8 @@ sur une coupe valide</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>401</width>
-              <height>283</height>
+              <width>415</width>
+              <height>253</height>
              </rect>
             </property>
             <attribute name="label">
@@ -1212,8 +1212,8 @@ sur une coupe valide</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>380</width>
-              <height>282</height>
+              <width>388</width>
+              <height>248</height>
              </rect>
             </property>
             <attribute name="label">
@@ -1480,8 +1480,8 @@ sur une coupe valide</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>375</width>
-              <height>321</height>
+              <width>388</width>
+              <height>285</height>
              </rect>
             </property>
             <attribute name="label">
@@ -1798,6 +1798,50 @@ sur une coupe valide</string>
              </item>
             </layout>
            </widget>
+           <widget class="QWidget" name="page_2">
+            <property name="geometry">
+             <rect>
+              <x>0</x>
+              <y>0</y>
+              <width>335</width>
+              <height>115</height>
+             </rect>
+            </property>
+            <attribute name="label">
+             <string>Profil de la moelle des nœuds</string>
+            </attribute>
+            <layout class="QFormLayout" name="formLayout_8">
+             <item row="0" column="0">
+              <widget class="QLabel" name="label_30">
+               <property name="font">
+                <font>
+                 <weight>50</weight>
+                 <bold>false</bold>
+                </font>
+               </property>
+               <property name="text">
+                <string>Rayon de lissage</string>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="1">
+              <widget class="QSpinBox" name="_spinKnotPithProfileSmoothingRadius">
+               <property name="font">
+                <font>
+                 <weight>50</weight>
+                 <bold>false</bold>
+                </font>
+               </property>
+               <property name="maximum">
+                <number>40</number>
+               </property>
+               <property name="value">
+                <number>5</number>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
           </widget>
          </item>
         </layout>
@@ -1960,8 +2004,8 @@ l'intervalle angulaire</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>358</width>
-              <height>94</height>
+              <width>374</width>
+              <height>86</height>
              </rect>
             </property>
             <attribute name="label">
@@ -2051,8 +2095,8 @@ l'intervalle angulaire</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>312</width>
-              <height>193</height>
+              <width>319</width>
+              <height>181</height>
              </rect>
             </property>
             <attribute name="label">
@@ -2260,8 +2304,8 @@ l'intervalle angulaire</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>326</width>
-              <height>174</height>
+              <width>334</width>
+              <height>157</height>
              </rect>
             </property>
             <attribute name="label">
@@ -2449,8 +2493,8 @@ l'intervalle angulaire</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>255</width>
-              <height>92</height>
+              <width>261</width>
+              <height>84</height>
              </rect>
             </property>
             <attribute name="label">
@@ -2515,8 +2559,8 @@ l'intervalle angulaire</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>397</width>
-              <height>124</height>
+              <width>398</width>
+              <height>112</height>
              </rect>
             </property>
             <attribute name="label">
@@ -2705,7 +2749,7 @@ l'intervalle angulaire</string>
          </item>
          <item>
           <widget class="QwtPolarPlot" name="_polarSectorHistogram">
-           <property name="plotBackground" stdset="0">
+           <property name="plotBackground">
             <brush brushstyle="SolidPattern">
              <color alpha="0">
               <red>255</red>

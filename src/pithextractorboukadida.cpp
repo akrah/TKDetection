@@ -112,9 +112,9 @@ void PithExtractorBoukadida::process( Billon &billon, const bool &adaptativeWidt
 
 	std::cout << "Step 3] Detect interval of valid slices" << std::endl;
 	const Interval<uint> validSliceInterval = detectValidSliceInterval( backgroundProportions );
-	const int &firstValideSliceIndex = validSliceInterval.min();
-	const int &lastValideSliceIndex = validSliceInterval.max();
-	const int firstSliceOrdered = _ascendingOrder?firstValideSliceIndex:lastValideSliceIndex;
+	const int &firstValidSliceIndex = validSliceInterval.min();
+	const int &lastValidSliceIndex = validSliceInterval.max();
+	const int firstSliceOrdered = _ascendingOrder?firstValidSliceIndex:lastValidSliceIndex;
 
 	// Calcul de la moelle sur la première coupe valide
 	std::cout << "Step 4] Hough transform on first valid slice" << std::endl;
@@ -125,7 +125,7 @@ void PithExtractorBoukadida::process( Billon &billon, const bool &adaptativeWidt
 	std::cout << "Step 5] Hough transform on next valid slices" << std::endl;
 	rCoord2D currentPithCoord;
 	iCoord2D subWindowStart, subWindowEnd;
-	for ( k=firstSliceOrdered+kIncrement ; k<=lastValideSliceIndex && k>=firstValideSliceIndex ; k += kIncrement )
+	for ( k=firstSliceOrdered+kIncrement ; k<=lastValidSliceIndex && k>=firstValidSliceIndex ; k += kIncrement )
 	{
 		std::cout << k << "  ";
 		const Slice &currentSlice = billonFillBackground.slice(k);
@@ -141,7 +141,7 @@ void PithExtractorBoukadida::process( Billon &billon, const bool &adaptativeWidt
 
 		if ( currentPithCoord.euclideanDistance(previousPith) > _pithShift )
 		{
-			std::cout << "...  " << std::endl;
+			std::cout << "...  ";
 			currentPithCoord = transHough( currentSlice, nbLineByMaxRatio[k], voxelDims, adaptativeWidth?k/static_cast<qreal>(depth):1.0 );
 		}
 
@@ -151,13 +151,13 @@ void PithExtractorBoukadida::process( Billon &billon, const bool &adaptativeWidt
 
 	// Extrapolation des coupes invalides
 	std::cout << "Step 6] Extrapolation of unvalid slices" << std::endl;
-	const rCoord2D &firstValidCoord = pith[firstValideSliceIndex];
-	for ( k=0 ; k<firstValideSliceIndex ; ++k )
+	const rCoord2D &firstValidCoord = pith[firstValidSliceIndex];
+	for ( k=0 ; k<firstValidSliceIndex ; ++k )
 	{
 		pith[k] = firstValidCoord;
 	}
-	const rCoord2D &lastValidCoord = pith[lastValideSliceIndex];
-	for ( k=lastValideSliceIndex+1 ; k<depth ; ++k )
+	const rCoord2D &lastValidCoord = pith[lastValidSliceIndex];
+	for ( k=lastValidSliceIndex+1 ; k<depth ; ++k )
 	{
 		pith[k] = lastValidCoord;
 	}
@@ -168,7 +168,7 @@ void PithExtractorBoukadida::process( Billon &billon, const bool &adaptativeWidt
 
 	// Lissage
 	std::cout << "Step 8] Smoothing of valid slices" << std::endl;
-	TKD::meanSmoothing<rCoord2D>( pith.begin()+validSliceInterval.min(), pith.begin()+validSliceInterval.max()+1, _smoothingRadius );
+	TKD::meanSmoothing<rCoord2D>( pith.begin()+firstValidSliceIndex, pith.begin()+lastValidSliceIndex+1, _smoothingRadius );
 }
 
 
@@ -178,24 +178,22 @@ uiCoord2D PithExtractorBoukadida::transHough( const Slice &slice, qreal &lineOnM
 	const uint &height = slice.n_rows;
 
 	const uint semiWidth = qFloor(width/2.);
-	const uint semiAdaptativeWidth = qFloor(semiWidth*adaptativeWidthCoeff);
-	const uint iMin = semiWidth+1-semiAdaptativeWidth;
-	const uint iMax = semiWidth+semiAdaptativeWidth-1;
+	const uint semiAdaptativeWidth = qRound(semiWidth*adaptativeWidthCoeff);
+	const uint iMin = semiWidth-semiAdaptativeWidth;
+	const uint iMax = semiWidth+semiAdaptativeWidth;
 
 	// Calcul des accumulation des droites suivant les orientations
-	arma::Mat<int> accuSlice( height, width );
-	accuSlice.fill(0);
+	arma::Mat<int> accuSlice( height, width, arma::fill::zeros );
 
 	lineOnMaxRatio = 0.;
 
-	if ( !semiAdaptativeWidth )
-		return uiCoord2D(semiWidth,height/2);
+	if ( semiAdaptativeWidth<2 )
+		return uiCoord2D(semiWidth,qFloor(height/2.));
 
 	// Calcul des orientations en chaque pixel avec les filtres de Sobel
-	arma::Mat<qreal> orientations( height, width );
-	arma::Mat<char> hasContour( height, width );
+	arma::Mat<qreal> orientations(0,0);
+	arma::Mat<char> hasContour(0,0);
 	uint nbContourPoints = contour( slice, orientations, hasContour, voxelDims, adaptativeWidthCoeff );
-
 
 	uint i, j;
 	for ( j=1 ; j<height-1 ; ++j )
@@ -220,37 +218,37 @@ uint PithExtractorBoukadida::contour( const Slice &slice, arma::Mat<qreal> & ori
 {
 	Q_ASSERT_X( adaptativeWidthCoeff>=0. && adaptativeWidthCoeff<=1. , "PithExtractorBoukadida::contour(...)", "adaptativeWidthCoeff must be in [0,1]." );
 
-	orientations.fill(0);
-	hasContour.fill(false);
-
 	const uint &width = slice.n_cols;
-	const uint &height = slice.n_rows-1;
+	const uint height = slice.n_rows-1;
+
+	orientations.zeros( height+1, width );
+	hasContour.zeros( height+1, width );
+
 
 	const qreal &xDim = voxelDims.x;
 	const qreal &yDim = voxelDims.y;
 	const qreal voxelRatio = qPow(xDim/yDim,2);
 
 	const uint semiWidth = qFloor(width/2.);
-	const uint semiAdaptativeWidth = qFloor(semiWidth*adaptativeWidthCoeff);
-	const uint iMin = semiWidth+1-semiAdaptativeWidth;
+	const uint semiAdaptativeWidth = qRound(semiWidth*adaptativeWidthCoeff);
+	const uint iMin = semiWidth-semiAdaptativeWidth+1;
 	const uint iMax = semiWidth+semiAdaptativeWidth-1;
 
-	if ( !semiAdaptativeWidth )
+	if ( semiAdaptativeWidth < 2 )
 		return 0;
 
-	arma::Mat<qreal> sobelNorm(slice.n_rows,2*semiAdaptativeWidth-2);
-	sobelNorm.fill(0.);
+	arma::Mat<qreal> sobelNorm(slice.n_rows,iMax-iMin,arma::fill::zeros);
 
-	arma::Col<qreal> sobelNormVec((2*semiAdaptativeWidth-2)*(height-1));
+	arma::Col<qreal> sobelNormVec((iMax-iMin)*(height-1));
 	arma::Col<qreal>::iterator sobelNormVecIt = sobelNormVec.begin();
 
 	uint i, j, nbPositiveNorm;
 	qreal sobelX, sobelY, norm;
 
 	nbPositiveNorm = 0;
-	for ( j=1 ; j<height ; ++j )
+	for ( i=iMin ; i<iMax ; ++i )
 	{
-		for ( i=iMin ; i<iMax ; ++i )
+		for ( j=1 ; j<height ; ++j )
 		{
 			sobelX = slice.at( j-1, i-1 ) - slice.at( j-1, i+1 ) +
 					 2* (slice.at( j, i-1 ) - slice.at( j, i+1 )) +
@@ -260,7 +258,7 @@ uint PithExtractorBoukadida::contour( const Slice &slice, arma::Mat<qreal> & ori
 					 slice.at( j+1, i+1 ) - slice.at( j-1, i+1 );
 			orientations.at(j,i) = qFuzzyIsNull(sobelX) ? 9999999999./1. : sobelY/sobelX*voxelRatio;
 			norm = qPow(sobelX*xDim,2) + qPow(sobelY*yDim,2);
-			sobelNorm.at(j,i-iMin) = *(sobelNormVecIt++) = norm;
+			sobelNorm.at(j,i-iMin) = *sobelNormVecIt++ = norm;
 			nbPositiveNorm += !qFuzzyIsNull(norm);
 		}
 	}
@@ -398,32 +396,35 @@ void PithExtractorBoukadida::fillBillonBackground( Billon &billonToFill, QVector
 
 	backgroundProportions.resize(nbSlices);
 
-	uint i, j, k, semiAdaptativeWidth, iMin, iMax;
+	Slice::col_iterator begin, end;
+	uint k, semiAdaptativeWidth, iMin, iMax;
 	qreal adaptativeWidthCoeff, currentProp;
+	__billon_type__ val;
+
 
 	iMin = 0;
-	iMax = width;
+	iMax = width-1;
 	for ( k=0 ; k<nbSlices ; ++k )
 	{
 		Slice &currentSlice = billonToFill.slice(k);
 		if ( adaptativeWidth )
 		{
 			adaptativeWidthCoeff = k/static_cast<qreal>(nbSlices);
-			semiAdaptativeWidth = qFloor(semiWidth*adaptativeWidthCoeff);
-			iMin = semiWidth+1-semiAdaptativeWidth;
+			semiAdaptativeWidth = qRound(semiWidth*adaptativeWidthCoeff);
+			iMin = semiWidth-semiAdaptativeWidth;
 			iMax = semiWidth+semiAdaptativeWidth-1;
-			if ( iMin<=iMax ) continue;
+			if ( semiAdaptativeWidth<1 ) continue;
 		}
+		begin = currentSlice.begin_col(iMin);
+		end = currentSlice.end_col(iMax);
 		currentProp = 0.;
-		for ( i=iMin ; i<iMax ; ++i )
+		while ( begin != end )
 		{
-			for ( j=0 ; j<height ; ++j )
-			{
-				currentSlice.at(j,i) = qMax( qMin( currentSlice.at(j,i), maxIntensity ), minIntensity );
-				currentProp += (currentSlice.at(j,i) == minIntensity || currentSlice.at(j,i) == maxIntensity);
-			}
+			val = qMax( qMin( *begin, maxIntensity ), minIntensity );
+			currentProp += (val == minIntensity || val == maxIntensity);
+			*begin++ = val;
 		}
-		backgroundProportions[k] = currentProp / static_cast<qreal>(height*(iMax-iMin));
+		backgroundProportions[k] = currentProp / static_cast<qreal>(height*(iMax-iMin+1));
 	}
 }
 

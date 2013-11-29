@@ -806,7 +806,7 @@ void MainWindow::updateKnotPithProfile()
 
 	if ( _tangentialBillon && _tangentialBillon->hasPith() )
 	{
-		_knotPithProfile->construct( _tangentialBillon->pith(), _tangentialBillon->voxelDims() );
+		_knotPithProfile->construct( _tangentialBillon->pith(), _tangentialBillon->voxelDims(), _ui->_spinKnotPithProfileSmoothingRadius->value() );
 	}
 
 	_plotKnotPithProfile->update( *_knotPithProfile );
