@@ -107,7 +107,8 @@ private:
 
 	void exportPithOfCurrentKnotAreaToSdp();
     void exportPithOfAllKnotAreaToSdp();
-    void exportPithOfAKnotAreaToSdp(QTextStream &stream, unsigned int numSliceInterval, unsigned int numAngularInterval);
+    void exportPithOfAKnotAreaToSdp(QTextStream &stream, unsigned int numSliceInterval, unsigned int numAngularInterval,
+                                     unsigned int knotID);
 
     //	void exportCurrentSegmentedKnotToSdp();
 //	void exportSegmentedKnotsOfCurrentSliceIntervalToSdp( bool keepBillonSliceNumber = false );

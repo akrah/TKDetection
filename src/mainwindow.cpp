@@ -1694,7 +1694,7 @@ void  MainWindow::exportPithOfAllKnotAreaToSdp()
             {
                 QTextStream stream(&file);
 
-
+                unsigned int knotID =0;
                 for (unsigned int intervalIndex=1 ; intervalIndex< _ui->_comboSelectSliceInterval->count() ; ++intervalIndex )
                 {
                     qDebug() << "processing interval: " << intervalIndex;
@@ -1704,15 +1704,16 @@ void  MainWindow::exportPithOfAllKnotAreaToSdp()
                     {
                         qDebug() << "processing sector: " << sectorIndex;
                         _ui->_comboSelectSectorInterval->setCurrentIndex(sectorIndex);
-                        exportPithOfAKnotAreaToSdp(stream, intervalIndex-1, sectorIndex-1);
+                        exportPithOfAKnotAreaToSdp(stream, intervalIndex-1, sectorIndex-1, knotID);
                         qDebug() << "processing sector: " << sectorIndex << "/" <<_ui->_comboSelectSectorInterval->count()-1<< " [done]";
+                        knotID++;
                     }
                     qDebug() << "processing interval: " << intervalIndex<< "/"<<_ui->_comboSelectSliceInterval->count()-1<<  " [done]";
 
                 }
                 file.close();
 
-                QMessageBox::information(this,tr("xporter la moelle de tous les nœuds du billon en SDP"), tr("Export réussi !"));
+                QMessageBox::information(this,tr("exporter la moelle de tous les nœuds du billon en SDP"), tr("Export réussi !"));
             }
         }
 
@@ -1730,7 +1731,7 @@ void  MainWindow::exportPithOfCurrentKnotAreaToSdp()
             if ( file.open(QIODevice::WriteOnly) )
             {
                 QTextStream stream(&file);
-                exportPithOfAKnotAreaToSdp(stream, _ui->_comboSelectSliceInterval->currentIndex()-1, _ui->_comboSelectSectorInterval->currentIndex()-1);
+                exportPithOfAKnotAreaToSdp(stream, _ui->_comboSelectSliceInterval->currentIndex()-1, _ui->_comboSelectSectorInterval->currentIndex()-1, 0);
                 file.close();
                 QMessageBox::information(this,tr("Exporter la moelle de la zone de nœud courante en SDP"), tr("Export réussi !"));
 
@@ -1748,14 +1749,15 @@ void  MainWindow::exportPithOfCurrentKnotAreaToSdp()
 
 
 
-void MainWindow::exportPithOfAKnotAreaToSdp(QTextStream &stream, unsigned int numSliceInterval, unsigned int numAngularInterval)
+void MainWindow::exportPithOfAKnotAreaToSdp(QTextStream &stream, unsigned int numSliceInterval, unsigned int numAngularInterval,
+                                            unsigned int knotID)
 {
 
 				stream << "# SDP (Sequence of Discrete Points)" << endl;
 				stream << "#" << endl;
-				stream << "# Pith  |                 Window size" << endl;
-				stream << "# Coord | Top Left | Top Right | Bottom Right | Bottom Left" << endl;
-				stream << "# x y z    x y z       x y z        x y z         x y z" << endl;
+                stream << "#Knot nums| Pith  |                 Window size" << endl;
+                stream << "#knotID NumSliceInterval NumAngularInterval| Coord | Top Left | Top Right | Bottom Right | Bottom Left" << endl;
+                stream << "KnotID NumSliceInterval NumAngularInterval x y z    x y z       x y z        x y z         x y z" << endl;
 
                 const Interval<uint> &sliceInterval = _sliceHistogram->interval(numSliceInterval);
 				const qreal zPithCoord = sliceInterval.mid();
@@ -1803,7 +1805,7 @@ void MainWindow::exportPithOfAKnotAreaToSdp(QTextStream &stream, unsigned int nu
 					initial.setX( _tangentialBillon->pithCoord(k).y-heightOnTwo );
 					initial.setY( widthOnTwoMinusOne-_tangentialBillon->pithCoord(k).x );
 					destination = quaterRot.rotatedVector(initial) + origin;
-
+                    stream << knotID << " " << numSliceInterval << " " << numAngularInterval << " " ;
 					stream << destination.x() << " "<< destination.y() << " " << destination.z() << " ";
 
 					initial.setX( jStart );
