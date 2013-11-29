@@ -86,7 +86,6 @@ meshFromMarrow(DGtal::Mesh<DGtal::Z3i::RealPoint> &aMesh, unsigned int aRadius,
 
 
 
-
 int main(int argc, char** argv)
 {
   typedef DGtal::ImageContainerBySTLVector<DGtal::Z2i::Domain,   unsigned char > Image2D;
