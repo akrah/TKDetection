@@ -535,7 +535,7 @@ void MainWindow::drawTangentialView()
 void MainWindow::zoomInSliceView( const qreal &zoomFactor, const qreal &zoomCoefficient )
 {
 	_labelSliceView->resize(zoomFactor * _mainPix.size());
-	QScrollBar *hBar = _ui->_scrollSliceView->horizontalScrollBar();
+    QScrollBar *hBar = _ui->_scrollSliceView->horizontalScrollBar();
 	hBar->setValue(int(zoomCoefficient * hBar->value() + ((zoomCoefficient - 1) * hBar->pageStep()/2)));
 	QScrollBar *vBar = _ui->_scrollSliceView->verticalScrollBar();
 	vBar->setValue(int(zoomCoefficient * vBar->value() + ((zoomCoefficient - 1) * vBar->pageStep()/2)));
@@ -738,7 +738,7 @@ void MainWindow::updateBillonPith()
 											  _ui->_spinPithMinimumWoodPercentage_billon->value(), Interval<int>( _ui->_spinPithMinIntensity_billon->value(), _ui->_spinPithMaxnIntensity_billon->value() ),
 											  _ui->_chechPithAscendingOrder_billon->isChecked());
 		pithExtractor.process(*_billon);
-		_treeRadius = BillonAlgorithms::restrictedAreaMeansRadius(*_billon,_ui->_spinRestrictedAreaResolution->value(),_ui->_spinRestrictedAreaThreshold->value(),_ui->_spinRestrictedAreaMinimumRadius->value()*_billon->n_cols/100., _ui->_spinHistogramPercentageOfSlicesToIgnore_zMotion->value()*_billon->n_slices/100.);
+        _treeRadius = BillonAlgorithms::restrictedAreaMeansRadius(*_billon,_ui->_spinRestrictedAreaResolution->value(),_ui->_spinRestrictedAreaThreshold->value(),_ui->_spinRestrictedAreaMinimumRadius->value()*_billon->n_cols/100., _ui->_spinHistogramPercentageOfSlicesToIgnore_zMotion->value()*_billon->n_slices/100.);
 		_ui->_checkRadiusAroundPith->setText( QString::number(_treeRadius) );
 		_ui->_spinHistogramNumberOfAngularSectors_zMotionAngular->setValue(TWO_PI*_treeRadius);
 	}
@@ -1755,14 +1755,13 @@ void MainWindow::exportPithOfAKnotAreaToSdp(QTextStream &stream, unsigned int nu
 
 				stream << "# SDP (Sequence of Discrete Points)" << endl;
 				stream << "#" << endl;
-                stream << "#Knot nums| Pith  |                 Window size" << endl;
-                stream << "#knotID NumSliceInterval NumAngularInterval| Coord | Top Left | Top Right | Bottom Right | Bottom Left" << endl;
-                stream << "KnotID NumSliceInterval NumAngularInterval x y z    x y z       x y z        x y z         x y z" << endl;
+                stream << "#Knot nums| Ellipse|  Pith  |                 Window size" << endl;
+                stream << "#knotID NumSliceInterval NumAngularInterval| EllipseWidth EllipseHeight| Coord | Top Left | Top Right | Bottom Right | Bottom Left" << endl;
+                stream << "#KnotID NumSliceInterval NumAngularInterval EllipseWidth EllipseHeight x y z    x y z       x y z        x y z         x y z" << endl;
 
                 const Interval<uint> &sliceInterval = _sliceHistogram->interval(numSliceInterval);
 				const qreal zPithCoord = sliceInterval.mid();
 				const rCoord2D &originPith = _billon->pithCoord(zPithCoord);
-
 
 				const uint &width = _tangentialBillon->n_cols;
 				const uint &height = _tangentialBillon->n_rows;
@@ -1770,6 +1769,8 @@ void MainWindow::exportPithOfAKnotAreaToSdp(QTextStream &stream, unsigned int nu
 				const int widthOnTwo = width/2.;
 				const int heightOnTwo = height/2.;
 				const int widthOnTwoMinusOne = widthOnTwo-1;
+
+
 
 				// Rotation autour de l'axe Y
 				const qreal alpha = PI_ON_TWO;
@@ -1801,11 +1802,16 @@ void MainWindow::exportPithOfAKnotAreaToSdp(QTextStream &stream, unsigned int nu
 					iEnd = qMin(qRound(k*semiKnotAreaWidthCoeff),widthOnTwo);
 					jStart = -heightOnTwo;
 					jEnd = heightOnTwo;
+                    const qreal ellipticityRate = (_tangentialBillon->voxelWidth()/_tangentialBillon->voxelHeight()) / qCos(_knotPithProfile->at(k));
+                    const qreal ellipseWidth = _knotEllipseRadiiHistogram->lowessData()[k];
+                    const qreal ellipseHeight = ellipseWidth*ellipticityRate;
+
+
 
 					initial.setX( _tangentialBillon->pithCoord(k).y-heightOnTwo );
 					initial.setY( widthOnTwoMinusOne-_tangentialBillon->pithCoord(k).x );
 					destination = quaterRot.rotatedVector(initial) + origin;
-                    stream << knotID << " " << numSliceInterval << " " << numAngularInterval << " " ;
+                    stream << knotID << " " << numSliceInterval << " " << numAngularInterval << " " << ellipseWidth << " " << ellipseHeight<< " ";
 					stream << destination.x() << " "<< destination.y() << " " << destination.z() << " ";
 
 					initial.setX( jStart );
