@@ -28,19 +28,15 @@ using namespace Z3i;
 
 namespace po = boost::program_options;
 
-
-std::vector<std::vector<DGtal::Z3i::RealPoint> >
-splitKnotPithFromKnotID(const std::vector<DGtal::Z3i::RealPoint> &vectCenters,
+template < typename TContent>
+std::vector<std::vector<TContent > >
+splitKnotPithFromKnotID(const std::vector<TContent> &vectCenters,
                         const std::vector< int> &vectKnotID)
 {
-  trace.info() << "splitting knot vect center" << std::endl;
-  trace.info() << "vect center size:"<< vectCenters.size()<< std::endl ;
-  trace.info() << "vect center size:"<< vectKnotID.size()<< std::endl ;
-
-  std::vector<std::vector<DGtal::Z3i::RealPoint> > vectResult;
+  std::vector<std::vector<TContent> > vectResult;
   unsigned int id = vectKnotID.at(0);
   unsigned  int idRef = id;
-  std::vector<DGtal::Z3i::RealPoint> vectKnotCenters;
+  std::vector<TContent> vectKnotCenters;
   for(unsigned int i =0; i< vectCenters.size(); i++)
     {
       id=vectKnotID.at(i);
@@ -51,16 +47,14 @@ splitKnotPithFromKnotID(const std::vector<DGtal::Z3i::RealPoint> &vectCenters,
         idRef=id;
       }else{
         vectKnotCenters.push_back(vectCenters.at(i));
-      }
-      
+      }     
     }
-  trace.info() << "[done]" << std::endl;
   return vectResult;
 }
                          
 
 void 
-meshFromMarrow(DGtal::Mesh<DGtal::Z3i::RealPoint> &aMesh, unsigned int aRadius, 
+meshFromMarrow(DGtal::Mesh<DGtal::Z3i::RealPoint> &aMesh, std::vector< double > vectRadiusW, std::vector< double > vectRadiusH, 
                   std::vector<DGtal::Z3i::RealPoint> anVector, unsigned int stepSample, unsigned int nbAngularStep=36)
 {
   unsigned int nbVertex=0;
@@ -90,26 +84,23 @@ meshFromMarrow(DGtal::Mesh<DGtal::Z3i::RealPoint> &aMesh, unsigned int aRadius,
        uDir2[1] = uDir1[2]*vectNormal[0]-uDir1[0]*vectNormal[2];
        uDir2[2] = uDir1[0]*vectNormal[1]-uDir1[1]*vectNormal[0];
        uDir2/=uDir2.norm();
-       std::vector<DGtal::Z3i::RealPoint> vectRing1;
-       std::vector<DGtal::Z3i::RealPoint> vectRing2;
+       double radiusW = abs( vectRadiusW.at(i) );
+       double radiusH = abs( vectRadiusH.at(i) );
        for (unsigned int j = 0; j<= nbAngularStep; j++){
          double angle = (6.28/nbAngularStep)*j;
-         DGtal::Z3i::RealPoint pt1 = ptOrigin+(uDir1*cos(angle)*aRadius)+(uDir2*sin(angle)*aRadius);
-         DGtal::Z3i::RealPoint pt2 = anVector.at(i+stepSample)+(uDir1*cos(angle)*aRadius)+(uDir2*sin(angle)*aRadius);
-      
+         DGtal::Z3i::RealPoint pt1 = ptOrigin+(uDir1*cos(angle)*radiusW)+(uDir2*sin(angle)*radiusH);
+         DGtal::Z3i::RealPoint pt2 = anVector.at(i+stepSample)+(uDir1*cos(angle)*vectRadiusW.at(i))+(uDir2*sin(angle)*radiusH);      
          aMesh.addVertex(pt1);
          aMesh.addVertex(pt2);
-
-         vectRing1.push_back(pt1);
-         vectRing2.push_back(pt2);
          nbVertex+=2;
        }
        // Generating mesh faces:
        unsigned int posRef = nbVertex-nbAngularStep*2;
-       for (unsigned int j = 0; j< 2*nbAngularStep-4; j=j+2){
+       for (unsigned int j = 0; j< 2*nbAngularStep-2; j=j+2){
          aMesh.addQuadFace(posRef+j, posRef+1+j, posRef+3+j, posRef+2+j);
        }
-       
+       // last face
+       aMesh.addQuadFace(nbVertex-2, nbVertex-1, posRef+1, posRef);
    }
 
 }
@@ -142,6 +133,7 @@ int main(int argc, char** argv)
     ("scaleZ,z",  po::value<float>()->default_value(1.0), "set the scale value in the Z direction (default 1.0)")
     ("patchMaxWidth,w",  po::value<unsigned int>()->default_value(50), "set the maximal patch width (default 50)")
     ("sampleStep,s",  po::value<unsigned int>()->default_value(20), "set the step between each patch images (default 20)")
+    ("constantRadius,c",po::value<double>(),   "use a constant radius for all knots.")
     ("cutEnd,s",  po::value<unsigned int>()->default_value(0), "remove some end points of the profiles. ")
     ("trunkBark-mesh,t", po::value<std::string>(), "mesh of the trunk bark in format OFS non normalized (.ofs)" )
     ("marrow-mesh,m", po::value<std::string>(), "mesh of trunk marrow  in format OFS non normalized (.ofs)" );
@@ -202,37 +194,54 @@ int main(int argc, char** argv)
   unsigned int patchMaxWidth = vm["patchMaxWidth"].as<unsigned int>();
   unsigned int sampleStep = vm["sampleStep"].as<unsigned int>();
   unsigned int cutEnd = vm["cutEnd"].as<unsigned int> ();
-  
+  bool constantRadius= vm.count("constantRadius");
+
+  double knotsRadius = 10;
+  if (constantRadius){
+    knotsRadius= vm["constantRadius"].as<double>();
+  } 
   viewer.setGLScale(sx,sy,sz);
   Image3D imageVol = DicomReader< Image3D,  RescalFCT  >::importDicom(vm["volumeFile"].as<std::string>(), RescalFCT(-900,
                                                                                                                     530,
                                                                                                                     0, 255));
-  std::vector<unsigned int> indexCenter; indexCenter.push_back(3); indexCenter.push_back(4); indexCenter.push_back(5);  
-  std::vector<unsigned int> indexTopLeft; indexTopLeft.push_back(6); indexTopLeft.push_back(7); indexTopLeft.push_back(8);
-  std::vector<unsigned int> indexBottomLeft; indexBottomLeft.push_back(9); indexBottomLeft.push_back(10); indexBottomLeft.push_back(11);
-  std::vector<unsigned int> indexBottomRight; indexBottomRight.push_back(12); indexBottomRight.push_back(13); indexBottomRight.push_back(14);
-  std::vector<unsigned int> indexTopRight; indexTopRight.push_back(15); indexTopRight.push_back(16); indexTopRight.push_back(17);
+  std::vector<unsigned int> indexCenter; indexCenter.push_back(5); indexCenter.push_back(6); indexCenter.push_back(7);  
+  std::vector<unsigned int> indexTopLeft; indexTopLeft.push_back(8); indexTopLeft.push_back(9); indexTopLeft.push_back(10);
+  std::vector<unsigned int> indexBottomLeft; indexBottomLeft.push_back(11); indexBottomLeft.push_back(12); indexBottomLeft.push_back(13);
+  std::vector<unsigned int> indexBottomRight; indexBottomRight.push_back(14); indexBottomRight.push_back(15); indexBottomRight.push_back(16);
+  std::vector<unsigned int> indexTopRight; indexTopRight.push_back(17); indexTopRight.push_back(18); indexTopRight.push_back(19);
   
   std::vector<  int > vectKnotID = DGtal::NumbersReader< int >::getNumbersFromFile(vm["pointsPk"].as<std::string>(), 0);
  
-   
+  
+  std::vector<  double > vectRadiusWALL = DGtal::NumbersReader< double >::getNumbersFromFile(vm["pointsPk"].as<std::string>(), 3);
+  std::vector<  double > vectRadiusHALL = DGtal::NumbersReader< double >::getNumbersFromFile(vm["pointsPk"].as<std::string>(), 4);  
+  if(constantRadius){
+    for (unsigned int i =0; i< vectRadiusHALL.size(); i++){
+      vectRadiusHALL.at(i)=knotsRadius;
+      vectRadiusWALL.at(i)=knotsRadius;
+    }
+  }
   std::vector<Z3i::RealPoint> vectPointsCenterALL = DGtal::PointListReader<Z3i::RealPoint>::getPointsFromFile(vm["pointsPk"].as<std::string>(), indexCenter);
   std::vector<Z3i::RealPoint> vectPointsTopLeftALL = DGtal::PointListReader<Z3i::RealPoint>::getPointsFromFile(vm["pointsPk"].as<std::string>(), indexTopLeft);
   std::vector<Z3i::RealPoint> vectPointsTopRightALL = DGtal::PointListReader<Z3i::RealPoint>::getPointsFromFile(vm["pointsPk"].as<std::string>(), indexTopRight);
   std::vector<Z3i::RealPoint> vectPointsBottomLeftALL = DGtal::PointListReader<Z3i::RealPoint>::getPointsFromFile(vm["pointsPk"].as<std::string>(), indexBottomLeft);
   std::vector<Z3i::RealPoint> vectPointsBottomRightALL = DGtal::PointListReader<Z3i::RealPoint>::getPointsFromFile(vm["pointsPk"].as<std::string>(), indexBottomRight);
 
-  std::vector< std::vector<Z3i::RealPoint> > vectPointsCenterSplitted = splitKnotPithFromKnotID(vectPointsCenterALL, vectKnotID);
-  std::vector< std::vector<Z3i::RealPoint> > vectPointsTopLeftSplitted = splitKnotPithFromKnotID(vectPointsTopLeftALL, vectKnotID);
-  std::vector< std::vector<Z3i::RealPoint> > vectPointsTopRightSplitted = splitKnotPithFromKnotID(vectPointsTopRightALL, vectKnotID);
+  std::vector< std::vector<  double > > vectRadiusWSplitted =  splitKnotPithFromKnotID<double>(vectRadiusWALL, vectKnotID);
+  std::vector< std::vector<  double > > vectRadiusHSplitted =  splitKnotPithFromKnotID<double>(vectRadiusHALL, vectKnotID);
+  std::vector< std::vector<Z3i::RealPoint> > vectPointsCenterSplitted = splitKnotPithFromKnotID<Z3i::RealPoint>(vectPointsCenterALL, vectKnotID);
+  std::vector< std::vector<Z3i::RealPoint> > vectPointsTopLeftSplitted = splitKnotPithFromKnotID<Z3i::RealPoint>(vectPointsTopLeftALL, vectKnotID);
+  std::vector< std::vector<Z3i::RealPoint> > vectPointsTopRightSplitted = splitKnotPithFromKnotID<Z3i::RealPoint>(vectPointsTopRightALL, vectKnotID);
 
-  std::vector< std::vector<Z3i::RealPoint> > vectPointsBottomLeftSplitted = splitKnotPithFromKnotID(vectPointsBottomLeftALL, vectKnotID);
-  std::vector< std::vector<Z3i::RealPoint> > vectPointsBottomRightSplitted = splitKnotPithFromKnotID(vectPointsBottomRightALL, vectKnotID);
+  std::vector< std::vector<Z3i::RealPoint> > vectPointsBottomLeftSplitted = splitKnotPithFromKnotID<Z3i::RealPoint>(vectPointsBottomLeftALL, vectKnotID);
+  std::vector< std::vector<Z3i::RealPoint> > vectPointsBottomRightSplitted = splitKnotPithFromKnotID<Z3i::RealPoint>(vectPointsBottomRightALL, vectKnotID);
   
   DGtal::DefaultFunctor idV;
   
   for (unsigned int numId=0; numId < vectPointsBottomRightSplitted.size(); numId++){
     unsigned k =0;
+    std::vector<double> vectRadiusW = vectRadiusWSplitted.at(numId);
+    std::vector<double> vectRadiusH = vectRadiusHSplitted.at(numId);
     std::vector<Z3i::RealPoint> vectPointsCenter = vectPointsCenterSplitted.at(numId);
     std::vector<Z3i::RealPoint> vectPointsTopLeft = vectPointsTopLeftSplitted.at(numId);
     std::vector<Z3i::RealPoint> vectPointsTopRight = vectPointsTopRightSplitted.at(numId);
@@ -290,7 +299,7 @@ int main(int argc, char** argv)
     }
     DGtal::Mesh<Z3i::RealPoint> meshMoelle(true);
     
-    meshFromMarrow(meshMoelle, 10.0, vectPointsCenter, 10, 30);
+    meshFromMarrow(meshMoelle, vectRadiusW, vectRadiusH, vectPointsCenter, sampleStep, 36);
     viewer << meshMoelle;
   }
   viewer << My3DViewer::updateDisplay; 
