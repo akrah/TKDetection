@@ -12,9 +12,9 @@ EllipticalAccumulationHistogram::~EllipticalAccumulationHistogram()
 {
 }
 
-const uint &EllipticalAccumulationHistogram::detectedRadius() const
+uint EllipticalAccumulationHistogram::detectedRadius() const
 {
-	return _maximums[1];
+	return _maximums.size()?_maximums[1]:0;
 }
 
 /**********************************
@@ -29,15 +29,14 @@ void EllipticalAccumulationHistogram::construct( const Slice &slice, const uiCoo
 	const qreal &pithCoordY = origin.y;
 	const uint nbEllipses = qMin(qMin(pithCoordX,width-pithCoordX),qMin(pithCoordY/ellipticityRate,(height-pithCoordY)/ellipticityRate));
 
-	int x,y,nbPixelOnEllipse ;
-	qreal a,b,d1,d2,aSquare,bSquare ;
+	int x,y;
+	qreal a,b,d1,d2,aSquare,bSquare, nbPixelOnEllipse ;
 
 	resize(nbEllipses);
 
-	(*this)[0] = slice.at( qRound(pithCoordY), qRound(pithCoordX) );
+	if ( nbEllipses ) (*this)[0] = slice.at( 0,0 );
 	for ( a=1 ; a<nbEllipses ; a++ )
 	{
-		nbPixelOnEllipse = 0;
 		b = a*ellipticityRate;
 		aSquare = a*a;
 		bSquare = b*b;
@@ -48,7 +47,7 @@ void EllipticalAccumulationHistogram::construct( const Slice &slice, const uiCoo
 					  slice.at( qRound(pithCoordY+y), qRound(pithCoordX-x) ) +
 					  slice.at( qRound(pithCoordY-y), qRound(pithCoordX-x) ) +
 					  slice.at( qRound(pithCoordY-y), qRound(pithCoordX+x) );
-		nbPixelOnEllipse += 4;
+		nbPixelOnEllipse = 4;
 		while ( aSquare*(y-.5) > bSquare*(x+1) )
 		{
 			if ( d1 >= 0 )
@@ -64,7 +63,7 @@ void EllipticalAccumulationHistogram::construct( const Slice &slice, const uiCoo
 						  slice.at( qRound(pithCoordY-y), qRound(pithCoordX+x) );
 			nbPixelOnEllipse += 4;
 		}
-		d2 = bSquare*(x+.5)*(x+.5) + aSquare*(y-1)*(y-1) - aSquare*bSquare ;
+		d2 = bSquare*qPow(x+.5,2) + aSquare*qPow(y-1,2) - aSquare*bSquare ;
 		while ( y > 0 )
 		{
 			if ( d2 < 0 )
@@ -89,20 +88,17 @@ void EllipticalAccumulationHistogram::construct( const Slice &slice, const uiCoo
 void EllipticalAccumulationHistogram::findFirstMaximumAndNextMinimum()
 {
 	_maximums.clear();
-	_maximums.resize(3);
 
 	const uint &size = this->size();
+	if ( size<4 ) return;
 
-	if ( !size ) return;
+	_maximums.resize(3);
 
 	uint maximumIndex = 2;
 	while ( maximumIndex<size && (*this)[maximumIndex] <= (*this)[maximumIndex-2] ) maximumIndex++;
 	while ( maximumIndex<size && (*this)[maximumIndex] > (*this)[maximumIndex-2] ) maximumIndex++;
 
-	if ( maximumIndex==size )
-	{
-		return;
-	}
+	if ( maximumIndex==size ) return;
 
 	maximumIndex--;
 	_maximums[0] = maximumIndex;

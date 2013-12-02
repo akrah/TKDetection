@@ -712,7 +712,7 @@ void MainWindow::selectSectorInterval(const int &index, const bool &draw )
 											  _ui->_spinPithMaximumShift_knot->value(), _ui->_spinPithSmoothingRadius_knot->value(),
 											  _ui->_spinPithMinimumWoodPercentage_knot->value(), Interval<int>( _ui->_spinPithMinIntensity_knot->value(), _ui->_spinPithMaxIntensity_knot->value() ),
 											  _ui->_chechPithAscendingOrder_knot->isChecked());
-		pithExtractor.process(*_tangentialBillon);
+		pithExtractor.process(*_tangentialBillon,true);
 	}
 
 	if (draw)
@@ -806,7 +806,7 @@ void MainWindow::updateKnotPithProfile()
 
 	if ( _tangentialBillon && _tangentialBillon->hasPith() )
 	{
-		_knotPithProfile->construct( _tangentialBillon->pith(), _tangentialBillon->voxelDims() );
+		_knotPithProfile->construct( _tangentialBillon->pith(), _tangentialBillon->voxelDims(), _ui->_spinKnotPithProfileSmoothingRadius->value() );
 	}
 
 	_plotKnotPithProfile->update( *_knotPithProfile );

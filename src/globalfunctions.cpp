@@ -2,7 +2,7 @@
 
 #include "inc/interval.h"
 
-#include <QtGlobal>
+#include <QVector>
 
 namespace TKD
 {
