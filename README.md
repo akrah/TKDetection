@@ -13,9 +13,9 @@ Dependencies list
 
 |   |            Library                  |  Tested version  |   |          Library            |  Tested version  |   |        Library              |  Tested version  |
 |:-:|:-----------------------------------:|:----------------:|---|:---------------------------:|:----------------:|---|:---------------------------:|:----------------:|
-| 1 | [Qt](#1-qt)                         |       4.8        | 4 | [Qwt](#4-qwt)               |      6.0.2       | 7 | [DGtalTools](#7-dgtaltools) |       0.6        |
-| 2 | [Armadillo](#2-armadillo)           |     3.920.2      | 5 | [Qxt](#5-qxt)               |      0.6.2       | 8 | [ImaGene](#8-imagene)       |      online      |
-| 3 | [InsightToolkit](#3-insighttoolkit) |      4.4.2       | 6 | [QwtPolar](#6-qwtpolar)     |      1.0.1       | 9 | [KerUtils](#9-kerutils)     |      online      |
+| 1 | [Qt](#1-qt)                         |       4.8        | 4 | [Qwt](#4-qwt)               |      6.0.2       | 7 | [DGtal](#7-dgtal)           |       0.6        |
+| 2 | [Armadillo](#2-armadillo)           |     3.920.2      | 5 | [Qxt](#5-qxt)               |      0.6.2       | 8 | [GSL](#8-GSL)               |      1.15        |
+| 3 | [InsightToolkit](#3-insighttoolkit) |      4.4.2       | 6 | [QwtPolar](#6-qwtpolar)     |      1.0.1       | 9 | 
 
 
 
@@ -213,10 +213,8 @@ Don't forget to replace *x.y.z* by the downloaded version number:
 ~~~
 
 
-### 7. DGtalTools
+### 7. DGtal
 [Top](#tkdetection)
-
-You must install the DGtal library required by DGtalTools.
 
 The DGtal library required QGLViewer, Boost program options and GMP:
 
@@ -242,53 +240,13 @@ If a problem appear during the cmake step, add an ITK parameter to the command w
   cmake .. -DWITH_GMP=true -DWITH_ITK=true -DWITH_C11=true -DWITH_QGLVIEWER=true -DBUILD_EXAMPLES=false -DBUILD_TESTING=false -DCMAKE_BUILD_TYPE="Release" -DITK_DIR=/usr/local/lib/cmake/ITK-x.y/
 ~~~
 
-Install then DGtalTools:
-
-~~~
-  git clone git://github.com/DGtal-team/DGtalTools.git DGtalTools
-  mkdir DGtalTools/build
-  cd DGtalTools/build
-  cmake .. -DWITH_VISU3D_QGLVIEWER=true -DCMAKE_BUILD_TYPE="Release"
-  make
-  sudo make install
-~~~
-
-If a problem appear, use the same tips than the DGtal installation:
-
-~~~
-  cmake .. -DWITH_VISU3D_QGLVIEWER=true -DCMAKE_BUILD_TYPE="Release" -DITK_DIR=/usr/local/lib/cmake/ITK-x.y/
-~~~
-
-### 8. ImaGene
+### 8. GSL
 [Top](#tkdetection)
 
-Kerutils uses features of ImaGene library.
-
-Install ImaGene by using the version without dependencies:
+The Gnu Standard Library (GSL) is present in the Ubuntu Main repository:
 
 ~~~
-  git clone git://github.com/kerautret/ImaGene-forIPOL.git
-  mkdir ImaGene-forIPOL/build
-  cd ImaGene-forIPOL/build
-  cmake .. -DCMAKE_BUILD_TYPE="Release" -BUILD_TESTING=false
-  make
-  sudo make install
-~~~
-
-### 9. KerUtils
-[Top](#tkdetection)
-
-KerUtils is the library used to detect the curvature on contour of knots.
-It provides the _curvature\_gmcb_ binary file.
-
-KerUtils should be downloaded here: http://www.loria.fr/~krahenbu/TKDetection/KerUtils.zip
-
-~~~
-  unzip KerUtils.zip
-  mkdir KerUtils/build && cd KerUtils/build
-  cmake .. -DCMAKE_BUILD_TYPE="Release"
-  make
-  sudo make install
+  sudo apt-get install libgsl0-dev
 ~~~
 
 TKDetection installation

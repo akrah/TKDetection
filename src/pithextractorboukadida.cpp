@@ -267,8 +267,8 @@ uint PithExtractorBoukadida::contour( const Slice &slice, arma::Mat<qreal> & ori
 		return 0;
 
 	const arma::Col<qreal> sobelNormSort = arma::sort( sobelNormVec );
-	//const qreal &medianVal = sobelNormSort.at( sobelNormSort.n_elem/2 );
-	const qreal &medianVal = sobelNormSort.at( sobelNormSort.n_elem - nbPositiveNorm + qRound(nbPositiveNorm/4.) );
+	const qreal &medianVal = sobelNormSort.at( sobelNormSort.n_elem/2 );
+	//const qreal &medianVal = sobelNormSort.at( sobelNormSort.n_elem - nbPositiveNorm + qRound(nbPositiveNorm/4.) );
 
 	uint nbContourPoints = 0;
 	for ( j=1 ; j<height ; ++j )

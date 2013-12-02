@@ -8,10 +8,13 @@ template <typename T> class QVector;
 class Lowess
 {
 public:
-	Lowess( const qreal &bandwidth = 0.33 );
+	Lowess( const qreal &bandwidth = 0.33, const uint &robustness = 3 );
 
 	const qreal &bandWidth() const;
 	void setBandWidth( const qreal &bandwidth );
+
+	const uint &robustness() const;
+	void setRobustness( const uint &robustness );
 
 	void compute( const QVector<qreal> &datas, QVector<qreal> &interpolatedDatas , QVector<qreal> &residus ) const;
 
@@ -20,6 +23,7 @@ private:
 
 private:
 	qreal _bandWidth;
+	uint _robustness;
 };
 
 #endif // LOWESS_H
