@@ -133,6 +133,7 @@ int main(int argc, char** argv)
     ("scaleZ,z",  po::value<float>()->default_value(1.0), "set the scale value in the Z direction (default 1.0)")
     ("patchMaxWidth,w",  po::value<unsigned int>()->default_value(50), "set the maximal patch width (default 50)")
     ("sampleStep,s",  po::value<unsigned int>()->default_value(20), "set the step between each patch images (default 20)")
+    ("radiusStep,r",  po::value<unsigned int>()->default_value(36), "set the radius step to define the ring (default 36)")
     ("constantRadius,c",po::value<double>(),   "use a constant radius for all knots.")
     ("cutEnd,s",  po::value<unsigned int>()->default_value(0), "remove some end points of the profiles. ")
     ("trunkBark-mesh,t", po::value<std::string>(), "mesh of the trunk bark in format OFS non normalized (.ofs)" )
@@ -201,9 +202,15 @@ int main(int argc, char** argv)
     knotsRadius= vm["constantRadius"].as<double>();
   } 
   viewer.setGLScale(sx,sy,sz);
-  Image3D imageVol = DicomReader< Image3D,  RescalFCT  >::importDicom(vm["volumeFile"].as<std::string>(), RescalFCT(-900,
-                                                                                                                    530,
-                                                                                                                    0, 255));
+  Z3i::Domain aDom;
+  Image3D imageVol(aDom);
+  if(vm.count("crossSectionView")|| vm.count("tangentialView") ){
+    trace.info() << "Reading dicom file ..." ;
+    imageVol = DicomReader< Image3D,  RescalFCT  >::importDicom(vm["volumeFile"].as<std::string>(), RescalFCT(-900,
+                                                                                                                      530,
+                                                                                                                      0, 255));
+    trace.info() << "[done]"<< std::endl;
+  }
   std::vector<unsigned int> indexCenter; indexCenter.push_back(5); indexCenter.push_back(6); indexCenter.push_back(7);  
   std::vector<unsigned int> indexTopLeft; indexTopLeft.push_back(8); indexTopLeft.push_back(9); indexTopLeft.push_back(10);
   std::vector<unsigned int> indexBottomLeft; indexBottomLeft.push_back(11); indexBottomLeft.push_back(12); indexBottomLeft.push_back(13);
@@ -299,7 +306,7 @@ int main(int argc, char** argv)
     }
     DGtal::Mesh<Z3i::RealPoint> meshMoelle(true);
     
-    meshFromMarrow(meshMoelle, vectRadiusW, vectRadiusH, vectPointsCenter, sampleStep, 36);
+    meshFromMarrow(meshMoelle, vectRadiusW, vectRadiusH, vectPointsCenter, sampleStep, vm["radiusStep"].as<unsigned int> ());
     viewer << meshMoelle;
   }
   viewer << My3DViewer::updateDisplay; 
