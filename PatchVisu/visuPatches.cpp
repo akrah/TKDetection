@@ -182,14 +182,10 @@ int main(int argc, char** argv)
       k++;
    
     }
-
+    
   } 
   
   
-    
   viewer << My3DViewer::updateDisplay; 
-
-
-
   return application.exec();
 }

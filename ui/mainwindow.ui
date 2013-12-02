@@ -280,7 +280,7 @@
      <item row="1" column="0">
       <widget class="QTabWidget" name="_tabs">
        <property name="currentIndex">
-        <number>4</number>
+        <number>5</number>
        </property>
        <widget class="QWidget" name="tab_4">
         <attribute name="title">
@@ -354,8 +354,8 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>434</width>
-              <height>148</height>
+              <width>390</width>
+              <height>139</height>
              </rect>
             </property>
             <attribute name="label">
@@ -554,8 +554,8 @@ du repère polaire</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>259</width>
-              <height>223</height>
+              <width>246</width>
+              <height>210</height>
              </rect>
             </property>
             <attribute name="label">
@@ -861,8 +861,8 @@ zone restreinte</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>415</width>
-              <height>253</height>
+              <width>379</width>
+              <height>251</height>
              </rect>
             </property>
             <attribute name="label">
@@ -1026,8 +1026,8 @@ sur une coupe valide</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>415</width>
-              <height>253</height>
+              <width>379</width>
+              <height>251</height>
              </rect>
             </property>
             <attribute name="label">
@@ -1261,8 +1261,8 @@ sur une coupe valide</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>388</width>
-              <height>248</height>
+              <width>360</width>
+              <height>243</height>
              </rect>
             </property>
             <attribute name="label">
@@ -1529,8 +1529,8 @@ sur une coupe valide</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>388</width>
-              <height>285</height>
+              <width>359</width>
+              <height>280</height>
              </rect>
             </property>
             <attribute name="label">
@@ -2231,8 +2231,8 @@ l'intervalle angulaire</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>319</width>
-              <height>181</height>
+              <width>304</width>
+              <height>177</height>
              </rect>
             </property>
             <attribute name="label">
@@ -2440,8 +2440,8 @@ l'intervalle angulaire</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>334</width>
-              <height>157</height>
+              <width>322</width>
+              <height>158</height>
              </rect>
             </property>
             <attribute name="label">
@@ -2714,6 +2714,11 @@ l'intervalle angulaire</string>
                <item>
                 <property name="text">
                  <string>Moelle de la zone de nœud courante</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>Moelle de tous les noeuds</string>
                 </property>
                </item>
                <item>

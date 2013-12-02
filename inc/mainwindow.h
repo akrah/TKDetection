@@ -2,6 +2,7 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QTextStream>
 
 #include "def/def_billon.h"
 #include "def/def_coordinate.h"
@@ -105,7 +106,11 @@ private:
 //	void exportAllSegmentedKnotsOfBillonToV3D();
 
 	void exportPithOfCurrentKnotAreaToSdp();
-//	void exportCurrentSegmentedKnotToSdp();
+    void exportPithOfAllKnotAreaToSdp();
+    void exportPithOfAKnotAreaToSdp(QTextStream &stream, unsigned int numSliceInterval, unsigned int numAngularInterval,
+                                     unsigned int knotID);
+
+    //	void exportCurrentSegmentedKnotToSdp();
 //	void exportSegmentedKnotsOfCurrentSliceIntervalToSdp( bool keepBillonSliceNumber = false );
 //	void exportSegmentedKnotsOfCurrentSliceIntervalToSdpOldAlgo( bool keepBillonSliceNumber = false );
 //	void exportAllSegmentedKnotsOfBillonToSdp();
