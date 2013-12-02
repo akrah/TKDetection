@@ -1,6 +1,7 @@
 #include "inc/ellipticalaccumulationhistogram.h"
 
 #include "inc/billon.h"
+#include "inc/globalfunctions.h"
 
 EllipticalAccumulationHistogram::EllipticalAccumulationHistogram() : Histogram<qreal>()
 {
@@ -21,7 +22,7 @@ uint EllipticalAccumulationHistogram::detectedRadius() const
  * Public setters
  **********************************/
 
-void EllipticalAccumulationHistogram::construct( const Slice &slice, const uiCoord2D &origin, const qreal &ellipticityRate )
+void EllipticalAccumulationHistogram::construct( const Slice &slice, const uiCoord2D &origin, const qreal &ellipticityRate, const uint &smoothingRadius, const uint &minimumGap )
 {
 	const uint &width = slice.n_cols;
 	const uint &height = slice.n_rows;
@@ -82,10 +83,11 @@ void EllipticalAccumulationHistogram::construct( const Slice &slice, const uiCoo
 		(*this)[a] /= nbPixelOnEllipse;
 	}
 
-	findFirstMaximumAndNextMinimum();
+	TKD::meanSmoothing<qreal>( this->begin(), this->end(), smoothingRadius );
+	findFirstMaximumAndNextMinimum( minimumGap );
 }
 
-void EllipticalAccumulationHistogram::findFirstMaximumAndNextMinimum()
+void EllipticalAccumulationHistogram::findFirstMaximumAndNextMinimum( const uint &minimumGap )
 {
 	_maximums.clear();
 
@@ -94,8 +96,8 @@ void EllipticalAccumulationHistogram::findFirstMaximumAndNextMinimum()
 
 	_maximums.resize(3);
 
+	// Recherche du premier maximum
 	uint maximumIndex = 2;
-	while ( maximumIndex<size && (*this)[maximumIndex] <= (*this)[maximumIndex-2] ) maximumIndex++;
 	while ( maximumIndex<size && (*this)[maximumIndex] > (*this)[maximumIndex-2] ) maximumIndex++;
 
 	if ( maximumIndex==size ) return;
@@ -103,18 +105,16 @@ void EllipticalAccumulationHistogram::findFirstMaximumAndNextMinimum()
 	maximumIndex--;
 	_maximums[0] = maximumIndex;
 
+	// Recherche du premier minimum après le premier maximum
 	uint minimumIndex = maximumIndex+2;
-	while ( minimumIndex<size && (*this)[minimumIndex] < (*this)[minimumIndex-2]-3 ) minimumIndex++;
+	while ( minimumIndex<size && (*this)[minimumIndex] < (*this)[minimumIndex-2]-minimumGap ) minimumIndex++;
 	minimumIndex--;
 	minimumIndex = qMax(qMin(minimumIndex,size-1),maximumIndex);
 	_maximums[2] = minimumIndex;
 
 
-	const qreal &maximumValue = (*this)[maximumIndex];
-	const qreal &minimumValue = (*this)[minimumIndex];
-	const qreal meanValue = ( maximumValue+minimumValue )/2.;
-
+	// Recherche du x corespondant au f(x) median de f(maximumIndex) et f(minimumIndex)
+	const qreal meanValue = ( (*this)[maximumIndex]+(*this)[minimumIndex] )/2.;
 	while ( (*this)[maximumIndex++] > meanValue );
-
 	_maximums[1] = maximumIndex-1;
 }

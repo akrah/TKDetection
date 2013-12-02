@@ -280,7 +280,7 @@
      <item row="1" column="0">
       <widget class="QTabWidget" name="_tabs">
        <property name="currentIndex">
-        <number>4</number>
+        <number>2</number>
        </property>
        <widget class="QWidget" name="tab_4">
         <attribute name="title">
@@ -1804,7 +1804,7 @@ sur une coupe valide</string>
               <x>0</x>
               <y>0</y>
               <width>335</width>
-              <height>115</height>
+              <height>84</height>
              </rect>
             </property>
             <attribute name="label">
@@ -1842,6 +1842,65 @@ sur une coupe valide</string>
              </item>
             </layout>
            </widget>
+           <widget class="QWidget" name="page_8">
+            <attribute name="label">
+             <string>Accumulation d'intensité elliptique</string>
+            </attribute>
+            <layout class="QFormLayout" name="formLayout_9">
+             <item row="0" column="0">
+              <widget class="QLabel" name="label_33">
+               <property name="font">
+                <font>
+                 <weight>50</weight>
+                 <bold>false</bold>
+                </font>
+               </property>
+               <property name="text">
+                <string>Rayon de lissage</string>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="1">
+              <widget class="QSpinBox" name="_spinEllipticalAccumulationSmoothingRadius">
+               <property name="font">
+                <font>
+                 <weight>50</weight>
+                 <bold>false</bold>
+                </font>
+               </property>
+               <property name="value">
+                <number>2</number>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="0">
+              <widget class="QLabel" name="label_34">
+               <property name="font">
+                <font>
+                 <weight>50</weight>
+                 <bold>false</bold>
+                </font>
+               </property>
+               <property name="text">
+                <string>Écart pour les minimums</string>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="1">
+              <widget class="QSpinBox" name="_spinEllipticalAccumulationMinimumGap">
+               <property name="font">
+                <font>
+                 <weight>50</weight>
+                 <bold>false</bold>
+                </font>
+               </property>
+               <property name="value">
+                <number>15</number>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
           </widget>
          </item>
         </layout>
@@ -1874,6 +1933,26 @@ sur une coupe valide</string>
               </property>
               <property name="value">
                <double>0.750000000000000</double>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="0">
+             <widget class="QLabel" name="label_31">
+              <property name="text">
+               <string>Coefficient IRQ</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="1">
+             <widget class="QDoubleSpinBox" name="_spinLowessIqrCoeff">
+              <property name="minimum">
+               <double>0.500000000000000</double>
+              </property>
+              <property name="maximum">
+               <double>3.000000000000000</double>
+              </property>
+              <property name="value">
+               <double>1.000000000000000</double>
               </property>
              </widget>
             </item>
@@ -2667,7 +2746,7 @@ l'intervalle angulaire</string>
         <enum>QTabWidget::South</enum>
        </property>
        <property name="currentIndex">
-        <number>4</number>
+        <number>3</number>
        </property>
        <widget class="QWidget" name="_tabSliceHistogram">
         <attribute name="title">
@@ -2774,7 +2853,7 @@ l'intervalle angulaire</string>
        </widget>
        <widget class="QWidget" name="tab_5">
         <attribute name="title">
-         <string>4. Histogramme d'intensité elliptique</string>
+         <string>4. Acumulation d'intensité elliptique</string>
         </attribute>
         <layout class="QVBoxLayout" name="verticalLayout_7">
          <item>

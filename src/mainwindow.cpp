@@ -821,7 +821,8 @@ void MainWindow::updateKnotEllipseRadiiHistogram()
 
 	if ( _tangentialBillon && _tangentialBillon->hasPith() && _knotPithProfile->size() )
 	{
-		_knotEllipseRadiiHistogram->construct( *_tangentialBillon, *_knotPithProfile, _ui->_spinLowessBandWidth->value() );
+		_knotEllipseRadiiHistogram->construct( *_tangentialBillon, *_knotPithProfile, _ui->_spinLowessBandWidth->value(), _ui->_spinLowessIqrCoeff->value(),
+											   _ui->_spinEllipticalAccumulationSmoothingRadius->value(), _ui->_spinEllipticalAccumulationMinimumGap->value());
 	}
 
 	_plotKnotEllipseRadiiHistogram->update( *_knotEllipseRadiiHistogram );

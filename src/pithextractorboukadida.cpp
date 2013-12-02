@@ -257,7 +257,7 @@ uint PithExtractorBoukadida::contour( const Slice &slice, arma::Mat<qreal> & ori
 					 2 * (slice.at( j+1, i ) - slice.at( j-1, i )) +
 					 slice.at( j+1, i+1 ) - slice.at( j-1, i+1 );
 			orientations.at(j,i) = qFuzzyIsNull(sobelX) ? 9999999999./1. : sobelY/sobelX*voxelRatio;
-			norm = qPow(sobelX*xDim,2) + qPow(sobelY*yDim,2);
+			norm = qSqrt(qPow(sobelX*xDim,2) + qPow(sobelY*yDim,2));
 			sobelNorm.at(j,i-iMin) = *sobelNormVecIt++ = norm;
 			nbPositiveNorm += !qFuzzyIsNull(norm);
 		}
@@ -268,7 +268,7 @@ uint PithExtractorBoukadida::contour( const Slice &slice, arma::Mat<qreal> & ori
 
 	const arma::Col<qreal> sobelNormSort = arma::sort( sobelNormVec );
 	//const qreal &medianVal = sobelNormSort.at( sobelNormSort.n_elem/2 );
-	const qreal &medianVal = sobelNormSort.at( sobelNormSort.n_elem - nbPositiveNorm + qRound(nbPositiveNorm/2.) );
+	const qreal &medianVal = sobelNormSort.at( sobelNormSort.n_elem - nbPositiveNorm + qRound(nbPositiveNorm/4.) );
 
 	uint nbContourPoints = 0;
 	for ( j=1 ; j<height ; ++j )

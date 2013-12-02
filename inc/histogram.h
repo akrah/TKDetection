@@ -4,7 +4,6 @@
 #include "interval.h"
 #include "inc/globalfunctions.h"
 
-#include <numeric>
 #include <QVector>
 #include <QTextStream>
 
