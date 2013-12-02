@@ -1699,11 +1699,13 @@ void  MainWindow::exportPithOfAllKnotAreaToSdp()
                 {
                     qDebug() << "processing interval: " << intervalIndex;
 
+                    //selectSliceInterval(intervalIndex);
                     _ui->_comboSelectSliceInterval->setCurrentIndex(intervalIndex);
                     for ( unsigned int sectorIndex=1 ; sectorIndex< _ui->_comboSelectSectorInterval->count() ; ++sectorIndex )
                     {
                         qDebug() << "processing sector: " << sectorIndex;
-                        _ui->_comboSelectSectorInterval->setCurrentIndex(sectorIndex);
+                        selectSectorInterval(sectorIndex, true);
+                        //_ui->_comboSelectSectorInterval->setCurrentIndex(sectorIndex);
                         exportPithOfAKnotAreaToSdp(stream, intervalIndex-1, sectorIndex-1, knotID);
                         qDebug() << "processing sector: " << sectorIndex << "/" <<_ui->_comboSelectSectorInterval->count()-1<< " [done]";
                         knotID++;
