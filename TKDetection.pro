@@ -114,12 +114,9 @@ FORMS =	ui/mainwindow.ui
 
 # Directives compilateur
 #-----------------------#
-INCLUDEPATH *=	/usr/include/ /usr/local/include/
-INCLUDEPATH *=	/Users/kerautre/dev/qwtpolar-1.1.0-rc1/lib/qwtpolar.framework/Headers /Users/kerautre/Dev/libqxt-libqxt-dadc327c2a6a/lib/QxtGui.framework/Versions/0/Headers/ /Users/kerautre/Dev/libqxt-libqxt-dadc327c2a6a/lib/QxtCore.framework/Versions/0/Headers/
-QMAKE_LIBDIR += /usr/lib/
-QMAKE_LIBDIR += /Users/kerautre/dev/qwtpolar-1.1.0-rc1/lib
-QMAKE_LIBDIR *=	/usr/local/lib/
-QMAKE_LIBDIR *=	/usr/lib/
+QMAKE_CXXFLAGS *= -std=c++0x
+macx:QMAKE_CC=/usr/bin/gcc
+macx:QMAKE_CXX=/usr/bin/g++
 
 
 # Librairies externes
@@ -128,7 +125,7 @@ INCLUDEPATH *=	/usr/include/ /usr/local/include/
 
 QMAKE_LIBDIR *=	/usr/local/lib/
 
-LIBS *= -lblas -llapack -larmadillo -lDGtal -lDGtalIO -lgsl -lgslcblas -lqwtpolar 
+LIBS *= -lblas -llapack -larmadillo -lDGtal -lDGtalIO -lgsl -lgslcblas
 
 # ITK
 #----#
