@@ -2,7 +2,7 @@
 #define GLOBALFUNCTIONS_H
 
 #include "def/def_billon.h"
-
+#include <numeric>
 #include <QtGlobal>
 #include <QVector>
 
@@ -51,7 +51,7 @@ namespace TKD
 		dataIter = begin;
 		dataEnd = end;
 
-		T currentValue = std::accumulate( copyIterBegin, copyIterEnd, T() );
+        T currentValue = std::accumulate( copyIterBegin, copyIterEnd, T() );
 		*dataIter++ = currentValue/smoothingDiameter;
 		while ( dataIter != dataEnd )
 		{
