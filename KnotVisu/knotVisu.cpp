@@ -127,6 +127,7 @@ int main(int argc, char** argv)
     ("volumeFile,v", po::value<std::string>(), "import volume image (dicom format)" )
     ("tangentialView", "Display tangential view defined from the set of the four imported points")
     ("crossSectionView", "Display cross section view defined from the set of simple points and the normal direction")
+    ("exportKnotMesh", po::value<std::string>(), "Export all knots mesh in OFS format.")
     ("pointsPk,p", po::value<std::string>(), "import the set of points Pk used to determine the image position." )
     ("scaleX,x",  po::value<float>()->default_value(1.0), "set the scale value in the X direction (default 1.0)" )
     ("scaleY,y",  po::value<float>()->default_value(1.0), "set the scale value in the Y direction (default 1.0)" )
@@ -244,7 +245,7 @@ int main(int argc, char** argv)
   std::vector< std::vector<Z3i::RealPoint> > vectPointsBottomRightSplitted = splitKnotPithFromKnotID<Z3i::RealPoint>(vectPointsBottomRightALL, vectKnotID);
   
   DGtal::DefaultFunctor idV;
-  
+  DGtal::Mesh<Z3i::RealPoint> meshMoelle(true);
   for (unsigned int numId=0; numId < vectPointsBottomRightSplitted.size(); numId++){
     unsigned k =0;
     std::vector<double> vectRadiusW = vectRadiusWSplitted.at(numId);
@@ -304,11 +305,11 @@ int main(int argc, char** argv)
    
       }    
     }
-    DGtal::Mesh<Z3i::RealPoint> meshMoelle(true);
+   
     
     meshFromMarrow(meshMoelle, vectRadiusW, vectRadiusH, vectPointsCenter, sampleStep, vm["radiusStep"].as<unsigned int> ());
-    viewer << meshMoelle;
   }
+  viewer << meshMoelle;
   viewer << My3DViewer::updateDisplay; 
 
   display mesh by splitting knots coordinates
