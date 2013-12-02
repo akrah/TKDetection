@@ -347,7 +347,7 @@
          <item>
           <widget class="QToolBox" name="toolBox_3">
            <property name="currentIndex">
-            <number>0</number>
+            <number>2</number>
            </property>
            <widget class="QWidget" name="page_10">
             <property name="geometry">
@@ -788,6 +788,55 @@ zone restreinte</string>
                </property>
                <property name="text">
                 <string>100</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+           <widget class="QWidget" name="page_12">
+            <property name="geometry">
+             <rect>
+              <x>0</x>
+              <y>0</y>
+              <width>335</width>
+              <height>115</height>
+             </rect>
+            </property>
+            <attribute name="label">
+             <string>Coupes tangentielles</string>
+            </attribute>
+            <layout class="QFormLayout" name="formLayout_14">
+             <item row="0" column="0">
+              <widget class="QLabel" name="label_36">
+               <property name="text">
+                <string>Interpolation trilinéaire</string>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="1">
+              <widget class="QCheckBox" name="_checkTrilinearInterpolation">
+               <property name="text">
+                <string/>
+               </property>
+               <property name="checked">
+                <bool>true</bool>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="0">
+              <widget class="QLabel" name="label_37">
+               <property name="text">
+                <string>Pourcentage d'interpolation</string>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="1">
+              <widget class="QSpinBox" name="_spinTrilinearInterpolationCoefficient">
+               <property name="maximum">
+                <number>100</number>
+               </property>
+               <property name="value">
+                <number>66</number>
                </property>
               </widget>
              </item>
@@ -1803,8 +1852,8 @@ sur une coupe valide</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>335</width>
-              <height>115</height>
+              <width>195</width>
+              <height>45</height>
              </rect>
             </property>
             <attribute name="label">
@@ -1842,6 +1891,73 @@ sur une coupe valide</string>
              </item>
             </layout>
            </widget>
+           <widget class="QWidget" name="page_8">
+            <property name="geometry">
+             <rect>
+              <x>0</x>
+              <y>0</y>
+              <width>335</width>
+              <height>84</height>
+             </rect>
+            </property>
+            <attribute name="label">
+             <string>Accumulation d'intensité elliptique</string>
+            </attribute>
+            <layout class="QFormLayout" name="formLayout_9">
+             <item row="0" column="0">
+              <widget class="QLabel" name="label_33">
+               <property name="font">
+                <font>
+                 <weight>50</weight>
+                 <bold>false</bold>
+                </font>
+               </property>
+               <property name="text">
+                <string>Rayon de lissage</string>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="1">
+              <widget class="QSpinBox" name="_spinEllipticalAccumulationSmoothingRadius">
+               <property name="font">
+                <font>
+                 <weight>50</weight>
+                 <bold>false</bold>
+                </font>
+               </property>
+               <property name="value">
+                <number>2</number>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="0">
+              <widget class="QLabel" name="label_34">
+               <property name="font">
+                <font>
+                 <weight>50</weight>
+                 <bold>false</bold>
+                </font>
+               </property>
+               <property name="text">
+                <string>Écart pour les minimums</string>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="1">
+              <widget class="QSpinBox" name="_spinEllipticalAccumulationMinimumGap">
+               <property name="font">
+                <font>
+                 <weight>50</weight>
+                 <bold>false</bold>
+                </font>
+               </property>
+               <property name="value">
+                <number>15</number>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
           </widget>
          </item>
         </layout>
@@ -1874,6 +1990,26 @@ sur une coupe valide</string>
               </property>
               <property name="value">
                <double>0.750000000000000</double>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="0">
+             <widget class="QLabel" name="label_31">
+              <property name="text">
+               <string>Coefficient IQR</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="1">
+             <widget class="QDoubleSpinBox" name="_spinLowessIqrCoeff">
+              <property name="minimum">
+               <double>0.500000000000000</double>
+              </property>
+              <property name="maximum">
+               <double>3.000000000000000</double>
+              </property>
+              <property name="value">
+               <double>1.000000000000000</double>
               </property>
              </widget>
             </item>
@@ -2672,7 +2808,7 @@ l'intervalle angulaire</string>
         <enum>QTabWidget::South</enum>
        </property>
        <property name="currentIndex">
-        <number>4</number>
+        <number>3</number>
        </property>
        <widget class="QWidget" name="_tabSliceHistogram">
         <attribute name="title">
@@ -2779,7 +2915,7 @@ l'intervalle angulaire</string>
        </widget>
        <widget class="QWidget" name="tab_5">
         <attribute name="title">
-         <string>4. Histogramme d'intensité elliptique</string>
+         <string>4. Acumulation d'intensité elliptique</string>
         </attribute>
         <layout class="QVBoxLayout" name="verticalLayout_7">
          <item>

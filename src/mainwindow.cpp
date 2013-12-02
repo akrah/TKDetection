@@ -49,7 +49,7 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 	_knotPithProfile(new KnotPithProfile()), _plotKnotPithProfile(new PlotKnotPithProfile()),
 	_knotEllipseRadiiHistogram(new KnotEllipseRadiiHistogram), _plotKnotEllipseRadiiHistogram(new PlotKnotEllipseRadiiHistogram),
 	_plotEllipticalAccumulationHistogram(new PlotEllipticalAccumulationHistogram()),
-	_currentSlice(0), _currentYSlice(0), _currentMaximum(0), _currentSector(0), _treeRadius(0)
+	_currentSlice(0), _currentSliceInterval(0), _currentSectorInterval(0), _currentYSlice(0), _currentMaximum(0), _currentSector(0), _treeRadius(0)
 {
 	_ui->setupUi(this);
 	setWindowTitle("TKDetection");
@@ -421,8 +421,8 @@ void MainWindow::drawSlice()
 					painter.drawLine(0,restrictedRadius,width,restrictedRadius);
 			}
 
-			const bool inDrawingArea = (_ui->_comboSelectSliceInterval->currentIndex() > 0 &&
-										_sliceHistogram->interval(_ui->_comboSelectSliceInterval->currentIndex()-1).containsClosed(_currentSlice));
+			const bool inDrawingArea = (_currentSliceInterval &&
+										_sliceHistogram->interval(_currentSliceInterval-1).containsClosed(_currentSlice));
 			if ( inDrawingArea )
 			{
 				if ( !_sectorHistogram->isEmpty() )
@@ -497,7 +497,7 @@ void MainWindow::drawTangentialView()
 			colors << Qt::blue << Qt::yellow << Qt::green << Qt::magenta << Qt::cyan << Qt::white;
 			const int nbKnotAreas = _sectorHistogram->intervals().size();
 			const int nbColorsToUse = qMax( nbKnotAreas>colors.size() ? ((nbKnotAreas+1)/2)%colors.size() : colors.size() , 1 );
-			const QColor currentColor = colors[(_ui->_comboSelectSectorInterval->currentIndex()-1)%nbColorsToUse];
+			const QColor currentColor = colors[(_currentSectorInterval-1)%nbColorsToUse];
 
 			const qreal knotAreaLine = currentSlice * (width/2.) / static_cast<qreal>(depth);
 
@@ -640,11 +640,12 @@ void MainWindow::setSectorNumber( const int &value )
 
 void MainWindow::selectSliceInterval( const int &index )
 {
+	_currentSliceInterval = index;
+
 	if ( _tangentialBillon )
 	{
 		delete _tangentialBillon;
 		_tangentialBillon = 0;
-		updateKnotPithProfile();
 	}
 	_ui->_sliderSelectTangentialSlice->setValue(0);
 
@@ -682,6 +683,8 @@ void MainWindow::selectCurrentSliceInterval()
 
 void MainWindow::selectSectorInterval(const int &index, const bool &draw )
 {
+	_currentSectorInterval = index;
+
 	if ( _tangentialBillon )
 	{
 		delete _tangentialBillon;
@@ -698,10 +701,11 @@ void MainWindow::selectSectorInterval(const int &index, const bool &draw )
 		if ( maximumIndex<semiAngularRange ) centeredSectorInterval.setMin( nbAngularSectors + centeredSectorInterval.min() - 1 );
 		if ( centeredSectorInterval.max() > nbAngularSectors-1 ) centeredSectorInterval.setMax( centeredSectorInterval.max() - nbAngularSectors + 1 );
 
-		const Interval<uint> &sliceInterval = _sliceHistogram->interval(_ui->_comboSelectSliceInterval->currentIndex()-1);
+		const Interval<uint> &sliceInterval = _sliceHistogram->interval(_currentSliceInterval-1);
 		const Interval<int> intensityInterval(_ui->_spinMinIntensity->value(), _ui->_spinMaxIntensity->value());
 
-		_tangentialBillon = BillonAlgorithms::tangentialTransform( *_billon, sliceInterval, centeredSectorInterval, intensityInterval.min() );
+		_tangentialBillon = BillonAlgorithms::tangentialTransform( *_billon, sliceInterval, centeredSectorInterval, intensityInterval.min(),
+																   _ui->_checkTrilinearInterpolation->isChecked(), _ui->_spinTrilinearInterpolationCoefficient->value()/100. );
 		_ui->_sliderSelectTangentialSlice->blockSignals(true);
 		_ui->_sliderSelectTangentialSlice->setMaximum(_tangentialBillon->n_slices>0?_tangentialBillon->n_slices-1:0);
 		_ui->_sliderSelectTangentialSlice->setValue(0);
@@ -821,7 +825,8 @@ void MainWindow::updateKnotEllipseRadiiHistogram()
 
 	if ( _tangentialBillon && _tangentialBillon->hasPith() && _knotPithProfile->size() )
 	{
-		_knotEllipseRadiiHistogram->construct( *_tangentialBillon, *_knotPithProfile, _ui->_spinLowessBandWidth->value() );
+		_knotEllipseRadiiHistogram->construct( *_tangentialBillon, *_knotPithProfile, _ui->_spinLowessBandWidth->value(), _ui->_spinLowessIqrCoeff->value(),
+											   _ui->_spinEllipticalAccumulationSmoothingRadius->value(), _ui->_spinEllipticalAccumulationMinimumGap->value());
 	}
 
 	_plotKnotEllipseRadiiHistogram->update( *_knotEllipseRadiiHistogram );
@@ -1100,7 +1105,7 @@ void MainWindow::exportPithToOfs( const bool &onCurrentSliceInterval )
 		QMessageBox::warning( this, tr("Export en .ofs"), tr("La moelle n'est pas calculée."));
 		return;
 	}
-	if ( onCurrentSliceInterval && !_ui->_comboSelectSliceInterval->currentIndex() )
+	if ( onCurrentSliceInterval && !_currentSliceInterval )
 	{
 		QMessageBox::warning( this, tr("Export en .ofs"), tr("Aucun intervalle de coupes selectionné."));
 		return;
@@ -1113,7 +1118,7 @@ void MainWindow::exportPithToOfs( const bool &onCurrentSliceInterval )
 		{
 			QTextStream stream(&file);
 			OfsExport::writeHeader( stream );
-			const Interval<uint> &sliceInterval = onCurrentSliceInterval ? _sliceHistogram->interval(_ui->_comboSelectSliceInterval->currentIndex()) : Interval<uint>(0,_billon->n_slices-1);
+			const Interval<uint> &sliceInterval = onCurrentSliceInterval ? _sliceHistogram->interval(_currentSliceInterval) : Interval<uint>(0,_billon->n_slices-1);
 			OfsExport::processOnPith( stream, *_billon, sliceInterval, _ui->_spinExportNbEdges->value(), _ui->_spinExportRadius->value(), false );
 			file.close();
 			QMessageBox::information( this, tr("Export en .ofs"), tr("Terminé avec succés !"));
@@ -1176,7 +1181,7 @@ void MainWindow::exportAllKnotAreasToOfs()
 		QVector< QVector< Interval<qreal> > > angleIntervals(sliceIntervals.size());
 		for ( int i=0 ; i<sliceIntervals.size() ; ++i )
 		{
-			_ui->_comboSelectSliceInterval->setCurrentIndex(i+1);
+			selectSliceInterval( i+1 );
 			for ( int j=0 ; j<_sectorHistogram->intervals().size() ; ++j )
 			{
 				const Interval<uint> &sectorInterval = _sectorHistogram->interval(j);
@@ -1212,8 +1217,8 @@ void MainWindow::exportAllKnotAreasToOfs()
 //	QString fileName = QFileDialog::getSaveFileName(this, tr("Exporter en .ofs"), "output.ofs", tr("Fichiers de données (*.ofs);;Tous les fichiers (*.*)"));
 //	if ( !fileName.isEmpty() )
 //	{
-//		const Interval<uint> &sliceInterval = _sliceHistogram->interval(_ui->_comboSelectSliceInterval->currentIndex()-1);
-//		const Interval<uint> &sectorInterval = _sectorHistogram->interval(_ui->_comboSelectSectorInterval->currentIndex()-1);
+//		const Interval<uint> &sliceInterval = _sliceHistogram->interval(_currentSliceInterval-1);
+//		const Interval<uint> &sectorInterval = _sectorHistogram->interval(_currentSectorInterval-1);
 //		QFile file(fileName);
 //		if ( file.open(QIODevice::WriteOnly) )
 //		{
@@ -1761,7 +1766,7 @@ void MainWindow::exportPithOfAKnotAreaToSdp(QTextStream &stream, unsigned int nu
                 stream << "#knotID NumSliceInterval NumAngularInterval| EllipseWidth EllipseHeight| Coord | Top Left | Top Right | Bottom Right | Bottom Left" << endl;
                 stream << "#KnotID NumSliceInterval NumAngularInterval EllipseWidth EllipseHeight x y z    x y z       x y z        x y z         x y z" << endl;
 
-                const Interval<uint> &sliceInterval = _sliceHistogram->interval(numSliceInterval);
+				const Interval<uint> &sliceInterval = _sliceHistogram->interval(_currentSliceInterval-1);
 				const qreal zPithCoord = sliceInterval.mid();
 				const rCoord2D &originPith = _billon->pithCoord(zPithCoord);
 
@@ -1779,7 +1784,7 @@ void MainWindow::exportPithOfAKnotAreaToSdp(QTextStream &stream, unsigned int nu
 				const QQuaternion quaterY = QQuaternion::fromAxisAndAngle( 0, 1, 0, alpha*RAD_TO_DEG_FACT );
 
 				// Rotation selon l'angle de la zone de nœuds
-                const Interval<uint> &angularInterval = _sectorHistogram->interval(numAngularInterval);
+				const Interval<uint> &angularInterval = _sectorHistogram->interval(_currentSectorInterval-1);
 				const uint angularRange = (angularInterval.max() + (angularInterval.isValid() ? 0. : PieChartSingleton::getInstance()->nbSectors())) - angularInterval.min();
 				const qreal bisectorOrientation = (angularInterval.min()+angularRange/2.)*PieChartSingleton::getInstance()->angleStep();
 				const QQuaternion quaterZ = QQuaternion::fromAxisAndAngle( 0, 0, 1, bisectorOrientation*RAD_TO_DEG_FACT );
