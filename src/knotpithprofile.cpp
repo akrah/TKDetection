@@ -24,7 +24,7 @@ void KnotPithProfile::construct( const Pith &pith, const rCoord3D &voxelDims, co
 
 	if (!size) return;
 
-	const qreal &voxelRatio = qPow(voxelDims.y/voxelDims.z,2.)/4.;
+	const qreal &voxelRatio = qPow(voxelDims.y/voxelDims.z,2)/4.;
 
 	for ( int k=2 ; k<size-2 ; ++k )
 	{

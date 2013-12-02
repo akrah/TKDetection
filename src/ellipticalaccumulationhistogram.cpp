@@ -83,7 +83,7 @@ void EllipticalAccumulationHistogram::construct( const Slice &slice, const uiCoo
 		(*this)[a] /= nbPixelOnEllipse;
 	}
 
-	TKD::meanSmoothing<qreal>( this->begin(), this->end(), smoothingRadius );
+	if (smoothingRadius) TKD::meanSmoothing<qreal>( this->begin(), this->end(), smoothingRadius );
 	findFirstMaximumAndNextMinimum( minimumGap );
 }
 
@@ -114,6 +114,7 @@ void EllipticalAccumulationHistogram::findFirstMaximumAndNextMinimum( const uint
 
 
 	// Recherche du x corespondant au f(x) median de f(maximumIndex) et f(minimumIndex)
+	//_maximums[1] = (maximumIndex+minimumIndex)/2.;
 	const qreal meanValue = ( (*this)[maximumIndex]+(*this)[minimumIndex] )/2.;
 	while ( (*this)[maximumIndex++] > meanValue );
 	_maximums[1] = maximumIndex-1;

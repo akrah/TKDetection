@@ -141,6 +141,8 @@ private:
 	PlotEllipticalAccumulationHistogram *_plotEllipticalAccumulationHistogram;
 
 	uint _currentSlice;
+	uint _currentSliceInterval;
+	uint _currentSectorInterval;
 	uint _currentYSlice;
 	int _currentMaximum;
 	uint _currentSector;
