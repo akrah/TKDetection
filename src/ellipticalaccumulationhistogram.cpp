@@ -35,7 +35,7 @@ void EllipticalAccumulationHistogram::construct( const Slice &slice, const uiCoo
 
 	resize(nbEllipses);
 
-	if ( nbEllipses ) (*this)[0] = slice.at( 0,0 );
+	if ( nbEllipses ) (*this)[0] = slice( 0,0 );
 	for ( a=1 ; a<nbEllipses ; a++ )
 	{
 		b = a*ellipticityRate;
@@ -44,10 +44,10 @@ void EllipticalAccumulationHistogram::construct( const Slice &slice, const uiCoo
 		x = 0;
 		y = b;
 		d1 = bSquare - aSquare*b + aSquare/4. ;
-		(*this)[a] += slice.at( qRound(pithCoordY+y), qRound(pithCoordX+x) ) +
-					  slice.at( qRound(pithCoordY+y), qRound(pithCoordX-x) ) +
-					  slice.at( qRound(pithCoordY-y), qRound(pithCoordX-x) ) +
-					  slice.at( qRound(pithCoordY-y), qRound(pithCoordX+x) );
+		(*this)[a] += slice( qRound(pithCoordY+y), qRound(pithCoordX+x) ) +
+					  slice( qRound(pithCoordY+y), qRound(pithCoordX-x) ) +
+					  slice( qRound(pithCoordY-y), qRound(pithCoordX-x) ) +
+					  slice( qRound(pithCoordY-y), qRound(pithCoordX+x) );
 		nbPixelOnEllipse = 4;
 		while ( aSquare*(y-.5) > bSquare*(x+1) )
 		{
@@ -58,10 +58,10 @@ void EllipticalAccumulationHistogram::construct( const Slice &slice, const uiCoo
 			}
 			d1 += bSquare*(2*x+3) ;
 			x++ ;
-			(*this)[a] += slice.at( qRound(pithCoordY+y), qRound(pithCoordX+x) ) +
-						  slice.at( qRound(pithCoordY+y), qRound(pithCoordX-x) ) +
-						  slice.at( qRound(pithCoordY-y), qRound(pithCoordX-x) ) +
-						  slice.at( qRound(pithCoordY-y), qRound(pithCoordX+x) );
+			(*this)[a] += slice( qRound(pithCoordY+y), qRound(pithCoordX+x) ) +
+						  slice( qRound(pithCoordY+y), qRound(pithCoordX-x) ) +
+						  slice( qRound(pithCoordY-y), qRound(pithCoordX-x) ) +
+						  slice( qRound(pithCoordY-y), qRound(pithCoordX+x) );
 			nbPixelOnEllipse += 4;
 		}
 		d2 = bSquare*qPow(x+.5,2) + aSquare*qPow(y-1,2) - aSquare*bSquare ;
@@ -74,10 +74,10 @@ void EllipticalAccumulationHistogram::construct( const Slice &slice, const uiCoo
 			}
 			d2 += aSquare*(-2*y+3);
 			y-- ;
-			(*this)[a] += slice.at( qRound(pithCoordY+y), qRound(pithCoordX+x) ) +
-						  slice.at( qRound(pithCoordY+y), qRound(pithCoordX-x) ) +
-						  slice.at( qRound(pithCoordY-y), qRound(pithCoordX-x) ) +
-						  slice.at( qRound(pithCoordY-y), qRound(pithCoordX+x) );
+			(*this)[a] += slice( qRound(pithCoordY+y), qRound(pithCoordX+x) ) +
+						  slice( qRound(pithCoordY+y), qRound(pithCoordX-x) ) +
+						  slice( qRound(pithCoordY-y), qRound(pithCoordX-x) ) +
+						  slice( qRound(pithCoordY-y), qRound(pithCoordX+x) );
 			nbPixelOnEllipse += 4;
 		}
 		(*this)[a] /= nbPixelOnEllipse;

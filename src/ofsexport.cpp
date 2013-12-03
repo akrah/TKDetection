@@ -246,7 +246,7 @@ namespace OfsExport
 					if ( displayBegEndFaces && !i && (k==sliceInterval.min() || k==sliceInterval.max()) )
 						stream << 0 << ' ' << 0 << ' ' << depth << endl;
 					else
-						stream << ( vectVertex.at(pos).x /norm.x - ofsStart.x ) << ' ' << ( vectVertex.at(pos).y/norm.y - ofsStart.y ) << ' ' << depth << endl;
+						stream << ( vectVertex[pos].x /norm.x - ofsStart.x ) << ' ' << ( vectVertex[pos].y/norm.y - ofsStart.y ) << ' ' << depth << endl;
 					pos++;
 				}
 				depth += depthShift;

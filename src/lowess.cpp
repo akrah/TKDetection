@@ -158,11 +158,10 @@ void Lowess::compute( const QVector<qreal> &datas, QVector<qreal> &interpolatedD
 
 qreal Lowess::tricube( const qreal &u, const qreal &t ) const
 {
+	qreal res = 0.0;
 	// 0 <= u < t
 	if ( (qFuzzyIsNull(u) || u > 0.0) && (u < t) )
-	{
 		// (1 - (u/t)^3)^3
-		return qPow( ( 1.0 - qPow(u/t, 3.0) ), 3.0 );
-	}
-	else return 0.0;
+		res = qPow( ( 1.0 - qPow(u/t, 3.0) ), 3.0 );
+	return res;
 }

@@ -461,7 +461,7 @@ void MainWindow::drawTangentialView()
 		const rCoord2D &pithCoord = _tangentialBillon->hasPith()?
 										_tangentialBillon->pithCoord(_ui->_sliderSelectTangentialSlice->value()):
 										rCoord2D(_tangentialBillon->n_cols/2,_tangentialBillon->n_rows/2);
-		const qreal ellipticityRate = (_tangentialBillon->voxelWidth()/_tangentialBillon->voxelHeight()) * qCos(_knotPithProfile->at(_ui->_sliderSelectTangentialSlice->value()));
+		const qreal ellipticityRate = (_tangentialBillon->voxelWidth()/_tangentialBillon->voxelHeight()) * qCos((*_knotPithProfile)[_ui->_sliderSelectTangentialSlice->value()]);
 		const uint &depth = _tangentialBillon->n_slices;
 
 		uint width = _tangentialBillon->n_cols;
@@ -777,8 +777,10 @@ void MainWindow::updateSliceHistogram()
 	{
 		_sliceHistogram->construct(*_billon, Interval<int>(_ui->_spinMinIntensity->value(),_ui->_spinMaxIntensity->value()),
 								   _ui->_spinZMotionMin->value(), _ui->_spinHistogramPercentageOfSlicesToIgnore_zMotion->value()*_billon->n_slices/100., _treeRadius*_ui->_spinRestrictedAreaPercentage->value()/100.);
-		_sliceHistogram->computeMaximumsAndIntervals( _ui->_spinHistogramSmoothingRadius_zMotion->value(), _ui->_spinHistogramMinimumHeightOfMaximum_zMotion->value(),
-													  _ui->_spinHistogramDerivativeSearchPercentage_zMotion->value(), _ui->_spinHistogramMinimumWidthOfInterval_zMotion->value(), false);
+		_sliceHistogram->computeMaximumsAndIntervals( _ui->_spinHistogramSmoothingRadius_zMotion->value(),
+													  _ui->_spinHistogramMinimumHeightOfMaximum_zMotion->value(),
+													  _ui->_spinHistogramDerivativeSearchPercentage_zMotion->value(),
+													  _ui->_spinHistogramMinimumWidthOfInterval_zMotion->value(), false);
 	}
 	_plotSliceHistogram->update( *_sliceHistogram );
 	_plotSliceHistogram->moveCursor( _ui->_sliderSelectSlice->value() );
@@ -1571,7 +1573,7 @@ void MainWindow::exportImageCartesianSliceIntervalToPgm3d()
 //							{
 //								for ( i=0 ; i<slice.n_cols ; ++i )
 //								{
-//									if (knotSlice.at(j,i)) slice.at(j,i) = sectorIndex;
+//									if (knotSlice(j,i)) slice(j,i) = sectorIndex;
 //								}
 //							}
 //						}
@@ -1587,7 +1589,7 @@ void MainWindow::exportImageCartesianSliceIntervalToPgm3d()
 //					{
 //						for ( i=0 ; i<slice.n_cols ; ++i )
 //						{
-//							dstream << (qint16)(slice.at(j,i));
+//							dstream << (qint16)(slice(j,i));
 //						}
 //					}
 //				}
@@ -1839,7 +1841,7 @@ void MainWindow::exportPithOfAKnotAreaToSdp(QTextStream &stream, unsigned int nu
 					iEnd = qMin(qRound(k*semiKnotAreaWidthCoeff),widthOnTwo);
 					jStart = -heightOnTwo;
 					jEnd = heightOnTwo;
-					const qreal ellipticityRate = (_tangentialBillon->voxelWidth()/_tangentialBillon->voxelHeight()) / qCos(_knotPithProfile->at(k));
+					const qreal ellipticityRate = (_tangentialBillon->voxelWidth()/_tangentialBillon->voxelHeight()) / qCos((*_knotPithProfile)[k]);
 					const qreal ellipseWidth = _knotEllipseRadiiHistogram->lowessData()[k];
 					const qreal ellipseHeight = ellipseWidth*ellipticityRate;
 
@@ -1983,7 +1985,7 @@ void MainWindow::exportPithOfAKnotAreaToSdp(QTextStream &stream, unsigned int nu
 //							{
 //								for ( i=0 ; i<width ; ++i )
 //								{
-//									if ( componentSlice.at(j,i) )
+//									if ( componentSlice(j,i) )
 //									{
 //										stream << i << " "<< j << " " <<  _knotBillon->zPos()+k-_componentBillon->zPos()*coeffSliceNumber << endl ;
 //									}

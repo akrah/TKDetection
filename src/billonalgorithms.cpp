@@ -35,7 +35,7 @@ namespace BillonAlgorithms
 					orientation += angleIncrement;
 					direction = rVec2D(qCos(orientation),qSin(orientation));
 					edge = center + direction*minimumRadius;
-					while ( edge.x>0 && edge.y>0 && edge.x<width && edge.y<height && currentSlice.at(edge.y,edge.x) > intensityThreshold )
+					while ( edge.x>0 && edge.y>0 && edge.x<width && edge.y<height && currentSlice(edge.y,edge.x) > intensityThreshold )
 					{
 						edge += direction;
 					}
@@ -72,7 +72,7 @@ namespace BillonAlgorithms
 					orientation += angleIncrement;
 					direction = rVec2D(qCos(orientation),qSin(orientation));
 					edge = center + direction*30;
-					while ( edge.x>0. && edge.y>0. && edge.x<width && edge.y<height && currentSlice.at(edge.y,edge.x) >= intensityThreshold )
+					while ( edge.x>0. && edge.y>0. && edge.x<width && edge.y<height && currentSlice(edge.y,edge.x) >= intensityThreshold )
 					{
 						edge += direction;
 					}
@@ -99,7 +99,7 @@ namespace BillonAlgorithms
 		const Slice &midSlice = billon.slice(zPithCoord);
 		const rVec2D direction(cosBisector,sinBisector);
 		rCoord2D edge = originPith + direction*30;
-		while ( edge.x>0 && edge.y>0 && edge.x<billon.n_cols && edge.y<billon.n_rows && midSlice.at(edge.y,edge.x) > minIntensity )
+		while ( edge.x>0 && edge.y>0 && edge.x<billon.n_cols && edge.y<billon.n_rows && midSlice(edge.y,edge.x) > minIntensity )
 		{
 			edge += direction;
 		}
@@ -107,11 +107,12 @@ namespace BillonAlgorithms
 		/* Hauteur et largeur des coueps tangentielles */
 		const uint width = sliceInterval.size()+1;
 		const uint height = 2 * qTan(angularRange*PieChartSingleton::getInstance()->angleStep()/2.) * depth;
-		const int widthOnTwo = width/2.;
+		const int widthOnTwo = width/2.-1;
 		const int heightOnTwo = height/2.;
 		const int heightOnTwoMinusOne = heightOnTwo-1;
 
 		const uint nbSlices = qRound(depth);
+		const uint startSliceIndexToReduce = nbSlices*qCos(angularRange*PieChartSingleton::getInstance()->angleStep()/2.);
 
 		// Inversion width et height pour correspondre à la ratation de 90°
 		Billon * tangentialBillon = new Billon(height,width,nbSlices);
@@ -135,18 +136,23 @@ namespace BillonAlgorithms
 		QVector3D initial, destination;
 
 		const qreal semiKnotAreaHeightCoeff = heightOnTwo / static_cast<qreal>( nbSlices );
+		const qreal secondSemiKnotAreaHeightCoeff = (startSliceIndexToReduce*semiKnotAreaHeightCoeff) / static_cast<qreal>( nbSlices-startSliceIndexToReduce );
 		const qreal originLinearInterpolationCoeff = 1.-linearInterpolationCoeff;
 		int i, j, jStart, jEnd;
+		qreal semiKnotAreaHeight;
+
 		int x0,y0,z0;
 		qreal x0Dist, y0Dist, z0Dist;
 		qreal xFrontTop, xFrontBottom, xBackTop, xBackBottom, yFront, yBack;
+
 		jStart = jEnd = 0;
 		initial.setZ(0.);
 		for ( uint k=0 ; k<nbSlices ; ++k )
 		{
 			Slice &slice = tangentialBillon->slice(k);
-			jStart = -qMin(qRound(k*semiKnotAreaHeightCoeff),heightOnTwo);
-			jEnd = qMin(qRound(k*semiKnotAreaHeightCoeff),heightOnTwo);
+			semiKnotAreaHeight = k<=startSliceIndexToReduce?k*semiKnotAreaHeightCoeff:(nbSlices-k)*secondSemiKnotAreaHeightCoeff;
+			jEnd = qMin(qRound(semiKnotAreaHeight),heightOnTwo);
+			jStart = -jEnd;
 			for ( j=jStart ; j<jEnd ; ++j )
 			{
 				initial.setY(j);
@@ -162,20 +168,20 @@ namespace BillonAlgorithms
 						x0Dist = destination.y()-x0;
 						y0Dist = destination.x()-y0;
 						z0Dist = destination.z()-z0;
-						xFrontTop = (1.-x0Dist)*billon.at(x0-1,y0+1,z0-1) + x0Dist*billon.at(x0+1,y0+1,z0-1);
-						xFrontBottom = (1.-x0Dist)*billon.at(x0-1,y0-1,z0-1) + x0Dist*billon.at(x0+1,y0-1,z0-1);
-						xBackTop = (1.-x0Dist)*billon.at(x0-1,y0+1,z0+1) + x0Dist*billon.at(x0+1,y0+1,z0+1);
-						xBackBottom = (1.-x0Dist)*billon.at(x0-1,y0-1,z0+1) + x0Dist*billon.at(x0+1,y0-1,z0+1);
+						xFrontTop = (1.-x0Dist)*billon(x0-1,y0+1,z0-1) + x0Dist*billon(x0+1,y0+1,z0-1);
+						xFrontBottom = (1.-x0Dist)*billon(x0-1,y0-1,z0-1) + x0Dist*billon(x0+1,y0-1,z0-1);
+						xBackTop = (1.-x0Dist)*billon(x0-1,y0+1,z0+1) + x0Dist*billon(x0+1,y0+1,z0+1);
+						xBackBottom = (1.-x0Dist)*billon(x0-1,y0-1,z0+1) + x0Dist*billon(x0+1,y0-1,z0+1);
 						yFront = (1.-y0Dist)*xFrontBottom + y0Dist*xFrontTop;
 						yBack = (1.-y0Dist)*xBackBottom + y0Dist*xBackTop;
 						// Rotation de 90° dans le sens horaire pour correspondre à l'orientation de l'article
-						slice(i+widthOnTwo,heightOnTwoMinusOne-j) = originLinearInterpolationCoeff * billon.at(x0,y0,z0)
+						slice(i+widthOnTwo+1,heightOnTwoMinusOne-j) = originLinearInterpolationCoeff * billon(x0,y0,z0)
 																	+ linearInterpolationCoeff * ((1.-z0Dist)*yFront + z0Dist*yBack);
 					}
 					else
 					{
 						// Rotation de 90° dans le sens horaire pour correspondre à l'orientation de l'article
-						slice(i+widthOnTwo,heightOnTwoMinusOne-j) =	billon.at(x0,y0,z0);
+						slice(i+widthOnTwo+1,heightOnTwoMinusOne-j) =	billon(x0,y0,z0);
 					}
 				}
 			}

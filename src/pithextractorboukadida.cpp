@@ -200,8 +200,8 @@ uiCoord2D PithExtractorBoukadida::transHough( const Slice &slice, qreal &lineOnM
 	{
 		for ( i=iMin ; i<iMax ; ++i )
 		{
-			if ( hasContour.at(j,i) )
-				drawLine( accuSlice, uiCoord2D(i,j), -orientations.at(j,i) );
+			if ( hasContour(j,i) )
+				drawLine( accuSlice, uiCoord2D(i,j), -orientations(j,i) );
 		}
 	}
 
@@ -250,15 +250,15 @@ uint PithExtractorBoukadida::contour( const Slice &slice, arma::Mat<qreal> & ori
 	{
 		for ( j=1 ; j<height ; ++j )
 		{
-			sobelX = slice.at( j-1, i-1 ) - slice.at( j-1, i+1 ) +
-					 2* (slice.at( j, i-1 ) - slice.at( j, i+1 )) +
-					 slice.at( j+1, i-1 ) - slice.at( j+1, i+1 );
-			sobelY = slice.at( j+1, i-1 ) - slice.at( j-1, i-1 ) +
-					 2 * (slice.at( j+1, i ) - slice.at( j-1, i )) +
-					 slice.at( j+1, i+1 ) - slice.at( j-1, i+1 );
-			orientations.at(j,i) = qFuzzyIsNull(sobelX) ? 9999999999./1. : sobelY/sobelX*voxelRatio;
+			sobelX = slice( j-1, i-1 ) - slice( j-1, i+1 ) +
+					 2* (slice( j, i-1 ) - slice( j, i+1 )) +
+					 slice( j+1, i-1 ) - slice( j+1, i+1 );
+			sobelY = slice( j+1, i-1 ) - slice( j-1, i-1 ) +
+					 2 * (slice( j+1, i ) - slice( j-1, i )) +
+					 slice( j+1, i+1 ) - slice( j-1, i+1 );
+			orientations(j,i) = qFuzzyIsNull(sobelX) ? 9999999999./1. : sobelY/sobelX*voxelRatio;
 			norm = qSqrt(qPow(sobelX*xDim,2) + qPow(sobelY*yDim,2));
-			sobelNorm.at(j,i-iMin) = *sobelNormVecIt++ = norm;
+			sobelNorm(j,i-iMin) = *sobelNormVecIt++ = norm;
 			nbPositiveNorm += !qFuzzyIsNull(norm);
 		}
 	}
@@ -267,18 +267,18 @@ uint PithExtractorBoukadida::contour( const Slice &slice, arma::Mat<qreal> & ori
 		return 0;
 
 	const arma::Col<qreal> sobelNormSort = arma::sort( sobelNormVec );
-	const qreal &medianVal = sobelNormSort.at( sobelNormSort.n_elem/2 );
-	//const qreal &medianVal = sobelNormSort.at( sobelNormSort.n_elem - nbPositiveNorm + qRound(nbPositiveNorm/4.) );
+	const qreal &medianVal = sobelNormSort( sobelNormSort.n_elem/2 );
+	//const qreal &medianVal = sobelNormSort( sobelNormSort.n_elem - nbPositiveNorm + qRound(nbPositiveNorm/4.) );
 
 	uint nbContourPoints = 0;
 	for ( j=1 ; j<height ; ++j )
 	{
 		for ( i=iMin ; i<iMax ; ++i )
 		{
-			if ( sobelNorm.at(j,i-iMin) > medianVal )
+			if ( sobelNorm(j,i-iMin) > medianVal )
 			{
 				nbContourPoints++;
-				hasContour.at(j,i) = true;
+				hasContour(j,i) = true;
 			}
 		}
 	}
@@ -300,44 +300,44 @@ void PithExtractorBoukadida::drawLine(arma::Mat<int> &slice, const iCoord2D &ori
 	{
 		for ( x = originX , y=originY; x<width && y<height ; x += orientationInv, y += 1. )
 		{
-			slice.at(qRound(y),qRound(x)) += 1;
+			slice(qRound(y),qRound(x)) += 1;
 		}
 		for ( x = originX-orientationInv , y=originY-1; x>=0. && y>=0. ; x -= orientationInv, y -= 1. )
 		{
-			slice.at(qRound(y),qRound(x)) += 1;
+			slice(qRound(y),qRound(x)) += 1;
 		}
 	}
 	else if ( orientation > 0. )
 	{
 		for ( x = originX, y=originY ; x<width && y<height ; x += 1., y += orientation )
 		{
-			slice.at(qRound(y),qRound(x)) += 1;
+			slice(qRound(y),qRound(x)) += 1;
 		}
 		for ( x = originX-1., y=originY-orientation ; x>=0 && y>=0 ; x -= 1., y -= orientation )
 		{
-			slice.at(qRound(y),qRound(x)) += 1;
+			slice(qRound(y),qRound(x)) += 1;
 		}
 	}
 	else if ( orientation > -1. )
 	{
 		for ( x = originX, y=originY ; x<width && y>=0 ; x += 1., y += orientation )
 		{
-			slice.at(qRound(y),qRound(x)) += 1;
+			slice(qRound(y),qRound(x)) += 1;
 		}
 		for ( x = originX-1., y=originY-orientation ; x>=0 && y<height ; x -= 1., y -= orientation )
 		{
-			slice.at(qRound(y),qRound(x)) += 1;
+			slice(qRound(y),qRound(x)) += 1;
 		}
 	}
 	else
 	{
 		for ( x = originX , y=originY; x>=0 && y<height ; x += orientationInv, y += 1. )
 		{
-			slice.at(qRound(y),qRound(x)) += 1;
+			slice(qRound(y),qRound(x)) += 1;
 		}
 		for ( x = originX-orientationInv , y=originY-1.; x<width && y>=0 ; x -= orientationInv, y -= 1. )
 		{
-			slice.at(qRound(y),qRound(x)) += 1;
+			slice(qRound(y),qRound(x)) += 1;
 		}
 	}
 }

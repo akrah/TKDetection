@@ -44,6 +44,12 @@ Install "build-essential", "cmake" and "git" packages.
   sudo apt-get install build-essential cmake git
 ~~~
 
+It is recommended to install the libraries LAPACK, BLAS, ATLAS, and Boost to improve the performances, in particular for the matrix sum and product of Armadillo.
+
+~~~
+  sudo apt-get install liblapack-dev libblas-dev libatlas-dev libatlas-base-dev libboost-dev libboost-all-dev
+~~~
+
 
 ### 1. QT
 [Top](#tkdetection)
@@ -60,14 +66,6 @@ This meta-package install the set of Qt dependencies.
 [Top](#tkdetection)
 
 Download the last version available on the website http://arma.sourceforge.net.
-
-It is recommended to install the libraries LAPACK, BLAS, ATLAS, and Boost to improve the performances, in particular for the matrix sum and product. 
-
-
-~~~
-  sudo apt-get install liblapack-dev libblas-dev libatlas-dev libboost-dev
-~~~
-
 Install then Armadillo by replacing *x.y.z* by the downloaded version number:
 
 ~~~
@@ -172,7 +170,6 @@ Restart QtDesigner.
 Use the version available on the website http://sourceforge.net/projects/qwtpolar.
 
 Replace *x.y.z* by the downloaded version number:
-
 
 ~~~
   unzip qwtpolar-x.y.z.zip

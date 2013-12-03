@@ -19,7 +19,8 @@ public:
 
 	QVector<QwtPointPolar>::Iterator begin();
 
-	QwtPointPolar &at( int i );
+	QwtPointPolar &operator[]( int i );
+	const QwtPointPolar &operator[]( int i ) const;
 };
 
 #endif // POINTPOLARSERIESDATA_H

@@ -52,7 +52,7 @@ void SliceHistogram::construct( const Billon &billon, const Interval<int> &inten
 			{
 				if ( currentPos.x >= 0 && currentPos.y >= 0 && currentPos.x < width && currentPos.y < height )
 				{
-					if ( intensity.containsClosed(billon.slice(k).at(currentPos.y,currentPos.x)) && intensity.containsClosed(billon.previousSlice(k).at(currentPos.y,currentPos.x)) )
+					if ( intensity.containsClosed(billon(currentPos.y,currentPos.x,k)) && intensity.containsClosed(billon.previousSlice(k)(currentPos.y,currentPos.x)) )
 					{
 						diff = billon.zMotion( currentPos.x, currentPos.y, k );
 						if ( diff > zMotionMin ) cumul += diff-zMotionMin;
