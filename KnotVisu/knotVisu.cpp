@@ -1,6 +1,7 @@
 #include <qapplication.h>
 #include <DGtal/base/Common.h>
 #include <DGtal/io/viewers/Viewer3D.h>
+#include <fstream>
 #include "DGtal/io/readers/VolReader.h"
 #include "DGtal/io/Color.h"
 #include "DGtal/io/colormaps/GradientColorMap.h"
@@ -18,7 +19,7 @@
 #include "DGtal/io/readers/MeshReader.h"
 #include "DGtal/io/readers/DicomReader.h"
 #include "DGtal/io/readers/PointListReader.h"
-#include "DGtal/io/readers/NumbersReader.h"
+#include "DGtal/io/readers/TableReader.h"
 #include "DGtal/kernel/BasicPointFunctors.h"
 #include "DGtal/shapes/Mesh.h"
 
@@ -57,7 +58,7 @@ void
 meshFromMarrow(DGtal::Mesh<DGtal::Z3i::RealPoint> &aMesh, std::vector< double > vectRadiusW, std::vector< double > vectRadiusH, 
                   std::vector<DGtal::Z3i::RealPoint> anVector, unsigned int stepSample, unsigned int nbAngularStep=36)
 {
-  unsigned int nbVertex=0;
+  unsigned int nbVertex=aMesh.nbVertex();
  for (unsigned int i=0; i < anVector.size()-stepSample; i++)
    {
      DGtal::Z3i::RealPoint ptRefOrigin = anVector.at(i);
@@ -127,7 +128,7 @@ int main(int argc, char** argv)
     ("volumeFile,v", po::value<std::string>(), "import volume image (dicom format)" )
     ("tangentialView", "Display tangential view defined from the set of the four imported points")
     ("crossSectionView", "Display cross section view defined from the set of simple points and the normal direction")
-    ("exportKnotMesh", po::value<std::string>(), "Export all knots mesh in OFS format.")
+    ("exportKnotMesh", po::value<std::string>(), "Export all knots mesh in OFF format.")
     ("pointsPk,p", po::value<std::string>(), "import the set of points Pk used to determine the image position." )
     ("scaleX,x",  po::value<float>()->default_value(1.0), "set the scale value in the X direction (default 1.0)" )
     ("scaleY,y",  po::value<float>()->default_value(1.0), "set the scale value in the Y direction (default 1.0)" )
@@ -218,11 +219,10 @@ int main(int argc, char** argv)
   std::vector<unsigned int> indexBottomRight; indexBottomRight.push_back(14); indexBottomRight.push_back(15); indexBottomRight.push_back(16);
   std::vector<unsigned int> indexTopRight; indexTopRight.push_back(17); indexTopRight.push_back(18); indexTopRight.push_back(19);
   
-  std::vector<  int > vectKnotID = DGtal::NumbersReader< int >::getNumbersFromFile(vm["pointsPk"].as<std::string>(), 0);
- 
-  
-  std::vector<  double > vectRadiusWALL = DGtal::NumbersReader< double >::getNumbersFromFile(vm["pointsPk"].as<std::string>(), 3);
-  std::vector<  double > vectRadiusHALL = DGtal::NumbersReader< double >::getNumbersFromFile(vm["pointsPk"].as<std::string>(), 4);  
+  std::vector<  int > vectKnotID = DGtal::TableReader< int >::getColumnElementsFromFile(vm["pointsPk"].as<std::string>(), 0);
+   
+  std::vector<  double > vectRadiusWALL = DGtal::TableReader< double >::getColumnElementsFromFile(vm["pointsPk"].as<std::string>(), 3);
+  std::vector<  double > vectRadiusHALL = DGtal::TableReader< double >::getColumnElementsFromFile(vm["pointsPk"].as<std::string>(), 4);  
   if(constantRadius){
     for (unsigned int i =0; i< vectRadiusHALL.size(); i++){
       vectRadiusHALL.at(i)=knotsRadius;
@@ -255,8 +255,7 @@ int main(int argc, char** argv)
     std::vector<Z3i::RealPoint> vectPointsTopRight = vectPointsTopRightSplitted.at(numId);
     std::vector<Z3i::RealPoint> vectPointsBottomLeft = vectPointsBottomLeftSplitted.at(numId);
     std::vector<Z3i::RealPoint> vectPointsBottomRight = vectPointsBottomRightSplitted.at(numId);
-      
-    
+          
     for (unsigned int i =0; i< vectPointsCenter.size() - cutEnd; 
          i=i+1){
       viewer.setFillColor(DGtal::Color(250,20,20,255));
@@ -310,7 +309,11 @@ int main(int argc, char** argv)
     meshFromMarrow(meshMoelle, vectRadiusW, vectRadiusH, vectPointsCenter, sampleStep, vm["radiusStep"].as<unsigned int> ());
   }
   viewer << meshMoelle;
-  viewer << My3DViewer::updateDisplay; 
+  if(vm.count("exportKnotMesh")){
+    string filename = vm["exportKnotMesh"].as<std::string>();
+    meshMoelle >> filename;
+  }
+      viewer << My3DViewer::updateDisplay; 
 
   display mesh by splitting knots coordinates
   return application.exec();
