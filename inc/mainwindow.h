@@ -56,6 +56,7 @@ private slots:
 	void setSlice( const int &sliceIndex );
 	void setYSlice( const int &yPosition );
 	void setTangentialSlice( const int &sliceIndex );
+	void setTangentialYSlice( const int &yPosition );
 	void setSectorNumber( const int &value );
 
 	void selectSliceInterval( const int &index );
@@ -106,11 +107,11 @@ private:
 //	void exportAllSegmentedKnotsOfBillonToV3D();
 
 	void exportPithOfCurrentKnotAreaToSdp();
-    void exportPithOfAllKnotAreaToSdp();
-    void exportPithOfAKnotAreaToSdp(QTextStream &stream, unsigned int numSliceInterval, unsigned int numAngularInterval,
-                                     unsigned int knotID);
+	void exportPithOfAllKnotAreaToSdp();
+	void exportPithOfAKnotAreaToSdp(QTextStream &stream, unsigned int numSliceInterval, unsigned int numAngularInterval,
+									 unsigned int knotID);
 
-    //	void exportCurrentSegmentedKnotToSdp();
+	//	void exportCurrentSegmentedKnotToSdp();
 //	void exportSegmentedKnotsOfCurrentSliceIntervalToSdp( bool keepBillonSliceNumber = false );
 //	void exportSegmentedKnotsOfCurrentSliceIntervalToSdpOldAlgo( bool keepBillonSliceNumber = false );
 //	void exportAllSegmentedKnotsOfBillonToSdp();
@@ -145,10 +146,8 @@ private:
 
 	PlotEllipticalAccumulationHistogram *_plotEllipticalAccumulationHistogram;
 
-	uint _currentSlice;
 	uint _currentSliceInterval;
 	uint _currentSectorInterval;
-	uint _currentYSlice;
 	int _currentMaximum;
 	uint _currentSector;
 	qreal _treeRadius;
