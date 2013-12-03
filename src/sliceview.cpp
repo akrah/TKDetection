@@ -288,7 +288,7 @@ void SliceView::drawCurrentSlice( QImage &image, const Billon &billon,
 	{
 		const Slice &slice = billon.slice(sliceIndex);
 		const rCoord2D &pithCoord = billon.hasPith()?billon.pithCoord(sliceIndex):rCoord2D(width/2,height/2);
-		const uint radialResolution = qMin(qMin(pithCoord.x,width-pithCoord.x),qMin(pithCoord.y/ellipticityRate,(height-pithCoord.y)/ellipticityRate));
+		const uint radialResolution = qMin(qMin(pithCoord.x,width-pithCoord.x),qMin(pithCoord.y,height-pithCoord.y)/ellipticityRate);
 		const qreal angularIncrement = TWO_PI/(qreal)(angularResolution);
 
 		int x, y;
@@ -296,8 +296,8 @@ void SliceView::drawCurrentSlice( QImage &image, const Billon &billon,
 		{
 			for ( i=0 ; i<angularResolution ; ++i )
 			{
-				x = pithCoord.x + j * qCos(i*angularIncrement);
-				y = pithCoord.y + j * qSin(i*angularIncrement) * ellipticityRate;
+				x = qRound(pithCoord.x + j * qCos(i*angularIncrement));
+				y = qRound(pithCoord.y + j * qSin(i*angularIncrement) * ellipticityRate);
 				color = (TKD::restrictedValue(slice.at(y,x),intensityInterval)-minIntensity)*fact;
 				dgtalColor= ((aRender== TKD::HueScale) ? hueShade( color): (aRender==TKD::GrayScale)? grayShade(color): (aRender==TKD::HueScaleLog)? hueShadeLog(log(1+color)):customShade(color));
 				*(line++) = qRgb(dgtalColor.red(),dgtalColor.green(),dgtalColor.blue());

@@ -98,6 +98,7 @@ void EllipticalAccumulationHistogram::findFirstMaximumAndNextMinimum( const uint
 
 	// Recherche du premier maximum
 	uint maximumIndex = 2;
+	while ( maximumIndex<size && (*this)[maximumIndex] <= (*this)[maximumIndex-2] ) maximumIndex++;
 	while ( maximumIndex<size && (*this)[maximumIndex] > (*this)[maximumIndex-2] ) maximumIndex++;
 
 	if ( maximumIndex==size ) return;
@@ -106,7 +107,7 @@ void EllipticalAccumulationHistogram::findFirstMaximumAndNextMinimum( const uint
 	_maximums[0] = maximumIndex;
 
 	// Recherche du premier minimum après le premier maximum
-	uint minimumIndex = maximumIndex+2;
+	uint minimumIndex = maximumIndex+1;
 	while ( minimumIndex<size && (*this)[minimumIndex] < (*this)[minimumIndex-2]-minimumGap ) minimumIndex++;
 	minimumIndex--;
 	minimumIndex = qMax(qMin(minimumIndex,size-1),maximumIndex);
@@ -114,8 +115,10 @@ void EllipticalAccumulationHistogram::findFirstMaximumAndNextMinimum( const uint
 
 
 	// Recherche du x corespondant au f(x) median de f(maximumIndex) et f(minimumIndex)
-	//_maximums[1] = (maximumIndex+minimumIndex)/2.;
-	const qreal meanValue = ( (*this)[maximumIndex]+(*this)[minimumIndex] )/2.;
-	while ( (*this)[maximumIndex++] > meanValue );
-	_maximums[1] = maximumIndex-1;
+	const qreal meanValue = (*this)[maximumIndex] - (qAbs((*this)[minimumIndex]-(*this)[maximumIndex]) / (minimumIndex<size-5?2.:8.));
+	//if ( minimumIndex<size-1 )
+		while ( maximumIndex<size-1 && (*this)[maximumIndex] > meanValue ) maximumIndex++;
+	//else maximumIndex += 1;
+
+	_maximums[1] = maximumIndex;
 }

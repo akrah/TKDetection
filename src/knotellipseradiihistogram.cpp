@@ -44,10 +44,11 @@ void KnotEllipseRadiiHistogram::construct( const Billon &tangentialBillon, const
 	for ( uint k=0 ; k<nbSlices ; ++k )
 	{
 		EllipticalAccumulationHistogram &ellipticalHistogram = _ellipticalHistograms[k];
-		ellipticityRate = (tangentialBillon.voxelWidth()/tangentialBillon.voxelHeight()) / qCos(knotPithProfile[k]);
+		ellipticityRate = (tangentialBillon.voxelWidth()/tangentialBillon.voxelHeight()) * qCos(knotPithProfile[k]);
 		ellipticalHistogram.construct( tangentialBillon.slice(k), tangentialBillon.pithCoord(k), ellipticityRate, ellipticalAccumulationSmoothingRadius, ellipticalAccumulationMinimumGap );
-		(*this)[k] = _lowessData[k] = ellipticalHistogram.detectedRadius();
+		(*this)[k] = ellipticalHistogram.detectedRadius();
 	}
+	(*this)[0] = 0;
 
 	// LOWESS
 	QVector<qreal> residus;
