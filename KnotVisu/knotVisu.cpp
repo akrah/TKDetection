@@ -315,6 +315,5 @@ int main(int argc, char** argv)
   }
       viewer << My3DViewer::updateDisplay; 
 
-  display mesh by splitting knots coordinates
   return application.exec();
 }
