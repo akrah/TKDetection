@@ -46,8 +46,8 @@ namespace Pgm3dExport
 				{
 					for ( i=0 ; i<width ; ++i )
 					{
-						//dstream << (qint16)(slice.at(j,i)-minValue);
-						dstream << (qint16)qBound(minValue,static_cast<int>((((slice.at(j,i)-minValue)-midValue)*contrastFactor)+midValue),maxValue);
+						//dstream << (qint16)(slice(j,i)-minValue);
+						dstream << (qint16)qBound(minValue,static_cast<int>((((slice(j,i)-minValue)-midValue)*contrastFactor)+midValue),maxValue);
 					}
 				}
 			}
@@ -61,7 +61,7 @@ namespace Pgm3dExport
 				{
 					for ( i=0 ; i<width ; ++i )
 					{
-						dstream << (qint16)(slice.at(j,i) == componentNumber);
+						dstream << (qint16)(slice(j,i) == componentNumber);
 					}
 				}
 			}

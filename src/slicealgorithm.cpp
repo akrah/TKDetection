@@ -27,42 +27,42 @@ namespace SliceAlgorithm
 			while ( circlePoint.y>=circlePoint.x && !edgeFind )
 			{
 				edgeFind = true;
-				if ( slice.at( sliceCenter.y+circlePoint.y, sliceCenter.x+circlePoint.x ) > intensityThreshold )
+				if ( slice( sliceCenter.y+circlePoint.y, sliceCenter.x+circlePoint.x ) > intensityThreshold )
 				{
 					position.x = sliceCenter.x+circlePoint.x;
 					position.y = sliceCenter.y+circlePoint.y;
 				}
-				else if ( slice.at( sliceCenter.y+circlePoint.y, sliceCenter.x-circlePoint.x ) > intensityThreshold )
+				else if ( slice( sliceCenter.y+circlePoint.y, sliceCenter.x-circlePoint.x ) > intensityThreshold )
 				{
 					position.x = sliceCenter.x-circlePoint.x;
 					position.y = sliceCenter.y+circlePoint.y;
 				}
-				else if ( slice.at( sliceCenter.y+circlePoint.x, sliceCenter.x+circlePoint.y ) > intensityThreshold )
+				else if ( slice( sliceCenter.y+circlePoint.x, sliceCenter.x+circlePoint.y ) > intensityThreshold )
 				{
 					position.x = sliceCenter.x+circlePoint.y;
 					position.y = sliceCenter.y+circlePoint.x;
 				}
-				else if ( slice.at( sliceCenter.y+circlePoint.x, sliceCenter.x-circlePoint.y ) > intensityThreshold )
+				else if ( slice( sliceCenter.y+circlePoint.x, sliceCenter.x-circlePoint.y ) > intensityThreshold )
 				{
 					position.x = sliceCenter.x-circlePoint.y;
 					position.y = sliceCenter.y+circlePoint.x;
 				}
-				else if ( slice.at( sliceCenter.y-circlePoint.y, sliceCenter.x+circlePoint.x ) > intensityThreshold )
+				else if ( slice( sliceCenter.y-circlePoint.y, sliceCenter.x+circlePoint.x ) > intensityThreshold )
 				{
 					position.x = sliceCenter.x+circlePoint.x;
 					position.y = sliceCenter.y-circlePoint.y;
 				}
-				else if ( slice.at( sliceCenter.y-circlePoint.y, sliceCenter.x-circlePoint.x ) > intensityThreshold )
+				else if ( slice( sliceCenter.y-circlePoint.y, sliceCenter.x-circlePoint.x ) > intensityThreshold )
 				{
 					position.x = sliceCenter.x-circlePoint.x;
 					position.y = sliceCenter.y-circlePoint.y;
 				}
-				else if ( slice.at( sliceCenter.y-circlePoint.x, sliceCenter.x+circlePoint.y ) > intensityThreshold )
+				else if ( slice( sliceCenter.y-circlePoint.x, sliceCenter.x+circlePoint.y ) > intensityThreshold )
 				{
 					position.x = sliceCenter.x+circlePoint.y;
 					position.y = sliceCenter.y-circlePoint.x;
 				}
-				else if ( slice.at( sliceCenter.y-circlePoint.x, sliceCenter.x-circlePoint.y ) > intensityThreshold )
+				else if ( slice( sliceCenter.y-circlePoint.x, sliceCenter.x-circlePoint.y ) > intensityThreshold )
 				{
 					position.x = sliceCenter.x-circlePoint.y;
 					position.y = sliceCenter.y-circlePoint.x;
@@ -125,7 +125,7 @@ namespace SliceAlgorithm
 			direction.x = qCos(orientation);
 			direction.y = qSin(orientation);
 			edge = center + direction*20;
-			while ( edge.x>0 && edge.y>0 && edge.x<width && edge.y<height && slice.at(edge.y,edge.x) > intensityThreshold )
+			while ( edge.x>0 && edge.y>0 && edge.x<width && edge.y<height && slice(edge.y,edge.x) > intensityThreshold )
 			{
 				edge += direction;
 			}
@@ -153,7 +153,7 @@ namespace SliceAlgorithm
 			{
 				for ( i=0 ; i<width ; ++i )
 				{
-					if ( slice.at(j,i) > intensityThreshold ) painter.drawPoint(i,j);
+					if ( slice(j,i) > intensityThreshold ) painter.drawPoint(i,j);
 				}
 			}
 		}
@@ -165,7 +165,7 @@ namespace SliceAlgorithm
 				{
 					x = pithCoord.x + j * qCos(i*angularIncrement);
 					y = pithCoord.y + j * qSin(i*angularIncrement);
-					if ( slice.at(y,x) > intensityThreshold ) painter.drawPoint(i,j);
+					if ( slice(y,x) > intensityThreshold ) painter.drawPoint(i,j);
 				}
 			}
 		}
@@ -180,7 +180,7 @@ namespace SliceAlgorithm
 		{
 			for ( i=0 ; i<slice.n_cols ; ++i )
 			{
-				stream << static_cast<qint16>(slice.at(j,i));
+				stream << static_cast<qint16>(slice(j,i));
 			}
 		}
 	}

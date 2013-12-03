@@ -64,7 +64,7 @@ namespace ConnexComponentExtractor
 			{
 				for ( iterCoords = iterComponents.value().constBegin() ; iterCoords != iterComponents.value().constEnd() ; ++iterCoords )
 				{
-					resultBillon.at((*iterCoords).y,(*iterCoords).x,(*iterCoords).z) = counter;
+					resultBillon((*iterCoords).y,(*iterCoords).x,(*iterCoords).z) = counter;
 				}
 				++counter;
 			}
@@ -101,25 +101,25 @@ namespace ConnexComponentExtractor
 			for ( i=1 ; i<width-1 ; ++i)
 			{
 				//Si on a un voxel
-				if ( slice.at(j,i) > threshold )
+				if ( slice(j,i) > threshold )
 				{
 					//On sauvegarde la valeur des voisins non nuls
 					voisinage.clear();
 					//Voisinage de la face courante
-					if (labels.at(j,i-1)) voisinage.append(labels.at(j,i-1));
-					if (labels.at(j-1,i-1)) voisinage.append(labels.at(j-1,i-1));
-					if (labels.at(j-1,i)) voisinage.append(labels.at(j-1,i));
-					if (labels.at(j-1,i+1)) voisinage.append(labels.at(j-1,i+1));
+					if (labels(j,i-1)) voisinage.append(labels(j,i-1));
+					if (labels(j-1,i-1)) voisinage.append(labels(j-1,i-1));
+					if (labels(j-1,i)) voisinage.append(labels(j-1,i));
+					if (labels(j-1,i+1)) voisinage.append(labels(j-1,i+1));
 					//Si ses voisins n'ont pas d'étiquette
 					if ( voisinage.isEmpty() )
 					{
 						++nbLabel;
-						labels.at(j,i) = nbLabel;
+						labels(j,i) = nbLabel;
 					}
 					//Si ses voisins ont une étiquette
 					else if ( voisinage.size() == 1 )
 					{
-						labels.at(j,i) = voisinage[0];
+						labels(j,i) = voisinage[0];
 					}
 					else
 					{
@@ -129,7 +129,7 @@ namespace ConnexComponentExtractor
 						{
 							mini = qMin(mini,(*iterVoisin++));
 						}
-						labels.at(j,i) = mini;
+						labels(j,i) = mini;
 						for ( iterVoisin = voisinage.constBegin() ; iterVoisin != voisinage.constEnd() ; ++iterVoisin )
 						{
 							if ( (*iterVoisin) > mini )
@@ -147,12 +147,12 @@ namespace ConnexComponentExtractor
 										if ( currentEquiv < mini )
 										{
 											tableEquiv[mini] = currentEquiv;
-											labels.at(j,i) = currentEquiv;
+											labels(j,i) = currentEquiv;
 										}
 										else if ( currentEquiv > mini )
 										{
 											tableEquiv[currentEquiv] = mini;
-											labels.at(j,i) = mini;
+											labels(j,i) = mini;
 										}
 									}
 									else if ( mini < currentEquiv )
@@ -165,12 +165,12 @@ namespace ConnexComponentExtractor
 										if ( currentEquiv > mini )
 										{
 											tableEquiv[currentEquiv] = mini;
-											labels.at(j,i) = mini;
+											labels(j,i) = mini;
 										}
 										else if ( currentEquiv < mini )
 										{
 											tableEquiv[mini] = currentEquiv;
-											labels.at(j,i) = currentEquiv;
+											labels(j,i) = currentEquiv;
 										}
 									}
 								}
@@ -201,14 +201,14 @@ namespace ConnexComponentExtractor
 		{
 			for ( i=0 ; i<width ; ++i )
 			{
-				label = labels.at(j,i);
+				label = labels(j,i);
 				//Si on a un voxel
 				if (label)
 				{
 					if (tableEquiv.contains(label))
 					{
-						labels.at(j,i) = tableEquiv[label];
-						label = labels.at(j,i);
+						labels(j,i) = tableEquiv[label];
+						label = labels(j,i);
 					}
 					if (!connexComponentList.contains(label)) connexComponentList[label] = QList<iCoord2D>();
 					connexComponentList[label].append(iCoord2D(i,j));
@@ -226,7 +226,7 @@ namespace ConnexComponentExtractor
 			{
 				for ( iterCoords = iterComponents.value().constBegin() ; iterCoords != iterComponents.value().constEnd() ; ++ iterCoords )
 				{
-					resultSlice.at((*iterCoords).y,(*iterCoords).x) = counter;
+					resultSlice((*iterCoords).y,(*iterCoords).x) = counter;
 				}
 				++counter;
 			}
@@ -252,31 +252,31 @@ namespace ConnexComponentExtractor
 				for ( i=1 ; i<width-1 ; ++i)
 				{
 					//Si on a un voxel
-					if ( currentSlice.at(j,i) > threshold )
+					if ( currentSlice(j,i) > threshold )
 					{
 						//On sauvegarde la valeur des voisins non nuls
 						voisinage.clear();
 						//Voisinage de la face courante
-						if (labels.at(j,i-1)) voisinage.append(labels.at(j,i-1));
-						if (labels.at(j-1,i-1))voisinage.append(labels.at(j-1,i-1));
-						if (labels.at(j-1,i)) voisinage.append(labels.at(j-1,i));
-						if (labels.at(j-1,i+1)) voisinage.append(labels.at(j-1,i+1));
+						if (labels(j,i-1)) voisinage.append(labels(j,i-1));
+						if (labels(j-1,i-1))voisinage.append(labels(j-1,i-1));
+						if (labels(j-1,i)) voisinage.append(labels(j-1,i));
+						if (labels(j-1,i+1)) voisinage.append(labels(j-1,i+1));
 						oldStart = voisinage.size();
 						//Voisinage de la face arrière
-						if (oldSlice.at(j-1,i-1)) voisinage.append(oldSlice.at(j-1,i-1));
-						if (oldSlice.at(j-1,i)) voisinage.append(oldSlice.at(j-1,i));
-						if (oldSlice.at(j-1,i+1)) voisinage.append(oldSlice.at(j-1,i+1));
-						if (oldSlice.at(j,i-1)) voisinage.append(oldSlice.at(j,i-1));
-						if (oldSlice.at(j,i)) voisinage.append(oldSlice.at(j,i));
-						if (oldSlice.at(j,i+1)) voisinage.append(oldSlice.at(j,i+1));
-						if (oldSlice.at(j+1,i-1)) voisinage.append(oldSlice.at(j+1,i-1));
-						if (oldSlice.at(j+1,i)) voisinage.append(oldSlice.at(j+1,i));
-						if (oldSlice.at(j+1,i+1)) voisinage.append(oldSlice.at(j+1,i+1));
+						if (oldSlice(j-1,i-1)) voisinage.append(oldSlice(j-1,i-1));
+						if (oldSlice(j-1,i)) voisinage.append(oldSlice(j-1,i));
+						if (oldSlice(j-1,i+1)) voisinage.append(oldSlice(j-1,i+1));
+						if (oldSlice(j,i-1)) voisinage.append(oldSlice(j,i-1));
+						if (oldSlice(j,i)) voisinage.append(oldSlice(j,i));
+						if (oldSlice(j,i+1)) voisinage.append(oldSlice(j,i+1));
+						if (oldSlice(j+1,i-1)) voisinage.append(oldSlice(j+1,i-1));
+						if (oldSlice(j+1,i)) voisinage.append(oldSlice(j+1,i));
+						if (oldSlice(j+1,i+1)) voisinage.append(oldSlice(j+1,i+1));
 						//Si ses voisins n'ont pas d'étiquette
 						if ( voisinage.isEmpty() )
 						{
 							++nbLabel;
-							labels.at(j,i) = nbLabel;
+							labels(j,i) = nbLabel;
 						}
 						//Si ses voisins ont une étiquette
 						else
@@ -288,7 +288,7 @@ namespace ConnexComponentExtractor
 								mini = qMin(mini,(*iterVoisin++));
 							}
 							//Attribution de la valeur minimale au voxel courant
-							labels.at(j,i) = mini;
+							labels(j,i) = mini;
 							isOld = connexComponentList.contains(mini);
 							//Mise à jour de la table d'équivalence pour la face courante
 							//et fusion des liste de sommets si un voxel fusionne des composantes connexes antérieures
@@ -344,14 +344,14 @@ namespace ConnexComponentExtractor
 			{
 				for ( i=0 ; i<width ; ++i )
 				{
-					label = labels.at(j,i);
+					label = labels(j,i);
 					//Si on a un voxel
 					if (label)
 					{
 						if (tableEquiv.contains(label))
 						{
-							labels.at(j,i) = tableEquiv[label];
-							label = labels.at(j,i);
+							labels(j,i) = tableEquiv[label];
+							label = labels(j,i);
 						}
 						if (!connexComponentList.contains(label)) connexComponentList[label] = QList<iCoord3D>();
 						connexComponentList[label].append(iCoord3D(i,j,k));

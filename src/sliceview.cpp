@@ -139,20 +139,20 @@ void SliceView::drawCurrentSlice( QImage &image, const Billon &billon,
 //	{
 //		for ( i=iMin ; i<iMax ; ++i )
 //		{
-//			sobelX = slice.at( j-1, i-1 ) - slice.at( j-1, i+1 ) +
-//					 2* (slice.at( j, i-1 ) - slice.at( j, i+1 )) +
-//					 slice.at( j+1, i-1 ) - slice.at( j+1, i+1 );
-//			sobelY = slice.at( j+1, i-1 ) - slice.at( j-1, i-1 ) +
-//					 2 * (slice.at( j+1, i ) - slice.at( j-1, i )) +
-//					 slice.at( j+1, i+1 ) - slice.at( j-1, i+1 );
-//			orientations.at(j,i) = qFuzzyIsNull(sobelX) ? 9999999999./1. : sobelY/sobelX*voxelRatio;
-//			sobelNorm.at(j,i) = qSqrt( qPow(sobelX*xDim,2) + qPow(sobelY*yDim,2) )/4.;
-//			*(sobelNormVecIt++) = sobelNorm.at(j,i);
+//			sobelX = slice( j-1, i-1 ) - slice( j-1, i+1 ) +
+//					 2* (slice( j, i-1 ) - slice( j, i+1 )) +
+//					 slice( j+1, i-1 ) - slice( j+1, i+1 );
+//			sobelY = slice( j+1, i-1 ) - slice( j-1, i-1 ) +
+//					 2 * (slice( j+1, i ) - slice( j-1, i )) +
+//					 slice( j+1, i+1 ) - slice( j-1, i+1 );
+//			orientations(j,i) = qFuzzyIsNull(sobelX) ? 9999999999./1. : sobelY/sobelX*voxelRatio;
+//			sobelNorm(j,i) = qSqrt( qPow(sobelX*xDim,2) + qPow(sobelY*yDim,2) )/4.;
+//			*(sobelNormVecIt++) = sobelNorm(j,i);
 //		}
 //	}
 
 //	const arma::Col<qreal> sobelNormSort = arma::sort( sobelNormVec );
-//	const qreal &medianVal = sobelNormSort.n_elem?sobelNormSort.at( sobelNormSort.n_elem/2 ):0;
+//	const qreal &medianVal = sobelNormSort.n_elem?sobelNormSort( sobelNormSort.n_elem/2 ):0;
 
 //	uint nbContourPoints = 0;
 //	hasContour.fill(false);
@@ -160,10 +160,10 @@ void SliceView::drawCurrentSlice( QImage &image, const Billon &billon,
 //	{
 //		for ( i=iMin ; i<iMax ; ++i )
 //		{
-//			if ( sobelNorm.at(j,i) > medianVal )
+//			if ( sobelNorm(j,i) > medianVal )
 //			{
 //				nbContourPoints++;
-//				hasContour.at(j,i) = true;
+//				hasContour(j,i) = true;
 //			}
 //		}
 //	}
@@ -177,62 +177,62 @@ void SliceView::drawCurrentSlice( QImage &image, const Billon &billon,
 //	{
 //		for ( i=iMin ; i<iMax ; ++i )
 //		{
-//			if ( hasContour.at(j,i) )
+//			if ( hasContour(j,i) )
 //			{
 //				const int originX = i;
 //				const int originY = j;
-//				const qreal orientation = -orientations.at(j,i);
+//				const qreal orientation = -orientations(j,i);
 //				const qreal orientationInv = 1./orientation;
 
 //				if ( orientation >= 1. )
 //				{
 //					for ( x = originX , y=originY; x<width && y<height ; x += orientationInv, y += 1. )
 //					{
-//						accuSlice.at(y,x) += 1;
+//						accuSlice(y,x) += 1;
 //					}
 //					for ( x = originX-orientationInv , y=originY-1; x>=0. && y>=0. ; x -= orientationInv, y -= 1. )
 //					{
-//						accuSlice.at(y,x) += 1;
+//						accuSlice(y,x) += 1;
 //					}
 //				}
 //				else if ( orientation > 0. )
 //				{
 //					for ( x = originX, y=originY ; x<width && y<height ; x += 1., y += orientation )
 //					{
-//						accuSlice.at(y,x) += 1;
+//						accuSlice(y,x) += 1;
 //					}
 //					for ( x = originX-1., y=originY-orientation ; x>=0 && y>=0 ; x -= 1., y -= orientation )
 //					{
-//						accuSlice.at(y,x) += 1;
+//						accuSlice(y,x) += 1;
 //					}
 //				}
 //				else if ( orientation > -1. )
 //				{
 //					for ( x = originX, y=originY ; x<width && y>=0 ; x += 1., y += orientation )
 //					{
-//						accuSlice.at(y,x) += 1;
+//						accuSlice(y,x) += 1;
 //					}
 //					for ( x = originX-1., y=originY-orientation ; x>=0 && y<height ; x -= 1., y -= orientation )
 //					{
-//						accuSlice.at(y,x) += 1;
+//						accuSlice(y,x) += 1;
 //					}
 //				}
 //				else
 //				{
 //					for ( x = originX , y=originY; x>=0 && y<height ; x += orientationInv, y += 1. )
 //					{
-//						accuSlice.at(y,x) += 1;
+//						accuSlice(y,x) += 1;
 //					}
 //					for ( x = originX-orientationInv , y=originY-1.; x<width && y>=0 ; x -= orientationInv, y -= 1. )
 //					{
-//						accuSlice.at(y,x) += 1;
+//						accuSlice(y,x) += 1;
 //					}
 //				}
 //			}
 //		}
 //	}
 
-//	const qreal fact = 255.0/(sobelNormSort.n_elem?sobelNormSort.at((sobelNormSort.n_elem-1)*0.97):1.);
+//	const qreal fact = 255.0/(sobelNormSort.n_elem?sobelNormSort((sobelNormSort.n_elem-1)*0.97):1.);
 
 
 	/********************************************************************/
@@ -244,7 +244,7 @@ void SliceView::drawCurrentSlice( QImage &image, const Billon &billon,
 		{
 			for ( i=0 ; i<width ; ++i)
 			{
-				color = (TKD::restrictedValue(billon.at(sliceIndex,i,depth-k-1),intensityInterval)-minIntensity)*fact;
+				color = (TKD::restrictedValue(billon(sliceIndex,i,depth-k-1),intensityInterval)-minIntensity)*fact;
 				dgtalColor = ((aRender== TKD::HueScale) ? hueShade( color): (aRender==TKD::GrayScale)? grayShade(color): customShade(color));
 				*(line++) = qRgb(dgtalColor.red(),dgtalColor.green(),dgtalColor.blue());
 			}
@@ -257,8 +257,8 @@ void SliceView::drawCurrentSlice( QImage &image, const Billon &billon,
 		{
 			for ( i=0 ; i<width ; ++i)
 			{
-				color = (TKD::restrictedValue(slice.at(j,i),intensityInterval)-minIntensity)*fact;
-				//color = accuSlice.at(j,i)*fact;
+				color = (TKD::restrictedValue(slice(j,i),intensityInterval)-minIntensity)*fact;
+				//color = accuSlice(j,i)*fact;
 				dgtalColor= ((aRender== TKD::HueScale) ? hueShade( color): (aRender==TKD::GrayScale)? grayShade(color): (aRender==TKD::HueScaleLog)? hueShadeLog(log(1+color)):customShade(color));
 				*(line++) = qRgb(dgtalColor.red(),dgtalColor.green(),dgtalColor.blue());
 			}
@@ -278,7 +278,7 @@ void SliceView::drawCurrentSlice( QImage &image, const Billon &billon,
 			{
 				x = qRound(pithCoord.x + j * qCos(i*angularIncrement));
 				y = qRound(pithCoord.y + j * qSin(i*angularIncrement));
-				color = (TKD::restrictedValue(slice.at(y,x),intensityInterval)-minIntensity)*fact;
+				color = (TKD::restrictedValue(slice(y,x),intensityInterval)-minIntensity)*fact;
 				dgtalColor= ((aRender== TKD::HueScale) ? hueShade( color): (aRender==TKD::GrayScale)? grayShade(color): (aRender==TKD::HueScaleLog)? hueShadeLog(log(1+color)):customShade(color));
 				*(line++) = qRgb(dgtalColor.red(),dgtalColor.green(),dgtalColor.blue());
 			}
@@ -298,7 +298,7 @@ void SliceView::drawCurrentSlice( QImage &image, const Billon &billon,
 			{
 				x = qRound(pithCoord.x + j * qCos(i*angularIncrement));
 				y = qRound(pithCoord.y + j * qSin(i*angularIncrement) * ellipticityRate);
-				color = (TKD::restrictedValue(slice.at(y,x),intensityInterval)-minIntensity)*fact;
+				color = (TKD::restrictedValue(slice(y,x),intensityInterval)-minIntensity)*fact;
 				dgtalColor= ((aRender== TKD::HueScale) ? hueShade( color): (aRender==TKD::GrayScale)? grayShade(color): (aRender==TKD::HueScaleLog)? hueShadeLog(log(1+color)):customShade(color));
 				*(line++) = qRgb(dgtalColor.red(),dgtalColor.green(),dgtalColor.blue());
 			}
@@ -325,7 +325,7 @@ void SliceView::drawMovementSlice( QImage &image, const Billon &billon, const ui
 		{
 			for ( i=0 ; i<width ; ++i )
 			{
-				if ( intensityInterval.containsClosed(currentSlice.at(j,i)) && intensityInterval.containsClosed(previousSlice.at(j,i)) )
+				if ( intensityInterval.containsClosed(currentSlice(j,i)) && intensityInterval.containsClosed(previousSlice(j,i)) )
 				{
 					color = billon.zMotion(i,j,sliceIndex);
 					if ( color > zMotionMin )
@@ -350,7 +350,7 @@ void SliceView::drawMovementSlice( QImage &image, const Billon &billon, const ui
 			{
 				x = pithCoord.x + j * qCos(i*angularIncrement);
 				y = pithCoord.y + j * qSin(i*angularIncrement);
-				if ( intensityInterval.containsClosed(currentSlice.at(y,x)) && intensityInterval.containsClosed(previousSlice.at(y,x)) )
+				if ( intensityInterval.containsClosed(currentSlice(y,x)) && intensityInterval.containsClosed(previousSlice(y,x)) )
 				{
 					color = billon.zMotion(x,y,sliceIndex);
 					if ( color > zMotionMin )

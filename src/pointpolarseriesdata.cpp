@@ -50,7 +50,12 @@ QVector<QwtPointPolar>::Iterator PointPolarSeriesData::begin()
 	return d_samples.begin();
 }
 
-QwtPointPolar &PointPolarSeriesData::at( int i )
+QwtPointPolar &PointPolarSeriesData::operator[]( int i )
+{
+	return d_samples[i];
+}
+
+const QwtPointPolar &PointPolarSeriesData::operator[]( int i ) const
 {
 	return d_samples[i];
 }

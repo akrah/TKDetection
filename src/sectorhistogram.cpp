@@ -56,11 +56,10 @@ void SectorHistogram::construct( const Billon &billon, const Interval<uint> &sli
 				iRadius += currentPithCoord.x;
 				while ( currentPos.x <= iRadius )
 				{
-					if ( currentPos.x < width && currentPos.y < height && intensity.containsOpen(currentSlice.at(currentPos.y,currentPos.x)) &&
-						 intensity.containsOpen(previousSlice.at(currentPos.y,currentPos.x)) )
+					if ( currentPos.x < width && currentPos.y < height && intensity.containsOpen(currentSlice(currentPos.y,currentPos.x)) &&
+						 intensity.containsOpen(previousSlice(currentPos.y,currentPos.x)) )
 					{
 						diff = billon.zMotion(currentPos.x,currentPos.y,k);
-						//if ( motionInterval.containsClosed(diff) )
 						if ( diff >= zMotionMin )
 						{
 							(*this)[PieChartSingleton::getInstance()->sectorIndexOfAngle( currentPithCoord.angle(currentPos) )] += diff-zMotionMin;
@@ -87,7 +86,6 @@ void SectorHistogram::computeMaximumsAndIntervals(const uint &smoothingRadius, c
 		min = interval.min();
 		max = interval.max();
 		interval.setMin(min<intervalGap?nbSectors+min-intervalGap:min-intervalGap);
-		// TODO : Faire de PieChart un singleton
 		interval.setMax(max>nbSectors-1-intervalGap?max+intervalGap-nbSectors:max+intervalGap);
 	}
 }

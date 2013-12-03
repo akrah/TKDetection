@@ -67,8 +67,8 @@ void PieChart::draw( QImage &image, const uiCoord2D &center, const uint &sectorI
 	// Liste qui va contenir les angles des deux côté du secteur à dessiner
 	// Permet de factoriser le code de calcul des coordonnées juste en dessous
 	QList<qreal> twoSides;
-	twoSides.append( _sectors.at(sectorIdx).minAngle() );
-	twoSides.append( _sectors.at(sectorIdx).maxAngle() );
+	twoSides.append( _sectors[sectorIdx].minAngle() );
+	twoSides.append( _sectors[sectorIdx].maxAngle() );
 
 	// Dessin des deux côtés du secteur
 	const int width = image.width();
