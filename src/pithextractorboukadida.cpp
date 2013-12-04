@@ -182,9 +182,6 @@ uiCoord2D PithExtractorBoukadida::transHough( const Slice &slice, qreal &lineOnM
 	const uint iMin = semiWidth-semiAdaptativeWidth;
 	const uint iMax = semiWidth+semiAdaptativeWidth;
 
-	// Calcul des accumulation des droites suivant les orientations
-	arma::Mat<int> accuSlice( height, width, arma::fill::zeros );
-
 	lineOnMaxRatio = 0.;
 
 	if ( semiAdaptativeWidth<2 )
@@ -195,6 +192,8 @@ uiCoord2D PithExtractorBoukadida::transHough( const Slice &slice, qreal &lineOnM
 	arma::Mat<char> hasContour(0,0);
 	uint nbContourPoints = contour( slice, orientations, hasContour, voxelDims, adaptativeWidthCoeff );
 
+	// Calcul des accumulation des droites suivant les orientations
+	arma::Mat<int> accuSlice( height, width, arma::fill::zeros );
 	uint i, j;
 	for ( j=1 ; j<height-1 ; ++j )
 	{
@@ -267,8 +266,8 @@ uint PithExtractorBoukadida::contour( const Slice &slice, arma::Mat<qreal> & ori
 		return 0;
 
 	const arma::Col<qreal> sobelNormSort = arma::sort( sobelNormVec );
-	const qreal &medianVal = sobelNormSort( sobelNormSort.n_elem/2 );
-	//const qreal &medianVal = sobelNormSort( sobelNormSort.n_elem - nbPositiveNorm + qRound(nbPositiveNorm/4.) );
+	//const qreal &medianVal = sobelNormSort( sobelNormSort.n_elem/2 );
+	const qreal &medianVal = sobelNormSort( sobelNormSort.n_elem - nbPositiveNorm + qRound(nbPositiveNorm/4.) );
 
 	uint nbContourPoints = 0;
 	for ( j=1 ; j<height ; ++j )

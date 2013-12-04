@@ -461,7 +461,7 @@ void MainWindow::drawTangentialView()
 		const rCoord2D &pithCoord = _tangentialBillon->hasPith()?
 										_tangentialBillon->pithCoord(_ui->_sliderSelectTangentialSlice->value()):
 										rCoord2D(_tangentialBillon->n_cols/2,_tangentialBillon->n_rows/2);
-		const qreal ellipticityRate = (_tangentialBillon->voxelWidth()/_tangentialBillon->voxelHeight()) * qCos((*_knotPithProfile)[_ui->_sliderSelectTangentialSlice->value()]);
+		const qreal ellipticityRate = (_tangentialBillon->voxelWidth()/_tangentialBillon->voxelHeight()) / qCos((*_knotPithProfile)[_ui->_sliderSelectTangentialSlice->value()]);
 		const uint &depth = _tangentialBillon->n_slices;
 
 		uint width = _tangentialBillon->n_cols;
@@ -1792,92 +1792,87 @@ void MainWindow::exportPithOfAKnotAreaToSdp(QTextStream &stream, unsigned int nu
 											unsigned int knotID)
 {
 
-				stream << "# SDP (Sequence of Discrete Points)" << endl;
-				stream << "#" << endl;
-				stream << "#Knot nums| Ellipse|  Pith  |                 Window size" << endl;
-				stream << "#knotID NumSliceInterval NumAngularInterval| EllipseWidth EllipseHeight| Coord | Top Left | Top Right | Bottom Right | Bottom Left" << endl;
-				stream << "#KnotID NumSliceInterval NumAngularInterval EllipseWidth EllipseHeight x y z    x y z       x y z        x y z         x y z" << endl;
+	stream << "# SDP (Sequence of Discrete Points)" << endl;
+	stream << "#" << endl;
+	stream << "#Knot nums| Ellipse|  Pith  |                 Window size" << endl;
+	stream << "#knotID NumSliceInterval NumAngularInterval| EllipseWidth EllipseHeight| Coord | Top Left | Top Right | Bottom Right | Bottom Left" << endl;
+	stream << "#KnotID NumSliceInterval NumAngularInterval EllipseWidth EllipseHeight x y z    x y z       x y z        x y z         x y z" << endl;
 
-				const Interval<uint> &sliceInterval = _sliceHistogram->interval(_currentSliceInterval-1);
-				const qreal zPithCoord = sliceInterval.mid();
-				const rCoord2D &originPith = _billon->pithCoord(zPithCoord);
+	const Interval<uint> &sliceInterval = _sliceHistogram->interval(numSliceInterval-1);
+	const qreal zPithCoord = sliceInterval.mid();
+	const rCoord2D &originPith = _billon->pithCoord(zPithCoord);
 
-				const uint &width = _tangentialBillon->n_cols;
-				const uint &height = _tangentialBillon->n_rows;
-				const uint &depth = _tangentialBillon->n_slices;
-				const int widthOnTwo = width/2.;
-				const int heightOnTwo = height/2.;
-				const int widthOnTwoMinusOne = widthOnTwo-1;
+	const uint &width = _tangentialBillon->n_cols;
+	const uint &height = _tangentialBillon->n_rows;
+	const uint &depth = _tangentialBillon->n_slices;
+	const int widthOnTwo = width/2.;
+	const int heightOnTwo = height/2.;
+	const int widthOnTwoMinusOne = widthOnTwo-1;
+	const int heightOnTwoMinusOne = heightOnTwo-1;
 
+	// Rotation autour de l'axe Y
+	const qreal alpha = PI_ON_TWO;
+	const QQuaternion quaterY = QQuaternion::fromAxisAndAngle( 0, 1, 0, alpha*RAD_TO_DEG_FACT );
 
+	// Rotation selon l'angle de la zone de nœuds
+	const Interval<uint> &angularInterval = _sectorHistogram->interval(numAngularInterval-1);
+	const uint angularRange = (angularInterval.max() + (angularInterval.isValid() ? 0. : PieChartSingleton::getInstance()->nbSectors())) - angularInterval.min();
+	const qreal bisectorOrientation = (angularInterval.min()+angularRange/2.)*PieChartSingleton::getInstance()->angleStep();
+	const QQuaternion quaterZ = QQuaternion::fromAxisAndAngle( 0, 0, 1, bisectorOrientation*RAD_TO_DEG_FACT );
 
-				// Rotation autour de l'axe Y
-				const qreal alpha = PI_ON_TWO;
-				const QQuaternion quaterY = QQuaternion::fromAxisAndAngle( 0, 1, 0, alpha*RAD_TO_DEG_FACT );
+	// Combinaisons des rotations
+	const QQuaternion quaterRot = quaterZ * quaterY;
 
-				// Rotation selon l'angle de la zone de nœuds
-				const Interval<uint> &angularInterval = _sectorHistogram->interval(_currentSectorInterval-1);
-				const uint angularRange = (angularInterval.max() + (angularInterval.isValid() ? 0. : PieChartSingleton::getInstance()->nbSectors())) - angularInterval.min();
-				const qreal bisectorOrientation = (angularInterval.min()+angularRange/2.)*PieChartSingleton::getInstance()->angleStep();
-				const QQuaternion quaterZ = QQuaternion::fromAxisAndAngle( 0, 0, 1, bisectorOrientation*RAD_TO_DEG_FACT );
+	// Vecteur de déplacement entre deux coupes tangentielles successives
+	const QVector3D shiftStep = quaterRot.rotatedVector( QVector3D( 0., 0., 1. ) );
 
-				// Combinaisons des rotations
-				const QQuaternion quaterRot = quaterZ * quaterY;
+	QVector3D origin( originPith.x, originPith.y, zPithCoord );
+	QVector3D initial, destination;
 
-				// Vecteur de déplacement entre deux coupes tangentielles successives
-				const QVector3D shiftStep = quaterRot.rotatedVector( QVector3D( 0., 0., 1. ) );
+	const qreal semiKnotAreaWidthCoeff = widthOnTwo / static_cast<qreal>( depth );
+	int jStart, jEnd, iStart, iEnd;
 
-				QVector3D origin( originPith.x, originPith.y, zPithCoord );
-				QVector3D initial, destination;
+	initial.setZ(0.);
 
-				const qreal semiKnotAreaWidthCoeff = widthOnTwo / static_cast<qreal>( depth );
-				int jStart, jEnd, iStart, iEnd;
+	for ( uint k=0 ; k<depth ; ++k )
+	{
+		iStart = -heightOnTwo;
+		iEnd = heightOnTwo;
+		jStart = -qMin(qRound(k*semiKnotAreaWidthCoeff),widthOnTwo);
+		jEnd = qMin(qRound(k*semiKnotAreaWidthCoeff),widthOnTwo);
+		const qreal ellipticityRate = (_tangentialBillon->voxelWidth()/_tangentialBillon->voxelHeight()) / qCos((*_knotPithProfile)[k]);
+		const qreal ellipseWidth = _knotEllipseRadiiHistogram->lowessData()[k];
+		const qreal ellipseHeight = ellipseWidth*ellipticityRate;
 
-				initial.setZ(0.);
+		initial.setX( _tangentialBillon->pithCoord(k).x-widthOnTwo );
+		initial.setY( heightOnTwoMinusOne-_tangentialBillon->pithCoord(k).y );
+		destination = quaterRot.rotatedVector(initial) + origin;
+		stream << knotID << " " << numSliceInterval << " " << numAngularInterval << " " << ellipseWidth << " " << ellipseHeight<< " ";
+		stream << destination.y() << " "<< destination.x() << " " << destination.z() << " ";
 
-				for ( uint k=0 ; k<depth ; ++k )
-				{
-					iStart = -qMin(qRound(k*semiKnotAreaWidthCoeff),widthOnTwo);
-					iEnd = qMin(qRound(k*semiKnotAreaWidthCoeff),widthOnTwo);
-					jStart = -heightOnTwo;
-					jEnd = heightOnTwo;
-					const qreal ellipticityRate = (_tangentialBillon->voxelWidth()/_tangentialBillon->voxelHeight()) / qCos((*_knotPithProfile)[k]);
-					const qreal ellipseWidth = _knotEllipseRadiiHistogram->lowessData()[k];
-					const qreal ellipseHeight = ellipseWidth*ellipticityRate;
+		initial.setX( iStart );
+		initial.setY( jStart );
+		destination = quaterRot.rotatedVector(initial) + origin;
 
+		stream << destination.y() << " "<< destination.x() << " " << destination.z() << " ";
 
+		initial.setX( iEnd );
+		destination = quaterRot.rotatedVector(initial) + origin;
 
-					initial.setX( _tangentialBillon->pithCoord(k).y-heightOnTwo );
-					initial.setY( widthOnTwoMinusOne-_tangentialBillon->pithCoord(k).x );
-					destination = quaterRot.rotatedVector(initial) + origin;
-					stream << knotID << " " << numSliceInterval << " " << numAngularInterval << " " << ellipseWidth << " " << ellipseHeight<< " ";
-					stream << destination.x() << " "<< destination.y() << " " << destination.z() << " ";
+		stream << destination.y() << " "<< destination.x() << " " << destination.z() << " ";
 
-					initial.setX( jStart );
-					initial.setY( iStart );
-					destination = quaterRot.rotatedVector(initial) + origin;
+		initial.setY( jEnd );
+		destination = quaterRot.rotatedVector(initial) + origin;
 
-					stream << destination.x() << " "<< destination.y() << " " << destination.z() << " ";
+		stream << destination.y() << " "<< destination.x() << " " << destination.z() << " ";
 
-					initial.setX( jEnd );
-					destination = quaterRot.rotatedVector(initial) + origin;
+		initial.setX( iStart );
+		destination = quaterRot.rotatedVector(initial) + origin;
 
-					stream << destination.x() << " "<< destination.y() << " " << destination.z() << " ";
+		stream << destination.y() << " "<< destination.x() << " " << destination.z() << endl;
 
-					initial.setY( iEnd );
-					destination = quaterRot.rotatedVector(initial) + origin;
-
-					stream << destination.x() << " "<< destination.y() << " " << destination.z() << " ";
-
-					initial.setX( jStart );
-					destination = quaterRot.rotatedVector(initial) + origin;
-
-					stream << destination.x() << " "<< destination.y() << " " << destination.z() << endl;
-
-					origin += shiftStep;
-				}
-
-
+		origin += shiftStep;
+	}
 }
 
 

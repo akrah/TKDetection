@@ -7,7 +7,6 @@ PlotKnotEllipseRadiiHistogram::PlotKnotEllipseRadiiHistogram()
 	_histogramCursor.setBrush(Qt::red);
 	_histogramCursor.setPen(QPen(Qt::red));
 
-	//_histogramSmoothed.setBrush(Qt::blue);
 	_histogramSmoothed.setPen(QPen(Qt::blue));
 }
 

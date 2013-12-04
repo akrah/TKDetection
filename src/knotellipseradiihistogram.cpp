@@ -41,11 +41,12 @@ void KnotEllipseRadiiHistogram::construct( const Billon &tangentialBillon, const
 	_ellipticalHistograms.resize(nbSlices);
 
 	qreal ellipticityRate;
-	for ( uint k=0 ; k<nbSlices ; ++k )
+	for ( uint k=1 ; k<nbSlices ; ++k )
 	{
 		EllipticalAccumulationHistogram &ellipticalHistogram = _ellipticalHistograms[k];
-		ellipticityRate = (tangentialBillon.voxelWidth()/tangentialBillon.voxelHeight()) * qCos(knotPithProfile[k]);
-		ellipticalHistogram.construct( tangentialBillon.slice(k), tangentialBillon.pithCoord(k), ellipticityRate, ellipticalAccumulationSmoothingRadius, ellipticalAccumulationMinimumGap );
+		ellipticityRate = (tangentialBillon.voxelWidth()/tangentialBillon.voxelHeight()) / qCos(knotPithProfile[k]);
+		ellipticalHistogram.construct( tangentialBillon.slice(k), tangentialBillon.pithCoord(k), ellipticityRate,
+									   ellipticalAccumulationSmoothingRadius, ellipticalAccumulationMinimumGap, (k/(nbSlices*1.0)) );
 		(*this)[k] = ellipticalHistogram.detectedRadius();
 	}
 	(*this)[0] = 0;
@@ -54,7 +55,7 @@ void KnotEllipseRadiiHistogram::construct( const Billon &tangentialBillon, const
 	QVector<qreal> residus;
 	Lowess lowess(lowessBandWidth);
 	lowess.compute( *this, _lowessData, residus );
-	outlierInterpolation( residus, lowessIqrCoeff );
+	//outlierInterpolation( residus, lowessIqrCoeff );
 	//lowess.compute( *this, _lowessData, residus );
 }
 

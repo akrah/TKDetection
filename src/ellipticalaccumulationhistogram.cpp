@@ -5,7 +5,6 @@
 
 EllipticalAccumulationHistogram::EllipticalAccumulationHistogram() : Histogram<qreal>()
 {
-	_maximums.resize(3);
 }
 
 
@@ -22,10 +21,14 @@ uint EllipticalAccumulationHistogram::detectedRadius() const
  * Public setters
  **********************************/
 
-void EllipticalAccumulationHistogram::construct( const Slice &slice, const uiCoord2D &origin, const qreal &ellipticityRate, const uint &smoothingRadius, const uint &minimumGap )
+void EllipticalAccumulationHistogram::construct( const Slice &slice, const uiCoord2D &origin, const qreal &ellipticityRate,
+												 const uint &smoothingRadius, const uint &minimumGap, const qreal &widthCoeff )
 {
 	const uint &width = slice.n_cols;
 	const uint &height = slice.n_rows;
+	const uint semiWidth = qFloor(width/2.);
+	const uint firstX = qFloor(semiWidth*widthCoeff);
+	const uint lastX = width-firstX;
 	const qreal &pithCoordX = origin.x;
 	const qreal &pithCoordY = origin.y;
 	const uint nbEllipses = qMin(qMin(pithCoordX,width-pithCoordX),qMin(pithCoordY/ellipticityRate,(height-pithCoordY)/ellipticityRate));
@@ -38,17 +41,25 @@ void EllipticalAccumulationHistogram::construct( const Slice &slice, const uiCoo
 	if ( nbEllipses ) (*this)[0] = slice( 0,0 );
 	for ( a=1 ; a<nbEllipses ; a++ )
 	{
+		nbPixelOnEllipse = 0;
 		b = a*ellipticityRate;
 		aSquare = a*a;
 		bSquare = b*b;
 		x = 0;
 		y = b;
 		d1 = bSquare - aSquare*b + aSquare/4. ;
-		(*this)[a] += slice( qRound(pithCoordY+y), qRound(pithCoordX+x) ) +
-					  slice( qRound(pithCoordY+y), qRound(pithCoordX-x) ) +
-					  slice( qRound(pithCoordY-y), qRound(pithCoordX-x) ) +
-					  slice( qRound(pithCoordY-y), qRound(pithCoordX+x) );
-		nbPixelOnEllipse = 4;
+		if ( pithCoordX+x<lastX )
+		{
+			(*this)[a] += slice( qRound(pithCoordY+y), qRound(pithCoordX+x) ) +
+						  slice( qRound(pithCoordY-y), qRound(pithCoordX+x) );
+			nbPixelOnEllipse += 2;
+		}
+		if ( pithCoordX-x>firstX )
+		{
+			(*this)[a] += slice( qRound(pithCoordY+y), qRound(pithCoordX-x) ) +
+						  slice( qRound(pithCoordY-y), qRound(pithCoordX-x) );
+			nbPixelOnEllipse += 2;
+		}
 		while ( aSquare*(y-.5) > bSquare*(x+1) )
 		{
 			if ( d1 >= 0 )
@@ -58,11 +69,18 @@ void EllipticalAccumulationHistogram::construct( const Slice &slice, const uiCoo
 			}
 			d1 += bSquare*(2*x+3) ;
 			x++ ;
-			(*this)[a] += slice( qRound(pithCoordY+y), qRound(pithCoordX+x) ) +
-						  slice( qRound(pithCoordY+y), qRound(pithCoordX-x) ) +
-						  slice( qRound(pithCoordY-y), qRound(pithCoordX-x) ) +
-						  slice( qRound(pithCoordY-y), qRound(pithCoordX+x) );
-			nbPixelOnEllipse += 4;
+			if ( pithCoordX+x<lastX )
+			{
+				(*this)[a] += slice( qRound(pithCoordY+y), qRound(pithCoordX+x) ) +
+							  slice( qRound(pithCoordY-y), qRound(pithCoordX+x) );
+				nbPixelOnEllipse += 2;
+			}
+			if ( pithCoordX-x>firstX )
+			{
+				(*this)[a] += slice( qRound(pithCoordY+y), qRound(pithCoordX-x) ) +
+							  slice( qRound(pithCoordY-y), qRound(pithCoordX-x) );
+				nbPixelOnEllipse += 2;
+			}
 		}
 		d2 = bSquare*qPow(x+.5,2) + aSquare*qPow(y-1,2) - aSquare*bSquare ;
 		while ( y > 0 )
@@ -74,11 +92,18 @@ void EllipticalAccumulationHistogram::construct( const Slice &slice, const uiCoo
 			}
 			d2 += aSquare*(-2*y+3);
 			y-- ;
-			(*this)[a] += slice( qRound(pithCoordY+y), qRound(pithCoordX+x) ) +
-						  slice( qRound(pithCoordY+y), qRound(pithCoordX-x) ) +
-						  slice( qRound(pithCoordY-y), qRound(pithCoordX-x) ) +
-						  slice( qRound(pithCoordY-y), qRound(pithCoordX+x) );
-			nbPixelOnEllipse += 4;
+			if ( pithCoordX+x<lastX )
+			{
+				(*this)[a] += slice( qRound(pithCoordY+y), qRound(pithCoordX+x) ) +
+							  slice( qRound(pithCoordY-y), qRound(pithCoordX+x) );
+				nbPixelOnEllipse += 2;
+			}
+			if ( pithCoordX-x>firstX )
+			{
+				(*this)[a] += slice( qRound(pithCoordY+y), qRound(pithCoordX-x) ) +
+							  slice( qRound(pithCoordY-y), qRound(pithCoordX-x) );
+				nbPixelOnEllipse += 2;
+			}
 		}
 		(*this)[a] /= nbPixelOnEllipse;
 	}
@@ -115,7 +140,8 @@ void EllipticalAccumulationHistogram::findFirstMaximumAndNextMinimum( const uint
 
 
 	// Recherche du x corespondant au f(x) median de f(maximumIndex) et f(minimumIndex)
-	const qreal meanValue = (*this)[maximumIndex] - (qAbs((*this)[minimumIndex]-(*this)[maximumIndex]) / (minimumIndex<size-5?2.:8.));
+	//const qreal meanValue = (*this)[maximumIndex] - (qAbs((*this)[minimumIndex]-(*this)[maximumIndex]) / (minimumIndex<size-5?2.:8.));
+	const qreal meanValue = (*this)[maximumIndex] - (qAbs((*this)[minimumIndex]-(*this)[maximumIndex]) * 0.25);
 	//if ( minimumIndex<size-1 )
 		while ( maximumIndex<size-1 && (*this)[maximumIndex] > meanValue ) maximumIndex++;
 	//else maximumIndex += 1;

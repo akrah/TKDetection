@@ -12,7 +12,7 @@ public:
 	KnotPithProfile();
 	virtual ~KnotPithProfile();
 
-	void construct(const Pith &pith , const rCoord3D &voxelDims , const uint &smoothingRadius );
+	void construct(const Pith &pith, const uint &smoothingRadius );
 };
 
 #endif // KNOTPITHPROFILE_H

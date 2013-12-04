@@ -104,7 +104,8 @@ namespace BillonAlgorithms
 			edge += direction;
 		}
 		const qreal depth = rVec2D(edge-originPith).norm();
-		/* Hauteur et largeur des coueps tangentielles */
+
+		/* Hauteur et largeur des coupes tangentielles */
 		const uint width = sliceInterval.size()+1;
 		const uint height = 2 * qTan(angularRange*PieChartSingleton::getInstance()->angleStep()/2.) * depth;
 		const int widthOnTwo = width/2.-1;
