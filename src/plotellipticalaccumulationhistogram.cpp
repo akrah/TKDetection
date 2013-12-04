@@ -69,7 +69,7 @@ void PlotEllipticalAccumulationHistogram::updateDatas( const EllipticalAccumulat
 void PlotEllipticalAccumulationHistogram::updateMaximums( const EllipticalAccumulationHistogram & histogram )
 {
 	QVector<QwtIntervalSample> datasMaximums(0);
-	if ( histogram.maximums() > 0 )
+	if ( histogram.nbMaximums() > 0 )
 	{
 		datasMaximums.reserve(histogram.nbMaximums());
 		int slice;

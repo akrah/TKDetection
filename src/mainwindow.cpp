@@ -831,7 +831,7 @@ void MainWindow::updateKnotPithProfile()
 
 	if ( _tangentialBillon && _tangentialBillon->hasPith() )
 	{
-		_knotPithProfile->construct( _tangentialBillon->pith(), _tangentialBillon->voxelDims(), _ui->_spinKnotPithProfileSmoothingRadius->value() );
+		_knotPithProfile->construct( _tangentialBillon->pith(), _ui->_spinKnotPithProfileSmoothingRadius->value() );
 	}
 
 	_plotKnotPithProfile->update( *_knotPithProfile );
@@ -1807,7 +1807,6 @@ void MainWindow::exportPithOfAKnotAreaToSdp(QTextStream &stream, unsigned int nu
 	const uint &depth = _tangentialBillon->n_slices;
 	const int widthOnTwo = width/2.;
 	const int heightOnTwo = height/2.;
-	const int widthOnTwoMinusOne = widthOnTwo-1;
 	const int heightOnTwoMinusOne = heightOnTwo-1;
 
 	// Rotation autour de l'axe Y
@@ -1848,28 +1847,28 @@ void MainWindow::exportPithOfAKnotAreaToSdp(QTextStream &stream, unsigned int nu
 		initial.setY( heightOnTwoMinusOne-_tangentialBillon->pithCoord(k).y );
 		destination = quaterRot.rotatedVector(initial) + origin;
 		stream << knotID << " " << numSliceInterval << " " << numAngularInterval << " " << ellipseWidth << " " << ellipseHeight<< " ";
-		stream << destination.y() << " "<< destination.x() << " " << destination.z() << " ";
+		stream << static_cast<int>(destination.y()) << " "<< static_cast<int>(destination.x()) << " " << static_cast<int>(destination.z()) << " ";
 
 		initial.setX( iStart );
 		initial.setY( jStart );
 		destination = quaterRot.rotatedVector(initial) + origin;
 
-		stream << destination.y() << " "<< destination.x() << " " << destination.z() << " ";
+		stream << static_cast<int>(destination.y()) << " "<< static_cast<int>(destination.x()) << " " << static_cast<int>(destination.z()) << " ";
 
 		initial.setX( iEnd );
 		destination = quaterRot.rotatedVector(initial) + origin;
 
-		stream << destination.y() << " "<< destination.x() << " " << destination.z() << " ";
+		stream << static_cast<int>(destination.y()) << " "<< static_cast<int>(destination.x()) << " " << static_cast<int>(destination.z()) << " ";
 
 		initial.setY( jEnd );
 		destination = quaterRot.rotatedVector(initial) + origin;
 
-		stream << destination.y() << " "<< destination.x() << " " << destination.z() << " ";
+		stream << static_cast<int>(destination.y()) << " "<< static_cast<int>(destination.x()) << " " << static_cast<int>(destination.z()) << " ";
 
 		initial.setX( iStart );
 		destination = quaterRot.rotatedVector(initial) + origin;
 
-		stream << destination.y() << " "<< destination.x() << " " << destination.z() << endl;
+		stream << static_cast<int>(destination.y()) << " "<< static_cast<int>(destination.x()) << " " << static_cast<int>(destination.z()) << endl;
 
 		origin += shiftStep;
 	}
