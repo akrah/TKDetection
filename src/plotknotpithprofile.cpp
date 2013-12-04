@@ -1,6 +1,7 @@
 #include "inc/plotknotpithprofile.h"
 
 #include "inc/knotpithprofile.h"
+#include "inc/define.h"
 
 PlotKnotPithProfile::PlotKnotPithProfile()
 {
@@ -48,7 +49,7 @@ void PlotKnotPithProfile::update( const KnotPithProfile & histogram )
 		const QVector<qreal>::ConstIterator end = histogram.end();
 		while ( begin != end )
 		{
-			datasHistogram.append(QwtIntervalSample(*begin++,i,i+1));
+			datasHistogram.append(QwtIntervalSample(qAcos(*begin++)*RAD_TO_DEG_FACT,i,i+1));
 			++i;
 		}
 	}

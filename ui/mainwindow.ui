@@ -252,7 +252,7 @@
              <property name="geometry">
               <rect>
                <x>0</x>
-               <y>0</y>
+               <y>72</y>
                <width>390</width>
                <height>234</height>
               </rect>
@@ -841,8 +841,8 @@ zone restreinte</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>274</width>
-              <height>72</height>
+              <width>335</width>
+              <height>121</height>
              </rect>
             </property>
             <attribute name="label">
@@ -1191,7 +1191,7 @@ sur une coupe valide</string>
                   <number>3024</number>
                  </property>
                  <property name="value">
-                  <number>-700</number>
+                  <number>-900</number>
                  </property>
                 </widget>
                </item>
@@ -1900,7 +1900,7 @@ sur une coupe valide</string>
              </rect>
             </property>
             <attribute name="label">
-             <string>Profil de la moelle des nœuds</string>
+             <string>Profil d'inclinaison de la moelle des nœuds</string>
             </attribute>
             <layout class="QFormLayout" name="formLayout_8">
              <item row="0" column="0">
@@ -1944,7 +1944,7 @@ sur une coupe valide</string>
              </rect>
             </property>
             <attribute name="label">
-             <string>Accumulation d'intensité elliptique</string>
+             <string>Accumulation elliptique d'intensité</string>
             </attribute>
             <layout class="QFormLayout" name="formLayout_9">
              <item row="0" column="0">
@@ -2016,6 +2016,9 @@ sur une coupe valide</string>
             <string>Algorithme LOWESS</string>
            </property>
            <layout class="QFormLayout" name="formLayout_3">
+            <property name="fieldGrowthPolicy">
+             <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
+            </property>
             <item row="0" column="0">
              <widget class="QLabel" name="label_12">
               <property name="text">
@@ -2033,26 +2036,6 @@ sur une coupe valide</string>
               </property>
               <property name="value">
                <double>0.750000000000000</double>
-              </property>
-             </widget>
-            </item>
-            <item row="1" column="0">
-             <widget class="QLabel" name="label_31">
-              <property name="text">
-               <string>Coefficient IQR</string>
-              </property>
-             </widget>
-            </item>
-            <item row="1" column="1">
-             <widget class="QDoubleSpinBox" name="_spinLowessIqrCoeff">
-              <property name="minimum">
-               <double>0.000000000000000</double>
-              </property>
-              <property name="maximum">
-               <double>5.000000000000000</double>
-              </property>
-              <property name="value">
-               <double>1.000000000000000</double>
               </property>
              </widget>
             </item>
@@ -2948,7 +2931,7 @@ l'intervalle angulaire</string>
        </widget>
        <widget class="QWidget" name="tab_3">
         <attribute name="title">
-         <string>3. Profil de la moelle du nœud</string>
+         <string>3. Profil d'inclinaison de la moelle du nœud</string>
         </attribute>
         <layout class="QVBoxLayout" name="verticalLayout_6">
          <item>
@@ -2958,7 +2941,7 @@ l'intervalle angulaire</string>
        </widget>
        <widget class="QWidget" name="tab_5">
         <attribute name="title">
-         <string>4. Acumulation d'intensité elliptique</string>
+         <string>4. Acumulation elliptique d'intensité</string>
         </attribute>
         <layout class="QVBoxLayout" name="verticalLayout_7">
          <item>
@@ -2968,7 +2951,7 @@ l'intervalle angulaire</string>
        </widget>
        <widget class="QWidget" name="tab_7">
         <attribute name="title">
-         <string>5. Histogramme des rayons d'ellipses</string>
+         <string>5. Rayons des ellipses</string>
         </attribute>
         <layout class="QVBoxLayout" name="verticalLayout_9">
          <item>

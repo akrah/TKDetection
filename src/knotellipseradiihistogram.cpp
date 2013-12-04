@@ -27,7 +27,7 @@ const QVector<qreal> &KnotEllipseRadiiHistogram::lowessData() const
 
 
 void KnotEllipseRadiiHistogram::construct( const Billon &tangentialBillon, const KnotPithProfile &knotPithProfile, const qreal &lowessBandWidth,
-										   const qreal &lowessIqrCoeff, const uint &ellipticalAccumulationSmoothingRadius, const uint &ellipticalAccumulationMinimumGap )
+										   const uint &ellipticalAccumulationSmoothingRadius, const uint &ellipticalAccumulationMinimumGap )
 {
 	const uint &nbSlices = tangentialBillon.n_slices;
 
@@ -41,10 +41,10 @@ void KnotEllipseRadiiHistogram::construct( const Billon &tangentialBillon, const
 	_ellipticalHistograms.resize(nbSlices);
 
 	qreal ellipticityRate;
-	for ( uint k=1 ; k<nbSlices ; ++k )
+	for ( uint k=0 ; k<nbSlices ; ++k )
 	{
 		EllipticalAccumulationHistogram &ellipticalHistogram = _ellipticalHistograms[k];
-		ellipticityRate = (tangentialBillon.voxelWidth()/tangentialBillon.voxelHeight()) / qCos(knotPithProfile[k]);
+		ellipticityRate = (tangentialBillon.voxelWidth()/tangentialBillon.voxelHeight()) / knotPithProfile[k];
 		ellipticalHistogram.construct( tangentialBillon.slice(k), tangentialBillon.pithCoord(k), ellipticityRate,
 									   ellipticalAccumulationSmoothingRadius, ellipticalAccumulationMinimumGap, (k/(nbSlices*1.0)) );
 		(*this)[k] = ellipticalHistogram.detectedRadius();
@@ -52,52 +52,6 @@ void KnotEllipseRadiiHistogram::construct( const Billon &tangentialBillon, const
 	(*this)[0] = 0;
 
 	// LOWESS
-	QVector<qreal> residus;
 	Lowess lowess(lowessBandWidth);
-	lowess.compute( *this, _lowessData, residus );
-	//outlierInterpolation( residus, lowessIqrCoeff );
-	//lowess.compute( *this, _lowessData, residus );
-}
-
-void KnotEllipseRadiiHistogram::outlierInterpolation( const QVector<qreal> &residus, const qreal &iqrCoeff )
-{
-	const int &size = this->size();
-
-	QVector<qreal> sortedResidus(residus);
-	qSort(sortedResidus);
-	const qreal &q1 = sortedResidus[size/4];
-	const qreal &q3 = sortedResidus[3*size/4];
-
-	const Interval<qreal> outlierInterval( q1-iqrCoeff*(q3-q1), q3+iqrCoeff*(q3-q1) );
-
-//	int startSliceIndex, newK, startSliceIndexMinusOne;
-//	qreal interpolationStep, currentInterpolatePithCoord;
-
-	for ( int k=0 ; k<size ; ++k )
-	{
-		if ( !outlierInterval.containsOpen(residus[k]) )
-		{
-			(*this)[k] = _lowessData[k];
-//			startSliceIndex = k++;
-//			startSliceIndexMinusOne = startSliceIndex?startSliceIndex-1:0;
-
-//			while ( k<size && !outlierInterval.containsOpen(residus[k]) ) ++k;
-//			if ( k<size ) --k;
-//			k = qMin(k,size-1);
-
-//			std::cout << "Outlier interpolation [" << startSliceIndex << ", " << k << "]" << std::endl;
-
-//			interpolationStep = startSliceIndex && k<size-1 ? ((*this)[k+1] - (*this)[startSliceIndexMinusOne]) / static_cast<qreal>( k+1-startSliceIndexMinusOne )
-//															   : 0.;
-
-//			currentInterpolatePithCoord = interpolationStep +
-//										  (startSliceIndex || k==size ? (*this)[startSliceIndexMinusOne]
-//																	  : (*this)[k+1]);
-
-//			for ( newK = startSliceIndex ; newK <= k ; ++newK, currentInterpolatePithCoord += interpolationStep )
-//			{
-//				(*this)[newK] = currentInterpolatePithCoord;
-//			}
-		}
-	}
+	lowess.compute( *this, _lowessData );
 }

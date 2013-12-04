@@ -461,7 +461,7 @@ void MainWindow::drawTangentialView()
 		const rCoord2D &pithCoord = _tangentialBillon->hasPith()?
 										_tangentialBillon->pithCoord(_ui->_sliderSelectTangentialSlice->value()):
 										rCoord2D(_tangentialBillon->n_cols/2,_tangentialBillon->n_rows/2);
-		const qreal ellipticityRate = (_tangentialBillon->voxelWidth()/_tangentialBillon->voxelHeight()) / qCos((*_knotPithProfile)[_ui->_sliderSelectTangentialSlice->value()]);
+		const qreal ellipticityRate = (_tangentialBillon->voxelWidth()/_tangentialBillon->voxelHeight()) / (*_knotPithProfile)[_ui->_sliderSelectTangentialSlice->value()];
 		const uint &depth = _tangentialBillon->n_slices;
 
 		uint width = _tangentialBillon->n_cols;
@@ -846,7 +846,7 @@ void MainWindow::updateKnotEllipseRadiiHistogram()
 
 	if ( _tangentialBillon && _tangentialBillon->hasPith() && _knotPithProfile->size() )
 	{
-		_knotEllipseRadiiHistogram->construct( *_tangentialBillon, *_knotPithProfile, _ui->_spinLowessBandWidth->value(), _ui->_spinLowessIqrCoeff->value(),
+		_knotEllipseRadiiHistogram->construct( *_tangentialBillon, *_knotPithProfile, _ui->_spinLowessBandWidth->value(),
 											   _ui->_spinEllipticalAccumulationSmoothingRadius->value(), _ui->_spinEllipticalAccumulationMinimumGap->value());
 	}
 
@@ -1807,7 +1807,6 @@ void MainWindow::exportPithOfAKnotAreaToSdp(QTextStream &stream, unsigned int nu
 	const uint &depth = _tangentialBillon->n_slices;
 	const int widthOnTwo = width/2.;
 	const int heightOnTwo = height/2.;
-	const int heightOnTwoMinusOne = heightOnTwo-1;
 
 	// Rotation autour de l'axe Y
 	const qreal alpha = PI_ON_TWO;
@@ -1837,14 +1836,14 @@ void MainWindow::exportPithOfAKnotAreaToSdp(QTextStream &stream, unsigned int nu
 	{
 		iStart = -heightOnTwo;
 		iEnd = heightOnTwo;
-		jStart = -qMin(qRound(k*semiKnotAreaWidthCoeff),widthOnTwo);
 		jEnd = qMin(qRound(k*semiKnotAreaWidthCoeff),widthOnTwo);
-		const qreal ellipticityRate = (_tangentialBillon->voxelWidth()/_tangentialBillon->voxelHeight()) / qCos((*_knotPithProfile)[k]);
+		jStart = -jEnd;
+		const qreal ellipticityRate = (_tangentialBillon->voxelWidth()/_tangentialBillon->voxelHeight()) / (*_knotPithProfile)[k];
 		const qreal ellipseWidth = _knotEllipseRadiiHistogram->lowessData()[k];
 		const qreal ellipseHeight = ellipseWidth*ellipticityRate;
 
-		initial.setX( _tangentialBillon->pithCoord(k).x-widthOnTwo );
-		initial.setY( heightOnTwoMinusOne-_tangentialBillon->pithCoord(k).y );
+		initial.setX( _tangentialBillon->pithCoord(k).y-heightOnTwo );
+		initial.setY( _tangentialBillon->pithCoord(k).x-widthOnTwo );
 		destination = quaterRot.rotatedVector(initial) + origin;
 		stream << knotID << " " << numSliceInterval << " " << numAngularInterval << " " << ellipseWidth << " " << ellipseHeight<< " ";
 		stream << static_cast<int>(destination.y()) << " "<< static_cast<int>(destination.x()) << " " << static_cast<int>(destination.z()) << " ";
@@ -1853,22 +1852,22 @@ void MainWindow::exportPithOfAKnotAreaToSdp(QTextStream &stream, unsigned int nu
 		initial.setY( jStart );
 		destination = quaterRot.rotatedVector(initial) + origin;
 
-		stream << static_cast<int>(destination.y()) << " "<< static_cast<int>(destination.x()) << " " << static_cast<int>(destination.z()) << " ";
+		stream << static_cast<int>(destination.x()) << " "<< static_cast<int>(destination.y()) << " " << static_cast<int>(destination.z()) << " ";
 
 		initial.setX( iEnd );
 		destination = quaterRot.rotatedVector(initial) + origin;
 
-		stream << static_cast<int>(destination.y()) << " "<< static_cast<int>(destination.x()) << " " << static_cast<int>(destination.z()) << " ";
+		stream << static_cast<int>(destination.x()) << " "<< static_cast<int>(destination.y()) << " " << static_cast<int>(destination.z()) << " ";
 
 		initial.setY( jEnd );
 		destination = quaterRot.rotatedVector(initial) + origin;
 
-		stream << static_cast<int>(destination.y()) << " "<< static_cast<int>(destination.x()) << " " << static_cast<int>(destination.z()) << " ";
+		stream << static_cast<int>(destination.x()) << " "<< static_cast<int>(destination.y()) << " " << static_cast<int>(destination.z()) << " ";
 
 		initial.setX( iStart );
 		destination = quaterRot.rotatedVector(initial) + origin;
 
-		stream << static_cast<int>(destination.y()) << " "<< static_cast<int>(destination.x()) << " " << static_cast<int>(destination.z()) << endl;
+		stream << static_cast<int>(destination.x()) << " "<< static_cast<int>(destination.y()) << " " << static_cast<int>(destination.z()) << endl;
 
 		origin += shiftStep;
 	}

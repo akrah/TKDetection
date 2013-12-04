@@ -119,32 +119,65 @@ void EllipticalAccumulationHistogram::findFirstMaximumAndNextMinimum( const uint
 	const uint &size = this->size();
 	if ( size<4 ) return;
 
-	_maximums.resize(3);
+	_maximums.resize(2);
 
 	// Recherche du premier maximum
 	uint maximumIndex = 2;
-	while ( maximumIndex<size && (*this)[maximumIndex] <= (*this)[maximumIndex-2] ) maximumIndex++;
 	while ( maximumIndex<size && (*this)[maximumIndex] > (*this)[maximumIndex-2] ) maximumIndex++;
-
 	if ( maximumIndex==size ) return;
 
-	maximumIndex--;
+	while ((*this)[maximumIndex]<(*this)[maximumIndex-1]) maximumIndex--;
 	_maximums[0] = maximumIndex;
 
-	// Recherche du premier minimum après le premier maximum
-	uint minimumIndex = maximumIndex+1;
-	while ( minimumIndex<size && (*this)[minimumIndex] < (*this)[minimumIndex-2]-minimumGap ) minimumIndex++;
-	minimumIndex--;
-	minimumIndex = qMax(qMin(minimumIndex,size-1),maximumIndex);
-	_maximums[2] = minimumIndex;
-
-
 	// Recherche du x corespondant au f(x) median de f(maximumIndex) et f(minimumIndex)
-	//const qreal meanValue = (*this)[maximumIndex] - (qAbs((*this)[minimumIndex]-(*this)[maximumIndex]) / (minimumIndex<size-5?2.:8.));
-	const qreal meanValue = (*this)[maximumIndex] - (qAbs((*this)[minimumIndex]-(*this)[maximumIndex]) * 0.25);
-	//if ( minimumIndex<size-1 )
-		while ( maximumIndex<size-1 && (*this)[maximumIndex] > meanValue ) maximumIndex++;
-	//else maximumIndex += 1;
+	maximumIndex+=2;
+	qreal oldSlope = (*this)[maximumIndex] - (*this)[maximumIndex-2];
+	qreal currentSlope;
+	bool increase = true;
+	while ( increase )
+	{
+		maximumIndex++;
+		currentSlope = (*this)[maximumIndex] - (*this)[maximumIndex-2];
+		increase = currentSlope<oldSlope;
+		oldSlope = currentSlope;
+	}
 
-	_maximums[1] = maximumIndex;
+	_maximums[1] = maximumIndex-2;
 }
+
+//void EllipticalAccumulationHistogram::findFirstMaximumAndNextMinimum( const uint &minimumGap )
+//{
+//	_maximums.clear();
+
+//	const uint &size = this->size();
+//	if ( size<4 ) return;
+
+//	_maximums.resize(3);
+
+//	// Recherche du premier maximum
+//	uint maximumIndex = 2;
+//	while ( maximumIndex<size && (*this)[maximumIndex] <= (*this)[maximumIndex-2] ) maximumIndex++;
+//	while ( maximumIndex<size && (*this)[maximumIndex] > (*this)[maximumIndex-2] ) maximumIndex++;
+
+//	if ( maximumIndex==size ) return;
+
+//	maximumIndex--;
+//	_maximums[0] = maximumIndex;
+
+//	// Recherche du premier minimum après le premier maximum
+//	uint minimumIndex = maximumIndex+1;
+//	while ( minimumIndex<size && (*this)[minimumIndex] < (*this)[minimumIndex-2]-minimumGap ) minimumIndex++;
+//	minimumIndex--;
+//	minimumIndex = qMax(qMin(minimumIndex,size-1),maximumIndex);
+//	_maximums[2] = minimumIndex;
+
+
+//	// Recherche du x corespondant au f(x) median de f(maximumIndex) et f(minimumIndex)
+//	//const qreal meanValue = (*this)[maximumIndex] - (qAbs((*this)[minimumIndex]-(*this)[maximumIndex]) / (minimumIndex<size-5?2.:8.));
+//	const qreal meanValue = (*this)[maximumIndex] - (qAbs((*this)[minimumIndex]-(*this)[maximumIndex]) * 0.25);
+//	//if ( minimumIndex<size-1 )
+//		while ( maximumIndex<size-1 && (*this)[maximumIndex] > meanValue ) maximumIndex++;
+//	//else maximumIndex += 1;
+
+//	_maximums[1] = maximumIndex;
+//}

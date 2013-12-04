@@ -25,12 +25,11 @@ void Lowess::setBandWidth( const qreal &bandwidth )
 	_bandWidth = bandwidth;
 }
 
-void Lowess::compute( const QVector<qreal> &datas, QVector<qreal> &interpolatedDatas, QVector<qreal> &residus ) const
+void Lowess::compute( const QVector<qreal> &datas, QVector<qreal> &interpolatedDatas ) const
 {
 	// Create test dataset.
 	const int &size = datas.size();
 	interpolatedDatas.resize(size);
-	residus.resize(size);
 
 	if ( !size ) return;
 
@@ -144,7 +143,6 @@ void Lowess::compute( const QVector<qreal> &datas, QVector<qreal> &interpolatedD
 		gsl_blas_ddot(x, c, &y);
 
 		interpolatedDatas[i] = y;
-		residus[i] = datas[i]-y;
 	}
 
 

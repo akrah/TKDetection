@@ -13,7 +13,7 @@ public:
 	const qreal &bandWidth() const;
 	void setBandWidth( const qreal &bandwidth );
 
-	void compute( const QVector<qreal> &datas, QVector<qreal> &interpolatedDatas , QVector<qreal> &residus ) const;
+	void compute( const QVector<qreal> &datas, QVector<qreal> &interpolatedDatas ) const;
 
 private:
 	qreal tricube( const qreal &u, const qreal &t ) const;
