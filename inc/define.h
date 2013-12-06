@@ -64,9 +64,10 @@ namespace TKD
 #define NEIGHBORHOOD_WINDOW_WIDTH_KNOT 59
 #define NEIGHBORHOOD_WINDOW_HEIGHT_KNOT NEIGHBORHOOD_WINDOW_WIDTH_KNOT
 #define PITH_LAG_KNOT 15
-#define PITH_SMOOTHING_KNOT 20
-#define MIN_WOOD_PERCENTAGE_KNOT 80
+#define PITH_SMOOTHING_KNOT 15
+#define MIN_WOOD_PERCENTAGE_KNOT 95
 #define ASCENDING_ORDER_KNOT true
+#define MINIMUM_ADAPTATIVE_WIDTH_KNOT 2
 
 // Paramètres de la zone restreinte autour de la moelle
 #define RESTRICTED_AREA_DEFAULT_RESOLUTION 100
@@ -120,14 +121,25 @@ namespace TKD
 	};
 
 
-  // Type de rendu image
-  enum ImageViewRender
+	// Type de rendu image
+	enum ImageViewRender
 	{
-	  _ImageViewRender_MIN_ = -1,
-	  GrayScale,
-	  HueScale,
-	  HueScaleLog,
-	  Custom
+		_ImageViewRender_MIN_ = -1,
+		GrayScale,
+		HueScale,
+		HueScaleLog,
+		Custom,
+		_ImageViewRender_MAX_
+	};
+
+	// Type d'extrapolation
+	enum ExtrapolationType
+	{
+		_EXTRAPOLATION_TYPE_MIN_ = -1,
+		NO_EXTRAPOLATION,
+		LINEAR,
+		SLOPE_DIRECTION,
+		_EXTRAPOLATION_TYPE_MAX_
 	};
 
 

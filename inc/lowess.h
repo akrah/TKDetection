@@ -20,7 +20,6 @@ private:
 
 private:
 	qreal _bandWidth;
-	uint _robustness;
 };
 
 #endif // LOWESS_H

@@ -109,7 +109,7 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 	QObject::connect(_ui->_sliderSelectTangentialYSlice, SIGNAL(valueChanged(int)), this, SLOT(setTangentialYSlice(int)));
 
 	/*********************************************
-	* Évènements de l'onglet "Paramètres généraux"
+	* Évènements de l'onglet "General"
 	 *********************************************/
 	QObject::connect(_ui->_spanSliderIntensityInterval, SIGNAL(lowerValueChanged(int)), _ui->_spinMinIntensity, SLOT(setValue(int)));
 	QObject::connect(_ui->_spinMinIntensity, SIGNAL(valueChanged(int)), _ui->_spanSliderIntensityInterval, SLOT(setLowerValue(int)));
@@ -716,14 +716,19 @@ void MainWindow::selectSectorInterval(const int &index, const bool &draw )
 		const Interval<int> intensityInterval(_ui->_spinMinIntensity->value(), _ui->_spinMaxIntensity->value());
 
 		_tangentialBillon = BillonAlgorithms::tangentialTransform( *_billon, sliceInterval, centeredSectorInterval, intensityInterval.min(),
-																   _ui->_checkTrilinearInterpolation->isChecked(), _ui->_spinTrilinearInterpolationCoefficient->value()/100. );
+																   _ui->_checkTrilinearInterpolation->isChecked(),
+																   _ui->_spinTrilinearInterpolationCoefficient->value()/100. );
 
-		PithExtractorBoukadida pithExtractor( _ui->_spinPithSubWindowWidth_knot->value()/_tangentialBillon->voxelWidth(),
-											  _ui->_spinPithSubWindowHeight_knot->value()/_tangentialBillon->voxelHeight(),
-											  _ui->_spinPithMaximumShift_knot->value(), _ui->_spinPithSmoothingRadius_knot->value(),
-											  _ui->_spinPithMinimumWoodPercentage_knot->value(), Interval<int>( _ui->_spinPithMinIntensity_knot->value(), _ui->_spinPithMaxIntensity_knot->value() ),
-											  _ui->_chechPithAscendingOrder_knot->isChecked());
-		pithExtractor.process(*_tangentialBillon,true);
+		_knotPithExtractor.setSubWindowWidth( _ui->_spinPithSubWindowWidth_knot->value()/_tangentialBillon->voxelWidth() );
+		_knotPithExtractor.setSubWindowHeight( _ui->_spinPithSubWindowHeight_knot->value()/_tangentialBillon->voxelHeight() );
+		_knotPithExtractor.setPithShift( _ui->_spinPithMaximumShift_knot->value() );
+		_knotPithExtractor.setSmoothingRadius( _ui->_spinPithSmoothingRadius_knot->value() );
+		_knotPithExtractor.setMinWoodPercentage( _ui->_spinPithMinimumWoodPercentage_knot->value() );
+		_knotPithExtractor.setIntensityInterval( Interval<int>( _ui->_spinPithMinIntensity_knot->value(), _ui->_spinPithMaxIntensity_knot->value() ) );
+		_knotPithExtractor.setAscendingOrder( _ui->_chechPithAscendingOrder_knot->isChecked() );
+		_knotPithExtractor.setExtrapolation( TKD::SLOPE_DIRECTION );
+
+		_knotPithExtractor.process(*_tangentialBillon,true);
 	}
 
 	if (draw)
@@ -759,9 +764,10 @@ void MainWindow::updateBillonPith()
 		PithExtractorBoukadida pithExtractor( _ui->_spinPithSubWindowWidth_billon->value(), _ui->_spinPithSubWindowHeight_billon->value(),
 											  _ui->_spinPithMaximumShift_billon->value(), _ui->_spinPithSmoothingRadius_billon->value(),
 											  _ui->_spinPithMinimumWoodPercentage_billon->value(), Interval<int>( _ui->_spinPithMinIntensity_billon->value(), _ui->_spinPithMaxnIntensity_billon->value() ),
-											  _ui->_chechPithAscendingOrder_billon->isChecked());
+											  _ui->_chechPithAscendingOrder_billon->isChecked(), TKD::LINEAR );
 		pithExtractor.process(*_billon);
-		_treeRadius = BillonAlgorithms::restrictedAreaMeansRadius(*_billon,_ui->_spinRestrictedAreaResolution->value(),_ui->_spinRestrictedAreaThreshold->value(),_ui->_spinRestrictedAreaMinimumRadius->value()*_billon->n_cols/100., _ui->_spinHistogramPercentageOfSlicesToIgnore_zMotion->value()*_billon->n_slices/100.);
+		_treeRadius = BillonAlgorithms::restrictedAreaMeansRadius(*_billon,_ui->_spinRestrictedAreaResolution->value(),_ui->_spinRestrictedAreaThreshold->value(),
+																  _ui->_spinRestrictedAreaMinimumRadius->value()*_billon->n_cols/100., _billon->n_slices*0.25);
 		_ui->_checkRadiusAroundPith->setText( QString::number(_treeRadius) );
 		_ui->_spinHistogramNumberOfAngularSectors_zMotionAngular->setValue(TWO_PI*_treeRadius);
 	}
@@ -846,8 +852,8 @@ void MainWindow::updateKnotEllipseRadiiHistogram()
 
 	if ( _tangentialBillon && _tangentialBillon->hasPith() && _knotPithProfile->size() )
 	{
-		_knotEllipseRadiiHistogram->construct( *_tangentialBillon, *_knotPithProfile, _ui->_spinLowessBandWidth->value(),
-											   _ui->_spinEllipticalAccumulationSmoothingRadius->value(), _ui->_spinEllipticalAccumulationMinimumGap->value());
+		_knotEllipseRadiiHistogram->construct( *_tangentialBillon, *_knotPithProfile, _knotPithExtractor.validSlices(),
+											   _ui->_spinLowessBandWidth->value(), _ui->_spinEllipticalAccumulationSmoothingRadius->value() );
 	}
 
 	_plotKnotEllipseRadiiHistogram->update( *_knotEllipseRadiiHistogram );

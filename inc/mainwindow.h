@@ -7,6 +7,7 @@
 #include "def/def_billon.h"
 #include "def/def_coordinate.h"
 #include "slicezoomer.h"
+#include "inc/pithextractorboukadida.h"
 
 namespace Ui
 {
@@ -145,6 +146,8 @@ private:
 	PlotKnotEllipseRadiiHistogram * _plotKnotEllipseRadiiHistogram;
 
 	PlotEllipticalAccumulationHistogram *_plotEllipticalAccumulationHistogram;
+
+	PithExtractorBoukadida _knotPithExtractor;
 
 	uint _currentSliceInterval;
 	uint _currentSectorInterval;

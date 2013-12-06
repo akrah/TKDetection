@@ -15,10 +15,10 @@ public:
 	uint detectedRadius() const;
 
 	void construct(const Slice &slice, const uiCoord2D &origin, const qreal &ellipticityRate,
-					const uint &smoothingRadius, const uint &minimumGap, const qreal &widthCoeff );
+					const uint &smoothingRadius, const qreal &widthCoeff );
 
 private:
-	void findFirstMaximumAndNextMinimum( const uint &minimumGap );
+	void findFirstMaximumAndNextMinimum();
 };
 
 #endif // ELLIPTICALACCUMULATIONHISTOGRAM_H

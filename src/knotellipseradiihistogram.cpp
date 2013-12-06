@@ -26,8 +26,8 @@ const QVector<qreal> &KnotEllipseRadiiHistogram::lowessData() const
 }
 
 
-void KnotEllipseRadiiHistogram::construct( const Billon &tangentialBillon, const KnotPithProfile &knotPithProfile, const qreal &lowessBandWidth,
-										   const uint &ellipticalAccumulationSmoothingRadius, const uint &ellipticalAccumulationMinimumGap )
+void KnotEllipseRadiiHistogram::construct( const Billon &tangentialBillon, const KnotPithProfile &knotPithProfile, const Interval<uint> &validSlices, const qreal &lowessBandWidth,
+										   const uint &smoothingRadius )
 {
 	const uint &nbSlices = tangentialBillon.n_slices;
 
@@ -40,18 +40,46 @@ void KnotEllipseRadiiHistogram::construct( const Billon &tangentialBillon, const
 	_lowessData.resize(nbSlices);
 	_ellipticalHistograms.resize(nbSlices);
 
+	const int &firstValidSliceIndex = validSlices.min();
+	const int &lastValidSliceIndex = validSlices.max();
+
 	qreal ellipticityRate;
-	for ( uint k=0 ; k<nbSlices ; ++k )
+	for ( int k=firstValidSliceIndex ; k<=lastValidSliceIndex ; ++k )
 	{
 		EllipticalAccumulationHistogram &ellipticalHistogram = _ellipticalHistograms[k];
 		ellipticityRate = (tangentialBillon.voxelWidth()/tangentialBillon.voxelHeight()) / knotPithProfile[k];
 		ellipticalHistogram.construct( tangentialBillon.slice(k), tangentialBillon.pithCoord(k), ellipticityRate,
-									   ellipticalAccumulationSmoothingRadius, ellipticalAccumulationMinimumGap, (k/(nbSlices*1.0)) );
+									   smoothingRadius, k/static_cast<qreal>(nbSlices) );
 		(*this)[k] = ellipticalHistogram.detectedRadius();
 	}
-	(*this)[0] = 0;
+
+	extrapolation(validSlices);
 
 	// LOWESS
 	Lowess lowess(lowessBandWidth);
 	lowess.compute( *this, _lowessData );
+}
+
+void KnotEllipseRadiiHistogram::extrapolation( const Interval<uint> &validSlices )
+{
+	const int size = this->size();
+
+	if ( !size ) return;
+
+	const int firstValidSliceIndex = validSlices.min();
+	const int lastValidSliceIndex = validSlices.max();
+	const qreal firstValidValueIncrement = (*this)[firstValidSliceIndex]/static_cast<qreal>(firstValidSliceIndex);
+	const qreal lastValidIncrement = qMin(qAbs(((*this)[lastValidSliceIndex] - (*this)[lastValidSliceIndex-2])),
+										  qAbs(((*this)[lastValidSliceIndex-1] - (*this)[lastValidSliceIndex-3])));
+
+	int k;
+	for ( k=0 ; k<firstValidSliceIndex; ++k )
+	{
+		(*this)[k] = firstValidValueIncrement*static_cast<qreal>(k);
+	}
+
+	for ( k=lastValidSliceIndex+1 ; k<size; ++k )
+	{
+		(*this)[k] = (*this)[k-1] + lastValidIncrement;
+	}
 }

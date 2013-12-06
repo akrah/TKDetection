@@ -22,12 +22,12 @@ uint EllipticalAccumulationHistogram::detectedRadius() const
  **********************************/
 
 void EllipticalAccumulationHistogram::construct( const Slice &slice, const uiCoord2D &origin, const qreal &ellipticityRate,
-												 const uint &smoothingRadius, const uint &minimumGap, const qreal &widthCoeff )
+												 const uint &smoothingRadius, const qreal &widthCoeff )
 {
 	const uint &width = slice.n_cols;
 	const uint &height = slice.n_rows;
 	const uint semiWidth = qFloor(width/2.);
-	const uint firstX = qFloor(semiWidth*widthCoeff);
+	const uint firstX = qFloor(semiWidth-semiWidth*widthCoeff);
 	const uint lastX = width-firstX;
 	const qreal &pithCoordX = origin.x;
 	const qreal &pithCoordY = origin.y;
@@ -38,7 +38,7 @@ void EllipticalAccumulationHistogram::construct( const Slice &slice, const uiCoo
 
 	resize(nbEllipses);
 
-	if ( nbEllipses ) (*this)[0] = slice( 0,0 );
+	if ( nbEllipses ) (*this)[0] = slice( pithCoordY, pithCoordX );
 	for ( a=1 ; a<nbEllipses ; a++ )
 	{
 		nbPixelOnEllipse = 0;
@@ -48,13 +48,13 @@ void EllipticalAccumulationHistogram::construct( const Slice &slice, const uiCoo
 		x = 0;
 		y = b;
 		d1 = bSquare - aSquare*b + aSquare/4. ;
-		if ( pithCoordX+x<lastX )
+		if ( pithCoordX+x<=lastX )
 		{
 			(*this)[a] += slice( qRound(pithCoordY+y), qRound(pithCoordX+x) ) +
 						  slice( qRound(pithCoordY-y), qRound(pithCoordX+x) );
 			nbPixelOnEllipse += 2;
 		}
-		if ( pithCoordX-x>firstX )
+		if ( pithCoordX-x>=firstX )
 		{
 			(*this)[a] += slice( qRound(pithCoordY+y), qRound(pithCoordX-x) ) +
 						  slice( qRound(pithCoordY-y), qRound(pithCoordX-x) );
@@ -69,13 +69,13 @@ void EllipticalAccumulationHistogram::construct( const Slice &slice, const uiCoo
 			}
 			d1 += bSquare*(2*x+3) ;
 			x++ ;
-			if ( pithCoordX+x<lastX )
+			if ( pithCoordX+x<=lastX )
 			{
 				(*this)[a] += slice( qRound(pithCoordY+y), qRound(pithCoordX+x) ) +
 							  slice( qRound(pithCoordY-y), qRound(pithCoordX+x) );
 				nbPixelOnEllipse += 2;
 			}
-			if ( pithCoordX-x>firstX )
+			if ( pithCoordX-x>=firstX )
 			{
 				(*this)[a] += slice( qRound(pithCoordY+y), qRound(pithCoordX-x) ) +
 							  slice( qRound(pithCoordY-y), qRound(pithCoordX-x) );
@@ -92,13 +92,13 @@ void EllipticalAccumulationHistogram::construct( const Slice &slice, const uiCoo
 			}
 			d2 += aSquare*(-2*y+3);
 			y-- ;
-			if ( pithCoordX+x<lastX )
+			if ( pithCoordX+x<=lastX )
 			{
 				(*this)[a] += slice( qRound(pithCoordY+y), qRound(pithCoordX+x) ) +
 							  slice( qRound(pithCoordY-y), qRound(pithCoordX+x) );
 				nbPixelOnEllipse += 2;
 			}
-			if ( pithCoordX-x>firstX )
+			if ( pithCoordX-x>=firstX )
 			{
 				(*this)[a] += slice( qRound(pithCoordY+y), qRound(pithCoordX-x) ) +
 							  slice( qRound(pithCoordY-y), qRound(pithCoordX-x) );
@@ -108,11 +108,11 @@ void EllipticalAccumulationHistogram::construct( const Slice &slice, const uiCoo
 		(*this)[a] /= nbPixelOnEllipse;
 	}
 
-	if (smoothingRadius) TKD::meanSmoothing<qreal>( this->begin(), this->end(), smoothingRadius );
-	findFirstMaximumAndNextMinimum( minimumGap );
+	if (smoothingRadius) TKD::meanSmoothing<qreal>( this->begin(), this->end(), smoothingRadius, false );
+	findFirstMaximumAndNextMinimum();
 }
 
-void EllipticalAccumulationHistogram::findFirstMaximumAndNextMinimum( const uint &minimumGap )
+void EllipticalAccumulationHistogram::findFirstMaximumAndNextMinimum()
 {
 	_maximums.clear();
 
@@ -123,18 +123,21 @@ void EllipticalAccumulationHistogram::findFirstMaximumAndNextMinimum( const uint
 
 	// Recherche du premier maximum
 	uint maximumIndex = 2;
-	while ( maximumIndex<size && (*this)[maximumIndex] > (*this)[maximumIndex-2] ) maximumIndex++;
+	while ( maximumIndex<size && (*this)[maximumIndex] < (*this)[maximumIndex-2] ) ++maximumIndex;
+	while ( maximumIndex<size && (*this)[maximumIndex] > (*this)[maximumIndex-2] ) ++maximumIndex;
 	if ( maximumIndex==size ) return;
 
-	while ((*this)[maximumIndex]<(*this)[maximumIndex-1]) maximumIndex--;
+	maximumIndex--;
+
+	//while ( maximumIndex>0 && (*this)[maximumIndex]<(*this)[maximumIndex-1]) --maximumIndex;
 	_maximums[0] = maximumIndex;
 
 	// Recherche du x corespondant au f(x) median de f(maximumIndex) et f(minimumIndex)
-	maximumIndex+=2;
+	maximumIndex = qMin(maximumIndex+2,size-1);
 	qreal oldSlope = (*this)[maximumIndex] - (*this)[maximumIndex-2];
 	qreal currentSlope;
 	bool increase = true;
-	while ( increase )
+	while ( maximumIndex<size-1 && increase )
 	{
 		maximumIndex++;
 		currentSlope = (*this)[maximumIndex] - (*this)[maximumIndex-2];
@@ -145,39 +148,3 @@ void EllipticalAccumulationHistogram::findFirstMaximumAndNextMinimum( const uint
 	_maximums[1] = maximumIndex-2;
 }
 
-//void EllipticalAccumulationHistogram::findFirstMaximumAndNextMinimum( const uint &minimumGap )
-//{
-//	_maximums.clear();
-
-//	const uint &size = this->size();
-//	if ( size<4 ) return;
-
-//	_maximums.resize(3);
-
-//	// Recherche du premier maximum
-//	uint maximumIndex = 2;
-//	while ( maximumIndex<size && (*this)[maximumIndex] <= (*this)[maximumIndex-2] ) maximumIndex++;
-//	while ( maximumIndex<size && (*this)[maximumIndex] > (*this)[maximumIndex-2] ) maximumIndex++;
-
-//	if ( maximumIndex==size ) return;
-
-//	maximumIndex--;
-//	_maximums[0] = maximumIndex;
-
-//	// Recherche du premier minimum après le premier maximum
-//	uint minimumIndex = maximumIndex+1;
-//	while ( minimumIndex<size && (*this)[minimumIndex] < (*this)[minimumIndex-2]-minimumGap ) minimumIndex++;
-//	minimumIndex--;
-//	minimumIndex = qMax(qMin(minimumIndex,size-1),maximumIndex);
-//	_maximums[2] = minimumIndex;
-
-
-//	// Recherche du x corespondant au f(x) median de f(maximumIndex) et f(minimumIndex)
-//	//const qreal meanValue = (*this)[maximumIndex] - (qAbs((*this)[minimumIndex]-(*this)[maximumIndex]) / (minimumIndex<size-5?2.:8.));
-//	const qreal meanValue = (*this)[maximumIndex] - (qAbs((*this)[minimumIndex]-(*this)[maximumIndex]) * 0.25);
-//	//if ( minimumIndex<size-1 )
-//		while ( maximumIndex<size-1 && (*this)[maximumIndex] > meanValue ) maximumIndex++;
-//	//else maximumIndex += 1;
-
-//	_maximums[1] = maximumIndex;
-//}
