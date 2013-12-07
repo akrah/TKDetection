@@ -441,8 +441,8 @@ void MainWindow::drawSlice()
 		_mainPix = QImage(1,1,QImage::Format_ARGB32);
 	}
 
-	_labelSliceView->setPixmap( QPixmap::fromImage(_mainPix) );
-	_labelSliceView->resize(_sliceZoomer.factor() * _mainPix.size());
+	_labelSliceView->resize( _sliceZoomer.factor() * _mainPix.size() );
+	_labelSliceView->setPixmap( QPixmap::fromImage(_mainPix).scaledToWidth(_sliceZoomer.factor()*_mainPix.width(),Qt::FastTransformation) );
 }
 
 void MainWindow::drawTangentialView()
@@ -535,14 +535,15 @@ void MainWindow::drawTangentialView()
 		_tangentialPix = QImage(1,1,QImage::Format_ARGB32);
 	}
 
-	_labelTangentialView->setPixmap( QPixmap::fromImage(_tangentialPix) );
 	_labelTangentialView->resize(_tangentialZoomer.factor() * _tangentialPix.size());
+	_labelTangentialView->setPixmap( QPixmap::fromImage(_tangentialPix).scaledToWidth(_tangentialZoomer.factor()*_tangentialPix.width(),Qt::FastTransformation ) );
 }
 
 
 void MainWindow::zoomInSliceView( const qreal &zoomFactor, const qreal &zoomCoefficient )
 {
 	_labelSliceView->resize(zoomFactor * _mainPix.size());
+	_labelSliceView->setPixmap( QPixmap::fromImage(_mainPix).scaledToWidth(zoomFactor*_mainPix.width(),Qt::FastTransformation) );
 	QScrollBar *hBar = _ui->_scrollSliceView->horizontalScrollBar();
 	hBar->setValue(int(zoomCoefficient * hBar->value() + ((zoomCoefficient - 1) * hBar->pageStep()/2)));
 	QScrollBar *vBar = _ui->_scrollSliceView->verticalScrollBar();
