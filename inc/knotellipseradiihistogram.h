@@ -23,6 +23,7 @@ public:
 
 private:
 	void extrapolation( const Interval<uint> &validSlices );
+	void outlierInterpolation( const QVector<qreal> &residus, const qreal &iqrCoeff );
 
 private:
 	QVector<EllipticalAccumulationHistogram> _ellipticalHistograms;

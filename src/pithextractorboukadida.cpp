@@ -123,37 +123,37 @@ void PithExtractorBoukadida::process( Billon &billon, const bool &adaptativeWidt
 	QVector<qreal> nbLineByMaxRatio( depth, 0. );
 	QVector<qreal> backgroundProportions( depth, 1. );
 
-	std::cout << "Step 1] Copie du billon" << std::endl;
+	qDebug() << "Step 1] Copie du billon";
 	Billon billonFillBackground(billon);
 
-	std::cout << "Step 2] Fill billon background and compute background proportions" << std::endl;
+	qDebug() << "Step 2] Fill billon background and compute background proportions";
 	fillBillonBackground( billonFillBackground, backgroundProportions, _intensityInterval, adaptativeWidth );
 
-	std::cout << "Step 3] Detect interval of valid slices" << std::endl;
+	qDebug() << "Step 3] Detect interval of valid slices";
 	detectValidSliceInterval( backgroundProportions );
 	const int &firstValidSliceIndex = _validSlices.min();
 	const int &lastValidSliceIndex = _validSlices.max();
 	const int firstSliceOrdered = _ascendingOrder?firstValidSliceIndex:lastValidSliceIndex;
-	std::cout << "[ " << firstValidSliceIndex << ", " << lastValidSliceIndex << " ]" << std::endl;
+	qDebug() << "[ " << firstValidSliceIndex << ", " << lastValidSliceIndex << " ]";
 
 	if ( _validSlices.size() < _smoothingRadius )
 	{
-		std::cout << "   => No valid slices, detection stopped" << std::endl;
+		qDebug() << "   => No valid slices, detection stopped";
 		return;
 	}
 
 	// Calcul de la moelle sur la première coupe valide
-	std::cout << "Step 4] Hough transform on first valid slice" << std::endl;
+	qDebug() << "Step 4] Hough transform on first valid slice";
 	pith[firstSliceOrdered] = transHough( billonFillBackground.slice(firstSliceOrdered), nbLineByMaxRatio[firstSliceOrdered],
 										  voxelDims, adaptativeWidth?firstSliceOrdered/static_cast<qreal>(depth):1.0 );
 
 	// Calcul de la moelle sur les coupes suivantes
-	std::cout << "Step 5] Hough transform on next valid slices" << std::endl;
+	qDebug() <<"Step 5] Hough transform on next valid slices";
 	rCoord2D currentPithCoord;
 	iCoord2D subWindowStart, subWindowEnd;
 	for ( k=firstSliceOrdered+kIncrement ; k<=lastValidSliceIndex && k>=firstValidSliceIndex ; k += kIncrement )
 	{
-		std::cout << k << "  ";
+		qDebug() << k ;
 		const Slice &currentSlice = billonFillBackground.slice(k);
 		const rCoord2D &previousPith = pith[k-kIncrement];
 
@@ -167,28 +167,27 @@ void PithExtractorBoukadida::process( Billon &billon, const bool &adaptativeWidt
 
 		if ( currentPithCoord.euclideanDistance(previousPith) > _pithShift )
 		{
-			std::cout << "...  ";
+			qDebug() << "...  ";
 			currentPithCoord = transHough( currentSlice, nbLineByMaxRatio[k], voxelDims, adaptativeWidth?k/static_cast<qreal>(depth):1.0 );
 		}
 
 		pith[k] = currentPithCoord;
 	}
-	std::cout << std::endl;
 
 	// Interpolation des coupes valides
-	std::cout << "Step 6] Interpolation of valid slices" << std::endl;
+	qDebug() << "Step 6] Interpolation of valid slices";
 	interpolation( pith, nbLineByMaxRatio, _validSlices );
 
 	// Lissage
-	std::cout << "Step 7] Smoothing of valid slices" << std::endl;
-	TKD::meanSmoothing<rCoord2D>( pith.begin()+firstValidSliceIndex, pith.begin()+lastValidSliceIndex+1, _smoothingRadius );
+	qDebug() << "Step 7] Smoothing of valid slices";
+	TKD::meanSmoothing2<rCoord2D>( pith.begin()+firstValidSliceIndex, pith.begin()+lastValidSliceIndex+1, _smoothingRadius );
 
 	// Extrapolation des coupes invalides
-	std::cout << "Step 8] Extrapolation of unvalid slices" << std::endl;
+	qDebug() << "Step 8] Extrapolation of unvalid slices";
 
 	const int slopeDistance = 5;
 
-	_validSlices.setBounds(firstValidSliceIndex+2*_smoothingRadius+1,lastValidSliceIndex-2*_smoothingRadius-1);
+	_validSlices.setBounds(firstValidSliceIndex+2.*_smoothingRadius,lastValidSliceIndex-2.*_smoothingRadius);
 	const int firstValidSliceIndexSmoothed = _validSlices.min();
 	const int lastValidSliceIndexSmoothed = _validSlices.max();
 
@@ -199,7 +198,7 @@ void PithExtractorBoukadida::process( Billon &billon, const bool &adaptativeWidt
 	switch (_extrapolation)
 	{
 		case TKD::LINEAR:
-			std::cout << "  Linear interpolation" << std::endl;
+			qDebug() << "  Linear interpolation";
 			for ( k=firstValidSliceIndexSmoothed-1 ; k>=0 ; --k )
 			{
 				pith[k] = firstValidCoord;
@@ -210,7 +209,7 @@ void PithExtractorBoukadida::process( Billon &billon, const bool &adaptativeWidt
 			}
 			break;
 		case TKD::SLOPE_DIRECTION:
-			std::cout << "  In slope direction interpolation" << std::endl;
+			qDebug() <<  "  In slope direction interpolation";
 			for ( k=firstValidSliceIndexSmoothed-1 ; k>=0 ; --k )
 			{
 				pith[k] = pith[k+1] + firstValidCoordSlope;
@@ -226,7 +225,7 @@ void PithExtractorBoukadida::process( Billon &billon, const bool &adaptativeWidt
 			break;
 		case TKD::NO_EXTRAPOLATION:
 		default:
-			std::cout << "  No interpolation" << std::endl;
+			qDebug() << "  No interpolation";
 			break;
 	}
 }
@@ -400,7 +399,7 @@ void PithExtractorBoukadida::interpolation( Pith &pith, const QVector<qreal> &nb
 			while ( k<lastSlice && nbLineByMaxRatio[k] < interpolationThreshold ) ++k;
 			if ( k<lastSlice ) --k;
 
-			std::cout << "Interpolation [" << startSliceIndex << ", " << k << "]" << std::endl;
+			qDebug() << "Interpolation [" << startSliceIndex << ", " << k << "]" ;
 
 			interpolationStep = startSliceIndex && k<lastSlice ? (pith[k+1] - pith[startSliceIndexMinusOne]) / static_cast<qreal>( k+1-startSliceIndexMinusOne )
 															   : rCoord2D(0,0);

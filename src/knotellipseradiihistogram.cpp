@@ -56,8 +56,11 @@ void KnotEllipseRadiiHistogram::construct( const Billon &tangentialBillon, const
 	extrapolation(validSlices);
 
 	// LOWESS
+	QVector<qreal> residus;
 	Lowess lowess(lowessBandWidth);
-	lowess.compute( *this, _lowessData );
+	lowess.compute( *this, _lowessData, residus );
+	outlierInterpolation( residus, 1. );
+	lowess.compute( *this, _lowessData, residus );
 }
 
 void KnotEllipseRadiiHistogram::extrapolation( const Interval<uint> &validSlices )
@@ -81,5 +84,45 @@ void KnotEllipseRadiiHistogram::extrapolation( const Interval<uint> &validSlices
 	for ( k=lastValidSliceIndex+1 ; k<size; ++k )
 	{
 		(*this)[k] = (*this)[k-1] + lastValidIncrement;
+	}
+}
+
+void KnotEllipseRadiiHistogram::outlierInterpolation( const QVector<qreal> &residus, const qreal &iqrCoeff )
+{
+	const int &size = this->size();
+
+	QVector<qreal> sortedResidus(residus);
+	qSort(sortedResidus);
+
+	const qreal &q1 = sortedResidus[size/4];
+	const qreal &q3 = sortedResidus[3*size/4];
+
+	const Interval<qreal> outlierInterval( q1-iqrCoeff*(q3-q1), q3+iqrCoeff*(q3-q1) );
+
+	int startSliceIndex, newK, startSliceIndexMinusOne;
+	qreal interpolationStep, currentInterpolatePithCoord;
+
+	for ( int k=0 ; k<size ; ++k )
+	{
+		if ( !outlierInterval.containsOpen(residus[k]) )
+		{
+			startSliceIndex = k++;
+			startSliceIndexMinusOne = startSliceIndex?startSliceIndex-1:0;
+
+			while ( k<size && !outlierInterval.containsOpen(residus[k]) ) ++k;
+			--k;
+			k = qMin(k,size-1);
+
+			qDebug() << "Outlier interpolation [" << startSliceIndex << ", " << k << "]";
+
+			interpolationStep = startSliceIndex && k<size-1 ? ((*this)[k+1] - (*this)[startSliceIndexMinusOne]) / static_cast<qreal>( k+1-startSliceIndexMinusOne )
+															: 0.;
+
+			currentInterpolatePithCoord = interpolationStep + (*this)[startSliceIndexMinusOne];
+			for ( newK = startSliceIndex ; newK <= k ; ++newK, currentInterpolatePithCoord += interpolationStep )
+			{
+				(*this)[newK] = currentInterpolatePithCoord;
+			}
+		}
 	}
 }

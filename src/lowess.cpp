@@ -25,11 +25,12 @@ void Lowess::setBandWidth( const qreal &bandwidth )
 	_bandWidth = bandwidth;
 }
 
-void Lowess::compute( const QVector<qreal> &datas, QVector<qreal> &interpolatedDatas ) const
+void Lowess::compute( const QVector<qreal> &datas, QVector<qreal> &interpolatedDatas, QVector<qreal> &residus ) const
 {
 	// Create test dataset.
 	const int &size = datas.size();
 	interpolatedDatas.resize(size);
+	residus.resize(size);
 
 	if ( !size ) return;
 
@@ -39,7 +40,6 @@ void Lowess::compute( const QVector<qreal> &datas, QVector<qreal> &interpolatedD
 
 	// Working arrays. Yes we need both distances and sortedDistances.
 	gsl_matrix *X = gsl_matrix_alloc(size, 3);
-	//gsl_matrix *cov = gsl_matrix_alloc(3, 3);
 	gsl_vector *weights = gsl_vector_alloc(size);
 	gsl_vector *c = gsl_vector_alloc(3);
 	gsl_vector *x = gsl_vector_alloc(3);
@@ -69,6 +69,8 @@ void Lowess::compute( const QVector<qreal> &datas, QVector<qreal> &interpolatedD
 	gsl_vector *xt = work->xt;
 	gsl_vector *D = work->D;
 
+	gsl_vector_view row, column;
+
 	for ( i=0 ; i<size ; ++i )
 	{
 		// Compute distances.
@@ -95,7 +97,7 @@ void Lowess::compute( const QVector<qreal> &datas, QVector<qreal> &interpolatedD
 			wi = gsl_vector_get (weights, j);
 			if (wi < 0)	wi = 0;
 			{
-				gsl_vector_view row = gsl_matrix_row (A, j);
+				row = gsl_matrix_row (A, j);
 				gsl_vector_scale (&row.vector, sqrt (wi));
 			}
 		}
@@ -121,7 +123,7 @@ void Lowess::compute( const QVector<qreal> &datas, QVector<qreal> &interpolatedD
 		alpha0 = gsl_vector_get (S, 0);
 		for ( j=0 ; j<3 ; ++j )
 		{
-			gsl_vector_view column = gsl_matrix_column (QSI, j);
+			column = gsl_matrix_column (QSI, j);
 			alpha = gsl_vector_get (S, j);
 
 			if (alpha <= 2.2204460492503131e-16 * alpha0) alpha = 0.0;
@@ -143,6 +145,7 @@ void Lowess::compute( const QVector<qreal> &datas, QVector<qreal> &interpolatedD
 		gsl_blas_ddot(x, c, &y);
 
 		interpolatedDatas[i] = y;
+		residus[i] = datas[i]-y;
 	}
 
 

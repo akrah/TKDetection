@@ -60,6 +60,77 @@ namespace TKD
 			*dataIter++ = currentValue/smoothingDiameter;
 		}
 	}
+
+	template<typename T >
+	void meanSmoothing2( const typename QVector<T>::iterator &begin, const typename QVector<T>::iterator &end, const uint &smoothingRadius, const bool &loop = false )
+	{
+		if ( !smoothingRadius || begin == end )
+			return;
+
+		const qreal smoothingDiameter = 2*smoothingRadius+1;
+
+		QVector<T> copy;
+		typename QVector<T>::iterator dataIter, dataEnd;
+		uint i;
+		T currentValue;
+
+		if ( loop )
+		{
+			dataIter = end-smoothingRadius-1;
+			dataEnd = end;
+			while ( dataIter != dataEnd ) copy << *dataIter++;
+			dataIter = begin;
+			while ( dataIter != dataEnd ) copy << *dataIter++;
+			dataIter = begin;
+			dataEnd = begin+smoothingRadius+1;
+			while ( dataIter != dataEnd ) copy << *dataIter++;
+
+			typename QVector<T>::ConstIterator copyIterBegin = copy.constBegin();
+			typename QVector<T>::ConstIterator copyIterEnd = copy.constBegin() + static_cast<int>(smoothingDiameter);
+
+			dataIter = begin;
+			dataEnd = end;
+
+			currentValue = std::accumulate( copyIterBegin, copyIterEnd, T() );
+			*dataIter++ = currentValue/smoothingDiameter;
+			while ( dataIter != dataEnd )
+			{
+				currentValue += (*copyIterEnd++ - *copyIterBegin++);
+				*dataIter++ = currentValue/smoothingDiameter;
+			}
+		}
+		else
+		{
+			dataIter = begin;
+			dataEnd = end;
+			while ( dataIter != dataEnd ) copy << *dataIter++;
+
+			typename QVector<T>::ConstIterator copyIterBegin = copy.constBegin();
+			typename QVector<T>::ConstIterator copyIterEnd = copy.constBegin() + static_cast<int>(smoothingRadius);
+
+			dataIter = begin;
+
+			currentValue = std::accumulate( copyIterBegin, copyIterEnd, T() );
+			for ( i=smoothingRadius+1 ; i<=smoothingDiameter ; ++i )
+			{
+				currentValue += *copyIterEnd++;
+				*dataIter++ = currentValue/static_cast<qreal>(i);
+			}
+
+			dataEnd = end-smoothingRadius;
+			while ( dataIter != dataEnd )
+			{
+				currentValue += (*copyIterEnd++ - *copyIterBegin++);
+				*dataIter++ = currentValue/smoothingDiameter;
+			}
+
+			for ( i=smoothingDiameter-1 ; i>0 ; --i )
+			{
+				currentValue -= *copyIterBegin++;
+				*dataIter++ = currentValue/static_cast<qreal>(i);
+			}
+		}
+	}
 }
 
 #endif // GLOBALFUNCTIONS_H

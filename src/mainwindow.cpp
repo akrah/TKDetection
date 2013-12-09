@@ -145,6 +145,8 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 	QObject::connect(_ui->_sliderRestrictedAreaMinimumRadius, SIGNAL(valueChanged(int)), _ui->_spinRestrictedAreaMinimumRadius, SLOT(setValue(int)));
 	QObject::connect(_ui->_spinRestrictedAreaMinimumRadius, SIGNAL(valueChanged(int)), _ui->_sliderRestrictedAreaMinimumRadius, SLOT(setValue(int)));
 	QObject::connect(_ui->_checkRadiusAroundPith, SIGNAL(clicked()), this, SLOT(drawSlice()));
+	// Onglet "Coupes tangentielles"
+	QObject::connect(_ui->_checkTangentialDrawEllipses, SIGNAL(toggled(bool)), this, SLOT(drawTangentialView()));
 
 	/**************************************
 	* Évènements de l'onglet "Histogrammes"
@@ -499,7 +501,7 @@ void MainWindow::drawTangentialView()
 							   _ui->_spinZMotionMin->value(), _ui->_spinCartesianAngularResolution->value(), projectionType, TKD::ImageViewRender(_ui->_comboViewRender->currentIndex()),
 							   ellipticityRate);
 
-		if ( projectionType == TKD::Z_PROJECTION )
+		if ( projectionType == TKD::Z_PROJECTION && _ui->_checkTangentialDrawEllipses->isChecked() )
 		{
 			QVector<QColor> colors;
 			colors << Qt::blue << Qt::yellow << Qt::green << Qt::magenta << Qt::cyan << Qt::white;
@@ -560,6 +562,7 @@ void MainWindow::dragInSliceView( const QPoint &movementVector )
 void MainWindow::zoomInTangentialView( const qreal &zoomFactor, const qreal &zoomCoefficient )
 {
 	_labelTangentialView->resize(zoomFactor * _tangentialPix.size());
+	_labelTangentialView->setPixmap( QPixmap::fromImage(_tangentialPix).scaledToWidth(zoomFactor*_tangentialPix.width(),Qt::FastTransformation) );
 	QScrollBar *hBar = _ui->_scrollTangentialView->horizontalScrollBar();
 	hBar->setValue(int(zoomCoefficient * hBar->value() + ((zoomCoefficient - 1) * hBar->pageStep()/2)));
 	QScrollBar *vBar = _ui->_scrollTangentialView->verticalScrollBar();
