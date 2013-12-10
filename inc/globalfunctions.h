@@ -13,7 +13,7 @@ namespace TKD
 	__billon_type__ restrictedValue( __billon_type__ value , const Interval<int> &intensityInterval );
 
 	template<typename T >
-	void meanSmoothing( const typename QVector<T>::iterator &begin, const typename QVector<T>::iterator &end, const uint &smoothingRadius, const bool &loop = false )
+	void meanSmoothingOld( const typename QVector<T>::iterator &begin, const typename QVector<T>::iterator &end, const uint &smoothingRadius, const bool &loop = false )
 	{
 		if ( !smoothingRadius || begin == end )
 			return;
@@ -62,7 +62,7 @@ namespace TKD
 	}
 
 	template<typename T >
-	void meanSmoothing2( const typename QVector<T>::iterator &begin, const typename QVector<T>::iterator &end, const uint &smoothingRadius, const bool &loop = false )
+	void meanSmoothingLoop( const typename QVector<T>::iterator &begin, const typename QVector<T>::iterator &end, const uint &smoothingRadius )
 	{
 		if ( !smoothingRadius || begin == end )
 			return;
@@ -70,66 +70,82 @@ namespace TKD
 		const qreal smoothingDiameter = 2*smoothingRadius+1;
 
 		QVector<T> copy;
+		copy.reserve(end-begin+2*smoothingRadius);
+		typename QVector<T>::iterator dataIter, dataEnd;
+
+		dataIter = end-smoothingRadius-1;
+		dataEnd = end;
+		while ( dataIter != dataEnd ) copy << *dataIter++;
+		dataIter = begin;
+		while ( dataIter != dataEnd ) copy << *dataIter++;
+		dataIter = begin;
+		dataEnd = begin+smoothingRadius+1;
+		while ( dataIter != dataEnd ) copy << *dataIter++;
+
+		typename QVector<T>::ConstIterator copyIterBegin = copy.constBegin();
+		typename QVector<T>::ConstIterator copyIterEnd = copy.constBegin() + static_cast<int>(smoothingDiameter);
+
+		dataIter = begin;
+		dataEnd = end;
+
+		T currentValue = std::accumulate( copyIterBegin, copyIterEnd, T() );
+		*dataIter++ = currentValue/smoothingDiameter;
+		while ( dataIter != dataEnd )
+		{
+			currentValue += (*copyIterEnd++ - *copyIterBegin++);
+			*dataIter++ = currentValue/smoothingDiameter;
+		}
+	}
+
+	template<typename T >
+	void meanSmoothingNoLoop( const typename QVector<T>::iterator &begin, const typename QVector<T>::iterator &end, const uint &smoothingRadius )
+	{
+		const qreal smoothingDiameter = 2*smoothingRadius+1;
+		if ( !smoothingRadius || (end-begin)<smoothingDiameter )
+			return;
+
+		QVector<T> copy;
+		copy.reserve(end-begin);
+
 		typename QVector<T>::iterator dataIter, dataEnd;
 		uint i;
 		T currentValue;
 
-		if ( loop )
+		dataIter = begin;
+		dataEnd = end;
+		while ( dataIter != dataEnd ) copy << *dataIter++;
+
+		typename QVector<T>::ConstIterator copyIterBegin = copy.constBegin();
+		typename QVector<T>::ConstIterator copyIterEnd = copy.constBegin() + static_cast<int>(smoothingRadius);
+
+		dataIter = begin;
+		copyIterBegin = copy.begin();
+		currentValue = std::accumulate( copyIterBegin, copyIterEnd, T() );
+		for ( i=smoothingRadius+1 ; i<=smoothingDiameter ; ++i )
 		{
-			dataIter = end-smoothingRadius-1;
-			dataEnd = end;
-			while ( dataIter != dataEnd ) copy << *dataIter++;
-			dataIter = begin;
-			while ( dataIter != dataEnd ) copy << *dataIter++;
-			dataIter = begin;
-			dataEnd = begin+smoothingRadius+1;
-			while ( dataIter != dataEnd ) copy << *dataIter++;
+			currentValue += *copyIterEnd++;
+			*dataIter++ = currentValue/static_cast<qreal>(i);
+		}
 
-			typename QVector<T>::ConstIterator copyIterBegin = copy.constBegin();
-			typename QVector<T>::ConstIterator copyIterEnd = copy.constBegin() + static_cast<int>(smoothingDiameter);
-
-			dataIter = begin;
-			dataEnd = end;
-
-			currentValue = std::accumulate( copyIterBegin, copyIterEnd, T() );
+		dataEnd = end-smoothingRadius;
+		while ( dataIter != dataEnd )
+		{
+			currentValue += (*copyIterEnd++ - *copyIterBegin++);
 			*dataIter++ = currentValue/smoothingDiameter;
-			while ( dataIter != dataEnd )
-			{
-				currentValue += (*copyIterEnd++ - *copyIterBegin++);
-				*dataIter++ = currentValue/smoothingDiameter;
-			}
 		}
-		else
+
+		for ( i=smoothingDiameter-1 ; i>smoothingRadius ; --i )
 		{
-			dataIter = begin;
-			dataEnd = end;
-			while ( dataIter != dataEnd ) copy << *dataIter++;
-
-			typename QVector<T>::ConstIterator copyIterBegin = copy.constBegin();
-			typename QVector<T>::ConstIterator copyIterEnd = copy.constBegin() + static_cast<int>(smoothingRadius);
-
-			dataIter = begin;
-
-			currentValue = std::accumulate( copyIterBegin, copyIterEnd, T() );
-			for ( i=smoothingRadius+1 ; i<=smoothingDiameter ; ++i )
-			{
-				currentValue += *copyIterEnd++;
-				*dataIter++ = currentValue/static_cast<qreal>(i);
-			}
-
-			dataEnd = end-smoothingRadius;
-			while ( dataIter != dataEnd )
-			{
-				currentValue += (*copyIterEnd++ - *copyIterBegin++);
-				*dataIter++ = currentValue/smoothingDiameter;
-			}
-
-			for ( i=smoothingDiameter-1 ; i>0 ; --i )
-			{
-				currentValue -= *copyIterBegin++;
-				*dataIter++ = currentValue/static_cast<qreal>(i);
-			}
+			currentValue -= *copyIterBegin++;
+			*dataIter++ = currentValue/static_cast<qreal>(i);
 		}
+	}
+
+	template<typename T >
+	void meanSmoothing( const typename QVector<T>::iterator &begin, const typename QVector<T>::iterator &end, const uint &smoothingRadius, const bool &loop = false )
+	{
+		if (loop) meanSmoothingLoop<T>( begin, end, smoothingRadius );
+		else meanSmoothingNoLoop<T>( begin, end, smoothingRadius );
 	}
 }
 

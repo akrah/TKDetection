@@ -40,11 +40,11 @@ void KnotEllipseRadiiHistogram::construct( const Billon &tangentialBillon, const
 	_lowessData.resize(nbSlices);
 	_ellipticalHistograms.resize(nbSlices);
 
-	const int &firstValidSliceIndex = validSlices.min();
-	const int &lastValidSliceIndex = validSlices.max();
+//	const int &firstValidSliceIndex = validSlices.min();
+//	const int &lastValidSliceIndex = validSlices.max();
 
 	qreal ellipticityRate;
-	for ( int k=firstValidSliceIndex ; k<=lastValidSliceIndex ; ++k )
+	for ( uint k=0 ; k<nbSlices ; ++k )
 	{
 		EllipticalAccumulationHistogram &ellipticalHistogram = _ellipticalHistograms[k];
 		ellipticityRate = (tangentialBillon.voxelWidth()/tangentialBillon.voxelHeight()) / knotPithProfile[k];
@@ -69,11 +69,11 @@ void KnotEllipseRadiiHistogram::extrapolation( const Interval<uint> &validSlices
 
 	if ( !size ) return;
 
-	const int firstValidSliceIndex = validSlices.min();
-	const int lastValidSliceIndex = validSlices.max();
+	const int firstValidSliceIndex = validSlices.min()+validSlices.size()*0.2;
+	const int lastValidSliceIndex = validSlices.max()-validSlices.size()*0.2;
 	const qreal firstValidValueIncrement = (*this)[firstValidSliceIndex]/static_cast<qreal>(firstValidSliceIndex);
 	const qreal lastValidIncrement = qMin(qAbs(((*this)[lastValidSliceIndex] - (*this)[lastValidSliceIndex-2])),
-										  qAbs(((*this)[lastValidSliceIndex-1] - (*this)[lastValidSliceIndex-3])));
+										  qAbs(((*this)[lastValidSliceIndex-1] - (*this)[lastValidSliceIndex-3])))/2.;
 
 	int k;
 	for ( k=0 ; k<firstValidSliceIndex; ++k )

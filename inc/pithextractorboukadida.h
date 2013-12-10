@@ -163,9 +163,9 @@ private:
 	 * \return	le nombre d'orientations prises en compte
 	 */
 	uint accumulation( const Slice &slice, arma::Mat<qreal> &orientations,
-					   arma::Mat<int> &accuSlice, const rCoord2D &voxelDims, const Interval<int> &iInterval ) const;
+					   arma::Mat<int> &accuSlice, const rCoord2D &voxelDims ) const;
 
-	void drawLine( arma::Mat<int> &slice, const iCoord2D &origin, const qreal &orientationOrig, const Interval<int> &iInterval ) const;
+	void drawLine(arma::Mat<int> &slice, const iCoord2D &origin, const qreal &orientationOrig ) const;
 
 	void interpolation( Pith &pith, const QVector<qreal> &nbLineByMaxRatio , const Interval<uint> &sliceIntervalToInterpolate ) const;
 

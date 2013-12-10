@@ -509,11 +509,11 @@ void MainWindow::drawTangentialView()
 			const int nbColorsToUse = qMax( nbKnotAreas>colors.size() ? ((nbKnotAreas+1)/2)%colors.size() : colors.size() , 1 );
 			const QColor currentColor = colors[(_currentSectorInterval-1)%nbColorsToUse];
 
-			const qreal knotAreaLine = currentSlice * (width/2.) / static_cast<qreal>(depth);
+			const qreal knotAreaLine = currentSlice * qFloor(width/2.) / static_cast<qreal>(depth);
 
 			QPainter painter(&_tangentialPix);
 			painter.setPen(currentColor);
-			painter.drawLine(width/2.-knotAreaLine,0,width/2.-knotAreaLine,height);
+			painter.drawLine(width/2.-knotAreaLine-1,0,width/2.-knotAreaLine-1,height);
 			painter.drawLine(width/2.+knotAreaLine,0,width/2.+knotAreaLine,height);
 			painter.end();
 
@@ -725,7 +725,7 @@ void MainWindow::selectSectorInterval(const int &index, const bool &draw )
 
 		_knotPithExtractor.setSubWindowWidth( _ui->_spinPithSubWindowWidth_knot->value()/_tangentialBillon->voxelWidth() );
 		_knotPithExtractor.setSubWindowHeight( _ui->_spinPithSubWindowHeight_knot->value()/_tangentialBillon->voxelHeight() );
-		_knotPithExtractor.setPithShift( _ui->_spinPithMaximumShift_knot->value() );
+		_knotPithExtractor.setPithShift( _ui->_spinPithMaximumShift_knot->value()/_tangentialBillon->voxelWidth() );
 		_knotPithExtractor.setSmoothingRadius( _ui->_spinPithSmoothingRadius_knot->value() );
 		_knotPithExtractor.setMinWoodPercentage( _ui->_spinPithMinimumWoodPercentage_knot->value() );
 		_knotPithExtractor.setIntensityInterval( Interval<int>( _ui->_spinPithMinIntensity_knot->value(), _ui->_spinPithMaxIntensity_knot->value() ) );
@@ -751,7 +751,6 @@ void MainWindow::selectSectorInterval(const int &index, const bool &draw )
 		}
 		updateKnotPithProfile();
 		updateKnotEllipseRadiiHistogram();
-		drawSlice();
 		drawTangentialView();
 	}
 }
@@ -771,7 +770,8 @@ void MainWindow::updateBillonPith()
 											  _ui->_chechPithAscendingOrder_billon->isChecked(), TKD::LINEAR );
 		pithExtractor.process(*_billon);
 		_treeRadius = BillonAlgorithms::restrictedAreaMeansRadius(*_billon,_ui->_spinRestrictedAreaResolution->value(),_ui->_spinRestrictedAreaThreshold->value(),
-																  _ui->_spinRestrictedAreaMinimumRadius->value()*_billon->n_cols/100., _billon->n_slices*0.25);
+																  _ui->_spinRestrictedAreaMinimumRadius->value()*_billon->n_cols/100.,
+																  _ui->_spinPercentageOfSlicesToIgnore->value()*_billon->n_slices/100.);
 		_ui->_checkRadiusAroundPith->setText( QString::number(_treeRadius) );
 		_ui->_spinHistogramNumberOfAngularSectors_zMotionAngular->setValue(TWO_PI*_treeRadius);
 	}

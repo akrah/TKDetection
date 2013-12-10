@@ -26,9 +26,17 @@ void EllipticalAccumulationHistogram::construct( const Slice &slice, const uiCoo
 {
 	const uint &width = slice.n_cols;
 	const uint &height = slice.n_rows;
-	const uint semiWidth = qFloor(width/2.);
+
+	if ( !width || !height )
+	{
+		resize(0);
+		findFirstMaximumAndNextMinimum();
+		return;
+	}
+
+	const uint semiWidth = qFloor((width-1)/2.);
 	const uint firstX = qFloor(semiWidth-semiWidth*widthCoeff);
-	const uint lastX = width-firstX;
+	const uint lastX = qMin(semiWidth+semiWidth*widthCoeff,width-1.);
 	const qreal &pithCoordX = origin.x;
 	const qreal &pithCoordY = origin.y;
 	const uint nbEllipses = qMin(qMin(pithCoordX,width-pithCoordX),qMin(pithCoordY/ellipticityRate,(height-pithCoordY)/ellipticityRate));
@@ -124,27 +132,11 @@ void EllipticalAccumulationHistogram::findFirstMaximumAndNextMinimum()
 	// Recherche du premier maximum
 	uint maximumIndex = 2;
 	while ( maximumIndex<size && (*this)[maximumIndex] < (*this)[maximumIndex-2] ) ++maximumIndex;
-	while ( maximumIndex<size && (*this)[maximumIndex] > (*this)[maximumIndex-2] ) ++maximumIndex;
-	if ( maximumIndex==size ) return;
+	if ( maximumIndex>size/3 ) maximumIndex=2;
+	while ( maximumIndex<size && (*this)[maximumIndex] >= (*this)[maximumIndex-2] ) ++maximumIndex;
+	if ( maximumIndex==size ) maximumIndex=2;
 
-	maximumIndex--;
-
-	//while ( maximumIndex>0 && (*this)[maximumIndex]<(*this)[maximumIndex-1]) --maximumIndex;
-	_maximums[0] = maximumIndex;
-
-	// Recherche du x corespondant au f(x) median de f(maximumIndex) et f(minimumIndex)
-	maximumIndex = qMin(maximumIndex+2,size-1);
-	qreal oldSlope = (*this)[maximumIndex] - (*this)[maximumIndex-2];
-	qreal currentSlope;
-	bool increase = true;
-	while ( maximumIndex<size-1 && increase )
-	{
-		maximumIndex++;
-		currentSlope = (*this)[maximumIndex] - (*this)[maximumIndex-2];
-		increase = currentSlope<oldSlope;
-		oldSlope = currentSlope;
-	}
-
-	_maximums[1] = maximumIndex-2;
+	_maximums[0] = maximumIndex-1;
+	_maximums[1] = qMin(maximumIndex+4,size-1);
 }
 

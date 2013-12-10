@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>692</width>
+    <width>683</width>
     <height>561</height>
    </rect>
   </property>
@@ -148,8 +148,8 @@
             <widget class="QWidget" name="scrollAreaWidgetContents">
              <property name="geometry">
               <rect>
-               <x>96</x>
-               <y>189</y>
+               <x>93</x>
+               <y>185</y>
                <width>0</width>
                <height>0</height>
               </rect>
@@ -252,7 +252,7 @@
              <property name="geometry">
               <rect>
                <x>0</x>
-               <y>0</y>
+               <y>68</y>
                <width>390</width>
                <height>234</height>
               </rect>
@@ -286,8 +286,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>692</width>
-     <height>25</height>
+     <width>683</width>
+     <height>29</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFichier">
@@ -390,15 +390,15 @@
          <item>
           <widget class="QToolBox" name="toolBox_3">
            <property name="currentIndex">
-            <number>2</number>
+            <number>1</number>
            </property>
            <widget class="QWidget" name="page_10">
             <property name="geometry">
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>434</width>
-              <height>148</height>
+              <width>422</width>
+              <height>167</height>
              </rect>
             </property>
             <attribute name="label">
@@ -596,9 +596,9 @@ du repère polaire</string>
             <property name="geometry">
              <rect>
               <x>0</x>
-              <y>0</y>
-              <width>259</width>
-              <height>223</height>
+              <y>-166</y>
+              <width>314</width>
+              <height>298</height>
              </rect>
             </property>
             <attribute name="label">
@@ -807,7 +807,7 @@ résolution de l'image)</string>
                </item>
               </layout>
              </item>
-             <item row="4" column="0">
+             <item row="5" column="0">
               <widget class="QLabel" name="label_20">
                <property name="font">
                 <font>
@@ -821,7 +821,7 @@ zone restreinte</string>
                </property>
               </widget>
              </item>
-             <item row="4" column="1">
+             <item row="5" column="1">
               <widget class="QCheckBox" name="_checkRadiusAroundPith">
                <property name="font">
                 <font>
@@ -834,6 +834,24 @@ zone restreinte</string>
                </property>
               </widget>
              </item>
+             <item row="4" column="0">
+              <widget class="QLabel" name="label_34">
+               <property name="text">
+                <string>Pourcentage de coupes
+à ignoer</string>
+               </property>
+              </widget>
+             </item>
+             <item row="4" column="1">
+              <widget class="QSpinBox" name="_spinPercentageOfSlicesToIgnore">
+               <property name="maximum">
+                <number>100</number>
+               </property>
+               <property name="value">
+                <number>5</number>
+               </property>
+              </widget>
+             </item>
             </layout>
            </widget>
            <widget class="QWidget" name="page_12">
@@ -841,8 +859,8 @@ zone restreinte</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>335</width>
-              <height>121</height>
+              <width>327</width>
+              <height>109</height>
              </rect>
             </property>
             <attribute name="label">
@@ -879,7 +897,7 @@ zone restreinte</string>
                 <number>100</number>
                </property>
                <property name="value">
-                <number>66</number>
+                <number>100</number>
                </property>
               </widget>
              </item>
@@ -921,8 +939,8 @@ zone restreinte</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>415</width>
-              <height>253</height>
+              <width>401</width>
+              <height>295</height>
              </rect>
             </property>
             <attribute name="label">
@@ -990,14 +1008,14 @@ deux coordonnées successives</string>
                </property>
               </widget>
              </item>
-             <item row="3" column="0">
+             <item row="5" column="0">
               <widget class="QLabel" name="label_13">
                <property name="text">
                 <string>Rayon de lissage</string>
                </property>
               </widget>
              </item>
-             <item row="3" column="1">
+             <item row="5" column="1">
               <widget class="QSpinBox" name="_spinPithSmoothingRadius_billon">
                <property name="maximum">
                 <number>50</number>
@@ -1007,32 +1025,14 @@ deux coordonnées successives</string>
                </property>
               </widget>
              </item>
-             <item row="4" column="0">
-              <widget class="QLabel" name="label_14">
-               <property name="text">
-                <string>Pourcentage minimum de bois
-sur une coupe valide</string>
-               </property>
-              </widget>
-             </item>
-             <item row="4" column="1">
-              <widget class="QSpinBox" name="_spinPithMinimumWoodPercentage_billon">
-               <property name="maximum">
-                <number>100</number>
-               </property>
-               <property name="value">
-                <number>25</number>
-               </property>
-              </widget>
-             </item>
-             <item row="5" column="0">
+             <item row="7" column="0">
               <widget class="QLabel" name="label_27">
                <property name="text">
                 <string>Intervalle d'intensité à considérer</string>
                </property>
               </widget>
              </item>
-             <item row="5" column="1">
+             <item row="7" column="1">
               <layout class="QHBoxLayout" name="horizontalLayout_10">
                <item>
                 <widget class="QSpinBox" name="_spinPithMinIntensity_billon">
@@ -1062,20 +1062,38 @@ sur une coupe valide</string>
                </item>
               </layout>
              </item>
-             <item row="6" column="0">
+             <item row="8" column="0">
               <widget class="QLabel" name="label_15">
                <property name="text">
                 <string>Coupes par ordre croissant</string>
                </property>
               </widget>
              </item>
-             <item row="6" column="1">
+             <item row="8" column="1">
               <widget class="QCheckBox" name="_chechPithAscendingOrder_billon">
                <property name="text">
                 <string/>
                </property>
                <property name="checked">
                 <bool>true</bool>
+               </property>
+              </widget>
+             </item>
+             <item row="4" column="0">
+              <widget class="QLabel" name="label_14">
+               <property name="text">
+                <string>Pourcentage minimum de bois
+sur une coupe valide</string>
+               </property>
+              </widget>
+             </item>
+             <item row="4" column="1">
+              <widget class="QSpinBox" name="_spinPithMinimumWoodPercentage_billon">
+               <property name="maximum">
+                <number>100</number>
+               </property>
+               <property name="value">
+                <number>25</number>
                </property>
               </widget>
              </item>
@@ -1086,8 +1104,8 @@ sur une coupe valide</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>415</width>
-              <height>253</height>
+              <width>398</width>
+              <height>279</height>
              </rect>
             </property>
             <attribute name="label">
@@ -1100,7 +1118,7 @@ sur une coupe valide</string>
              <item row="0" column="0">
               <widget class="QLabel" name="label_58">
                <property name="text">
-                <string>Largeur de la sous-fenetre</string>
+                <string>Largeur de la sous-fenetre (mm)</string>
                </property>
               </widget>
              </item>
@@ -1113,14 +1131,14 @@ sur une coupe valide</string>
                 <number>200</number>
                </property>
                <property name="value">
-                <number>59</number>
+                <number>40</number>
                </property>
               </widget>
              </item>
              <item row="1" column="0">
               <widget class="QLabel" name="label_16">
                <property name="text">
-                <string>Hauteur de la sous-fenetre</string>
+                <string>Hauteur de la sous-fenetre (mm)</string>
                </property>
               </widget>
              </item>
@@ -1133,15 +1151,14 @@ sur une coupe valide</string>
                 <number>200</number>
                </property>
                <property name="value">
-                <number>59</number>
+                <number>40</number>
                </property>
               </widget>
              </item>
              <item row="2" column="0">
               <widget class="QLabel" name="label_57">
                <property name="text">
-                <string>Distance euclidienne maximum entre
-deux coordonnées successives</string>
+                <string>Décalage horizontal maximum (mm)</string>
                </property>
               </widget>
              </item>
@@ -1151,53 +1168,35 @@ deux coordonnées successives</string>
                 <number>100</number>
                </property>
                <property name="value">
-                <number>15</number>
+                <number>5</number>
                </property>
               </widget>
              </item>
-             <item row="3" column="0">
+             <item row="4" column="0">
               <widget class="QLabel" name="label_59">
                <property name="text">
                 <string>Rayon de lissage</string>
                </property>
               </widget>
              </item>
-             <item row="3" column="1">
+             <item row="4" column="1">
               <widget class="QSpinBox" name="_spinPithSmoothingRadius_knot">
                <property name="maximum">
                 <number>50</number>
                </property>
                <property name="value">
-                <number>15</number>
+                <number>10</number>
                </property>
               </widget>
              </item>
-             <item row="4" column="0">
-              <widget class="QLabel" name="label_61">
-               <property name="text">
-                <string>Pourcentage minimum de bois
-sur une coupe valide</string>
-               </property>
-              </widget>
-             </item>
-             <item row="4" column="1">
-              <widget class="QSpinBox" name="_spinPithMinimumWoodPercentage_knot">
-               <property name="maximum">
-                <number>100</number>
-               </property>
-               <property name="value">
-                <number>95</number>
-               </property>
-              </widget>
-             </item>
-             <item row="5" column="0">
+             <item row="6" column="0">
               <widget class="QLabel" name="label_22">
                <property name="text">
                 <string>Intervalle d'intensité à considérer</string>
                </property>
               </widget>
              </item>
-             <item row="5" column="1">
+             <item row="6" column="1">
               <layout class="QHBoxLayout" name="horizontalLayout_6">
                <item>
                 <widget class="QSpinBox" name="_spinPithMinIntensity_knot">
@@ -1227,20 +1226,38 @@ sur une coupe valide</string>
                </item>
               </layout>
              </item>
-             <item row="6" column="0">
+             <item row="7" column="0">
               <widget class="QLabel" name="label_60">
                <property name="text">
                 <string>Coupes par ordre croissant</string>
                </property>
               </widget>
              </item>
-             <item row="6" column="1">
+             <item row="7" column="1">
               <widget class="QCheckBox" name="_chechPithAscendingOrder_knot">
                <property name="text">
                 <string/>
                </property>
                <property name="checked">
                 <bool>true</bool>
+               </property>
+              </widget>
+             </item>
+             <item row="3" column="0">
+              <widget class="QLabel" name="label_61">
+               <property name="text">
+                <string>Pourcentage minimum de bois
+sur une coupe valide</string>
+               </property>
+              </widget>
+             </item>
+             <item row="3" column="1">
+              <widget class="QSpinBox" name="_spinPithMinimumWoodPercentage_knot">
+               <property name="maximum">
+                <number>100</number>
+               </property>
+               <property name="value">
+                <number>75</number>
                </property>
               </widget>
              </item>
@@ -1321,8 +1338,8 @@ sur une coupe valide</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>388</width>
-              <height>248</height>
+              <width>380</width>
+              <height>282</height>
              </rect>
             </property>
             <attribute name="label">
@@ -1589,8 +1606,8 @@ sur une coupe valide</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>388</width>
-              <height>285</height>
+              <width>375</width>
+              <height>321</height>
              </rect>
             </property>
             <attribute name="label">
@@ -1912,8 +1929,8 @@ sur une coupe valide</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>195</width>
-              <height>45</height>
+              <width>199</width>
+              <height>49</height>
              </rect>
             </property>
             <attribute name="label">
@@ -1956,8 +1973,8 @@ sur une coupe valide</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>195</width>
-              <height>45</height>
+              <width>199</width>
+              <height>49</height>
              </rect>
             </property>
             <attribute name="label">
@@ -2029,7 +2046,7 @@ sur une coupe valide</string>
                <double>0.050000000000000</double>
               </property>
               <property name="value">
-               <double>0.750000000000000</double>
+               <double>0.500000000000000</double>
               </property>
              </widget>
             </item>
@@ -2160,8 +2177,8 @@ l'intervalle angulaire</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>374</width>
-              <height>86</height>
+              <width>358</width>
+              <height>94</height>
              </rect>
             </property>
             <attribute name="label">
@@ -2251,8 +2268,8 @@ l'intervalle angulaire</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>319</width>
-              <height>181</height>
+              <width>312</width>
+              <height>193</height>
              </rect>
             </property>
             <attribute name="label">
@@ -2460,8 +2477,8 @@ l'intervalle angulaire</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>334</width>
-              <height>157</height>
+              <width>326</width>
+              <height>174</height>
              </rect>
             </property>
             <attribute name="label">
@@ -2649,8 +2666,8 @@ l'intervalle angulaire</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>261</width>
-              <height>84</height>
+              <width>255</width>
+              <height>92</height>
              </rect>
             </property>
             <attribute name="label">
@@ -2715,8 +2732,8 @@ l'intervalle angulaire</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>398</width>
-              <height>112</height>
+              <width>397</width>
+              <height>124</height>
              </rect>
             </property>
             <attribute name="label">
@@ -2910,7 +2927,7 @@ l'intervalle angulaire</string>
          </item>
          <item>
           <widget class="QwtPolarPlot" name="_polarSectorHistogram">
-           <property name="plotBackground">
+           <property name="plotBackground" stdset="0">
             <brush brushstyle="SolidPattern">
              <color alpha="0">
               <red>255</red>
