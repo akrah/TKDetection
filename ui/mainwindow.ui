@@ -323,7 +323,7 @@
      <item row="1" column="0">
       <widget class="QTabWidget" name="_tabs">
        <property name="currentIndex">
-        <number>4</number>
+        <number>0</number>
        </property>
        <widget class="QWidget" name="tab_4">
         <attribute name="title">
@@ -597,7 +597,7 @@ du repère polaire</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>314</width>
+              <width>265</width>
               <height>298</height>
              </rect>
             </property>
@@ -897,7 +897,7 @@ zone restreinte</string>
                 <number>100</number>
                </property>
                <property name="value">
-                <number>50</number>
+                <number>100</number>
                </property>
               </widget>
              </item>
@@ -1103,7 +1103,7 @@ sur une coupe valide</string>
             <property name="geometry">
              <rect>
               <x>0</x>
-              <y>-107</y>
+              <y>0</y>
               <width>398</width>
               <height>279</height>
              </rect>
@@ -1929,8 +1929,8 @@ sur une coupe valide</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>327</width>
-              <height>74</height>
+              <width>199</width>
+              <height>49</height>
              </rect>
             </property>
             <attribute name="label">
@@ -1973,8 +1973,8 @@ sur une coupe valide</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>327</width>
-              <height>74</height>
+              <width>199</width>
+              <height>49</height>
              </rect>
             </property>
             <attribute name="label">
