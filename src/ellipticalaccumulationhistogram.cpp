@@ -125,18 +125,32 @@ void EllipticalAccumulationHistogram::findFirstMaximumAndNextMinimum()
 	_maximums.clear();
 
 	const uint &size = this->size();
-	if ( size<4 ) return;
+	const uint lag = 3;
+
+	if ( size<2*lag+1 ) return;
 
 	_maximums.resize(2);
 
 	// Recherche du premier maximum
-	uint maximumIndex = 2;
-	while ( maximumIndex<size && (*this)[maximumIndex] < (*this)[maximumIndex-2] ) ++maximumIndex;
-	if ( maximumIndex>size/3 ) maximumIndex=2;
-	while ( maximumIndex<size && (*this)[maximumIndex] >= (*this)[maximumIndex-2] ) ++maximumIndex;
-	if ( maximumIndex==size ) maximumIndex=2;
+	uint maximumIndex = lag;
+	while ( maximumIndex<size && (*this)[maximumIndex] < (*this)[maximumIndex-lag] ) ++maximumIndex;
+	if ( maximumIndex>size/3 ) maximumIndex=lag;
+	while ( maximumIndex<size && (*this)[maximumIndex] >= (*this)[maximumIndex-lag] ) ++maximumIndex;
+	if ( maximumIndex>2*size/3 ) maximumIndex=lag;
 
-	_maximums[0] = maximumIndex-1;
-	_maximums[1] = qMin(maximumIndex+4,size-1);
+	_maximums[0] = maximumIndex;
+
+	maximumIndex += lag;
+	qreal comparedSlope = (*this)[maximumIndex-lag]-(*this)[maximumIndex];
+	++maximumIndex;
+	qreal slope = (*this)[maximumIndex-lag]-(*this)[maximumIndex];
+	while (maximumIndex<size-1 && slope>=comparedSlope)
+	{
+		comparedSlope = slope;
+		++maximumIndex;
+		slope = (*this)[maximumIndex-lag]-(*this)[maximumIndex];
+	}
+
+	_maximums[1] = qMin(maximumIndex-lag+1,size-1);
 }
 

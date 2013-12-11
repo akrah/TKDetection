@@ -69,8 +69,8 @@ void KnotEllipseRadiiHistogram::extrapolation( const Interval<uint> &validSlices
 
 	if ( !size ) return;
 
-	const int firstValidSliceIndex = validSlices.min()+validSlices.size()*0.2;
-	const int lastValidSliceIndex = validSlices.max()-validSlices.size()*0.2;
+	const int firstValidSliceIndex = validSlices.min()+validSlices.size()*0.15;
+	const int lastValidSliceIndex = validSlices.max()-validSlices.size()*0.15;
 	const qreal firstValidValueIncrement = (*this)[firstValidSliceIndex]/static_cast<qreal>(firstValidSliceIndex);
 	const qreal lastValidIncrement = qMin(qAbs(((*this)[lastValidSliceIndex] - (*this)[lastValidSliceIndex-2])),
 										  qAbs(((*this)[lastValidSliceIndex-1] - (*this)[lastValidSliceIndex-3])))/2.;
