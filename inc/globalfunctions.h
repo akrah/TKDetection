@@ -116,10 +116,9 @@ namespace TKD
 		while ( dataIter != dataEnd ) copy << *dataIter++;
 
 		typename QVector<T>::ConstIterator copyIterBegin = copy.constBegin();
-		typename QVector<T>::ConstIterator copyIterEnd = copy.constBegin() + static_cast<int>(smoothingRadius);
+		typename QVector<T>::ConstIterator copyIterEnd = copyIterBegin + static_cast<int>(smoothingRadius);
 
 		dataIter = begin;
-		copyIterBegin = copy.begin();
 		currentValue = std::accumulate( copyIterBegin, copyIterEnd, T() );
 		for ( i=smoothingRadius+1 ; i<=smoothingDiameter ; ++i )
 		{

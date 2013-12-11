@@ -184,7 +184,7 @@ void PithExtractorBoukadida::process( Billon &billon, const bool &adaptativeWidt
 
 	// Lissage
 	qDebug() << "Step 7] Smoothing of valid slices";
-	TKD::meanSmoothing<rCoord2D>( pith.begin()+firstValidSliceIndex, pith.begin()+lastValidSliceIndex, _smoothingRadius, false );
+	TKD::meanSmoothing<rCoord2D>( pith.begin()+firstValidSliceIndex, pith.begin()+lastValidSliceIndex+1, _smoothingRadius, false );
 
 	// Extrapolation des coupes invalides
 	qDebug() << "Step 8] Extrapolation of unvalid slices";
@@ -192,13 +192,14 @@ void PithExtractorBoukadida::process( Billon &billon, const bool &adaptativeWidt
 	const int slopeDistance = 3;
 
 	const int firstValidSliceIndexSmoothed = firstValidSliceIndex+(lastValidSliceIndex-firstValidSliceIndex)*0.2;
-	const int lastValidSliceIndexSmoothed = lastValidSliceIndex-(lastValidSliceIndex-firstValidSliceIndex)*0.1;
+	const int lastValidSliceIndexSmoothed = lastValidSliceIndex-(lastValidSliceIndex-firstValidSliceIndex)*0.15;
 
 	const rCoord2D firstValidCoord = pith[firstValidSliceIndexSmoothed];
 	const rCoord2D lastValidCoord = pith[lastValidSliceIndexSmoothed];
 
-	const rCoord2D firstValidCoordSlope = (pith[firstValidSliceIndexSmoothed]-pith[firstValidSliceIndexSmoothed+slopeDistance])/static_cast<qreal>(slopeDistance);
-	const rCoord2D lastValidCoordSlope = (pith[lastValidSliceIndexSmoothed]-pith[lastValidSliceIndexSmoothed-slopeDistance])/static_cast<qreal>(slopeDistance);
+	rCoord2D firstValidCoordSlope = (firstValidCoord - pith[firstValidSliceIndexSmoothed+slopeDistance])/static_cast<qreal>(slopeDistance);
+	firstValidCoordSlope.x = ((widthMinusOne/2.)-firstValidCoord.x)/static_cast<qreal>(firstValidSliceIndexSmoothed);
+	const rCoord2D lastValidCoordSlope = (lastValidCoord - pith[lastValidSliceIndexSmoothed-slopeDistance])/static_cast<qreal>(slopeDistance);
 
 	switch (_extrapolation)
 	{
