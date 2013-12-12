@@ -16,7 +16,8 @@ public:
 	void compute( const QVector<qreal> &datas, QVector<qreal> &interpolatedDatas , QVector<qreal> &residus ) const;
 
 private:
-	qreal tricube( const qreal &u, const qreal &t ) const;
+	qreal tricubeKernel( const qreal &u, const qreal &t ) const;
+	qreal epanechnikovKernel( const qreal &u, const qreal &t ) const;
 
 private:
 	qreal _bandWidth;

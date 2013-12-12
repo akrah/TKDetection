@@ -85,7 +85,8 @@ void Lowess::compute( const QVector<qreal> &datas, QVector<qreal> &interpolatedD
 		// Compute weights.
 		for ( j=0 ; j<size ; ++j )
 		{
-			gsl_vector_set(weights, j, tricube(distances[j], sortedDistances[q]));
+			//gsl_vector_set(weights, j, tricubeKernel(distances[j], sortedDistances[q]));
+			gsl_vector_set(weights, j, epanechnikovKernel(distances[j], sortedDistances[q]));
 		}
 
 /******************************/
@@ -157,12 +158,22 @@ void Lowess::compute( const QVector<qreal> &datas, QVector<qreal> &interpolatedD
 	gsl_vector_free(x);
 }
 
-qreal Lowess::tricube( const qreal &u, const qreal &t ) const
+qreal Lowess::tricubeKernel( const qreal &u, const qreal &t ) const
 {
 	qreal res = 0.0;
 	// 0 <= u < t
 	if ( (qFuzzyIsNull(u) || u > 0.0) && (u < t) )
 		// (1 - (u/t)^3)^3
 		res = qPow( ( 1.0 - qPow(u/t, 3.0) ), 3.0 );
+	return res;
+}
+
+qreal Lowess::epanechnikovKernel( const qreal &u, const qreal &t ) const
+{
+	qreal res = 0.0;
+	// 0 <= u < t
+	if ( !qFuzzyIsNull(t) && (t-u) >= 0 )
+		// (1 - (u/t)^3)^3
+		res = ( 1.0 - qPow(u/t, 2.0) );
 	return res;
 }

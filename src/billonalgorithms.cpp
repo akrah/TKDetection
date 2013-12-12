@@ -120,7 +120,10 @@ namespace BillonAlgorithms
 
 		// Inversion width et height pour correspondre à la ratation de 90°
 		Billon * tangentialBillon = new Billon(height,width,nbSlices);
-		tangentialBillon->setVoxelSize( billon.voxelWidth(), billon.voxelDepth(), billon.voxelWidth() );
+		//tangentialBillon->setVoxelSize( billon.voxelWidth(), billon.voxelDepth(), billon.voxelWidth() );
+		tangentialBillon->setVoxelSize( qSqrt(qPow(billon.voxelWidth()*cosBisector,2)+qPow(billon.voxelHeight()*sinBisector,2)),
+										billon.voxelDepth(),
+										(billon.voxelWidth()*billon.voxelHeight())/qSqrt(qPow(billon.voxelWidth()*cosBisector,2)+qPow(billon.voxelHeight()*sinBisector,2)) );
 		tangentialBillon->fill(minIntensity);
 
 		// Rotation autour de l'axe Y

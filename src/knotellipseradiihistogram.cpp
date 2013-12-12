@@ -55,7 +55,7 @@ void KnotEllipseRadiiHistogram::construct( const Billon &tangentialBillon, const
 
 	extrapolation(validSlices);
 
-	// LOWESS
+	// LOESS
 	QVector<qreal> residus;
 	Lowess lowess(lowessBandWidth);
 	lowess.compute( *this, _lowessData, residus );
@@ -106,6 +106,7 @@ void KnotEllipseRadiiHistogram::outlierInterpolation( const QVector<qreal> &resi
 	{
 		if ( !outlierInterval.containsOpen(residus[k]) )
 		{
+//			(*this)[k] = _lowessData[k];
 			startSliceIndex = k++;
 			startSliceIndexMinusOne = startSliceIndex?startSliceIndex-1:0;
 
