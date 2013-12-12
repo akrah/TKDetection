@@ -145,7 +145,6 @@ namespace BillonAlgorithms
 		const qreal semiKnotAreaHeightCoeff = heightOnTwo / static_cast<qreal>( nbSlices );
 		const qreal originLinearInterpolationCoeff = 1.-linearInterpolationCoeff;
 		int i, j, jStart, jEnd;
-		qreal semiKnotAreaHeight;
 
 		int x0,y0,z0;
 		qreal x0Dist, y0Dist, z0Dist;
@@ -156,8 +155,7 @@ namespace BillonAlgorithms
 		for ( uint k=0 ; k<nbSlices ; ++k )
 		{
 			Slice &slice = tangentialBillon->slice(k);
-			semiKnotAreaHeight = k*semiKnotAreaHeightCoeff;
-			jEnd = qMin(qRound(semiKnotAreaHeight),heightOnTwoMinusOne);
+			jEnd = qMin(qRound(semiKnotAreaHeightCoeff*k),heightOnTwoMinusOne);
 			jStart = -jEnd;
 			for ( j=jStart ; j<=jEnd ; ++j )
 			{
@@ -166,8 +164,8 @@ namespace BillonAlgorithms
 				{
 					initial.setX(i);
 					destination = quaterRot.rotatedVector(initial) + origin;
-					x0 = qFloor(destination.y());
-					y0 = qFloor(destination.x());
+					x0 = qFloor(destination.x());
+					y0 = qFloor(destination.y());
 					z0 = qFloor(destination.z());
 					if ( x0>0 && x0<billonWidthMinusOne &&
 						 y0>0 && y0<billonHeightMinusOne &&
@@ -175,23 +173,23 @@ namespace BillonAlgorithms
 					{
 						if ( trilinearInterpolation )
 						{
-							x0Dist = destination.y()-x0;
-							y0Dist = destination.x()-y0;
+							x0Dist = destination.x()-x0;
+							y0Dist = destination.y()-y0;
 							z0Dist = destination.z()-z0;
-							xFrontTop = (1.-x0Dist)*billon(x0-1,y0+1,z0-1) + x0Dist*billon(x0+1,y0+1,z0-1);
-							xFrontBottom = (1.-x0Dist)*billon(x0-1,y0-1,z0-1) + x0Dist*billon(x0+1,y0-1,z0-1);
-							xBackTop = (1.-x0Dist)*billon(x0-1,y0+1,z0+1) + x0Dist*billon(x0+1,y0+1,z0+1);
-							xBackBottom = (1.-x0Dist)*billon(x0-1,y0-1,z0+1) + x0Dist*billon(x0+1,y0-1,z0+1);
+							xFrontTop = (1.-x0Dist)*billon(y0+1,x0-1,z0-1) + x0Dist*billon(y0+1,x0+1,z0-1);
+							xFrontBottom = (1.-x0Dist)*billon(y0-1,x0-1,z0-1) + x0Dist*billon(y0-1,x0+1,z0-1);
+							xBackTop = (1.-x0Dist)*billon(y0+1,x0-1,z0+1) + x0Dist*billon(y0+1,x0+1,z0+1);
+							xBackBottom = (1.-x0Dist)*billon(y0-1,x0-1,z0+1) + x0Dist*billon(y0-1,x0+1,z0+1);
 							yFront = (1.-y0Dist)*xFrontBottom + y0Dist*xFrontTop;
 							yBack = (1.-y0Dist)*xBackBottom + y0Dist*xBackTop;
 							// Rotation de 90° dans le sens horaire pour correspondre à l'orientation de l'article
-							slice(i+widthOnTwo,heightOnTwoMinusOne-j) = originLinearInterpolationCoeff * billon(x0,y0,z0)
+							slice(i+widthOnTwo,heightOnTwoMinusOne-j) = originLinearInterpolationCoeff * billon(y0,x0,z0)
 																		  + linearInterpolationCoeff * ((1.-z0Dist)*yFront + z0Dist*yBack);
 						}
 						else
 						{
 							// Rotation de 90° dans le sens horaire pour correspondre à l'orientation de l'article
-							slice(i+widthOnTwo,heightOnTwoMinusOne-j) =	billon(x0,y0,z0);
+							slice(i+widthOnTwo,heightOnTwoMinusOne-j) =	billon(y0,x0,z0);
 						}
 					}
 				}
