@@ -1798,7 +1798,7 @@ void MainWindow::exportPithOfAKnotAreaToSdp(QTextStream &stream, unsigned int nu
 	stream << "#knotID NumSliceInterval NumAngularInterval| EllipseWidth EllipseHeight| Coord | Top Left | Top Right | Bottom Right | Bottom Left" << endl;
 	stream << "#KnotID NumSliceInterval NumAngularInterval EllipseWidth EllipseHeight x y z    x y z       x y z        x y z         x y z" << endl;
 
-    const Interval<uint> &sliceInterval = _sliceHistogram->interval(numSliceInterval);
+	const Interval<uint> &sliceInterval = _sliceHistogram->interval(numSliceInterval);
 	const qreal zPithCoord = sliceInterval.mid();
 	const rCoord2D &originPith = _billon->pithCoord(zPithCoord);
 
@@ -1814,7 +1814,7 @@ void MainWindow::exportPithOfAKnotAreaToSdp(QTextStream &stream, unsigned int nu
 	const QQuaternion quaterY = QQuaternion::fromAxisAndAngle( 0, 1, 0, alpha*RAD_TO_DEG_FACT );
 
 	// Rotation selon l'angle de la zone de nœuds
-    const Interval<uint> &angularInterval = _sectorHistogram->interval(numAngularInterval);
+	const Interval<uint> &angularInterval = _sectorHistogram->interval(numAngularInterval);
 	const uint angularRange = (angularInterval.max() + (angularInterval.isValid() ? 0. : PieChartSingleton::getInstance()->nbSectors())) - angularInterval.min();
 	const qreal bisectorOrientation = (angularInterval.min()+angularRange/2.)*PieChartSingleton::getInstance()->angleStep();
 	const QQuaternion quaterZ = QQuaternion::fromAxisAndAngle( 0, 0, 1, bisectorOrientation*RAD_TO_DEG_FACT );
