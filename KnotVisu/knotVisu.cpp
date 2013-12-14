@@ -134,6 +134,7 @@ int main(int argc, char** argv)
     ("scaleX,x",  po::value<float>()->default_value(1.0), "set the scale value in the X direction (default 1.0)" )
     ("scaleY,y",  po::value<float>()->default_value(1.0), "set the scale value in the Y direction (default 1.0)" )
     ("scaleZ,z",  po::value<float>()->default_value(1.0), "set the scale value in the Z direction (default 1.0)")
+    ("selectOneKnot,o",  po::value<unsigned int>(), "select only one knot to be read in input (default all)")
     ("patchMaxWidth,w",  po::value<unsigned int>()->default_value(50), "set the maximal patch width (default 50)")
     ("sampleStep,s",  po::value<unsigned int>()->default_value(20), "set the step between each patch images (default 20)")
     ("radiusStep,r",  po::value<unsigned int>()->default_value(36), "set the radius step to define the ring (default 36)")
@@ -257,7 +258,8 @@ int main(int argc, char** argv)
     std::vector<Z3i::RealPoint> vectPointsTopRight = vectPointsTopRightSplitted.at(numId);
     std::vector<Z3i::RealPoint> vectPointsBottomLeft = vectPointsBottomLeftSplitted.at(numId);
     std::vector<Z3i::RealPoint> vectPointsBottomRight = vectPointsBottomRightSplitted.at(numId);
-          
+    if (vm.count("selectOneKnot")!=0 && numId!=vm["selectOneKnot"].as<unsigned int> ())
+      continue;
     for (unsigned int i =0; i< vectPointsCenter.size() - cutEnd; 
          i=i+1){
       viewer.setFillColor(DGtal::Color(250,20,20,255));
