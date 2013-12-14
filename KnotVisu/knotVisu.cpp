@@ -13,7 +13,6 @@
 #include "DGtal/images/imagesSetsUtils/SetFromImage.h"
 #include "DGtal/images/imagesSetsUtils/ImageFromSet.h"
 #include "DGtal/io/readers/GenericReader.h"
-#include "DGtal/io/writers/GenericWriter.h"
 #include "DGtal/images/ConstImageAdapter.h"
 #include <DGtal/shapes/Shapes.h>
 #include "DGtal/io/readers/MeshReader.h"
@@ -50,6 +49,7 @@ splitKnotPithFromKnotID(const std::vector<TContent> &vectCenters,
         vectKnotCenters.push_back(vectCenters.at(i));
       }     
     }
+  vectResult.push_back(vectKnotCenters);
   return vectResult;
 }
                          
@@ -128,6 +128,7 @@ int main(int argc, char** argv)
     ("volumeFile,v", po::value<std::string>(), "import volume image (dicom format)" )
     ("tangentialView", "Display tangential view defined from the set of the four imported points")
     ("crossSectionView", "Display cross section view defined from the set of simple points and the normal direction")
+    ("visuKnotMesh", "Add visu of knot mesh generated from radius and centers")
     ("exportKnotMesh", po::value<std::string>(), "Export all knots mesh in OFF format.")
     ("pointsPk,p", po::value<std::string>(), "import the set of points Pk used to determine the image position." )
     ("scaleX,x",  po::value<float>()->default_value(1.0), "set the scale value in the X direction (default 1.0)" )
@@ -209,8 +210,8 @@ int main(int argc, char** argv)
   if(vm.count("crossSectionView")|| vm.count("tangentialView") ){
     trace.info() << "Reading dicom file ..." ;
     imageVol = DicomReader< Image3D,  RescalFCT  >::importDicom(vm["volumeFile"].as<std::string>(), RescalFCT(-900,
-                                                                                                                      530,
-                                                                                                                      0, 255));
+                                                                                                              530,
+                                                                                                              0, 255));
     trace.info() << "[done]"<< std::endl;
   }
   std::vector<unsigned int> indexCenter; indexCenter.push_back(5); indexCenter.push_back(6); indexCenter.push_back(7);  
@@ -246,8 +247,9 @@ int main(int argc, char** argv)
   
   DGtal::DefaultFunctor idV;
   DGtal::Mesh<Z3i::RealPoint> meshMoelle(true);
+  unsigned k =0;
+
   for (unsigned int numId=0; numId < vectPointsBottomRightSplitted.size(); numId++){
-    unsigned k =0;
     std::vector<double> vectRadiusW = vectRadiusWSplitted.at(numId);
     std::vector<double> vectRadiusH = vectRadiusHSplitted.at(numId);
     std::vector<Z3i::RealPoint> vectPointsCenter = vectPointsCenterSplitted.at(numId);
@@ -276,13 +278,16 @@ int main(int argc, char** argv)
           ImageAdapterExtractor extractedImage(imageVol, domainImage2D, embedder, idV);
           viewer << extractedImage;
           viewer << DGtal::UpdateImage3DEmbedding<Z3i::Space, Z3i::KSpace>(k, 
-                                                                         embedder(Z2i::RealPoint(0,0), false),
+                                                                           embedder(Z2i::RealPoint(0,0), false),
                                                                            embedder(Z2i::RealPoint(width,0), false),
                                                                            embedder(domainImage2D.upperBound(), false),
                                                                            embedder(Z2i::RealPoint(0, width), false));
+          k++;
           
         }else if (vm.count("tangentialView")){
-          
+          if((vectPointsTopRight.at(i) - vectPointsTopLeft.at(i)).norm() <=5 ||
+             (vectPointsTopRight.at(i) - vectPointsBottomRight.at(i)).norm()<=5)
+            continue;
           DGtal::Z2i::Domain domainImage2D (DGtal::Z2i::Point(0,0), 
                                             DGtal::Z2i::Point((vectPointsTopRight.at(i) - vectPointsTopLeft.at(i)).norm(),
                                                               (vectPointsTopRight.at(i) - vectPointsBottomRight.at(i)).norm())); 
@@ -293,22 +298,29 @@ int main(int argc, char** argv)
           ImageAdapterExtractor extractedImage(imageVol, domainImage2D, embedder, idV);        
           viewer << extractedImage;
           viewer << DGtal::UpdateImage3DEmbedding<Z3i::Space, Z3i::KSpace>(k, 
-                                                                           embedder(Z2i::RealPoint(0,0), false),
-                                                                           embedder(Z2i::RealPoint((vectPointsTopRight.at(i) - vectPointsTopLeft.at(i)).norm(),0), false),
+                                                                           embedder(Z2i::Point(0,0), false),
+                                                                           embedder(Z2i::Point((int)(vectPointsTopRight.at(i) - 
+                                                                                                    vectPointsTopLeft.at(i)).norm(),0), false),
                                                                            embedder(domainImage2D.upperBound(), false),
-                                                                           embedder(Z2i::RealPoint(0, (vectPointsTopRight.at(i) - vectPointsBottomRight.at(i)).norm()), false));
+                                                                           embedder(Z2i::Point(0, (int)(vectPointsTopRight.at(i) - vectPointsBottomRight.at(i)).norm()), false));
+          k++;
+          trace.info()<<embedder(Z2i::RealPoint(0,0), false);
+          
         }    
       
-        k++;
+
         
    
       }    
     }
    
-    
-    meshFromMarrow(meshMoelle, vectRadiusW, vectRadiusH, vectPointsCenter, sampleStep, vm["radiusStep"].as<unsigned int> ());
+    if(vm.count("visuKnotMesh")){
+      meshFromMarrow(meshMoelle, vectRadiusW, vectRadiusH, vectPointsCenter, sampleStep, vm["radiusStep"].as<unsigned int> ());
+    }
   }
-  viewer << meshMoelle;
+  if(vm.count("visuKnotMesh")){
+    viewer << meshMoelle;
+  }
   if(vm.count("exportKnotMesh")){
     string filename = vm["exportKnotMesh"].as<std::string>();
     meshMoelle >> filename;
