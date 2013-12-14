@@ -994,7 +994,7 @@ void MainWindow::exportToSdp()
 	{
 		case 0 : exportPithOfCurrentKnotToSdp(); break;
 		case 1 : exportPithOfCurrentKnotAreaToSdp(); break;
-        case 2 : exportPithOfAllKnotAreaToSdp(); break;
+		case 2 : exportPithOfAllKnotAreaToSdp(); break;
 
         //		case 1 : exportCurrentSegmentedKnotToSdp();	break;
 //		case 2 : exportSegmentedKnotsOfCurrentSliceIntervalToSdp(_ui->_checkBoxKeepBillonSliceNumber->isChecked() );	break;
@@ -1768,7 +1768,7 @@ void  MainWindow::exportPithOfAllKnotAreaToSdp()
 
 void  MainWindow::exportPithOfCurrentKnotToSdp()
 {
-    if ( _tangentialBillon && _tangentialBillon->hasPith() )
+	if ( _tangentialBillon && _tangentialBillon->hasPith() )
 	{
 		QString fileName = QFileDialog::getSaveFileName(this, tr("Exporter la moelle de la zone de nœud courante en SDP"), "pith.sdp",
 														tr("Fichiers SDP (*.sdp);;Tous les fichiers (*.*)"));

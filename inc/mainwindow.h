@@ -107,7 +107,7 @@ private:
 //	void exportSegmentedKnotsOfCurrentSliceIntervalToV3D();
 //	void exportAllSegmentedKnotsOfBillonToV3D();
          
-    void exportPithOfCurrentKnotToSdp();
+	void exportPithOfCurrentKnotToSdp();
 	void exportPithOfCurrentKnotAreaToSdp();
 	void exportPithOfAllKnotAreaToSdp();
 	void exportPithOfAKnotAreaToSdp(QTextStream &stream, unsigned int numSliceInterval, unsigned int numAngularInterval,
