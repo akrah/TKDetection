@@ -39,7 +39,7 @@ void EllipticalAccumulationHistogram::construct( const Slice &slice, const uiCoo
 	const int lastX = qMin(semiWidth+semiWidth*widthCoeff,width-1.);
 	const qreal &pithCoordX = origin.x;
 	const qreal &pithCoordY = origin.y;
-	const uint nbEllipses = qMin(semiWidth,height/2);
+	const uint nbEllipses = qMin(semiWidth,qFloor(height/(2*ellipticityRate)));
 
 	int x,y;
 	qreal a,b,d1,d2,aSquare,bSquare, nbPixelOnEllipse ;
@@ -176,7 +176,7 @@ void EllipticalAccumulationHistogram::findFirstMaximumAndNextMinimum()
 	// Recherche du premier maximum
 	uint maximumIndex = lag;
 	while ( maximumIndex<size && (*this)[maximumIndex] < (*this)[maximumIndex-lag] ) ++maximumIndex;
-	if ( maximumIndex>size/3 ) maximumIndex=lag;
+	if ( maximumIndex>size/4 ) maximumIndex=lag;
 	while ( maximumIndex<size && (*this)[maximumIndex] >= (*this)[maximumIndex-lag] ) ++maximumIndex;
 	if ( maximumIndex>2*size/3 ) maximumIndex=lag;
 

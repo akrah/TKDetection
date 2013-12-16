@@ -56,11 +56,16 @@ void KnotEllipseRadiiHistogram::construct( const Billon &tangentialBillon, const
 	extrapolation(validSlices);
 
 	// LOESS
-	QVector<qreal> residus;
-	Lowess lowess(lowessBandWidth);
-	lowess.compute( *this, _lowessData, residus );
-	outlierInterpolation( residus, 1. );
-	lowess.compute( *this, _lowessData, residus );
+	if ( !qFuzzyIsNull(lowessBandWidth) )
+	{
+		QVector<qreal> residus;
+		Lowess lowess(lowessBandWidth);
+		lowess.compute( *this, _lowessData, residus );
+		outlierInterpolation( residus, 1. );
+		lowess.compute( *this, _lowessData, residus );
+	}
+	else
+		_lowessData = *this;
 }
 
 void KnotEllipseRadiiHistogram::extrapolation( const Interval<uint> &validSlices )
@@ -71,17 +76,26 @@ void KnotEllipseRadiiHistogram::extrapolation( const Interval<uint> &validSlices
 
 	const int firstValidSliceIndex = validSlices.min()+validSlices.size()*0.15;
 	const int lastValidSliceIndex = validSlices.max()-validSlices.size()*0.15;
-	const qreal firstValidValueIncrement = (*this)[firstValidSliceIndex]/static_cast<qreal>(firstValidSliceIndex);
-	const qreal lastValidIncrement = qMin(qAbs(((*this)[lastValidSliceIndex] - (*this)[lastValidSliceIndex-2])),
-										  qAbs(((*this)[lastValidSliceIndex-1] - (*this)[lastValidSliceIndex-3])))/2.;
+
+	const int indexFirstValid = (*this)[firstValidSliceIndex]<(*this)[firstValidSliceIndex+1] ?
+									((*this)[firstValidSliceIndex+1]<(*this)[firstValidSliceIndex+2] ? 1
+																									: ((*this)[firstValidSliceIndex+2]<(*this)[firstValidSliceIndex] ? 0 : 2))
+								  : ((*this)[firstValidSliceIndex]<(*this)[firstValidSliceIndex+2] ? 0
+																									 : ((*this)[firstValidSliceIndex+2]<(*this)[firstValidSliceIndex+1] ? 2 : 1));
+	const int indexLastValid = qAbs(((*this)[lastValidSliceIndex] - (*this)[lastValidSliceIndex-2])) < qAbs(((*this)[lastValidSliceIndex-1] - (*this)[lastValidSliceIndex-3])) ?
+								   0 : 1;
+
+
+	const qreal firstValidValueIncrement = (*this)[firstValidSliceIndex+indexFirstValid]/static_cast<qreal>(firstValidSliceIndex+indexFirstValid);
+	const qreal lastValidIncrement = ((*this)[lastValidSliceIndex-indexLastValid] - (*this)[lastValidSliceIndex-2-indexLastValid])/2.;
 
 	int k;
-	for ( k=0 ; k<firstValidSliceIndex; ++k )
+	for ( k=0 ; k<firstValidSliceIndex+indexFirstValid; ++k )
 	{
 		(*this)[k] = firstValidValueIncrement*static_cast<qreal>(k);
 	}
 
-	for ( k=lastValidSliceIndex+1 ; k<size; ++k )
+	for ( k=lastValidSliceIndex+1-indexLastValid ; k<size; ++k )
 	{
 		(*this)[k] = (*this)[k-1] + lastValidIncrement;
 	}
