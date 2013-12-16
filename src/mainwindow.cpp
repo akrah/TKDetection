@@ -994,10 +994,10 @@ void MainWindow::exportToSdp()
 	{
 		case 0 : exportPithOfCurrentKnotAreaToSdp(); break;
 		case 1 : exportPithOfAllKnotAreaToSdp(); break;
-//		case 1 : exportCurrentSegmentedKnotToSdp();	break;
-//		case 2 : exportSegmentedKnotsOfCurrentSliceIntervalToSdp(_ui->_checkBoxKeepBillonSliceNumber->isChecked() );	break;
-//		case 3 : exportAllSegmentedKnotsOfBillonToSdp(); break;
-//		case 4 : exportSegmentedKnotsOfCurrentSliceIntervalToSdpOldAlgo(_ui->_checkBoxKeepBillonSliceNumber->isChecked() );	break;
+		case 2 : exportCurrentSegmentedKnotToSdp();	break;
+//		case 3 : exportSegmentedKnotsOfCurrentSliceIntervalToSdp(_ui->_checkBoxKeepBillonSliceNumber->isChecked() );	break;
+//		case 4 : exportAllSegmentedKnotsOfBillonToSdp(); break;
+//		case 5 : exportSegmentedKnotsOfCurrentSliceIntervalToSdpOldAlgo(_ui->_checkBoxKeepBillonSliceNumber->isChecked() );	break;
 		default : break;
 	}
 }
@@ -1788,10 +1788,8 @@ void  MainWindow::exportPithOfCurrentKnotAreaToSdp()
 	else QMessageBox::warning(this,tr("Exporter la moelle de la zone de nœud courante en SDP"),tr("L'export a échoué : la moelle n'existe pas."));
 }
 
-void MainWindow::exportPithOfAKnotAreaToSdp(QTextStream &stream, unsigned int numSliceInterval, unsigned int numAngularInterval,
-											unsigned int knotID)
+void MainWindow::exportPithOfAKnotAreaToSdp( QTextStream &stream, const uint &numSliceInterval, const uint &numAngularInterval, const uint &knotID )
 {
-
 	stream << "# SDP (Sequence of Discrete Points)" << endl;
 	stream << "#" << endl;
 	stream << "#Knot nums| Ellipse|  Pith  |                 Window size" << endl;
@@ -1869,6 +1867,144 @@ void MainWindow::exportPithOfAKnotAreaToSdp(QTextStream &stream, unsigned int nu
 		destination = quaterRot.rotatedVector(initial) + origin;
 
 		stream << static_cast<int>(destination.x()) << " "<< static_cast<int>(destination.y()) << " " << static_cast<int>(destination.z()) << endl;
+
+		origin += shiftStep;
+	}
+}
+
+void MainWindow::exportCurrentSegmentedKnotToSdp()
+{
+	if ( _tangentialBillon && _tangentialBillon->hasPith() )
+	{
+		QString fileName = QFileDialog::getSaveFileName(this, tr("Exporter le nœud segmenté courant en SDP"), "segmentedKnot.sdp",
+														tr("Fichiers SDP (*.sdp);;Tous les fichiers (*.*)"));
+		if ( !fileName.isEmpty() )
+		{
+			QFile file(fileName);
+			if ( file.open(QIODevice::WriteOnly) )
+			{
+				QTextStream stream(&file);
+				stream << "# SDP (Sequence of Discrete Points)" << endl;
+				stream << "#" << endl;
+				stream << "# Coordinates of the segmented knot" << endl;
+				stream << "# x y z" << endl;
+				exportSegmentedKnotToSdp(stream, _ui->_comboSelectSliceInterval->currentIndex()-1, _ui->_comboSelectSectorInterval->currentIndex()-1);
+				file.close();
+				QMessageBox::information(this,tr("Export du nœud courant segmenté en SDP"), tr("Export réussi !"));
+			}
+			else
+				QMessageBox::warning(this,tr("Export du nœud courant segmenté en SDP"),tr("L'export a échoué : impossible de créer le ficher %1.").arg(fileName));
+		}
+	}
+	else QMessageBox::warning(this,tr("Export du nœud courant segmenté en SDP"),tr("L'export a échoué : la moelle n'existe pas."));
+}
+
+void MainWindow::exportSegmentedKnotToSdp( QTextStream &stream, const uint &numSliceInterval, const uint &numAngularInterval )
+{
+	const Interval<uint> &sliceInterval = _sliceHistogram->interval(numSliceInterval);
+	const qreal zPithCoord = sliceInterval.mid();
+	const rCoord2D &originPith = _billon->pithCoord(zPithCoord);
+
+	const uint &width = _tangentialBillon->n_rows;
+	const uint &height = _tangentialBillon->n_cols;
+	const uint &nbSlices = _tangentialBillon->n_slices;
+	const int widthOnTwo = qFloor((width-1)/2.);
+	const int heightOnTwo = qFloor(height/2.);
+
+	// Rotation autour de l'axe Y
+	const qreal alpha = PI_ON_TWO;
+	const QQuaternion quaterY = QQuaternion::fromAxisAndAngle( 0, 1, 0, alpha*RAD_TO_DEG_FACT );
+
+	// Rotation selon l'angle de la zone de nœuds
+	const Interval<uint> &angularInterval = _sectorHistogram->interval(numAngularInterval);
+	const uint angularRange = (angularInterval.max() + (angularInterval.isValid() ? 0. : PieChartSingleton::getInstance()->nbSectors())) - angularInterval.min();
+	const qreal bisectorOrientation = (angularInterval.min()+angularRange/2.)*PieChartSingleton::getInstance()->angleStep();
+	const QQuaternion quaterZ = QQuaternion::fromAxisAndAngle( 0, 0, 1, bisectorOrientation*RAD_TO_DEG_FACT );
+
+	// Combinaisons des rotations
+	const QQuaternion quaterRot = quaterZ * quaterY;
+
+	// Vecteur de déplacement entre deux coupes tangentielles successives
+	const QVector3D shiftStep = quaterRot.rotatedVector( QVector3D( 0., 0., 1. ) );
+
+	QVector3D origin( originPith.x, originPith.y, zPithCoord );
+	QVector3D initial, destination;
+
+	QVector<int> xBound;
+	qreal a,b,d1,d2,aSquare,bSquare;
+	int x,y;
+
+	initial.setZ(0.);
+	for ( uint k=0 ; k<nbSlices ; ++k )
+	{
+		const qreal ellipticityRate = (_tangentialBillon->voxelWidth()/_tangentialBillon->voxelHeight()) / (*_knotPithProfile)[k];
+		const qreal ellipseWidth = _knotEllipseRadiiHistogram->lowessData()[k];
+		const qreal ellipseHeight = ellipseWidth*ellipticityRate;
+		const int &ellipseXCenter = _tangentialBillon->pithCoord(k).x-widthOnTwo;
+		const int &ellipseYCenter = _tangentialBillon->pithCoord(k).y-heightOnTwo;
+
+		// Recherche des bornes en X des ellipses.
+		xBound.resize(ellipseHeight+1);
+
+		a = ellipseWidth;
+		b = ellipseHeight;
+		aSquare = a*a;
+		bSquare = b*b;
+		x = 0;
+		y = b;
+		d1 = bSquare - aSquare*b + aSquare/4. ;
+
+		xBound[y] = qMax(xBound[y],x);
+
+		while ( aSquare*(y-.5) > bSquare*(x+1) )
+		{
+			if ( d1 >= 0 )
+			{
+				d1 += aSquare*(-2*y+2) ;
+				y-- ;
+			}
+			d1 += bSquare*(2*x+3) ;
+			x++ ;
+			xBound[y] = qMax(xBound[y],x);
+		}
+		d2 = bSquare*qPow(x+.5,2) + aSquare*qPow(y-1,2) - aSquare*bSquare ;
+		while ( y > 0 )
+		{
+			if ( d2 < 0 )
+			{
+				d2 += bSquare*(2*x+2);
+				x++ ;
+			}
+			d2 += aSquare*(-2*y+3);
+			y-- ;
+			xBound[y] = qMax(xBound[y],x);
+		}
+
+		// Écriture de l'ensemble des points de l'intérieur de de l'ellipse
+
+		for ( y=0 ; y<=ellipseHeight ; ++y )
+		{
+			initial.setX( ellipseXCenter );
+			initial.setY( ellipseYCenter );
+			destination = quaterRot.rotatedVector(initial) + origin;
+			stream << static_cast<int>(destination.x()) << " "<< static_cast<int>(destination.y()) << " " << static_cast<int>(destination.z()) << endl;
+			for ( x=1 ; x<=xBound[y] ; ++x )
+			{
+				initial.setX( x+ellipseXCenter );
+				initial.setY( y+ellipseYCenter );
+				destination = quaterRot.rotatedVector(initial) + origin;
+				stream << static_cast<int>(destination.x()) << " "<< static_cast<int>(destination.y()) << " " << static_cast<int>(destination.z()) << endl;
+				initial.setY( -y+ellipseYCenter );
+				destination = quaterRot.rotatedVector(initial) + origin;
+				stream << static_cast<int>(destination.x()) << " "<< static_cast<int>(destination.y()) << " " << static_cast<int>(destination.z()) << endl;
+				initial.setX( -x+ellipseXCenter );
+				destination = quaterRot.rotatedVector(initial) + origin;
+				stream << static_cast<int>(destination.x()) << " "<< static_cast<int>(destination.y()) << " " << static_cast<int>(destination.z()) << endl;
+				initial.setY( y+ellipseYCenter );
+				destination = quaterRot.rotatedVector(initial) + origin;
+				stream << static_cast<int>(destination.x()) << " "<< static_cast<int>(destination.y()) << " " << static_cast<int>(destination.z()) << endl;
+			}
+		}
 
 		origin += shiftStep;
 	}
