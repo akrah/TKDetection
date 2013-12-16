@@ -355,7 +355,7 @@ void MainWindow::closeImage()
 	_mainPix = QImage(0,0,QImage::Format_ARGB32);
 	_tangentialPix = QImage(0,0,QImage::Format_ARGB32);
 	_treeRadius = 133.33;
-	_ui->_checkRadiusAroundPith->setText( QString::number(_treeRadius) );
+	_ui->_checkRadiusAroundPith->setText( QString::number(_treeRadius*_ui->_spinRestrictedAreaPercentage->value()/100.) );
 	updateSliceHistogram();
 
 	_sectorHistogram->clear();
@@ -420,7 +420,7 @@ void MainWindow::drawSlice()
 				QPainter painter(&_mainPix);
 				painter.setPen(Qt::yellow);
 				if ( projectionType == TKD::Z_PROJECTION )
-					painter.drawEllipse(pithCoord.x,pithCoord.y,restrictedRadius,restrictedRadius);
+					painter.drawEllipse(pithCoord.x-restrictedRadius,pithCoord.y-restrictedRadius,2*restrictedRadius,2*restrictedRadius);
 				else
 					painter.drawLine(0,restrictedRadius,width,restrictedRadius);
 			}
@@ -772,8 +772,8 @@ void MainWindow::updateBillonPith()
 		_treeRadius = BillonAlgorithms::restrictedAreaMeansRadius(*_billon,_ui->_spinRestrictedAreaResolution->value(),_ui->_spinRestrictedAreaThreshold->value(),
 																  _ui->_spinRestrictedAreaMinimumRadius->value()*_billon->n_cols/100.,
 																  _ui->_spinPercentageOfSlicesToIgnore->value()*_billon->n_slices/100.);
-		_ui->_checkRadiusAroundPith->setText( QString::number(_treeRadius) );
-		_ui->_spinHistogramNumberOfAngularSectors_zMotionAngular->setValue(TWO_PI*_treeRadius);
+		_ui->_checkRadiusAroundPith->setText( QString::number(_treeRadius*_ui->_spinRestrictedAreaPercentage->value()/100.) );
+		_ui->_spinHistogramNumberOfAngularSectors_zMotionAngular->setValue(TWO_PI*_treeRadius*_ui->_spinRestrictedAreaPercentage->value()/100.);
 	}
 	drawSlice();
 	updateSliceHistogram();
@@ -893,7 +893,7 @@ void MainWindow::resetHistogramDefaultValuesZMotion()
 
 void MainWindow::resetHistogramDefaultValuesZMotionAngular()
 {
-	_ui->_spinHistogramNumberOfAngularSectors_zMotionAngular->setValue(TWO_PI*_treeRadius);
+	_ui->_spinHistogramNumberOfAngularSectors_zMotionAngular->setValue(TWO_PI*_treeRadius*_ui->_spinRestrictedAreaPercentage->value()/100.);
 	_ui->_spinHistogramSmoothingRadius_zMotionAngular->setValue(HISTOGRAM_ANGULAR_SMOOTHING_RADIUS);
 	_ui->_spinHistogramMinimumHeightOfMaximum_zMotionAngular->setValue(HISTOGRAM_ANGULAR_PERCENTAGE_OF_MINIMUM_HEIGHT_OF_MAXIMUM);
 	_ui->_spinHistogramMinimumWidthOfInterval_zMotionAngular->setValue(HISTOGRAM_ANGULAR_MINIMUM_WIDTH_OF_INTERVALS);
@@ -1114,7 +1114,7 @@ void MainWindow::updateUiComponentsValues()
 	_ui->_spanSliderIntensityInterval->setMaximum(maxValue);
 	_ui->_spanSliderIntensityInterval->setUpperValue(MAXIMUM_INTENSITY);
 
-	_ui->_checkRadiusAroundPith->setText( QString::number(_treeRadius) );
+	_ui->_checkRadiusAroundPith->setText( QString::number(_treeRadius*_ui->_spinRestrictedAreaPercentage->value()/100.) );
 
 	_ui->_spinCartesianAngularResolution->setMaximum(angularResolution);
 	_ui->_sliderCartesianAngularResolution->setMaximum(angularResolution);
@@ -1235,7 +1235,7 @@ void MainWindow::exportAllKnotAreasToOfs()
 		{
 			QTextStream stream(&file);
 			OfsExport::writeHeader( stream );
-			OfsExport::processOnAllSectorInAllIntervals( stream, *_billon, _ui->_spinExportNbEdges->value(), _treeRadius, sliceIntervals, angleIntervals, false );
+			OfsExport::processOnAllSectorInAllIntervals( stream, *_billon, _ui->_spinExportNbEdges->value(), _treeRadius*_ui->_spinRestrictedAreaPercentage->value()/100., sliceIntervals, angleIntervals, false );
 			QMessageBox::information(this,tr("Export en .ofs"), tr("Terminé avec succés !"));
 			file.close();
 		}

@@ -24,8 +24,8 @@ uint EllipticalAccumulationHistogram::detectedRadius() const
 void EllipticalAccumulationHistogram::construct( const Slice &slice, const uiCoord2D &origin, const qreal &ellipticityRate,
 												 const uint &smoothingRadius, const qreal &widthCoeff )
 {
-	const uint &width = slice.n_cols;
-	const uint &height = slice.n_rows;
+	const int &width = slice.n_cols;
+	const int &height = slice.n_rows;
 
 	if ( !width || !height )
 	{
@@ -34,12 +34,12 @@ void EllipticalAccumulationHistogram::construct( const Slice &slice, const uiCoo
 		return;
 	}
 
-	const uint semiWidth = qFloor((width-1)/2.);
-	const uint firstX = qFloor(semiWidth-semiWidth*widthCoeff);
-	const uint lastX = qMin(semiWidth+semiWidth*widthCoeff,width-1.);
+	const int semiWidth = qFloor((width-1)/2.);
+	const int firstX = qFloor(semiWidth-semiWidth*widthCoeff);
+	const int lastX = qMin(semiWidth+semiWidth*widthCoeff,width-1.);
 	const qreal &pithCoordX = origin.x;
 	const qreal &pithCoordY = origin.y;
-	const uint nbEllipses = qMin(qMin(pithCoordX,width-pithCoordX),qMin(pithCoordY/ellipticityRate,(height-pithCoordY)/ellipticityRate));
+	const uint nbEllipses = qMin(semiWidth,height/2);
 
 	int x,y;
 	qreal a,b,d1,d2,aSquare,bSquare, nbPixelOnEllipse ;
@@ -56,17 +56,31 @@ void EllipticalAccumulationHistogram::construct( const Slice &slice, const uiCoo
 		x = 0;
 		y = b;
 		d1 = bSquare - aSquare*b + aSquare/4. ;
-		if ( pithCoordX+x<=lastX )
+		if ( qRound(pithCoordX+x)<=lastX )
 		{
-			(*this)[a] += slice( qRound(pithCoordY+y), qRound(pithCoordX+x) ) +
-						  slice( qRound(pithCoordY-y), qRound(pithCoordX+x) );
-			nbPixelOnEllipse += 2;
+			if ( qRound(pithCoordY+y)<height )
+			{
+				(*this)[a] += slice( qRound(pithCoordY+y), qRound(pithCoordX+x) );
+				++nbPixelOnEllipse;
+			}
+			if ( qRound(pithCoordY-y)>=0 )
+			{
+				(*this)[a] += slice( qRound(pithCoordY-y), qRound(pithCoordX+x) );
+				++nbPixelOnEllipse;
+			}
 		}
-		if ( pithCoordX-x>=firstX )
+		if ( qRound(pithCoordX-x)>=firstX )
 		{
-			(*this)[a] += slice( qRound(pithCoordY+y), qRound(pithCoordX-x) ) +
-						  slice( qRound(pithCoordY-y), qRound(pithCoordX-x) );
-			nbPixelOnEllipse += 2;
+			if ( qRound(pithCoordY+y)<height )
+			{
+				(*this)[a] += slice( qRound(pithCoordY+y), qRound(pithCoordX-x) );
+				++nbPixelOnEllipse;
+			}
+			if ( qRound(pithCoordY-y)>=0 )
+			{
+				(*this)[a] += slice( qRound(pithCoordY-y), qRound(pithCoordX-x) );
+				++nbPixelOnEllipse;
+			}
 		}
 		while ( aSquare*(y-.5) > bSquare*(x+1) )
 		{
@@ -77,17 +91,31 @@ void EllipticalAccumulationHistogram::construct( const Slice &slice, const uiCoo
 			}
 			d1 += bSquare*(2*x+3) ;
 			x++ ;
-			if ( pithCoordX+x<=lastX )
+			if ( qRound(pithCoordX+x)<=lastX )
 			{
-				(*this)[a] += slice( qRound(pithCoordY+y), qRound(pithCoordX+x) ) +
-							  slice( qRound(pithCoordY-y), qRound(pithCoordX+x) );
-				nbPixelOnEllipse += 2;
+				if ( qRound(pithCoordY+y)<height )
+				{
+					(*this)[a] += slice( qRound(pithCoordY+y), qRound(pithCoordX+x) );
+					++nbPixelOnEllipse;
+				}
+				if ( qRound(pithCoordY-y)>=0 )
+				{
+					(*this)[a] += slice( qRound(pithCoordY-y), qRound(pithCoordX+x) );
+					++nbPixelOnEllipse;
+				}
 			}
-			if ( pithCoordX-x>=firstX )
+			if ( qRound(pithCoordX-x)>=firstX )
 			{
-				(*this)[a] += slice( qRound(pithCoordY+y), qRound(pithCoordX-x) ) +
-							  slice( qRound(pithCoordY-y), qRound(pithCoordX-x) );
-				nbPixelOnEllipse += 2;
+				if ( qRound(pithCoordY+y)<height )
+				{
+					(*this)[a] += slice( qRound(pithCoordY+y), qRound(pithCoordX-x) );
+					++nbPixelOnEllipse;
+				}
+				if ( qRound(pithCoordY-y)>=0 )
+				{
+					(*this)[a] += slice( qRound(pithCoordY-y), qRound(pithCoordX-x) );
+					++nbPixelOnEllipse;
+				}
 			}
 		}
 		d2 = bSquare*qPow(x+.5,2) + aSquare*qPow(y-1,2) - aSquare*bSquare ;
@@ -100,17 +128,31 @@ void EllipticalAccumulationHistogram::construct( const Slice &slice, const uiCoo
 			}
 			d2 += aSquare*(-2*y+3);
 			y-- ;
-			if ( pithCoordX+x<=lastX )
+			if ( qRound(pithCoordX+x)<=lastX )
 			{
-				(*this)[a] += slice( qRound(pithCoordY+y), qRound(pithCoordX+x) ) +
-							  slice( qRound(pithCoordY-y), qRound(pithCoordX+x) );
-				nbPixelOnEllipse += 2;
+				if ( qRound(pithCoordY+y)<height )
+				{
+					(*this)[a] += slice( qRound(pithCoordY+y), qRound(pithCoordX+x) );
+					++nbPixelOnEllipse;
+				}
+				if ( qRound(pithCoordY-y)>=0 )
+				{
+					(*this)[a] += slice( qRound(pithCoordY-y), qRound(pithCoordX+x) );
+					++nbPixelOnEllipse;
+				}
 			}
-			if ( pithCoordX-x>=firstX )
+			if ( qRound(pithCoordX-x)>=firstX )
 			{
-				(*this)[a] += slice( qRound(pithCoordY+y), qRound(pithCoordX-x) ) +
-							  slice( qRound(pithCoordY-y), qRound(pithCoordX-x) );
-				nbPixelOnEllipse += 2;
+				if ( qRound(pithCoordY+y)<height )
+				{
+					(*this)[a] += slice( qRound(pithCoordY+y), qRound(pithCoordX-x) );
+					++nbPixelOnEllipse;
+				}
+				if ( qRound(pithCoordY-y)>=0 )
+				{
+					(*this)[a] += slice( qRound(pithCoordY-y), qRound(pithCoordX-x) );
+					++nbPixelOnEllipse;
+				}
 			}
 		}
 		(*this)[a] /= nbPixelOnEllipse;
