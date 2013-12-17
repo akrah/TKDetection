@@ -13,7 +13,6 @@
 #include "DGtal/images/imagesSetsUtils/SetFromImage.h"
 #include "DGtal/images/imagesSetsUtils/ImageFromSet.h"
 #include "DGtal/io/readers/GenericReader.h"
-#include "DGtal/io/writers/GenericWriter.h"
 #include "DGtal/images/ConstImageAdapter.h"
 #include <DGtal/shapes/Shapes.h>
 #include "DGtal/io/readers/MeshReader.h"
@@ -50,6 +49,7 @@ splitKnotPithFromKnotID(const std::vector<TContent> &vectCenters,
         vectKnotCenters.push_back(vectCenters.at(i));
       }     
     }
+  vectResult.push_back(vectKnotCenters);
   return vectResult;
 }
                          
@@ -128,17 +128,22 @@ int main(int argc, char** argv)
     ("volumeFile,v", po::value<std::string>(), "import volume image (dicom format)" )
     ("tangentialView", "Display tangential view defined from the set of the four imported points")
     ("crossSectionView", "Display cross section view defined from the set of simple points and the normal direction")
+    ("visuKnotMesh", "Add visu of knot mesh generated from radius and centers")
     ("exportKnotMesh", po::value<std::string>(), "Export all knots mesh in OFF format.")
     ("pointsPk,p", po::value<std::string>(), "import the set of points Pk used to determine the image position." )
     ("scaleX,x",  po::value<float>()->default_value(1.0), "set the scale value in the X direction (default 1.0)" )
     ("scaleY,y",  po::value<float>()->default_value(1.0), "set the scale value in the Y direction (default 1.0)" )
     ("scaleZ,z",  po::value<float>()->default_value(1.0), "set the scale value in the Z direction (default 1.0)")
+    ("selectKnots,o",  po::value<std::vector<unsigned int> >()->multitoken(), "select only one knot to be read in input (default all)")
     ("patchMaxWidth,w",  po::value<unsigned int>()->default_value(50), "set the maximal patch width (default 50)")
     ("sampleStep,s",  po::value<unsigned int>()->default_value(20), "set the step between each patch images (default 20)")
     ("radiusStep,r",  po::value<unsigned int>()->default_value(36), "set the radius step to define the ring (default 36)")
     ("constantRadius,c",po::value<double>(),   "use a constant radius for all knots.")
     ("cutEnd,s",  po::value<unsigned int>()->default_value(0), "remove some end points of the profiles. ")
     ("trunkBark-mesh,t", po::value<std::string>(), "mesh of the trunk bark in format OFS non normalized (.ofs)" )
+    ("displayZSliceImages", po::value<std::vector <unsigned int> >()->multitoken(), "display Z-slices given as index" )
+    ("displayXSliceImages", po::value<std::vector <unsigned int> >()->multitoken(), "display Y-slices given as index" )
+    ("displayYSliceImages", po::value<std::vector <unsigned int> >()->multitoken(), "display Y-slices given as index" )
     ("marrow-mesh,m", po::value<std::string>(), "mesh of trunk marrow  in format OFS non normalized (.ofs)" );
   
  
@@ -209,8 +214,8 @@ int main(int argc, char** argv)
   if(vm.count("crossSectionView")|| vm.count("tangentialView") ){
     trace.info() << "Reading dicom file ..." ;
     imageVol = DicomReader< Image3D,  RescalFCT  >::importDicom(vm["volumeFile"].as<std::string>(), RescalFCT(-900,
-                                                                                                                      530,
-                                                                                                                      0, 255));
+                                                                                                              530,
+                                                                                                              0, 255));
     trace.info() << "[done]"<< std::endl;
   }
   std::vector<unsigned int> indexCenter; indexCenter.push_back(5); indexCenter.push_back(6); indexCenter.push_back(7);  
@@ -246,8 +251,9 @@ int main(int argc, char** argv)
   
   DGtal::DefaultFunctor idV;
   DGtal::Mesh<Z3i::RealPoint> meshMoelle(true);
+  unsigned int numImageDisplayed =0;
+
   for (unsigned int numId=0; numId < vectPointsBottomRightSplitted.size(); numId++){
-    unsigned k =0;
     std::vector<double> vectRadiusW = vectRadiusWSplitted.at(numId);
     std::vector<double> vectRadiusH = vectRadiusHSplitted.at(numId);
     std::vector<Z3i::RealPoint> vectPointsCenter = vectPointsCenterSplitted.at(numId);
@@ -255,7 +261,17 @@ int main(int argc, char** argv)
     std::vector<Z3i::RealPoint> vectPointsTopRight = vectPointsTopRightSplitted.at(numId);
     std::vector<Z3i::RealPoint> vectPointsBottomLeft = vectPointsBottomLeftSplitted.at(numId);
     std::vector<Z3i::RealPoint> vectPointsBottomRight = vectPointsBottomRightSplitted.at(numId);
-          
+    
+    if (vm.count("selectKnots")!=0 ){
+      std::vector<unsigned int > vectSelected = vm["selectKnots"].as< std::vector<unsigned int > > (); 
+      bool found=false;
+      for(unsigned int i =0; i< vectSelected.size(); i++){
+        found= found || (vectSelected.at(i)==numId); 
+      }
+      if (!found)
+        continue;
+    }
+    
     for (unsigned int i =0; i< vectPointsCenter.size() - cutEnd; 
          i=i+1){
       viewer.setFillColor(DGtal::Color(250,20,20,255));
@@ -275,14 +291,17 @@ int main(int argc, char** argv)
                                                                     width);
           ImageAdapterExtractor extractedImage(imageVol, domainImage2D, embedder, idV);
           viewer << extractedImage;
-          viewer << DGtal::UpdateImage3DEmbedding<Z3i::Space, Z3i::KSpace>(k, 
-                                                                         embedder(Z2i::RealPoint(0,0), false),
+          viewer << DGtal::UpdateImage3DEmbedding<Z3i::Space, Z3i::KSpace>(numImageDisplayed, 
+                                                                           embedder(Z2i::RealPoint(0,0), false),
                                                                            embedder(Z2i::RealPoint(width,0), false),
                                                                            embedder(domainImage2D.upperBound(), false),
                                                                            embedder(Z2i::RealPoint(0, width), false));
+          numImageDisplayed++;
           
         }else if (vm.count("tangentialView")){
-          
+          if((vectPointsTopRight.at(i) - vectPointsTopLeft.at(i)).norm() <=5 ||
+             (vectPointsTopRight.at(i) - vectPointsBottomRight.at(i)).norm()<=5)
+            continue;
           DGtal::Z2i::Domain domainImage2D (DGtal::Z2i::Point(0,0), 
                                             DGtal::Z2i::Point((vectPointsTopRight.at(i) - vectPointsTopLeft.at(i)).norm(),
                                                               (vectPointsTopRight.at(i) - vectPointsBottomRight.at(i)).norm())); 
@@ -292,28 +311,110 @@ int main(int argc, char** argv)
                                                                     DGtal::Z3i::Point(0,0, 0));
           ImageAdapterExtractor extractedImage(imageVol, domainImage2D, embedder, idV);        
           viewer << extractedImage;
-          viewer << DGtal::UpdateImage3DEmbedding<Z3i::Space, Z3i::KSpace>(k, 
-                                                                           embedder(Z2i::RealPoint(0,0), false),
-                                                                           embedder(Z2i::RealPoint((vectPointsTopRight.at(i) - vectPointsTopLeft.at(i)).norm(),0), false),
+          viewer << DGtal::UpdateImage3DEmbedding<Z3i::Space, Z3i::KSpace>(numImageDisplayed, 
+                                                                           embedder(Z2i::Point(0,0), false),
+                                                                           embedder(Z2i::Point((int)(vectPointsTopRight.at(i) - 
+                                                                                                    vectPointsTopLeft.at(i)).norm(),0), false),
                                                                            embedder(domainImage2D.upperBound(), false),
-                                                                           embedder(Z2i::RealPoint(0, (vectPointsTopRight.at(i) - vectPointsBottomRight.at(i)).norm()), false));
+                                                                           embedder(Z2i::Point(0, (int)(vectPointsTopRight.at(i) - vectPointsBottomRight.at(i)).norm()), false));
+          numImageDisplayed++;
+          trace.info()<<embedder(Z2i::RealPoint(0,0), false);
+          
         }    
       
-        k++;
+
         
    
       }    
     }
    
-    
-    meshFromMarrow(meshMoelle, vectRadiusW, vectRadiusH, vectPointsCenter, sampleStep, vm["radiusStep"].as<unsigned int> ());
+    if(vm.count("visuKnotMesh")){
+      meshFromMarrow(meshMoelle, vectRadiusW, vectRadiusH, vectPointsCenter, sampleStep, vm["radiusStep"].as<unsigned int> ());
+    }
   }
-  viewer << meshMoelle;
+  if(vm.count("visuKnotMesh")){
+    viewer << meshMoelle;
+  }
   if(vm.count("exportKnotMesh")){
     string filename = vm["exportKnotMesh"].as<std::string>();
     meshMoelle >> filename;
   }
-      viewer << My3DViewer::updateDisplay; 
+  
+  
+  if(vm.count("displayZSliceImages")){
+    std::vector<unsigned int> vectZindex = vm["displayZSliceImages"].as<std::vector<unsigned int> >();
+    for(unsigned int z=0; z < vectZindex.size(); z++){
+      unsigned int zIndex= vectZindex.at(z);
+      DGtal::Z2i::Domain domainImage2D (DGtal::Z2i::Point(0,0), 
+                                        DGtal::Z2i::Point(imageVol.domain().upperBound()[0],
+                                                          imageVol.domain().upperBound()[1]));
+     
+      DGtal::Point2DEmbedderIn3D<DGtal::Z3i::Domain >  embedder(imageVol.domain(), 
+                                                                DGtal::Z3i::Point(0,0,zIndex), DGtal::Z3i::Point(imageVol.domain().upperBound()[0],0,zIndex),
+                                                                DGtal::Z3i::Point(0,imageVol.domain().upperBound()[1],zIndex),
+                                                                DGtal::Z3i::Point(0,0, zIndex));      
+      ImageAdapterExtractor extractedImage(imageVol, domainImage2D, embedder, idV);        
+      viewer << extractedImage;
+      viewer << DGtal::UpdateImage3DEmbedding<Z3i::Space, Z3i::KSpace>(numImageDisplayed, 
+                                                                       embedder(Z2i::Point(0,0), false),
+                                                                       embedder(DGtal::Z2i::Point(imageVol.domain().upperBound()[0],0), false),
+                                                                       embedder(DGtal::Z2i::Point(imageVol.domain().upperBound()[0],
+                                                                                                  imageVol.domain().upperBound()[1]), false),
+                                                                       embedder(DGtal::Z2i::Point(0, imageVol.domain().upperBound()[1]), false));
+      numImageDisplayed++;
+    }
+  }
+  if(vm.count("displayXSliceImages")){
+    std::vector<unsigned int> vectXindex = vm["displayXSliceImages"].as<std::vector<unsigned int> >();
+    for(unsigned int x=0; x < vectXindex.size(); x++){
+      unsigned int xIndex= vectXindex.at(x);
+      DGtal::Z2i::Domain domainImage2D (DGtal::Z2i::Point(0,0), 
+                                        DGtal::Z2i::Point(imageVol.domain().upperBound()[1],
+                                                          imageVol.domain().upperBound()[2]));
+      
+      DGtal::Point2DEmbedderIn3D<DGtal::Z3i::Domain >  embedder(imageVol.domain(), 
+                                                                DGtal::Z3i::Point(xIndex,0,0), DGtal::Z3i::Point(xIndex, imageVol.domain().upperBound()[1],0),
+                                                                DGtal::Z3i::Point(xIndex,0, imageVol.domain().upperBound()[2]),
+                                                                DGtal::Z3i::Point(xIndex,0,0));      
+      ImageAdapterExtractor extractedImage(imageVol, domainImage2D, embedder, idV);        
+      viewer << extractedImage;
+      viewer << DGtal::UpdateImage3DEmbedding<Z3i::Space, Z3i::KSpace>(numImageDisplayed, 
+                                                                       embedder(Z2i::Point(0,0), false),
+                                                                       embedder(DGtal::Z2i::Point(imageVol.domain().upperBound()[1],0), false),
+                                                                       embedder(DGtal::Z2i::Point(imageVol.domain().upperBound()[1],
+                                                                                                  imageVol.domain().upperBound()[2]), false),
+                                                                       embedder(DGtal::Z2i::Point(0, imageVol.domain().upperBound()[2]), false));
+      numImageDisplayed++;
+    }
+  }
+  if(vm.count("displayYSliceImages")){
+    std::vector<unsigned int> vectYindex = vm["displayYSliceImages"].as<std::vector<unsigned int> >();
+    for(unsigned int y=0; y < vectYindex.size(); y++){
+      unsigned int yIndex= vectYindex.at(y);
+      DGtal::Z2i::Domain domainImage2D (DGtal::Z2i::Point(0,0), 
+                                        DGtal::Z2i::Point(imageVol.domain().upperBound()[2],
+                                                          imageVol.domain().upperBound()[0]));
+      
+      DGtal::Point2DEmbedderIn3D<DGtal::Z3i::Domain >  embedder(imageVol.domain(), 
+                                                                DGtal::Z3i::Point(0,yIndex,0), DGtal::Z3i::Point( 0 , yIndex, imageVol.domain().upperBound()[2]),
+                                                                DGtal::Z3i::Point(imageVol.domain().upperBound()[0] ,yIndex, 0),
+                                                                DGtal::Z3i::Point(0,yIndex,0));      
+      ImageAdapterExtractor extractedImage(imageVol, domainImage2D, embedder, idV);        
+      viewer << extractedImage;
+      viewer << DGtal::UpdateImage3DEmbedding<Z3i::Space, Z3i::KSpace>(numImageDisplayed, 
+                                                                       embedder(Z2i::Point(0,0), false),
+                                                                       embedder(DGtal::Z2i::Point(imageVol.domain().upperBound()[2],0), false),
+                                                                       embedder(DGtal::Z2i::Point(imageVol.domain().upperBound()[2],
+                                                                                                  imageVol.domain().upperBound()[0]), false),
+                                                                       embedder(DGtal::Z2i::Point(0, imageVol.domain().upperBound()[0]), false));
+      numImageDisplayed++;
+    }
+  }
+  
+
+
+  
+  viewer << My3DViewer::updateDisplay; 
 
   return application.exec();
 }
