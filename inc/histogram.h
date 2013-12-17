@@ -326,7 +326,6 @@ void Histogram<T>::computeIntervals( const int & derivativesPercentage, const ui
 		if ( _intervals.isEmpty() )
 		{
 			if ( (cursor.isValid() ? cursor.width() : histoSize-(cursor.min()-cursor.max())) > minimumWidthOfIntervals ) _intervals.append(cursor);
-			else _maximums.remove(i--);
 		}
 		else
 		{
@@ -336,6 +335,7 @@ void Histogram<T>::computeIntervals( const int & derivativesPercentage, const ui
 				cursor = last;
 				cursorMin = last.min();
 				cursorMax = last.max();
+				if ( (*this)[_maximums[i]]>(*this)[_maximums[i-1]] ) _maximums[i-1] = _maximums[i];
 				_maximums.remove(i--);
 			}
 			else
@@ -346,7 +346,11 @@ void Histogram<T>::computeIntervals( const int & derivativesPercentage, const ui
 					cursor.setMin(cursorMin);
 				}
 				if ( (cursor.isValid() ? cursor.width() : histoSize-(cursor.min()-cursor.max())) > minimumWidthOfIntervals ) _intervals.append(cursor);
-				else _maximums.remove(i--);
+				else
+				{
+					if ( (*this)[_maximums[i]]>(*this)[_maximums[i-1]] ) _maximums[i-1] = _maximums[i];
+					_maximums.remove(i--);
+				}
 			}
 		}
 	}
