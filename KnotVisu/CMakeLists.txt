@@ -30,9 +30,9 @@ ADD_EXECUTABLE(trunkVisu trunkVisu)
 TARGET_LINK_LIBRARIES(trunkVisu ${DGTAL_LIBRARIES} ${DGtalToolsLibDependencies})
 INSTALL(TARGETS trunkVisu  RUNTIME DESTINATION bin)
 
-ADD_EXECUTABLE(trunkVisuFig1_Step2 trunkVisuFig1_Step2)
-TARGET_LINK_LIBRARIES(trunkVisuFig1_Step2 ${DGTAL_LIBRARIES} ${DGtalToolsLibDependencies})
-INSTALL(TARGETS trunkVisuFig1_Step2  RUNTIME DESTINATION bin)
+ADD_EXECUTABLE(trunkVisuFig1_Step2_3 trunkVisuFig1_Step2_3)
+TARGET_LINK_LIBRARIES(trunkVisuFig1_Step2_3 ${DGTAL_LIBRARIES} ${DGtalToolsLibDependencies})
+INSTALL(TARGETS trunkVisuFig1_Step2_3  RUNTIME DESTINATION bin)
 
 ADD_EXECUTABLE(trunkVisuFig1_Step1 trunkVisuFig1_Step1)
 TARGET_LINK_LIBRARIES(trunkVisuFig1_Step1 ${DGTAL_LIBRARIES} ${DGtalToolsLibDependencies})
