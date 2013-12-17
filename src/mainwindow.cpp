@@ -992,9 +992,10 @@ void MainWindow::exportToSdp()
 {
 	switch ( _ui->_comboExportToSdpType->currentIndex() )
 	{
-		case 0 : exportPithOfCurrentKnotAreaToSdp(); break;
-		case 1 : exportPithOfAllKnotAreaToSdp(); break;
-		case 2 : exportCurrentSegmentedKnotToSdp();	break;
+		case 0 : exportPithOfCurrentKnotToSdp(); break;
+		case 1 : exportPithOfCurrentKnotAreaToSdp(); break;
+		case 2 : exportPithOfAllKnotAreaToSdp(); break;
+		case 3 : exportCurrentSegmentedKnotToSdp();	break;
 //		case 3 : exportSegmentedKnotsOfCurrentSliceIntervalToSdp(_ui->_checkBoxKeepBillonSliceNumber->isChecked() );	break;
 //		case 4 : exportAllSegmentedKnotsOfBillonToSdp(); break;
 //		case 5 : exportSegmentedKnotsOfCurrentSliceIntervalToSdpOldAlgo(_ui->_checkBoxKeepBillonSliceNumber->isChecked() );	break;
@@ -1763,7 +1764,7 @@ void  MainWindow::exportPithOfAllKnotAreaToSdp()
 	}
 }
 
-void  MainWindow::exportPithOfCurrentKnotAreaToSdp()
+void  MainWindow::exportPithOfCurrentKnotToSdp()
 {
 	if ( _tangentialBillon && _tangentialBillon->hasPith() )
 	{
@@ -1786,6 +1787,35 @@ void  MainWindow::exportPithOfCurrentKnotAreaToSdp()
 
 	}
 	else QMessageBox::warning(this,tr("Exporter la moelle de la zone de nœud courante en SDP"),tr("L'export a échoué : la moelle n'existe pas."));
+}
+
+void  MainWindow::exportPithOfCurrentKnotAreaToSdp()
+{
+	QString fileName = QFileDialog::getSaveFileName(this, tr("Exporter la moelle de tous les nœuds du billon en SDP"), "pith.sdp",
+													tr("Fichiers SDP (*.sdp);;Tous les fichiers (*.*)"));
+	if ( !fileName.isEmpty() )
+	{
+		QFile file(fileName);
+		if ( file.open(QIODevice::WriteOnly) )
+		{
+			QTextStream stream(&file);
+
+			int sectorIndex;
+			uint knotID = 0;
+			for ( sectorIndex=1 ; sectorIndex< _ui->_comboSelectSectorInterval->count() ; ++sectorIndex )
+				{
+					qDebug() << "processing sector: " << sectorIndex;
+					selectSectorInterval(sectorIndex, true);
+					//_ui->_comboSelectSectorInterval->setCurrentIndex(sectorIndex);
+					exportPithOfAKnotAreaToSdp(stream, _ui->_comboSelectSliceInterval->currentIndex()-1, sectorIndex-1, knotID);
+					qDebug() << "processing sector: " << sectorIndex << "/" <<_ui->_comboSelectSectorInterval->count()-1<< " [done]";
+					knotID++;
+				}
+			file.close();
+
+			QMessageBox::information(this,tr("exporter la moelle de tous les nœuds du billon en SDP"), tr("Export réussi !"));
+		}
+	}
 }
 
 void MainWindow::exportPithOfAKnotAreaToSdp( QTextStream &stream, const uint &numSliceInterval, const uint &numAngularInterval, const uint &knotID )
