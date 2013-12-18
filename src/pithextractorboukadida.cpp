@@ -107,14 +107,14 @@ void PithExtractorBoukadida::process( Billon &billon, const bool &adaptativeWidt
 	const int widthMinusOne = billon.n_cols-1;
 	const int heightMinusOne = billon.n_rows-1;
 	const int &depth = billon.n_slices;
+
 	const rCoord2D voxelDims(billon.voxelWidth(),billon.voxelHeight());
-
-	const int semiSubWindowWidth = qFloor(_subWindowWidth/2.);
-	const int semiSubWindowHeight = qFloor(_subWindowHeight/2.);
-	const int kIncrement = (_ascendingOrder?1:-1);
-
 	const qreal &xDim = billon.voxelWidth();
 	const qreal &yDim = billon.voxelHeight();
+
+	const int semiSubWindowWidth = qFloor(_subWindowWidth/(2.*xDim));
+	const int semiSubWindowHeight = qFloor(_subWindowHeight/(2.*yDim));
+	const int kIncrement = (_ascendingOrder?1:-1);
 
 	Pith &pith = billon._pith;
 
@@ -169,7 +169,7 @@ void PithExtractorBoukadida::process( Billon &billon, const bool &adaptativeWidt
 						   + subWindowStart;
 
 		//if ( currentPithCoord.euclideanDistance(previousPith) > _pithShift )
-		if ( qSqrt( qPow((currentPithCoord.x-previousPith.x)*xDim,2) + qPow((currentPithCoord.y-previousPith.y)*yDim,2)) > _pithShift )
+		if ( qSqrt( qPow((currentPithCoord.x-previousPith.x)*xDim,2) + qPow((currentPithCoord.y-previousPith.y)*yDim,2) ) > _pithShift )
 		{
 			qDebug() << "...  ";
 			currentPithCoord = transHough( currentSlice, nbLineByMaxRatio[k], voxelDims, adaptativeWidth?k/static_cast<qreal>(depth):1.0 );

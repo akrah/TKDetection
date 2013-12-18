@@ -723,9 +723,9 @@ void MainWindow::selectSectorInterval(const int &index, const bool &draw )
 																   _ui->_checkTrilinearInterpolation->isChecked(),
 																   _ui->_spinTrilinearInterpolationCoefficient->value()/100. );
 
-		_knotPithExtractor.setSubWindowWidth( _ui->_spinPithSubWindowWidth_knot->value()/_tangentialBillon->voxelWidth() );
-		_knotPithExtractor.setSubWindowHeight( _ui->_spinPithSubWindowHeight_knot->value()/_tangentialBillon->voxelHeight() );
-		_knotPithExtractor.setPithShift( _ui->_spinPithMaximumShift_knot->value()/_tangentialBillon->voxelWidth() );
+		_knotPithExtractor.setSubWindowWidth( _ui->_spinPithSubWindowWidth_knot->value() );
+		_knotPithExtractor.setSubWindowHeight( _ui->_spinPithSubWindowHeight_knot->value() );
+		_knotPithExtractor.setPithShift( _ui->_spinPithMaximumShift_knot->value() );
 		_knotPithExtractor.setSmoothingRadius( _ui->_spinPithSmoothingRadius_knot->value() );
 		_knotPithExtractor.setMinWoodPercentage( _ui->_spinPithMinimumWoodPercentage_knot->value() );
 		_knotPithExtractor.setIntensityInterval( Interval<int>( _ui->_spinPithMinIntensity_knot->value(), _ui->_spinPithMaxIntensity_knot->value() ) );
