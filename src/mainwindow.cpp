@@ -1940,6 +1940,7 @@ void MainWindow::exportSegmentedKnotToSdp( QTextStream &stream, const uint &numS
 	const uint &nbSlices = _tangentialBillon->n_slices;
 	const int widthOnTwo = qFloor((width-1)/2.);
 	const int heightOnTwo = qFloor(height/2.);
+	const int heightOnTwoMinusOne = heightOnTwo-1;
 
 	// Rotation autour de l'axe Y
 	const qreal alpha = PI_ON_TWO;
@@ -1970,8 +1971,8 @@ void MainWindow::exportSegmentedKnotToSdp( QTextStream &stream, const uint &numS
 		const qreal ellipticityRate = (_tangentialBillon->voxelWidth()/_tangentialBillon->voxelHeight()) / (*_knotPithProfile)[k];
 		const qreal ellipseWidth = _knotEllipseRadiiHistogram->lowessData()[k];
 		const qreal ellipseHeight = ellipseWidth*ellipticityRate;
-		const int &ellipseXCenter = _tangentialBillon->pithCoord(k).x-widthOnTwo;
-		const int &ellipseYCenter = _tangentialBillon->pithCoord(k).y-heightOnTwo;
+		const int &ellipseXCenter = _tangentialBillon->pithCoord(k).y-widthOnTwo;
+		const int &ellipseYCenter = heightOnTwoMinusOne-_tangentialBillon->pithCoord(k).x;
 
 		// Recherche des bornes en X des ellipses.
 		xBound.resize(ellipseHeight+1);
@@ -2020,17 +2021,17 @@ void MainWindow::exportSegmentedKnotToSdp( QTextStream &stream, const uint &numS
 			stream << static_cast<int>(destination.x()) << " "<< static_cast<int>(destination.y()) << " " << static_cast<int>(destination.z()) << endl;
 			for ( x=1 ; x<=xBound[y] ; ++x )
 			{
-				initial.setX( x+ellipseXCenter );
-				initial.setY( y+ellipseYCenter );
+				initial.setX( y+ellipseXCenter );
+				initial.setY( x+ellipseYCenter );
 				destination = quaterRot.rotatedVector(initial) + origin;
 				stream << static_cast<int>(destination.x()) << " "<< static_cast<int>(destination.y()) << " " << static_cast<int>(destination.z()) << endl;
-				initial.setY( -y+ellipseYCenter );
+				initial.setY( -x+ellipseYCenter );
 				destination = quaterRot.rotatedVector(initial) + origin;
 				stream << static_cast<int>(destination.x()) << " "<< static_cast<int>(destination.y()) << " " << static_cast<int>(destination.z()) << endl;
-				initial.setX( -x+ellipseXCenter );
+				initial.setX( -y+ellipseXCenter );
 				destination = quaterRot.rotatedVector(initial) + origin;
 				stream << static_cast<int>(destination.x()) << " "<< static_cast<int>(destination.y()) << " " << static_cast<int>(destination.z()) << endl;
-				initial.setY( y+ellipseYCenter );
+				initial.setY( x+ellipseYCenter );
 				destination = quaterRot.rotatedVector(initial) + origin;
 				stream << static_cast<int>(destination.x()) << " "<< static_cast<int>(destination.y()) << " " << static_cast<int>(destination.z()) << endl;
 			}
