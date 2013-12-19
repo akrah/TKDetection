@@ -857,7 +857,9 @@ void MainWindow::updateKnotEllipseRadiiHistogram()
 	if ( _tangentialBillon && _tangentialBillon->hasPith() && _knotPithProfile->size() )
 	{
 		_knotEllipseRadiiHistogram->construct( *_tangentialBillon, *_knotPithProfile, _knotPithExtractor.validSlices(),
-											   _ui->_spinLowessBandWidth->value(), _ui->_spinEllipticalAccumulationSmoothingRadius->value() );
+											   _ui->_spinLowessBandWidth->value(), _ui->_spinEllipticalAccumulationSmoothingRadius->value(),
+											   _ui->_spinLowessIqrCoefficient->value(), _ui->_spinLowessPercentagOfFirstValidSlicesToExtrapolate->value(),
+											   _ui->_spinLowessPercentagOfLastValidSlicesToExtrapolate->value() );
 	}
 
 	_plotKnotEllipseRadiiHistogram->update( *_knotEllipseRadiiHistogram );
@@ -996,7 +998,7 @@ void MainWindow::exportToSdp()
 		case 1 : exportPithOfCurrentKnotAreaToSdp(); break;
 		case 2 : exportPithOfAllKnotAreaToSdp(); break;
 		case 3 : exportCurrentSegmentedKnotToSdp();	break;
-//		case 3 : exportSegmentedKnotsOfCurrentSliceIntervalToSdp(_ui->_checkBoxKeepBillonSliceNumber->isChecked() );	break;
+		case 4 : exportSegmentedKnotsOfCurrentSliceIntervalToSdp( _ui->_checkBoxKeepBillonSliceNumber->isChecked() ); break;
 //		case 4 : exportAllSegmentedKnotsOfBillonToSdp(); break;
 //		case 5 : exportSegmentedKnotsOfCurrentSliceIntervalToSdpOldAlgo(_ui->_checkBoxKeepBillonSliceNumber->isChecked() );	break;
 		default : break;
@@ -1929,6 +1931,39 @@ void MainWindow::exportCurrentSegmentedKnotToSdp()
 	else QMessageBox::warning(this,tr("Export du nœud courant segmenté en SDP"),tr("L'export a échoué : la moelle n'existe pas."));
 }
 
+void MainWindow::exportSegmentedKnotsOfCurrentSliceIntervalToSdp( const bool &keepBillonSliceNumber )
+{
+	if ( _ui->_comboSelectSliceInterval->currentIndex() )
+	{
+		QString fileName = QFileDialog::getSaveFileName(this, tr("Exporter les nœud segmentés de l'intervalle de coupes courant en SDP"), "segmentedSliceIntervalle.sdp",
+														tr("Fichiers SDP (*.sdp);;Tous les fichiers (*.*)"));
+		if ( !fileName.isEmpty() )
+		{
+			QFile file(fileName);
+			if ( file.open(QIODevice::WriteOnly) )
+			{
+				QTextStream stream(&file);
+				stream << "# SDP (Sequence of Discrete Points)" << endl;
+				stream << "#" << endl;
+				stream << "# Coordinates of the segmented knot" << endl;
+				stream << "# x y z" << endl;
+
+				for ( int sectorIndex=1 ; sectorIndex<_ui->_comboSelectSectorInterval->count() ; ++sectorIndex )
+				{
+					selectSectorInterval(sectorIndex, true);
+					exportSegmentedKnotToSdp(stream, _ui->_comboSelectSliceInterval->currentIndex()-1, sectorIndex-1);
+				}
+
+				file.close();
+				QMessageBox::information(this,tr("Export des nœud segmentés de l'intervalle de coupes courant en SDP"), tr("Export réussi !"));
+			}
+			else
+				QMessageBox::warning(this,tr("Export des nœud segmentés de l'intervalle de coupes courant en SDP"),tr("L'export a échoué : impossible de créer le ficher %1.").arg(fileName));
+		}
+	}
+	else QMessageBox::warning(this,tr("Export des nœud segmentés de l'intervalle de coupes courant en SDP"),tr("L'export a échoué : la moelle n'existe pas."));
+}
+
 void MainWindow::exportSegmentedKnotToSdp( QTextStream &stream, const uint &numSliceInterval, const uint &numAngularInterval )
 {
 	const Interval<uint> &sliceInterval = _sliceHistogram->interval(numSliceInterval);
@@ -1969,7 +2004,7 @@ void MainWindow::exportSegmentedKnotToSdp( QTextStream &stream, const uint &numS
 	for ( uint k=0 ; k<nbSlices ; ++k )
 	{
 		const qreal ellipticityRate = (_tangentialBillon->voxelWidth()/_tangentialBillon->voxelHeight()) / (*_knotPithProfile)[k];
-		const qreal ellipseWidth = _knotEllipseRadiiHistogram->lowessData()[k];
+		const qreal ellipseWidth = qAbs(_knotEllipseRadiiHistogram->lowessData()[k]);
 		const qreal ellipseHeight = ellipseWidth*ellipticityRate;
 		const int &ellipseXCenter = _tangentialBillon->pithCoord(k).y-widthOnTwo;
 		const int &ellipseYCenter = heightOnTwoMinusOne-_tangentialBillon->pithCoord(k).x;

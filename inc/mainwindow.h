@@ -106,17 +106,16 @@ private:
 //	void exportCurrentSegmentedKnotToV3D();
 //	void exportSegmentedKnotsOfCurrentSliceIntervalToV3D();
 //	void exportAllSegmentedKnotsOfBillonToV3D();
-         
+
 	void exportPithOfCurrentKnotToSdp();
 	void exportPithOfCurrentKnotAreaToSdp();
 	void exportPithOfAllKnotAreaToSdp();
 	void exportPithOfAKnotAreaToSdp( QTextStream &stream, const uint &numSliceInterval, const uint &numAngularInterval, const uint &knotID );
 
 	void exportCurrentSegmentedKnotToSdp();
+	void exportSegmentedKnotsOfCurrentSliceIntervalToSdp( const bool &keepBillonSliceNumber = false );
 	void exportSegmentedKnotToSdp( QTextStream &stream, const uint &numSliceInterval, const uint &numAngularInterval );
 
-	//	void exportCurrentSegmentedKnotToSdp();
-//	void exportSegmentedKnotsOfCurrentSliceIntervalToSdp( bool keepBillonSliceNumber = false );
 //	void exportSegmentedKnotsOfCurrentSliceIntervalToSdpOldAlgo( bool keepBillonSliceNumber = false );
 //	void exportAllSegmentedKnotsOfBillonToSdp();
 

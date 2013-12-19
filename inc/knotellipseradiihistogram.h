@@ -18,11 +18,13 @@ public:
 	const EllipticalAccumulationHistogram & ellipticalHistogram( const int & sliceIndex ) const;
 	const QVector<qreal> &lowessData() const;
 
-	void construct(const Billon &tangentialBillon, const KnotPithProfile &knotPithProfile, const Interval<uint> &validSlices,
-					const qreal & lowessBandWidth, const uint &smoothingRadius);
+	void construct( const Billon &tangentialBillon, const KnotPithProfile &knotPithProfile, const Interval<uint> &validSlices,
+					const qreal & lowessBandWidth, const uint &smoothingRadius, const qreal &iqrCoeff,
+					const uint &percentageOfFirstValidSlicesToExtrapolate, const uint &percentageOfLastValidSlicesToExtrapolate );
 
 private:
-	void extrapolation( const Interval<uint> &validSlices );
+	void extrapolation( const Interval<uint> &validSlices , const uint & percentageOfFirstValidSlicesToExtrapolate,
+						const uint & percentageOfLastValidSlicesToExtrapolate);
 	void outlierInterpolation( const QVector<qreal> &residus, const qreal &iqrCoeff );
 
 private:

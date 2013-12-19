@@ -109,8 +109,8 @@ void PithExtractorBoukadida::process( Billon &billon, const bool &adaptativeWidt
 	const int &depth = billon.n_slices;
 
 	const rCoord2D voxelDims(billon.voxelWidth(),billon.voxelHeight());
-	const qreal &xDim = billon.voxelWidth();
-	const qreal &yDim = billon.voxelHeight();
+	const qreal &xDim = voxelDims.x;
+	const qreal &yDim = voxelDims.y;
 
 	const int semiSubWindowWidth = qFloor(_subWindowWidth/(2.*xDim));
 	const int semiSubWindowHeight = qFloor(_subWindowHeight/(2.*yDim));
@@ -191,6 +191,7 @@ void PithExtractorBoukadida::process( Billon &billon, const bool &adaptativeWidt
 
 	const int slopeDistance = 3;
 
+	// TODO : mettre les pourcentages en paramètres de l'algo
 	const int firstValidSliceIndexSmoothed = firstValidSliceIndex+(lastValidSliceIndex-firstValidSliceIndex)*0.2;
 	const int lastValidSliceIndexSmoothed = lastValidSliceIndex-(lastValidSliceIndex-firstValidSliceIndex)*0.15;
 

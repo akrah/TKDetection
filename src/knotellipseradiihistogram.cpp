@@ -26,8 +26,9 @@ const QVector<qreal> &KnotEllipseRadiiHistogram::lowessData() const
 }
 
 
-void KnotEllipseRadiiHistogram::construct( const Billon &tangentialBillon, const KnotPithProfile &knotPithProfile, const Interval<uint> &validSlices, const qreal &lowessBandWidth,
-										   const uint &smoothingRadius )
+void KnotEllipseRadiiHistogram::construct( const Billon &tangentialBillon, const KnotPithProfile &knotPithProfile, const Interval<uint> &validSlices,
+										   const qreal & lowessBandWidth, const uint &smoothingRadius, const qreal &iqrCoeff,
+										   const uint &percentageOfFirstValidSlicesToExtrapolate, const uint &percentageOfLastValidSlicesToExtrapolate  )
 {
 	const uint &nbSlices = tangentialBillon.n_slices;
 
@@ -53,7 +54,7 @@ void KnotEllipseRadiiHistogram::construct( const Billon &tangentialBillon, const
 		(*this)[k] = ellipticalHistogram.detectedRadius();
 	}
 
-	extrapolation(validSlices);
+	extrapolation(validSlices,percentageOfFirstValidSlicesToExtrapolate,percentageOfLastValidSlicesToExtrapolate);
 
 	// LOESS
 	if ( !qFuzzyIsNull(lowessBandWidth) )
@@ -61,29 +62,40 @@ void KnotEllipseRadiiHistogram::construct( const Billon &tangentialBillon, const
 		QVector<qreal> residus;
 		Lowess lowess(lowessBandWidth);
 		lowess.compute( *this, _lowessData, residus );
-		outlierInterpolation( residus, 1. );
+		outlierInterpolation( residus, iqrCoeff );
 		lowess.compute( *this, _lowessData, residus );
 	}
 	else
 		_lowessData = *this;
 }
 
-void KnotEllipseRadiiHistogram::extrapolation( const Interval<uint> &validSlices )
+void KnotEllipseRadiiHistogram::extrapolation( const Interval<uint> &validSlices, const uint &percentageOfFirstValidSlicesToExtrapolate,
+											   const uint &percentageOfLastValidSlicesToExtrapolate )
 {
 	const int size = this->size();
 
 	if ( !size ) return;
 
-	const int firstValidSliceIndex = validSlices.min()+validSlices.size()*0.15;
-	const int lastValidSliceIndex = validSlices.max()-validSlices.size()*0.15;
+	const int firstValidSliceIndex = validSlices.min()+validSlices.size()*(percentageOfFirstValidSlicesToExtrapolate/100.);
+	const int lastValidSliceIndex = validSlices.max()-validSlices.size()*(percentageOfLastValidSlicesToExtrapolate/100.);
 
-	const int indexFirstValid = (*this)[firstValidSliceIndex]<(*this)[firstValidSliceIndex+1] ?
-									((*this)[firstValidSliceIndex+1]<(*this)[firstValidSliceIndex+2] ? 1
-																									: ((*this)[firstValidSliceIndex+2]<(*this)[firstValidSliceIndex] ? 0 : 2))
-								  : ((*this)[firstValidSliceIndex]<(*this)[firstValidSliceIndex+2] ? 0
-																									 : ((*this)[firstValidSliceIndex+2]<(*this)[firstValidSliceIndex+1] ? 2 : 1));
-	const int indexLastValid = qAbs(((*this)[lastValidSliceIndex] - (*this)[lastValidSliceIndex-2])) < qAbs(((*this)[lastValidSliceIndex-1] - (*this)[lastValidSliceIndex-3])) ?
-								   0 : 1;
+	qreal compareZero, compareOne, compareTwo;
+
+	compareZero = (*this)[firstValidSliceIndex];
+	compareOne = (*this)[firstValidSliceIndex+1];
+	compareTwo = (*this)[firstValidSliceIndex+2];
+	const int indexFirstValid = compareZero < compareOne ?
+									( compareOne < compareTwo ? 1
+															  : (compareZero < compareTwo ? 2 : 0))
+								  : ( compareZero < compareTwo ? 0
+															   : (compareOne < compareTwo ? 2 : 1));
+
+	compareZero = qAbs(((*this)[lastValidSliceIndex] - (*this)[lastValidSliceIndex-2]));
+	compareOne = qAbs(((*this)[lastValidSliceIndex-1] - (*this)[lastValidSliceIndex-3]));
+	compareTwo = qAbs(((*this)[lastValidSliceIndex-2] - (*this)[lastValidSliceIndex-4]));
+	const int indexLastValid = compareZero < compareOne ?
+								   ( compareZero < compareTwo ? 0 : 2)
+								 : ( compareOne < compareTwo ? 1 : 2 );
 
 
 	const qreal firstValidValueIncrement = (*this)[firstValidSliceIndex+indexFirstValid]/static_cast<qreal>(firstValidSliceIndex+indexFirstValid);
