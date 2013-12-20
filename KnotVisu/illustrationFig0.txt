@@ -1,0 +1,21 @@
+SPR3T
+
+slcie 635 690
+
+0.68 0.68 1.25
+
+
+./trunkVisuFig0 --volumeFile ../../SPR-3-T/1.2.840.113619.2.55.3.1670609623.384.1323081041.419.361.dcm  --centerCoord 230 275 --startBillon 635 --endBillon 690  --cylinderRadius1Max 130  --cylinderRadius1Min 110 --cylinderRadius2Max 70 --cylinderRadius2Min 40 --cylinderRadius3Max 20 -x 0.68 -y 0.68 -z 1.25 --translateCylinderIncluded -60 --displayAllSector  --translateSourceCylinder 200
+
+### Visu avec Sample 2 de l'article PR/  
+  ./trunkVisuFig0 --volumeFile  /Users/kerautre/EnCours/ExpePRCompKnots/SamplesDICOM/sample2/1.2.840.113619.2.55.3.1670609623.384.1323081041.419.647.dcm   --centerCoord 230 275 --startBillon 0 --endBillon 48  --cylinderRadius1Max 130  --cylinderRadius1Min 110 --cylinderRadius2Max 70 --cylinderRadius2Min 40 --cylinderRadius3Max 20 -x 0.68 -y 0.68 -z 1.25 --translateCylinderIncluded -60 --displayAllSector  --translateSourceCylinder 130
+
+
+### visu comparaisons:
+3dImageViewer -i /Users/kerautre/EnCours/ExpePRCompKnots/SamplesDICOM/sample2/1.2.840.113619.2.55.3.1670609623.384.1323081041.419.647.dcm -s /Users/kerautre/EnCours/ExpePRCompKnots/ResuSample2/resuSample2Basic200_256BG1200_256BG175.sdp  --dicomMin -900 --dicomMax 530 --displayDigitalSurface --colorizeCC -t 100
+
+
+
+# visu coupes tangentielle:
+./tangentialImageExtraction -i /Users/kerautre/EnCours/TKDetection/SPR-3-T/1.2.840.113619.2.55.3.1670609623.384.1323081041.419.363.dcm  --outputFile resu.pgm -c 230 275 677 --height 170 -d 80 -s 100 -e 28
+

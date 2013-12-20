@@ -154,7 +154,7 @@ meshQuadZCylinder( const Image3D &image, My3DViewer &aViewer, DGtal::Mesh<DGtal:
         }
       }
       
-    }    //Remplissage face arriÃ¨re:
+    }    //Remplissage face arrière:
   for (double i=0; i<2*radiusMax; i=i+gridSize){
     for (double j=0; j<2*radiusMax; j=j+gridSize){
       DGtal::Z3i::RealPoint pt (center[0]-radiusMax+i,
@@ -220,34 +220,26 @@ int main(int argc, char** argv)
     ("scaleX,x",  po::value<float>()->default_value(1.0), "set the scale value in the X direction (default 1.0)" )
     ("scaleY,y",  po::value<float>()->default_value(1.0), "set the scale value in the Y direction (default 1.0)" )
     ("scaleZ,z",  po::value<float>()->default_value(1.0), "set the scale value in the Z direction (default 1.0)")
-    ("cutSectionFirstIndex",  po::value<unsigned int>()->default_value(1.0), "indicate the cut section to be extracted (with the first index)")
-    ("cutSectionLastIndex",  po::value<unsigned int>()->default_value(1.0), "indicate the cut section to be extracted (with the last index)")
-    ("cutSectionSpace",  po::value<unsigned int>()->default_value(1.0), "indicate the space between billon and  cut section")
-    
-    ("cutSection2FirstIndex",  po::value<unsigned int>()->default_value(1.0), "indicate the cut section2 to be extracted (with the first index)")
-    ("cutSection2LastIndex",  po::value<unsigned int>()->default_value(1.0), "indicate the cut section2 to be extracted (with the last index)")
-    ("cutSection2Space",  po::value<unsigned int>()->default_value(1.0), "indicate the space between billon and  cut section")
-
-    ("cutSection3FirstIndex",  po::value<unsigned int>()->default_value(1.0), "indicate the cut section3 to be extracted (with the first index)")
-    ("cutSection3LastIndex",  po::value<unsigned int>()->default_value(1.0), "indicate the cut section3 to be extracted (with the last index)")
-    ("cutSection3Space",  po::value<unsigned int>()->default_value(1.0), "indicate the space between billon and  cut section")
-    
-    ("cutSection4FirstIndex",  po::value<unsigned int>()->default_value(1.0), "indicate the cut section4 to be extracted (with the first index)")
-    ("cutSection4LastIndex",  po::value<unsigned int>()->default_value(1.0), "indicate the cut section4 to be extracted (with the last index)")
-    ("cutSection4Space",  po::value<unsigned int>()->default_value(1.0), "indicate the space between billon and  cut section")
-    
-    ("cutSection5FirstIndex",  po::value<unsigned int>()->default_value(1.0), "indicate the cut section5 to be extracted (with the first index)")
-    ("cutSection5LastIndex",  po::value<unsigned int>()->default_value(1.0), "indicate the cut section5 to be extracted (with the last index)")
-    ("cutSection5Space",  po::value<unsigned int>()->default_value(1.0), "indicate the space between billon and  cut section")
-
+    ("cutSectionFirstIndex",  po::value<unsigned int>()->default_value(10), "indicate the cut section to be extracted (with the first index)")
+    ("cutSectionLastIndex",  po::value<unsigned int>()->default_value(20), "indicate the cut section to be extracted (with the last index)")
+    ("cutSectionSpace",  po::value<unsigned int>()->default_value(5), "indicate the space between billon and  cut section")
     ("colorizeCutSection", po::value<std::vector <double > >()->multitoken(), "ratioR, ratioG, ratioB: specify the ratio of each color channel to illustrate cut section (1.0, 1.0, 1.0 = white)" )
-  ("startBillon",  po::value<unsigned int>()->default_value(1.0), "indicate the index of the first slice section to be extracted.")
-    ("endBillon",  po::value<unsigned int>()->default_value(1.0), "indicate the index of the first slice section to be extracted.")
+    ("startBillon",  po::value<unsigned int>()->default_value(0), "indicate the index of the first slice section to be extracted.")
+    ("endBillon",  po::value<unsigned int>()->default_value(40), "indicate the index of the first slice section to be extracted.")
     
     ("gridSize",  po::value<double>()->default_value(0.5), "specify the grid size for top/bottom pixels filling.")
     ("angleStep",  po::value<double>()->default_value(5.0), "specify the angle step in degree to define the cylinder mesh.")
     
-    ("cylinderRadius",  po::value<unsigned int>()->default_value(300), "specify the radius cylinder.")
+    
+    ("cylinderRadius1Min",  po::value<unsigned int>()->default_value(300), "specify the min radius of first cylinder (bigger radius).")
+    ("cylinderRadius1Max",  po::value<unsigned int>()->default_value(300), "specify the max radius of first cylinder (bigger radius).")
+    ("cylinderRadius2Min",  po::value<unsigned int>()->default_value(300), "specify the min radius of second cylinder.")
+    ("cylinderRadius2Max",  po::value<unsigned int>()->default_value(300), "specify the max radius of second cylinder.")
+    ("cylinderRadius3Max",  po::value<unsigned int>()->default_value(300), "specify the max radius of third cylinder (no min since the third cylinder is plain).")
+    
+    ("translateCylinderIncluded", po::value<int>()->default_value(-50), "set the distance betwwen the cylindriic view") 
+    ("translateSourceCylinder", po::value<int>()->default_value(150), "set the distance betwwen the cylindriic view") 
+    ("displayAllSector", "display all sectors together (source cylinder)") 
     ("centerCoord", po::value<std::vector <unsigned int> >()->multitoken(), "x, y, z coordinate of the center" );
   
   
@@ -268,6 +260,15 @@ int main(int argc, char** argv)
       return 0;
     }
 
+  if(!vm.count("centerCoord")){
+    trace.error() << "You have to sepecify center coordinates" << std::endl;
+    return 0;
+  }
+  if(!vm.count("volumeFile")){
+    trace.error() << "You have to sepecify the input volume file" << std::endl;
+    return 0;
+  }
+
 
   QApplication application(argc,argv);
   My3DViewer viewer;
@@ -287,18 +288,11 @@ int main(int argc, char** argv)
   Z3i::Point upper = imageVol.domain().upperBound();
   Z3i::Point lower = imageVol.domain().lowerBound();
   Z2i::RealPoint center2Dz ((upper[0]-lower[0])/2, (upper[1]-lower[1])/2);
-  DGtal::Mesh<Z3i::RealPoint> meshTrunkStart(true);
-  DGtal::Mesh<Z3i::RealPoint> meshTrunkSlice(true);
-  DGtal::Mesh<Z3i::RealPoint> meshTrunkStart2(true);  
-  DGtal::Mesh<Z3i::RealPoint> meshTrunkSlice2(true);
-  DGtal::Mesh<Z3i::RealPoint> meshTrunkStart3(true);
-  DGtal::Mesh<Z3i::RealPoint> meshTrunkSlice3(true);
-  DGtal::Mesh<Z3i::RealPoint> meshTrunkStart4(true);
-  DGtal::Mesh<Z3i::RealPoint> meshTrunkSlice4(true);
-  DGtal::Mesh<Z3i::RealPoint> meshTrunkStart5(true);
-  DGtal::Mesh<Z3i::RealPoint> meshTrunkSlice5(true);
-
-  DGtal::Mesh<Z3i::RealPoint> meshTrunkEnd(true);
+  DGtal::Mesh<Z3i::RealPoint> meshAubie(true);
+  DGtal::Mesh<Z3i::RealPoint> meshCenter(true);
+  DGtal::Mesh<Z3i::RealPoint> meshPith(true);  
+  
+  DGtal::Mesh<Z3i::RealPoint> meshALL(true);  
   
   double distanceTranslation= 70;
   double dir = (350/180.0)*3.142;
@@ -306,28 +300,19 @@ int main(int argc, char** argv)
 
   unsigned int startBillonSection = vm["startBillon"].as<unsigned int > ();
   unsigned int endBillonSection = vm["endBillon"].as<unsigned int > ();  
-  unsigned int cylinderRadius = vm["cylinderRadius"].as<unsigned int> ();
+  unsigned int cylinderRadius1Min = vm["cylinderRadius1Min"].as<unsigned int> ();
+  unsigned int cylinderRadius1Max = vm["cylinderRadius1Max"].as<unsigned int> ();
 
+  unsigned int cylinderRadius2Min = vm["cylinderRadius2Min"].as<unsigned int> ();
+  unsigned int cylinderRadius2Max = vm["cylinderRadius2Max"].as<unsigned int> ();
+
+
+  unsigned int cylinderRadius3Max = vm["cylinderRadius3Max"].as<unsigned int> ();
+
+  
   unsigned int cutSectionFirstIndex = vm["cutSectionFirstIndex"].as<unsigned int > ();  
   unsigned int cutSectionLastIndex = vm["cutSectionLastIndex"].as<unsigned int > ();  
-  unsigned int cutSectionSpace = vm["cutSectionSpace"].as<unsigned int > ();  
- 
-  unsigned int cutSection2FirstIndex = vm["cutSection2FirstIndex"].as<unsigned int > ();  
-  unsigned int cutSection2LastIndex = vm["cutSection2LastIndex"].as<unsigned int > ();  
-  unsigned int cutSection2Space = vm["cutSection2Space"].as<unsigned int > ();  
-  
-  unsigned int cutSection3FirstIndex = vm["cutSection3FirstIndex"].as<unsigned int > ();  
-  unsigned int cutSection3LastIndex = vm["cutSection3LastIndex"].as<unsigned int > ();  
-  unsigned int cutSection3Space = vm["cutSection3Space"].as<unsigned int > ();  
-
-  unsigned int cutSection4FirstIndex = vm["cutSection4FirstIndex"].as<unsigned int > ();  
-  unsigned int cutSection4LastIndex = vm["cutSection4LastIndex"].as<unsigned int > ();  
-  unsigned int cutSection4Space = vm["cutSection4Space"].as<unsigned int > ();  
-
-  unsigned int cutSection5FirstIndex = vm["cutSection5FirstIndex"].as<unsigned int > ();  
-  unsigned int cutSection5LastIndex = vm["cutSection5LastIndex"].as<unsigned int > ();  
-  unsigned int cutSection5Space = vm["cutSection5Space"].as<unsigned int > ();  
-  
+  unsigned int cutSectionSpace = vm["cutSectionSpace"].as<unsigned int > ();     
   
   double angleStep = vm["angleStep"].as<double>();
   double gridSize = vm["gridSize"].as<double>();
@@ -340,70 +325,41 @@ int main(int argc, char** argv)
     colorCoefs.push_back(1.0);
   }
   
-  // First cut section:
-  meshQuadZCylinder(imageVol, viewer, meshTrunkStart, center, 0,  cylinderRadius, true, startBillonSection, cutSectionFirstIndex, 0, 0, angleStep, gridSize); 
-  meshQuadZCylinder(imageVol, viewer, meshTrunkSlice, center, 0,  cylinderRadius, true, cutSectionFirstIndex, cutSectionLastIndex, 
-                    0, 0, angleStep, gridSize, Z3i::RealPoint(0,0,   cutSectionSpace));     
-  meshQuadZCylinder(imageVol, viewer, meshTrunkStart2, center, 0,  cylinderRadius, true, cutSectionLastIndex, cutSection2FirstIndex,
-                    0, 0, angleStep, gridSize, Z3i::RealPoint(0,0, 2*cutSectionSpace)); 
-
-  embeddMeshInVol(imageVol, viewer, meshTrunkStart, ColorizeFonctor(), Z3i::RealPoint(0,0,0));  
-  embeddMeshInVol(imageVol, viewer, meshTrunkSlice, ColorizeFonctor(colorCoefs[0], colorCoefs[1], colorCoefs[2]), Z3i::RealPoint(0,0, cutSectionSpace));
-  embeddMeshInVol(imageVol, viewer, meshTrunkStart2, ColorizeFonctor(), Z3i::RealPoint(0,0, cutSectionSpace*2));
+  // Aubié mesh:
+  meshQuadZCylinder(imageVol, viewer, meshAubie, center, cylinderRadius1Min,  cylinderRadius1Max, true,
+                    startBillonSection, endBillonSection, 0, 0, angleStep, gridSize); 
+  meshQuadZCylinder(imageVol, viewer, meshAubie, center, 0,  cylinderRadius1Min, false,
+                    startBillonSection, endBillonSection, 0, 0, angleStep, gridSize); 
+  embeddMeshInVol(imageVol, viewer, meshAubie, ColorizeFonctor(), Z3i::RealPoint(0,0, 0));
   
+  // central area
+  Z3i::RealPoint vectTranslate1 (0,0,vm["translateCylinderIncluded"].as<int>());
+  meshQuadZCylinder(imageVol, viewer, meshCenter, center, cylinderRadius2Min,  cylinderRadius2Max, true,
+                    startBillonSection, endBillonSection, 0, 0, angleStep, gridSize, vectTranslate1); 
+  meshQuadZCylinder(imageVol, viewer, meshCenter, center, 0,  cylinderRadius2Min, false,
+                    startBillonSection, endBillonSection, 0, 0, angleStep, gridSize, vectTranslate1); 
   
-  // Second cut section 
-  meshQuadZCylinder(imageVol, viewer, meshTrunkSlice2, center, 0,  cylinderRadius, true, cutSection2FirstIndex, cutSection2LastIndex, 
-                    0, 0, angleStep, gridSize, Z3i::RealPoint(0,0,   cutSectionSpace*2+cutSection2Space));     
-  meshQuadZCylinder(imageVol, viewer, meshTrunkStart3, center, 0,  cylinderRadius, true, cutSection2LastIndex, cutSection3FirstIndex,
-                    0, 0, angleStep, gridSize, Z3i::RealPoint(0,0, cutSectionSpace*2+2*cutSection2Space)); 
-
-  embeddMeshInVol(imageVol, viewer, meshTrunkSlice2, ColorizeFonctor(colorCoefs[0], colorCoefs[1], colorCoefs[2]), Z3i::RealPoint(0,0, cutSectionSpace*2+cutSection2Space));
-  embeddMeshInVol(imageVol, viewer, meshTrunkStart3, ColorizeFonctor(), Z3i::RealPoint(0 ,0, cutSectionSpace*2+2*cutSection2Space));
+  embeddMeshInVol(imageVol, viewer, meshCenter, ColorizeFonctor(), vectTranslate1);  
 
 
-
-  // Third cut section 
-  meshQuadZCylinder(imageVol, viewer, meshTrunkSlice3, center, 0,  cylinderRadius, true, cutSection3FirstIndex, cutSection3LastIndex, 
-                    0, 0, angleStep, gridSize, Z3i::RealPoint(0,0,   cutSectionSpace*2+cutSection2Space*2+cutSection3Space));     
-  meshQuadZCylinder(imageVol, viewer, meshTrunkStart4, center, 0,  cylinderRadius, true, cutSection3LastIndex, cutSection4FirstIndex,
-                    0, 0, angleStep, gridSize, Z3i::RealPoint(0,0, cutSectionSpace*2+cutSection2Space*2+cutSection3Space*2)); 
-  
-  embeddMeshInVol(imageVol, viewer, meshTrunkSlice3, ColorizeFonctor(colorCoefs[0], colorCoefs[1], colorCoefs[2]), Z3i::RealPoint(0,0, cutSectionSpace*2+cutSection2Space*2+cutSection3Space));
-  embeddMeshInVol(imageVol, viewer, meshTrunkStart4, ColorizeFonctor(), Z3i::RealPoint(0,0, cutSectionSpace*2+cutSection2Space*2+cutSection3Space*2));
-
-
-
-  // Forth cut section 
-  meshQuadZCylinder(imageVol, viewer, meshTrunkSlice4, center, 0,  cylinderRadius, true, cutSection4FirstIndex, cutSection4LastIndex, 
-                    0, 0, angleStep, gridSize, Z3i::RealPoint(-30, -20,   cutSectionSpace*2+cutSection2Space*2+cutSection3Space*2+cutSection4Space));     
-  meshQuadZCylinder(imageVol, viewer, meshTrunkStart5, center, 0,  cylinderRadius, true, cutSection4LastIndex,cutSection5FirstIndex ,
-                    0, 0, angleStep, gridSize, Z3i::RealPoint(00,0, cutSectionSpace*2+cutSection2Space*2+cutSection3Space*2+cutSection4Space*2)); 
-
-  embeddMeshInVol(imageVol, viewer, meshTrunkSlice4, ColorizeFonctor(colorCoefs[0], colorCoefs[1], colorCoefs[2]), Z3i::RealPoint(-30,-20, cutSectionSpace*2+cutSection2Space*2+cutSection3Space*2+cutSection4Space));
-  embeddMeshInVol(imageVol, viewer, meshTrunkStart5, ColorizeFonctor(), Z3i::RealPoint(0,0, cutSectionSpace*2+cutSection2Space*2+cutSection3Space*2+
-                                                                                    cutSection4Space*2));
-  
-  
-  // Fith cut section 
-  meshQuadZCylinder(imageVol, viewer, meshTrunkSlice5, center, 0,  cylinderRadius, true, cutSection5FirstIndex, cutSection5LastIndex, 
-                    0, 0, angleStep, gridSize, Z3i::RealPoint(0, 0,   cutSectionSpace*2+cutSection2Space*2+cutSection3Space*2+
-                                                              cutSection4Space*2+cutSection5Space));     
-  meshQuadZCylinder(imageVol, viewer, meshTrunkEnd, center, 0,  cylinderRadius, true, cutSection5LastIndex, endBillonSection,
-                    0, 0, angleStep, gridSize, Z3i::RealPoint(00,0, cutSectionSpace*2+cutSection2Space*2+
-                                                              cutSection3Space*2+cutSection4Space*2+cutSection5Space*2)); 
-
-  embeddMeshInVol(imageVol, viewer, meshTrunkSlice5, ColorizeFonctor(colorCoefs[0], colorCoefs[1], colorCoefs[2]), 
-                  Z3i::RealPoint(0,0, cutSectionSpace*2+cutSection2Space*2+cutSection3Space*2+cutSection4Space*2+cutSection5Space));
-  embeddMeshInVol(imageVol, viewer, meshTrunkEnd, ColorizeFonctor(), Z3i::RealPoint(0,0, cutSectionSpace*2+cutSection2Space*2+
-                                                              cutSection3Space*2+cutSection4Space*2+cutSection5Space*2));
-
-
-
+  // pith area
+  Z3i::RealPoint vectTranslate2 (0,0,2*vm["translateCylinderIncluded"].as<int>());
+  meshQuadZCylinder(imageVol, viewer, meshPith, center,0,  cylinderRadius3Max, true,
+                    startBillonSection, endBillonSection, 0, 0, angleStep, gridSize, vectTranslate2);   
+  embeddMeshInVol(imageVol, viewer, meshPith, ColorizeFonctor(), vectTranslate2);  
   
 
 
-
+  
+  // All Area 
+  if(vm.count("displayAllSector")){
+    Z3i::RealPoint vectTranslate3 (0,0, vm["translateSourceCylinder"].as<int>());
+    
+    meshQuadZCylinder(imageVol, viewer, meshPith, center,0,  cylinderRadius1Max, true,
+                      startBillonSection, endBillonSection, 0, 0, angleStep, gridSize, vectTranslate3);   
+    embeddMeshInVol(imageVol, viewer, meshPith, ColorizeFonctor(), vectTranslate3);  
+    
+  }
  
   viewer <<  My3DViewer::updateDisplay;
   
