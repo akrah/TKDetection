@@ -131,6 +131,7 @@ int main(int argc, char** argv)
     ("crossSectionView", "Display cross section view defined from the set of simple points and the normal direction")
     ("visuKnotMesh", "Add visu of knot mesh generated from radius and centers")
     ("exportKnotMesh", po::value<std::string>(), "Export all knots mesh in OFF format.")
+    ("exportImageExtracted", po::value<std::string>(), "basename: Export all tangential or sectional images in pgm format (extension added to basename).")
     ("pointsPk,p", po::value<std::string>(), "import the set of points Pk used to determine the image position." )
     ("scaleX,x",  po::value<float>()->default_value(1.0), "set the scale value in the X direction (default 1.0)" )
     ("scaleY,y",  po::value<float>()->default_value(1.0), "set the scale value in the Y direction (default 1.0)" )
@@ -142,6 +143,8 @@ int main(int argc, char** argv)
     ("constantRadius,c",po::value<double>(),   "use a constant radius for all knots.")
     ("cutEnd,s",  po::value<unsigned int>()->default_value(0), "remove some end points of the profiles. ")
     ("trunkBark-mesh,t", po::value<std::string>(), "mesh of the trunk bark in format OFS non normalized (.ofs)" )
+    ("colorPithMesh", po::value<std::vector <unsigned int> >()->multitoken(), "R, G, B defined for the trunk mesh" )
+    ("colorKnotMesh", po::value<std::vector <unsigned int> >()->multitoken(), "R, G, B defined for the knot mesh" )
     ("displayZSliceImages", po::value<std::vector <unsigned int> >()->multitoken(), "display Z-slices given as index" )
     ("displayXSliceImages", po::value<std::vector <unsigned int> >()->multitoken(), "display Y-slices given as index" )
     ("displayYSliceImages", po::value<std::vector <unsigned int> >()->multitoken(), "display Y-slices given as index" )
@@ -179,11 +182,31 @@ int main(int argc, char** argv)
       trace.error() << " Missing input file" << endl;
       return 0;
     }
-  if(vm.count("marrow-mesh")){
-     string meshFilename = vm["marrow-mesh"].as<std::string>();
-     Mesh<Z3i::RealPoint> anImportedMesh(DGtal::Color(70,70,70,255));
+  
+
+  std::vector<unsigned int> vectColorKnots;
+  if(vm.count("colorKnotMesh"))
+    vectColorKnots = vm["colorKnotMesh"].as<std::vector<unsigned int > >();
+  else{
+    vectColorKnots.push_back(255); vectColorKnots.push_back(255); vectColorKnots.push_back(255);
+  }
+  DGtal::Color colorKnotMesh (vectColorKnots[0], vectColorKnots[1], vectColorKnots[2]);
+  std::vector<unsigned int> vectColorPith;
+  if(vm.count("colorPithMesh")){
+    vectColorPith = vm["colorPithMesh"].as< std::vector<unsigned int > >();
+  }else{
+    vectColorPith.push_back(255); vectColorPith.push_back(255); vectColorPith.push_back(255);
+  }
+  
+  DGtal::Color colorPithMesh (vectColorPith[0], vectColorPith[1], vectColorPith[2]);
+  
+  
+if(vm.count("marrow-mesh")){
+  string meshFilename = vm["marrow-mesh"].as<std::string>();
+     Mesh<Z3i::RealPoint> anImportedMesh(colorPithMesh);
      bool import = anImportedMesh << meshFilename;
      if(import){
+       viewer.setFillColor(colorPithMesh);
        viewer << anImportedMesh;
      }
    }
@@ -204,7 +227,9 @@ int main(int argc, char** argv)
   unsigned int sampleStep = vm["sampleStep"].as<unsigned int>();
   unsigned int cutEnd = vm["cutEnd"].as<unsigned int> ();
   bool constantRadius= vm.count("constantRadius");
-
+  
+  
+  
   double knotsRadius = 10;
   if (constantRadius){
     knotsRadius= vm["constantRadius"].as<double>();
@@ -251,7 +276,7 @@ int main(int argc, char** argv)
   std::vector< std::vector<Z3i::RealPoint> > vectPointsBottomRightSplitted = splitKnotPithFromKnotID<Z3i::RealPoint>(vectPointsBottomRightALL, vectKnotID);
   
   DGtal::DefaultFunctor idV;
-  DGtal::Mesh<Z3i::RealPoint> meshMoelle(true);
+  DGtal::Mesh<Z3i::RealPoint> meshMoelle(colorKnotMesh);
   unsigned int numImageDisplayed =0;
 
   for (unsigned int numId=0; numId < vectPointsBottomRightSplitted.size(); numId++){
@@ -298,7 +323,13 @@ int main(int argc, char** argv)
                                                                            embedder(domainImage2D.upperBound(), false),
                                                                            embedder(Z2i::RealPoint(0, width), false));
           numImageDisplayed++;
-          
+          stringstream ss; ss << numImageDisplayed;
+          if(vm.count("exportImageExtracted")){            
+            std::string imageNameToExport= vm["exportImageExtracted"].as<string>();
+            extractedImage >> (imageNameToExport + ss.str() + ".pgm");
+          }
+
+
         }else if (vm.count("tangentialView")){
           if((vectPointsTopRight.at(i) - vectPointsTopLeft.at(i)).norm() <=5 ||
              (vectPointsTopRight.at(i) - vectPointsBottomRight.at(i)).norm()<=5)
@@ -320,7 +351,12 @@ int main(int argc, char** argv)
                                                                            embedder(Z2i::Point(0, (int)(vectPointsTopRight.at(i) - vectPointsBottomRight.at(i)).norm()), false));
           numImageDisplayed++;
           trace.info()<<embedder(Z2i::RealPoint(0,0), false);
-          
+          stringstream ss; ss << numImageDisplayed;
+          if(vm.count("exportImageExtracted")){            
+            std::string imageNameToExport= vm["exportImageExtracted"].as<string>();
+            extractedImage >> (imageNameToExport + ss.str() + ".pgm");
+          }
+                    
         }    
       
 
@@ -334,6 +370,7 @@ int main(int argc, char** argv)
     }
   }
   if(vm.count("visuKnotMesh")){
+    viewer.setFillColor(colorKnotMesh);
     viewer << meshMoelle;
   }
   if(vm.count("exportKnotMesh")){
