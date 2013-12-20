@@ -13,6 +13,7 @@
 #include "DGtal/images/imagesSetsUtils/SetFromImage.h"
 #include "DGtal/images/imagesSetsUtils/ImageFromSet.h"
 #include "DGtal/io/readers/GenericReader.h"
+#include "DGtal/io/writers/GenericWriter.h"
 #include "DGtal/images/ConstImageAdapter.h"
 #include <DGtal/shapes/Shapes.h>
 #include "DGtal/io/readers/MeshReader.h"
