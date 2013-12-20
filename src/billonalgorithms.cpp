@@ -87,7 +87,7 @@ namespace BillonAlgorithms
 	{
 		const qreal zPithCoord = sliceInterval.mid();
 		const rCoord2D &originPith = billon.pithCoord(zPithCoord);
-		const uint angularRange = (angularInterval.max() + (angularInterval.isValid() ? 0. : PieChartSingleton::getInstance()->nbSectors())) - angularInterval.min();
+		const qreal angularRange = (angularInterval.max() + (angularInterval.isValid() ? 0. : PieChartSingleton::getInstance()->nbSectors())) - angularInterval.min() + 1;
 
 		const qreal bisectorOrientation = (angularInterval.min()+angularRange/2.)*PieChartSingleton::getInstance()->angleStep();
 		const qreal cosBisector = qCos(bisectorOrientation);
@@ -110,16 +110,15 @@ namespace BillonAlgorithms
 		const int &billonDepthMinusOne = billon.n_slices-1;
 
 		/* Hauteur et largeur des coupes tangentielles */
-		const uint width = sliceInterval.size()+1;
-		const uint height = 2 * qTan(angularRange*PieChartSingleton::getInstance()->angleStep()/2.) * depth;
-		const int widthOnTwo = qFloor((width-1)/2.);
+		const uint width = 2 * qTan(angularRange/2.) * depth;
+		const uint height = sliceInterval.size()+1;
+		const int widthOnTwo = qFloor(width/2.);
 		const int heightOnTwo = qFloor(height/2.);
-		const int heightOnTwoMinusOne = heightOnTwo-1;
 
 		const uint nbSlices = qRound(depth);
 
 		// Inversion width et height pour correspondre à la ratation de 90°
-		Billon * tangentialBillon = new Billon(height,width,nbSlices);
+		Billon * tangentialBillon = new Billon(width,height,nbSlices);
 		//tangentialBillon->setVoxelSize( billon.voxelWidth(), billon.voxelDepth(), billon.voxelWidth() );
 		tangentialBillon->setVoxelSize( qSqrt(qPow(billon.voxelWidth()*cosBisector,2)+qPow(billon.voxelHeight()*sinBisector,2)),
 										billon.voxelDepth(),
@@ -127,14 +126,15 @@ namespace BillonAlgorithms
 		tangentialBillon->fill(minIntensity);
 
 		// Rotation autour de l'axe Y
-		const qreal alpha = PI_ON_TWO;
-		const QQuaternion quaterY = QQuaternion::fromAxisAndAngle( 0, 1, 0, alpha*RAD_TO_DEG_FACT );
+		const qreal alpha = 90.;
+		const QQuaternion quaterY = QQuaternion::fromAxisAndAngle( 0., 1., 0., alpha );
+		const QQuaternion quaterX = QQuaternion::fromAxisAndAngle( 1., 0., 0., -alpha );
 
 		// Rotation selon l'angle de la zone de nœuds
-		const QQuaternion quaterZ = QQuaternion::fromAxisAndAngle( 0, 0, 1, bisectorOrientation*RAD_TO_DEG_FACT );
+		const QQuaternion quaterZ = QQuaternion::fromAxisAndAngle( 0., 0., 1., bisectorOrientation*RAD_TO_DEG_FACT );
 
 		// Combinaisons des rotations
-		const QQuaternion quaterRot = quaterZ * quaterY;
+		const QQuaternion quaterRot = quaterZ * quaterX * quaterY;
 
 		// Vecteur de déplacement entre deux coupes tangentielles successives
 		const QVector3D shiftStep = quaterRot.rotatedVector( QVector3D( 0., 0., 1. ) );
@@ -142,27 +142,27 @@ namespace BillonAlgorithms
 		QVector3D origin( originPith.x, originPith.y, zPithCoord );
 		QVector3D initial, destination;
 
-		const qreal semiKnotAreaHeightCoeff = heightOnTwo / static_cast<qreal>( nbSlices );
+		const qreal semiKnotAreaWidthCoeff = widthOnTwo / static_cast<qreal>( nbSlices );
 		const qreal originLinearInterpolationCoeff = 1.-linearInterpolationCoeff;
-		int i, j, jStart, jEnd;
+		int j, i, iStart, iEnd;
 
 		int x0,y0,z0;
 		qreal x0Dist, y0Dist, z0Dist;
 		qreal xFrontTop, xFrontBottom, xBackTop, xBackBottom, yFront, yBack;
 
-		jStart = jEnd = 0;
+		iStart = iEnd = 0;
 		initial.setZ(0.);
 		for ( uint k=0 ; k<nbSlices ; ++k )
 		{
 			Slice &slice = tangentialBillon->slice(k);
-			jEnd = qMin(qRound(semiKnotAreaHeightCoeff*k),heightOnTwoMinusOne);
-			jStart = -jEnd;
-			for ( j=jStart ; j<=jEnd ; ++j )
+			iEnd = qMin(qRound(semiKnotAreaWidthCoeff*k),widthOnTwo);
+			iStart = -iEnd;
+			for ( i=iStart ; i<iEnd ; ++i )
 			{
-				initial.setY(j);
-				for ( i=-widthOnTwo ; i<=widthOnTwo ; ++i )
+				initial.setX(i);
+				for ( j=-heightOnTwo ; j<heightOnTwo ; ++j )
 				{
-					initial.setX(i);
+					initial.setY(j);
 					destination = quaterRot.rotatedVector(initial) + origin;
 					x0 = qFloor(destination.x());
 					y0 = qFloor(destination.y());
@@ -183,13 +183,13 @@ namespace BillonAlgorithms
 							yFront = (1.-y0Dist)*xFrontBottom + y0Dist*xFrontTop;
 							yBack = (1.-y0Dist)*xBackBottom + y0Dist*xBackTop;
 							// Rotation de 90° dans le sens horaire pour correspondre à l'orientation de l'article
-							slice(i+widthOnTwo,heightOnTwoMinusOne-j) = originLinearInterpolationCoeff * billon(y0,x0,z0)
+							slice(j+heightOnTwo,i+widthOnTwo) = originLinearInterpolationCoeff * billon(y0,x0,z0)
 																		  + linearInterpolationCoeff * ((1.-z0Dist)*yFront + z0Dist*yBack);
 						}
 						else
 						{
 							// Rotation de 90° dans le sens horaire pour correspondre à l'orientation de l'article
-							slice(i+widthOnTwo,heightOnTwoMinusOne-j) =	billon(y0,x0,z0);
+							slice(j+heightOnTwo,i+widthOnTwo) =	billon(y0,x0,z0);
 						}
 					}
 				}
