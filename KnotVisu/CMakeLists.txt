@@ -42,7 +42,7 @@ ADD_EXECUTABLE(trunkVisuFig0 trunkVisuFig0)
 TARGET_LINK_LIBRARIES(trunkVisuFig0 ${DGTAL_LIBRARIES} ${DGtalToolsLibDependencies})
 INSTALL(TARGETS trunkVisuFig0  RUNTIME DESTINATION bin)
 
-ADD_EXECUTABLE(tangentialImageExtraction trunkVisuFig0 trunkVisuFig0)
+ADD_EXECUTABLE(tangentialImageExtraction tangentialImageExtraction)
 TARGET_LINK_LIBRARIES(tangentialImageExtraction ${DGTAL_LIBRARIES} ${DGtalToolsLibDependencies})
 INSTALL(TARGETS tangentialImageExtraction  RUNTIME DESTINATION bin)
 
