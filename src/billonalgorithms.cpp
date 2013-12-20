@@ -110,7 +110,7 @@ namespace BillonAlgorithms
 		const int &billonDepthMinusOne = billon.n_slices-1;
 
 		/* Hauteur et largeur des coupes tangentielles */
-		const uint width = 2 * qTan(angularRange/2.) * depth;
+		const uint width = qFloor(2 * qTan(angularRange*PieChartSingleton::getInstance()->angleStep()/2.) * depth);
 		const uint height = sliceInterval.size()+1;
 		const int widthOnTwo = qFloor(width/2.);
 		const int heightOnTwo = qFloor(height/2.);

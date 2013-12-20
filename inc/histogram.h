@@ -231,7 +231,8 @@ void Histogram<T>::computeMaximums( const int & minimumHeightPercentageOfMaximum
 			value = copy[i];
 			if ( value > thresholdOfMaximums )
 			{
-				cursor = 2;
+				cursor = qMin(2,neighborhoodOfMaximums);
+				isMax = false;
 				do
 				{
 					isMax = ( (value >= copy[i-cursor]) && (value >= copy[i+cursor]) );

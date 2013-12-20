@@ -1845,7 +1845,7 @@ void MainWindow::exportPithOfAKnotAreaToSdp( QTextStream &stream, const uint &nu
 
 	// Rotation selon l'angle de la zone de nœuds
 	const Interval<uint> &angularInterval = _sectorHistogram->interval(numAngularInterval);
-	const uint angularRange = (angularInterval.max() + (angularInterval.isValid() ? 0. : PieChartSingleton::getInstance()->nbSectors())) - angularInterval.min();
+	const uint angularRange = (angularInterval.max() + (angularInterval.isValid() ? 0. : PieChartSingleton::getInstance()->nbSectors())) - angularInterval.min() + 1;
 	const qreal bisectorOrientation = (angularInterval.min()+angularRange/2.)*PieChartSingleton::getInstance()->angleStep();
 	const QQuaternion quaterZ = QQuaternion::fromAxisAndAngle( 0., 0., 1., bisectorOrientation*RAD_TO_DEG_FACT );
 
