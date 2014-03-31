@@ -423,6 +423,7 @@ void MainWindow::drawSlice()
 					painter.drawEllipse(pithCoord.x-restrictedRadius,pithCoord.y-restrictedRadius,2*restrictedRadius,2*restrictedRadius);
 				else
 					painter.drawLine(0,restrictedRadius,width,restrictedRadius);
+				painter.end();
 			}
 
 			const bool inDrawingArea = (_currentSliceInterval &&
@@ -433,6 +434,119 @@ void MainWindow::drawSlice()
 				{
 					PieChartSingleton::getInstance()->draw(_mainPix, pithCoord, _sectorHistogram->intervals(), projectionType);
 					PieChartSingleton::getInstance()->draw(_mainPix, pithCoord, _currentSector, projectionType);
+				}
+				if ( _currentSectorInterval && _tangentialBillon )
+				{
+					const Interval<uint> &sliceInterval = _sliceHistogram->interval(_currentSliceInterval-1);
+					const Interval<uint> &angularInterval = _sectorHistogram->interval(_currentSectorInterval-1);
+					const qreal zPithCoord = sliceInterval.mid();
+					const rCoord2D &originPith = _billon->pithCoord(zPithCoord);
+					const qreal angularRange = (angularInterval.max() + (angularInterval.isValid() ? 0. : PieChartSingleton::getInstance()->nbSectors())) - angularInterval.min() + 1;
+
+					const qreal bisectorOrientation = (angularInterval.min()+angularRange/2.)*PieChartSingleton::getInstance()->angleStep();
+
+					// Dimensions de la coupe tangentielle
+					const qreal depth = _tangentialBillon->n_slices;
+
+					/* Hauteur et largeur des coupes tangentielles */
+					const uint width = qFloor(2 * qTan(angularRange*PieChartSingleton::getInstance()->angleStep()/2.) * depth);
+					const int widthOnTwo = qFloor(width/2.);
+					const int heightOnTwo = qFloor((sliceInterval.size()+1)/2.);
+
+					const uint nbSlices = qRound(depth);
+
+					// Rotation autour de l'axe Y
+					const qreal alpha = 90.;
+					const QQuaternion quaterY = QQuaternion::fromAxisAndAngle( 0., 1., 0., alpha );
+					const QQuaternion quaterX = QQuaternion::fromAxisAndAngle( 1., 0., 0., -alpha );
+
+					// Rotation selon l'angle de la zone de nœuds
+					const QQuaternion quaterZ = QQuaternion::fromAxisAndAngle( 0., 0., 1., bisectorOrientation*RAD_TO_DEG_FACT );
+
+					// Combinaisons des rotations
+					const QQuaternion quaterRot = quaterZ * quaterX * quaterY;
+
+
+					const QVector3D shiftStep = quaterRot.rotatedVector( QVector3D( 0., 0., 1. ) );
+					QVector3D origin( originPith.x, originPith.y, zPithCoord );
+					//origin += depth*shiftStep;
+					QVector3D initial, destination;
+
+					const qreal semiKnotAreaWidthCoeff = widthOnTwo / static_cast<qreal>( nbSlices );
+					int iStart, iEnd, j;
+
+					int x0,y0,z0;
+
+					iStart = iEnd = 0;
+					j = currentSlice-sliceInterval.min()-heightOnTwo;
+					initial.setZ(0.);
+					initial.setY(j);
+
+					QPainter painter(&_mainPix);
+					painter.setPen(Qt::green);
+					for ( uint k=0 ; k<nbSlices ; ++k )
+					{
+						iEnd = qMin(qRound(semiKnotAreaWidthCoeff*k),widthOnTwo);
+						iStart = -iEnd;
+
+						initial.setX(iStart);
+						destination = quaterRot.rotatedVector(initial) + origin;
+						x0 = qFloor(destination.x());
+						y0 = qFloor(destination.y());
+						z0 = qFloor(destination.z());
+						//slice(j+heightOnTwo,iStart+widthOnTwo) = billon(y0,x0,z0);
+						painter.drawPoint( x0, y0 );
+
+						initial.setX(iEnd);
+						destination = quaterRot.rotatedVector(initial) + origin;
+						x0 = qFloor(destination.x());
+						y0 = qFloor(destination.y());
+						z0 = qFloor(destination.z());
+						//slice(j+heightOnTwo,iEnd+widthOnTwo) =	billon(y0,x0,z0);
+						painter.drawPoint( x0, y0 );
+
+						painter.setPen(Qt::red);
+
+						initial.setX( _tangentialBillon->pithCoord(k).x - widthOnTwo - 1 );
+						initial.setY( _tangentialBillon->pithCoord(k).y - heightOnTwo );
+						destination = quaterRot.rotatedVector(initial) + origin;
+						x0 = qFloor(destination.x());
+						y0 = qFloor(destination.y());
+						z0 = qFloor(destination.z());
+						//slice(j+heightOnTwo,i+widthOnTwo) =	billon(y0,x0,z0);
+						painter.drawPoint( x0, y0 );
+
+						origin += shiftStep;
+					}
+					painter.end();
+
+//					initial.setY(currentSlice-sliceInterval.min()-heightOnTwo);
+
+//					const uint &k = nbSlices;
+
+//					iEnd = qMin(qRound(semiKnotAreaWidthCoeff*k),widthOnTwo);
+//					iStart = -iEnd;
+
+//					QPainter painter(&_mainPix);
+//					painter.setPen(Qt::green);
+//					for ( i=iStart ; i<iEnd ; ++i )
+//					{
+//						initial.setX(i);
+//						destination = quaterRot.rotatedVector(initial) + origin;
+//						x0 = qFloor(destination.x());
+//						y0 = qFloor(destination.y());
+//						painter.drawPoint( x0, y0 );
+
+//					}
+
+//					initial.setX( _tangentialBillon->pithCoord(depth).x - widthOnTwo - 1 );
+//					//initial.setY( _tangentialBillon->pithCoord(depth).y - heightOnTwo );
+//					destination = quaterRot.rotatedVector(initial) + origin;
+//					x0 = qFloor(destination.x());
+//					y0 = qFloor(destination.y());
+//					painter.setPen(Qt::red);
+//					painter.drawPoint( x0, y0 );
+
 				}
 			}
 		}
@@ -1162,7 +1276,7 @@ void MainWindow::exportPithToOfs( const bool &onCurrentSliceInterval )
 		{
 			QTextStream stream(&file);
 			OfsExport::writeHeader( stream );
-			const Interval<uint> &sliceInterval = onCurrentSliceInterval ? _sliceHistogram->interval(_currentSliceInterval) : Interval<uint>(0,_billon->n_slices-1);
+			const Interval<uint> &sliceInterval = onCurrentSliceInterval ? _sliceHistogram->interval(_currentSliceInterval-1) : Interval<uint>(0,_billon->n_slices-1);
 			OfsExport::processOnPith( stream, *_billon, sliceInterval, _ui->_spinExportNbEdges->value(), _ui->_spinExportRadius->value(), false );
 			file.close();
 			QMessageBox::information( this, tr("Export en .ofs"), tr("Terminé avec succés !"));
@@ -1824,9 +1938,9 @@ void MainWindow::exportPithOfAKnotAreaToSdp( QTextStream &stream, const uint &nu
 {
 	stream << "# SDP (Sequence of Discrete Points)" << endl;
 	stream << "#" << endl;
-	stream << "#Knot nums| Ellipse|  Pith  |                 Window size" << endl;
+	stream << "#              Knot location               |          Ellipse          |  Pith |               Window size" << endl;
 	stream << "#knotID NumSliceInterval NumAngularInterval| EllipseWidth EllipseHeight| Coord | Top Left | Top Right | Bottom Right | Bottom Left" << endl;
-	stream << "#KnotID NumSliceInterval NumAngularInterval EllipseWidth EllipseHeight x y z    x y z       x y z        x y z         x y z" << endl;
+	stream << "# int       int                  int       |    double       double    | x y z |   x y z  |   x y z   |    x y z     |   x y z" << endl;
 
 	const Interval<uint> &sliceInterval = _sliceHistogram->interval(numSliceInterval);
 	const qreal zPithCoord = sliceInterval.mid();
