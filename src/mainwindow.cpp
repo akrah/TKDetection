@@ -437,13 +437,20 @@ void MainWindow::drawSlice()
 				}
 				if ( _currentSectorInterval && _tangentialBillon )
 				{
-					const Interval<uint> &sliceInterval = _sliceHistogram->interval(_currentSliceInterval-1);
+					const uint nbAngularSectors = PieChartSingleton::getInstance()->nbSectors();
 					const Interval<uint> &angularInterval = _sectorHistogram->interval(_currentSectorInterval-1);
+					const uint semiAngularRange = ((angularInterval.max() + (angularInterval.isValid() ? 0. : nbAngularSectors)) - angularInterval.min())/2.;
+					const uint &maximumIndex = _sectorHistogram->maximumIndex(_currentSectorInterval-1);
+					Interval<uint> centeredSectorInterval( maximumIndex-semiAngularRange, maximumIndex+semiAngularRange );
+					if ( maximumIndex<semiAngularRange ) centeredSectorInterval.setMin( nbAngularSectors + centeredSectorInterval.min() - 1 );
+					if ( centeredSectorInterval.max() > nbAngularSectors-1 ) centeredSectorInterval.setMax( centeredSectorInterval.max() - nbAngularSectors + 1 );
+
+					const Interval<uint> &sliceInterval = _sliceHistogram->interval(_currentSliceInterval-1);
 					const qreal zPithCoord = sliceInterval.mid();
 					const rCoord2D &originPith = _billon->pithCoord(zPithCoord);
-					const qreal angularRange = (angularInterval.max() + (angularInterval.isValid() ? 0. : PieChartSingleton::getInstance()->nbSectors())) - angularInterval.min() + 1;
+					const qreal angularRange = 2*semiAngularRange + 1;
 
-					const qreal bisectorOrientation = (angularInterval.min()+angularRange/2.)*PieChartSingleton::getInstance()->angleStep();
+					const qreal bisectorOrientation = (centeredSectorInterval.min()+semiAngularRange)*PieChartSingleton::getInstance()->angleStep();
 
 					// Dimensions de la coupe tangentielle
 					const qreal depth = _tangentialBillon->n_slices;
@@ -475,7 +482,7 @@ void MainWindow::drawSlice()
 					const qreal semiKnotAreaWidthCoeff = widthOnTwo / static_cast<qreal>( nbSlices );
 					int iStart, iEnd, j;
 
-					int x0,y0,z0;
+					int x0,y0;
 
 					iStart = iEnd = 0;
 					j = currentSlice-sliceInterval.min()-heightOnTwo;
@@ -483,9 +490,9 @@ void MainWindow::drawSlice()
 					initial.setY(j);
 
 					QPainter painter(&_mainPix);
-					painter.setPen(Qt::green);
 					for ( uint k=0 ; k<nbSlices ; ++k )
 					{
+						painter.setPen(Qt::green);
 						iEnd = qMin(qRound(semiKnotAreaWidthCoeff*k),widthOnTwo);
 						iStart = -iEnd;
 
@@ -493,7 +500,6 @@ void MainWindow::drawSlice()
 						destination = quaterRot.rotatedVector(initial) + origin;
 						x0 = qFloor(destination.x());
 						y0 = qFloor(destination.y());
-						z0 = qFloor(destination.z());
 						//slice(j+heightOnTwo,iStart+widthOnTwo) = billon(y0,x0,z0);
 						painter.drawPoint( x0, y0 );
 
@@ -501,18 +507,16 @@ void MainWindow::drawSlice()
 						destination = quaterRot.rotatedVector(initial) + origin;
 						x0 = qFloor(destination.x());
 						y0 = qFloor(destination.y());
-						z0 = qFloor(destination.z());
 						//slice(j+heightOnTwo,iEnd+widthOnTwo) =	billon(y0,x0,z0);
 						painter.drawPoint( x0, y0 );
 
 						painter.setPen(Qt::red);
 
-						initial.setX( _tangentialBillon->pithCoord(k).x - widthOnTwo - 1 );
+						initial.setX( _tangentialBillon->pithCoord(k).x - widthOnTwo );
 						initial.setY( _tangentialBillon->pithCoord(k).y - heightOnTwo );
 						destination = quaterRot.rotatedVector(initial) + origin;
 						x0 = qFloor(destination.x());
 						y0 = qFloor(destination.y());
-						z0 = qFloor(destination.z());
 						//slice(j+heightOnTwo,i+widthOnTwo) =	billon(y0,x0,z0);
 						painter.drawPoint( x0, y0 );
 
