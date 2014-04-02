@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>692</width>
+    <width>700</width>
     <height>561</height>
    </rect>
   </property>
@@ -148,7 +148,7 @@
             <widget class="QWidget" name="scrollAreaWidgetContents">
              <property name="geometry">
               <rect>
-               <x>96</x>
+               <x>98</x>
                <y>189</y>
                <width>0</width>
                <height>0</height>
@@ -252,7 +252,7 @@
              <property name="geometry">
               <rect>
                <x>0</x>
-               <y>0</y>
+               <y>72</y>
                <width>390</width>
                <height>234</height>
               </rect>
@@ -286,7 +286,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>692</width>
+     <width>700</width>
      <height>25</height>
     </rect>
    </property>
@@ -323,7 +323,7 @@
      <item row="1" column="0">
       <widget class="QTabWidget" name="_tabs">
        <property name="currentIndex">
-        <number>1</number>
+        <number>5</number>
        </property>
        <widget class="QWidget" name="tab_4">
         <attribute name="title">
@@ -397,7 +397,7 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>434</width>
+              <width>435</width>
               <height>148</height>
              </rect>
             </property>
@@ -597,7 +597,7 @@ du repère polaire</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>271</width>
+              <width>267</width>
               <height>263</height>
              </rect>
             </property>
@@ -859,8 +859,8 @@ zone restreinte</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>274</width>
-              <height>99</height>
+              <width>339</width>
+              <height>143</height>
              </rect>
             </property>
             <attribute name="label">
@@ -939,7 +939,7 @@ zone restreinte</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>415</width>
+              <width>406</width>
               <height>265</height>
              </rect>
             </property>
@@ -1104,7 +1104,7 @@ sur une coupe valide</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>408</width>
+              <width>399</width>
               <height>252</height>
              </rect>
             </property>
@@ -1338,7 +1338,7 @@ sur une coupe valide</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>388</width>
+              <width>394</width>
               <height>248</height>
              </rect>
             </property>
@@ -1606,7 +1606,7 @@ sur une coupe valide</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>388</width>
+              <width>394</width>
               <height>285</height>
              </rect>
             </property>
@@ -1929,7 +1929,7 @@ sur une coupe valide</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>195</width>
+              <width>198</width>
               <height>45</height>
              </rect>
             </property>
@@ -1973,7 +1973,7 @@ sur une coupe valide</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>195</width>
+              <width>198</width>
               <height>45</height>
              </rect>
             </property>
@@ -2233,7 +2233,7 @@ l'intervalle angulaire</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>374</width>
+              <width>380</width>
               <height>86</height>
              </rect>
             </property>
@@ -2324,7 +2324,7 @@ l'intervalle angulaire</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>319</width>
+              <width>322</width>
               <height>181</height>
              </rect>
             </property>
@@ -2533,7 +2533,7 @@ l'intervalle angulaire</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>334</width>
+              <width>339</width>
               <height>157</height>
              </rect>
             </property>
@@ -2722,7 +2722,7 @@ l'intervalle angulaire</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>261</width>
+              <width>264</width>
               <height>84</height>
              </rect>
             </property>
@@ -2788,7 +2788,7 @@ l'intervalle angulaire</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>398</width>
+              <width>355</width>
               <height>112</height>
              </rect>
             </property>
@@ -2834,11 +2834,6 @@ l'intervalle angulaire</string>
                  <string>Nœuds du billon</string>
                 </property>
                </item>
-               <item>
-                <property name="text">
-                 <string>Nœuds de l'intervalle de coupes (old Method)</string>
-                </property>
-               </item>
               </widget>
              </item>
              <item>
@@ -2850,7 +2845,7 @@ l'intervalle angulaire</string>
                 </font>
                </property>
                <property name="text">
-                <string>keep billon slice number (else numbers starting by 0)</string>
+                <string>Utiliser le repère de l'intervalle de coupe</string>
                </property>
               </widget>
              </item>
@@ -2988,7 +2983,7 @@ l'intervalle angulaire</string>
          </item>
          <item>
           <widget class="QwtPolarPlot" name="_polarSectorHistogram">
-           <property name="plotBackground">
+           <property name="plotBackground" stdset="0">
             <brush brushstyle="SolidPattern">
              <color alpha="0">
               <red>255</red>

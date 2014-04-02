@@ -476,35 +476,44 @@ void MainWindow::drawSlice()
 
 					QVector3D origin( originPith.x, originPith.y, zPithCoord );
 					const QVector3D shiftStep = quaterRot.rotatedVector( QVector3D( 0., 0., 1. ) );
-					const qreal semiKnotAreaWidthCoeff = widthOnTwo / static_cast<qreal>( nbSlices );
+
+					QVector<QColor> colors;
+					colors << Qt::blue << Qt::yellow << Qt::green << Qt::magenta << Qt::cyan << Qt::white;
+					const int nbColorsToUse = qMax( _sectorHistogram->intervals().size()>colors.size() ? ((_sectorHistogram->intervals().size()+1)/2)%colors.size() : colors.size() , 1 );
+					QColor currentColor = colors[(_currentSectorInterval-1)%nbColorsToUse];
 
 					QVector3D initial, destination;
-					int iEnd;
 
-					iEnd = 0;
 					initial.setZ(0.);
 					initial.setY(0.);
 
 					QPainter painter(&_mainPix);
 					for ( uint k=0 ; k<nbSlices ; ++k )
 					{
-						painter.setPen(Qt::red);
-						iEnd = qMin(qRound(semiKnotAreaWidthCoeff*k),widthOnTwo);
+						painter.setPen(currentColor);
 
-						initial.setX(-iEnd);
+						// Draw knot contour
+						const qreal ellipticityRate = (_tangentialBillon->voxelWidth()/_tangentialBillon->voxelHeight()) / (*_knotPithProfile)[k];
+						const qreal a = _knotEllipseRadiiHistogram->lowessData()[k];
+						const qreal b = a*ellipticityRate;
+						const qreal y = (sliceInterval.width() - currentSlice + sliceInterval.min())-_tangentialBillon->pithCoord(k).y;
+						const qreal x = qSqrt( (1-qPow(y/b,2)) * qPow(a,2) );
+
+						initial.setX( _tangentialBillon->pithCoord(k).x + x - widthOnTwo );
+						initial.setY( _tangentialBillon->pithCoord(k).y + y - heightOnTwo );
 						destination = quaterRot.rotatedVector(initial) + origin;
 						painter.drawPoint( qFloor(destination.x()), qFloor(destination.y()) );
 
-						initial.setX(iEnd);
+						initial.setX( _tangentialBillon->pithCoord(k).x - x - widthOnTwo );
 						destination = quaterRot.rotatedVector(initial) + origin;
 						painter.drawPoint( qFloor(destination.x()), qFloor(destination.y()) );
 
-
+						// Draw knot pith
 						initial.setX( _tangentialBillon->pithCoord(k).x - widthOnTwo );
 						initial.setY( _tangentialBillon->pithCoord(k).y - heightOnTwo );
 						destination = quaterRot.rotatedVector(initial) + origin;
-						if ( qRound(_tangentialBillon->pithCoord(k).y) == sliceInterval.width()-currentSlice+sliceInterval.min() )
-							painter.setPen(Qt::green);
+						if ( qRound(_tangentialBillon->pithCoord(k).y) == static_cast<int>(sliceInterval.width()-currentSlice+sliceInterval.min()) )
+							painter.setPen(Qt::red);
 						painter.drawPoint( qFloor(destination.x()), qFloor(destination.y()) );
 
 						origin += shiftStep;
@@ -1075,10 +1084,9 @@ void MainWindow::exportToSdp()
 		case 0 : exportPithOfCurrentKnotToSdp(); break;
 		case 1 : exportPithOfCurrentKnotAreaToSdp(); break;
 		case 2 : exportPithOfAllKnotAreaToSdp(); break;
-		case 3 : exportCurrentSegmentedKnotToSdp();	break;
+		case 3 : exportCurrentSegmentedKnotToSdp( _ui->_checkBoxKeepBillonSliceNumber->isChecked() );	break;
 		case 4 : exportSegmentedKnotsOfCurrentSliceIntervalToSdp( _ui->_checkBoxKeepBillonSliceNumber->isChecked() ); break;
-//		case 4 : exportAllSegmentedKnotsOfBillonToSdp(); break;
-//		case 5 : exportSegmentedKnotsOfCurrentSliceIntervalToSdpOldAlgo(_ui->_checkBoxKeepBillonSliceNumber->isChecked() );	break;
+		case 5 : exportAllSegmentedKnotsOfBillonToSdp(); break;
 		default : break;
 	}
 }
@@ -1989,7 +1997,7 @@ void MainWindow::exportPithOfAKnotAreaToSdp( QTextStream &stream, const uint &nu
 	}
 }
 
-void MainWindow::exportCurrentSegmentedKnotToSdp()
+void MainWindow::exportCurrentSegmentedKnotToSdp( const bool &useSliceIntervalCoordinates )
 {
 	if ( _tangentialBillon && _tangentialBillon->hasPith() )
 	{
@@ -2005,7 +2013,7 @@ void MainWindow::exportCurrentSegmentedKnotToSdp()
 				stream << "#" << endl;
 				stream << "# Coordinates of the segmented knot" << endl;
 				stream << "# x y z" << endl;
-				exportSegmentedKnotToSdp(stream, _ui->_comboSelectSliceInterval->currentIndex()-1, _ui->_comboSelectSectorInterval->currentIndex()-1);
+				exportSegmentedKnotToSdp(stream, _ui->_comboSelectSliceInterval->currentIndex()-1, _ui->_comboSelectSectorInterval->currentIndex()-1, useSliceIntervalCoordinates);
 				file.close();
 				QMessageBox::information(this,tr("Export du nœud courant segmenté en SDP"), tr("Export réussi !"));
 			}
@@ -2016,7 +2024,7 @@ void MainWindow::exportCurrentSegmentedKnotToSdp()
 	else QMessageBox::warning(this,tr("Export du nœud courant segmenté en SDP"),tr("L'export a échoué : la moelle n'existe pas."));
 }
 
-void MainWindow::exportSegmentedKnotsOfCurrentSliceIntervalToSdp( const bool &keepBillonSliceNumber )
+void MainWindow::exportSegmentedKnotsOfCurrentSliceIntervalToSdp( const bool &useSliceIntervalCoordinates )
 {
 	if ( _ui->_comboSelectSliceInterval->currentIndex() )
 	{
@@ -2036,7 +2044,7 @@ void MainWindow::exportSegmentedKnotsOfCurrentSliceIntervalToSdp( const bool &ke
 				for ( int sectorIndex=1 ; sectorIndex<_ui->_comboSelectSectorInterval->count() ; ++sectorIndex )
 				{
 					selectSectorInterval(sectorIndex, true);
-					exportSegmentedKnotToSdp(stream, _ui->_comboSelectSliceInterval->currentIndex()-1, sectorIndex-1);
+					exportSegmentedKnotToSdp(stream, _ui->_comboSelectSliceInterval->currentIndex()-1, sectorIndex-1, useSliceIntervalCoordinates);
 				}
 
 				file.close();
@@ -2049,7 +2057,46 @@ void MainWindow::exportSegmentedKnotsOfCurrentSliceIntervalToSdp( const bool &ke
 	else QMessageBox::warning(this,tr("Export des nœud segmentés de l'intervalle de coupes courant en SDP"),tr("L'export a échoué : la moelle n'existe pas."));
 }
 
-void MainWindow::exportSegmentedKnotToSdp( QTextStream &stream, const uint &numSliceInterval, const uint &numAngularInterval )
+void MainWindow::exportAllSegmentedKnotsOfBillonToSdp()
+{
+	if ( _billon && _billon->hasPith() )
+	{
+		QString fileName = QFileDialog::getSaveFileName(this, tr("Exporter tous les nœuds segmentés du billon en SDP"), "output.sdp", tr("Fichiers SDP (*.sdp);;Tous les fichiers (*.*)"));
+		if ( !fileName.isEmpty() )
+		{
+			QFile file(fileName);
+			if ( file.open(QIODevice::WriteOnly) )
+			{
+				QTextStream stream(&file);
+				stream << "# SDP (Sequence of Discrete Points)" << endl;
+				stream << "#" << endl;
+				stream << "# Coordinates of the segmented knot" << endl;
+				stream << "# x y z" << endl;
+
+				int intervalIndex, sectorIndex;
+
+				for ( intervalIndex=1 ; intervalIndex< _ui->_comboSelectSliceInterval->count() ; ++intervalIndex )
+				{
+					_ui->_comboSelectSliceInterval->setCurrentIndex(intervalIndex);
+					for ( sectorIndex=1 ; sectorIndex< _ui->_comboSelectSectorInterval->count() ; ++sectorIndex )
+					{
+						selectSectorInterval(sectorIndex,false);
+						exportSegmentedKnotToSdp(stream, intervalIndex-1, sectorIndex-1,false);
+					}
+				}
+
+				file.close();
+
+				QMessageBox::information(this,tr("Exporter tous les nœuds segmentés du billon en SDP"), tr("Export réussi !"));
+			}
+			else QMessageBox::warning(this,tr("Exporter tous les nœuds segmentés du billon en SDP"),tr("L'export a échoué : impossible de créer le ficher %1.").arg(fileName));
+		}
+	}
+	else QMessageBox::warning(this,tr("Exporter tous les nœuds segmentés du billon en SDP"),tr("L'export a échoué : la moelle du billon n'est pas calculée."));
+}
+
+
+void MainWindow::exportSegmentedKnotToSdp(QTextStream &stream, const uint &numSliceInterval, const uint &numAngularInterval, const bool &useSliceIntervalCoordinates )
 {
 	const Interval<uint> &sliceInterval = _sliceHistogram->interval(numSliceInterval);
 	const qreal zPithCoord = sliceInterval.mid();
@@ -2067,9 +2114,15 @@ void MainWindow::exportSegmentedKnotToSdp( QTextStream &stream, const uint &numS
 	const QQuaternion quaterX = QQuaternion::fromAxisAndAngle( 1., 0., 0., -alpha );
 
 	// Rotation selon l'angle de la zone de nœuds
+	PieChartSingleton &pieChart = *(PieChartSingleton::getInstance());
+	const uint nbAngularSectors = pieChart.nbSectors();
 	const Interval<uint> &angularInterval = _sectorHistogram->interval(numAngularInterval);
-	const qreal angularRange = (angularInterval.max() + (angularInterval.isValid() ? 0. : PieChartSingleton::getInstance()->nbSectors())) - angularInterval.min() + 1;
-	const qreal bisectorOrientation = (angularInterval.min()+angularRange/2.)*PieChartSingleton::getInstance()->angleStep();
+	const qreal semiAngularRange = ((angularInterval.max() + (angularInterval.isValid() ? 0. : nbAngularSectors)) - angularInterval.min())/2.;
+	const uint &maximumIndex = _sectorHistogram->maximumIndex(_currentSectorInterval-1);
+	Interval<uint> centeredSectorInterval( maximumIndex-semiAngularRange, maximumIndex+semiAngularRange );
+	if ( maximumIndex<semiAngularRange ) centeredSectorInterval.setMin( nbAngularSectors + centeredSectorInterval.min() - 1 );
+	if ( centeredSectorInterval.max() > nbAngularSectors-1 ) centeredSectorInterval.setMax( centeredSectorInterval.max() - nbAngularSectors + 1 );
+	const qreal bisectorOrientation = (centeredSectorInterval.min()+semiAngularRange)*pieChart.angleStep();
 	const QQuaternion quaterZ = QQuaternion::fromAxisAndAngle( 0., 0., 1., bisectorOrientation*RAD_TO_DEG_FACT );
 
 	// Combinaisons des rotations
@@ -2078,7 +2131,7 @@ void MainWindow::exportSegmentedKnotToSdp( QTextStream &stream, const uint &numS
 	// Vecteur de déplacement entre deux coupes tangentielles successives
 	const QVector3D shiftStep = quaterRot.rotatedVector( QVector3D( 0., 0., .5 ) );
 
-	QVector3D origin( originPith.x, originPith.y, zPithCoord );
+	QVector3D origin( originPith.x, originPith.y, zPithCoord-(useSliceIntervalCoordinates?sliceInterval.min():0.) );
 	QVector3D initial, destination;
 
 	QVector<int> xBound;
@@ -2158,174 +2211,4 @@ void MainWindow::exportSegmentedKnotToSdp( QTextStream &stream, const uint &numS
 		}
 	}
 }
-
-
-//void MainWindow::exportCurrentSegmentedKnotToSdp()
-//{
-//	if ( _knotBillon )
-//	{
-//		QString fileName = QFileDialog::getSaveFileName(this, tr("Exporter le nœud courant segmenté en SDP"), "output.sdp", tr("Fichiers PGM3D (*.sdp);;Tous les fichiers (*.*)"));
-//		if ( !fileName.isEmpty() )
-//		{
-//			QFile file(fileName);
-//			if ( file.open(QIODevice::WriteOnly) )
-//			{
-//				QTextStream stream(&file);
-//				stream << "#SDP (Sequence of Discrete Points)" << endl;
-
-//				for ( uint k=0 ; k<_knotBillon->n_slices ; ++k )
-//				{
-//					SliceAlgorithm::writeInSDP( _knotBillon->slice(k) , stream, k, 0 );
-//				}
-
-//				file.close();
-
-//				QMessageBox::information(this,tr("Exporter le nœud segmenté en SDP"), tr("Export réussi !"));
-//				QMessageBox::information(this,"Exporter le nœud courant segmenté en SDP", "Export réussi !");
-//			}
-//			else QMessageBox::warning(this,tr("Exporter le nœud courant segmenté en SDP"),tr("L'export a échoué : impossible de créer le ficher %1.").arg(fileName));
-//		}
-//	}
-//	else QMessageBox::warning(this,tr("Exporter le nœud courant segmenté en SDP"),tr("L'export a échoué : le nœud n'est pas segmenté."));
-//}
-
-//void MainWindow::exportSegmentedKnotsOfCurrentSliceIntervalToSdp( bool keepBillonSliceNumber )
-//{
-//	if ( _billon && _billon->hasPith() )
-//	{
-//		QString fileName = QFileDialog::getSaveFileName(this, tr("Exporter les nœuds segmentés de l'intervalle de coupe courant en SDP"), "output.sdp",
-//														tr("Fichiers SDP (*.sdp);;Tous les fichiers (*.*)"));
-//		if ( !fileName.isEmpty() )
-//		{
-//			QFile file(fileName);
-//			if ( file.open(QIODevice::WriteOnly) )
-//			{
-//				QTextStream stream(&file);
-//				stream << "#SDP (Sequence of Discrete Points)" << endl;
-
-//				const bool coeffSliceNumber = !keepBillonSliceNumber;
-//				int sectorIndex;
-//				uint k;
-
-//				for ( sectorIndex=1 ; sectorIndex< _ui->_comboSelectSectorInterval->count() ; ++sectorIndex )
-//				{
-//					selectSectorInterval(sectorIndex,false);
-//					if ( _knotBillon )
-//					{
-//						for ( k=0 ; k<_knotBillon->n_slices ; ++k )
-//						{
-//							SliceAlgorithm::writeInSDP( _knotBillon->slice(k) , stream, _knotBillon->zPos()+k-_componentBillon->zPos()*coeffSliceNumber, 0 );
-//						}
-//					}
-//				}
-
-//				file.close();
-
-//				QMessageBox::information(this,tr("Exporter les nœuds segmentés de l'intervalle de coupe courant en SDP"), tr("Export réussi !"));
-//			}
-//			else QMessageBox::warning(this,tr("Exporter les nœuds segmentés de l'intervalle de coupe courant en SDP"),tr("L'export a échoué : impossible de créer le ficher %1.").arg(fileName));
-//		}
-//	}
-//	else QMessageBox::warning(this,tr("Exporter les nœuds segmentés de l'intervalle de coupe courant en SDP"),tr("L'export a échoué : le nœud n'est pas segmenté."));
-//}
-
-
-
-//void MainWindow::exportSegmentedKnotsOfCurrentSliceIntervalToSdpOldAlgo( bool keepBillonSliceNumber )
-//{
-//	if ( _billon && _billon->hasPith() )
-//	  {
-//		QString fileName = QFileDialog::getSaveFileName(this, tr("Exporter les nœuds segmentés de l'intervalle de coupe courant en SDP (old version)"), "output.sdp",
-//														tr("Fichiers SDP (*.sdp);;Tous les fichiers (*.*)"));
-//		if ( !fileName.isEmpty() )
-//		{
-//			QFile file(fileName);
-//			if ( file.open(QIODevice::WriteOnly) )
-//			{
-//				QTextStream stream(&file);
-//				stream << "#SDP (Sequence of Discrete Points)" << endl;
-
-//				const uint width = _billon->n_cols;
-//				const uint height = _billon->n_rows;
-//				const bool coeffSliceNumber = !keepBillonSliceNumber;
-
-//				int sectorIndex;
-//				uint i,j,k;
-
-//				for ( sectorIndex=1 ; sectorIndex< _ui->_comboSelectSectorInterval->count() ; ++sectorIndex )
-//				{
-//					selectSectorInterval(sectorIndex,false);
-//					if ( _knotBillon )
-//					{
-//						for ( k=0 ; k<_knotBillon->n_slices ; ++k )
-//						{
-//							const Slice &componentSlice = _componentBillon->slice(_knotBillon->zPos()-_componentBillon->zPos()+k);
-//							for ( j=0 ; j<height ; ++j )
-//							{
-//								for ( i=0 ; i<width ; ++i )
-//								{
-//									if ( componentSlice(j,i) )
-//									{
-//										stream << i << " "<< j << " " <<  _knotBillon->zPos()+k-_componentBillon->zPos()*coeffSliceNumber << endl ;
-//									}
-//								}
-//							}
-//						}
-//					}
-//				}
-
-//				file.close();
-
-//				QMessageBox::information(this,tr("Exporter les nœuds segmentés de l'intervalle de coupe courant en SDP"), tr("Export réussi !"));
-//			}
-//			else QMessageBox::warning(this,tr("Exporter les nœuds segmentés de l'intervalle de coupe courant en SDP"),tr("L'export a échoué : impossible de créer le ficher %1.").arg(fileName));
-//		}
-//	}
-//	else QMessageBox::warning(this,tr("Exporter les nœuds segmentés de l'intervalle de coupe courant en SDP"),tr("L'export a échoué : le nœud n'est pas segmenté."));
-//}
-
-
-
-
-//void MainWindow::exportAllSegmentedKnotsOfBillonToSdp()
-//{
-//	if ( _billon && _billon->hasPith() )
-//	{
-//		QString fileName = QFileDialog::getSaveFileName(this, tr("Exporter tous les nœuds segmentés du billon en SDP"), "output.sdp", tr("Fichiers SDP (*.sdp);;Tous les fichiers (*.*)"));
-//		if ( !fileName.isEmpty() )
-//		{
-//			QFile file(fileName);
-//			if ( file.open(QIODevice::WriteOnly) )
-//			{
-//				QTextStream stream(&file);
-//				stream << "#SDP (Sequence of Discrete Points)" << endl;
-
-//				int intervalIndex, sectorIndex;
-//				uint k;
-
-//				for ( intervalIndex=1 ; intervalIndex< _ui->_comboSelectSliceInterval->count() ; ++intervalIndex )
-//				{
-//					_ui->_comboSelectSliceInterval->setCurrentIndex(intervalIndex);
-//					for ( sectorIndex=1 ; sectorIndex< _ui->_comboSelectSectorInterval->count() ; ++sectorIndex )
-//					{
-//						selectSectorInterval(sectorIndex,false);
-//						if ( _knotBillon )
-//						{
-//							for ( k=0 ; k<_knotBillon->n_slices ; ++k )
-//							{
-//								SliceAlgorithm::writeInSDP( _knotBillon->slice(k) , stream, _knotBillon->zPos()+k, 0 );
-//							}
-//						}
-//					}
-//				}
-
-//				file.close();
-
-//				QMessageBox::information(this,tr("Exporter tous les nœuds segmentés du billon en SDP"), tr("Export réussi !"));
-//			}
-//			else QMessageBox::warning(this,tr("Exporter tous les nœuds segmentés du billon en SDP"),tr("L'export a échoué : impossible de créer le ficher %1.").arg(fileName));
-//		}
-//	}
-//	else QMessageBox::warning(this,tr("Exporter tous les nœuds segmentés du billon en SDP"),tr("L'export a échoué : la moelle n'est pas calculée."));
-//}
 

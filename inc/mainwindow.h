@@ -112,12 +112,12 @@ private:
 	void exportPithOfAllKnotAreaToSdp();
 	void exportPithOfAKnotAreaToSdp( QTextStream &stream, const uint &numSliceInterval, const uint &numAngularInterval, const uint &knotID );
 
-	void exportCurrentSegmentedKnotToSdp();
-	void exportSegmentedKnotsOfCurrentSliceIntervalToSdp( const bool &keepBillonSliceNumber = false );
-	void exportSegmentedKnotToSdp( QTextStream &stream, const uint &numSliceInterval, const uint &numAngularInterval );
+	void exportCurrentSegmentedKnotToSdp( const bool &useSliceIntervalCoordinates = false );
+	void exportSegmentedKnotsOfCurrentSliceIntervalToSdp( const bool &useSliceIntervalCoordinates = false );
+	void exportAllSegmentedKnotsOfBillonToSdp();
+	void exportSegmentedKnotToSdp(QTextStream &stream, const uint &numSliceInterval, const uint &numAngularInterval, const bool &useSliceIntervalCoordinates );
 
 //	void exportSegmentedKnotsOfCurrentSliceIntervalToSdpOldAlgo( bool keepBillonSliceNumber = false );
-//	void exportAllSegmentedKnotsOfBillonToSdp();
 
 private:
 	Ui::MainWindow *_ui;
