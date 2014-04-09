@@ -8,6 +8,7 @@
 #include "def/def_coordinate.h"
 #include "slicezoomer.h"
 #include "inc/pithextractorboukadida.h"
+#include "inc/tangentialtransform.h"
 
 namespace Ui
 {
@@ -115,7 +116,7 @@ private:
 	void exportCurrentSegmentedKnotToSdp( const bool &useSliceIntervalCoordinates = false );
 	void exportSegmentedKnotsOfCurrentSliceIntervalToSdp( const bool &useSliceIntervalCoordinates = false );
 	void exportAllSegmentedKnotsOfBillonToSdp();
-	void exportSegmentedKnotToSdp(QTextStream &stream, const uint &numSliceInterval, const uint &numAngularInterval, const bool &useSliceIntervalCoordinates );
+	void exportSegmentedKnotToSdp( QTextStream &stream, const TangentialTransform &tangentialTransform, const bool &useSliceIntervalCoordinates );
 
 //	void exportSegmentedKnotsOfCurrentSliceIntervalToSdpOldAlgo( bool keepBillonSliceNumber = false );
 
@@ -150,6 +151,8 @@ private:
 	PlotEllipticalAccumulationHistogram *_plotEllipticalAccumulationHistogram;
 
 	PithExtractorBoukadida _knotPithExtractor;
+
+	TangentialTransform _tangentialTransform;
 
 	uint _currentSliceInterval;
 	uint _currentSectorInterval;

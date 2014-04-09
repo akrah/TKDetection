@@ -48,7 +48,7 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 	_sectorHistogram(new SectorHistogram()), _plotSectorHistogram(new PlotSectorHistogram()),
 	_knotPithProfile(new KnotPithProfile()), _plotKnotPithProfile(new PlotKnotPithProfile()),
 	_knotEllipseRadiiHistogram(new KnotEllipseRadiiHistogram), _plotKnotEllipseRadiiHistogram(new PlotKnotEllipseRadiiHistogram),
-	_plotEllipticalAccumulationHistogram(new PlotEllipticalAccumulationHistogram()),
+	_plotEllipticalAccumulationHistogram(new PlotEllipticalAccumulationHistogram()), _tangentialTransform( -900, true, .5 ),
 	_currentSliceInterval(0), _currentSectorInterval(0), _currentMaximum(0), _currentSector(0), _treeRadius(0)
 {
 	_ui->setupUi(this);
@@ -437,86 +437,64 @@ void MainWindow::drawSlice()
 				}
 				if ( _currentSectorInterval && _tangentialBillon )
 				{
-					PieChartSingleton &pieChart = *(PieChartSingleton::getInstance());
-					const uint nbAngularSectors = pieChart.nbSectors();
-					const Interval<uint> &angularInterval = _sectorHistogram->interval(_currentSectorInterval-1);
-					const qreal semiAngularRange = ((angularInterval.max() + (angularInterval.isValid() ? 0. : nbAngularSectors)) - angularInterval.min())/2.;
-					const uint &maximumIndex = _sectorHistogram->maximumIndex(_currentSectorInterval-1);
-					Interval<uint> centeredSectorInterval( maximumIndex-semiAngularRange, maximumIndex+semiAngularRange );
-					if ( maximumIndex<semiAngularRange ) centeredSectorInterval.setMin( nbAngularSectors + centeredSectorInterval.min() - 1 );
-					if ( centeredSectorInterval.max() > nbAngularSectors-1 ) centeredSectorInterval.setMax( centeredSectorInterval.max() - nbAngularSectors + 1 );
-
-					const Interval<uint> &sliceInterval = _sliceHistogram->interval(_currentSliceInterval-1);
-					const qreal zPithCoord = sliceInterval.mid();
-					const rCoord2D &originPith = _billon->pithCoord(zPithCoord);
-
-					const qreal bisectorOrientation = (centeredSectorInterval.min()+semiAngularRange)*pieChart.angleStep();
-
-					// Dimensions de la coupe tangentielle
-					const qreal depth = _tangentialBillon->n_slices;
-
-					/* Hauteur et largeur des coupes tangentielles */
-					const uint width = qFloor(2 * qTan(semiAngularRange*PieChartSingleton::getInstance()->angleStep()) * depth);
-					const int widthOnTwo = qFloor(width/2.);
-					const int heightOnTwo = qFloor((sliceInterval.size()+1)/2.);
-
-					const uint nbSlices = qRound(depth);
-
-					// Rotation autour de l'axe Y
-					const qreal alpha = 90.;
-					const QQuaternion quaterY = QQuaternion::fromAxisAndAngle( 0., 1., 0., alpha );
-					const QQuaternion quaterX = QQuaternion::fromAxisAndAngle( 1., 0., 0., -alpha );
-
-					// Rotation selon l'angle de la zone de nœuds
-					const QQuaternion quaterZ = QQuaternion::fromAxisAndAngle( 0., 0., 1., bisectorOrientation*RAD_TO_DEG_FACT );
-
-					// Combinaisons des rotations
-					const QQuaternion quaterRot = quaterZ * quaterX * quaterY;
-
-
-					QVector3D origin( originPith.x, originPith.y, zPithCoord );
-					const QVector3D shiftStep = quaterRot.rotatedVector( QVector3D( 0., 0., 1. ) );
+					QVector3D origin( _tangentialTransform.origin() );
 
 					QVector<QColor> colors;
 					colors << Qt::blue << Qt::yellow << Qt::green << Qt::magenta << Qt::cyan << Qt::white;
 					const int nbColorsToUse = qMax( _sectorHistogram->intervals().size()>colors.size() ? ((_sectorHistogram->intervals().size()+1)/2)%colors.size() : colors.size() , 1 );
 					QColor currentColor = colors[(_currentSectorInterval-1)%nbColorsToUse];
 
+					const Interval<uint> &sliceInterval = _sliceHistogram->interval(_currentSliceInterval-1);
+					const qreal sliceIntervalWidth = sliceInterval.width();
+					const qreal sliceIntervalMin = sliceInterval.min();
+					const qreal sliceIntervalMax = sliceInterval.max();
+					const QQuaternion &quaterRot = _tangentialTransform.quaterRot();
+					const QVector3D shiftStep = _tangentialTransform.shiftStep( .25 );
+
+					const int widthOnTwo = qFloor(_tangentialBillon->n_cols/2.);
+					const int heightOnTwo = qFloor(_tangentialBillon->n_rows/2.);
+
+
 					QVector3D initial, destination;
+					int ellipseXCenter,ellipseYCenter;
+					qreal x,y,a,b,ellipticityRate;
 
 					initial.setZ(0.);
-					initial.setY(0.);
 
 					QPainter painter(&_mainPix);
-					for ( uint k=0 ; k<nbSlices ; ++k )
+					for ( uint k=0 ; k<_tangentialBillon->n_slices ; ++k )
 					{
-						painter.setPen(currentColor);
+						ellipticityRate = (_tangentialBillon->voxelWidth()/_tangentialBillon->voxelHeight()) / (*_knotPithProfile)[k];
+						ellipseXCenter = _tangentialBillon->pithCoord(k).x - widthOnTwo;
+						ellipseYCenter = _tangentialBillon->pithCoord(k).y - heightOnTwo;
+						a = _knotEllipseRadiiHistogram->lowessData()[k];
+						b = a*ellipticityRate;
+						y = (sliceIntervalMax - currentSlice )-_tangentialBillon->pithCoord(k).y;
+						x = qSqrt( (1-qPow(y/b,2)) * qPow(a,2) );
+						for ( uint step=0 ; step<4 ; ++step  )
+						{
+							// Draw knot contour
+							painter.setPen(currentColor);
 
-						// Draw knot contour
-						const qreal ellipticityRate = (_tangentialBillon->voxelWidth()/_tangentialBillon->voxelHeight()) / (*_knotPithProfile)[k];
-						const qreal a = _knotEllipseRadiiHistogram->lowessData()[k];
-						const qreal b = a*ellipticityRate;
-						const qreal y = (sliceInterval.width() - currentSlice + sliceInterval.min())-_tangentialBillon->pithCoord(k).y;
-						const qreal x = qSqrt( (1-qPow(y/b,2)) * qPow(a,2) );
+							initial.setX( ellipseXCenter + x );
+							initial.setY( ellipseYCenter + y );
+							destination = quaterRot.rotatedVector(initial) + origin;
+							painter.drawPoint( qRound(destination.x()), qRound(destination.y()) );
 
-						initial.setX( _tangentialBillon->pithCoord(k).x + x - widthOnTwo );
-						initial.setY( _tangentialBillon->pithCoord(k).y + y - heightOnTwo );
-						destination = quaterRot.rotatedVector(initial) + origin;
-						painter.drawPoint( qFloor(destination.x()), qFloor(destination.y()) );
+							initial.setX( ellipseXCenter - x );
+							destination = quaterRot.rotatedVector(initial) + origin;
+							painter.drawPoint( qRound(destination.x()), qRound(destination.y()) );
 
-						initial.setX( _tangentialBillon->pithCoord(k).x - x - widthOnTwo );
-						destination = quaterRot.rotatedVector(initial) + origin;
-						painter.drawPoint( qFloor(destination.x()), qFloor(destination.y()) );
+							// Draw knot pith
+							initial.setX( ellipseXCenter );
+							initial.setY( ellipseYCenter );
+							destination = quaterRot.rotatedVector(initial) + origin;
+							if ( qRound(_tangentialBillon->pithCoord(k).y) == static_cast<int>(sliceIntervalWidth-currentSlice+sliceIntervalMin) )
+								painter.setPen(Qt::red);
+							painter.drawPoint( qRound(destination.x()), qRound(destination.y()) );
 
-						// Draw knot pith
-						initial.setX( _tangentialBillon->pithCoord(k).x - widthOnTwo );
-						initial.setY( _tangentialBillon->pithCoord(k).y - heightOnTwo );
-						destination = quaterRot.rotatedVector(initial) + origin;
-						if ( qRound(_tangentialBillon->pithCoord(k).y) == static_cast<int>(sliceInterval.width()-currentSlice+sliceInterval.min()) )
-							painter.setPen(Qt::red);
-						painter.drawPoint( qFloor(destination.x()), qFloor(destination.y()) );
-
-						origin += shiftStep;
+							origin += shiftStep;
+						}
 					}
 					painter.end();
 				}
@@ -759,7 +737,7 @@ void MainWindow::selectSliceInterval( const int &index )
 	{
 		const Interval<uint> &sliceInterval = _sliceHistogram->interval(index-1);
 		updateSectorHistogram(sliceInterval);
-		_ui->_sliderSelectSlice->setValue(_sliceHistogram->interval(index-1).mid());
+		_ui->_sliderSelectSlice->setValue(sliceInterval.mid());
 
 		const QVector< Interval<uint> > &angularIntervals = _sectorHistogram->intervals();
 		if ( !angularIntervals.isEmpty() )
@@ -774,6 +752,7 @@ void MainWindow::selectSliceInterval( const int &index )
 														 .arg(currentAngularInterval.isValid()?maxAngle-minAngle:maxAngle-minAngle+360.));
 			}
 		}
+		_tangentialTransform.setSliceInterval( *_billon, sliceInterval );
 	}
 }
 
@@ -796,18 +775,23 @@ void MainWindow::selectSectorInterval(const int &index, const bool &draw )
 	{
 		const uint nbAngularSectors = PieChartSingleton::getInstance()->nbSectors();
 		const Interval<uint> &sectorInterval = _sectorHistogram->interval(index-1);
-		const uint semiAngularRange = ((sectorInterval.max() + (sectorInterval.isValid() ? 0. : nbAngularSectors)) - sectorInterval.min())/2;
-		const uint &maximumIndex = _sectorHistogram->maximumIndex(index-1);
+		uint semiAngularRange = ((sectorInterval.max() + (sectorInterval.isValid() ? 0. : nbAngularSectors)) - sectorInterval.min())/2;
+		uint maximumIndex = _sectorHistogram->maximumIndex(index-1);
 		Interval<uint> centeredSectorInterval( maximumIndex-semiAngularRange, maximumIndex+semiAngularRange );
-		if ( maximumIndex<semiAngularRange ) centeredSectorInterval.setMin( nbAngularSectors + centeredSectorInterval.min() - 1 );
-		if ( centeredSectorInterval.max() > nbAngularSectors-1 ) centeredSectorInterval.setMax( centeredSectorInterval.max() - nbAngularSectors + 1 );
+		if ( maximumIndex<semiAngularRange ) centeredSectorInterval.setMin( nbAngularSectors + maximumIndex - semiAngularRange );
+		if ( centeredSectorInterval.max() > nbAngularSectors-1 ) centeredSectorInterval.setMax( centeredSectorInterval.max() - nbAngularSectors );
 
-		const Interval<uint> &sliceInterval = _sliceHistogram->interval(_currentSliceInterval-1);
+		if ( maximumIndex < sectorInterval.min()+semiAngularRange ) centeredSectorInterval.setMin(sectorInterval.min());
+		else if ( maximumIndex > sectorInterval.min()+semiAngularRange ) centeredSectorInterval.setMax(sectorInterval.max());
+		semiAngularRange = ((centeredSectorInterval.max() + (centeredSectorInterval.isValid() ? 0. : nbAngularSectors)) - centeredSectorInterval.min())/2.;
+
 		const Interval<int> intensityInterval(_ui->_spinMinIntensity->value(), _ui->_spinMaxIntensity->value());
 
-		_tangentialBillon = BillonAlgorithms::tangentialTransform( *_billon, sliceInterval, centeredSectorInterval, intensityInterval.min(),
-																   _ui->_checkTrilinearInterpolation->isChecked(),
-																   _ui->_spinTrilinearInterpolationCoefficient->value()/100. );
+		_tangentialTransform.setMinIntensity( intensityInterval.min() );
+		_tangentialTransform.enableTrilinearInterpolation( _ui->_checkTrilinearInterpolation->isChecked() );
+		_tangentialTransform.setLinearInterpolationCoeff( _ui->_spinTrilinearInterpolationCoefficient->value()/100. );
+		_tangentialTransform.setAngularInterval( *_billon, centeredSectorInterval );
+		_tangentialBillon = _tangentialTransform.execute( *_billon );
 
 		_knotPithExtractor.setSubWindowWidth( _ui->_spinPithSubWindowWidth_knot->value() );
 		_knotPithExtractor.setSubWindowHeight( _ui->_spinPithSubWindowHeight_knot->value() );
@@ -2013,7 +1997,7 @@ void MainWindow::exportCurrentSegmentedKnotToSdp( const bool &useSliceIntervalCo
 				stream << "#" << endl;
 				stream << "# Coordinates of the segmented knot" << endl;
 				stream << "# x y z" << endl;
-				exportSegmentedKnotToSdp(stream, _ui->_comboSelectSliceInterval->currentIndex()-1, _ui->_comboSelectSectorInterval->currentIndex()-1, useSliceIntervalCoordinates);
+				exportSegmentedKnotToSdp( stream, _tangentialTransform , useSliceIntervalCoordinates);
 				file.close();
 				QMessageBox::information(this,tr("Export du nœud courant segmenté en SDP"), tr("Export réussi !"));
 			}
@@ -2044,7 +2028,7 @@ void MainWindow::exportSegmentedKnotsOfCurrentSliceIntervalToSdp( const bool &us
 				for ( int sectorIndex=1 ; sectorIndex<_ui->_comboSelectSectorInterval->count() ; ++sectorIndex )
 				{
 					selectSectorInterval(sectorIndex, true);
-					exportSegmentedKnotToSdp(stream, _ui->_comboSelectSliceInterval->currentIndex()-1, sectorIndex-1, useSliceIntervalCoordinates);
+					exportSegmentedKnotToSdp(stream, _tangentialTransform, useSliceIntervalCoordinates);
 				}
 
 				file.close();
@@ -2081,7 +2065,7 @@ void MainWindow::exportAllSegmentedKnotsOfBillonToSdp()
 					for ( sectorIndex=1 ; sectorIndex< _ui->_comboSelectSectorInterval->count() ; ++sectorIndex )
 					{
 						selectSectorInterval(sectorIndex,false);
-						exportSegmentedKnotToSdp(stream, intervalIndex-1, sectorIndex-1,false);
+						exportSegmentedKnotToSdp(stream, _tangentialTransform, false);
 					}
 				}
 
@@ -2096,113 +2080,53 @@ void MainWindow::exportAllSegmentedKnotsOfBillonToSdp()
 }
 
 
-void MainWindow::exportSegmentedKnotToSdp(QTextStream &stream, const uint &numSliceInterval, const uint &numAngularInterval, const bool &useSliceIntervalCoordinates )
+void MainWindow::exportSegmentedKnotToSdp(QTextStream &stream, const TangentialTransform &tangentialTransform, const bool &useSliceIntervalCoordinates )
 {
-	const Interval<uint> &sliceInterval = _sliceHistogram->interval(numSliceInterval);
-	const qreal zPithCoord = sliceInterval.mid();
-	const rCoord2D &originPith = _billon->pithCoord(zPithCoord);
-
-	const uint &width = _tangentialBillon->n_cols;
-	const uint &height = _tangentialBillon->n_rows;
-	const uint &nbSlices = _tangentialBillon->n_slices;
+	const int &width = _tangentialBillon->n_cols;
+	const int &height = _tangentialBillon->n_rows;
+	const int &nbSlices = _tangentialBillon->n_slices;
 	const int widthOnTwo = qFloor(width/2.);
 	const int heightOnTwo = qFloor(height/2.);
 
-	// Rotation autour de l'axe Y
-	const qreal alpha = 90.;
-	const QQuaternion quaterY = QQuaternion::fromAxisAndAngle( 0., 1., 0., alpha);
-	const QQuaternion quaterX = QQuaternion::fromAxisAndAngle( 1., 0., 0., -alpha );
-
 	// Rotation selon l'angle de la zone de nœuds
-	PieChartSingleton &pieChart = *(PieChartSingleton::getInstance());
-	const uint nbAngularSectors = pieChart.nbSectors();
-	const Interval<uint> &angularInterval = _sectorHistogram->interval(numAngularInterval);
-	const qreal semiAngularRange = ((angularInterval.max() + (angularInterval.isValid() ? 0. : nbAngularSectors)) - angularInterval.min())/2.;
-	const uint &maximumIndex = _sectorHistogram->maximumIndex(_currentSectorInterval-1);
-	Interval<uint> centeredSectorInterval( maximumIndex-semiAngularRange, maximumIndex+semiAngularRange );
-	if ( maximumIndex<semiAngularRange ) centeredSectorInterval.setMin( nbAngularSectors + centeredSectorInterval.min() - 1 );
-	if ( centeredSectorInterval.max() > nbAngularSectors-1 ) centeredSectorInterval.setMax( centeredSectorInterval.max() - nbAngularSectors + 1 );
-	const qreal bisectorOrientation = (centeredSectorInterval.min()+semiAngularRange)*pieChart.angleStep();
-	const QQuaternion quaterZ = QQuaternion::fromAxisAndAngle( 0., 0., 1., bisectorOrientation*RAD_TO_DEG_FACT );
 
-	// Combinaisons des rotations
-	const QQuaternion quaterRot = quaterZ * quaterX * quaterY;
+	const QVector3D shiftStep = tangentialTransform.shiftStep( .25 );
+	const QQuaternion &quaterRot = tangentialTransform.quaterRot();
 
-	// Vecteur de déplacement entre deux coupes tangentielles successives
-	const QVector3D shiftStep = quaterRot.rotatedVector( QVector3D( 0., 0., .5 ) );
-
-	QVector3D origin( originPith.x, originPith.y, zPithCoord-(useSliceIntervalCoordinates?sliceInterval.min():0.) );
+	QVector3D origin( useSliceIntervalCoordinates?tangentialTransform.originRelativeToSliceInterval():tangentialTransform.origin() );
 	QVector3D initial, destination;
 
-	QVector<int> xBound;
-	qreal a,b,d1,d2,aSquare,bSquare;
-	int x,y,subSlices;
+	int subSlices,ellipseXCenter,ellipseYCenter;
+	qreal a,b,x,y,xMax,ellipticityRate;
 
 	initial.setZ(0.);
-	for ( uint k=0 ; k<nbSlices ; ++k )
+	for ( int k=0 ; k<nbSlices ; ++k )
 	{
-		const qreal ellipticityRate = (_tangentialBillon->voxelWidth()/_tangentialBillon->voxelHeight()) / (*_knotPithProfile)[k];
-		const qreal ellipseWidth = qAbs(_knotEllipseRadiiHistogram->lowessData()[k]);
-		const qreal ellipseHeight = ellipseWidth*ellipticityRate;
-		const int &ellipseXCenter = _tangentialBillon->pithCoord(k).x - widthOnTwo;
-		const int &ellipseYCenter = _tangentialBillon->pithCoord(k).y - heightOnTwo;
-
-		// Recherche des bornes en X des ellipses.
-		xBound.resize(ellipseHeight+1);
-
-		a = ellipseWidth;
-		b = ellipseHeight;
-		aSquare = a*a;
-		bSquare = b*b;
-		x = 0;
-		y = b;
-		d1 = bSquare - aSquare*b + aSquare/4. ;
-
-		xBound[y] = qMax(xBound[y],x);
-
-		while ( aSquare*(y-.5) > bSquare*(x+1) )
-		{
-			if ( d1 >= 0 )
-			{
-				d1 += aSquare*(-2*y+2) ;
-				y-- ;
-			}
-			d1 += bSquare*(2*x+3) ;
-			x++ ;
-			xBound[y] = qMax(xBound[y],x);
-		}
-		d2 = bSquare*qPow(x+.5,2) + aSquare*qPow(y-1,2) - aSquare*bSquare ;
-		while ( y > 0 )
-		{
-			if ( d2 < 0 )
-			{
-				d2 += bSquare*(2*x+2);
-				x++ ;
-			}
-			d2 += aSquare*(-2*y+3);
-			y-- ;
-			xBound[y] = qMax(xBound[y],x);
-		}
+		ellipticityRate = (_tangentialBillon->voxelWidth()/_tangentialBillon->voxelHeight()) / (*_knotPithProfile)[k];
+		ellipseXCenter = _tangentialBillon->pithCoord(k).x - widthOnTwo;
+		ellipseYCenter = _tangentialBillon->pithCoord(k).y - heightOnTwo;
+		a = _knotEllipseRadiiHistogram->lowessData()[k];
+		b = a*ellipticityRate;
 
 		// Écriture de l'ensemble des points de l'intérieur de de l'ellipse
-
-		for ( subSlices = 0 ; subSlices<2 ; ++subSlices )
+		for ( subSlices = 0 ; subSlices<4 ; ++subSlices )
 		{
-			for ( y=0 ; y<=ellipseHeight ; ++y )
+			for ( y=0 ; y<b ; y+=0.5 )
 			{
-				for ( x=0 ; x<=xBound[y] ; ++x )
+				xMax = qSqrt( (1-qPow(y/b,2)) * qPow(a,2) );
+				for ( x=0 ; x<=xMax ; x+=0.5 )
 				{
-					initial.setX( ellipseXCenter+x );
-					initial.setY( ellipseYCenter+y );
+					initial.setX( ellipseXCenter + x );
+					initial.setY( ellipseYCenter + y );
 					destination = quaterRot.rotatedVector(initial) + origin;
 					stream << qRound(destination.x()) << " "<< qRound(destination.y()) << " " << qRound(destination.z()) << endl;
-					initial.setY( ellipseYCenter-y );
+					initial.setY( ellipseYCenter - y );
 					destination = quaterRot.rotatedVector(initial) + origin;
 					stream << qRound(destination.x()) << " "<< qRound(destination.y()) << " " << qRound(destination.z()) << endl;
-					initial.setX( ellipseXCenter-x );
+					initial.setX( ellipseXCenter - x );
 					destination = quaterRot.rotatedVector(initial) + origin;
 					stream << qRound(destination.x()) << " "<< qRound(destination.y()) << " " << qRound(destination.z()) << endl;
-					initial.setY( ellipseYCenter+y );
+					initial.setY( ellipseYCenter + y );
 					destination = quaterRot.rotatedVector(initial) + origin;
 					stream << qRound(destination.x()) << " "<< qRound(destination.y()) << " " << qRound(destination.z()) << endl;
 				}
