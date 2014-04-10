@@ -47,7 +47,7 @@ void EllipticalAccumulationHistogram::construct( const Slice &slice, const uiCoo
 	resize(nbEllipses);
 
 	if ( nbEllipses ) (*this)[0] = slice( pithCoordY, pithCoordX );
-	for ( a=1 ; a<nbEllipses ; a++ )
+	for ( a=1 ; a<nbEllipses ; ++a )
 	{
 		nbPixelOnEllipse = 0;
 		b = a*ellipticityRate;

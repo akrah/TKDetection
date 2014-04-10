@@ -437,44 +437,43 @@ void MainWindow::drawSlice()
 				}
 				if ( _currentSectorInterval && _tangentialBillon )
 				{
-					QVector3D origin( _tangentialTransform.origin() );
-
 					QVector<QColor> colors;
 					colors << Qt::blue << Qt::yellow << Qt::green << Qt::magenta << Qt::cyan << Qt::white;
 					const int nbColorsToUse = qMax( _sectorHistogram->intervals().size()>colors.size() ? ((_sectorHistogram->intervals().size()+1)/2)%colors.size() : colors.size() , 1 );
 					QColor currentColor = colors[(_currentSectorInterval-1)%nbColorsToUse];
 
 					const Interval<uint> &sliceInterval = _sliceHistogram->interval(_currentSliceInterval-1);
-					const qreal sliceIntervalWidth = sliceInterval.width();
-					const qreal sliceIntervalMin = sliceInterval.min();
 					const qreal sliceIntervalMax = sliceInterval.max();
-					const QQuaternion &quaterRot = _tangentialTransform.quaterRot();
-					const QVector3D shiftStep = _tangentialTransform.shiftStep( .25 );
-
+					const uint nbTangentialSlice = _tangentialBillon->n_slices;
 					const int widthOnTwo = qFloor(_tangentialBillon->n_cols/2.);
 					const int heightOnTwo = qFloor(_tangentialBillon->n_rows/2.);
+					const qreal voxelRatio = _tangentialBillon->voxelWidth()/_tangentialBillon->voxelHeight();
 
+					const QQuaternion &quaterRot = _tangentialTransform.quaterRot();
+					const QVector3D shiftStep = _tangentialTransform.shiftStep( 1. );
 
+					QVector3D origin( _tangentialTransform.origin() );
 					QVector3D initial, destination;
-					int ellipseXCenter,ellipseYCenter;
-					qreal x,y,a,b,ellipticityRate;
-
-					initial.setZ(0.);
+					qreal a,b,x, y,ellipticityRate,ellipseXCenter,ellipseYCenter;
 
 					QPainter painter(&_mainPix);
-					for ( uint k=0 ; k<_tangentialBillon->n_slices ; ++k )
+
+					initial.setZ(0.);
+					for ( uint k=0 ; k<nbTangentialSlice ; ++k )
 					{
-						ellipticityRate = (_tangentialBillon->voxelWidth()/_tangentialBillon->voxelHeight()) / (*_knotPithProfile)[k];
+						ellipticityRate = voxelRatio / (*_knotPithProfile)[k];
 						ellipseXCenter = _tangentialBillon->pithCoord(k).x - widthOnTwo;
 						ellipseYCenter = _tangentialBillon->pithCoord(k).y - heightOnTwo;
+
+						painter.setPen(currentColor);
+
+						// Draw knot contour
 						a = _knotEllipseRadiiHistogram->lowessData()[k];
 						b = a*ellipticityRate;
-						y = (sliceIntervalMax - currentSlice )-_tangentialBillon->pithCoord(k).y;
-						x = qSqrt( (1-qPow(y/b,2)) * qPow(a,2) );
-						for ( uint step=0 ; step<4 ; ++step  )
+						y = sliceIntervalMax - currentSlice -_tangentialBillon->pithCoord(k).y;
+						if ( y <= b )
 						{
-							// Draw knot contour
-							painter.setPen(currentColor);
+							x = qSqrt( (1-qPow(y/b,2)) * qPow(a,2) );
 
 							initial.setX( ellipseXCenter + x );
 							initial.setY( ellipseYCenter + y );
@@ -484,17 +483,15 @@ void MainWindow::drawSlice()
 							initial.setX( ellipseXCenter - x );
 							destination = quaterRot.rotatedVector(initial) + origin;
 							painter.drawPoint( qRound(destination.x()), qRound(destination.y()) );
-
-							// Draw knot pith
-							initial.setX( ellipseXCenter );
-							initial.setY( ellipseYCenter );
-							destination = quaterRot.rotatedVector(initial) + origin;
-							if ( qRound(_tangentialBillon->pithCoord(k).y) == static_cast<int>(sliceIntervalWidth-currentSlice+sliceIntervalMin) )
-								painter.setPen(Qt::red);
-							painter.drawPoint( qRound(destination.x()), qRound(destination.y()) );
-
-							origin += shiftStep;
 						}
+						// Draw knot pith
+						initial.setX( ellipseXCenter );
+						initial.setY( ellipseYCenter );
+						destination = quaterRot.rotatedVector(initial) + origin;
+						if ( qRound(_tangentialBillon->pithCoord(k).y) == static_cast<int>(sliceIntervalMax-currentSlice) )
+							painter.setPen(Qt::red);
+						painter.drawPoint( qRound(destination.x()), qRound(destination.y()) );
+						origin += shiftStep;
 					}
 					painter.end();
 				}
@@ -2084,55 +2081,51 @@ void MainWindow::exportSegmentedKnotToSdp(QTextStream &stream, const TangentialT
 {
 	const int &width = _tangentialBillon->n_cols;
 	const int &height = _tangentialBillon->n_rows;
-	const int &nbSlices = _tangentialBillon->n_slices;
+	const uint &nbSlices = _tangentialBillon->n_slices;
 	const int widthOnTwo = qFloor(width/2.);
 	const int heightOnTwo = qFloor(height/2.);
+	const qreal sliceIntervalMin = tangentialTransform.currentSliceInterval().min();
+	const qreal sliceIntervalMax = tangentialTransform.currentSliceInterval().max();
+	const qreal voxelRatio = _tangentialBillon->voxelWidth()/_tangentialBillon->voxelHeight();
 
-	// Rotation selon l'angle de la zone de nœuds
-
-	const QVector3D shiftStep = tangentialTransform.shiftStep( .25 );
 	const QQuaternion &quaterRot = tangentialTransform.quaterRot();
+	const QVector3D shiftStep = tangentialTransform.shiftStep( 1. );
 
 	QVector3D origin( useSliceIntervalCoordinates?tangentialTransform.originRelativeToSliceInterval():tangentialTransform.origin() );
 	QVector3D initial, destination;
 
-	int subSlices,ellipseXCenter,ellipseYCenter;
-	qreal a,b,x,y,xMax,ellipticityRate;
+	qreal a,b,x,y,xMax,ellipticityRate,ellipseXCenter,ellipseYCenter;
+	int cS;
 
 	initial.setZ(0.);
-	for ( int k=0 ; k<nbSlices ; ++k )
+	for ( uint k=0 ; k<nbSlices ; ++k )
 	{
-		ellipticityRate = (_tangentialBillon->voxelWidth()/_tangentialBillon->voxelHeight()) / (*_knotPithProfile)[k];
+		ellipticityRate = voxelRatio / (*_knotPithProfile)[k];
 		ellipseXCenter = _tangentialBillon->pithCoord(k).x - widthOnTwo;
 		ellipseYCenter = _tangentialBillon->pithCoord(k).y - heightOnTwo;
 		a = _knotEllipseRadiiHistogram->lowessData()[k];
 		b = a*ellipticityRate;
 
-		// Écriture de l'ensemble des points de l'intérieur de de l'ellipse
-		for ( subSlices = 0 ; subSlices<4 ; ++subSlices )
+		// Écriture de l'ensemble des points à l'intérieur de l'ellipse
+		for ( cS = sliceIntervalMin ; cS<sliceIntervalMax ; cS++ )
 		{
-			for ( y=0 ; y<b ; y+=0.5 )
+			y = sliceIntervalMax - cS - _tangentialBillon->pithCoord(k).y;
+			if ( y <= b )
 			{
 				xMax = qSqrt( (1-qPow(y/b,2)) * qPow(a,2) );
-				for ( x=0 ; x<=xMax ; x+=0.5 )
+				for ( x=0. ; x<xMax ; x+=0.25 )
 				{
 					initial.setX( ellipseXCenter + x );
 					initial.setY( ellipseYCenter + y );
 					destination = quaterRot.rotatedVector(initial) + origin;
 					stream << qRound(destination.x()) << " "<< qRound(destination.y()) << " " << qRound(destination.z()) << endl;
-					initial.setY( ellipseYCenter - y );
-					destination = quaterRot.rotatedVector(initial) + origin;
-					stream << qRound(destination.x()) << " "<< qRound(destination.y()) << " " << qRound(destination.z()) << endl;
 					initial.setX( ellipseXCenter - x );
-					destination = quaterRot.rotatedVector(initial) + origin;
-					stream << qRound(destination.x()) << " "<< qRound(destination.y()) << " " << qRound(destination.z()) << endl;
-					initial.setY( ellipseYCenter + y );
 					destination = quaterRot.rotatedVector(initial) + origin;
 					stream << qRound(destination.x()) << " "<< qRound(destination.y()) << " " << qRound(destination.z()) << endl;
 				}
 			}
-			origin += shiftStep;
 		}
+		origin += shiftStep;
 	}
 }
 
