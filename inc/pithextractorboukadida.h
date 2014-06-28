@@ -16,11 +16,12 @@ class PithExtractorBoukadida
 
 public:
 
-	PithExtractorBoukadida( const int &subWindowWidth = NEIGHBORHOOD_WINDOW_WIDTH_BILLON, const int &subWindowHeight = NEIGHBORHOOD_WINDOW_HEIGHT_BILLON,
+	PithExtractorBoukadida(const int &subWindowWidth = NEIGHBORHOOD_WINDOW_WIDTH_BILLON, const int &subWindowHeight = NEIGHBORHOOD_WINDOW_HEIGHT_BILLON,
 							const qreal &pithShift = PITH_LAG_BILLON, const uint &smoothingRadius = PITH_SMOOTHING_BILLON,
 							const qreal &minWoodPercentage = MIN_WOOD_PERCENTAGE_BILLON,
 							const Interval<int> &intensityInterval = Interval<int>(MINIMUM_INTENSITY,MAXIMUM_INTENSITY),
-							const bool &ascendingOrder = ASCENDING_ORDER_BILLON,	const TKD::ExtrapolationType &extrapolationType = TKD::LINEAR );
+							const bool &ascendingOrder = ASCENDING_ORDER_BILLON, const TKD::ExtrapolationType &extrapolationType = TKD::LINEAR,
+							const qreal &firstValidSliceToExtrapolate = FIRST_VALID_SLICES_TO_EXTRAPOLATE_BILLON, const qreal &lastValidSliceToExtrapolate = LAST_VALID_SLICES_TO_EXTRAPOLATE_BILLON );
 
 	~PithExtractorBoukadida();
 
@@ -91,6 +92,18 @@ public:
 	 */
 	const Interval<uint> &validSlices() const;
 
+	/**
+	 * \fn		const qreal &firstValidSlicesToExtrapolate()
+	 * \return	The percentage of valid slices to Extrapolate at the pith beginning
+	 */
+	const uint &firstValidSlicesToExtrapolate() const;
+
+	/**
+	 * \fn		const qreal &lasttValidSlicesToExtrapolate()
+	 * \return	The percentage of valid slices to Extrapolate at the pith ending
+	 */
+	const uint &lastValidSlicesToExtrapolate() const;
+
 	/********************************************************
 	 * Set functions
 	 ********************************************************/
@@ -144,6 +157,18 @@ public:
 	 */
 	void setExtrapolation( const TKD::ExtrapolationType &extrapolationType );
 
+	/**
+	 * \fn		void setFirstValidSlicesToExtrapolate( const qreal &percentOfSlices )
+	 * \param	percentOfSlices	Percentage of valid slices to Extrapolate at the pith beginning
+	 */
+	void setFirstValidSlicesToExtrapolate( const uint &percentOfSlices );
+
+	/**
+	 * \fn		void setLastValidSlicesToExtrapolate( const qreal &percentOfSlices )
+	 * \param	percentOfSlices	Percentage of valid slices to Extrapolate at the pith ending
+	 */
+	void setLastValidSlicesToExtrapolate( const uint &percentOfSlices );
+
 private:
 	/**
 	 * \fn		Coord transHough(const Slice &slice, uint &nbContourPoints );
@@ -185,6 +210,8 @@ private:
 	TKD::ExtrapolationType _extrapolation;	/*!< Extrapoler la position de la moelle en dehors de l'intervalle de coupes valides */
 
 	Interval<uint> _validSlices;			/*!< Intervalle de coupes valides */
+	uint _firstValidSliceToExtrapolate;		/*!< Poucentage de coupes valides à interpeler en début de moelle */
+	uint _lastValidSliceToExtrapolate;		/*!< Poucentage de coupes valides à interpeler en fin de moelle */
 };
 
 #endif // PITHEXTRACTORBOUKADIDA_H

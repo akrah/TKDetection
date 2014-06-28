@@ -148,7 +148,7 @@
             <widget class="QWidget" name="scrollAreaWidgetContents">
              <property name="geometry">
               <rect>
-               <x>98</x>
+               <x>97</x>
                <y>189</y>
                <width>0</width>
                <height>0</height>
@@ -323,7 +323,7 @@
      <item row="1" column="0">
       <widget class="QTabWidget" name="_tabs">
        <property name="currentIndex">
-        <number>5</number>
+        <number>4</number>
        </property>
        <widget class="QWidget" name="tab_4">
         <attribute name="title">
@@ -597,7 +597,7 @@ du repère polaire</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>267</width>
+              <width>276</width>
               <height>263</height>
              </rect>
             </property>
@@ -859,7 +859,7 @@ zone restreinte</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>339</width>
+              <width>340</width>
               <height>143</height>
              </rect>
             </property>
@@ -880,7 +880,7 @@ zone restreinte</string>
                 <string/>
                </property>
                <property name="checked">
-                <bool>true</bool>
+                <bool>false</bool>
                </property>
               </widget>
              </item>
@@ -897,7 +897,7 @@ zone restreinte</string>
                 <number>100</number>
                </property>
                <property name="value">
-                <number>100</number>
+                <number>50</number>
                </property>
               </widget>
              </item>
@@ -932,15 +932,15 @@ zone restreinte</string>
          <item>
           <widget class="QToolBox" name="toolBox_4">
            <property name="currentIndex">
-            <number>0</number>
+            <number>1</number>
            </property>
            <widget class="QWidget" name="page_7">
             <property name="geometry">
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>406</width>
-              <height>265</height>
+              <width>424</width>
+              <height>305</height>
              </rect>
             </property>
             <attribute name="label">
@@ -966,7 +966,7 @@ zone restreinte</string>
                 <number>200</number>
                </property>
                <property name="value">
-                <number>40</number>
+                <number>59</number>
                </property>
               </widget>
              </item>
@@ -986,7 +986,7 @@ zone restreinte</string>
                 <number>200</number>
                </property>
                <property name="value">
-                <number>40</number>
+                <number>59</number>
                </property>
               </widget>
              </item>
@@ -1004,7 +1004,25 @@ deux coordonnées successives</string>
                 <number>100</number>
                </property>
                <property name="value">
-                <number>10</number>
+                <number>29</number>
+               </property>
+              </widget>
+             </item>
+             <item row="4" column="0">
+              <widget class="QLabel" name="label_14">
+               <property name="text">
+                <string>Pourcentage minimum de bois
+sur une coupe valide</string>
+               </property>
+              </widget>
+             </item>
+             <item row="4" column="1">
+              <widget class="QSpinBox" name="_spinPithMinimumWoodPercentage_billon">
+               <property name="maximum">
+                <number>100</number>
+               </property>
+               <property name="value">
+                <number>25</number>
                </property>
               </widget>
              </item>
@@ -1062,14 +1080,14 @@ deux coordonnées successives</string>
                </item>
               </layout>
              </item>
-             <item row="8" column="0">
+             <item row="9" column="0">
               <widget class="QLabel" name="label_15">
                <property name="text">
                 <string>Coupes par ordre croissant</string>
                </property>
               </widget>
              </item>
-             <item row="8" column="1">
+             <item row="9" column="1">
               <widget class="QCheckBox" name="_chechPithAscendingOrder_billon">
                <property name="text">
                 <string/>
@@ -1079,33 +1097,47 @@ deux coordonnées successives</string>
                </property>
               </widget>
              </item>
-             <item row="4" column="0">
-              <widget class="QLabel" name="label_14">
+             <item row="8" column="0">
+              <widget class="QLabel" name="label_44">
                <property name="text">
-                <string>Pourcentage minimum de bois
-sur une coupe valide</string>
+                <string>Pourcentages de coupes valides
+à extrapoler</string>
                </property>
               </widget>
              </item>
-             <item row="4" column="1">
-              <widget class="QSpinBox" name="_spinPithMinimumWoodPercentage_billon">
-               <property name="maximum">
-                <number>100</number>
-               </property>
-               <property name="value">
-                <number>25</number>
-               </property>
-              </widget>
+             <item row="8" column="1">
+              <layout class="QHBoxLayout" name="horizontalLayout_5">
+               <item>
+                <widget class="QSpinBox" name="_spinFirstSlicesToExtrapolate_billon">
+                 <property name="maximum">
+                  <number>100</number>
+                 </property>
+                 <property name="value">
+                  <number>0</number>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QSpinBox" name="_spinLastSlicesToExtrapolate_billon">
+                 <property name="maximum">
+                  <number>100</number>
+                 </property>
+                 <property name="value">
+                  <number>0</number>
+                 </property>
+                </widget>
+               </item>
+              </layout>
              </item>
             </layout>
            </widget>
            <widget class="QWidget" name="page_11">
             <property name="geometry">
              <rect>
-              <x>0</x>
-              <y>0</y>
-              <width>399</width>
-              <height>252</height>
+              <x>-90</x>
+              <y>-92</y>
+              <width>417</width>
+              <height>292</height>
              </rect>
             </property>
             <attribute name="label">
@@ -1226,20 +1258,20 @@ sur une coupe valide</string>
                </item>
               </layout>
              </item>
-             <item row="7" column="0">
+             <item row="8" column="0">
               <widget class="QLabel" name="label_60">
                <property name="text">
                 <string>Coupes par ordre croissant</string>
                </property>
               </widget>
              </item>
-             <item row="7" column="1">
+             <item row="8" column="1">
               <widget class="QCheckBox" name="_chechPithAscendingOrder_knot">
                <property name="text">
                 <string/>
                </property>
                <property name="checked">
-                <bool>true</bool>
+                <bool>false</bool>
                </property>
               </widget>
              </item>
@@ -1257,9 +1289,41 @@ sur une coupe valide</string>
                 <number>100</number>
                </property>
                <property name="value">
-                <number>80</number>
+                <number>50</number>
                </property>
               </widget>
+             </item>
+             <item row="7" column="0">
+              <widget class="QLabel" name="label_47">
+               <property name="text">
+                <string>Pourcentage de coupes valides
+à extrapoler</string>
+               </property>
+              </widget>
+             </item>
+             <item row="7" column="1">
+              <layout class="QHBoxLayout" name="horizontalLayout_17">
+               <item>
+                <widget class="QSpinBox" name="_spinFirstSlicesToExtrapolate_knot">
+                 <property name="maximum">
+                  <number>100</number>
+                 </property>
+                 <property name="value">
+                  <number>10</number>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QSpinBox" name="_spinLastSlicesToExtrapolate_knot">
+                 <property name="maximum">
+                  <number>100</number>
+                 </property>
+                 <property name="value">
+                  <number>5</number>
+                 </property>
+                </widget>
+               </item>
+              </layout>
              </item>
             </layout>
            </widget>
@@ -1929,8 +1993,8 @@ sur une coupe valide</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>198</width>
-              <height>45</height>
+              <width>340</width>
+              <height>112</height>
              </rect>
             </property>
             <attribute name="label">
@@ -1973,8 +2037,8 @@ sur une coupe valide</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>198</width>
-              <height>45</height>
+              <width>340</width>
+              <height>112</height>
              </rect>
             </property>
             <attribute name="label">
@@ -2084,7 +2148,7 @@ coupes valides à extrapoler</string>
                <number>50</number>
               </property>
               <property name="value">
-               <number>15</number>
+               <number>10</number>
               </property>
              </widget>
             </item>
@@ -2094,7 +2158,7 @@ coupes valides à extrapoler</string>
                <number>50</number>
               </property>
               <property name="value">
-               <number>10</number>
+               <number>0</number>
               </property>
              </widget>
             </item>
@@ -2233,7 +2297,7 @@ l'intervalle angulaire</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>380</width>
+              <width>381</width>
               <height>86</height>
              </rect>
             </property>
@@ -2324,7 +2388,7 @@ l'intervalle angulaire</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>322</width>
+              <width>323</width>
               <height>181</height>
              </rect>
             </property>
@@ -2533,7 +2597,7 @@ l'intervalle angulaire</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>339</width>
+              <width>340</width>
               <height>157</height>
              </rect>
             </property>
@@ -2722,7 +2786,7 @@ l'intervalle angulaire</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>264</width>
+              <width>265</width>
               <height>84</height>
              </rect>
             </property>
@@ -2788,7 +2852,7 @@ l'intervalle angulaire</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>355</width>
+              <width>343</width>
               <height>112</height>
              </rect>
             </property>

@@ -182,6 +182,7 @@ Billon* TangentialTransform::execute( const Billon &billon )
 	QVector3D origin(_origin);
 	QVector3D initial, destination;
 
+	const qreal trilinearInterpolationCoeff = 1.-_linearInterpolationCoeff;
 	const qreal semiKnotAreaWidthCoeff = widthOnTwo / static_cast<qreal>( nbSlices );
 	int j, i, iStart, iEnd;
 
@@ -223,7 +224,7 @@ Billon* TangentialTransform::execute( const Billon &billon )
 						yBack = (1.-y0Dist)*xBackBottom + y0Dist*xBackTop;
 						// Rotation de 90° dans le sens horaire pour correspondre à l'orientation de l'article
 						slice(j+heightOnTwo,i+widthOnTwo) = _linearInterpolationCoeff * billon(y0,x0,z0)
-																	  + _linearInterpolationCoeff * ((1.-z0Dist)*yFront + z0Dist*yBack);
+																	  + trilinearInterpolationCoeff * ((1.-z0Dist)*yFront + z0Dist*yBack);
 					}
 					else
 					{

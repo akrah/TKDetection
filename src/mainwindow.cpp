@@ -798,6 +798,8 @@ void MainWindow::selectSectorInterval(const int &index, const bool &draw )
 		_knotPithExtractor.setIntensityInterval( Interval<int>( _ui->_spinPithMinIntensity_knot->value(), _ui->_spinPithMaxIntensity_knot->value() ) );
 		_knotPithExtractor.setAscendingOrder( _ui->_chechPithAscendingOrder_knot->isChecked() );
 		_knotPithExtractor.setExtrapolation( TKD::SLOPE_DIRECTION );
+		_knotPithExtractor.setFirstValidSlicesToExtrapolate( _ui->_spinFirstSlicesToExtrapolate_knot->value() );
+		_knotPithExtractor.setLastValidSlicesToExtrapolate( _ui->_spinLastSlicesToExtrapolate_knot->value() );
 
 		_knotPithExtractor.process(*_tangentialBillon,true);
 	}
@@ -835,7 +837,8 @@ void MainWindow::updateBillonPith()
 		PithExtractorBoukadida pithExtractor( _ui->_spinPithSubWindowWidth_billon->value(), _ui->_spinPithSubWindowHeight_billon->value(),
 											  _ui->_spinPithMaximumShift_billon->value(), _ui->_spinPithSmoothingRadius_billon->value(),
 											  _ui->_spinPithMinimumWoodPercentage_billon->value(), Interval<int>( _ui->_spinPithMinIntensity_billon->value(), _ui->_spinPithMaxnIntensity_billon->value() ),
-											  _ui->_chechPithAscendingOrder_billon->isChecked(), TKD::LINEAR );
+											  _ui->_chechPithAscendingOrder_billon->isChecked(), TKD::LINEAR,
+											  _ui->_spinFirstSlicesToExtrapolate_billon->value(), _ui->_spinLastSlicesToExtrapolate_billon->value());
 		pithExtractor.process(*_billon);
 		_treeRadius = BillonAlgorithms::restrictedAreaMeansRadius(*_billon,_ui->_spinRestrictedAreaResolution->value(),_ui->_spinRestrictedAreaThreshold->value(),
 																  _ui->_spinRestrictedAreaMinimumRadius->value()*_billon->n_cols/100.,

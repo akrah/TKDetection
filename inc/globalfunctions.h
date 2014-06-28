@@ -64,10 +64,10 @@ namespace TKD
 	template<typename T >
 	void meanSmoothingLoop( const typename QVector<T>::iterator &begin, const typename QVector<T>::iterator &end, const uint &smoothingRadius )
 	{
-		if ( !smoothingRadius || begin == end )
-			return;
-
 		const qreal smoothingDiameter = 2*smoothingRadius+1;
+
+		if ( (end-begin) <= smoothingDiameter )
+			return;
 
 		QVector<T> copy;
 		copy.reserve(end-begin+2*smoothingRadius);
@@ -101,7 +101,8 @@ namespace TKD
 	void meanSmoothingNoLoop( const typename QVector<T>::iterator &begin, const typename QVector<T>::iterator &end, const uint &smoothingRadius )
 	{
 		const qreal smoothingDiameter = 2*smoothingRadius+1;
-		if ( !smoothingRadius || (end-begin)<smoothingDiameter )
+
+		if ( (end-begin) <= smoothingDiameter )
 			return;
 
 		QVector<T> copy;

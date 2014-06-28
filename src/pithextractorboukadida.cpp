@@ -6,10 +6,12 @@
 
 PithExtractorBoukadida::PithExtractorBoukadida( const int &subWindowWidth, const int &subWindowHeight, const qreal &pithShift, const uint &smoothingRadius,
 												const qreal &minWoodPercentage, const Interval<int> &intensityInterval,
-												const bool &ascendingOrder, const TKD::ExtrapolationType &extrapolationType ) :
+												const bool &ascendingOrder, const TKD::ExtrapolationType &extrapolationType,
+												const qreal &firstValidSliceToExtrapolate, const qreal &lastValidSliceToExtrapolate ) :
 	_subWindowWidth(subWindowWidth), _subWindowHeight(subWindowHeight), _pithShift(pithShift), _smoothingRadius(smoothingRadius),
 	_minWoodPercentage(minWoodPercentage), _intensityInterval(intensityInterval), _ascendingOrder(ascendingOrder),
-	_extrapolation(extrapolationType), _validSlices(0,0)
+	_extrapolation(extrapolationType), _validSlices(0,0),
+	_firstValidSliceToExtrapolate(firstValidSliceToExtrapolate), _lastValidSliceToExtrapolate(lastValidSliceToExtrapolate)
 {
 }
 
@@ -62,6 +64,16 @@ const Interval<uint> & PithExtractorBoukadida::validSlices() const
 	return _validSlices;
 }
 
+const uint &PithExtractorBoukadida::firstValidSlicesToExtrapolate() const
+{
+	return _firstValidSliceToExtrapolate;
+}
+
+const uint &PithExtractorBoukadida::lastValidSlicesToExtrapolate() const
+{
+	return _lastValidSliceToExtrapolate;
+}
+
 void PithExtractorBoukadida::setSubWindowWidth( const int &width )
 {
 	_subWindowWidth = width;
@@ -100,6 +112,16 @@ void PithExtractorBoukadida::setAscendingOrder( const bool &order )
 void PithExtractorBoukadida::setExtrapolation( const TKD::ExtrapolationType &extrapolationType )
 {
 	_extrapolation = extrapolationType;
+}
+
+void PithExtractorBoukadida::setFirstValidSlicesToExtrapolate( const uint &percentOfSlices )
+{
+	_firstValidSliceToExtrapolate = percentOfSlices;
+}
+
+void PithExtractorBoukadida::setLastValidSlicesToExtrapolate( const uint &percentOfSlices )
+{
+	_lastValidSliceToExtrapolate = percentOfSlices;
 }
 
 void PithExtractorBoukadida::process( Billon &billon, const bool &adaptativeWidth )
@@ -184,46 +206,45 @@ void PithExtractorBoukadida::process( Billon &billon, const bool &adaptativeWidt
 
 	// Lissage
 	qDebug() << "Step 7] Smoothing of valid slices";
-	TKD::meanSmoothing<rCoord2D>( pith.begin()+firstValidSliceIndex, pith.begin()+lastValidSliceIndex+1, _smoothingRadius, false );
+	TKD::meanSmoothing<rCoord2D>( pith.begin()+firstValidSliceIndex, pith.begin()+lastValidSliceIndex, _smoothingRadius, false );
 
 	// Extrapolation des coupes invalides
 	qDebug() << "Step 8] Extrapolation of unvalid slices";
 
 	const int slopeDistance = 3;
 
-	// TODO : mettre les pourcentages en paramètres de l'algo
-	const int firstValidSliceIndexSmoothed = firstValidSliceIndex+(lastValidSliceIndex-firstValidSliceIndex)*0.2;
-	const int lastValidSliceIndexSmoothed = lastValidSliceIndex-(lastValidSliceIndex-firstValidSliceIndex)*0.15;
+	const int firstValidSliceIndexToExtrapolate = firstValidSliceIndex+(lastValidSliceIndex-firstValidSliceIndex)*_firstValidSliceToExtrapolate/100.;
+	const int lastValidSliceIndexToExtrapolate = lastValidSliceIndex-(lastValidSliceIndex-firstValidSliceIndex)*_lastValidSliceToExtrapolate/100.;
 
-	const rCoord2D firstValidCoord = pith[firstValidSliceIndexSmoothed];
-	const rCoord2D lastValidCoord = pith[lastValidSliceIndexSmoothed];
+	const rCoord2D firstValidCoord = pith[firstValidSliceIndexToExtrapolate];
+	const rCoord2D lastValidCoord = pith[lastValidSliceIndexToExtrapolate];
 
-	rCoord2D firstValidCoordSlope = (firstValidCoord - pith[firstValidSliceIndexSmoothed+slopeDistance])/static_cast<qreal>(slopeDistance);
-	firstValidCoordSlope.x = ((widthMinusOne/2.)-firstValidCoord.x)/static_cast<qreal>(firstValidSliceIndexSmoothed);
-	const rCoord2D lastValidCoordSlope = (lastValidCoord - pith[lastValidSliceIndexSmoothed-slopeDistance])/static_cast<qreal>(slopeDistance);
+	rCoord2D firstValidCoordSlope = (firstValidCoord - pith[firstValidSliceIndexToExtrapolate+slopeDistance])/static_cast<qreal>(slopeDistance);
+	// firstValidCoordSlope.x = ((widthMinusOne/2.)-firstValidCoord.x)/static_cast<qreal>(firstValidSliceIndexToExtrapolate);
+	const rCoord2D lastValidCoordSlope = (lastValidCoord - pith[lastValidSliceIndexToExtrapolate-slopeDistance])/static_cast<qreal>(slopeDistance);
 
 	switch (_extrapolation)
 	{
 		case TKD::LINEAR:
 			qDebug() << "  Linear extrapolation";
-			for ( k=firstValidSliceIndexSmoothed-1 ; k>=0 ; --k )
+			for ( k=firstValidSliceIndexToExtrapolate-1 ; k>=0 ; --k )
 			{
 				pith[k] = firstValidCoord;
 			}
-			for ( k=lastValidSliceIndexSmoothed+1 ; k<depth ; ++k )
+			for ( k=lastValidSliceIndexToExtrapolate+1 ; k<depth ; ++k )
 			{
 				pith[k] = lastValidCoord;
 			}
 			break;
 		case TKD::SLOPE_DIRECTION:
 			qDebug() <<  "  In slope direction extrapolation";
-			for ( k=firstValidSliceIndexSmoothed-1 ; k>=0 ; --k )
+			for ( k=firstValidSliceIndexToExtrapolate-1 ; k>=0 ; --k )
 			{
 				pith[k] = pith[k+1] + firstValidCoordSlope;
 				pith[k].x = qMin(qMax(pith[k].x,0.),static_cast<qreal>(widthMinusOne));
 				pith[k].y = qMin(qMax(pith[k].y,0.),static_cast<qreal>(heightMinusOne));
 			}
-			for ( k=lastValidSliceIndexSmoothed+1 ; k<depth ; ++k )
+			for ( k=lastValidSliceIndexToExtrapolate+1 ; k<depth ; ++k )
 			{
 				pith[k] = pith[k-1] + lastValidCoordSlope;
 				pith[k].x = qMin(qMax(pith[k].x,0.),static_cast<qreal>(widthMinusOne));
@@ -424,16 +445,16 @@ void PithExtractorBoukadida::interpolation( Pith &pith, const QVector<qreal> &nb
 void PithExtractorBoukadida::fillBillonBackground( Billon &billonToFill, QVector<qreal> &backgroundProportions,
 												   const Interval<int> &intensityInterval, const bool &adaptativeWidth ) const
 {
-	const uint &width = billonToFill.n_cols;
-	const uint &height = billonToFill.n_rows;
-	const uint &nbSlices = billonToFill.n_slices;
+	const int &width = billonToFill.n_cols;
+	const int &height = billonToFill.n_rows;
+	const int &nbSlices = billonToFill.n_slices;
 	const int &minIntensity = intensityInterval.min();
 	const int &maxIntensity = intensityInterval.max();
 
-	const uint semiWidth = qFloor(width/2.);
+	const int semiWidth = qFloor(width/2.);
 
 	Slice::col_iterator begin, end;
-	uint k, semiAdaptativeWidth;
+	int k, semiAdaptativeWidth;
 	int iMin, iMax;
 	qreal adaptativeWidthCoeff, currentProp;
 	__billon_type__ val;
