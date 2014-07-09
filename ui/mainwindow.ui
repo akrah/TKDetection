@@ -323,7 +323,7 @@
      <item row="1" column="0">
       <widget class="QTabWidget" name="_tabs">
        <property name="currentIndex">
-        <number>3</number>
+        <number>0</number>
        </property>
        <widget class="QWidget" name="tab_4">
         <attribute name="title">
@@ -859,8 +859,8 @@ zone restreinte</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>274</width>
-              <height>99</height>
+              <width>340</width>
+              <height>143</height>
              </rect>
             </property>
             <attribute name="label">
@@ -880,7 +880,7 @@ zone restreinte</string>
                 <string/>
                </property>
                <property name="checked">
-                <bool>false</bool>
+                <bool>true</bool>
                </property>
               </widget>
              </item>
@@ -897,7 +897,7 @@ zone restreinte</string>
                 <number>100</number>
                </property>
                <property name="value">
-                <number>50</number>
+                <number>100</number>
                </property>
               </widget>
              </item>
@@ -2148,7 +2148,7 @@ coupes valides à extrapoler</string>
                <number>50</number>
               </property>
               <property name="value">
-               <number>15</number>
+               <number>5</number>
               </property>
              </widget>
             </item>
