@@ -297,13 +297,10 @@ Check the ITK_NUMBER variable in the TKDetection.pro file (line 13) and compile:
 
 The binary file **TKDetection** is then located in the build/bin directory of TKDetection.
 
-<<<<<<< HEAD
 ### Translation
 
 TKDetection is originally wrote in french language.
 If you want to translate interface in english, just copy the **TKDetection_en.qm** file in the same folder than the binary file **TKDetection**.
-=======
+
 
 [![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/akrah/tkdetection/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
-
->>>>>>> master
