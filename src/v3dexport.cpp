@@ -102,7 +102,7 @@ namespace V3DExport
 			{
 				for ( i=0; i<width; ++i )
 				{
-					voxelStream << (qint16)(slice.at(j,i));
+					voxelStream << (qint16)(slice(j,i));
 				}
 			}
 		}

@@ -89,12 +89,12 @@ void PlotSectorHistogram::moveCursor( const uint &index )
 	{
 		const QwtIntervalSample &sample = _histogramData.sample(index);
 		_datasCurveCursor->resize(4);
-		_datasCurveCursor->at(0).setAzimuth(sample.interval.maxValue());
-		_datasCurveCursor->at(1).setAzimuth(sample.interval.minValue());
-		_datasCurveCursor->at(1).setRadius(sample.value);
-		_datasCurveCursor->at(2).setAzimuth(sample.interval.minValue());
-		_datasCurveCursor->at(2).setRadius(sample.value);
-		_datasCurveCursor->at(3).setAzimuth(sample.interval.minValue());
+		(*_datasCurveCursor)[0].setAzimuth(sample.interval.maxValue());
+		(*_datasCurveCursor)[1].setAzimuth(sample.interval.minValue());
+		(*_datasCurveCursor)[1].setRadius(sample.value);
+		(*_datasCurveCursor)[2].setAzimuth(sample.interval.minValue());
+		(*_datasCurveCursor)[2].setRadius(sample.value);
+		(*_datasCurveCursor)[3].setAzimuth(sample.interval.minValue());
 		datasCursor[0] = sample;
 	}
 	else

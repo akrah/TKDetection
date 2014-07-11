@@ -73,7 +73,7 @@ namespace TiffReader
 					for ( uint i=0; i<width; i++ )
 					{
 						const int &current = in.Value();
-						slice.at(j,i) = current;
+						slice(j,i) = current;
 						max = qMax(max,current);
 						min = qMin(min,current);
 						++in;

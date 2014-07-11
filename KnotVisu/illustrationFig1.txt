@@ -1,0 +1,29 @@
+-------------------
+Figure 1: Step1
+-------------------
+## DOU 1 T
+- Slice first section 305
+- Slice end 380
+- Distance between 100
+- Cylinder radius: 150
+- center sur 315:    295  ,  267 
+./trunkVisuFig1_Step1 -v /Users/kerautre/EnCours/TKDetection/DOU-1-T_sample/1.2.840.113619.2.55.3.1670609623.384.1323081047.210.8.dcm  --centerCoord 295 267 -x 0.53 -y 0.53 -z 1.25 --startBillon 20 --endBillon 499 --cutSectionFirstIndex 84 --cutSectionLastIndex 105  --cutSectionSpace 5 --cutSection2FirstIndex 155 --cutSection2LastIndex 184  --cutSection2Space 5 --cutSection3FirstIndex 200 --cutSection3LastIndex 220  --cutSection3Space 5  --cutSection4FirstIndex 280 --cutSection4LastIndex 348  --cutSection4Space 25   --cutSection5FirstIndex 405 --cutSection5LastIndex 450  --cutSection5Space 5   --cylinderRadius 150 --colorizeCutSection 1.0 0.3 0.3 
+
+
+-------------------
+Figure 1: Step 2
+-------------------
+## DOU 1 T
+Orientation noeud: 169 degré
+
+ ./trunkVisuFig1_Step2_3 -v /Users/kerautre/EnCours/TKDetection/DOU-1-T_sample/1.2.840.113619.2.55.3.1670609623.384.1323081047.210.8.dcm  --centerCoord 295 267 -x 0.53 -y 0.53 -z 1.25 --startBillon 20 --endBillon 499 -f 315 -l 348 --cylinderRadius 150 --cutSectionSpace 100 --sectorStartAngle 200 --sectorEndAngle 133 --sectorTranslateDistance 100 --sectorCenterAngle 170 --onlyCutSection --gridSize 0.25 --angleStep 1
+
+
+
+-------------------
+Figure 1: Step 3
+-------------------
+## DOU 1 T
+Orientation noeud: 169 degré
+
+ ./trunkVisuFig1_Step2_3 -v /Users/kerautre/EnCours/TKDetection/DOU-1-T_sample/1.2.840.113619.2.55.3.1670609623.384.1323081047.210.8.dcm  --centerCoord 295 267 -x 0.53 -y 0.53 -z 1.25 --startBillon 20 --endBillon 499 -f 315 -l 348 --cylinderRadius 150 --cutSectionSpace 100 --sectorStartAngle 200 --sectorEndAngle 133 --sectorTranslateDistance 100 --sectorCenterAngle 170 --onlyCutSectionExtracted --gridSize 0.25 --angleStep 10

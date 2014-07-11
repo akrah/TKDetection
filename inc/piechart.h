@@ -17,10 +17,10 @@ public:
 	PieChart( const int &nbSectors );
 	PieChart( const PieChart &pieChart );
 
-	qreal sectorAngle() const;
+	qreal angleStep() const;
 	uint nbSectors() const;
 	const PiePart &sector( const uint &index ) const;
-	uint sectorIndexOfAngle( qreal sectorAngle ) const;
+	uint sectorIndexOfAngle( qreal angle ) const;
 
 	void setNumberOfAngularSectors( const uint &nbSectors );
 

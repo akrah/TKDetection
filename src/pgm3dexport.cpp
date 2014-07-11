@@ -46,8 +46,8 @@ namespace Pgm3dExport
 				{
 					for ( i=0 ; i<width ; ++i )
 					{
-						//dstream << (qint16)(slice.at(j,i)-minValue);
-						dstream << (qint16)qBound(minValue,static_cast<int>((((slice.at(j,i)-minValue)-midValue)*contrastFactor)+midValue),maxValue);
+						//dstream << (qint16)(slice(j,i)-minValue);
+						dstream << (qint16)qBound(minValue,static_cast<int>((((slice(j,i)-minValue)-midValue)*contrastFactor)+midValue),maxValue);
 					}
 				}
 			}
@@ -61,7 +61,7 @@ namespace Pgm3dExport
 				{
 					for ( i=0 ; i<width ; ++i )
 					{
-						dstream << (qint16)(slice.at(j,i) == componentNumber);
+						dstream << (qint16)(slice(j,i) == componentNumber);
 					}
 				}
 			}
@@ -94,18 +94,21 @@ namespace Pgm3dExport
 		for ( int k=firstSlice ; k<=lastSlice ; ++k )
 		{
 			const Slice &slice = billon.slice(k);
-			const uiCoord2D &pithCoord = billon.hasPith()?billon.pithCoord(k):uiCoord2D(billon.n_cols/2,billon.n_rows/2);
-			unsigned int x, y;
+			const rCoord2D &pithCoord = billon.hasPith()?billon.pithCoord(k):rCoord2D(billon.n_cols/2,billon.n_rows/2);
+			uint x, y;
 
-			for ( unsigned int j=0 ; j<height-shift ; j+=resolution )
+			for ( uint j=0 ; j<height-shift ; j+=resolution )
 			{
-				for ( unsigned int i=0 ; i<width ; i++ )
+				for ( uint i=0 ; i<width ; i++ )
 				{
 					x = pithCoord.x + j * qCos(i*angularIncrement);
 					y = pithCoord.y + j * qSin(i*angularIncrement);
-					if(y<billon.n_cols && x<billon.n_rows &&y+shift<billon.n_cols ){
+					if ( y < billon.n_cols && x < billon.n_rows && y+shift < billon.n_cols )
+					{
 						value =  TKD::restrictedValue(arma::mean(arma::mean(slice.submat(y,x,y+shift,x))),intensityInterval);
-					}else{
+					}
+					else
+					{
 						value=minValue;
 					}
 					dStream << static_cast<qint8>( qBound(0., ((((value-minValue)*fact)-128.)*contrastFactor)+128, 255.) );

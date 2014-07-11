@@ -125,9 +125,9 @@ uiCoord2D PithExtractor::transHough(const Slice &slice, int width, int height, i
 	*nbContourPoints = 0;
 	for(uint i=0; i<cont->n_rows; i++){
 		for(uint j=0; j<cont->n_cols; j++){
-			if(cont->at(i,j) == 1){
+			if((*cont)(i,j) == 1){
 				*nbContourPoints += 1;
-				droite = drawLine(j, i, orientation->at(i,j), width, height, &longueur);
+				droite = drawLine(j, i, (*orientation)(i,j), width, height, &longueur);
 				for(int k=0; k<longueur; k++){
 					y_accu = droite[k]/width;
 					x_accu = droite[k]-(y_accu*width);
@@ -142,7 +142,7 @@ uiCoord2D PithExtractor::transHough(const Slice &slice, int width, int height, i
 	delete orientation;
 
 	//min et max globaux
-	min = *sliceMaxValue = tabaccu->at(0,0);
+	min = *sliceMaxValue = (*tabaccu)(0,0);
 	coordmax.x = coordmax.y = 0;
 
 	minSlice(*tabaccu, &min, sliceMaxValue, &coordmax);
@@ -175,16 +175,16 @@ arma::fmat * PithExtractor::contour(const Slice &slice, arma::fmat **orientation
 
 	for (uint i=0; i<height; i++) {
 		for (uint j=0; j<width; j++) {
-			norm.at(i,j) = sqrt(resultatGX->at(i,j)*resultatGX->at(i,j)+resultatGY->at(i,j)*resultatGY->at(i,j))/4;
-			if (norm.at(i,j)>_binarizationThreshold && i>0 && i<norm.n_rows-1 && j>0 && j<norm.n_cols-1 ) {
-				contour->at(i,j) = 1;
-				if(resultatGX->at(i,j)) {
+			norm(i,j) = sqrt((*resultatGX)(i,j)*(*resultatGX)(i,j)+(*resultatGY)(i,j)*(*resultatGY)(i,j))/4;
+			if (norm(i,j)>_binarizationThreshold && i>0 && i<norm.n_rows-1 && j>0 && j<norm.n_cols-1 ) {
+				(*contour)(i,j) = 1;
+				if((*resultatGX)(i,j)) {
 					// Fred : pas de raison de faire une division entière ici :
-					// (*orientation)->at(i,j) = resultatGY->at(i,j) / resultatGX->at(i,j);	//tangente teta
-					(*orientation)->at(i,j) = double (resultatGY->at(i,j)) / resultatGX->at(i,j);	//tangente teta
+					// (**orientation)(i,j) = (*resultatGY)(i,j) / (*resultatGX)(i,j);	//tangente teta
+					(**orientation)(i,j) = double ((*resultatGY)(i,j)) / (*resultatGX)(i,j);	//tangente teta
 				}
 			} else {
-				contour->at(i,j) = 0;
+				(*contour)(i,j) = 0;
 			}
 		}
 	}
@@ -220,7 +220,7 @@ Slice * PithExtractor::convolution(const Slice &slice, arma::fcolvec verticalFil
 		//index=0 to index=kCenter-1
 		for (int j=0; j<kCenter; j++) {
 			for (int k=kCenter+kOffset, m=0; k>=0; k--, m++) {
-				tmpSum(i,j) += slice.at(i,m) * horizontalFilter[k];
+				tmpSum(i,j) += slice(i,m) * horizontalFilter[k];
 			}
 			kOffset++;
 		}
@@ -228,7 +228,7 @@ Slice * PithExtractor::convolution(const Slice &slice, arma::fcolvec verticalFil
 		for (int j=kCenter; j<endIndex; j++) {
 			lag = j-kCenter;
 			for (int k=horizontalFilter.n_cols-1, m=0; k >= 0; k--, m++) {
-				tmpSum(i,j) += slice.at(i,(lag+m)) * horizontalFilter[k];
+				tmpSum(i,j) += slice(i,(lag+m)) * horizontalFilter[k];
 			}
 		}
 		//index=(width pictures)-kCenter to index=(width pictures)-1
@@ -236,7 +236,7 @@ Slice * PithExtractor::convolution(const Slice &slice, arma::fcolvec verticalFil
 		for (uint j=endIndex; j<width; j++) {
 			lag = j-kCenter;
 			for (int k=horizontalFilter.n_cols-1, m=0; k >= kOffset; k--, m++) {
-				tmpSum(i,j) += slice.at(i,lag+m) * horizontalFilter[k];
+				tmpSum(i,j) += slice(i,lag+m) * horizontalFilter[k];
 			}
 			kOffset++;
 		}
@@ -263,9 +263,9 @@ Slice * PithExtractor::convolution(const Slice &slice, arma::fcolvec verticalFil
 		}
 		for (uint n=0; n<width; n++) {				//convert to output format
 			if(sum[n]>=0)
-				resultat->at(i,n) = (int)(sum[n] + 0.5f);
+				(*resultat)(i,n) = (int)(sum[n] + 0.5f);
 			else
-				resultat->at(i,n) = (int)(sum[n] - 0.5f);
+				(*resultat)(i,n) = (int)(sum[n] - 0.5f);
 			sum[n] = 0;											//reset before next summing
 		}
 		kOffset++;
@@ -281,9 +281,9 @@ Slice * PithExtractor::convolution(const Slice &slice, arma::fcolvec verticalFil
 		}
 		for (uint n=0; n<width; n++) {				//convert to output format
 			if(sum[n]>=0)
-				resultat->at(i,n) = (int)(sum[n] + 0.5f);
+				(*resultat)(i,n) = (int)(sum[n] + 0.5f);
 			else
-				resultat->at(i,n) = (int)(sum[n] - 0.5f);
+				(*resultat)(i,n) = (int)(sum[n] - 0.5f);
 			sum[n] = 0;											//reset before next summing
 		}
 	}
@@ -299,9 +299,9 @@ Slice * PithExtractor::convolution(const Slice &slice, arma::fcolvec verticalFil
 		}
 		for (uint n=0; n<width; n++) {				//convert to output format
 			if(sum[n]>=0)
-				resultat->at(i,n) = (int)(sum[n] + 0.5f);
+				(*resultat)(i,n) = (int)(sum[n] + 0.5f);
 			else
-				resultat->at(i,n) = (int)(sum[n] - 0.5f);
+				(*resultat)(i,n) = (int)(sum[n] - 0.5f);
 			sum[n] = 0;											//reset before next summing
 		}
 		kOffset++;
@@ -457,7 +457,7 @@ void PithExtractor::minSlice(const Slice &slice, int *minValue, int *maxValue, u
 
 	for ( uint i=1 ; i<height ; i++ ) {
 		for ( uint j=1; j<width ; j++ ) {
-			const int value = slice.at(i,j);
+			const int value = slice(i,j);
 			if ( value < *minValue ) {
 				*minValue = value;
 			}
@@ -469,7 +469,7 @@ void PithExtractor::minSlice(const Slice &slice, int *minValue, int *maxValue, u
 	}
 }
 
-void PithExtractor::correctPith( QVector<uiCoord2D> &moelle, float *listMax, float seuilHough ) const {
+void PithExtractor::correctPith( QVector<rCoord2D> &moelle, float *listMax, float seuilHough ) const {
 	const int pithSize = moelle.size();
 	if ( pithSize < 3 ) return;
 	int startSlice, endSlice, i=0, x1, y1, x2, y2, newx, newy;
@@ -484,18 +484,18 @@ void PithExtractor::correctPith( QVector<uiCoord2D> &moelle, float *listMax, flo
 			if(!startSlice){
 				ax = 9999;
 				ay = 9999;
-				x1 = moelle.at(endSlice+1).x;
-				y1 = moelle.at(endSlice+1).y;
+				x1 = moelle[endSlice+1].x;
+				y1 = moelle[endSlice+1].y;
 			}else if(endSlice == pithSize-1){
 				ax = 9999;
 				ay = 9999;
-				x1 = moelle.at(startSlice-1).x;
-				y1 = moelle.at(startSlice-1).y;
+				x1 = moelle[startSlice-1].x;
+				y1 = moelle[startSlice-1].y;
 			}else {
-				x1 = moelle.at(startSlice-1).x;
-				x2 = moelle.at(endSlice+1).x;
-				y1 = moelle.at(startSlice-1).y;
-				y2 = moelle.at(endSlice+1).y;
+				x1 = moelle[startSlice-1].x;
+				x2 = moelle[endSlice+1].x;
+				y1 = moelle[startSlice-1].y;
+				y2 = moelle[endSlice+1].y;
 				if(x1!=x2){
 					ax = (float)((endSlice+1) - (startSlice-1) ) / (x2-x1);
 				}else{
@@ -525,7 +525,7 @@ void PithExtractor::correctPith( QVector<uiCoord2D> &moelle, float *listMax, flo
 				}else{
 					newy = y1;
 				}
-				moelle.replace(j, uiCoord2D(newx, newy));
+				moelle.replace(j, rCoord2D(newx, newy));
 			}
 		}
 		i++;

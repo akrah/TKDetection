@@ -19,6 +19,7 @@ template< typename T >
 class BillonTpl : public arma::Cube<T>
 {
 	friend class PithExtractor;
+	friend class PithExtractorBoukadida;
 
 public:
 	BillonTpl();
@@ -31,6 +32,7 @@ public:
 	const qreal &voxelWidth() const;
 	const qreal &voxelHeight() const;
 	const qreal &voxelDepth() const;
+	const rCoord3D &voxelDims() const;
 	const int &zPos() const;
 
 	const Slice& previousSlice( const uint currentSlice) const;
@@ -41,7 +43,7 @@ public:
 
 	const Pith & pith() const;
 	bool hasPith() const;
-	const uiCoord2D &pithCoord( const uint & sliceIndex ) const;
+	const rCoord2D &pithCoord( const uint & sliceIndex ) const;
 
 	void setMinValue( const T &value );
 	void setMaxValue( const T &value );
@@ -51,8 +53,10 @@ public:
 protected:
 	Pith _pith;
 
+	Interval<T> _valueInterval;
 	T _minValue;        // Valeur minimum à considérer (mais une valeur PEUT être plus petite car pas de vérification à l'affectation)
 	T _maxValue;        // Valeur maximum à considérer (mais une valeur PEUT être plus grande car pas de vérification à l'affectation)
+	rCoord3D _voxelDims;
 	qreal _voxelWidth;  // Largeur d'un voxel en cm
 	qreal _voxelHeight; // Hauteur d'un voxel en cm
 	qreal _voxelDepth;  // Profondeur d'un voxel en cm
@@ -69,21 +73,19 @@ protected:
 
 template< typename T >
 BillonTpl<T>::BillonTpl() :
-	arma::Cube<T>(), _pith(0), _minValue(T(0)), _maxValue(T(0)), _voxelWidth(1.), _voxelHeight(1.), _voxelDepth(1.), _zPos(0) {}
+	arma::Cube<T>(), _pith(0), _valueInterval(T(0),T(0)), _voxelDims(1.,1.,1.), _zPos(0) {}
 
 template< typename T >
 BillonTpl<T>::BillonTpl( const int & width, const int & height, const int & depth ) :
-	arma::Cube<T>(height,width,depth), _pith(0), _minValue(T(0)), _maxValue(T(0)), _voxelWidth(1.), _voxelHeight(1.), _voxelDepth(1.), _zPos(0) {}
+	arma::Cube<T>(height,width,depth), _pith(0), _valueInterval(T(0),T(0)), _voxelDims(1.,1.,1.), _zPos(0) {}
 
 template< typename T >
 BillonTpl<T>::BillonTpl( const BillonTpl<T> & billon ) :
-	arma::Cube<T>(billon), _pith(billon._pith), _minValue(billon._minValue), _maxValue(billon._maxValue),
-	_voxelWidth(billon._voxelWidth), _voxelHeight(billon._voxelHeight), _voxelDepth(billon._voxelDepth), _zPos(billon._zPos) {}
+	arma::Cube<T>(billon), _pith(billon._pith), _valueInterval(billon._valueInterval), _voxelDims(billon._voxelDims), _zPos(billon._zPos) {}
 
 template< typename T >
 BillonTpl<T>::BillonTpl( const BillonTpl<T> &billon, const Interval<uint> &sliceInterval ) :
-	arma::Cube<T>(billon.slices(sliceInterval.min(),sliceInterval.max())), _minValue(billon._minValue), _maxValue(billon._maxValue),
-	_voxelWidth(billon._voxelWidth), _voxelHeight(billon._voxelHeight), _voxelDepth(billon._voxelDepth), _zPos(billon._zPos+sliceInterval.min())
+	arma::Cube<T>(billon.slices(sliceInterval.min(),sliceInterval.max())), _valueInterval(billon._valueInterval), _voxelDims(billon._voxelDims), _zPos(billon._zPos+sliceInterval.min())
 {
 	if ( billon.hasPith() ) _pith = billon._pith.mid(sliceInterval.min(),sliceInterval.width()+1);
 }
@@ -95,31 +97,37 @@ BillonTpl<T>::BillonTpl( const BillonTpl<T> &billon, const Interval<uint> &slice
 template< typename T >
 const T &BillonTpl<T>::minValue() const
 {
-	return _minValue;
+	return _valueInterval.min();
 }
 
 template< typename T >
 const T &BillonTpl<T>::maxValue() const
 {
-	return _maxValue;
+	return _valueInterval.max();
 }
 
 template< typename T >
 const qreal &BillonTpl<T>::voxelWidth() const
 {
-	return _voxelWidth;
+	return _voxelDims.x;
 }
 
 template< typename T >
 const qreal &BillonTpl<T>::voxelHeight() const
 {
-	return _voxelHeight;
+	return _voxelDims.y;
 }
 
 template< typename T >
 const qreal &BillonTpl<T>::voxelDepth() const
 {
-	return _voxelDepth;
+	return _voxelDims.z;
+}
+
+template< typename T >
+const rCoord3D &BillonTpl<T>::voxelDims() const
+{
+	return _voxelDims;
 }
 
 template< typename T >
@@ -155,9 +163,9 @@ Slice& BillonTpl<T>::nextSlice( const uint currentSlice )
 template< typename T >
 T BillonTpl<T>::zMotion( const uint i, const uint j, const uint sliceIndex ) const
 {
-	return qAbs( this->at(j,i,sliceIndex) - previousSlice(sliceIndex).at(j,i) );
-	//return qAbs( nextSlice(sliceIndex).at(j,i) - previousSlice(sliceIndex).at(j,i) );
-	//return 0.25 * qAbs( -2 * this->at(j,i,sliceIndex) + previousSlice(sliceIndex).at(j,i) + nextSlice(sliceIndex).at(j,i));
+	return qAbs( (*this)(j,i,sliceIndex) - previousSlice(sliceIndex)(j,i) );
+	//return qAbs( nextSlice(sliceIndex)(j,i) - previousSlice(sliceIndex)(j,i) );
+	//return 0.25 * qAbs( -2 * (*this)(j,i,sliceIndex) + previousSlice(sliceIndex)(j,i) + nextSlice(sliceIndex)(j,i));
 }
 
 template< typename T >
@@ -173,7 +181,7 @@ bool BillonTpl<T>::hasPith() const
 }
 
 template< typename T >
-const uiCoord2D &BillonTpl<T>::pithCoord( const uint & sliceIndex ) const
+const rCoord2D &BillonTpl<T>::pithCoord( const uint & sliceIndex ) const
 {
 	return _pith[sliceIndex];
 }
@@ -185,21 +193,21 @@ const uiCoord2D &BillonTpl<T>::pithCoord( const uint & sliceIndex ) const
 template< typename T >
 void BillonTpl<T>::setMinValue( const T & value )
 {
-	_minValue = value;
+	_valueInterval.setMin(value);
 }
 
 template< typename T >
 void BillonTpl<T>::setMaxValue( const T & value )
 {
-	_maxValue = value;
+	_valueInterval.setMax(value);
 }
 
 template< typename T >
 void BillonTpl<T>::setVoxelSize( const qreal & width, const qreal & height, const qreal & depth )
 {
-	_voxelWidth = width;
-	_voxelHeight = height;
-	_voxelDepth = depth;
+	_voxelDims.x = width;
+	_voxelDims.y = height;
+	_voxelDims.z = depth;
 }
 
 template< typename T >

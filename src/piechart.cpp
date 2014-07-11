@@ -25,7 +25,7 @@ PieChart::PieChart( const PieChart &pieChart ) : _sectors(pieChart._sectors)
  * Public getters
  *******************************/
 
-qreal PieChart::sectorAngle() const
+qreal PieChart::angleStep() const
 {
 	return TWO_PI/static_cast<qreal>(_sectors.size());
 }
@@ -67,8 +67,8 @@ void PieChart::draw( QImage &image, const uiCoord2D &center, const uint &sectorI
 	// Liste qui va contenir les angles des deux côté du secteur à dessiner
 	// Permet de factoriser le code de calcul des coordonnées juste en dessous
 	QList<qreal> twoSides;
-	twoSides.append( _sectors.at(sectorIdx).minAngle() );
-	twoSides.append( _sectors.at(sectorIdx).maxAngle() );
+	twoSides.append( _sectors[sectorIdx].minAngle() );
+	twoSides.append( _sectors[sectorIdx].maxAngle() );
 
 	// Dessin des deux côtés du secteur
 	const int width = image.width();
@@ -99,7 +99,7 @@ void PieChart::draw( QImage &image, const uiCoord2D &center, const uint &sectorI
 			painter.drawLine(center.x,center.y,end.x,end.y);
 		}
 	}
-	else if ( viewType == TKD::CARTESIAN_PROJECTION )
+	else if ( viewType == TKD::POLAR_PROJECTION )
 	{
 		for ( side = twoSides.constBegin() ; side < twoSides.constEnd() ; ++side )
 		{
@@ -128,13 +128,8 @@ void PieChart::draw( QImage &image, const uiCoord2D &center, const QVector< Inte
 		const int &width = image.width();
 		const int &height = image.height();
 
-		QVector<QColor> colors(6);
-		colors[0] = Qt::blue;
-		colors[1] = Qt::yellow;
-		colors[2] = Qt::green;
-		colors[3] = Qt::magenta;
-		colors[4] = Qt::cyan;
-		colors[5] = Qt::white;
+		QVector<QColor> colors;
+		colors << Qt::blue << Qt::yellow << Qt::green << Qt::magenta << Qt::cyan << Qt::white;
 
 		const int nbColorsToUse = qMax( angleIntervals.size()>colors.size() ? ((angleIntervals.size()+1)/2)%colors.size() : colors.size() , 1 );
 
@@ -168,7 +163,7 @@ void PieChart::draw( QImage &image, const uiCoord2D &center, const QVector< Inte
 				painter.drawLine(center.x,center.y,end.x,end.y);
 			}
 		}
-		else if ( viewType == TKD::CARTESIAN_PROJECTION )
+		else if ( viewType == TKD::POLAR_PROJECTION )
 		{
 			for ( side = twoSides.constBegin() ; side != twoSides.constEnd() ; ++side )
 			{

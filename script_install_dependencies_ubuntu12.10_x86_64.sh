@@ -3,28 +3,28 @@
 ### Ensemble des paquets à installer pour l'ensemble des dépendances de TKDetection
 sudo apt-get install build-essential cmake qtcreator liblapack-dev libblas-dev libatlas-dev libboost-dev libqwt-dev libqxt-dev libqglviewer-dev-common libboost-program-options-dev libgmp-dev git
 
-### Armadillo v. 3.920.2
-wget "http://downloads.sourceforge.net/project/arma/armadillo-3.920.2.tar.gz"
-tar xvf armadillo-3.920.2.tar.gz
-cd armadillo-3.920.2/
+### Armadillo v. 4.320.0
+wget "http://downloads.sourceforge.net/project/arma/armadillo-4.320.0.tar.gz"
+tar xvf armadillo-4.320.0.tar.gz
+cd armadillo-4.320.0/
 ./configure
 make
 sudo make install
 cd -
 
-### InsightToolkit v. 4.4.2
-wget "http://sourceforge.net/projects/itk/files/itk/4.3/InsightToolkit-4.4.2.tar.gz"
-tar xvf InsightToolkit-4.4.2.tar.gz
-mkdir InsightToolkit-4.4.2/build
-cd InsightToolkit-4.4.2/build
-cmake .. -DCMAKE_CXX_FLAGS="-std=c++0x" -DCMAKE_BUILD_TYPE="Release" -DBUILD_EXAMPLES=false -DBUILD_TESTING=false -DITK_BUILD_ALL_MODULES=false -DITKGroup_Core=true -DITKGroup_IO=true
+### InsightToolkit v. 4.5.2
+wget "http://sourceforge.net/projects/itk/files/itk/4.3/InsightToolkit-4.5.2.tar.gz"
+tar xvf InsightToolkit-4.5.2.tar.gz
+mkdir InsightToolkit-4.5.2/build
+cd InsightToolkit-4.5.2/build
+cmake .. -DCMAKE_CXX_FLAGS="-std=c++0x" -DCMAKE_BUILD_TYPE="Release" -DBUILD_EXAMPLES=false -DBUILD_TESTING=false -DITK_BUILD_ALL_MODULES=false -DITK_BUILD_DEFAULT_MODULES=false -DITKGroup_Core=true -DITKGroup_IO=true
 make
 sudo make install
 cd -
 
 ### QwtPolar v. 1.0.1
-wget "http://downloads.sourceforge.net/project/qwtpolar/qwtpolar/1.0.1/qwtpolar-1.0.1.zip"
-unzip qwtpolar-1.0.1.zip
+wget "http://kent.dl.sourceforge.net/project/qwtpolar/qwtpolar/1.0.1/qwtpolar-1.0.1.tar.bz2"
+unzip qwtpolar-1.0.1.tar.bz2
 mkdir qwtpolar-1.0.1/build
 cd qwtpolar-1.0.1/build
 qmake ..
@@ -32,7 +32,7 @@ make
 sudo make install
 cd -
 
-sudo ln -s /usr/local/qwtpolar-1.0.0/features/qwtpolar.prf /usr/share/qt4/mkspecs/features/
+sudo ln -s /usr/local/qwtpolar-1.0.0/features/qwtpolar.prf       /usr/share/qt4/mkspecs/features/
 sudo ln -s /usr/local/qwtpolar-1.0.0/features/qwtpolarconfig.pri /usr/share/qt4/mkspecs/features/
 sudo ln -s /usr/local/qwtpolar-1.0.0/lib/libqwtpolar.so       /usr/lib/
 sudo ln -s /usr/local/qwtpolar-1.0.0/lib/libqwtpolar.so.1     /usr/lib/

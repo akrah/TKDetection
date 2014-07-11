@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE TS>
-<TS version="2.0" language="en_US">
+<TS version="2.1" language="en_US">
 <context>
     <name>MainWindow</name>
     <message>
@@ -18,147 +18,139 @@
         <translation type="obsolete">Contour detection</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="76"/>
         <source>Flots optiques</source>
-        <translation>Optical flows</translation>
+        <translation type="vanished">Optical flows</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="79"/>
         <source>Sobel</source>
-        <translation>Sobel</translation>
+        <translation type="vanished">Sobel</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="80"/>
         <source>Laplacien</source>
         <oldsource>Laplacian</oldsource>
-        <translation>Laplacian</translation>
+        <translation type="vanished">Laplacian</translation>
     </message>
     <message>
         <location filename="ui/mainwindow.ui" line="14"/>
         <source>TKDetection</source>
         <translation>TKDetection</translation>
     </message>
-    <message utf8="true">
-        <location filename="ui/mainwindow.ui" line="36"/>
+    <message>
+        <location filename="ui/mainwindow.ui" line="31"/>
+        <source>Billon</source>
+        <translation>Billon</translation>
+    </message>
+    <message>
+        <location filename="ui/mainwindow.ui" line="52"/>
+        <location filename="ui/mainwindow.ui" line="187"/>
         <source>N° coupe :</source>
         <translation>N° slice :</translation>
     </message>
-    <message utf8="true">
-        <location filename="ui/mainwindow.ui" line="46"/>
+    <message>
+        <location filename="ui/mainwindow.ui" line="62"/>
+        <location filename="ui/mainwindow.ui" line="197"/>
         <source>Aucune coupe présente</source>
         <translation>No slice</translation>
     </message>
     <message>
-        <location filename="ui/mainwindow.ui" line="86"/>
-        <location filename="ui/mainwindow.ui" line="161"/>
-        <location filename="ui/mainwindow.ui" line="195"/>
+        <location filename="ui/mainwindow.ui" line="102"/>
         <source>+</source>
         <translation>+</translation>
     </message>
     <message>
-        <location filename="ui/mainwindow.ui" line="151"/>
         <source>Intervalle</source>
-        <translation>Interval</translation>
+        <translation type="vanished">Interval</translation>
     </message>
     <message>
-        <location filename="ui/mainwindow.ui" line="158"/>
-        <location filename="ui/mainwindow.ui" line="192"/>
         <source>Coupe courante</source>
-        <translation>Current slice</translation>
+        <translation type="vanished">Current slice</translation>
     </message>
     <message>
-        <location filename="ui/mainwindow.ui" line="214"/>
+        <location filename="ui/mainwindow.ui" line="295"/>
         <source>Fichier</source>
         <translation>File</translation>
     </message>
     <message>
-        <location filename="ui/mainwindow.ui" line="249"/>
+        <location filename="ui/mainwindow.ui" line="405"/>
         <source>Affichage</source>
         <translation>Display</translation>
     </message>
     <message>
-        <location filename="ui/mainwindow.ui" line="260"/>
+        <location filename="ui/mainwindow.ui" line="421"/>
         <source>Type d&apos;affichage</source>
         <translation>Display type</translation>
     </message>
-    <message utf8="true">
+    <message>
         <source>Paramètres de l&apos;affichage original</source>
         <translation type="obsolete">Original display settings</translation>
     </message>
     <message>
-        <location filename="ui/mainwindow.ui" line="355"/>
         <source>Type de projection</source>
         <oldsource>Projection</oldsource>
-        <translation>Projection type</translation>
+        <translation type="vanished">Projection type</translation>
     </message>
     <message>
-        <location filename="ui/mainwindow.ui" line="327"/>
+        <location filename="ui/mainwindow.ui" line="465"/>
         <source>y</source>
         <translation>y</translation>
     </message>
-    <message utf8="true">
-        <location filename="ui/mainwindow.ui" line="297"/>
+    <message>
         <source>Paramètres globaux</source>
-        <translation>Global parameters</translation>
+        <translation type="vanished">Global parameters</translation>
     </message>
     <message>
-        <location filename="ui/mainwindow.ui" line="311"/>
+        <location filename="ui/mainwindow.ui" line="449"/>
         <source>z</source>
         <translation>z</translation>
     </message>
-    <message utf8="true">
-        <location filename="ui/mainwindow.ui" line="340"/>
+    <message>
         <source>Cartésienne</source>
-        <translation>Cartesian</translation>
+        <translation type="vanished">Cartesian</translation>
     </message>
-    <message utf8="true">
-        <location filename="ui/mainwindow.ui" line="368"/>
+    <message>
         <source>Résolution angulaire
 de la projection cart.</source>
-        <translation>Angular resolution
+        <translation type="vanished">Angular resolution
 of cartesian projection</translation>
     </message>
     <message>
-        <location filename="ui/mainwindow.ui" line="428"/>
+        <location filename="ui/mainwindow.ui" line="573"/>
         <source>Niveau de gris</source>
         <translation>Greyscale</translation>
     </message>
     <message>
-        <location filename="ui/mainwindow.ui" line="433"/>
+        <location filename="ui/mainwindow.ui" line="578"/>
         <source>HUE</source>
         <translation>HUE</translation>
     </message>
-    <message utf8="true">
-        <location filename="ui/mainwindow.ui" line="438"/>
+    <message>
+        <location filename="ui/mainwindow.ui" line="583"/>
         <source>HUE (échelle logarithmique)</source>
         <translation>HUE (logarithmic scale)</translation>
     </message>
-    <message utf8="true">
-        <location filename="ui/mainwindow.ui" line="443"/>
+    <message>
+        <location filename="ui/mainwindow.ui" line="588"/>
         <source>Personalisée</source>
         <translation>Custom</translation>
     </message>
     <message>
-        <location filename="ui/mainwindow.ui" line="457"/>
         <source>Type de couleurs</source>
-        <translation>Colors</translation>
-    </message>
-    <message utf8="true">
-        <location filename="ui/mainwindow.ui" line="500"/>
-        <source>Paramètres des détecteurs de coins</source>
-        <translation>Edge detection parameters</translation>
+        <translation type="vanished">Colors</translation>
     </message>
     <message>
-        <location filename="ui/mainwindow.ui" line="2016"/>
+        <source>Paramètres des détecteurs de coins</source>
+        <translation type="vanished">Edge detection parameters</translation>
+    </message>
+    <message>
         <source>Seuillage</source>
-        <translation>Thresholding</translation>
+        <translation type="vanished">Thresholding</translation>
     </message>
     <message>
         <source>Afficher les
 composantes connexes</source>
         <translation type="obsolete">Show connected components</translation>
     </message>
-    <message utf8="true">
+    <message>
         <source>Résolution angulaire</source>
         <translation type="obsolete">Angular resolution</translation>
     </message>
@@ -166,33 +158,32 @@ composantes connexes</source>
         <source>Zone retreinte</source>
         <translation type="obsolete">Restricted area</translation>
     </message>
-    <message utf8="true">
-        <location filename="ui/mainwindow.ui" line="1048"/>
+    <message>
         <source>Résolution du cercle</source>
-        <translation>Circle resolution</translation>
+        <translation type="vanished">Circle resolution</translation>
     </message>
     <message>
         <source>Seuil de contour</source>
         <translation type="obsolete">Contour&apos;s threshold</translation>
     </message>
     <message>
-        <location filename="ui/mainwindow.ui" line="1162"/>
+        <location filename="ui/mainwindow.ui" line="730"/>
         <source>Pourcentage du
 rayon moyen</source>
         <translation>Means radius percentage</translation>
     </message>
     <message>
-        <location filename="ui/mainwindow.ui" line="470"/>
+        <location filename="ui/mainwindow.ui" line="819"/>
         <source>Afficher la
 zone restreinte</source>
         <translation>Show restricted area</translation>
     </message>
     <message>
-        <location filename="ui/mainwindow.ui" line="484"/>
+        <location filename="ui/mainwindow.ui" line="833"/>
         <source>100</source>
         <translation>100</translation>
     </message>
-    <message utf8="true">
+    <message>
         <source>Paramètres du z-mouvement</source>
         <translation type="obsolete">Z-motion settings</translation>
     </message>
@@ -200,116 +191,97 @@ zone restreinte</source>
         <source>Seuil de z-mouvement</source>
         <translation type="obsolete">Z-motion threshold</translation>
     </message>
-    <message utf8="true">
+    <message>
         <source>Paramètres de la détection de contours</source>
         <translation type="obsolete">Contour detection settings</translation>
     </message>
     <message>
-        <location filename="ui/mainwindow.ui" line="517"/>
         <source>Algorithme</source>
-        <translation>Algorithm</translation>
+        <translation type="vanished">Algorithm</translation>
     </message>
     <message>
-        <location filename="ui/mainwindow.ui" line="536"/>
-        <location filename="src/mainwindow.cpp" line="81"/>
         <source>Canny</source>
-        <translation>Canny</translation>
+        <translation type="vanished">Canny</translation>
     </message>
     <message>
-        <location filename="ui/mainwindow.ui" line="551"/>
         <source>Rayon du masque gaussien</source>
-        <translation>Gaussian mask radius</translation>
+        <translation type="vanished">Gaussian mask radius</translation>
     </message>
     <message>
-        <location filename="ui/mainwindow.ui" line="580"/>
         <source>Sigma du masque gaussien</source>
-        <translation>Gaussian mask sigma</translation>
+        <translation type="vanished">Gaussian mask sigma</translation>
     </message>
     <message>
-        <location filename="ui/mainwindow.ui" line="615"/>
         <source>Gradient minimum</source>
-        <translation>Minimum gradient</translation>
-    </message>
-    <message utf8="true">
-        <location filename="ui/mainwindow.ui" line="644"/>
-        <source>Déviation minimum</source>
-        <translation>Minimum deviation</translation>
-    </message>
-    <message utf8="true">
-        <location filename="ui/mainwindow.ui" line="695"/>
-        <source>Paramètres des flots optiques</source>
-        <translation>Optical flow parameters</translation>
+        <translation type="vanished">Minimum gradient</translation>
     </message>
     <message>
-        <location filename="ui/mainwindow.ui" line="734"/>
+        <source>Déviation minimum</source>
+        <translation type="vanished">Minimum deviation</translation>
+    </message>
+    <message>
+        <source>Paramètres des flots optiques</source>
+        <translation type="vanished">Optical flow parameters</translation>
+    </message>
+    <message>
         <source>Alpha (lissage)</source>
-        <translation>Alpha (smoothing)</translation>
+        <translation type="vanished">Alpha (smoothing)</translation>
     </message>
-    <message utf8="true">
-        <location filename="ui/mainwindow.ui" line="772"/>
+    <message>
         <source>Epsilon (seuil de précision)</source>
-        <translation>Epsilon (precision threshold)</translation>
+        <translation type="vanished">Epsilon (precision threshold)</translation>
     </message>
-    <message utf8="true">
-        <location filename="ui/mainwindow.ui" line="804"/>
+    <message>
         <source>Nombre maximum d&apos;itérations</source>
-        <translation>Maximum iteration number</translation>
+        <translation type="vanished">Maximum iteration number</translation>
     </message>
-    <message utf8="true">
-        <location filename="ui/mainwindow.ui" line="819"/>
-        <location filename="ui/mainwindow.ui" line="2468"/>
-        <location filename="ui/mainwindow.ui" line="2508"/>
-        <location filename="ui/mainwindow.ui" line="3372"/>
-        <location filename="ui/mainwindow.ui" line="3392"/>
-        <location filename="ui/mainwindow.ui" line="3452"/>
+    <message>
+        <location filename="ui/mainwindow.ui" line="2217"/>
+        <location filename="ui/mainwindow.ui" line="2271"/>
+        <location filename="ui/mainwindow.ui" line="3009"/>
         <source>Mettre à jour</source>
         <translation>Update</translation>
     </message>
-    <message utf8="true">
-        <location filename="ui/mainwindow.ui" line="844"/>
+    <message>
         <source>Paramètres généraux</source>
-        <translation>General settings</translation>
+        <translation type="vanished">General settings</translation>
     </message>
-    <message utf8="true">
-        <location filename="ui/mainwindow.ui" line="858"/>
+    <message>
+        <location filename="ui/mainwindow.ui" line="344"/>
         <source>Intervalle d&apos;intensité</source>
         <translation>Intensity interval</translation>
     </message>
     <message>
-        <location filename="ui/mainwindow.ui" line="911"/>
         <source>Z-mouvement
 minimum</source>
-        <translation>Minimum of
+        <translation type="vanished">Minimum of
 Z-Motion</translation>
     </message>
     <message>
-        <location filename="ui/mainwindow.ui" line="952"/>
         <source>Nombre de
 secteurs angulaires</source>
-        <translation>Number of
+        <translation type="vanished">Number of
 angular sectors</translation>
     </message>
-    <message utf8="true">
-        <location filename="ui/mainwindow.ui" line="966"/>
+    <message>
         <source>Pourcentage de
 coupes à ignorer</source>
-        <translation>Percentage of slices
+        <translation type="vanished">Percentage of slices
 to ignore</translation>
     </message>
     <message>
-        <location filename="ui/mainwindow.ui" line="1036"/>
+        <location filename="ui/mainwindow.ui" line="605"/>
         <source>Zone restreinte</source>
         <translation>Restricted area</translation>
     </message>
-    <message utf8="true">
-        <location filename="ui/mainwindow.ui" line="1103"/>
+    <message>
         <source>Seuil d&apos;intensité
 minimum</source>
-        <translation>Threshold of
+        <translation type="vanished">Threshold of
 minimum intensity</translation>
     </message>
-    <message utf8="true">
-        <location filename="ui/mainwindow.ui" line="1209"/>
+    <message>
+        <location filename="ui/mainwindow.ui" line="777"/>
         <source>Rayon minimum
 (en pourcentage de la
 résolution de l&apos;image)</source>
@@ -318,24 +290,26 @@ résolution de l&apos;image)</source>
 image resolution)</translation>
     </message>
     <message>
-        <location filename="ui/mainwindow.ui" line="1249"/>
-        <location filename="ui/mainwindow.ui" line="3324"/>
+        <location filename="ui/mainwindow.ui" line="1336"/>
+        <location filename="ui/mainwindow.ui" line="2955"/>
         <source>Histogrammes</source>
         <translation>Histograms</translation>
     </message>
     <message>
-        <location filename="ui/mainwindow.ui" line="1270"/>
+        <location filename="ui/mainwindow.ui" line="1410"/>
         <source>Z-Mouvement par coupe</source>
         <translation>Z-Motion per slice</translation>
     </message>
     <message>
-        <location filename="ui/mainwindow.ui" line="1282"/>
-        <location filename="ui/mainwindow.ui" line="1776"/>
-        <location filename="ui/mainwindow.ui" line="2198"/>
+        <location filename="ui/mainwindow.ui" line="1032"/>
+        <location filename="ui/mainwindow.ui" line="1210"/>
+        <location filename="ui/mainwindow.ui" line="1422"/>
+        <location filename="ui/mainwindow.ui" line="2013"/>
+        <location filename="ui/mainwindow.ui" line="2060"/>
         <source>Rayon de lissage</source>
         <translation>Smoothing radius</translation>
     </message>
-    <message utf8="true">
+    <message>
         <source>Pourcentage de coupes à supprimer
 au début et à la fin</source>
         <oldsource>Porucentage de coupes à supprimer
@@ -344,9 +318,8 @@ au début et à la fin</oldsource>
 at the begining and at the end</translation>
     </message>
     <message>
-        <location filename="ui/mainwindow.ui" line="1334"/>
-        <location filename="ui/mainwindow.ui" line="1557"/>
-        <location filename="ui/mainwindow.ui" line="1828"/>
+        <location filename="ui/mainwindow.ui" line="1474"/>
+        <location filename="ui/mainwindow.ui" line="1745"/>
         <source>Hauteur minimum d&apos;un maximum
 (en % du maximum global)</source>
         <oldsource>Seuil de hauteur minimum d&apos;un
@@ -356,195 +329,461 @@ maximum
 (in % of global maximum)</translation>
     </message>
     <message>
-        <location filename="ui/mainwindow.ui" line="1381"/>
-        <location filename="ui/mainwindow.ui" line="1875"/>
         <source>Largeur minimum des intervalles</source>
-        <translation>Minimum width of intervals</translation>
+        <translation type="vanished">Minimum width of intervals</translation>
     </message>
-    <message utf8="true">
-        <location filename="ui/mainwindow.ui" line="1474"/>
-        <location filename="ui/mainwindow.ui" line="1698"/>
-        <location filename="ui/mainwindow.ui" line="1968"/>
+    <message>
+        <location filename="ui/mainwindow.ui" line="1615"/>
+        <location filename="ui/mainwindow.ui" line="1886"/>
         <source>Valeurs par défaut</source>
         <translation>Default values</translation>
     </message>
     <message>
-        <location filename="ui/mainwindow.ui" line="1490"/>
+        <location filename="ui/mainwindow.ui" line="1678"/>
         <source>Z-Mouvement par secteur angulaire</source>
         <translation>Z-Motions per angular sector</translation>
     </message>
-    <message utf8="true">
-        <location filename="ui/mainwindow.ui" line="1505"/>
+    <message>
+        <location filename="ui/mainwindow.ui" line="1693"/>
         <source>Rayon de lissage (en degrés)</source>
         <translation>Smoothing radius (in degrees)</translation>
     </message>
-    <message utf8="true">
-        <location filename="ui/mainwindow.ui" line="1604"/>
+    <message>
+        <location filename="ui/mainwindow.ui" line="1792"/>
         <source>Largeur minimum des intervalles
 (en degrés)</source>
         <translation>Minimum width of intervals
 (in degrees)</translation>
     </message>
-    <message utf8="true">
-        <location filename="ui/mainwindow.ui" line="1744"/>
+    <message>
         <source>Écart ajouté aux intervalles
 (en degrés)</source>
-        <translation>Space add to each interval (in degrees)</translation>
+        <translation type="vanished">Space add to each interval (in degrees)</translation>
     </message>
     <message>
-        <location filename="ui/mainwindow.ui" line="2298"/>
         <source>Seuil de courbure</source>
-        <translation>Curvatue threshold</translation>
+        <translation type="vanished">Curvatue threshold</translation>
     </message>
-    <message utf8="true">
-        <location filename="ui/mainwindow.ui" line="2356"/>
+    <message>
         <source>Épaisseur des segments flous
 pour la détection de la courbure</source>
-        <translation>Blurred segment width
+        <translation type="vanished">Blurred segment width
 for curvature detection</translation>
     </message>
-    <message utf8="true">
-        <location filename="ui/mainwindow.ui" line="2370"/>
+    <message>
         <source>Distance minimum des points
 de concavité par rapport au
 premier point de contour (en px)</source>
-        <translation>Minimum distance of concavity
+        <translation type="vanished">Minimum distance of concavity
 points to the first contour
 point (in pixels)</translation>
     </message>
     <message>
-        <location filename="ui/mainwindow.ui" line="2560"/>
+        <location filename="ui/mainwindow.ui" line="2323"/>
         <source>Histogramme/diagramme de secteurs angulaires</source>
         <translation>Histogram/diagram of angular sectors</translation>
     </message>
-    <message utf8="true">
-        <location filename="ui/mainwindow.ui" line="2565"/>
+    <message>
         <source>Histogramme de distances à la moelle</source>
-        <translation>Histogram of distances to the pith</translation>
+        <translation type="vanished">Histogram of distances to the pith</translation>
     </message>
     <message>
-        <location filename="ui/mainwindow.ui" line="2806"/>
+        <location filename="ui/mainwindow.ui" line="947"/>
         <source>Moelle du billon</source>
         <translation>Pith</translation>
     </message>
-    <message utf8="true">
-        <location filename="ui/mainwindow.ui" line="2811"/>
+    <message>
         <source>Zone réduite du billon</source>
-        <translation>Restricted area of billon</translation>
+        <translation type="vanished">Restricted area of billon</translation>
     </message>
     <message>
-        <location filename="ui/mainwindow.ui" line="2816"/>
         <source>Secteur angulaire courant (zone large)</source>
-        <translation>Current angular sector (large area)</translation>
+        <translation type="vanished">Current angular sector (large area)</translation>
     </message>
     <message>
-        <location filename="ui/mainwindow.ui" line="2821"/>
         <source>Secteurs angulaires du billon (zone large)</source>
-        <translation>Angular sectors (large area)</translation>
+        <translation type="vanished">Angular sectors (large area)</translation>
     </message>
-    <message utf8="true">
-        <location filename="ui/mainwindow.ui" line="3010"/>
-        <location filename="ui/mainwindow.ui" line="3199"/>
-        <location filename="ui/mainwindow.ui" line="3270"/>
+    <message>
+        <location filename="ui/mainwindow.ui" line="166"/>
+        <location filename="ui/mainwindow.ui" line="867"/>
+        <source>Coupes tangentielles</source>
+        <translation>Tangential slices</translation>
+    </message>
+    <message>
+        <location filename="ui/mainwindow.ui" line="330"/>
+        <source>Général</source>
+        <translation>Global</translation>
+    </message>
+    <message>
+        <location filename="ui/mainwindow.ui" line="434"/>
+        <source>Type de repère</source>
+        <translation>Coordinate System type</translation>
+    </message>
+    <message>
+        <location filename="ui/mainwindow.ui" line="478"/>
+        <source>Polaire</source>
+        <translation>Polar</translation>
+    </message>
+    <message>
+        <location filename="ui/mainwindow.ui" line="485"/>
+        <source>Elliptique</source>
+        <translation>Elliptic</translation>
+    </message>
+    <message>
+        <location filename="ui/mainwindow.ui" line="500"/>
+        <source>Résolution angulaire
+du repère polaire</source>
+        <translation>Angular resolution
+of polar system</translation>
+    </message>
+    <message>
+        <location filename="ui/mainwindow.ui" line="559"/>
+        <source>Echelle de couleurs</source>
+        <translation>Scale of colors</translation>
+    </message>
+    <message>
+        <location filename="ui/mainwindow.ui" line="672"/>
+        <source>Intensité minimum</source>
+        <translation>Minimum intensity</translation>
+    </message>
+    <message>
+        <location filename="ui/mainwindow.ui" line="840"/>
+        <source>Pourcentage de coupes
+à ignoer</source>
+        <translation>Percentage of slices
+to ignore</translation>
+    </message>
+    <message>
+        <location filename="ui/mainwindow.ui" line="873"/>
+        <source>Interpolation trilinéaire</source>
+        <translation>Trilinear interpolation</translation>
+    </message>
+    <message>
+        <location filename="ui/mainwindow.ui" line="890"/>
+        <source>Pourcentage d&apos;interpolation</source>
+        <translation>Interpolation percentage</translation>
+    </message>
+    <message>
+        <location filename="ui/mainwindow.ui" line="907"/>
+        <source>Dessiner l&apos;ellipse</source>
+        <translation>Draw ellipse</translation>
+    </message>
+    <message>
+        <location filename="ui/mainwindow.ui" line="929"/>
+        <source>Moelle</source>
+        <translation>Pith</translation>
+    </message>
+    <message>
+        <location filename="ui/mainwindow.ui" line="956"/>
+        <source>Largeur de la sous-fenetre</source>
+        <translation>Sub-window width</translation>
+    </message>
+    <message>
+        <location filename="ui/mainwindow.ui" line="976"/>
+        <source>Hauteur de la sous-fenetre</source>
+        <translation>Sub-window height</translation>
+    </message>
+    <message>
+        <location filename="ui/mainwindow.ui" line="996"/>
+        <source>Distance euclidienne maximum entre
+deux coordonnées successives</source>
+        <translation>Maximum euclidean distance
+between two successive coordinates</translation>
+    </message>
+    <message>
+        <location filename="ui/mainwindow.ui" line="1014"/>
+        <location filename="ui/mainwindow.ui" line="1281"/>
+        <source>Pourcentage minimum de bois
+sur une coupe valide</source>
+        <translation>Minimum percentage of wood
+on a valid slice</translation>
+    </message>
+    <message>
+        <location filename="ui/mainwindow.ui" line="1049"/>
+        <location filename="ui/mainwindow.ui" line="1227"/>
+        <source>Intervalle d&apos;intensité à considérer</source>
+        <translation>Intensity interval to consider</translation>
+    </message>
+    <message>
+        <location filename="ui/mainwindow.ui" line="1086"/>
+        <location filename="ui/mainwindow.ui" line="1264"/>
+        <source>Coupes par ordre croissant</source>
+        <translation>Slices by ascending order</translation>
+    </message>
+    <message>
+        <location filename="ui/mainwindow.ui" line="1103"/>
+        <source>Pourcentages de coupes valides
+à extrapoler</source>
+        <translation>Percentage of valid slices
+to extrapolate</translation>
+    </message>
+    <message>
+        <location filename="ui/mainwindow.ui" line="1144"/>
+        <source>Moelle des nœuds</source>
+        <translation>Pith of knots</translation>
+    </message>
+    <message>
+        <location filename="ui/mainwindow.ui" line="1153"/>
+        <source>Largeur de la sous-fenetre (mm)</source>
+        <translation>Sub-window width (mm)</translation>
+    </message>
+    <message>
+        <location filename="ui/mainwindow.ui" line="1173"/>
+        <source>Hauteur de la sous-fenetre (mm)</source>
+        <translation>Sub-window height (mm)</translation>
+    </message>
+    <message>
+        <location filename="ui/mainwindow.ui" line="1193"/>
+        <source>Décalage horizontal maximum (mm)</source>
+        <translation>Maximum horizontal shift (mm)</translation>
+    </message>
+    <message>
+        <location filename="ui/mainwindow.ui" line="1299"/>
+        <source>Pourcentage de coupes valides
+à extrapoler</source>
+        <translation>Percentage of valid slices
+to extrapolate</translation>
+    </message>
+    <message>
+        <location filename="ui/mainwindow.ui" line="1353"/>
+        <source>Z-mouvement minimum</source>
+        <translation>Minimum z-Motion</translation>
+    </message>
+    <message>
+        <location filename="ui/mainwindow.ui" line="1521"/>
+        <source>Largeur minimum des intervalles
+(en nombre de coupes)</source>
+        <translation>Minimum width of intervals
+(in slice number)</translation>
+    </message>
+    <message>
+        <location filename="ui/mainwindow.ui" line="1568"/>
+        <location filename="ui/mainwindow.ui" line="1839"/>
+        <source>Seuil de recherche des dérivées
+(en % du maximum courant)</source>
+        <translation>Threshold of derivative search
+(in % of current maximum)</translation>
+    </message>
+    <message>
+        <location filename="ui/mainwindow.ui" line="1661"/>
+        <source>Pourcentage de coupes à ignorer
+(en début et fin de billon)</source>
+        <translation>Percentage of slices ti ignore
+(at begin and end of billon)</translation>
+    </message>
+    <message>
+        <location filename="ui/mainwindow.ui" line="1932"/>
+        <source>Écart ajouté aux intervalles
+(en degrés.)</source>
+        <translation>Gap add to intervals
+(in degrees)</translation>
+    </message>
+    <message>
+        <location filename="ui/mainwindow.ui" line="2001"/>
+        <source>Profil d&apos;inclinaison de la moelle des nœuds</source>
+        <translation>Inclination profile of pith of knots</translation>
+    </message>
+    <message>
+        <location filename="ui/mainwindow.ui" line="2045"/>
+        <source>Accumulation elliptique d&apos;intensité</source>
+        <translation>Elliptical accumulation of intensity</translation>
+    </message>
+    <message>
+        <location filename="ui/mainwindow.ui" line="2085"/>
+        <source>Ellipses</source>
+        <translation>Ellipses</translation>
+    </message>
+    <message>
+        <location filename="ui/mainwindow.ui" line="2091"/>
+        <source>Algorithme LOWESS</source>
+        <translation>LOWESS algorithm</translation>
+    </message>
+    <message>
+        <location filename="ui/mainwindow.ui" line="2100"/>
+        <source>Largeur de bande</source>
+        <translation>Bandwidth</translation>
+    </message>
+    <message>
+        <location filename="ui/mainwindow.ui" line="2120"/>
+        <source>Coefficient inter-quartile</source>
+        <translation>Interquartile coefficient</translation>
+    </message>
+    <message>
+        <location filename="ui/mainwindow.ui" line="2140"/>
+        <source>Pourcentage de premières
+coupes valides à extrapoler</source>
+        <translation>Percentage of first valid
+slices to extrapolate</translation>
+    </message>
+    <message>
+        <location filename="ui/mainwindow.ui" line="2168"/>
+        <source>Pourcentage de dernières
+coupes valides à extrapoler</source>
+        <translation>Percentage of last valid
+slices to extrapolate</translation>
+    </message>
+    <message>
+        <location filename="ui/mainwindow.ui" line="2409"/>
+        <source>Moelle en entier</source>
+        <translation>Full pith</translation>
+    </message>
+    <message>
+        <location filename="ui/mainwindow.ui" line="2414"/>
+        <source>Moelle sur l&apos;intervalle de coupes courant</source>
+        <translation>Pith on current slice interval</translation>
+    </message>
+    <message>
+        <location filename="ui/mainwindow.ui" line="2419"/>
+        <source>Billon en entier</source>
+        <translation>Full billon</translation>
+    </message>
+    <message>
+        <location filename="ui/mainwindow.ui" line="2424"/>
+        <source>Toutes les zones de nœuds du billon</source>
+        <translation>All knot areas of billon</translation>
+    </message>
+    <message>
+        <location filename="ui/mainwindow.ui" line="2429"/>
+        <source>La zone de nœud courante</source>
+        <translation>Current knot area</translation>
+    </message>
+    <message>
+        <location filename="ui/mainwindow.ui" line="2618"/>
+        <location filename="ui/mainwindow.ui" line="2807"/>
         <source>Nœud courant</source>
         <translation>Current knot</translation>
     </message>
-    <message utf8="true">
-        <location filename="ui/mainwindow.ui" line="3015"/>
-        <location filename="ui/mainwindow.ui" line="3204"/>
+    <message>
+        <location filename="ui/mainwindow.ui" line="2623"/>
+        <location filename="ui/mainwindow.ui" line="2812"/>
         <source>Nœuds de l&apos;intervalle de coupes</source>
         <translation>Knots of the slice interval</translation>
     </message>
     <message>
-        <location filename="ui/mainwindow.ui" line="3020"/>
+        <location filename="ui/mainwindow.ui" line="2628"/>
         <source>Image de l&apos;intervalle de coupes</source>
         <translation>Image of the slice interval</translation>
     </message>
-    <message utf8="true">
-        <location filename="ui/mainwindow.ui" line="3025"/>
+    <message>
+        <location filename="ui/mainwindow.ui" line="2633"/>
         <source>Image cartésienne de l&apos;intervalle de coupes</source>
         <translation>Cartesian image of the slice interval</translation>
     </message>
-    <message utf8="true">
-        <location filename="ui/mainwindow.ui" line="3102"/>
+    <message>
+        <location filename="ui/mainwindow.ui" line="2710"/>
         <source>Résolution (image de
  noeuds seulement)</source>
         <translation>Resolution (only
 knot image)</translation>
     </message>
-    <message utf8="true">
-        <location filename="ui/mainwindow.ui" line="3209"/>
-        <location filename="ui/mainwindow.ui" line="3280"/>
+    <message>
+        <location filename="ui/mainwindow.ui" line="2817"/>
+        <location filename="ui/mainwindow.ui" line="2898"/>
         <source>Nœuds du billon</source>
         <translation>Billon&apos;s knots</translation>
     </message>
     <message>
-        <location filename="ui/mainwindow.ui" line="3265"/>
-        <source>Contour de la coupe</source>
-        <translation>Slice contour</translation>
-    </message>
-    <message utf8="true">
-        <location filename="ui/mainwindow.ui" line="3275"/>
-        <source>Nœuds  de l&apos;intervalle de coupes</source>
-        <translation>Knots of slice interval</translation>
-    </message>
-    <message utf8="true">
-        <location filename="ui/mainwindow.ui" line="3341"/>
-        <source>0. Distribution de l&apos;intensité</source>
-        <translation>0. Intensity distribution</translation>
+        <location filename="ui/mainwindow.ui" line="2873"/>
+        <source>Moelle du noeud courant</source>
+        <translation>Pith of current knot</translation>
     </message>
     <message>
-        <location filename="ui/mainwindow.ui" line="3415"/>
+        <location filename="ui/mainwindow.ui" line="2878"/>
+        <source>Moelle de la zone de nœud courante</source>
+        <translation>Pith of current knot area</translation>
+    </message>
+    <message>
+        <location filename="ui/mainwindow.ui" line="2883"/>
+        <source>Moelle de tous les noeuds</source>
+        <translation>Pith of all knots</translation>
+    </message>
+    <message>
+        <location filename="ui/mainwindow.ui" line="2893"/>
+        <source>Nœuds segmentés de l&apos;intervalle de coupes</source>
+        <translation>Segmented knots of current slice interval</translation>
+    </message>
+    <message>
+        <location filename="ui/mainwindow.ui" line="2912"/>
+        <source>Utiliser le repère de l&apos;intervalle de coupe</source>
+        <translation>Use system of slice interval</translation>
+    </message>
+    <message>
+        <source>Histogrammes et vue tangentielle</source>
+        <translation type="vanished">Histograms</translation>
+    </message>
+    <message>
+        <location filename="ui/mainwindow.ui" line="3065"/>
+        <source>3. Profil d&apos;inclinaison de la moelle du nœud</source>
+        <translation>3. inclination profil of knot pith</translation>
+    </message>
+    <message>
+        <location filename="ui/mainwindow.ui" line="3075"/>
+        <source>4. Acumulation elliptique d&apos;intensité</source>
+        <translation>4. Elliptical accumulation of intensity</translation>
+    </message>
+    <message>
+        <location filename="ui/mainwindow.ui" line="3085"/>
+        <source>5. Rayons des ellipses</source>
+        <translation>5. Ellipse radii</translation>
+    </message>
+    <message>
+        <source>Contour de la coupe</source>
+        <translation type="vanished">Slice contour</translation>
+    </message>
+    <message>
+        <source>Nœuds  de l&apos;intervalle de coupes</source>
+        <translation type="vanished">Knots of slice interval</translation>
+    </message>
+    <message>
+        <source>0. Distribution de l&apos;intensité</source>
+        <translation type="vanished">0. Intensity distribution</translation>
+    </message>
+    <message>
+        <location filename="ui/mainwindow.ui" line="2972"/>
         <source>1. Z-Mouvement par coupe</source>
         <translation>1.Z-Motion per slice</translation>
     </message>
     <message>
-        <location filename="ui/mainwindow.ui" line="3485"/>
+        <location filename="ui/mainwindow.ui" line="3042"/>
         <source>2. Z-Mouvement par secteurs angulaire</source>
         <translation>2. Z-Motion per angular sectors</translation>
     </message>
-    <message utf8="true">
-        <location filename="ui/mainwindow.ui" line="3508"/>
+    <message>
         <source>3. Distance à la moelle</source>
-        <translation>3.Distance to the pith</translation>
+        <translation type="vanished">3.Distance to the pith</translation>
     </message>
     <message>
-        <location filename="ui/mainwindow.ui" line="3518"/>
         <source>4. Contours et courbure</source>
-        <translation>4. Contours and curvature</translation>
+        <translation type="vanished">4. Contours and curvature</translation>
     </message>
-    <message utf8="true">
-        <location filename="ui/mainwindow.ui" line="3541"/>
+    <message>
         <source>5. Points de concavité</source>
-        <translation>5. Concavity points</translation>
+        <translation type="vanished">5. Concavity points</translation>
     </message>
-    <message utf8="true">
-        <location filename="ui/mainwindow.ui" line="1427"/>
-        <location filename="ui/mainwindow.ui" line="1651"/>
-        <location filename="ui/mainwindow.ui" line="1921"/>
+    <message>
         <source>Hauteur de recherche des dérivées
 (en % du maximum courant)</source>
-        <translation>Height of derivative search
+        <translation type="vanished">Height of derivative search
 (in % of the current maximum)</translation>
     </message>
     <message>
         <source>Z-Mouvement</source>
         <translation type="obsolete">Z-Motion</translation>
     </message>
-    <message utf8="true">
-        <location filename="ui/mainwindow.ui" line="1761"/>
+    <message>
         <source>Distance à la moelle</source>
-        <translation>Distance to the pith</translation>
+        <translation type="vanished">Distance to the pith</translation>
     </message>
     <message>
         <source>Histogramme de secteurs</source>
         <translation type="obsolete">Sector histogram</translation>
     </message>
-    <message utf8="true">
+    <message>
         <source>Écart ajouté aux intervalles</source>
         <translation type="obsolete">Padding add to the intervals</translation>
     </message>
-    <message utf8="true">
+    <message>
         <source>Histogramme de distance à la moelle</source>
         <translation type="obsolete">Distance to the pith histogram</translation>
     </message>
@@ -552,75 +791,71 @@ knot image)</translation>
         <source>Distance de comparaison</source>
         <translation type="obsolete">Comparison distance</translation>
     </message>
-    <message utf8="true">
+    <message>
         <source>Différence minimum</source>
         <translation type="obsolete">Minimum difference</translation>
     </message>
     <message>
-        <location filename="ui/mainwindow.ui" line="2417"/>
+        <location filename="ui/mainwindow.ui" line="2180"/>
         <source>Processus</source>
         <translation>Process steps</translation>
     </message>
     <message>
-        <location filename="ui/mainwindow.ui" line="2423"/>
+        <location filename="ui/mainwindow.ui" line="2186"/>
         <source>1. Moelle</source>
         <translation>1. Pith</translation>
     </message>
     <message>
-        <location filename="ui/mainwindow.ui" line="2430"/>
+        <location filename="ui/mainwindow.ui" line="2193"/>
         <source>Calculer la moelle</source>
         <translation>Pith computing</translation>
     </message>
-    <message utf8="true">
-        <location filename="ui/mainwindow.ui" line="2443"/>
+    <message>
+        <location filename="ui/mainwindow.ui" line="2232"/>
         <source>2. Sélection de
 l&apos;intervalle de coupes</source>
         <translation>2. Slice interval selection</translation>
     </message>
-    <message utf8="true">
-        <location filename="ui/mainwindow.ui" line="2477"/>
+    <message>
+        <location filename="ui/mainwindow.ui" line="2240"/>
         <source>3. Sélection de
 l&apos;intervalle angulaire</source>
         <translation>3. Angular interval selection</translation>
     </message>
     <message>
-        <location filename="ui/mainwindow.ui" line="1980"/>
         <source>Segmentation</source>
-        <translation>Segmentation</translation>
+        <translation type="vanished">Segmentation</translation>
     </message>
-    <message utf8="true">
+    <message>
         <source>Résolution angulaire
 de la projection cartesienne</source>
         <translation type="obsolete">Angular resolution
 of cartesian projection</translation>
     </message>
     <message>
+        <location filename="ui/mainwindow.ui" line="1946"/>
         <source>Nombre de secteurs angulaires</source>
-        <translation type="obsolete">Angular sector number</translation>
+        <translation>Number of angular sectors</translation>
     </message>
     <message>
-        <location filename="ui/mainwindow.ui" line="2004"/>
         <source>Composantes connexes</source>
-        <translation>Connected components</translation>
+        <translation type="vanished">Connected components</translation>
     </message>
-    <message utf8="true">
-        <location filename="ui/mainwindow.ui" line="2074"/>
+    <message>
         <source>Taille minimum en 3D
 (côté du cube)</source>
-        <translation>Minimum size in 3D
+        <translation type="vanished">Minimum size in 3D
 (cube side length)</translation>
     </message>
-    <message utf8="true">
-        <location filename="ui/mainwindow.ui" line="2127"/>
+    <message>
         <source>Taille minimum en 2D
 (côté du carré)</source>
-        <translation>Minimum size in 2D
+        <translation type="vanished">Minimum size in 2D
 (square side length)</translation>
     </message>
     <message>
-        <location filename="ui/mainwindow.ui" line="2183"/>
         <source>Contours</source>
-        <translation>Contours</translation>
+        <translation type="vanished">Contours</translation>
     </message>
     <message>
         <source>Points dominants</source>
@@ -634,7 +869,7 @@ of cartesian projection</translation>
         <source>Points dominants principaux</source>
         <translation type="obsolete">Main dominant points</translation>
     </message>
-    <message utf8="true">
+    <message>
         <source>Distance minimum à
 l&apos;origine du contour</source>
         <translation type="obsolete">Minimum distance
@@ -644,22 +879,22 @@ to the contour origin</translation>
         <source>Courbure</source>
         <translation type="obsolete">Curvature</translation>
     </message>
-    <message utf8="true">
+    <message>
         <source>Épaisseur des segments flous</source>
         <translation type="obsolete">Thickness of blurred segments</translation>
     </message>
     <message>
-        <location filename="ui/mainwindow.ui" line="2518"/>
+        <location filename="ui/mainwindow.ui" line="2281"/>
         <source>Export</source>
         <translation>Export</translation>
     </message>
     <message>
-        <location filename="ui/mainwindow.ui" line="2542"/>
+        <location filename="ui/mainwindow.ui" line="2305"/>
         <source>Exporter les histogrammes (SEP et format image)</source>
         <translation>Export histograms (in SEP and image formats)</translation>
     </message>
     <message>
-        <location filename="ui/mainwindow.ui" line="2555"/>
+        <location filename="ui/mainwindow.ui" line="2318"/>
         <source>Histogramme de coupes</source>
         <translation>Slice histogram</translation>
     </message>
@@ -667,48 +902,44 @@ to the contour origin</translation>
         <source>Histogramme/diagramme de secteurs</source>
         <translation type="obsolete">Sector histogram/diagram</translation>
     </message>
-    <message utf8="true">
+    <message>
         <source>Histogramme de distances des noeuds à la moelle</source>
         <translation type="obsolete">Histogram of the pith-knot distance</translation>
     </message>
     <message>
-        <location filename="ui/mainwindow.ui" line="2587"/>
-        <location filename="ui/mainwindow.ui" line="2764"/>
-        <location filename="ui/mainwindow.ui" line="2981"/>
-        <location filename="ui/mainwindow.ui" line="3157"/>
-        <location filename="ui/mainwindow.ui" line="3223"/>
-        <location filename="ui/mainwindow.ui" line="3294"/>
+        <location filename="ui/mainwindow.ui" line="2345"/>
+        <location filename="ui/mainwindow.ui" line="2589"/>
+        <location filename="ui/mainwindow.ui" line="2765"/>
+        <location filename="ui/mainwindow.ui" line="2831"/>
+        <location filename="ui/mainwindow.ui" line="2925"/>
         <source>Exporter</source>
         <translation>Export</translation>
     </message>
     <message>
-        <location filename="ui/mainwindow.ui" line="2601"/>
+        <location filename="ui/mainwindow.ui" line="2359"/>
         <source>En .sep</source>
         <translation>To .sep</translation>
     </message>
     <message>
-        <location filename="ui/mainwindow.ui" line="2606"/>
+        <location filename="ui/mainwindow.ui" line="2364"/>
         <source>En image (.png, .jpeg, ...)</source>
         <translation>To images (.png, .jpeg, ...)</translation>
     </message>
     <message>
-        <location filename="ui/mainwindow.ui" line="2638"/>
         <source>Exporter en DAT</source>
-        <translation>Export to DAT</translation>
-    </message>
-    <message utf8="true">
-        <location filename="ui/mainwindow.ui" line="2652"/>
-        <source>Résolution</source>
-        <translation>Resolution</translation>
+        <translation type="vanished">Export to DAT</translation>
     </message>
     <message>
-        <location filename="ui/mainwindow.ui" line="2668"/>
-        <location filename="ui/mainwindow.ui" line="3050"/>
+        <source>Résolution</source>
+        <translation type="vanished">Resolution</translation>
+    </message>
+    <message>
+        <location filename="ui/mainwindow.ui" line="2658"/>
         <source>Contraste</source>
         <translation>Contrast</translation>
     </message>
     <message>
-        <location filename="ui/mainwindow.ui" line="2793"/>
+        <location filename="ui/mainwindow.ui" line="2396"/>
         <source>Exporter en OFS</source>
         <translation>Export to OFS</translation>
     </message>
@@ -716,7 +947,7 @@ to the contour origin</translation>
         <source>La moelle du billon</source>
         <translation type="obsolete">Billon pith</translation>
     </message>
-    <message utf8="true">
+    <message>
         <source>La zone réduite du billon</source>
         <translation type="obsolete">Billon restricted area</translation>
     </message>
@@ -729,52 +960,56 @@ to the contour origin</translation>
         <translation type="obsolete">All angular sectors of the billon (large area)</translation>
     </message>
     <message>
-        <location filename="ui/mainwindow.ui" line="2837"/>
+        <location filename="ui/mainwindow.ui" line="617"/>
+        <location filename="ui/mainwindow.ui" line="2445"/>
         <source>Nombre de sommets</source>
         <translation>Egde number</translation>
     </message>
     <message>
-        <location filename="ui/mainwindow.ui" line="2850"/>
+        <location filename="ui/mainwindow.ui" line="2458"/>
         <source>Rayon autour de la moelle</source>
         <translation>Radius around the pith</translation>
     </message>
     <message>
-        <location filename="ui/mainwindow.ui" line="2863"/>
+        <location filename="ui/mainwindow.ui" line="2471"/>
         <source>Fermer les faces du cylindre</source>
         <translation>Close cylynder faces</translation>
     </message>
     <message>
-        <location filename="ui/mainwindow.ui" line="2997"/>
+        <location filename="ui/mainwindow.ui" line="2605"/>
+        <location filename="src/mainwindow.cpp" line="1561"/>
+        <location filename="src/mainwindow.cpp" line="1587"/>
         <source>Exporter en PGM3D</source>
         <translation>Export to PGM3D</translation>
     </message>
-    <message utf8="true">
+    <message>
         <source>Zone de nœuds courante</source>
         <translation type="obsolete">Current knot area</translation>
     </message>
-    <message utf8="true">
+    <message>
+        <location filename="ui/mainwindow.ui" line="2888"/>
         <source>Nœud courant segmenté</source>
-        <translation type="obsolete">Current segmented knot</translation>
+        <translation>Current segmented knot</translation>
     </message>
     <message>
-        <location filename="ui/mainwindow.ui" line="3186"/>
+        <location filename="ui/mainwindow.ui" line="2794"/>
         <source>Exporter en V3D</source>
         <translation>export to V3D</translation>
     </message>
-    <message utf8="true">
+    <message>
         <source>Le nœud courant segmenté</source>
         <translation type="obsolete">Current segmented knot</translation>
     </message>
-    <message utf8="true">
+    <message>
         <source>Les nœuds segmentés de l&apos;intervalle de coupe courant</source>
         <translation type="obsolete">Segmented knots of the current slice interval</translation>
     </message>
-    <message utf8="true">
+    <message>
         <source>Les nœuds segmentés du billon</source>
         <translation type="obsolete">Segmented knot of the billon</translation>
     </message>
     <message>
-        <location filename="ui/mainwindow.ui" line="3252"/>
+        <location filename="ui/mainwindow.ui" line="2860"/>
         <source>Export en SDP</source>
         <translation>Export to SDP</translation>
     </message>
@@ -782,19 +1017,19 @@ to the contour origin</translation>
         <source>Contour de la coupe courante</source>
         <translation type="obsolete">Contour of current slice</translation>
     </message>
-    <message utf8="true">
+    <message>
         <source>Tous les nœuds segmentés de l&apos;intervalle de coupe courant</source>
         <translation type="obsolete">All segmented knot of the current slice interval</translation>
     </message>
-    <message utf8="true">
+    <message>
         <source>Tous les nœuds segmentés du billon</source>
         <translation type="obsolete">All segmented knots of the billon</translation>
     </message>
-    <message utf8="true">
+    <message>
         <source>Ancienne méthode</source>
         <translation type="obsolete">Old method</translation>
     </message>
-    <message utf8="true">
+    <message>
         <source>0. Intensité et Z-mouvement</source>
         <translation type="obsolete">0. Intensity and z-motion</translation>
     </message>
@@ -802,28 +1037,28 @@ to the contour origin</translation>
         <source>1. Coupes</source>
         <translation type="obsolete">1. Slices</translation>
     </message>
-    <message utf8="true">
-        <location filename="ui/mainwindow.ui" line="3426"/>
+    <message>
+        <location filename="ui/mainwindow.ui" line="2983"/>
         <source>Aller au maximum précédent</source>
         <translation>Go to the previous maximum</translation>
     </message>
     <message>
-        <location filename="ui/mainwindow.ui" line="3429"/>
+        <location filename="ui/mainwindow.ui" line="2986"/>
         <source>&lt;--</source>
         <translation>&lt;--</translation>
     </message>
-    <message utf8="true">
-        <location filename="ui/mainwindow.ui" line="3449"/>
+    <message>
+        <location filename="ui/mainwindow.ui" line="3006"/>
         <source>Mettre à jour l&apos;histogramme</source>
         <translation>Update histogram</translation>
     </message>
     <message>
-        <location filename="ui/mainwindow.ui" line="3472"/>
+        <location filename="ui/mainwindow.ui" line="3029"/>
         <source>Aller au maximum suivant</source>
         <translation>Go to the next maximum</translation>
     </message>
     <message>
-        <location filename="ui/mainwindow.ui" line="3475"/>
+        <location filename="ui/mainwindow.ui" line="3032"/>
         <source>--&gt;</source>
         <translation>--&gt;</translation>
     </message>
@@ -831,7 +1066,7 @@ to the contour origin</translation>
         <source>2. Secteurs angulaires</source>
         <translation type="obsolete">2. Angular sectors</translation>
     </message>
-    <message utf8="true">
+    <message>
         <source>3. Distance moelle/nœud</source>
         <translation type="obsolete">3. Pith-knot distance</translation>
     </message>
@@ -840,558 +1075,653 @@ to the contour origin</translation>
         <translation type="obsolete">4. Contours</translation>
     </message>
     <message>
-        <location filename="ui/mainwindow.ui" line="3556"/>
+        <location filename="ui/mainwindow.ui" line="3100"/>
         <source>Ouvrir une image DICOM</source>
         <translation>Open DICOM</translation>
     </message>
     <message>
-        <location filename="ui/mainwindow.ui" line="3561"/>
+        <location filename="ui/mainwindow.ui" line="3105"/>
         <source>Fermer l&apos;image</source>
         <translation>Close image</translation>
     </message>
     <message>
-        <location filename="ui/mainwindow.ui" line="3566"/>
+        <location filename="ui/mainwindow.ui" line="3110"/>
         <source>Quitter</source>
         <translation>Quit</translation>
     </message>
     <message>
-        <location filename="ui/mainwindow.ui" line="3571"/>
+        <location filename="ui/mainwindow.ui" line="3115"/>
         <source>Importer une image V3D</source>
         <translation>Import V3D</translation>
     </message>
     <message>
-        <location filename="ui/mainwindow.ui" line="3576"/>
+        <location filename="ui/mainwindow.ui" line="3120"/>
         <source>Ouvrir un fichier Tiff</source>
         <translation>Open Tiff</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="353"/>
         <source>SÃ©lection du rÃ©pertoire DICOM</source>
-        <translation>DICOM folder selection</translation>
+        <translation type="vanished">DICOM folder selection</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="357"/>
         <source>InversÃ©</source>
-        <translation>Inversed</translation>
+        <translation type="vanished">Inversed</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="358"/>
+        <location filename="src/mainwindow.cpp" line="307"/>
         <source>Ordre de chargement des coupes du billon</source>
         <translation>Bilon slice order during the loading</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="358"/>
+        <location filename="src/mainwindow.cpp" line="307"/>
         <source>Ordre :</source>
         <translation>Order :</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="358"/>
+        <location filename="src/mainwindow.cpp" line="307"/>
         <source>De lecture du fichier</source>
         <translation>of file reading</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="376"/>
         <source>SÃ©lection du fichier TIF</source>
-        <translation>TIFF file selection</translation>
+        <translation type="vanished">TIFF file selection</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="376"/>
+        <location filename="src/mainwindow.cpp" line="325"/>
         <source>Images TIFF (*.tiff *.tif)</source>
         <translation>TIFF images (*.tiff *.tif)</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="557"/>
+        <location filename="src/mainwindow.cpp" line="503"/>
+        <location filename="src/mainwindow.cpp" line="597"/>
         <source>Aucune</source>
         <translation>None</translation>
     </message>
     <message>
-        <location filename="ui/mainwindow.ui" line="2454"/>
-        <location filename="ui/mainwindow.ui" line="2494"/>
-        <location filename="src/mainwindow.cpp" line="690"/>
-        <location filename="src/mainwindow.cpp" line="840"/>
+        <location filename="ui/mainwindow.ui" line="2203"/>
+        <location filename="ui/mainwindow.ui" line="2257"/>
+        <location filename="src/mainwindow.cpp" line="730"/>
+        <location filename="src/mainwindow.cpp" line="874"/>
         <source>Aucun</source>
         <translation>None</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="847"/>
+        <location filename="src/mainwindow.cpp" line="881"/>
         <source>Interval %1 : [ %2, %3 ] (%4 coupes)</source>
         <translation>Interval %1 : [ %2, %3 ] (%4 slices)</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="708"/>
+        <location filename="src/mainwindow.cpp" line="748"/>
         <source>Secteur %1 : [ %2, %3 ] (%4 degres)</source>
         <translation>Sector %1 : [ %2, %3 ] (%4 degrees)</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="75"/>
         <source>DÃ©tection de coins</source>
-        <translation>Edge detection</translation>
+        <translation type="vanished">Edge detection</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="1046"/>
         <source>Exporter en .dat</source>
-        <translation>Export to .dat</translation>
+        <translation type="vanished">Export to .dat</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="1046"/>
         <source>Fichiers de donnÃ©es (*.dat);;Tous les fichiers (*.*)</source>
-        <translation>Data files (*.dat);;All files (*.*)</translation>
+        <translation type="vanished">Data files (*.dat);;All files (*.*)</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="1057"/>
-        <location filename="src/mainwindow.cpp" line="1059"/>
-        <location filename="src/mainwindow.cpp" line="1062"/>
         <source>Export en .dat</source>
-        <translation>Export to .dat</translation>
+        <translation type="vanished">Export to .dat</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="1057"/>
-        <location filename="src/mainwindow.cpp" line="1320"/>
-        <location filename="src/mainwindow.cpp" line="1333"/>
-        <location filename="src/mainwindow.cpp" line="1351"/>
-        <location filename="src/mainwindow.cpp" line="1376"/>
-        <location filename="src/mainwindow.cpp" line="1396"/>
-        <location filename="src/mainwindow.cpp" line="1418"/>
-        <location filename="src/mainwindow.cpp" line="1440"/>
-        <location filename="src/mainwindow.cpp" line="1488"/>
-        <location filename="src/mainwindow.cpp" line="1568"/>
-        <location filename="src/mainwindow.cpp" line="1635"/>
-        <location filename="src/mainwindow.cpp" line="1679"/>
-        <location filename="src/mainwindow.cpp" line="1704"/>
         <source>TerminÃ© avec succÃ©s !</source>
-        <translation>Successfully completed !</translation>
+        <translation type="vanished">Successfully completed !</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="1059"/>
-        <location filename="src/mainwindow.cpp" line="1681"/>
-        <location filename="src/mainwindow.cpp" line="1706"/>
         <source>L&apos;export a Ã©chouÃ©</source>
-        <translation>Export failed</translation>
+        <translation type="vanished">Export failed</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="1062"/>
-        <location filename="src/mainwindow.cpp" line="1088"/>
-        <location filename="src/mainwindow.cpp" line="1684"/>
-        <location filename="src/mainwindow.cpp" line="1709"/>
+        <location filename="src/mainwindow.cpp" line="1008"/>
         <source>Aucun fichier de billon ouvert.</source>
         <translation>No billon file open.</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="1084"/>
-        <location filename="src/mainwindow.cpp" line="1088"/>
-        <location filename="src/mainwindow.cpp" line="1320"/>
-        <location filename="src/mainwindow.cpp" line="1333"/>
-        <location filename="src/mainwindow.cpp" line="1336"/>
-        <location filename="src/mainwindow.cpp" line="1351"/>
-        <location filename="src/mainwindow.cpp" line="1354"/>
-        <location filename="src/mainwindow.cpp" line="1376"/>
-        <location filename="src/mainwindow.cpp" line="1379"/>
+        <location filename="src/mainwindow.cpp" line="1004"/>
+        <location filename="src/mainwindow.cpp" line="1008"/>
+        <location filename="src/mainwindow.cpp" line="1214"/>
+        <location filename="src/mainwindow.cpp" line="1219"/>
+        <location filename="src/mainwindow.cpp" line="1224"/>
+        <location filename="src/mainwindow.cpp" line="1238"/>
+        <location filename="src/mainwindow.cpp" line="1240"/>
+        <location filename="src/mainwindow.cpp" line="1248"/>
+        <location filename="src/mainwindow.cpp" line="1253"/>
+        <location filename="src/mainwindow.cpp" line="1270"/>
+        <location filename="src/mainwindow.cpp" line="1272"/>
+        <location filename="src/mainwindow.cpp" line="1275"/>
+        <location filename="src/mainwindow.cpp" line="1283"/>
+        <location filename="src/mainwindow.cpp" line="1288"/>
+        <location filename="src/mainwindow.cpp" line="1312"/>
+        <location filename="src/mainwindow.cpp" line="1315"/>
         <source>Export en .ofs</source>
         <translation>Export to .ofs</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="1084"/>
         <source>Contenu Ã  exporter inconnu.</source>
-        <translation>Content to export unknown.</translation>
+        <translation type="vanished">Content to export unknown.</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="1102"/>
+        <location filename="src/mainwindow.cpp" line="1022"/>
         <source>Exporter l&apos;histogramme de coupes</source>
         <translation>Export the slice histogram</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="1102"/>
-        <location filename="src/mainwindow.cpp" line="1110"/>
-        <location filename="src/mainwindow.cpp" line="1118"/>
         <source>L&apos;export a Ã©chouÃ© : format inconnu.</source>
-        <translation>Export failed : unknown format.</translation>
+        <translation type="vanished">Export failed : unknown format.</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="1110"/>
+        <location filename="src/mainwindow.cpp" line="1030"/>
         <source>Exporter l&apos;histogramme de secteurs</source>
         <translation>Export sector histogram</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="1118"/>
         <source>Exporter l&apos;histogramme de zone de nÅuds</source>
-        <translation>Export knot area histogram</translation>
+        <translation type="vanished">Export knot area histogram</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="1121"/>
+        <location filename="src/mainwindow.cpp" line="1033"/>
         <source>Exporter les histogramme</source>
         <translation>Export histograms</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="1121"/>
         <source>L&apos;histogramme demandÃ© n&apos;est pas prÃ©vu pour l&apos;export.</source>
-        <translation>Requested histogram cannot be exported.</translation>
+        <translation type="vanished">Requested histogram cannot be exported.</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="1246"/>
+        <location filename="src/mainwindow.cpp" line="1151"/>
         <source>Dimensions de voxels (largeur, hauteur, profondeur) : ( %1, %2, %3 )</source>
         <translation>Voxels dimensions (width,  height, depth) : (%1, %2, %3)</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="1254"/>
         <source>Aucune coupe prÃ©sente.</source>
-        <translation>No slice.</translation>
+        <translation type="vanished">No slice.</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="1315"/>
-        <location filename="src/mainwindow.cpp" line="1328"/>
-        <location filename="src/mainwindow.cpp" line="1344"/>
-        <location filename="src/mainwindow.cpp" line="1361"/>
+        <location filename="src/mainwindow.cpp" line="1227"/>
+        <location filename="src/mainwindow.cpp" line="1256"/>
+        <location filename="src/mainwindow.cpp" line="1291"/>
         <source>Exporter en .ofs</source>
         <translation>Export to .ofs</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="1315"/>
-        <location filename="src/mainwindow.cpp" line="1328"/>
-        <location filename="src/mainwindow.cpp" line="1344"/>
-        <location filename="src/mainwindow.cpp" line="1361"/>
         <source>Fichiers de donnÃ©es (*.ofs);;Tous les fichiers (*.*)</source>
-        <translation>Data files (*.ofs);;All files (*.*)</translation>
+        <translation type="vanished">Data files (*.ofs);;All files (*.*)</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="1336"/>
         <source>La moelle n&apos;est pas calculÃ©e.</source>
-        <translation>Pith is not computed.</translation>
+        <translation type="vanished">Pith is not computed.</translation>
+    </message>
+    <message>
+        <source>Impossible  d&apos;exporter car la moelle n&apos;est pas calculÃ©e ou aucun secteur angulaire n&apos;est sÃ©lectionnÃ©.</source>
+        <translation type="vanished">Export unvailable : pith not computed or any angular sector selected.</translation>
+    </message>
+    <message>
+        <source>Impossible car la moelle et/ou les interalles de coupes ne sont pas calculÃ©s.</source>
+        <translation type="vanished">Export unvailable : pith and/or slice intervals no computed.</translation>
     </message>
     <message>
         <location filename="src/mainwindow.cpp" line="1354"/>
-        <source>Impossible  d&apos;exporter car la moelle n&apos;est pas calculÃ©e ou aucun secteur angulaire n&apos;est sÃ©lectionnÃ©.</source>
-        <translation>Export unvailable : pith not computed or any angular sector selected.</translation>
-    </message>
-    <message>
-        <location filename="src/mainwindow.cpp" line="1379"/>
-        <source>Impossible car la moelle et/ou les interalles de coupes ne sont pas calculÃ©s.</source>
-        <translation>Export unvailable : pith and/or slice intervals no computed.</translation>
-    </message>
-    <message>
-        <location filename="src/mainwindow.cpp" line="1386"/>
-        <location filename="src/mainwindow.cpp" line="1396"/>
-        <location filename="src/mainwindow.cpp" line="1398"/>
-        <location filename="src/mainwindow.cpp" line="1401"/>
+        <location filename="src/mainwindow.cpp" line="1364"/>
+        <location filename="src/mainwindow.cpp" line="1366"/>
+        <location filename="src/mainwindow.cpp" line="1369"/>
         <source>Exporter l&apos;histogramme de coupes en .sep</source>
         <translation>Histogram export to sep</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="1387"/>
-        <location filename="src/mainwindow.cpp" line="1409"/>
-        <location filename="src/mainwindow.cpp" line="1431"/>
         <source>Fichiers sÃ©quences de point euclidiens (*.sep);;Tous les fichiers (*.*)</source>
-        <translation>File of euclidean point sequences (*.sep);;All files (*.*)</translation>
+        <translation type="vanished">File of euclidean point sequences (*.sep);;All files (*.*)</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="1398"/>
-        <location filename="src/mainwindow.cpp" line="1420"/>
-        <location filename="src/mainwindow.cpp" line="1442"/>
         <source>L&apos;export a Ã©chouÃ© : impossible de crÃ©er le fichier.</source>
-        <translation>Export failed : impossible to create file.</translation>
+        <translation type="vanished">Export failed : impossible to create file.</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="1401"/>
-        <location filename="src/mainwindow.cpp" line="1513"/>
         <source>L&apos;export a Ã©chouÃ© : l&apos;histogramme de coupes n&apos;est pas calculÃ©.</source>
-        <translation>Export failed : slice histogram not computed.</translation>
+        <translation type="vanished">Export failed : slice histogram not computed.</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="1408"/>
-        <location filename="src/mainwindow.cpp" line="1418"/>
-        <location filename="src/mainwindow.cpp" line="1420"/>
-        <location filename="src/mainwindow.cpp" line="1423"/>
+        <location filename="src/mainwindow.cpp" line="1376"/>
+        <location filename="src/mainwindow.cpp" line="1386"/>
+        <location filename="src/mainwindow.cpp" line="1388"/>
+        <location filename="src/mainwindow.cpp" line="1391"/>
         <source>Exporter l&apos;histogramme de secteurs en .sep</source>
         <translation>Export of slice histogram to sep</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="1423"/>
-        <location filename="src/mainwindow.cpp" line="1593"/>
         <source>L&apos;export a Ã©chouÃ© : l&apos;histogramme de secteurs n&apos;est pas calculÃ©.</source>
-        <translation>Export failed : sector histogram not computed.</translation>
+        <translation type="vanished">Export failed : sector histogram not computed.</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="1430"/>
-        <location filename="src/mainwindow.cpp" line="1440"/>
-        <location filename="src/mainwindow.cpp" line="1442"/>
-        <location filename="src/mainwindow.cpp" line="1445"/>
         <source>Exporter l&apos;histogramme de la zone de nÅuds en .sep</source>
-        <translation>Export of knot area histogram to sep</translation>
+        <translation type="vanished">Export of knot area histogram to sep</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="1445"/>
         <source>L&apos;export a Ã©chouÃ© : l&apos;histogramme de la zone de nÅuds n&apos;est pas calculÃ©.</source>
-        <translation>Export failed : knot area histogram not computed.</translation>
+        <translation type="vanished">Export failed : knot area histogram not computed.</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="1463"/>
-        <location filename="src/mainwindow.cpp" line="1533"/>
-        <location filename="src/mainwindow.cpp" line="1611"/>
+        <location filename="src/mainwindow.cpp" line="302"/>
+        <source>Sélection du répertoire DICOM</source>
+        <translation>Selection of DICOM folder</translation>
+    </message>
+    <message>
+        <location filename="src/mainwindow.cpp" line="306"/>
+        <source>Inversé</source>
+        <translation>Inversed</translation>
+    </message>
+    <message>
+        <location filename="src/mainwindow.cpp" line="325"/>
+        <source>Sélection du fichier TIF</source>
+        <translation>Selection of TIFF file</translation>
+    </message>
+    <message>
+        <location filename="src/mainwindow.cpp" line="1004"/>
+        <source>Contenu à exporter inconnu.</source>
+        <translation>Content to export unknown.</translation>
+    </message>
+    <message>
+        <location filename="src/mainwindow.cpp" line="1022"/>
+        <location filename="src/mainwindow.cpp" line="1030"/>
+        <source>L&apos;export a échoué : format inconnu.</source>
+        <translation>Export failed: unknown format.</translation>
+    </message>
+    <message>
+        <location filename="src/mainwindow.cpp" line="1033"/>
+        <source>L&apos;histogramme demandé n&apos;est pas prévu pour l&apos;export.</source>
+        <translation>The requested histogram cannot be exported.</translation>
+    </message>
+    <message>
+        <location filename="src/mainwindow.cpp" line="1159"/>
+        <location filename="src/mainwindow.cpp" line="1163"/>
+        <source>Aucune coupe présente.</source>
+        <translation>No slice.</translation>
+    </message>
+    <message>
+        <location filename="src/mainwindow.cpp" line="1214"/>
+        <location filename="src/mainwindow.cpp" line="1248"/>
+        <location filename="src/mainwindow.cpp" line="1283"/>
+        <location filename="src/mainwindow.cpp" line="1547"/>
+        <location filename="src/mainwindow.cpp" line="1573"/>
+        <source>Aucun billon ouvert.</source>
+        <translation>No billon.</translation>
+    </message>
+    <message>
+        <location filename="src/mainwindow.cpp" line="1219"/>
+        <location filename="src/mainwindow.cpp" line="1253"/>
+        <location filename="src/mainwindow.cpp" line="1288"/>
+        <source>La moelle n&apos;est pas calculée.</source>
+        <translation>Pith not computed.</translation>
+    </message>
+    <message>
+        <location filename="src/mainwindow.cpp" line="1224"/>
+        <source>Aucun intervalle de coupes selectionné.</source>
+        <translation>No slice interval selected.</translation>
+    </message>
+    <message>
+        <location filename="src/mainwindow.cpp" line="1227"/>
+        <location filename="src/mainwindow.cpp" line="1256"/>
+        <location filename="src/mainwindow.cpp" line="1291"/>
+        <source>Fichiers de données (*.ofs);;Tous les fichiers (*.*)</source>
+        <translation>Data files (*.ofs);;All files (*.*)</translation>
+    </message>
+    <message>
+        <location filename="src/mainwindow.cpp" line="1238"/>
+        <location filename="src/mainwindow.cpp" line="1270"/>
+        <location filename="src/mainwindow.cpp" line="1312"/>
+        <location filename="src/mainwindow.cpp" line="1364"/>
+        <location filename="src/mainwindow.cpp" line="1386"/>
+        <location filename="src/mainwindow.cpp" line="1434"/>
+        <location filename="src/mainwindow.cpp" line="1514"/>
+        <source>Terminé avec succés !</source>
+        <translation>Ended with sucess !</translation>
+    </message>
+    <message>
+        <location filename="src/mainwindow.cpp" line="1240"/>
+        <location filename="src/mainwindow.cpp" line="1275"/>
+        <location filename="src/mainwindow.cpp" line="1315"/>
+        <location filename="src/mainwindow.cpp" line="1563"/>
+        <location filename="src/mainwindow.cpp" line="1589"/>
+        <source>Impossible d&apos;écrire le fichier.</source>
+        <translation>Unable to write file.</translation>
+    </message>
+    <message>
+        <location filename="src/mainwindow.cpp" line="1272"/>
+        <source>Erreur lors de la création du tube.</source>
+        <translation>Error during pipe creation.</translation>
+    </message>
+    <message>
+        <location filename="src/mainwindow.cpp" line="1355"/>
+        <location filename="src/mainwindow.cpp" line="1377"/>
+        <source>Fichiers séquences de point euclidiens (*.sep);;Tous les fichiers (*.*)</source>
+        <translation>File of euclidean point sequences (*.sep);;All files (*.*)</translation>
+    </message>
+    <message>
+        <location filename="src/mainwindow.cpp" line="1366"/>
+        <location filename="src/mainwindow.cpp" line="1388"/>
+        <source>L&apos;export a échoué : impossible de créer le fichier.</source>
+        <translation>Export failed: unable to create file.</translation>
+    </message>
+    <message>
+        <location filename="src/mainwindow.cpp" line="1369"/>
+        <location filename="src/mainwindow.cpp" line="1459"/>
+        <source>L&apos;export a échoué : l&apos;histogramme de coupes n&apos;est pas calculé.</source>
+        <translation>Export failed: slice histogram not computed.</translation>
+    </message>
+    <message>
+        <location filename="src/mainwindow.cpp" line="1391"/>
+        <location filename="src/mainwindow.cpp" line="1539"/>
+        <source>L&apos;export a échoué : l&apos;histogramme de secteurs n&apos;est pas calculé.</source>
+        <translation>Export failed: secto histogram not computed.</translation>
+    </message>
+    <message>
+        <location filename="src/mainwindow.cpp" line="1409"/>
+        <location filename="src/mainwindow.cpp" line="1479"/>
         <source>Taille de l&apos;image</source>
         <translation>Size of image</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="1463"/>
-        <location filename="src/mainwindow.cpp" line="1533"/>
-        <location filename="src/mainwindow.cpp" line="1611"/>
+        <location filename="src/mainwindow.cpp" line="1409"/>
+        <location filename="src/mainwindow.cpp" line="1479"/>
         <source>Pourcentage</source>
         <translation>Percentage</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="1469"/>
+        <location filename="src/mainwindow.cpp" line="1415"/>
         <source>Indice de la coupe</source>
         <translation>Slice index</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="1471"/>
-        <location filename="src/mainwindow.cpp" line="1544"/>
+        <location filename="src/mainwindow.cpp" line="1417"/>
+        <location filename="src/mainwindow.cpp" line="1490"/>
         <source>Cumul du z-mouvement</source>
         <translation>Sum of z-motion</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="1479"/>
-        <location filename="src/mainwindow.cpp" line="1556"/>
-        <location filename="src/mainwindow.cpp" line="1626"/>
+        <location filename="src/mainwindow.cpp" line="1425"/>
+        <location filename="src/mainwindow.cpp" line="1502"/>
         <source>Taille correcte</source>
         <translation>Valid size</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="1479"/>
-        <location filename="src/mainwindow.cpp" line="1556"/>
-        <location filename="src/mainwindow.cpp" line="1626"/>
+        <location filename="src/mainwindow.cpp" line="1425"/>
+        <location filename="src/mainwindow.cpp" line="1502"/>
         <source>La taille de l&apos;image est-elle correcte ?</source>
         <translation>Correct size for the image ?</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="1483"/>
-        <location filename="src/mainwindow.cpp" line="1488"/>
-        <location filename="src/mainwindow.cpp" line="1490"/>
-        <location filename="src/mainwindow.cpp" line="1509"/>
-        <location filename="src/mainwindow.cpp" line="1513"/>
+        <location filename="src/mainwindow.cpp" line="1429"/>
+        <location filename="src/mainwindow.cpp" line="1434"/>
+        <location filename="src/mainwindow.cpp" line="1436"/>
+        <location filename="src/mainwindow.cpp" line="1455"/>
+        <location filename="src/mainwindow.cpp" line="1459"/>
         <source>Export de l&apos;histogramme de coupes en image</source>
         <translation>Export of slice histogram to image format</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="1484"/>
-        <location filename="src/mainwindow.cpp" line="1561"/>
-        <location filename="src/mainwindow.cpp" line="1631"/>
+        <location filename="src/mainwindow.cpp" line="1430"/>
+        <location filename="src/mainwindow.cpp" line="1507"/>
         <source>Fichiers PDF (*.pdf);;Fichiers PS (*.ps);;Fichiers PNG (*.png);;Fichiers SVG (*.svg);;Tous les fichiers (*.*)</source>
         <translation>PDF files (*.pdf);;PS files (*.ps);;PNG files (*.png);;SVG files (*.svg);;All files (*.*)</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="1490"/>
-        <location filename="src/mainwindow.cpp" line="1637"/>
-        <source>Impossible de crÃ©er le fichier.</source>
-        <translation>Impossible to create file.</translation>
+        <location filename="src/mainwindow.cpp" line="1436"/>
+        <source>Impossible de créer le fichier.</source>
+        <translation>Unable to create file.</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="1509"/>
-        <location filename="src/mainwindow.cpp" line="1589"/>
-        <location filename="src/mainwindow.cpp" line="1656"/>
+        <location filename="src/mainwindow.cpp" line="1516"/>
+        <source>Impossible de créer les fichiers.</source>
+        <translation>Unable to create files.</translation>
+    </message>
+    <message>
+        <location filename="src/mainwindow.cpp" line="1550"/>
+        <location filename="src/mainwindow.cpp" line="1576"/>
+        <source>Fichiers de données (*.pgm3d);;Tous les fichiers (*.*)</source>
+        <translation>Data files (*.pgm3d);;All files (*.*)</translation>
+    </message>
+    <message>
+        <location filename="src/mainwindow.cpp" line="1561"/>
+        <location filename="src/mainwindow.cpp" line="1587"/>
+        <location filename="src/mainwindow.cpp" line="1834"/>
+        <location filename="src/mainwindow.cpp" line="1853"/>
+        <location filename="src/mainwindow.cpp" line="1888"/>
+        <location filename="src/mainwindow.cpp" line="1983"/>
+        <location filename="src/mainwindow.cpp" line="2016"/>
+        <location filename="src/mainwindow.cpp" line="2055"/>
+        <source>Export réussi !</source>
+        <translation>Successfull export !</translation>
+    </message>
+    <message>
+        <location filename="src/mainwindow.cpp" line="1803"/>
+        <location filename="src/mainwindow.cpp" line="1866"/>
+        <source>Exporter la moelle de tous les nœuds du billon en SDP</source>
+        <translation>Export of pith of all knots of billon in SDP</translation>
+    </message>
+    <message>
+        <location filename="src/mainwindow.cpp" line="1834"/>
+        <location filename="src/mainwindow.cpp" line="1888"/>
+        <source>exporter la moelle de tous les nœuds du billon en SDP</source>
+        <translation>export pith of all knots of billon in SDP</translation>
+    </message>
+    <message>
+        <location filename="src/mainwindow.cpp" line="1843"/>
+        <location filename="src/mainwindow.cpp" line="1853"/>
+        <location filename="src/mainwindow.cpp" line="1857"/>
+        <location filename="src/mainwindow.cpp" line="1861"/>
+        <source>Exporter la moelle de la zone de nœud courante en SDP</source>
+        <translation>Export of pith of current knot area in SDP</translation>
+    </message>
+    <message>
+        <location filename="src/mainwindow.cpp" line="1857"/>
+        <location filename="src/mainwindow.cpp" line="1986"/>
+        <location filename="src/mainwindow.cpp" line="2019"/>
+        <location filename="src/mainwindow.cpp" line="2057"/>
+        <source>L&apos;export a échoué : impossible de créer le ficher %1.</source>
+        <translation>Export failed: unable to create file %1.</translation>
+    </message>
+    <message>
+        <location filename="src/mainwindow.cpp" line="1861"/>
+        <location filename="src/mainwindow.cpp" line="1989"/>
+        <location filename="src/mainwindow.cpp" line="2022"/>
+        <source>L&apos;export a échoué : la moelle n&apos;existe pas.</source>
+        <translation>Export failed: pith does not exist.</translation>
+    </message>
+    <message>
+        <location filename="src/mainwindow.cpp" line="1969"/>
+        <source>Exporter le nœud segmenté courant en SDP</source>
+        <translation>Export current segmented knot to SDP</translation>
+    </message>
+    <message>
+        <location filename="src/mainwindow.cpp" line="1983"/>
+        <location filename="src/mainwindow.cpp" line="1986"/>
+        <location filename="src/mainwindow.cpp" line="1989"/>
+        <source>Export du nœud courant segmenté en SDP</source>
+        <translation>Export current segmented knot to SDP</translation>
+    </message>
+    <message>
+        <location filename="src/mainwindow.cpp" line="1996"/>
+        <source>Exporter les nœud segmentés de l&apos;intervalle de coupes courant en SDP</source>
+        <translation>Export segmented knots of current slice interval in SDP</translation>
+    </message>
+    <message>
+        <location filename="src/mainwindow.cpp" line="2016"/>
+        <location filename="src/mainwindow.cpp" line="2019"/>
+        <location filename="src/mainwindow.cpp" line="2022"/>
+        <source>Export des nœud segmentés de l&apos;intervalle de coupes courant en SDP</source>
+        <translation>Export of segmented knots of current slice interval in SDP</translation>
+    </message>
+    <message>
+        <location filename="src/mainwindow.cpp" line="2029"/>
+        <location filename="src/mainwindow.cpp" line="2055"/>
+        <location filename="src/mainwindow.cpp" line="2057"/>
+        <location filename="src/mainwindow.cpp" line="2060"/>
+        <source>Exporter tous les nœuds segmentés du billon en SDP</source>
+        <translation>Export all segmented knots of billon in SDP</translation>
+    </message>
+    <message>
+        <location filename="src/mainwindow.cpp" line="2060"/>
+        <source>L&apos;export a échoué : la moelle du billon n&apos;est pas calculée.</source>
+        <translation>Export failed: billon pith not computed</translation>
+    </message>
+    <message>
+        <source>Impossible de crÃ©er le fichier.</source>
+        <translation type="vanished">Impossible to create file.</translation>
+    </message>
+    <message>
+        <location filename="src/mainwindow.cpp" line="1455"/>
+        <location filename="src/mainwindow.cpp" line="1535"/>
         <source>Erreur lors de la saisie de la taille de l&apos;image.</source>
         <translation>Wrong image size.</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="1542"/>
+        <location filename="src/mainwindow.cpp" line="1488"/>
         <source>Secteur angulaire en radians</source>
         <translation>Angular sectors in radians</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="1560"/>
-        <location filename="src/mainwindow.cpp" line="1568"/>
-        <location filename="src/mainwindow.cpp" line="1570"/>
-        <location filename="src/mainwindow.cpp" line="1589"/>
-        <location filename="src/mainwindow.cpp" line="1593"/>
+        <location filename="src/mainwindow.cpp" line="1506"/>
+        <location filename="src/mainwindow.cpp" line="1514"/>
+        <location filename="src/mainwindow.cpp" line="1516"/>
+        <location filename="src/mainwindow.cpp" line="1535"/>
+        <location filename="src/mainwindow.cpp" line="1539"/>
         <source>Export de l&apos;histogramme de secteurs en image</source>
         <translation>Export of sector histogram to image format</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="1570"/>
         <source>Impossible de crÃ©er les fichiers.</source>
-        <translation>Impossible to create files.</translation>
+        <translation type="vanished">Impossible to create files.</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="1617"/>
         <source>Slice index</source>
-        <translation>Slice index</translation>
+        <translation type="vanished">Slice index</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="1618"/>
         <source>Distance to the pith</source>
-        <translation>Distance to the pith</translation>
+        <translation type="vanished">Distance to the pith</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="1630"/>
-        <location filename="src/mainwindow.cpp" line="1635"/>
-        <location filename="src/mainwindow.cpp" line="1637"/>
-        <location filename="src/mainwindow.cpp" line="1656"/>
-        <location filename="src/mainwindow.cpp" line="1660"/>
         <source>Export de l&apos;histogramme de zone de nÅuds en image</source>
-        <translation>Export of knot area histogram to image format</translation>
+        <translation type="vanished">Export of knot area histogram to image format</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="1660"/>
         <source>L&apos;export a Ã©chouÃ© : l&apos;histogramme de zone de nÅuds n&apos;est pas calculÃ©.</source>
-        <translation>Export failed : knot area histogram not computed.</translation>
+        <translation type="vanished">Export failed : knot area histogram not computed.</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="1718"/>
-        <location filename="src/mainwindow.cpp" line="1739"/>
-        <location filename="src/mainwindow.cpp" line="1742"/>
-        <location filename="src/mainwindow.cpp" line="1802"/>
         <source>Exporter le nÅud courant segmentÃ© en PGM3D</source>
-        <translation>Export of the current knot to PGM3D</translation>
+        <translation type="vanished">Export of the current knot to PGM3D</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="1718"/>
         <source>Fichiers PGM3D (*.pgm3d);;Tous les fichiers (*.*)</source>
-        <translation>PGM3D files (*.pgm3d);;All files (*.*)</translation>
+        <translation type="vanished">PGM3D files (*.pgm3d);;All files (*.*)</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="1739"/>
-        <location filename="src/mainwindow.cpp" line="1802"/>
-        <location filename="src/mainwindow.cpp" line="1824"/>
-        <location filename="src/mainwindow.cpp" line="1868"/>
-        <location filename="src/mainwindow.cpp" line="1914"/>
-        <location filename="src/mainwindow.cpp" line="1942"/>
-        <location filename="src/mainwindow.cpp" line="1970"/>
-        <location filename="src/mainwindow.cpp" line="2009"/>
-        <location filename="src/mainwindow.cpp" line="2051"/>
         <source>L&apos;export a Ã©chouÃ© : impossible de crÃ©er le ficher %1.</source>
-        <translation>Export failed : impossible to create the %1 file.</translation>
+        <translation type="vanished">Export failed : impossible to create the %1 file.</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="1742"/>
-        <location filename="src/mainwindow.cpp" line="1945"/>
         <source>L&apos;export a Ã©chouÃ© : le contour n&apos;est pas calculÃ©.</source>
-        <translation>Export failed : contour not computed.</translation>
+        <translation type="vanished">Export failed : contour not computed.</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="1749"/>
         <source>Exporter la zone de nÅuds courante en PGM3D</source>
-        <translation>Export current knot area to PGM3D</translation>
+        <translation type="vanished">Export current knot area to PGM3D</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="1668"/>
-        <location filename="src/mainwindow.cpp" line="1693"/>
-        <location filename="src/mainwindow.cpp" line="1749"/>
         <source>Fichiers de donnÃ©es (*.pgm3d);;Tous les fichiers (*.*)</source>
-        <translation>PGM3D files (*.pgm3d);;All files (*.*)</translation>
+        <translation type="vanished">PGM3D files (*.pgm3d);;All files (*.*)</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="1805"/>
         <source>Exporter de la zone de nÅuds courante en PGM3D</source>
-        <translation>Export of current knot area to PGM3D</translation>
+        <translation type="vanished">Export of current knot area to PGM3D</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="1805"/>
         <source>L&apos;export a Ã©chouÃ© : aucun intervalle angulaire sÃ©lectionnÃ©.</source>
-        <translation>Export failed : no angular interval selected.</translation>
+        <translation type="vanished">Export failed : no angular interval selected.</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="1668"/>
-        <location filename="src/mainwindow.cpp" line="1693"/>
+        <location filename="src/mainwindow.cpp" line="1550"/>
+        <location filename="src/mainwindow.cpp" line="1576"/>
         <source>Exporter l&apos;image en .pgm3d</source>
         <translation>Export image in PGM3D</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="1679"/>
-        <location filename="src/mainwindow.cpp" line="1681"/>
-        <location filename="src/mainwindow.cpp" line="1684"/>
-        <location filename="src/mainwindow.cpp" line="1704"/>
-        <location filename="src/mainwindow.cpp" line="1706"/>
-        <location filename="src/mainwindow.cpp" line="1709"/>
+        <location filename="src/mainwindow.cpp" line="1547"/>
+        <location filename="src/mainwindow.cpp" line="1563"/>
+        <location filename="src/mainwindow.cpp" line="1573"/>
+        <location filename="src/mainwindow.cpp" line="1589"/>
         <source>Export en .pgm3d</source>
         <translation>Export in PGM3D</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="1813"/>
-        <location filename="src/mainwindow.cpp" line="1824"/>
-        <location filename="src/mainwindow.cpp" line="1827"/>
         <source>Exporter le nÅud courant segmentÃ© en V3D</source>
-        <translation>Export of the current segmented knot to V3D</translation>
+        <translation type="vanished">Export of the current segmented knot to V3D</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="1813"/>
-        <location filename="src/mainwindow.cpp" line="1835"/>
-        <location filename="src/mainwindow.cpp" line="1878"/>
         <source>Fichiers V3D (*.v3d);;Tous les fichiers (*.*)</source>
-        <translation>V3D files (*.v3d);;All files (*.*)</translation>
+        <translation type="vanished">V3D files (*.v3d);;All files (*.*)</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="1827"/>
-        <location filename="src/mainwindow.cpp" line="1973"/>
-        <location filename="src/mainwindow.cpp" line="2012"/>
         <source>L&apos;export a Ã©chouÃ© : le nÅud n&apos;est pas segmentÃ©.</source>
-        <translation>Export failed : the knot is not segmented.</translation>
+        <translation type="vanished">Export failed : the knot is not segmented.</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="1834"/>
-        <location filename="src/mainwindow.cpp" line="1868"/>
-        <location filename="src/mainwindow.cpp" line="1871"/>
         <source>Exporter les nÅuds segmentÃ©s de l&apos;intervalle de coupe courant en V3D</source>
-        <translation>Export of segmented knots of the current slice interval to V3D</translation>
+        <translation type="vanished">Export of segmented knots of the current slice interval to V3D</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="1871"/>
         <source>L&apos;export a Ã©chouÃ© : aucun intervalle de coupes sÃ©lectionnÃ©.</source>
-        <translation>Export failed : no slice interval selected.</translation>
+        <translation type="vanished">Export failed : no slice interval selected.</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="1878"/>
-        <location filename="src/mainwindow.cpp" line="1914"/>
-        <location filename="src/mainwindow.cpp" line="1917"/>
         <source>Exporter tous les nÅuds segmentÃ©s du billon en V3D</source>
-        <translation>Export af all segmented knot of the billon to V3D</translation>
+        <translation type="vanished">Export af all segmented knot of the billon to V3D</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="1917"/>
-        <location filename="src/mainwindow.cpp" line="2054"/>
         <source>L&apos;export a Ã©chouÃ© : la moelle n&apos;est pas calculÃ©e.</source>
-        <translation>Export failed : the pith is not computed.</translation>
+        <translation type="vanished">Export failed : the pith is not computed.</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="1924"/>
-        <location filename="src/mainwindow.cpp" line="1942"/>
-        <location filename="src/mainwindow.cpp" line="1945"/>
         <source>Exporter le contour de la coupe courante en SDP</source>
-        <translation>Export contour of current slice to SDP</translation>
+        <translation type="vanished">Export contour of current slice to SDP</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="1924"/>
         <source>Fichiers de contours (*.sdp);;Tous les fichiers (*.*)</source>
-        <translation>Contour files (*.sdp);;All files (*.*)</translation>
+        <translation type="vanished">Contour files (*.sdp);;All files (*.*)</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="1952"/>
-        <location filename="src/mainwindow.cpp" line="1970"/>
-        <location filename="src/mainwindow.cpp" line="1973"/>
         <source>Exporter le nÅud courant segmentÃ© en SDP</source>
-        <translation>Export of the current segmented knot to SDP</translation>
+        <translation type="vanished">Export of the current segmented knot to SDP</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="1952"/>
         <source>Fichiers PGM3D (*.sdp);;Tous les fichiers (*.*)</source>
-        <translation>PGM3D files (*.sdp);;All files (*.*)</translation>
+        <translation type="vanished">PGM3D files (*.sdp);;All files (*.*)</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="1980"/>
-        <location filename="src/mainwindow.cpp" line="2009"/>
-        <location filename="src/mainwindow.cpp" line="2012"/>
         <source>Exporter les nÅuds segmentÃ©s de l&apos;intervalle de coupe courant en SDP</source>
-        <translation>Export segmented knots of the current slice interval to SDP</translation>
+        <translation type="vanished">Export segmented knots of the current slice interval to SDP</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="1981"/>
-        <location filename="src/mainwindow.cpp" line="2019"/>
+        <location filename="src/mainwindow.cpp" line="1804"/>
+        <location filename="src/mainwindow.cpp" line="1844"/>
+        <location filename="src/mainwindow.cpp" line="1867"/>
+        <location filename="src/mainwindow.cpp" line="1970"/>
+        <location filename="src/mainwindow.cpp" line="1997"/>
+        <location filename="src/mainwindow.cpp" line="2029"/>
         <source>Fichiers SDP (*.sdp);;Tous les fichiers (*.*)</source>
         <translation>SDP files (*.sdp);;All files (*.*)</translation>
     </message>
     <message>
-        <location filename="src/mainwindow.cpp" line="2019"/>
-        <location filename="src/mainwindow.cpp" line="2051"/>
-        <location filename="src/mainwindow.cpp" line="2054"/>
         <source>Exporter tous les nÅuds segmentÃ©s du billon en SDP</source>
-        <translation>Export all segmented knots of billon to SDP</translation>
+        <translation type="vanished">Export all segmented knots of billon to SDP</translation>
     </message>
 </context>
 <context>
@@ -1402,9 +1732,8 @@ to the contour origin</translation>
         <translation>Number of components = %1</translation>
     </message>
     <message>
-        <location filename="src/curvaturehistogram.cpp" line="33"/>
         <source>ERREUR : Impossible de crÃ©er le ficher de contours %1.</source>
-        <translation>ERROR : Impossible to create contour file %1.</translation>
+        <translation type="vanished">ERROR : Impossible to create contour file %1.</translation>
     </message>
     <message>
         <source>ERREUR : Impossible de crÃ©er le ficher de points dominants %1.</source>
@@ -1415,30 +1744,24 @@ to the contour origin</translation>
         <translation type="obsolete">ERROR : Impossible to read dominant point file %1.</translation>
     </message>
     <message>
-        <location filename="src/curvaturehistogram.cpp" line="47"/>
         <source>ERREUR : Impossible de crÃ©er le ficher de courbure %1.</source>
-        <translation>ERROR : Impossible to create curvature file %1.</translation>
+        <translation type="vanished">ERROR : Impossible to create curvature file %1.</translation>
     </message>
     <message>
-        <location filename="src/curvaturehistogram.cpp" line="61"/>
         <source>ERREUR : Impossible de lire le ficher de courbure %1.</source>
-        <translation>ERROR : Impossible to read curvature file %1.</translation>
+        <translation type="vanished">ERROR : Impossible to read curvature file %1.</translation>
     </message>
     <message>
-        <location filename="src/dicomreader.cpp" line="25"/>
         <source>ERREUR : Impossible de lire le contenu du rÃ©pertoire.</source>
-        <translation>ERROR : Impossible to read the folder content.</translation>
+        <translation type="vanished">ERROR : Impossible to read the folder content.</translation>
     </message>
     <message>
-        <location filename="src/dicomreader.cpp" line="71"/>
-        <location filename="src/dicomreader.cpp" line="77"/>
         <source>ERREUR : Lecture des dimensions de l&apos;image impossible.</source>
-        <translation>ERROR : Impossible to read image dimensions.</translation>
+        <translation type="vanished">ERROR : Impossible to read image dimensions.</translation>
     </message>
     <message>
-        <location filename="src/dicomreader.cpp" line="117"/>
         <source>indÃ©finie</source>
-        <translation>undefined</translation>
+        <translation type="vanished">undefined</translation>
     </message>
     <message>
         <location filename="src/main.cpp" line="16"/>
@@ -1446,27 +1769,43 @@ to the contour origin</translation>
         <translation>Error message</translation>
     </message>
     <message>
-        <location filename="src/ofsexport.cpp" line="42"/>
-        <location filename="src/ofsexport.cpp" line="59"/>
-        <location filename="src/ofsexport.cpp" line="126"/>
-        <location filename="src/ofsexport.cpp" line="146"/>
         <source>%1 file writing error.</source>
-        <translation>%1 file writing error.</translation>
+        <translation type="vanished">%1 file writing error.</translation>
     </message>
     <message>
-        <location filename="src/ofsexport.cpp" line="151"/>
         <source>No vertex to write</source>
-        <translation>No vertex to write</translation>
+        <translation type="vanished">No vertex to write</translation>
     </message>
     <message>
         <location filename="src/pgm3dexport.cpp" line="19"/>
-        <source>ERREUR : Impossible de crÃ©er le ficher PGM %1.</source>
-        <translation>ERROR : Impossible to create the PGM file %1.</translation>
+        <source>ERREUR : Impossible de créer le ficher PGM %1.</source>
+        <oldsource>ERREUR : Impossible de crÃ©er le ficher PGM %1.</oldsource>
+        <translation>ERROR : Unable to create PGM file %1.</translation>
     </message>
     <message>
         <location filename="src/tiffreader.cpp" line="24"/>
         <source>ERREUR : Impossible de lire le contenu du fichier.</source>
         <translation>ERROR : Impossible to read the file content.</translation>
+    </message>
+    <message>
+        <location filename="src/dicomreader.cpp" line="24"/>
+        <source>ERREUR : Impossible de lire le contenu du répertoire.</source>
+        <translation>ERROR: unable to read folder content.</translation>
+    </message>
+    <message>
+        <location filename="src/knotellipseradiihistogram.cpp" line="19"/>
+        <source>ellipticalHistogram( uint sliceIndex )</source>
+        <translation>ellipticalHistogram( uint sliceIndex )</translation>
+    </message>
+    <message>
+        <location filename="src/knotellipseradiihistogram.cpp" line="19"/>
+        <source>sliceIndex trop grand</source>
+        <translation>sliceIndex too big</translation>
+    </message>
+    <message>
+        <location filename="src/ofsexport.cpp" line="164"/>
+        <source>Pas de correspondance entre intervalles de coupes et intervalles d&apos;angles !</source>
+        <translation>No matching between slice intervalles and angular intervals !</translation>
     </message>
 </context>
 <context>
@@ -1475,11 +1814,11 @@ to the contour origin</translation>
         <source>TKDetection</source>
         <translation type="obsolete">TKDetection</translation>
     </message>
-    <message utf8="true">
+    <message>
         <source>N° coupe :</source>
         <translation type="obsolete">N° slice :</translation>
     </message>
-    <message utf8="true">
+    <message>
         <source>Aucune coupe présente</source>
         <translation type="obsolete">No slice</translation>
     </message>
@@ -1507,7 +1846,7 @@ to the contour origin</translation>
         <source>Type d&apos;affichage</source>
         <translation type="obsolete">Display type</translation>
     </message>
-    <message utf8="true">
+    <message>
         <source>Paramètres de l&apos;affichage original</source>
         <translation type="obsolete">Original display settings</translation>
     </message>
@@ -1523,7 +1862,7 @@ to the contour origin</translation>
         <source>z</source>
         <translation type="obsolete">z</translation>
     </message>
-    <message utf8="true">
+    <message>
         <source>Cartésienne</source>
         <translation type="obsolete">Cartesian</translation>
     </message>
@@ -1536,7 +1875,7 @@ to the contour origin</translation>
 composantes connexes</source>
         <translation type="obsolete">Show connected components</translation>
     </message>
-    <message utf8="true">
+    <message>
         <source>Résolution angulaire</source>
         <translation type="obsolete">Angular resolution</translation>
     </message>
@@ -1544,7 +1883,7 @@ composantes connexes</source>
         <source>Zone retreinte</source>
         <translation type="obsolete">Restricted area</translation>
     </message>
-    <message utf8="true">
+    <message>
         <source>Résolution du cercle</source>
         <translation type="obsolete">Circle resolution</translation>
     </message>
@@ -1566,7 +1905,7 @@ zone restreinte</source>
         <source>100</source>
         <translation type="obsolete">100</translation>
     </message>
-    <message utf8="true">
+    <message>
         <source>Paramètres du z-mouvement</source>
         <oldsource>Paramètres du mouvement</oldsource>
         <translation type="obsolete">Z-motion settings</translation>
@@ -1576,7 +1915,7 @@ zone restreinte</source>
         <oldsource>Seuil de mouvement</oldsource>
         <translation type="obsolete">Z-motion threshold</translation>
     </message>
-    <message utf8="true">
+    <message>
         <source>Paramètres de la détection de contours</source>
         <oldsource>Paramètres de détection de contours</oldsource>
         <translation type="obsolete">Contour detection settings</translation>
@@ -1603,7 +1942,7 @@ zone restreinte</source>
         <source>Gradient minimum</source>
         <translation type="obsolete">Minimum gradient</translation>
     </message>
-    <message utf8="true">
+    <message>
         <source>Déviation minimum</source>
         <translation type="obsolete">Minimum deviation</translation>
     </message>
