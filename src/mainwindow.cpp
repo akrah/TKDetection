@@ -758,7 +758,7 @@ void MainWindow::selectCurrentSliceInterval()
 	selectSliceInterval(_ui->_comboSelectSliceInterval->currentIndex());
 }
 
-void MainWindow::selectSectorInterval(const int &index, const bool &draw )
+void MainWindow::selectSectorInterval( const int &index, const bool &draw , qreal *execTime )
 {
 	_currentSectorInterval = index;
 
@@ -767,6 +767,11 @@ void MainWindow::selectSectorInterval(const int &index, const bool &draw )
 		delete _tangentialBillon;
 		_tangentialBillon = 0;
 	}
+
+	/* <Time computing> */
+	std::chrono::system_clock::time_point start;
+	if (execTime) start = std::chrono::system_clock::now();
+	/* </Time computing> */
 
 	if ( index > 0 && index <= static_cast<int>(_sectorHistogram->nbIntervals()) && _billon->hasPith() )
 	{
@@ -802,6 +807,7 @@ void MainWindow::selectSectorInterval(const int &index, const bool &draw )
 		_knotPithExtractor.setLastValidSlicesToExtrapolate( _ui->_spinLastSlicesToExtrapolate_knot->value() );
 
 		_knotPithExtractor.process(*_tangentialBillon,true);
+
 	}
 
 	if (draw)
@@ -823,6 +829,10 @@ void MainWindow::selectSectorInterval(const int &index, const bool &draw )
 		drawTangentialView();
 		drawSlice();
 	}
+
+	/* <Time computing> */
+	if (execTime) (*execTime) += std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - start).count();
+	/* </Time computing> */
 }
 
 void MainWindow::selectCurrentSectorInterval()
@@ -2006,11 +2016,18 @@ void MainWindow::exportSegmentedKnotsOfCurrentSliceIntervalToSdp( const bool &us
 				stream << "# Coordinates of the segmented knot" << endl;
 				stream << "# x y z" << endl;
 
+				/* <Time computing> */
+				double execTime = 0.;
+				/* </Time computing> */
 				for ( int sectorIndex=1 ; sectorIndex<_ui->_comboSelectSectorInterval->count() ; ++sectorIndex )
 				{
-					selectSectorInterval(sectorIndex, true);
+					selectSectorInterval(sectorIndex, true, &execTime);
 					exportSegmentedKnotToSdp(stream, _tangentialTransform, useSliceIntervalCoordinates);
 				}
+
+				/* <Time computing> */
+				qDebug() << "Temps d'exécutiuon : " << execTime << "ms";
+				/* </Time computing> */
 
 				file.close();
 				QMessageBox::information(this,tr("Export des nœud segmentés de l'intervalle de coupes courant en SDP"), tr("Export réussi !"));
