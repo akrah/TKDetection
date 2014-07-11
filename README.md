@@ -14,8 +14,8 @@ Dependencies list
 |   |            Library                  |  Tested version  |   |          Library            |  Tested version  |   |        Library              |  Tested version  |
 |:-:|:-----------------------------------:|:----------------:|---|:---------------------------:|:----------------:|---|:---------------------------:|:----------------:|
 | 1 | [Qt](#1-qt)                         |       4.8        | 4 | [Qwt](#4-qwt)               |      6.0.2       | 7 | [DGtal](#7-dgtal)           |       0.6        |
-| 2 | [Armadillo](#2-armadillo)           |     3.920.2      | 5 | [Qxt](#5-qxt)               |      0.6.2       | 8 | [GSL](#8-GSL)               |      1.15        |
-| 3 | [InsightToolkit](#3-insighttoolkit) |      4.4.2       | 6 | [QwtPolar](#6-qwtpolar)     |      1.0.1       | 9 | 
+| 2 | [Armadillo](#2-armadillo)           |     4.320.0      | 5 | [Qxt](#5-qxt)               |      0.6.2       | 8 | [GSL](#8-GSL)               |      1.15        |
+| 3 | [InsightToolkit](#3-insighttoolkit) |      4.5.2       | 6 | [QwtPolar](#6-qwtpolar)     |      1.0.1       | 9 | 
 
 
 
@@ -97,7 +97,7 @@ Replace *x.y.z* by the downloaded version number:
   tar xvf InsightToolkit-x.y.z.tar.gz
   mkdir InsightToolkit-x.y.z/build
   cd InsightToolkit-x.y.z/build
-  cmake .. -DCMAKE_CXX_FLAGS="-std=c++0x" -DCMAKE_BUILD_TYPE="Release" -DBUILD_EXAMPLES=false -DBUILD_TESTING=false -DITK_BUILD_ALL_MODULES=false -DITKGroup_Core=true -DITKGroup_IO=true
+  cmake .. -DCMAKE_CXX_FLAGS="-std=c++0x" -DCMAKE_BUILD_TYPE="Release" -DBUILD_EXAMPLES=false -DBUILD_TESTING=false -DITK_BUILD_ALL_MODULES=false -DITK_BUILD_DEFAULT_MODULES=false -DITKGroup_Core=true -DITKGroup_IO=true
   make
   sudo make install
 ~~~
@@ -120,16 +120,45 @@ Use the version available on the *Main* repository.
   sudo apt-get install libqwt-dev
 ~~~
 
-If problems appear, you can install the version available on the website http://sourceforge.net/projects/qwt/files/qwt/6.0.2/ :
+If problems appear, you can install the version available on the website http://sourceforge.net/projects/qwt/files/qwt/x.y.z/ :
 
 ~~~
-  tar xvf qwt-6.0.2.tar.bz2
-  mkdir qwt-6.0.2/build
-  cd qwt-6.0.2/build
+  tar xvf qwt-x.y.z.tar.bz2
+  mkdir qwt-x.y.z/build
+  cd qwt-x.y.z/build
   qmake ../qwt.pro
   make
   sudo make install
 ~~~
+
+##### If you have a problem during the TKDetection compilation step:
+
+1.  Check that the following files exist:
+    - /usr/share/qt4/mkspecs/features/qwt.prf
+    - /usr/share/qt4/mkspecs/features/qwtconfig.pri
+    - /usr/share/qt4/mkspecs/features/qwtfunctions.pri
+    - /usr/share/qt4/mkspecs/features/qwtmathml.prf
+
+  If they do not exist:
+  ~~~
+      sudo ln -s /usr/local/qwt-x.y.z/features/qwt.prf /usr/share/qt4/mkspecs/features/
+      sudo ln -s /usr/local/qwtpolar-x.y.z/features/qwtconfig.pri /usr/share/qt4/mkspecs/features/
+      sudo ln -s /usr/local/qwtpolar-x.y.z/features/qwtfunctions.pri /usr/share/qt4/mkspecs/features/
+      sudo ln -s /usr/local/qwtpolar-x.y.z/features/qwtmathml.pri /usr/share/qt4/mkspecs/features/
+  ~~~
+
+2.  if 1. does not resolve the problem:
+
+  ~~~
+      sudo ln -s /usr/local/qwt-x.y.z/lib/libqwt.so       /usr/lib/
+      sudo ln -s /usr/local/qwt-x.y.z/lib/libqwt.so.x     /usr/lib/
+      sudo ln -s /usr/local/qwt-x.y.z/lib/libqwt.so.x.y   /usr/lib/
+      sudo ln -s /usr/local/qwt-x.y.z/lib/libqwt.so.x.y.z /usr/lib/
+      sudo ln -s /usr/local/qwt-x.y.z/lib/libqwtmathml.so       /usr/lib/
+      sudo ln -s /usr/local/qwt-x.y.z/lib/libqwtmathml.so.x     /usr/lib/
+      sudo ln -s /usr/local/qwt-x.y.z/lib/libqwtmathml.so.x.y   /usr/lib/
+      sudo ln -s /usr/local/qwt-x.y.z/lib/libqwtmathml.so.x.y.z /usr/lib/
+  ~~~
 
 ### 5. Qxt
 [Top](#tkdetection)
@@ -172,7 +201,7 @@ Use the version available on the website http://sourceforge.net/projects/qwtpola
 Replace *x.y.z* by the downloaded version number:
 
 ~~~
-  unzip qwtpolar-x.y.z.zip
+  tar xvf qwtpolar-x.y.z.tar.bz2
   mkdir qwtpolar-x.y.z/build
   cd qwtpolar-x.y.z/build
   qmake ..
@@ -196,9 +225,9 @@ Replace *x.y.z* by the downloaded version number:
 
   ~~~
       sudo ln -s /usr/local/qwtpolar-x.y.z/lib/libqwtpolar.so       /usr/lib/
-      sudo ln -s /usr/local/qwtpolar-x.y.z/lib/libqwtpolar.so.1     /usr/lib/
-      sudo ln -s /usr/local/qwtpolar-x.y.z/lib/libqwtpolar.so.1.0   /usr/lib/
-      sudo ln -s /usr/local/qwtpolar-x.y.z/lib/libqwtpolar.so.1.0.0 /usr/lib/
+      sudo ln -s /usr/local/qwtpolar-x.y.z/lib/libqwtpolar.so.x     /usr/lib/
+      sudo ln -s /usr/local/qwtpolar-x.y.z/lib/libqwtpolar.so.x.y   /usr/lib/
+      sudo ln -s /usr/local/qwtpolar-x.y.z/lib/libqwtpolar.so.x.y.z /usr/lib/
   ~~~
 
 ##### If the QwtPolarPlot widget does not appear in QtDesigner
@@ -267,3 +296,8 @@ Check the ITK_NUMBER variable in the TKDetection.pro file (line 13) and compile:
 ~~~
 
 The binary file **TKDetection** is then located in the build/bin directory of TKDetection.
+
+### Translation
+
+TKDetection is originally wrote in french language.
+If you want to translate interface in english, just copy the **TKDetection_en.qm** file in the same folder than the binary file **TKDetection**.

@@ -2952,7 +2952,7 @@ l'intervalle angulaire</string>
   </widget>
   <widget class="QDockWidget" name="dockWidget">
    <property name="windowTitle">
-    <string>Histogrammes et vue tangentielle</string>
+    <string>Histogrammes</string>
    </property>
    <attribute name="dockWidgetArea">
     <number>2</number>
