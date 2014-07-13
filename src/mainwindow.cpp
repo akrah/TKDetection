@@ -1977,7 +1977,7 @@ void MainWindow::exportCurrentSegmentedKnotToSdp( const bool &useSliceIntervalCo
 				stream << "# SDP (Sequence of Discrete Points)" << endl;
 				stream << "#" << endl;
 				stream << "# Coordinates of the segmented knot" << endl;
-				stream << "# x y z" << endl;
+				stream << "# x y z knotID" << endl;
 				exportSegmentedKnotToSdp( stream, _tangentialTransform , useSliceIntervalCoordinates);
 				file.close();
 				QMessageBox::information(this,tr("Export du nœud courant segmenté en SDP"), tr("Export réussi !"));
@@ -2004,12 +2004,12 @@ void MainWindow::exportSegmentedKnotsOfCurrentSliceIntervalToSdp( const bool &us
 				stream << "# SDP (Sequence of Discrete Points)" << endl;
 				stream << "#" << endl;
 				stream << "# Coordinates of the segmented knot" << endl;
-				stream << "# x y z" << endl;
+				stream << "# x y z knotID" << endl;
 
 				for ( int sectorIndex=1 ; sectorIndex<_ui->_comboSelectSectorInterval->count() ; ++sectorIndex )
 				{
 					selectSectorInterval(sectorIndex, true);
-					exportSegmentedKnotToSdp(stream, _tangentialTransform, useSliceIntervalCoordinates);
+					exportSegmentedKnotToSdp(stream, _tangentialTransform, useSliceIntervalCoordinates, sectorIndex );
 				}
 
 				file.close();
@@ -2036,9 +2036,10 @@ void MainWindow::exportAllSegmentedKnotsOfBillonToSdp()
 				stream << "# SDP (Sequence of Discrete Points)" << endl;
 				stream << "#" << endl;
 				stream << "# Coordinates of the segmented knot" << endl;
-				stream << "# x y z" << endl;
+				stream << "# x y z knotID" << endl;
 
 				int intervalIndex, sectorIndex;
+				int knotID = 1;
 
 				for ( intervalIndex=1 ; intervalIndex< _ui->_comboSelectSliceInterval->count() ; ++intervalIndex )
 				{
@@ -2046,7 +2047,7 @@ void MainWindow::exportAllSegmentedKnotsOfBillonToSdp()
 					for ( sectorIndex=1 ; sectorIndex< _ui->_comboSelectSectorInterval->count() ; ++sectorIndex )
 					{
 						selectSectorInterval(sectorIndex,false);
-						exportSegmentedKnotToSdp(stream, _tangentialTransform, false);
+						exportSegmentedKnotToSdp(stream, _tangentialTransform, false, knotID++);
 					}
 				}
 
@@ -2061,7 +2062,7 @@ void MainWindow::exportAllSegmentedKnotsOfBillonToSdp()
 }
 
 
-void MainWindow::exportSegmentedKnotToSdp(QTextStream &stream, const TangentialTransform &tangentialTransform, const bool &useSliceIntervalCoordinates )
+void MainWindow::exportSegmentedKnotToSdp( QTextStream &stream, const TangentialTransform &tangentialTransform, const bool &useSliceIntervalCoordinates, const int &knotId )
 {
 	const int &width = _tangentialBillon->n_cols;
 	const int &height = _tangentialBillon->n_rows;
@@ -2102,10 +2103,10 @@ void MainWindow::exportSegmentedKnotToSdp(QTextStream &stream, const TangentialT
 					initial.setX( ellipseXCenter + x );
 					initial.setY( ellipseYCenter + y );
 					destination = quaterRot.rotatedVector(initial) + origin;
-					stream << qRound(destination.x()) << " "<< qRound(destination.y()) << " " << qRound(destination.z()) << endl;
+					stream << qRound(destination.x()) << " "<< qRound(destination.y()) << " " << qRound(destination.z()) << " " << knotId << endl;
 					initial.setX( ellipseXCenter - x );
 					destination = quaterRot.rotatedVector(initial) + origin;
-					stream << qRound(destination.x()) << " "<< qRound(destination.y()) << " " << qRound(destination.z()) << endl;
+					stream << qRound(destination.x()) << " "<< qRound(destination.y()) << " " << qRound(destination.z()) << " " << knotId << endl;
 				}
 			}
 		}

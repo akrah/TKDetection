@@ -116,7 +116,7 @@ private:
 	void exportCurrentSegmentedKnotToSdp( const bool &useSliceIntervalCoordinates = false );
 	void exportSegmentedKnotsOfCurrentSliceIntervalToSdp( const bool &useSliceIntervalCoordinates = false );
 	void exportAllSegmentedKnotsOfBillonToSdp();
-	void exportSegmentedKnotToSdp( QTextStream &stream, const TangentialTransform &tangentialTransform, const bool &useSliceIntervalCoordinates );
+	void exportSegmentedKnotToSdp( QTextStream &stream, const TangentialTransform &tangentialTransform, const bool &useSliceIntervalCoordinates , const int & knotId = 1 );
 
 //	void exportSegmentedKnotsOfCurrentSliceIntervalToSdpOldAlgo( bool keepBillonSliceNumber = false );
 
