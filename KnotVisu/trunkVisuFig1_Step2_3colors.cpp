@@ -62,7 +62,8 @@ void
 meshQuadZCylinder( const Image3D &image, My3DViewer &aViewer, DGtal::Mesh<DGtal::Z3i::RealPoint> &aMesh, DGtal::Z2i::RealPoint center, 
                    double radiusMin, double radiusMax, bool fillBorders,   
                    unsigned int startSliceZ, unsigned int endSliceZ, double angleMin, double angleMax,
-                   double angularStep, double gridSize, DGtal::Z3i::RealPoint vectTranslationNonMesh=DGtal::Z3i::RealPoint(0,0,0))
+                   double angularStep, double gridSize, DGtal::Z3i::RealPoint vectTranslationNonMesh=DGtal::Z3i::RealPoint(0,0,0),
+                   bool drawCutPlanes=true, bool drawCutPlanesOnly=false)
 {
  
   unsigned int stepSample = endSliceZ- startSliceZ;
@@ -110,13 +111,14 @@ meshQuadZCylinder( const Image3D &image, My3DViewer &aViewer, DGtal::Mesh<DGtal:
        // Generating mesh faces:
        unsigned int posRef = nbVertex-nbVertexSlice;
        for (unsigned int j = 0; j< nbVertexSlice-2; j=j+2){
-         aMesh.addQuadFace(posRef+2+j, posRef+3+j, posRef+1+j,posRef+j );
+         if(!drawCutPlanesOnly)
+           aMesh.addQuadFace(posRef+2+j, posRef+3+j, posRef+1+j,posRef+j );
        }
        // last face
        if(fullCylinder){
          aMesh.addQuadFace(posRef, posRef+1, nbVertex-1, nbVertex-2);
        }
-       else if (fillBorders){
+       else if (fillBorders && drawCutPlanes ){
          // Generate two end/start face
          DGtal::Z3i::RealPoint pt1 = ptRefOrigin+(uDir1*cos(angleMaxRad)*radiusMin)+(uDir2*sin(angleMaxRad)*radiusMin);
          DGtal::Z3i::RealPoint pt2 = ptRefOrigin+Z3i::Point(0,0,stepSample)+
@@ -136,7 +138,7 @@ meshQuadZCylinder( const Image3D &image, My3DViewer &aViewer, DGtal::Mesh<DGtal:
    }
   //Remplissage face avant:
     
-  if (fillBorders){
+  if (fillBorders && ! drawCutPlanesOnly){
     for (double i=0; i<2*radiusMax; i=i+gridSize){
       for (double j=0; j<2*radiusMax; j=j+gridSize){
         DGtal::Z3i::RealPoint pt (center[0]-radiusMax+i,
@@ -281,6 +283,8 @@ int main(int argc, char** argv)
   DGtal::Mesh<Z3i::RealPoint> meshTrunkSlice(true);
   DGtal::Mesh<Z3i::RealPoint> meshTrunkSectorExtracted(true);
   DGtal::Mesh<Z3i::RealPoint> meshTrunkEnd(true);
+  DGtal::Mesh<Z3i::RealPoint> meshCutSectionsMain(true);
+  DGtal::Mesh<Z3i::RealPoint> meshCutSectionsExtra(true);
 
   double distanceTranslation= 70;
   double dir = (350/180.0)*3.142;
@@ -310,14 +314,38 @@ int main(int argc, char** argv)
   if(!vm.count("onlyCutSection") && ! vm.count("onlyCutSectionExtracted"))
     meshQuadZCylinder(imageVol, viewer, meshTrunkStart, center, 0,  cylinderRadius, true, startBillonSection, cutSectionFirstIndex, 0, 0, angleStep, gridSize); 
   
-   if(! vm.count("onlyCutSectionExtracted"))
+  if(! vm.count("onlyCutSectionExtracted")){
      meshQuadZCylinder(imageVol, viewer, meshTrunkSlice, center, 0,  cylinderRadius, true, cutSectionFirstIndex, cutSectionLastIndex, 
-                    sectorStartAngle, sectorEndAngle, angleStep, gridSize, Z3i::RealPoint(0,0,   cutSectionSpace)); 
+                       sectorStartAngle, sectorEndAngle, angleStep, gridSize, Z3i::RealPoint(0,0,   cutSectionSpace), false, false);
+     
+     meshQuadZCylinder(imageVol, viewer, meshCutSectionsMain, center, 0,  cylinderRadius, true, cutSectionFirstIndex, cutSectionLastIndex, 
+                       sectorStartAngle, sectorEndAngle, angleStep, gridSize, Z3i::RealPoint(0,0,   cutSectionSpace),true, true); 
+  }
    
    meshQuadZCylinder(imageVol, viewer, meshTrunkSectorExtracted, center, 0,  cylinderRadius, true, cutSectionFirstIndex, cutSectionLastIndex, 
                      sectorEndAngle, sectorStartAngle , angleStep, gridSize, Z3i::RealPoint(0,0,  cutSectionSpace)+ 
                      Z3i::RealPoint(cos(sectorCenterAngle)*sectorTranslateDistance, 
-                                    sin(sectorCenterAngle)*sectorTranslateDistance, 0)); 
+                                    sin(sectorCenterAngle)*sectorTranslateDistance, 0), false, false); 
+   
+
+   meshQuadZCylinder(imageVol, viewer, meshCutSectionsExtra, center, 0,  cylinderRadius, true, cutSectionFirstIndex, cutSectionLastIndex, 
+                     sectorEndAngle, sectorStartAngle , angleStep, gridSize, Z3i::RealPoint(0,0,  cutSectionSpace)+ 
+                     Z3i::RealPoint(cos(sectorCenterAngle)*sectorTranslateDistance, 
+                                    sin(sectorCenterAngle)*sectorTranslateDistance, 0), true, true); 
+   
+   
+
+   //ONLY CIRCULAR section (cylinder)
+   //   meshQuadZCylinder(imageVol, viewer, meshTrunkSectorExtracted, center, 0,  cylinderRadius, true, cutSectionFirstIndex, cutSectionLastIndex, 
+   //                 sectorEndAngle, sectorStartAngle , angleStep, gridSize, Z3i::RealPoint(0,0,  cutSectionSpace)+ 
+   //                 Z3i::RealPoint(cos(sectorCenterAngle)*sectorTranslateDistance, 
+   //                                sin(sectorCenterAngle)*sectorTranslateDistance, 0), false, false); 
+   
+   //ONLY CUT PLANE
+   //meshQuadZCylinder(imageVol, viewer, meshTrunkSectorExtracted, center, 0,  cylinderRadius, true, cutSectionFirstIndex, cutSectionLastIndex, 
+   //                 sectorEndAngle, sectorStartAngle , angleStep, gridSize, Z3i::RealPoint(0,0,  cutSectionSpace)+ 
+   ///                 Z3i::RealPoint(cos(sectorCenterAngle)*sectorTranslateDistance, 
+   //                               sin(sectorCenterAngle)*sectorTranslateDistance, 0), true, true); 
    
   
   if(!vm.count("onlyCutSection")&& ! vm.count("onlyCutSectionExtracted"))
@@ -327,8 +355,11 @@ int main(int argc, char** argv)
   if(!vm.count("onlyCutSection") && ! vm.count("onlyCutSectionExtracted"))
     embeddMeshInVol(imageVol, viewer, meshTrunkStart, ColorizeFonctor());
   
-  if(! vm.count("onlyCutSectionExtracted"))
+  if(! vm.count("onlyCutSectionExtracted")){
     embeddMeshInVol(imageVol, viewer, meshTrunkSlice,ColorizeFonctor(colorCoefs[0], colorCoefs[1], colorCoefs[2]),  Z3i::RealPoint(0,0, cutSectionSpace));
+    embeddMeshInVol(imageVol, viewer, meshCutSectionsMain,ColorizeFonctor(),  Z3i::RealPoint(0,0, cutSectionSpace));
+  }
+
 
   if(!vm.count("onlyCutSection") && ! vm.count("onlyCutSectionExtracted"))
     embeddMeshInVol(imageVol, viewer, meshTrunkEnd, ColorizeFonctor(), Z3i::RealPoint(0,0, cutSectionSpace*2));
@@ -336,6 +367,10 @@ int main(int argc, char** argv)
   
   embeddMeshInVol(imageVol, viewer, meshTrunkSectorExtracted, 
                   ColorizeFonctor(colorCoefs[0], colorCoefs[1], colorCoefs[2]),
+                  Z3i::RealPoint(0,0,  cutSectionSpace)+ Z3i::RealPoint(cos(sectorCenterAngle)*sectorTranslateDistance, 
+                                                                        sin(sectorCenterAngle)*sectorTranslateDistance, 0));
+  embeddMeshInVol(imageVol, viewer, meshCutSectionsExtra, 
+                  ColorizeFonctor(),
                   Z3i::RealPoint(0,0,  cutSectionSpace)+ Z3i::RealPoint(cos(sectorCenterAngle)*sectorTranslateDistance, 
                                                                         sin(sectorCenterAngle)*sectorTranslateDistance, 0));
   

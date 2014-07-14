@@ -32,11 +32,11 @@ namespace po = boost::program_options;
              
 typedef DGtal::ImageContainerBySTLVector<DGtal::Z2i::Domain,   unsigned char > Image2D;
 typedef DGtal::ImageContainerBySTLVector<DGtal::Z3i::Domain,   unsigned char  > Image3D;
-typedef DGtal::ConstImageAdapter<Image3D, Z2i::Domain, DGtal::Point2DEmbedderIn3D<DGtal::Z3i::Domain>,
-                                   Image3D::Value,  DGtal::DefaultFunctor >  ImageAdapterExtractor;
+typedef DGtal::ConstImageAdapter<Image3D, Z2i::Domain, DGtal::functors::Point2DEmbedderIn3D<DGtal::Z3i::Domain>,
+                                 Image3D::Value,  DGtal::functors::Identity >  ImageAdapterExtractor;
 typedef DGtal::Viewer3D<Z3i::Space, Z3i::KSpace> My3DViewer;  
-typedef DGtal::RescalingFunctor<int ,unsigned char > RescalFCT;
-DGtal::DefaultFunctor idV;
+typedef DGtal::functors::Rescaling<int ,unsigned char > RescalFCT;
+DGtal::functors::Identity idV;
 
 
 struct ColorizeFonctor{
@@ -192,8 +192,8 @@ embeddMeshInVol(const Image3D &anImage, My3DViewer &aViewer, DGtal::Mesh<DGtal::
     DGtal::Z2i::Domain domainImage2D (DGtal::Z2i::RealPoint(0,0), 
                                       DGtal::Z2i::RealPoint((point2-point1).norm(), (point4-point1).norm() ));    
     
-    DGtal::Point2DEmbedderIn3D<DGtal::Z3i::Domain >  embedder(anImage.domain(), 
-                                                              point1, point2, point4, DGtal::Z3i::Point(0,0,0));      
+    DGtal::functors::Point2DEmbedderIn3D<DGtal::Z3i::Domain >  embedder(anImage.domain(), 
+                                                                        point1, point2, point4, DGtal::Z3i::Point(0,0,0));      
     ImageAdapterExtractor extractedImage(anImage, domainImage2D, embedder, idV);        
     
     

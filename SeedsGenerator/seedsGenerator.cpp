@@ -158,6 +158,8 @@ int main(int argc, char** argv)
     ("markerFromThresold", po::value<std::vector <int> >()->multitoken(), " valMin valMax: defines markers simply from thresholds (all voxels includes in (valMin valMax) are set as foreground). ")
     ("minSizeBoundary,m",  po::value<unsigned int >()->default_value(100), "set the min size of the boundary to be extracted (default 100)" );
 
+
+
   bool parseOK=true;
   po::variables_map vm;
   try{

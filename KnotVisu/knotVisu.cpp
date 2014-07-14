@@ -113,13 +113,13 @@ int main(int argc, char** argv)
 {
   typedef DGtal::ImageContainerBySTLVector<DGtal::Z2i::Domain,   unsigned char > Image2D;
   typedef DGtal::ImageContainerBySTLVector<DGtal::Z3i::Domain,   unsigned char  > Image3D;
-  typedef DGtal::ConstImageAdapter<Image3D, Z2i::Domain, DGtal::Point2DEmbedderIn3D<DGtal::Z3i::Domain>,
-                                   Image3D::Value,  DGtal::DefaultFunctor >  ImageAdapterExtractor;
+  typedef DGtal::ConstImageAdapter<Image3D, Z2i::Domain, DGtal::functors::Point2DEmbedderIn3D<DGtal::Z3i::Domain>,
+                                   Image3D::Value,  DGtal::functors::Identity >  ImageAdapterExtractor;
 
   typedef DGtal::Viewer3D<Z3i::Space, Z3i::KSpace> My3DViewer;  
 
 
-  typedef DGtal::RescalingFunctor<int ,unsigned char > RescalFCT;
+  typedef DGtal::functors::Rescaling<int ,unsigned char > RescalFCT;
 
    
    
@@ -275,7 +275,7 @@ if(vm.count("marrow-mesh")){
   std::vector< std::vector<Z3i::RealPoint> > vectPointsBottomLeftSplitted = splitKnotPithFromKnotID<Z3i::RealPoint>(vectPointsBottomLeftALL, vectKnotID);
   std::vector< std::vector<Z3i::RealPoint> > vectPointsBottomRightSplitted = splitKnotPithFromKnotID<Z3i::RealPoint>(vectPointsBottomRightALL, vectKnotID);
   
-  DGtal::DefaultFunctor idV;
+  DGtal::functors::Identity idV;
   DGtal::Mesh<Z3i::RealPoint> meshMoelle(colorKnotMesh);
   unsigned int numImageDisplayed =0;
 
@@ -311,7 +311,7 @@ if(vm.count("marrow-mesh")){
           DGtal::Z2i::Domain domainImage2D (DGtal::Z2i::Point(0,0), 
                                             DGtal::Z2i::Point(width, width)); 
           
-          DGtal::Point2DEmbedderIn3D<DGtal::Z3i::Domain >  embedder(imageVol.domain(), 
+          DGtal::functors::Point2DEmbedderIn3D<DGtal::Z3i::Domain >  embedder(imageVol.domain(), 
                                                                     vectPointsCenter.at(i), 
                                                                     vectPointsCenter.at(i) - vectPointsCenter.at(i+sampleStep), 
                                                                     width);
@@ -338,7 +338,7 @@ if(vm.count("marrow-mesh")){
                                             DGtal::Z2i::Point((vectPointsTopRight.at(i) - vectPointsTopLeft.at(i)).norm(),
                                                               (vectPointsTopRight.at(i) - vectPointsBottomRight.at(i)).norm())); 
           
-          DGtal::Point2DEmbedderIn3D<DGtal::Z3i::Domain >  embedder(imageVol.domain(), 
+          DGtal::functors::Point2DEmbedderIn3D<DGtal::Z3i::Domain >  embedder(imageVol.domain(), 
                                                                     vectPointsBottomLeft.at(i),vectPointsBottomRight.at(i), vectPointsTopLeft.at(i),
                                                                     DGtal::Z3i::Point(0,0, 0));
           ImageAdapterExtractor extractedImage(imageVol, domainImage2D, embedder, idV);        
@@ -387,7 +387,7 @@ if(vm.count("marrow-mesh")){
                                         DGtal::Z2i::Point(imageVol.domain().upperBound()[0],
                                                           imageVol.domain().upperBound()[1]));
      
-      DGtal::Point2DEmbedderIn3D<DGtal::Z3i::Domain >  embedder(imageVol.domain(), 
+      DGtal::functors::Point2DEmbedderIn3D<DGtal::Z3i::Domain >  embedder(imageVol.domain(), 
                                                                 DGtal::Z3i::Point(0,0,zIndex), DGtal::Z3i::Point(imageVol.domain().upperBound()[0],0,zIndex),
                                                                 DGtal::Z3i::Point(0,imageVol.domain().upperBound()[1],zIndex),
                                                                 DGtal::Z3i::Point(0,0, zIndex));      
@@ -410,7 +410,7 @@ if(vm.count("marrow-mesh")){
                                         DGtal::Z2i::Point(imageVol.domain().upperBound()[1],
                                                           imageVol.domain().upperBound()[2]));
       
-      DGtal::Point2DEmbedderIn3D<DGtal::Z3i::Domain >  embedder(imageVol.domain(), 
+      DGtal::functors::Point2DEmbedderIn3D<DGtal::Z3i::Domain >  embedder(imageVol.domain(), 
                                                                 DGtal::Z3i::Point(xIndex,0,0), DGtal::Z3i::Point(xIndex, imageVol.domain().upperBound()[1],0),
                                                                 DGtal::Z3i::Point(xIndex,0, imageVol.domain().upperBound()[2]),
                                                                 DGtal::Z3i::Point(xIndex,0,0));      
@@ -433,7 +433,7 @@ if(vm.count("marrow-mesh")){
                                         DGtal::Z2i::Point(imageVol.domain().upperBound()[2],
                                                           imageVol.domain().upperBound()[0]));
       
-      DGtal::Point2DEmbedderIn3D<DGtal::Z3i::Domain >  embedder(imageVol.domain(), 
+      DGtal::functors::Point2DEmbedderIn3D<DGtal::Z3i::Domain >  embedder(imageVol.domain(), 
                                                                 DGtal::Z3i::Point(0,yIndex,0), DGtal::Z3i::Point( 0 , yIndex, imageVol.domain().upperBound()[2]),
                                                                 DGtal::Z3i::Point(imageVol.domain().upperBound()[0] ,yIndex, 0),
                                                                 DGtal::Z3i::Point(0,yIndex,0));      

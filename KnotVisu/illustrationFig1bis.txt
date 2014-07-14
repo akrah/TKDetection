@@ -1,0 +1,2 @@
+
+ ./knotVisu -v /Users/kerautre/EnCours/TKDetection/SPR-1-T-Ilustrations/1.2.840.113619.2.55.3.1670609623.803.1322469364.155.649.dcm  -p ../../allKnotsSPR1TIllustration.sdp --tangentialView  -m ../../pithSPR1TIllustration.ofs  -x 0.65 -y 0.65 -z 1.25  --selectKnots  3 --displayXSliceImages 150 --displayZSliceImages  550 300 --sampleStep 30  --visuKnotMesh -c 1 --cutEnd 20 --colorPithMesh 120 130 200  --colorKnotMesh 230 100 100
