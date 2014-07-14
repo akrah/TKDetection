@@ -32,11 +32,11 @@ using namespace Z3i;
 namespace po = boost::program_options;
 typedef DGtal::ImageContainerBySTLVector<DGtal::Z2i::Domain,   unsigned char > Image2D;
 typedef DGtal::ImageContainerBySTLVector<DGtal::Z3i::Domain, unsigned char> Image3D;
-typedef DGtal::ConstImageAdapter<Image3D, Z2i::Domain, DGtal::Point2DEmbedderIn3D<DGtal::Z3i::Domain>,
-                                 Image3D::Value,  DGtal::DefaultFunctor >  ImageAdapterExtractor;
+typedef DGtal::ConstImageAdapter<Image3D, Z2i::Domain, DGtal::functors::Point2DEmbedderIn3D<DGtal::Z3i::Domain>,
+                                 Image3D::Value,  DGtal::functors::Identity >  ImageAdapterExtractor;
 
-DGtal::DefaultFunctor idV;
-typedef DGtal::RescalingFunctor<int ,unsigned char > RescalFCT;
+DGtal::functors::Identity idV;
+typedef DGtal::functors::Rescaling<int ,unsigned char > RescalFCT;
 
 
 
@@ -153,7 +153,7 @@ int main(int argc, char** argv)
     p4[0]=p1[0]; p4[1]=p1[1]; p4[2]=center[2]+height/2; 
   }
   
-  DGtal::Point2DEmbedderIn3D<DGtal::Z3i::Domain >  embedder(imageVol.domain(), p1, p2, p4);
+  DGtal::functors::Point2DEmbedderIn3D<DGtal::Z3i::Domain >  embedder(imageVol.domain(), p1, p2, p4);
   trace.info() << imageVol.domain();
   ImageAdapterExtractor extractedImage(imageVol, domainImage2D, embedder, idV);        
   GenericWriter< ImageAdapterExtractor>::exportFile(outputFilename , extractedImage);

@@ -1,0 +1,6 @@
+ ./trunkVisuFig1_Step2_3 -v /Users/kerautre/EnCours/TKDetection/DOU-1-T_sample/1.2.840.113619.2.55.3.1670609623.384.1323081047.210.8.dcm  --centerCoord 295 267 -x 0.53 -y 0.53 -z 1.25 --startBillon 20 --endBillon 499 -f 315 -l 348 --cylinderRadius 150 --cutSectionSpace 100 --sectorStartAngle 200 --sectorEndAngle 133 --sectorTranslateDistance 100 --sectorCenterAngle 170 --onlyCutSectionExtracted --gridSize 0.25 --angleStep 10
+
+
+ ./trunkVisuFig1_Step2_3colors -v /Users/kerautre/EnCours/TKDetection/DOU-1-T_sample/1.2.840.113619.2.55.3.1670609623.384.1323081047.210.8.dcm  --centerCoord 295 267 -x 0.53 -y 0.53 -z 1.25 --startBillon 20 --endBillon 499 -f 315 -l 348 --cylinderRadius 150 --cutSectionSpace 100 --sectorStartAngle 200 --sectorEndAngle 133 --sectorTranslateDistance 100 --sectorCenterAngle 170 --onlyCutSectionExtracted --gridSize 0.25 --angleStep 10  --col
+
+

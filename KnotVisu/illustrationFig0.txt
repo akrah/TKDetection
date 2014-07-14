@@ -19,3 +19,9 @@ slcie 635 690
 # visu coupes tangentielle:
 ./tangentialImageExtraction -i /Users/kerautre/EnCours/TKDetection/SPR-3-T/1.2.840.113619.2.55.3.1670609623.384.1323081041.419.363.dcm  --outputFile resu.pgm -c 230 275 677 --height 170 -d 80 -s 100 -e 28
 
+
+
+
+Génération avec sample 3;
+
+ ./trunkVisuFig0 --volumeFile ../../../ExpePRCompKnots/SamplesDICOM/sample3/1.2.840.113619.2.55.3.1670609623.384.1323081044.250.1029.dcm  --centerCoord 239 275 --startBillon 0 --endBillon 49  --cylinderRadius1Max 140  --cylinderRadius1Min 110 --cylinderRadius2Max 70 --cylinderRadius2Min 0 --cylinderRadius3Max 20 -x 0.53 -y 0.53 -z 1.25 --translateCylinderIncluded -90 --displayAllSector  --translateSourceCylinder 150
