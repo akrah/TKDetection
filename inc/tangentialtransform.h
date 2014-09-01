@@ -12,7 +12,7 @@
 class TangentialTransform
 {
 public:
-	TangentialTransform( const int &minIntensity, const bool &trilinearInterpolation, const qreal &linearInterpolationCoeff );
+	TangentialTransform(const int &minIntensity, const bool &trilinearInterpolation );
 	TangentialTransform( const TangentialTransform &tangentialTransform );
 	virtual ~TangentialTransform();
 
@@ -24,11 +24,9 @@ public:
 
 	void setMinIntensity( const int &minIntensity );
 	void enableTrilinearInterpolation( bool enable );
-	void setLinearInterpolationCoeff( const qreal &linearInterpolationCoeff );
 
 	const int &minIntensity() const;
 	const bool &trilinearInterpolation() const;
-	const qreal &linearInterpolationCoeff() const;
 
 	const Interval<uint> &currentSliceInterval() const;
 	const Interval<uint> &currentAngularInterval() const;
@@ -50,7 +48,6 @@ public:
 protected:
 	int _minIntensity;
 	bool _trilinearInterpolation;
-	qreal _linearInterpolationCoeff;
 
 	Interval<uint> _currentSliceInterval;
 	Interval<uint> _currentAngularInterval;

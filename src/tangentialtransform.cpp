@@ -5,8 +5,8 @@
 #include "inc/billon.h"
 #include "inc/piechart.h"
 
-TangentialTransform::TangentialTransform( const int &minIntensity, const bool &trilinearInterpolation, const qreal &linearInterpolationCoeff ) :
-	_minIntensity(minIntensity), _trilinearInterpolation(trilinearInterpolation), _linearInterpolationCoeff(1.-linearInterpolationCoeff),
+TangentialTransform::TangentialTransform( const int &minIntensity, const bool &trilinearInterpolation ) :
+	_minIntensity(minIntensity), _trilinearInterpolation(trilinearInterpolation),
 	_currentSliceInterval(Interval<uint>(0,0)), _currentAngularInterval(Interval<uint>(0,0)),
 	_origin(QVector3D(0,0,0)), _angularRange(0.), _bisectorOrientation(0.), _depth(0.),
 	_quaterX(QQuaternion::fromAxisAndAngle( 1., 0., 0., -90.)), _quaterY(QQuaternion::fromAxisAndAngle( 0., 1., 0., 90.)),
@@ -16,7 +16,7 @@ TangentialTransform::TangentialTransform( const int &minIntensity, const bool &t
 }
 
 TangentialTransform::TangentialTransform( const TangentialTransform &tT ) :
-	_minIntensity(tT._minIntensity), _trilinearInterpolation(tT._trilinearInterpolation), _linearInterpolationCoeff(tT._linearInterpolationCoeff),
+	_minIntensity(tT._minIntensity), _trilinearInterpolation(tT._trilinearInterpolation),
 	_currentSliceInterval(tT._currentSliceInterval), _currentAngularInterval(tT._currentAngularInterval),
 	_origin(tT._origin), _angularRange(tT._angularRange), _bisectorOrientation(tT._bisectorOrientation), _depth(tT._depth),
 	_quaterX(tT._quaterX), _quaterY(tT._quaterY),
@@ -71,11 +71,6 @@ void TangentialTransform::enableTrilinearInterpolation( bool enable )
 	_trilinearInterpolation = enable;
 }
 
-void TangentialTransform::setLinearInterpolationCoeff( const qreal &linearInterpolationCoeff )
-{
-	_linearInterpolationCoeff = linearInterpolationCoeff;
-}
-
 const int &TangentialTransform::minIntensity() const
 {
 	return _minIntensity;
@@ -84,11 +79,6 @@ const int &TangentialTransform::minIntensity() const
 const bool &TangentialTransform::trilinearInterpolation() const
 {
 	return _trilinearInterpolation;
-}
-
-const qreal &TangentialTransform::linearInterpolationCoeff() const
-{
-	return _linearInterpolationCoeff;
 }
 
 const Interval<uint> &TangentialTransform::currentSliceInterval() const
@@ -170,7 +160,7 @@ Billon* TangentialTransform::execute( const Billon &billon )
 
 	const uint nbSlices = qCeil(_depth);
 
-	// Inversion width et height pour correspondre à la ratation de 90°
+	// Inversion width et height pour correspondre à la rotation de 90°
 	const qreal cosBisector = qCos(_bisectorOrientation);
 	const qreal sinBisector = qSin(_bisectorOrientation);
 	Billon * tangentialBillon = new Billon(width,height,nbSlices);
@@ -182,7 +172,6 @@ Billon* TangentialTransform::execute( const Billon &billon )
 	QVector3D origin(_origin);
 	QVector3D initial, destination;
 
-	const qreal trilinearInterpolationCoeff = 1.-_linearInterpolationCoeff;
 	const qreal semiKnotAreaWidthCoeff = widthOnTwo / static_cast<qreal>( nbSlices );
 	int j, i, iStart, iEnd;
 
@@ -216,15 +205,14 @@ Billon* TangentialTransform::execute( const Billon &billon )
 						x0Dist = destination.x()-x0;
 						y0Dist = destination.y()-y0;
 						z0Dist = destination.z()-z0;
-						xFrontTop = (1.-x0Dist)*billon(y0+1,x0-1,z0-1) + x0Dist*billon(y0+1,x0+1,z0-1);
-						xFrontBottom = (1.-x0Dist)*billon(y0-1,x0-1,z0-1) + x0Dist*billon(y0-1,x0+1,z0-1);
-						xBackTop = (1.-x0Dist)*billon(y0+1,x0-1,z0+1) + x0Dist*billon(y0+1,x0+1,z0+1);
-						xBackBottom = (1.-x0Dist)*billon(y0-1,x0-1,z0+1) + x0Dist*billon(y0-1,x0+1,z0+1);
-						yFront = (1.-y0Dist)*xFrontBottom + y0Dist*xFrontTop;
-						yBack = (1.-y0Dist)*xBackBottom + y0Dist*xBackTop;
+						xFrontTop = (1.-x0Dist)*billon(y0,x0,z0) + x0Dist*billon(y0,x0+1,z0);
+						xFrontBottom = (1.-x0Dist)*billon(y0+1,x0,z0) + x0Dist*billon(y0+1,x0+1,z0);
+						xBackTop = (1.-x0Dist)*billon(y0,x0,z0+1) + x0Dist*billon(y0,x0+1,z0+1);
+						xBackBottom = (1.-x0Dist)*billon(y0+1,x0,z0+1) + x0Dist*billon(y0+1,x0+1,z0+1);
+						yFront = (1.-y0Dist)*xFrontTop + y0Dist*xFrontBottom;
+						yBack = (1.-y0Dist)*xBackTop + y0Dist*xBackBottom;
 						// Rotation de 90° dans le sens horaire pour correspondre à l'orientation de l'article
-						slice(j+heightOnTwo,i+widthOnTwo) = _linearInterpolationCoeff * billon(y0,x0,z0)
-																	  + trilinearInterpolationCoeff * ((1.-z0Dist)*yFront + z0Dist*yBack);
+						slice(j+heightOnTwo,i+widthOnTwo) = (1.-z0Dist)*yFront + z0Dist*yBack;
 					}
 					else
 					{

@@ -25,6 +25,7 @@ private :
 						  const TKD::ProjectionType &axe = TKD::Z_PROJECTION, const qreal &ellipticityRate = 1. );
 	void drawMovementSlice( QImage &image, const Billon &billon, const uint &sliceIndex, const Interval<int> &intensityInterval,
 							const uint &zMotionMin, const uint &angularResolution, const TKD::ProjectionType &axe = TKD::Z_PROJECTION );
+	void drawHoughSlice( QImage &image, const Billon &billon, const uint &sliceIndex, const TKD::ProjectionType &axe = TKD::Z_PROJECTION );
 };
 
 #endif // SLICEVIEW_H

@@ -87,6 +87,7 @@ namespace TKD
 		_VIEW_TYPE_MIN_ = -1,
 		CLASSIC,
 		Z_MOTION,
+		HOUGH,
 		_VIEW_TYPE_MAX_
 	};
 

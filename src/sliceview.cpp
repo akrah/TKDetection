@@ -22,21 +22,23 @@ SliceView::SliceView()
  *******************************/
 
 void SliceView::drawSlice(QImage &image, const Billon &billon, const TKD::ViewType &sliceType, const uint &sliceIndex, const Interval<int> &intensityInterval,
-			  const uint &zMotionMin, const uint &angularResolution, const TKD::ProjectionType &axe, const TKD::ImageViewRender &imageRender, const qreal &ellipticityRate )
+						  const uint &zMotionMin, const uint &angularResolution, const TKD::ProjectionType &axe, const TKD::ImageViewRender &imageRender, const qreal &ellipticityRate )
 {
 	switch (axe)
 	{
 		case TKD::Z_PROJECTION:
 			switch (sliceType)
 			{
+				case TKD::HOUGH :
+					drawHoughSlice( image, billon, sliceIndex, axe );
+					break;
 				// Affichage de la coupe de mouvements
 				case TKD::Z_MOTION :
 					drawMovementSlice( image, billon, sliceIndex, intensityInterval, zMotionMin, angularResolution, axe );
-					break;
 				// Affichage de la coupe originale
 				case TKD::CLASSIC:
 				default :
-				  drawCurrentSlice( image, billon, sliceIndex, intensityInterval, angularResolution, imageRender , axe );
+					drawCurrentSlice( image, billon, sliceIndex, intensityInterval, angularResolution, imageRender , axe );
 					break;
 			}
 			break;
@@ -46,7 +48,7 @@ void SliceView::drawSlice(QImage &image, const Billon &billon, const TKD::ViewTy
 				// Affichage de la coupe originale
 				case TKD::CLASSIC:
 				default :
-				  drawCurrentSlice( image, billon, sliceIndex, intensityInterval, angularResolution, imageRender, axe );
+					drawCurrentSlice( image, billon, sliceIndex, intensityInterval, angularResolution, imageRender, axe );
 					break;
 			}
 		case TKD::POLAR_PROJECTION:
@@ -59,7 +61,7 @@ void SliceView::drawSlice(QImage &image, const Billon &billon, const TKD::ViewTy
 				// Affichage de la coupe originale
 				case TKD::CLASSIC:
 				default :
-				  drawCurrentSlice( image, billon, sliceIndex, intensityInterval, angularResolution, imageRender, axe );
+					drawCurrentSlice( image, billon, sliceIndex, intensityInterval, angularResolution, imageRender, axe );
 					break;
 			}
 			break;
@@ -69,7 +71,7 @@ void SliceView::drawSlice(QImage &image, const Billon &billon, const TKD::ViewTy
 				// Affichage de la coupe originale
 				case TKD::CLASSIC:
 				default :
-				  drawCurrentSlice( image, billon, sliceIndex, intensityInterval, angularResolution, imageRender, axe, ellipticityRate );
+					drawCurrentSlice( image, billon, sliceIndex, intensityInterval, angularResolution, imageRender, axe, ellipticityRate );
 					break;
 			}
 			break;
@@ -84,9 +86,9 @@ void SliceView::drawSlice(QImage &image, const Billon &billon, const TKD::ViewTy
  *******************************/
 
 void SliceView::drawCurrentSlice( QImage &image, const Billon &billon,
-				  const uint &sliceIndex, const Interval<int> &intensityInterval,
-				  const uint &angularResolution, const TKD::ImageViewRender &aRender, const TKD::ProjectionType &axe,
-				  const qreal &ellipticityRate )
+								  const uint &sliceIndex, const Interval<int> &intensityInterval,
+								  const uint &angularResolution, const TKD::ImageViewRender &aRender, const TKD::ProjectionType &axe,
+								  const qreal &ellipticityRate )
 {
 	const uint &width = billon.n_cols;
 	const uint &height = billon.n_rows;
@@ -360,6 +362,149 @@ void SliceView::drawMovementSlice( QImage &image, const Billon &billon, const ui
 				}
 				++line;
 			}
+		}
+	}
+}
+
+void SliceView::drawHoughSlice( QImage &image, const Billon &billon, const uint &sliceIndex, const TKD::ProjectionType &axe )
+{
+	if ( axe != TKD::Z_PROJECTION ) return;
+
+	const int &width = billon.n_cols;
+	const int &height = billon.n_rows;
+	const int &depth = billon.n_slices;
+
+	QRgb * line = (QRgb *) image.bits();
+	int color;
+	int i,j;
+
+
+	/********************************************************************/
+
+	const Slice &slice = billon.slice(sliceIndex);
+
+	// Calcul des orientations en chaque pixel avec les filtres de Sobel
+	arma::Mat<qreal> orientations( height, width );
+	arma::Mat<qreal> sobelNorm( height, width );
+
+	const int semiWidth = qFloor(width/2.);
+	const int semiAdaptativeWidth = qFloor(semiWidth*(sliceIndex/static_cast<qreal>(depth)));
+	const int iMin = qMax(semiWidth-semiAdaptativeWidth+1,0);
+	const int iMax = semiWidth+semiAdaptativeWidth-1;
+
+	if ( semiAdaptativeWidth<3 || height<3 ) return;
+
+	arma::Col<qreal> sobelNormVec(qMax((2*semiAdaptativeWidth-2)*(height-2),0));
+	arma::Col<qreal>::iterator sobelNormVecIt = sobelNormVec.begin();
+
+	qreal sobelX, sobelY, norm;
+
+	const qreal &xDim = billon.voxelWidth();
+	const qreal &yDim = billon.voxelHeight();
+	const qreal voxelRatio = qPow(xDim/yDim,2);
+
+	int nbPositiveNorm;
+
+	orientations.fill(0);
+	sobelNorm.fill(0.);
+	nbPositiveNorm = 0;
+	for ( j=1 ; j<height-1 ; ++j )
+	{
+		for ( i=iMin ; i<iMax ; ++i )
+		{
+			sobelX = slice( j-1, i-1 ) - slice( j-1, i+1 ) +
+					 2* (slice( j, i-1 ) - slice( j, i+1 )) +
+					 slice( j+1, i-1 ) - slice( j+1, i+1 );
+			sobelY = slice( j+1, i-1 ) - slice( j-1, i-1 ) +
+					 2 * (slice( j+1, i ) - slice( j-1, i )) +
+					 slice( j+1, i+1 ) - slice( j-1, i+1 );
+			orientations(j,i) = qFuzzyIsNull(sobelX) ? 9999999999./1. : sobelY/sobelX*voxelRatio;
+			norm = qSqrt(qPow(sobelX*xDim,2) + qPow(sobelY*yDim,2))/4.;
+			*sobelNormVecIt++ = norm;
+			nbPositiveNorm += !qFuzzyIsNull(norm);
+		}
+	}
+
+	const arma::Col<qreal> sobelNormSort = arma::sort( sobelNormVec );
+	const qreal &medianVal = sobelNormSort( (2*sobelNormSort.n_elem - nbPositiveNorm)/2. );
+
+	// Calcul des accumulation des droites suivant les orientations
+	arma::Mat<int> accuSlice( height, width );
+	accuSlice.fill(0);
+
+	qreal x, y;
+	sobelNormVecIt = sobelNormVec.begin();
+	for ( j=1 ; j<height-1 ; ++j )
+	{
+		for ( i=iMin ; i<iMax ; ++i )
+		{
+			if ( *sobelNormVecIt++ >= medianVal )
+			{
+				const int originX = i;
+				const int originY = j;
+				const qreal orientation = -orientations(j,i);
+				const qreal orientationInv = 1./orientation;
+
+				if ( orientation >= 1. )
+				{
+					for ( x = originX , y=originY; x<width && y<height ; x += orientationInv, y += 1. )
+					{
+						accuSlice(y,x) += 1;
+					}
+					for ( x = originX-orientationInv , y=originY-1; x>=0. && y>=0. ; x -= orientationInv, y -= 1. )
+					{
+						accuSlice(y,x) += 1;
+					}
+				}
+				else if ( orientation > 0. )
+				{
+					for ( x = originX, y=originY ; x<width && y<height ; x += 1., y += orientation )
+					{
+						accuSlice(y,x) += 1;
+					}
+					for ( x = originX-1., y=originY-orientation ; x>=0 && y>=0 ; x -= 1., y -= orientation )
+					{
+						accuSlice(y,x) += 1;
+					}
+				}
+				else if ( orientation > -1. )
+				{
+					for ( x = originX, y=originY ; x<width && y>=0 ; x += 1., y += orientation )
+					{
+						accuSlice(y,x) += 1;
+					}
+					for ( x = originX-1., y=originY-orientation ; x>=0 && y<height ; x -= 1., y -= orientation )
+					{
+						accuSlice(y,x) += 1;
+					}
+				}
+				else
+				{
+					for ( x = originX , y=originY; x>=0 && y<height ; x += orientationInv, y += 1. )
+					{
+						accuSlice(y,x) += 1;
+					}
+					for ( x = originX-orientationInv , y=originY-1.; x<width && y>=0 ; x -= orientationInv, y -= 1. )
+					{
+						accuSlice(y,x) += 1;
+					}
+				}
+			}
+		}
+	}
+
+
+
+	const qreal fact = 255.0/(sobelNormSort.n_elem?accuSlice.max():1.);
+
+	/********************************************************************/
+
+	for ( j=0 ; j<height ; ++j)
+	{
+		for ( i=0 ; i<width ; ++i)
+		{
+			color = accuSlice(j,i)*fact;
+			*(line++) = qRgb(color,color,color);
 		}
 	}
 }

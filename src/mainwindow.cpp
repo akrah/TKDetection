@@ -48,7 +48,7 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 	_sectorHistogram(new SectorHistogram()), _plotSectorHistogram(new PlotSectorHistogram()),
 	_knotPithProfile(new KnotPithProfile()), _plotKnotPithProfile(new PlotKnotPithProfile()),
 	_knotEllipseRadiiHistogram(new KnotEllipseRadiiHistogram), _plotKnotEllipseRadiiHistogram(new PlotKnotEllipseRadiiHistogram),
-	_plotEllipticalAccumulationHistogram(new PlotEllipticalAccumulationHistogram()), _tangentialTransform( -900, true, .5 ),
+	_plotEllipticalAccumulationHistogram(new PlotEllipticalAccumulationHistogram()), _tangentialTransform( -900, true ),
 	_currentSliceInterval(0), _currentSectorInterval(0), _currentMaximum(0), _currentSector(0), _treeRadius(0)
 {
 	_ui->setupUi(this);
@@ -72,6 +72,7 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 
 	_ui->_comboViewType->insertItem(TKD::CLASSIC,tr("Originale"));
 	_ui->_comboViewType->insertItem(TKD::Z_MOTION,tr("Z-mouvements"));
+	_ui->_comboViewType->insertItem(TKD::HOUGH,tr("Accumulation de Hough"));
 	_ui->_comboViewType->setCurrentIndex(TKD::CLASSIC);
 
 	// Histogrammes
@@ -512,6 +513,7 @@ void MainWindow::drawTangentialView()
 {
 	if ( _tangentialBillon )
 	{
+		const TKD::ViewType viewType = static_cast<const TKD::ViewType>(_ui->_comboViewType->currentIndex())==TKD::HOUGH?TKD::HOUGH:TKD::CLASSIC;
 		const TKD::ProjectionType projectionType = _ui->_radioPolarProjection->isChecked()?
 													   TKD::POLAR_PROJECTION:
 													   _ui->_radioEllipticProjection->isChecked()?
@@ -558,7 +560,7 @@ void MainWindow::drawTangentialView()
 		_tangentialPix = QImage(width,height,QImage::Format_ARGB32);
 		_tangentialPix.fill(0xff000000);
 
-		_sliceView->drawSlice( _tangentialPix, *_tangentialBillon, TKD::CLASSIC, currentSlice, Interval<int>(_ui->_spinMinIntensity->value(), _ui->_spinMaxIntensity->value()),
+		_sliceView->drawSlice( _tangentialPix, *_tangentialBillon, viewType, currentSlice, Interval<int>(_ui->_spinMinIntensity->value(), _ui->_spinMaxIntensity->value()),
 							   _ui->_spinZMotionMin->value(), _ui->_spinCartesianAngularResolution->value(), projectionType, TKD::ImageViewRender(_ui->_comboViewRender->currentIndex()),
 							   ellipticityRate);
 
@@ -786,7 +788,6 @@ void MainWindow::selectSectorInterval(const int &index, const bool &draw )
 
 		_tangentialTransform.setMinIntensity( intensityInterval.min() );
 		_tangentialTransform.enableTrilinearInterpolation( _ui->_checkTrilinearInterpolation->isChecked() );
-		_tangentialTransform.setLinearInterpolationCoeff( _ui->_spinTrilinearInterpolationCoefficient->value()/100. );
 		_tangentialTransform.setAngularInterval( *_billon, centeredSectorInterval );
 		_tangentialBillon = _tangentialTransform.execute( *_billon );
 
