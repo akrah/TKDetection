@@ -161,12 +161,15 @@ Billon* TangentialTransform::execute( const Billon &billon )
 	const uint nbSlices = qCeil(_depth);
 
 	// Inversion width et height pour correspondre à la rotation de 90°
-	const qreal cosBisector = qCos(_bisectorOrientation);
-	const qreal sinBisector = qSin(_bisectorOrientation);
+//	const qreal cosBisector = qCos(_bisectorOrientation);
+//	const qreal sinBisector = qSin(_bisectorOrientation);
 	Billon * tangentialBillon = new Billon(width,height,nbSlices);
-	tangentialBillon->setVoxelSize( qSqrt(qPow(billon.voxelWidth()*cosBisector,2)+qPow(billon.voxelHeight()*sinBisector,2)),
+//	tangentialBillon->setVoxelSize( qSqrt(qPow(billon.voxelWidth()*cosBisector,2)+qPow(billon.voxelHeight()*sinBisector,2)),
+//									billon.voxelDepth(),
+//									(billon.voxelWidth()*billon.voxelHeight())/qSqrt(qPow(billon.voxelWidth()*cosBisector,2)+qPow(billon.voxelHeight()*sinBisector,2)) );
+	tangentialBillon->setVoxelSize( billon.voxelWidth(),
 									billon.voxelDepth(),
-									(billon.voxelWidth()*billon.voxelHeight())/qSqrt(qPow(billon.voxelWidth()*cosBisector,2)+qPow(billon.voxelHeight()*sinBisector,2)) );
+									billon.voxelHeight() );
 	tangentialBillon->fill(_minIntensity);
 
 	QVector3D origin(_origin);

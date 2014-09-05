@@ -403,11 +403,11 @@ void SliceView::drawHoughSlice( QImage &image, const Billon &billon, const uint 
 	const qreal &yDim = billon.voxelHeight();
 	const qreal voxelRatio = qPow(xDim/yDim,2);
 
-	int nbPositiveNorm;
+	int nbNegativeNorm;
 
 	orientations.fill(0);
 	sobelNorm.fill(0.);
-	nbPositiveNorm = 0;
+	nbNegativeNorm = 0;
 	for ( j=1 ; j<height-1 ; ++j )
 	{
 		for ( i=iMin ; i<iMax ; ++i )
@@ -419,72 +419,70 @@ void SliceView::drawHoughSlice( QImage &image, const Billon &billon, const uint 
 					 2 * (slice( j+1, i ) - slice( j-1, i )) +
 					 slice( j+1, i+1 ) - slice( j-1, i+1 );
 			orientations(j,i) = qFuzzyIsNull(sobelX) ? 9999999999./1. : sobelY/sobelX*voxelRatio;
-			norm = qSqrt(qPow(sobelX*xDim,2) + qPow(sobelY*yDim,2))/4.;
+			norm = qPow(sobelX,2) + qPow(sobelY,2);
 			*sobelNormVecIt++ = norm;
-			nbPositiveNorm += !qFuzzyIsNull(norm);
+			nbNegativeNorm += qFuzzyIsNull(norm);
 		}
 	}
 
 	const arma::Col<qreal> sobelNormSort = arma::sort( sobelNormVec );
-	const qreal &medianVal = sobelNormSort( (2*sobelNormSort.n_elem - nbPositiveNorm)/2. );
+	const qreal &medianVal = sobelNormSort( (sobelNormSort.n_elem + nbNegativeNorm)*0.4 );
 
 	// Calcul des accumulation des droites suivant les orientations
 	arma::Mat<int> accuSlice( height, width );
 	accuSlice.fill(0);
 
-	qreal x, y;
+	qreal x, y, orientation, orientationInv;
 	sobelNormVecIt = sobelNormVec.begin();
 	for ( j=1 ; j<height-1 ; ++j )
 	{
 		for ( i=iMin ; i<iMax ; ++i )
 		{
-			if ( *sobelNormVecIt++ >= medianVal )
+			if ( *sobelNormVecIt++ > medianVal )
 			{
-				const int originX = i;
-				const int originY = j;
-				const qreal orientation = -orientations(j,i);
-				const qreal orientationInv = 1./orientation;
+				orientation = -orientations(j,i);
+				orientationInv = 1./orientation;
 
 				if ( orientation >= 1. )
 				{
-					for ( x = originX , y=originY; x<width && y<height ; x += orientationInv, y += 1. )
+					for ( x = i , y=j; x<width && y<height ; x += orientationInv, y += 1. )
 					{
 						accuSlice(y,x) += 1;
 					}
-					for ( x = originX-orientationInv , y=originY-1; x>=0. && y>=0. ; x -= orientationInv, y -= 1. )
+					for ( x = i-orientationInv , y=j-1; x>=0. && y>=0. ; x -= orientationInv, y -= 1. )
 					{
 						accuSlice(y,x) += 1;
 					}
 				}
 				else if ( orientation > 0. )
 				{
-					for ( x = originX, y=originY ; x<width && y<height ; x += 1., y += orientation )
+					for ( x = i, y=j ; x<width && y<height ; x += 1., y += orientation )
 					{
 						accuSlice(y,x) += 1;
 					}
-					for ( x = originX-1., y=originY-orientation ; x>=0 && y>=0 ; x -= 1., y -= orientation )
+					for ( x = i-1., y=j-orientation ; x>=0 && y>=0 ; x -= 1., y -= orientation )
 					{
 						accuSlice(y,x) += 1;
 					}
 				}
 				else if ( orientation > -1. )
 				{
-					for ( x = originX, y=originY ; x<width && y>=0 ; x += 1., y += orientation )
+					for ( x = i, y=j ; x<width && y>=0 ; x += 1., y += orientation )
 					{
 						accuSlice(y,x) += 1;
 					}
-					for ( x = originX-1., y=originY-orientation ; x>=0 && y<height ; x -= 1., y -= orientation )
+					for ( x = i-1., y=j-orientation ; x>=0 && y<height ; x -= 1., y -= orientation )
 					{
 						accuSlice(y,x) += 1;
 					}
 				}
 				else
 				{
-					for ( x = originX , y=originY; x>=0 && y<height ; x += orientationInv, y += 1. )
+					for ( x = i , y=j; x>=0 && y<height ; x += orientationInv, y += 1. )
 					{
 						accuSlice(y,x) += 1;
 					}
-					for ( x = originX-orientationInv , y=originY-1.; x<width && y>=0 ; x -= orientationInv, y -= 1. )
+					for ( x = i-orientationInv , y=j-1.; x<width && y>=0 ; x -= orientationInv, y -= 1. )
 					{
 						accuSlice(y,x) += 1;
 					}

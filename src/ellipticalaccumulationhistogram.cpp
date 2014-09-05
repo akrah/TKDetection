@@ -180,7 +180,7 @@ void EllipticalAccumulationHistogram::findFirstMaximumAndNextMinimum()
 	while ( maximumIndex<size && (*this)[maximumIndex] >= (*this)[maximumIndex-lag] ) ++maximumIndex;
 	if ( maximumIndex>2*size/3 ) maximumIndex=lag;
 
-	_maximums[0] = maximumIndex;
+	_maximums[0] = maximumIndex-lag+1;
 
 	maximumIndex += lag;
 	qreal comparedSlope = (*this)[maximumIndex-lag]-(*this)[maximumIndex];

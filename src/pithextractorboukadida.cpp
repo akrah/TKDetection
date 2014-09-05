@@ -303,10 +303,10 @@ uint PithExtractorBoukadida::accumulation( const Slice &slice, arma::Mat<qreal> 
 	arma::Col<qreal> sobelNormVec((widthMinusOne-1)*(heightMinusOne-1));
 	arma::Col<qreal>::iterator sobelNormVecIt = sobelNormVec.begin();
 
-	uint i, j, nbPositiveNorm;
+	uint i, j, nbNegativeNorm;
 	qreal sobelX, sobelY, norm;
 
-	nbPositiveNorm = 0;
+	nbNegativeNorm = 0;
 	for ( i=1 ; i<widthMinusOne ; ++i )
 	{
 		for ( j=1 ; j<heightMinusOne ; ++j )
@@ -318,17 +318,17 @@ uint PithExtractorBoukadida::accumulation( const Slice &slice, arma::Mat<qreal> 
 					 2 * (slice( j+1, i ) - slice( j-1, i )) +
 					 slice( j+1, i+1 ) - slice( j-1, i+1 );
 			orientations(j,i) = qFuzzyIsNull(sobelX) ? 9999999999./1. : sobelY/sobelX*voxelRatio;
-			norm = qSqrt(qPow(sobelX*xDim,2) + qPow(sobelY*yDim,2))/4.;
+			norm = qPow(sobelX,2) + qPow(sobelY,2);
 			*sobelNormVecIt++ = norm;
-			nbPositiveNorm += !qFuzzyIsNull(norm);
+			nbNegativeNorm += qFuzzyIsNull(norm);
 		}
 	}
 
-	if ( !nbPositiveNorm  )
+	if ( nbNegativeNorm >= sobelNormVec.n_elem-2 )
 		return 0;
 
 	const arma::Col<qreal> sobelNormSort = arma::sort( sobelNormVec );
-	const qreal &medianVal = sobelNormSort( (2*sobelNormSort.n_elem - nbPositiveNorm)/2. );
+	const qreal &medianVal = sobelNormSort( (sobelNormSort.n_elem + nbNegativeNorm)*0.4 );
 
 	uint nbContourPoints = 0;
 	sobelNormVecIt = sobelNormVec.begin();
@@ -336,7 +336,7 @@ uint PithExtractorBoukadida::accumulation( const Slice &slice, arma::Mat<qreal> 
 	{
 		for ( j=1 ; j<heightMinusOne ; ++j )
 		{
-			if ( *sobelNormVecIt++ >= medianVal )
+			if ( *sobelNormVecIt++ > medianVal )
 			{
 				drawLine( accuSlice, uiCoord2D(i,j), -orientations(j,i) );
 				nbContourPoints++;
