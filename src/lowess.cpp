@@ -73,6 +73,10 @@ void Lowess::compute( const QVector<qreal> &datas, QVector<qreal> &interpolatedD
 
 	for ( i=0 ; i<size ; ++i )
 	{
+		// TODO : Ici on sait directement la distance en foction de i et j car on n'est pas sur un nuage de points.
+		// Il faudrait donc optimiser le calcul des poids.
+		// Et peut-être carrément remonter la condition des fonction tricube et epanechnikov ici.
+
 		// Compute distances.
 		for ( j=0 ; j<size ; ++j )
 		{
@@ -162,7 +166,8 @@ qreal Lowess::tricubeKernel( const qreal &u, const qreal &t ) const
 {
 	qreal res = 0.0;
 	// 0 <= u < t
-	if ( (qFuzzyIsNull(u) || u > 0.0) && (u < t) )
+	//if ( (qFuzzyIsNull(u) || u > 0.0) && (u < t) )
+	if ( u <= t )
 		// (1 - (u/t)^3)^3
 		res = qPow( ( 1.0 - qPow(u/t, 3.0) ), 3.0 );
 	return res;
@@ -172,7 +177,8 @@ qreal Lowess::epanechnikovKernel( const qreal &u, const qreal &t ) const
 {
 	qreal res = 0.0;
 	// 0 <= u < t
-	if ( !qFuzzyIsNull(t) && (t-u) >= 0 )
+	//if ( !qFuzzyIsNull(t) && (t-u) >= 0 )
+	if ( u <= t )
 		// (1 - (u/t)^3)^3
 		res = ( 1.0 - qPow(u/t, 2.0) );
 	return res;

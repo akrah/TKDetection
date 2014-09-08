@@ -99,7 +99,7 @@ void KnotEllipseRadiiHistogram::extrapolation( const Interval<uint> &validSlices
 
 
 	const qreal firstValidValueIncrement = (*this)[firstValidSliceIndex+indexFirstValid]/static_cast<qreal>(firstValidSliceIndex+indexFirstValid);
-	const qreal lastValidIncrement = ((*this)[lastValidSliceIndex-indexLastValid] - (*this)[lastValidSliceIndex-2-indexLastValid])/2.;
+	//const qreal lastValidIncrement = ((*this)[lastValidSliceIndex-indexLastValid] - (*this)[lastValidSliceIndex-2-indexLastValid])/2.;
 
 	int k;
 	for ( k=0 ; k<firstValidSliceIndex+indexFirstValid; ++k )
@@ -109,7 +109,7 @@ void KnotEllipseRadiiHistogram::extrapolation( const Interval<uint> &validSlices
 
 	for ( k=lastValidSliceIndex+1-indexLastValid ; k<size; ++k )
 	{
-		(*this)[k] = (*this)[k-1] + lastValidIncrement;
+		(*this)[k] = (*this)[k-1];// + lastValidIncrement;
 	}
 }
 
@@ -123,32 +123,33 @@ void KnotEllipseRadiiHistogram::outlierInterpolation( const QVector<qreal> &resi
 	const qreal &q1 = sortedResidus[size/4];
 	const qreal &q3 = sortedResidus[3*size/4];
 
-	const Interval<qreal> outlierInterval( q1-iqrCoeff*(q3-q1), q3+iqrCoeff*(q3-q1) );
+	const Interval<qreal> inlierInterval( q1-iqrCoeff*(q3-q1), q3+iqrCoeff*(q3-q1) );
 
 	int startSliceIndex, newK, startSliceIndexMinusOne;
-	qreal interpolationStep, currentInterpolatePithCoord;
+	qreal interpolationStep, currentInterpolatedRadius;
 
 	for ( int k=0 ; k<size ; ++k )
 	{
-		if ( !outlierInterval.containsOpen(residus[k]) )
+		(*this)[k] = _lowessData[k];
+		if ( !inlierInterval.containsOpen(residus[k]) )
 		{
-//			(*this)[k] = _lowessData[k];
 			startSliceIndex = k++;
 			startSliceIndexMinusOne = startSliceIndex?startSliceIndex-1:0;
 
-			while ( k<size && !outlierInterval.containsOpen(residus[k]) ) ++k;
+			while ( k<size && !inlierInterval.containsOpen(residus[k]) ) ++k;
 			--k;
-			k = qMin(k,size-1);
+			k = qMin(k,size-2);
 
 			qDebug() << "Outlier interpolation [" << startSliceIndex << ", " << k << "]";
 
 			interpolationStep = startSliceIndex && k<size-1 ? ((*this)[k+1] - (*this)[startSliceIndexMinusOne]) / static_cast<qreal>( k+1-startSliceIndexMinusOne )
-															: 0.;
+															: (*this)[k+1] / static_cast<qreal>( k+1 );
 
-			currentInterpolatePithCoord = interpolationStep + (*this)[startSliceIndexMinusOne];
-			for ( newK = startSliceIndex ; newK <= k ; ++newK, currentInterpolatePithCoord += interpolationStep )
+			currentInterpolatedRadius = startSliceIndex && k<size-1 ? (*this)[startSliceIndexMinusOne] + interpolationStep
+																	: 0.;
+			for ( newK = startSliceIndex ; newK <= k ; ++newK, currentInterpolatedRadius += interpolationStep )
 			{
-				(*this)[newK] = currentInterpolatePithCoord;
+				(*this)[newK] = _lowessData[newK] = currentInterpolatedRadius;
 			}
 		}
 	}

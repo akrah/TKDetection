@@ -24,6 +24,9 @@ uint EllipticalAccumulationHistogram::detectedRadius() const
 void EllipticalAccumulationHistogram::construct( const Slice &slice, const uiCoord2D &origin, const qreal &ellipticityRate,
 												 const uint &smoothingRadius, const qreal &widthCoeff )
 {
+	/* Il faudrait penser la coupe slice intégralement, c'est à dire passer à construct() seulement les colonnes utiles.
+	 * En effet, la variables nbEllipse est mal définie comme cela.
+	 */
 	const int &width = slice.n_cols;
 	const int &height = slice.n_rows;
 
@@ -39,7 +42,7 @@ void EllipticalAccumulationHistogram::construct( const Slice &slice, const uiCoo
 	const int lastX = qMin(semiWidth+semiWidth*widthCoeff,width-1.);
 	const qreal &pithCoordX = origin.x;
 	const qreal &pithCoordY = origin.y;
-	const uint nbEllipses = qMin(semiWidth,qFloor(height/(2*ellipticityRate)));
+	const uint nbEllipses = qMin(semiWidth,qFloor(qMin(height-pithCoordY,pithCoordY)/ellipticityRate));
 
 	int x,y;
 	qreal a,b,d1,d2,aSquare,bSquare, nbPixelOnEllipse ;
@@ -167,7 +170,7 @@ void EllipticalAccumulationHistogram::findFirstMaximumAndNextMinimum()
 	_maximums.clear();
 
 	const uint &size = this->size();
-	const uint lag = 3;
+	uint lag = 2;
 
 	if ( size<2*lag+1 ) return;
 
@@ -175,24 +178,61 @@ void EllipticalAccumulationHistogram::findFirstMaximumAndNextMinimum()
 
 	// Recherche du premier maximum
 	uint maximumIndex = lag;
-	while ( maximumIndex<size && (*this)[maximumIndex] < (*this)[maximumIndex-lag] ) ++maximumIndex;
-	if ( maximumIndex>size/4 ) maximumIndex=lag;
-	while ( maximumIndex<size && (*this)[maximumIndex] >= (*this)[maximumIndex-lag] ) ++maximumIndex;
-	if ( maximumIndex>2*size/3 ) maximumIndex=lag;
+	while ( maximumIndex<size && (*this)[maximumIndex-lag] >= (*this)[maximumIndex+lag] ) ++maximumIndex;
+	if ( maximumIndex>size*0.3 ) maximumIndex=lag;
+	while ( maximumIndex<size && (*this)[maximumIndex-lag] <= (*this)[maximumIndex+lag] ) ++maximumIndex;
+	if ( maximumIndex>size*0.5 ) maximumIndex=lag;
+	while ( maximumIndex>=lag && (*this)[maximumIndex] < (*this)[maximumIndex-1] ) --maximumIndex;
 
-	_maximums[0] = maximumIndex-lag+1;
+	_maximums[0] = maximumIndex;
+
+	lag = 1;
 
 	maximumIndex += lag;
-	qreal comparedSlope = (*this)[maximumIndex-lag]-(*this)[maximumIndex];
+	qreal comparedSlope = (*this)[maximumIndex-lag]+(*this)[maximumIndex-lag-1]-(*this)[maximumIndex+lag]-(*this)[maximumIndex+lag+1];
 	++maximumIndex;
-	qreal slope = (*this)[maximumIndex-lag]-(*this)[maximumIndex];
+	qreal slope = (*this)[maximumIndex-lag]+(*this)[maximumIndex-lag-1]-(*this)[maximumIndex+lag]-(*this)[maximumIndex+lag+1];
 	while (maximumIndex<size-1 && slope>=comparedSlope)
 	{
 		comparedSlope = slope;
 		++maximumIndex;
-		slope = (*this)[maximumIndex-lag]-(*this)[maximumIndex];
+		slope = (*this)[maximumIndex-lag]+(*this)[maximumIndex-lag-1]-(*this)[maximumIndex+lag]-(*this)[maximumIndex+lag+1];
 	}
 
 	_maximums[1] = qMin(maximumIndex-lag+1,size-1);
 }
+
+//void EllipticalAccumulationHistogram::findFirstMaximumAndNextMinimum()
+//{
+//	_maximums.clear();
+
+//	const uint &size = this->size();
+//	const uint lag = 3;
+
+//	if ( size<2*lag+1 ) return;
+
+//	_maximums.resize(2);
+
+//	// Recherche du premier maximum
+//	uint maximumIndex = lag;
+//	while ( maximumIndex<size && (*this)[maximumIndex] < (*this)[maximumIndex-lag] ) ++maximumIndex;
+//	if ( maximumIndex>size/4 ) maximumIndex=lag;
+//	while ( maximumIndex<size && (*this)[maximumIndex] >= (*this)[maximumIndex-lag] ) ++maximumIndex;
+//	if ( maximumIndex>2*size/3 ) maximumIndex=lag;
+
+//	_maximums[0] = maximumIndex-lag+1;
+
+//	maximumIndex += lag;
+//	qreal comparedSlope = (*this)[maximumIndex-lag]-(*this)[maximumIndex];
+//	++maximumIndex;
+//	qreal slope = (*this)[maximumIndex-lag]-(*this)[maximumIndex];
+//	while (maximumIndex<size-1 && slope>=comparedSlope)
+//	{
+//		comparedSlope = slope;
+//		++maximumIndex;
+//		slope = (*this)[maximumIndex-lag]-(*this)[maximumIndex];
+//	}
+
+//	_maximums[1] = qMin(maximumIndex-lag+1,size-1);
+//}
 
