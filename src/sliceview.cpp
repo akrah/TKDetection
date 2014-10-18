@@ -65,6 +65,16 @@ void SliceView::drawSlice(QImage &image, const Billon &billon, const TKD::ViewTy
 					break;
 			}
 			break;
+		case TKD::CYLINDRIC_PROJECTION:
+			switch (sliceType)
+			{
+				// Affichage de la coupe originale
+				case TKD::CLASSIC:
+				default :
+					drawCurrentSlice( image, billon, sliceIndex, intensityInterval, angularResolution, imageRender, axe );
+					break;
+			}
+			break;
 		case TKD::ELLIPTIC_PROJECTION:
 			switch (sliceType)
 			{
@@ -304,6 +314,31 @@ void SliceView::drawCurrentSlice( QImage &image, const Billon &billon,
 				dgtalColor= ((aRender== TKD::HueScale) ? hueShade( color): (aRender==TKD::GrayScale)? grayShade(color): (aRender==TKD::HueScaleLog)? hueShadeLog(log(1+color)):customShade(color));
 				*(line++) = qRgb(dgtalColor.red(),dgtalColor.green(),dgtalColor.blue());
 			}
+		}
+	}
+	else if ( axe == TKD::CYLINDRIC_PROJECTION )
+	{
+		const qreal angularIncrement = TWO_PI/(qreal)(angularResolution);
+		const qreal radius = qMax(5,qMin(200,(int)sliceIndex));
+
+		rCoord2D center, edge;
+		rVec2D direction;
+		int nbCircularPoints = 0;
+
+		for ( k=0 ; k<depth ; ++k)
+		{
+			const Slice &currentSlice = billon.slice(k);
+			center = billon.hasPith()?billon.pithCoord(k):rCoord2D(width/2,height/2);
+			nbCircularPoints = 0;
+			do
+			{
+				direction = rVec2D(qCos(nbCircularPoints*angularIncrement),qSin(nbCircularPoints*angularIncrement));
+				edge = center + direction*radius;
+				color = (TKD::restrictedValue(currentSlice(edge.x,edge.y),intensityInterval)-minIntensity)*fact;
+				dgtalColor = ((aRender== TKD::HueScale) ? hueShade( color): (aRender==TKD::GrayScale)? grayShade(color): customShade(color));
+				*(line++) = qRgb(dgtalColor.red(),dgtalColor.green(),dgtalColor.blue());
+			}
+			while (nbCircularPoints++ < angularResolution);
 		}
 	}
 }

@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>700</width>
-    <height>561</height>
+    <width>699</width>
+    <height>523</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -149,7 +149,7 @@
              <property name="geometry">
               <rect>
                <x>97</x>
-               <y>189</y>
+               <y>170</y>
                <width>0</width>
                <height>0</height>
               </rect>
@@ -252,7 +252,7 @@
              <property name="geometry">
               <rect>
                <x>0</x>
-               <y>72</y>
+               <y>184</y>
                <width>390</width>
                <height>234</height>
               </rect>
@@ -286,7 +286,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>700</width>
+     <width>699</width>
      <height>25</height>
     </rect>
    </property>
@@ -323,7 +323,7 @@
      <item row="1" column="0">
       <widget class="QTabWidget" name="_tabs">
        <property name="currentIndex">
-        <number>3</number>
+        <number>0</number>
        </property>
        <widget class="QWidget" name="tab_4">
         <attribute name="title">
@@ -390,15 +390,15 @@
          <item>
           <widget class="QToolBox" name="toolBox_3">
            <property name="currentIndex">
-            <number>2</number>
+            <number>0</number>
            </property>
            <widget class="QWidget" name="page_10">
             <property name="geometry">
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>435</width>
-              <height>148</height>
+              <width>385</width>
+              <height>157</height>
              </rect>
             </property>
             <attribute name="label">
@@ -434,59 +434,6 @@
                 <string>Type de repère</string>
                </property>
               </widget>
-             </item>
-             <item row="1" column="1">
-              <layout class="QHBoxLayout" name="horizontalLayout">
-               <item>
-                <widget class="QRadioButton" name="_radioZProjection">
-                 <property name="font">
-                  <font>
-                   <weight>50</weight>
-                   <bold>false</bold>
-                  </font>
-                 </property>
-                 <property name="text">
-                  <string>z</string>
-                 </property>
-                 <property name="checked">
-                  <bool>true</bool>
-                 </property>
-                </widget>
-               </item>
-               <item>
-                <widget class="QRadioButton" name="_radioYProjection">
-                 <property name="font">
-                  <font>
-                   <weight>50</weight>
-                   <bold>false</bold>
-                  </font>
-                 </property>
-                 <property name="text">
-                  <string>y</string>
-                 </property>
-                </widget>
-               </item>
-               <item>
-                <widget class="QRadioButton" name="_radioPolarProjection">
-                 <property name="font">
-                  <font>
-                   <weight>50</weight>
-                   <bold>false</bold>
-                  </font>
-                 </property>
-                 <property name="text">
-                  <string>Polaire</string>
-                 </property>
-                </widget>
-               </item>
-               <item>
-                <widget class="QRadioButton" name="_radioEllipticProjection">
-                 <property name="text">
-                  <string>Elliptique</string>
-                 </property>
-                </widget>
-               </item>
-              </layout>
              </item>
              <item row="2" column="0">
               <widget class="QLabel" name="label_46">
@@ -590,6 +537,9 @@ du repère polaire</string>
                </item>
               </widget>
              </item>
+             <item row="1" column="1">
+              <widget class="QComboBox" name="_comboProjectionType"/>
+             </item>
             </layout>
            </widget>
            <widget class="QWidget" name="page_9">
@@ -597,8 +547,8 @@ du repère polaire</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>276</width>
-              <height>263</height>
+              <width>549</width>
+              <height>292</height>
              </rect>
             </property>
             <attribute name="label">
@@ -859,8 +809,8 @@ zone restreinte</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>340</width>
-              <height>143</height>
+              <width>549</width>
+              <height>292</height>
              </rect>
             </property>
             <attribute name="label">
@@ -1121,9 +1071,9 @@ sur une coupe valide</string>
             <property name="geometry">
              <rect>
               <x>0</x>
-              <y>-92</y>
-              <width>417</width>
-              <height>292</height>
+              <y>0</y>
+              <width>549</width>
+              <height>362</height>
              </rect>
             </property>
             <attribute name="label">
@@ -1388,8 +1338,8 @@ sur une coupe valide</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>394</width>
-              <height>248</height>
+              <width>549</width>
+              <height>261</height>
              </rect>
             </property>
             <attribute name="label">
@@ -1979,8 +1929,8 @@ sur une coupe valide</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>340</width>
-              <height>112</height>
+              <width>185</width>
+              <height>45</height>
              </rect>
             </property>
             <attribute name="label">
@@ -2023,8 +1973,8 @@ sur une coupe valide</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>340</width>
-              <height>112</height>
+              <width>185</width>
+              <height>45</height>
              </rect>
             </property>
             <attribute name="label">
@@ -2838,8 +2788,8 @@ l'intervalle angulaire</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>343</width>
-              <height>112</height>
+              <width>549</width>
+              <height>269</height>
              </rect>
             </property>
             <attribute name="label">
@@ -3128,9 +3078,6 @@ l'intervalle angulaire</string>
   </customwidget>
  </customwidgets>
  <tabstops>
-  <tabstop>_radioZProjection</tabstop>
-  <tabstop>_radioYProjection</tabstop>
-  <tabstop>_radioPolarProjection</tabstop>
   <tabstop>_sliderCartesianAngularResolution</tabstop>
   <tabstop>_spinCartesianAngularResolution</tabstop>
   <tabstop>_sliderRestrictedAreaResolution</tabstop>

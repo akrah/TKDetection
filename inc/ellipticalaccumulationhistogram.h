@@ -12,6 +12,7 @@ public:
 	EllipticalAccumulationHistogram();
 	virtual ~EllipticalAccumulationHistogram();
 
+	uint detectedMaximum() const;
 	uint detectedRadius() const;
 
 	void construct(const Slice &slice, const uiCoord2D &origin, const qreal &ellipticityRate,

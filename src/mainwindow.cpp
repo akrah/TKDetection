@@ -75,6 +75,13 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 	_ui->_comboViewType->insertItem(TKD::HOUGH,tr("Accumulation de Hough"));
 	_ui->_comboViewType->setCurrentIndex(TKD::CLASSIC);
 
+	_ui->_comboProjectionType->insertItem(TKD::Z_PROJECTION,tr("Plan X/Z"));
+	_ui->_comboProjectionType->insertItem(TKD::Y_PROJECTION,tr("Plan X/Y"));
+	_ui->_comboProjectionType->insertItem(TKD::POLAR_PROJECTION,tr("Polaire"));
+	_ui->_comboProjectionType->insertItem(TKD::ELLIPTIC_PROJECTION,tr("Elliptique"));
+	_ui->_comboProjectionType->insertItem(TKD::CYLINDRIC_PROJECTION,tr("Cylindrique"));
+	_ui->_comboProjectionType->setCurrentIndex(TKD::Z_PROJECTION);
+
 	// Histogrammes
 	_plotSliceHistogram->attach(_ui->_plotSliceHistogram);
 
@@ -122,13 +129,8 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 	QObject::connect(_ui->_spinMaxIntensity, SIGNAL(valueChanged(int)), this, SLOT(drawTangentialView()));
 	// Onglet "Affichage"
 	QObject::connect(_ui->_comboViewType, SIGNAL(currentIndexChanged(int)), this, SLOT(drawSlice()));
-	QObject::connect(_ui->_radioYProjection, SIGNAL(clicked()), this, SLOT(drawSlice()));
-	QObject::connect(_ui->_radioZProjection, SIGNAL(clicked()), this, SLOT(drawSlice()));
-	QObject::connect(_ui->_radioZProjection, SIGNAL(clicked()), this, SLOT(drawTangentialView()));
-	QObject::connect(_ui->_radioPolarProjection, SIGNAL(clicked()), this, SLOT(drawSlice()));
-	QObject::connect(_ui->_radioPolarProjection, SIGNAL(clicked()), this, SLOT(drawTangentialView()));
-	QObject::connect(_ui->_radioEllipticProjection, SIGNAL(clicked()), this, SLOT(drawSlice()));
-	QObject::connect(_ui->_radioEllipticProjection, SIGNAL(clicked()), this, SLOT(drawTangentialView()));
+	QObject::connect(_ui->_comboProjectionType, SIGNAL(currentIndexChanged(int)), this, SLOT(drawSlice()));
+	QObject::connect(_ui->_comboProjectionType, SIGNAL(currentIndexChanged(int)), this, SLOT(drawTangentialView()));
 	QObject::connect(_ui->_sliderCartesianAngularResolution, SIGNAL(valueChanged(int)), _ui->_spinCartesianAngularResolution, SLOT(setValue(int)));
 	QObject::connect(_ui->_spinCartesianAngularResolution, SIGNAL(valueChanged(int)), _ui->_sliderCartesianAngularResolution, SLOT(setValue(int)));
 	QObject::connect(_ui->_spinCartesianAngularResolution, SIGNAL(valueChanged(int)), this, SLOT(drawSlice()));
@@ -384,8 +386,9 @@ void MainWindow::drawSlice()
 	if ( _billon )
 	{
 		const TKD::ViewType viewType = static_cast<const TKD::ViewType>(_ui->_comboViewType->currentIndex());
-		const TKD::ProjectionType projectionType = _ui->_radioYProjection->isChecked()?TKD::Y_PROJECTION:_ui->_radioZProjection->isChecked()?TKD::Z_PROJECTION:TKD::POLAR_PROJECTION;
-		const uint &currentSlice = _ui->_radioYProjection->isChecked()?_billon->n_rows-_ui->_sliderSelectYSlice->value()-1:_ui->_sliderSelectSlice->value();
+		const TKD::ProjectionType projectionType = static_cast<const TKD::ProjectionType>( _ui->_comboViewType->currentIndex() );
+
+		const uint &currentSlice = projectionType == TKD::Y_PROJECTION ? _billon->n_rows-_ui->_sliderSelectYSlice->value()-1:_ui->_sliderSelectSlice->value();
 		const rCoord2D &pithCoord = _billon->hasPith()?_billon->pithCoord(_ui->_sliderSelectSlice->value()):rCoord2D(_billon->n_cols/2,_billon->n_rows/2);
 		uint width, height;
 
@@ -401,6 +404,7 @@ void MainWindow::drawSlice()
 				width = _ui->_spinCartesianAngularResolution->value();
 				break;
 			case TKD::Y_PROJECTION : width = _billon->n_cols; height = _billon->n_slices; break;
+			case TKD::CYLINDRIC_PROJECTION : width = _ui->_spinCartesianAngularResolution->value()+1; height = _billon->n_slices; break;
 			case TKD::Z_PROJECTION :
 			default : width = _billon->n_cols; height = _billon->n_rows; break;
 		}
@@ -514,13 +518,9 @@ void MainWindow::drawTangentialView()
 	if ( _tangentialBillon )
 	{
 		const TKD::ViewType viewType = static_cast<const TKD::ViewType>(_ui->_comboViewType->currentIndex())==TKD::HOUGH?TKD::HOUGH:TKD::CLASSIC;
-		const TKD::ProjectionType projectionType = _ui->_radioPolarProjection->isChecked()?
-													   TKD::POLAR_PROJECTION:
-													   _ui->_radioEllipticProjection->isChecked()?
-														   TKD::ELLIPTIC_PROJECTION:
-														   _ui->_radioYProjection->isChecked()?
-															   TKD::Y_PROJECTION : TKD::Z_PROJECTION;
-		const uint &currentSlice = _ui->_radioYProjection->isChecked()?
+		const TKD::ProjectionType projectionType = static_cast<const TKD::ProjectionType>( _ui->_comboViewType->currentIndex() );
+
+		const uint &currentSlice = projectionType == TKD::Y_PROJECTION?
 									   _tangentialBillon->n_rows-_ui->_sliderSelectTangentialYSlice->value():
 									   _ui->_sliderSelectTangentialSlice->value();
 		const rCoord2D &pithCoord = _tangentialBillon->hasPith()?
@@ -588,10 +588,17 @@ void MainWindow::drawTangentialView()
 			const qreal ellipseWidth = _knotEllipseRadiiHistogram->lowessData()[currentSlice];
 			const qreal ellipseHeight = ellipseWidth*ellipticityRate;
 
+			const qreal ellipseWidth2 = _knotEllipseRadiiHistogram->ellipticalHistogram(currentSlice).maximums()[0];
+			const qreal ellipseHeight2 = ellipseWidth2*ellipticityRate;
+
 			painter.begin(&_tangentialPix);
 			painter.setPen(currentColor);
 			painter.drawEllipse(QPointF(pithCoord.x,pithCoord.y),ellipseWidth,ellipseHeight);
+//			painter.setPen(Qt::green);
+//			painter.drawEllipse(QPointF(pithCoord.x,pithCoord.y),ellipseWidth2,ellipseHeight2);
 			painter.end();
+
+
 		}
 	}
 	else
