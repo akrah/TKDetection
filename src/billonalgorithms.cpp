@@ -43,7 +43,7 @@ namespace BillonAlgorithms
 				if ( currentNorm < radius ) radius = currentNorm;
 			}
 		}
-		qDebug() << "Rayon de la boite englobante (en pixels) : " << radius;
+//		qDebug() << "Rayon de la boite englobante (en pixels) : " << radius;
 		return radius;
 	}
 

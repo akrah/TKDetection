@@ -140,7 +140,7 @@ void KnotEllipseRadiiHistogram::outlierInterpolation( const QVector<qreal> &resi
 			--k;
 			k = qMin(k,size-2);
 
-			qDebug() << "Outlier interpolation [" << startSliceIndex << ", " << k << "]";
+//			qDebug() << "Outlier interpolation [" << startSliceIndex << ", " << k << "]";
 
 			interpolationStep = startSliceIndex && k<size-1 ? ((*this)[k+1] - (*this)[startSliceIndexMinusOne]) / static_cast<qreal>( k+1-startSliceIndexMinusOne )
 															: (*this)[k+1] / static_cast<qreal>( k+1 );

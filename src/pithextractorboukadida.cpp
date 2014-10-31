@@ -4,6 +4,8 @@
 #include "inc/coordinate.h"
 #include "inc/globalfunctions.h"
 
+#include <iomanip>
+
 PithExtractorBoukadida::PithExtractorBoukadida( const int &subWindowWidth, const int &subWindowHeight, const qreal &pithShift, const uint &smoothingRadius,
 												const qreal &minWoodPercentage, const Interval<int> &intensityInterval,
 												const bool &ascendingOrder, const TKD::ExtrapolationType &extrapolationType,
@@ -148,18 +150,35 @@ void PithExtractorBoukadida::process( Billon &billon, const bool &adaptativeWidt
 	QVector<qreal> nbLineByMaxRatio( depth, 0. );
 	QVector<qreal> backgroundProportions( depth, 1. );
 
-	qDebug() << "Step 1] Copie du billon";
+//	qDebug() << "Step 1] Copie du billon";
+
+/* <Time computing> */
+	double execTime;
+	std::chrono::system_clock::time_point start = std::chrono::system_clock::now();
 	Billon billonFillBackground(billon);
+	execTime = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - start).count();
+	std::cout << std::setw(50) << std::left << "    a) Copie du tronc" << std::setw(8) << std::right << execTime << " ms" << std::endl;
+/* </Time computing> */
 
-	qDebug() << "Step 2] Fill billon background and compute background proportions";
+//	qDebug() << "Step 2] Fill billon background + proportions";
+/* <Time computing> */
+	start = std::chrono::system_clock::now();
 	fillBillonBackground( billonFillBackground, backgroundProportions, _intensityInterval, adaptativeWidth );
+	execTime = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - start).count();
+	std::cout << std::setw(50) << std::left << "    b) Fill billon background + proportions" << std::setw(8) << std::right << execTime << " ms" << std::endl;
+/* </Time computing> */
 
-	qDebug() << "Step 3] Detect interval of valid slices";
+//	qDebug() << "Step 3] Detect interval of valid slices";
+/* <Time computing> */
+	start = std::chrono::system_clock::now();
 	detectValidSliceInterval( backgroundProportions );
+	execTime = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - start).count();
+	std::cout << std::setw(50) << std::left << "    c) Detect interval of valid slices" << std::setw(8) << std::right << execTime << " ms" << std::endl;
+/* </Time computing> */
 	const int &firstValidSliceIndex = _validSlices.min();
 	const int &lastValidSliceIndex = _validSlices.max();
 	const int firstSliceOrdered = _ascendingOrder?firstValidSliceIndex:lastValidSliceIndex;
-	qDebug() << "[ " << firstValidSliceIndex << ", " << lastValidSliceIndex << " ]";
+//	qDebug() << "[ " << firstValidSliceIndex << ", " << lastValidSliceIndex << " ]";
 
 	if ( _validSlices.size() < _smoothingRadius )
 	{
@@ -168,17 +187,25 @@ void PithExtractorBoukadida::process( Billon &billon, const bool &adaptativeWidt
 	}
 
 	// Calcul de la moelle sur la première coupe valide
-	qDebug() << "Step 4] Hough transform on first valid slice";
+//	qDebug() << "Step 4] Hough transform on first valid slice";
+/* <Time computing> */
+	start = std::chrono::system_clock::now();
 	pith[firstSliceOrdered] = transHough( billonFillBackground.slice(firstSliceOrdered), nbLineByMaxRatio[firstSliceOrdered],
 										  voxelDims, adaptativeWidth?firstSliceOrdered/static_cast<qreal>(depth):1.0 );
+	execTime = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - start).count();
+	std::cout << std::setw(50) << std::left << "    d) Hough transform on first valid slice" << std::setw(8) << std::right << execTime << " ms" << std::endl;
+/* </Time computing> */
 
 	// Calcul de la moelle sur les coupes suivantes
-	qDebug() <<"Step 5] Hough transform on next valid slices";
+//	qDebug() <<"Step 5] Hough transform on next valid slices";
 	rCoord2D currentPithCoord;
 	iCoord2D subWindowStart, subWindowEnd;
+
+/* <Time computing> */
+	start = std::chrono::system_clock::now();
 	for ( k=firstSliceOrdered+kIncrement ; k<=lastValidSliceIndex && k>=firstValidSliceIndex ; k += kIncrement )
 	{
-		qDebug() << k ;
+//		qDebug() << k ;
 		const Slice &currentSlice = billonFillBackground.slice(k);
 		const rCoord2D &previousPith = pith[k-kIncrement];
 
@@ -193,24 +220,39 @@ void PithExtractorBoukadida::process( Billon &billon, const bool &adaptativeWidt
 		//if ( currentPithCoord.euclideanDistance(previousPith) > _pithShift )
 		if ( qSqrt( qPow((currentPithCoord.x-previousPith.x)*xDim,2) + qPow((currentPithCoord.y-previousPith.y)*yDim,2) ) > _pithShift )
 		{
-			qDebug() << "...  ";
+//			qDebug() << "...  ";
 			currentPithCoord = transHough( currentSlice, nbLineByMaxRatio[k], voxelDims, adaptativeWidth?k/static_cast<qreal>(depth):1.0 );
 		}
 
 		pith[k] = currentPithCoord;
 	}
+	execTime = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - start).count();
+	std::cout << std::setw(50) << std::left << "    e) Hough transform on next valid slices" << std::setw(8) << std::right << execTime << " ms" << std::endl;
+/* </Time computing> */
 
 	// Interpolation des coupes valides
-	qDebug() << "Step 6] Interpolation of valid slices";
+//	qDebug() << "Step 6] Interpolation of valid slices";
+/* <Time computing> */
+	start = std::chrono::system_clock::now();
 	interpolation( pith, nbLineByMaxRatio, _validSlices );
+	execTime = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - start).count();
+	std::cout << std::setw(50) << std::left << "    f) Interpolation of valid slices" << std::setw(8) << std::right << execTime << " ms" << std::endl;
+/* </Time computing> */
 
 	// Lissage
-	qDebug() << "Step 7] Smoothing of valid slices";
+//	qDebug() << "Step 7] Smoothing of valid slices";
+/* <Time computing> */
+	start = std::chrono::system_clock::now();
 	TKD::meanSmoothing<rCoord2D>( pith.begin()+firstValidSliceIndex, pith.begin()+lastValidSliceIndex, _smoothingRadius, false );
+	execTime = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - start).count();
+	std::cout << std::setw(50) << std::left << "    g) Smoothing of valid slices" << std::setw(8) << std::right << execTime << " ms" << std::endl;
+/* </Time computing> */
 
 	// Extrapolation des coupes invalides
-	qDebug() << "Step 8] Extrapolation of unvalid slices";
+//	qDebug() << "Step 8] Extrapolation of unvalid slices";
 
+/* <Time computing> */
+	start = std::chrono::system_clock::now();
 	const int slopeDistance = 3;
 
 	const int firstValidSliceIndexToExtrapolate = firstValidSliceIndex+(lastValidSliceIndex-firstValidSliceIndex)*_firstValidSliceToExtrapolate/100.;
@@ -226,7 +268,7 @@ void PithExtractorBoukadida::process( Billon &billon, const bool &adaptativeWidt
 	switch (_extrapolation)
 	{
 		case TKD::LINEAR:
-			qDebug() << "  Linear extrapolation";
+//			qDebug() << "  Linear extrapolation";
 			for ( k=firstValidSliceIndexToExtrapolate-1 ; k>=0 ; --k )
 			{
 				pith[k] = firstValidCoord;
@@ -237,7 +279,7 @@ void PithExtractorBoukadida::process( Billon &billon, const bool &adaptativeWidt
 			}
 			break;
 		case TKD::SLOPE_DIRECTION:
-			qDebug() <<  "  In slope direction extrapolation";
+//			qDebug() <<  "  In slope direction extrapolation";
 			for ( k=firstValidSliceIndexToExtrapolate-1 ; k>=0 ; --k )
 			{
 				pith[k] = pith[k+1] + firstValidCoordSlope;
@@ -253,9 +295,12 @@ void PithExtractorBoukadida::process( Billon &billon, const bool &adaptativeWidt
 			break;
 		case TKD::NO_EXTRAPOLATION:
 		default:
-			qDebug() << "  No extrapolation";
+//			qDebug() << "  No extrapolation";
 			break;
 	}
+	execTime = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - start).count();
+	std::cout << std::setw(50) << std::left << "    h) Extrapolation of unvalid slices" << std::setw(8) << std::right << execTime << " ms" << std::endl;
+/* </Time computing> */
 }
 
 
@@ -427,7 +472,7 @@ void PithExtractorBoukadida::interpolation( Pith &pith, const QVector<qreal> &nb
 			while ( k<=lastSlice && nbLineByMaxRatio[k] < interpolationThreshold ) ++k;
 			if ( k>startSliceIndex ) --k;
 
-			qDebug() << "Interpolation [" << startSliceIndex << ", " << k << "]" ;
+//			qDebug() << "Interpolation [" << startSliceIndex << ", " << k << "]" ;
 
 			interpolationStep = k<lastSlice ? (pith[k+1] - pith[startSliceIndexMinusOne]) / static_cast<qreal>( k+1-startSliceIndexMinusOne )
 				: rCoord2D(0,0);
