@@ -125,18 +125,6 @@ namespace TKD
 		_PROJECTION_TYPE_MAX_
 	};
 
-
-	// Type de rendu image
-	enum ImageViewRender
-	{
-		_ImageViewRender_MIN_ = -1,
-		GrayScale,
-		HueScale,
-		HueScaleLog,
-		Custom,
-		_ImageViewRender_MAX_
-	};
-
 	// Type d'extrapolation
 	enum ExtrapolationType
 	{

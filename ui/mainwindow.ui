@@ -148,8 +148,8 @@
             <widget class="QWidget" name="scrollAreaWidgetContents">
              <property name="geometry">
               <rect>
-               <x>97</x>
-               <y>170</y>
+               <x>106</x>
+               <y>177</y>
                <width>0</width>
                <height>0</height>
               </rect>
@@ -252,7 +252,7 @@
              <property name="geometry">
               <rect>
                <x>0</x>
-               <y>184</y>
+               <y>0</y>
                <width>390</width>
                <height>234</height>
               </rect>
@@ -396,15 +396,25 @@
             <property name="geometry">
              <rect>
               <x>0</x>
-              <y>0</y>
-              <width>385</width>
-              <height>157</height>
+              <y>-10</y>
+              <width>327</width>
+              <height>118</height>
              </rect>
             </property>
             <attribute name="label">
              <string>Affichage</string>
             </attribute>
             <layout class="QFormLayout" name="formLayout_6">
+             <property name="fieldGrowthPolicy">
+              <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
+             </property>
+             <item row="0" column="0">
+              <widget class="QLabel" name="label_23">
+               <property name="text">
+                <string>Type d'affichage</string>
+               </property>
+              </widget>
+             </item>
              <item row="0" column="1">
               <widget class="QComboBox" name="_comboViewType">
                <property name="sizePolicy">
@@ -412,13 +422,6 @@
                  <horstretch>0</horstretch>
                  <verstretch>0</verstretch>
                 </sizepolicy>
-               </property>
-              </widget>
-             </item>
-             <item row="0" column="0">
-              <widget class="QLabel" name="label_23">
-               <property name="text">
-                <string>Type d'affichage</string>
                </property>
               </widget>
              </item>
@@ -434,6 +437,9 @@
                 <string>Type de repère</string>
                </property>
               </widget>
+             </item>
+             <item row="1" column="1">
+              <widget class="QComboBox" name="_comboProjectionType"/>
              </item>
              <item row="2" column="0">
               <widget class="QLabel" name="label_46">
@@ -494,52 +500,6 @@ du repère polaire</string>
                </item>
               </layout>
              </item>
-             <item row="3" column="0">
-              <widget class="QLabel" name="label_49">
-               <property name="font">
-                <font>
-                 <weight>50</weight>
-                 <bold>false</bold>
-                </font>
-               </property>
-               <property name="text">
-                <string>Echelle de couleurs</string>
-               </property>
-              </widget>
-             </item>
-             <item row="3" column="1">
-              <widget class="QComboBox" name="_comboViewRender">
-               <property name="font">
-                <font>
-                 <weight>50</weight>
-                 <bold>false</bold>
-                </font>
-               </property>
-               <item>
-                <property name="text">
-                 <string>Niveau de gris</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>HUE</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>HUE (échelle logarithmique)</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>Personalisée</string>
-                </property>
-               </item>
-              </widget>
-             </item>
-             <item row="1" column="1">
-              <widget class="QComboBox" name="_comboProjectionType"/>
-             </item>
             </layout>
            </widget>
            <widget class="QWidget" name="page_9">
@@ -547,8 +507,8 @@ du repère polaire</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>549</width>
-              <height>292</height>
+              <width>278</width>
+              <height>259</height>
              </rect>
             </property>
             <attribute name="label">
@@ -809,8 +769,8 @@ zone restreinte</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>549</width>
-              <height>292</height>
+              <width>204</width>
+              <height>66</height>
              </rect>
             </property>
             <attribute name="label">
@@ -1072,8 +1032,8 @@ sur une coupe valide</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>549</width>
-              <height>362</height>
+              <width>417</width>
+              <height>292</height>
              </rect>
             </property>
             <attribute name="label">
@@ -1338,8 +1298,8 @@ sur une coupe valide</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>549</width>
-              <height>261</height>
+              <width>392</width>
+              <height>245</height>
              </rect>
             </property>
             <attribute name="label">
@@ -1606,8 +1566,8 @@ sur une coupe valide</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>394</width>
-              <height>285</height>
+              <width>392</width>
+              <height>280</height>
              </rect>
             </property>
             <attribute name="label">
@@ -2325,7 +2285,7 @@ l'intervalle angulaire</string>
               <x>0</x>
               <y>0</y>
               <width>323</width>
-              <height>181</height>
+              <height>176</height>
              </rect>
             </property>
             <attribute name="label">
@@ -2534,7 +2494,7 @@ l'intervalle angulaire</string>
               <x>0</x>
               <y>0</y>
               <width>340</width>
-              <height>157</height>
+              <height>154</height>
              </rect>
             </property>
             <attribute name="label">
@@ -2723,7 +2683,7 @@ l'intervalle angulaire</string>
               <x>0</x>
               <y>0</y>
               <width>265</width>
-              <height>84</height>
+              <height>83</height>
              </rect>
             </property>
             <attribute name="label">
@@ -2788,8 +2748,8 @@ l'intervalle angulaire</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>549</width>
-              <height>269</height>
+              <width>343</width>
+              <height>111</height>
              </rect>
             </property>
             <attribute name="label">
