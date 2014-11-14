@@ -3,6 +3,7 @@
 #include "inc/billon.h"
 #include "inc/coordinate.h"
 #include "inc/globalfunctions.h"
+#include "inc/globaltimer.h"
 
 #include <iomanip>
 
@@ -153,27 +154,23 @@ void PithExtractorBoukadida::process( Billon &billon, const bool &adaptativeWidt
 //	qDebug() << "Step 1] Copie du billon";
 
 /* <Time computing> */
-	double execTime;
-	std::chrono::system_clock::time_point start = std::chrono::system_clock::now();
+	GlobalTimer::getInstance()->start("a) Copie du tronc");
 	Billon billonFillBackground(billon);
-	execTime = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - start).count();
-	std::cout << std::setw(50) << std::left << "    a) Copie du tronc" << std::setw(8) << std::right << execTime << " ms" << std::endl;
+	GlobalTimer::getInstance()->end();
 /* </Time computing> */
 
 //	qDebug() << "Step 2] Fill billon background + proportions";
 /* <Time computing> */
-	start = std::chrono::system_clock::now();
+	GlobalTimer::getInstance()->start("b) Fill billon background + proportions");
 	fillBillonBackground( billonFillBackground, backgroundProportions, _intensityInterval, adaptativeWidth );
-	execTime = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - start).count();
-	std::cout << std::setw(50) << std::left << "    b) Fill billon background + proportions" << std::setw(8) << std::right << execTime << " ms" << std::endl;
+	GlobalTimer::getInstance()->end();
 /* </Time computing> */
 
 //	qDebug() << "Step 3] Detect interval of valid slices";
 /* <Time computing> */
-	start = std::chrono::system_clock::now();
+	GlobalTimer::getInstance()->start("c) Detect interval of valid slices");
 	detectValidSliceInterval( backgroundProportions );
-	execTime = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - start).count();
-	std::cout << std::setw(50) << std::left << "    c) Detect interval of valid slices" << std::setw(8) << std::right << execTime << " ms" << std::endl;
+	GlobalTimer::getInstance()->end();
 /* </Time computing> */
 	const int &firstValidSliceIndex = _validSlices.min();
 	const int &lastValidSliceIndex = _validSlices.max();
@@ -189,11 +186,10 @@ void PithExtractorBoukadida::process( Billon &billon, const bool &adaptativeWidt
 	// Calcul de la moelle sur la première coupe valide
 //	qDebug() << "Step 4] Hough transform on first valid slice";
 /* <Time computing> */
-	start = std::chrono::system_clock::now();
+	GlobalTimer::getInstance()->start("d) Hough transform on first valid slice");
 	pith[firstSliceOrdered] = transHough( billonFillBackground.slice(firstSliceOrdered), nbLineByMaxRatio[firstSliceOrdered],
 										  voxelDims, adaptativeWidth?firstSliceOrdered/static_cast<qreal>(depth):1.0 );
-	execTime = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - start).count();
-	std::cout << std::setw(50) << std::left << "    d) Hough transform on first valid slice" << std::setw(8) << std::right << execTime << " ms" << std::endl;
+	GlobalTimer::getInstance()->end();
 /* </Time computing> */
 
 	// Calcul de la moelle sur les coupes suivantes
@@ -202,7 +198,7 @@ void PithExtractorBoukadida::process( Billon &billon, const bool &adaptativeWidt
 	iCoord2D subWindowStart, subWindowEnd;
 
 /* <Time computing> */
-	start = std::chrono::system_clock::now();
+	GlobalTimer::getInstance()->start("e) Hough transform on next valid slices");
 	for ( k=firstSliceOrdered+kIncrement ; k<=lastValidSliceIndex && k>=firstValidSliceIndex ; k += kIncrement )
 	{
 //		qDebug() << k ;
@@ -226,33 +222,30 @@ void PithExtractorBoukadida::process( Billon &billon, const bool &adaptativeWidt
 
 		pith[k] = currentPithCoord;
 	}
-	execTime = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - start).count();
-	std::cout << std::setw(50) << std::left << "    e) Hough transform on next valid slices" << std::setw(8) << std::right << execTime << " ms" << std::endl;
+	GlobalTimer::getInstance()->end();
 /* </Time computing> */
 
 	// Interpolation des coupes valides
 //	qDebug() << "Step 6] Interpolation of valid slices";
 /* <Time computing> */
-	start = std::chrono::system_clock::now();
+	GlobalTimer::getInstance()->start("f) Interpolation of valid slices");
 	interpolation( pith, nbLineByMaxRatio, _validSlices );
-	execTime = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - start).count();
-	std::cout << std::setw(50) << std::left << "    f) Interpolation of valid slices" << std::setw(8) << std::right << execTime << " ms" << std::endl;
+	GlobalTimer::getInstance()->end();
 /* </Time computing> */
 
 	// Lissage
 //	qDebug() << "Step 7] Smoothing of valid slices";
 /* <Time computing> */
-	start = std::chrono::system_clock::now();
+	GlobalTimer::getInstance()->start("g) Smoothing of valid slices");
 	TKD::meanSmoothing<rCoord2D>( pith.begin()+firstValidSliceIndex, pith.begin()+lastValidSliceIndex, _smoothingRadius, false );
-	execTime = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - start).count();
-	std::cout << std::setw(50) << std::left << "    g) Smoothing of valid slices" << std::setw(8) << std::right << execTime << " ms" << std::endl;
+	GlobalTimer::getInstance()->end();
 /* </Time computing> */
 
 	// Extrapolation des coupes invalides
 //	qDebug() << "Step 8] Extrapolation of unvalid slices";
 
 /* <Time computing> */
-	start = std::chrono::system_clock::now();
+	GlobalTimer::getInstance()->start("h) Extrapolation of unvalid slice");
 	const int slopeDistance = 3;
 
 	const int firstValidSliceIndexToExtrapolate = firstValidSliceIndex+(lastValidSliceIndex-firstValidSliceIndex)*_firstValidSliceToExtrapolate/100.;
@@ -298,8 +291,7 @@ void PithExtractorBoukadida::process( Billon &billon, const bool &adaptativeWidt
 //			qDebug() << "  No extrapolation";
 			break;
 	}
-	execTime = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - start).count();
-	std::cout << std::setw(50) << std::left << "    h) Extrapolation of unvalid slices" << std::setw(8) << std::right << execTime << " ms" << std::endl;
+	GlobalTimer::getInstance()->end();
 /* </Time computing> */
 }
 

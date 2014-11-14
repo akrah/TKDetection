@@ -7,6 +7,7 @@
 #include "inc/define.h"
 #include "inc/dicomreader.h"
 #include "inc/ellipticalaccumulationhistogram.h"
+#include "inc/globaltimer.h"
 #include "inc/knotellipseradiihistogram.h"
 #include "inc/knotpithprofile.h"
 #include "inc/pith.h"
@@ -42,8 +43,6 @@
 #include <qwt_polar_renderer.h>
 #include <qwt_polar_grid.h>
 
-#include <chrono>
-#include <iomanip>
 
 MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::MainWindow), _labelSliceView(new QLabel), _labelTangentialView(new QLabel),
 	_billon(0), _tangentialBillon(0), _sliceView(new SliceView()),
@@ -790,11 +789,10 @@ void MainWindow::selectSectorInterval(const int &index, const bool &draw )
 		_tangentialTransform.enableTrilinearInterpolation( _ui->_checkTrilinearInterpolation->isChecked() );
 		_tangentialTransform.setAngularInterval( *_billon, centeredSectorInterval );
 /* <Time computing> */
-		double execTime;
-		std::chrono::system_clock::time_point start = std::chrono::system_clock::now();
+		GlobalTimer::getInstance()->start(QString("Intervalle angulaire n°%1").arg(index));
+		GlobalTimer::getInstance()->start("7) Construction des coupes tangentielles");
 		_tangentialBillon = _tangentialTransform.execute( *_billon );
-		execTime = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - start).count();
-		std::cout << std::setw(50) << std::left << "7) Construction des coupes tangentielles" << std::setw(8) << std::right << execTime << " ms" << std::endl;
+		GlobalTimer::getInstance()->end();
 /* </Time computing> */
 
 		_knotPithExtractor.setSubWindowWidth( _ui->_spinPithSubWindowWidth_knot->value() );
@@ -809,11 +807,9 @@ void MainWindow::selectSectorInterval(const int &index, const bool &draw )
 		_knotPithExtractor.setLastValidSlicesToExtrapolate( _ui->_spinLastSlicesToExtrapolate_knot->value() );
 
 /* <Time computing> */
-		start = std::chrono::system_clock::now();
-		std::cout << "8) Detection de la moelle du noeud" << std::endl;
+		GlobalTimer::getInstance()->start("8) Detection de la moelle du noeud");
 		_knotPithExtractor.process(*_tangentialBillon,true);
-		execTime = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - start).count();
-		std::cout << std::setw(50) << "Total " << std::setw(8) << std::right << execTime << " ms" << std::endl;
+		GlobalTimer::getInstance()->end();
 /* </Time computing> */
 	}
 
@@ -853,20 +849,16 @@ void MainWindow::updateBillonPith()
 											  _ui->_chechPithAscendingOrder_billon->isChecked(), TKD::LINEAR,
 											  _ui->_spinFirstSlicesToExtrapolate_billon->value(), _ui->_spinLastSlicesToExtrapolate_billon->value());
 /* <Time computing> */
-		double execTime;
-		std::chrono::system_clock::time_point start = std::chrono::system_clock::now();
-		std::cout << "1) Calcul de la moelle" << std::endl;
+		GlobalTimer::getInstance()->start("1) Calcul de la moelle");
 		pithExtractor.process(*_billon);
-		execTime = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - start).count();
-		std::cout << std::setw(50) << "Total " << std::setw(8) << std::right << execTime << " ms" << std::endl;
+		GlobalTimer::getInstance()->end();
 /* </Time computing> */
 /* <Time computing> */
-		start = std::chrono::system_clock::now();
+		GlobalTimer::getInstance()->start("2) Calcul du rayon minimum");
 		_treeRadius = BillonAlgorithms::restrictedAreaMeansRadius(*_billon,_ui->_spinRestrictedAreaResolution->value(),_ui->_spinRestrictedAreaThreshold->value(),
 																  _ui->_spinRestrictedAreaMinimumRadius->value()*_billon->n_cols/100.,
 																  _ui->_spinPercentageOfSlicesToIgnore->value()*_billon->n_slices/100.);
-		execTime = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - start).count();
-		std::cout << std::setw(50) << std::left << "2) Calcul du rayon minimum" << std::setw(8) << std::right << execTime << " ms" << std::endl;
+		GlobalTimer::getInstance()->end();
 /* </Time computing> */
 		_ui->_checkRadiusAroundPith->setText( QString::number(_treeRadius*_ui->_spinRestrictedAreaPercentage->value()/100.) );
 		_ui->_spinHistogramNumberOfAngularSectors_zMotionAngular->setValue(TWO_PI*_treeRadius*_ui->_spinRestrictedAreaPercentage->value()/100.);
@@ -882,21 +874,18 @@ void MainWindow::updateSliceHistogram()
 	if ( _billon && _billon->hasPith() )
 	{
 /* <Time computing> */
-		double execTime;
-		std::chrono::system_clock::time_point start = std::chrono::system_clock::now();
+		GlobalTimer::getInstance()->start("3) Histo de z-mouvement");
 		_sliceHistogram->construct(*_billon, Interval<int>(_ui->_spinMinIntensity->value(),_ui->_spinMaxIntensity->value()),
 								   _ui->_spinZMotionMin->value(), _ui->_spinHistogramPercentageOfSlicesToIgnore_zMotion->value()*_billon->n_slices/100., _treeRadius*_ui->_spinRestrictedAreaPercentage->value()/100.);
-		execTime = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - start).count();
-		std::cout << std::setw(50) << std::left << "3) Histo de z-mouvement" << std::setw(8) << std::right << execTime << " ms" << std::endl;
+		GlobalTimer::getInstance()->end();
 /* </Time computing> */
 /* <Time computing> */
-		start = std::chrono::system_clock::now();
+		GlobalTimer::getInstance()->start("4) Calcul des maximums et intervalles");
 		_sliceHistogram->computeMaximumsAndIntervals( _ui->_spinHistogramSmoothingRadius_zMotion->value(),
 													  _ui->_spinHistogramMinimumHeightOfMaximum_zMotion->value(),
 													  _ui->_spinHistogramDerivativeSearchPercentage_zMotion->value(),
 													  _ui->_spinHistogramMinimumWidthOfInterval_zMotion->value(), false);
-		execTime = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - start).count();
-		std::cout << std::setw(50) << std::left << "4) Calcul des maximums et intervalles" << std::setw(8) << std::right << execTime << " ms" << std::endl;
+		GlobalTimer::getInstance()->end();
 /* </Time computing> */
 	}
 	_plotSliceHistogram->update( *_sliceHistogram );
@@ -927,23 +916,21 @@ void MainWindow::updateSectorHistogram( const Interval<uint> &interval )
 	if ( _billon )
 	{
 /* <Time computing> */
-		double execTime;
-		std::chrono::system_clock::time_point start = std::chrono::system_clock::now();
+//		GlobalTimer::getInstance()->start("Intervalle de coupes n°"+ _ui->_comboSelectSliceInterval->currentIndex()-1);
+		GlobalTimer::getInstance()->start("5) Histo des secteurs angulaires");
 		_sectorHistogram->construct( *_billon, interval, Interval<int>(_ui->_spinMinIntensity->value(),_ui->_spinMaxIntensity->value()),
 									 _ui->_spinZMotionMin->value(), _treeRadius*_ui->_spinRestrictedAreaPercentage->value()/100.);
-		execTime = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - start).count();
-		std::cout << std::setw(50) << std::left << "5) Histo des secteurs angulaires" << std::setw(8) << std::right << execTime << " ms" << std::endl;
+		GlobalTimer::getInstance()->end();
 /* </Time computing> */
 		qreal coeffDegToSize = _ui->_spinHistogramNumberOfAngularSectors_zMotionAngular->value()/360.;
 /* <Time computing> */
-		start = std::chrono::system_clock::now();
+		GlobalTimer::getInstance()->start("6) Calcul des maximums et intervalles");
 		_sectorHistogram->computeMaximumsAndIntervals( _ui->_spinHistogramSmoothingRadius_zMotionAngular->value()*coeffDegToSize,
 													   _ui->_spinHistogramMinimumHeightOfMaximum_zMotionAngular->value(),
 													   _ui->_spinHistogramDerivativeSearchPercentage_zMotionAngular->value(),
 													   _ui->_spinHistogramMinimumWidthOfInterval_zMotionAngular->value()*coeffDegToSize,
 													   _ui->_spinHistogramIntervalGap_zMotionAngular->value(), true );
-		execTime = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - start).count();
-		std::cout << std::setw(50) << std::left << "6) Calcul des maximums et intervalles" << std::setw(8) << std::right << execTime << " ms" << std::endl;
+		GlobalTimer::getInstance()->end();
 /* </Time computing> */
 	}
 
@@ -960,11 +947,9 @@ void MainWindow::updateKnotPithProfile()
 	if ( _tangentialBillon && _tangentialBillon->hasPith() )
 	{
 /* <Time computing> */
-		double execTime;
-		std::chrono::system_clock::time_point start = std::chrono::system_clock::now();
+		GlobalTimer::getInstance()->start("9) Histo derivees verticales moelle noeud");
 		_knotPithProfile->construct( _tangentialBillon->pith(), _ui->_spinKnotPithProfileSmoothingRadius->value() );
-		execTime = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - start).count();
-		std::cout << std::setw(50) << std::left << "9) Histo derivees verticales moelle noeud" << std::setw(8) << std::right << execTime << " ms" << std::endl;
+		GlobalTimer::getInstance()->end();
 /* </Time computing> */
 	}
 
@@ -981,14 +966,13 @@ void MainWindow::updateKnotEllipseRadiiHistogram()
 	if ( _tangentialBillon && _tangentialBillon->hasPith() && _knotPithProfile->size() )
 	{
 /* <Time computing> */
-		double execTime;
-		std::chrono::system_clock::time_point start = std::chrono::system_clock::now();
+		GlobalTimer::getInstance()->start("10) Histo accumulation ellipses + global");
 		_knotEllipseRadiiHistogram->construct( *_tangentialBillon, *_knotPithProfile, _knotPithExtractor.validSlices(),
 											   _ui->_spinLowessBandWidth->value(), _ui->_spinEllipticalAccumulationSmoothingRadius->value(),
 											   _ui->_spinLowessIqrCoefficient->value(), _ui->_spinLowessPercentagOfFirstValidSlicesToExtrapolate->value(),
 											   _ui->_spinLowessPercentagOfLastValidSlicesToExtrapolate->value() );
-		execTime = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - start).count();
-		std::cout << std::setw(50) << std::left << "10) Histo accumulation ellipses + global" << std::setw(8) << std::right << execTime << " ms" << std::endl;
+		GlobalTimer::getInstance()->end();
+		GlobalTimer::getInstance()->end();
 /* </Time computing> */
 	}
 
@@ -2065,11 +2049,14 @@ void MainWindow::exportSegmentedKnotsOfCurrentSliceIntervalToSdp( const bool &us
 				stream << "# Coordinates of the segmented knot" << endl;
 				stream << "# x y z knotID" << endl;
 
+				GlobalTimer::getInstance()->reset();
 				for ( int sectorIndex=1 ; sectorIndex<_ui->_comboSelectSectorInterval->count() ; ++sectorIndex )
 				{
 					selectSectorInterval(sectorIndex, true);
 					exportSegmentedKnotToSdp(stream, _tangentialTransform, useSliceIntervalCoordinates, sectorIndex );
 				}
+				QTextStream streamOut(stdout);
+				GlobalTimer::getInstance()->print(streamOut);
 
 				file.close();
 				QMessageBox::information(this,tr("Export des nœud segmentés de l'intervalle de coupes courant en SDP"), tr("Export réussi !"));
