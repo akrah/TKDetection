@@ -13,9 +13,9 @@ Dependencies list
 
 |   |            Library                  |  Tested version  |   |          Library            |  Tested version  |   |        Library              |  Tested version  |
 |:-:|:-----------------------------------:|:----------------:|---|:---------------------------:|:----------------:|---|:---------------------------:|:----------------:|
-| 1 | [Qt](#1-qt)                         |       4.8        | 4 | [Qwt](#4-qwt)               |      6.0.2       | 7 | [DGtal](#7-dgtal)           |       0.6        |
-| 2 | [Armadillo](#2-armadillo)           |     4.320.0      | 5 | [Qxt](#5-qxt)               |      0.6.2       | 8 | [GSL](#8-gsl)               |      1.15        |
-| 3 | [InsightToolkit](#3-insighttoolkit) |      4.5.2       | 6 | [QwtPolar](#6-qwtpolar)     |      1.0.1       | 9 | 
+| 1 | [Qt](#1-qt)                         |       4.8        | 4 | [Qwt](#4-qwt)               |      6.0.2       | 7 | [GSL](#8-gsl)               |       1.15       |
+| 2 | [Armadillo](#2-armadillo)           |     4.320.0      | 5 | [Qxt](#5-qxt)               |      0.6.2       |   |                             |                  |
+| 3 | [InsightToolkit](#3-insighttoolkit) |      4.5.2       | 6 | [QwtPolar](#6-qwtpolar)     |      1.0.1       |   |                             |                  |
 
 
 
@@ -238,33 +238,6 @@ Don't forget to replace *x.y.z* by the downloaded version number:
   sudo cp /usr/local/qwtpolar-x.y.z/plugins/designer/libqwt_polar_designer_plugin.so /usr/lib/x86_64-linux-gnu/qt4/plugins/designer/
 ~~~
 
-
-### 7. DGtal
-[Top](#tkdetection)
-
-The DGtal library required QGLViewer, Boost program options and GMP:
-
-~~~
-	sudo apt-get install libqglviewer-dev-common libboost-program-options-dev libgmp-dev
-~~~
-
-
-Now you can clone and install DGtal from the main repository:
-
-~~~
-  git clone git://github.com/DGtal-team/DGtal.git DGtal
-  mkdir DGtal/build
-  cd DGtal/build
-  cmake .. -DWITH_GMP=true -DWITH_ITK=true -DWITH_C11=true -DWITH_QGLVIEWER=true -DBUILD_EXAMPLES=false -DBUILD_TESTING=false -DCMAKE_BUILD_TYPE="Release"
-  make
-  sudo make install
-~~~
-
-If a problem appear during the cmake step, add an ITK parameter to the command with the version number of ITK (x.y below):
-
-~~~
-  cmake .. -DWITH_GMP=true -DWITH_ITK=true -DWITH_C11=true -DWITH_QGLVIEWER=true -DBUILD_EXAMPLES=false -DBUILD_TESTING=false -DCMAKE_BUILD_TYPE="Release" -DITK_DIR=/usr/local/lib/cmake/ITK-x.y/
-~~~
 
 ### 8. GSL
 [Top](#tkdetection)

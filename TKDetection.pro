@@ -127,7 +127,7 @@ INCLUDEPATH *=	/usr/include/ /usr/local/include/
 
 QMAKE_LIBDIR *=	/usr/local/lib/
 
-LIBS *= -lblas -llapack -larmadillo -lDGtal -lDGtalIO -lgsl -lgslcblas
+LIBS *= -lblas -llapack -larmadillo -lgsl -lgslcblas
 
 # ITK
 #----#
