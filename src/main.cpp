@@ -6,7 +6,7 @@
 #include <cstdio>
 
 #include <QMessageBox>
-#include "tst/test_intervalshistogram.h"
+//#include "tst/test_intervalshistogram.h"
 
 void outputHandler(QtMsgType type, const char *msg)
 {

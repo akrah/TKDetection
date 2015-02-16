@@ -9,6 +9,7 @@
 #include <gsl/gsl_linalg.h>
 #include <gsl/gsl_blas.h>
 
+#define ARMA_DONT_USE_ATLAS
 #include <armadillo>
 
 Lowess::Lowess( const qreal &bandwidth  ) : _bandWidth(bandwidth)

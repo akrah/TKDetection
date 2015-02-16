@@ -67,10 +67,10 @@ SOURCES	=	src/main.cpp \
 			src/slicehistogram.cpp \
 			src/sliceview.cpp \
 			src/slicezoomer.cpp \
+			src/tangentialtransform.cpp \
 			tst/test_intervalshistogram.cpp \
 			src/tiffreader.cpp \
 			src/v3dexport.cpp \
-	src/tangentialtransform.cpp
 
 HEADERS	=	inc/billon.h \
 			inc/billonalgorithms.h \
@@ -108,9 +108,9 @@ HEADERS	=	inc/billon.h \
 			inc/sliceview.h \
 			inc/slicezoomer.h \
 			tst/test_intervalshistogram.h \
+			inc/tangentialtransform.h \
 			inc/tiffreader.h \
 			inc/v3dexport.h \
-	inc/tangentialtransform.h
 
 FORMS =	ui/mainwindow.ui
 
@@ -127,7 +127,7 @@ INCLUDEPATH *=	/usr/include/ /usr/local/include/
 
 QMAKE_LIBDIR *=	/usr/local/lib/
 
-LIBS *= -lblas -llapack -larmadillo -lgsl -lgslcblas
+LIBS *= -larmadillo -lgsl -lgslcblas
 
 # ITK
 #----#
