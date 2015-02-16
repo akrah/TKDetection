@@ -323,20 +323,52 @@ void SliceView::drawHoughSlice( QImage &image, const Billon &billon, const uint 
 	orientations.fill(0);
 	sobelNorm.fill(0.);
 	nbNegativeNorm = 0;
-	for ( j=1 ; j<height-1 ; ++j )
+	if (billon.hasPith())
 	{
-		for ( i=iMin ; i<iMax ; ++i )
+		for ( j=1 ; j<height-1 ; ++j )
 		{
-			sobelX = slice( j-1, i-1 ) - slice( j-1, i+1 ) +
-					 2* (slice( j, i-1 ) - slice( j, i+1 )) +
-					 slice( j+1, i-1 ) - slice( j+1, i+1 );
-			sobelY = slice( j+1, i-1 ) - slice( j-1, i-1 ) +
-					 2 * (slice( j+1, i ) - slice( j-1, i )) +
-					 slice( j+1, i+1 ) - slice( j-1, i+1 );
-			orientations(j,i) = qFuzzyIsNull(sobelX) ? 9999999999./1. : sobelY/sobelX*voxelRatio;
-			norm = qPow(sobelX,2) + qPow(sobelY,2);
-			*sobelNormVecIt++ = norm;
-			nbNegativeNorm += qFuzzyIsNull(norm);
+			for ( i=iMin ; i<iMax ; ++i )
+			{
+				if ( j>=qMax(1.,billon.pithCoord(sliceIndex).y-30) && j<qMin(height-1.,billon.pithCoord(sliceIndex).y+30) &&
+					 i>=qMax((double)iMin,billon.pithCoord(sliceIndex).x-30) && i<qMin((double)iMax,billon.pithCoord(sliceIndex).x+30) )
+				{
+					sobelX = slice( j-1, i-1 ) - slice( j-1, i+1 ) +
+							 2* (slice( j, i-1 ) - slice( j, i+1 )) +
+							 slice( j+1, i-1 ) - slice( j+1, i+1 );
+					sobelY = slice( j+1, i-1 ) - slice( j-1, i-1 ) +
+							 2 * (slice( j+1, i ) - slice( j-1, i )) +
+							 slice( j+1, i+1 ) - slice( j-1, i+1 );
+					orientations(j,i) = qFuzzyIsNull(sobelX) ? 9999999999./1. : sobelY/sobelX*voxelRatio;
+					norm = qPow(sobelX,2) + qPow(sobelY,2);
+					*sobelNormVecIt++ = norm;
+					nbNegativeNorm += qFuzzyIsNull(norm);
+				}
+				else
+				{
+					orientations(j,i) = 0.;
+					*sobelNormVecIt++ = 0.;
+					nbNegativeNorm++;
+				}
+			}
+		}
+	}
+	else
+	{
+		for ( j=1 ; j<height-1 ; ++j )
+		{
+			for ( i=iMin ; i<iMax ; ++i )
+			{
+				sobelX = slice( j-1, i-1 ) - slice( j-1, i+1 ) +
+						 2* (slice( j, i-1 ) - slice( j, i+1 )) +
+						 slice( j+1, i-1 ) - slice( j+1, i+1 );
+				sobelY = slice( j+1, i-1 ) - slice( j-1, i-1 ) +
+						 2 * (slice( j+1, i ) - slice( j-1, i )) +
+						 slice( j+1, i+1 ) - slice( j-1, i+1 );
+				orientations(j,i) = qFuzzyIsNull(sobelX) ? 9999999999./1. : sobelY/sobelX*voxelRatio;
+				norm = qPow(sobelX,2) + qPow(sobelY,2);
+				*sobelNormVecIt++ = norm;
+				nbNegativeNorm += qFuzzyIsNull(norm);
+			}
 		}
 	}
 
@@ -349,6 +381,7 @@ void SliceView::drawHoughSlice( QImage &image, const Billon &billon, const uint 
 
 	qreal x, y, orientation, orientationInv;
 	sobelNormVecIt = sobelNormVec.begin();
+
 	for ( j=1 ; j<height-1 ; ++j )
 	{
 		for ( i=iMin ; i<iMax ; ++i )

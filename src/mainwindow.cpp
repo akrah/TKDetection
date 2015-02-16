@@ -219,6 +219,8 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 	QObject::connect(_ui->_buttonExportToV3D, SIGNAL(clicked()), this, SLOT(exportToV3D()));
 	// Onglet "Exporter en SDP"
 	QObject::connect(_ui->_buttonExportToSDP, SIGNAL(clicked()), this, SLOT(exportToSdp()));
+	// Onglet "Exporter en PNG"
+	QObject::connect(_ui->_buttonExportToPNG, SIGNAL(clicked()), this, SLOT(exportToPng()));
 
 	/*************************************
 	* Évènements du panneau "Histogrammes"
@@ -1079,6 +1081,19 @@ void MainWindow::exportToSdp()
 		default : break;
 	}
 }
+
+
+void MainWindow::exportToPng()
+{
+	QString fileName = QFileDialog::getSaveFileName(this, tr("Exporter l'image courante en PNG"), "coupe.png",
+													tr("Fichiers PNG (*.png);;Tous les fichiers (*.*)"));
+	QImage &image = _ui->_tabsViews->currentWidget() == _ui->_tabBillon ?_mainPix:_tangentialPix;
+	if ( !fileName.isEmpty() && image.save(fileName) )
+		QMessageBox::information(this,tr("Export de l'image courante en PNG"), tr("Export réussi !"));
+	else
+		QMessageBox::warning(this,tr("Export de l'image courante en PNG"),tr("L'export a échoué : impossible de créer le ficher %1.").arg(fileName));
+}
+
 
 /*******************************
  * Private functions
@@ -2118,4 +2133,3 @@ void MainWindow::exportSegmentedKnotToSdp( QTextStream &stream, const Tangential
 		origin += shiftStep;
 	}
 }
-

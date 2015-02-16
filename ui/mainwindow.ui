@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>699</width>
-    <height>523</height>
+    <height>542</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -16,7 +16,7 @@
   <widget class="QWidget" name="centralWidget">
    <layout class="QVBoxLayout" name="verticalLayout_5">
     <item>
-     <widget class="QTabWidget" name="tabWidget_2">
+     <widget class="QTabWidget" name="_tabsViews">
       <property name="tabPosition">
        <enum>QTabWidget::West</enum>
       </property>
@@ -26,7 +26,7 @@
       <property name="documentMode">
        <bool>true</bool>
       </property>
-      <widget class="QWidget" name="tab">
+      <widget class="QWidget" name="_tabBillon">
        <attribute name="title">
         <string>Billon</string>
        </attribute>
@@ -149,7 +149,7 @@
              <property name="geometry">
               <rect>
                <x>106</x>
-               <y>177</y>
+               <y>186</y>
                <width>0</width>
                <height>0</height>
               </rect>
@@ -161,7 +161,7 @@
         </item>
        </layout>
       </widget>
-      <widget class="QWidget" name="tab_6">
+      <widget class="QWidget" name="_tabTangential">
        <attribute name="title">
         <string>Coupes tangentielles</string>
        </attribute>
@@ -252,7 +252,7 @@
              <property name="geometry">
               <rect>
                <x>0</x>
-               <y>0</y>
+               <y>71</y>
                <width>390</width>
                <height>234</height>
               </rect>
@@ -323,7 +323,7 @@
      <item row="1" column="0">
       <widget class="QTabWidget" name="_tabs">
        <property name="currentIndex">
-        <number>0</number>
+        <number>5</number>
        </property>
        <widget class="QWidget" name="tab_4">
         <attribute name="title">
@@ -396,9 +396,9 @@
             <property name="geometry">
              <rect>
               <x>0</x>
-              <y>-10</y>
-              <width>327</width>
-              <height>118</height>
+              <y>0</y>
+              <width>339</width>
+              <height>127</height>
              </rect>
             </property>
             <attribute name="label">
@@ -2186,7 +2186,7 @@ l'intervalle angulaire</string>
             </font>
            </property>
            <property name="currentIndex">
-            <number>4</number>
+            <number>5</number>
            </property>
            <widget class="QWidget" name="page">
             <property name="geometry">
@@ -2834,6 +2834,47 @@ l'intervalle angulaire</string>
                 </size>
                </property>
               </spacer>
+             </item>
+            </layout>
+           </widget>
+           <widget class="QWidget" name="page_13">
+            <property name="geometry">
+             <rect>
+              <x>0</x>
+              <y>0</y>
+              <width>339</width>
+              <height>71</height>
+             </rect>
+            </property>
+            <attribute name="label">
+             <string>Export en PNG</string>
+            </attribute>
+            <layout class="QFormLayout" name="formLayout_15">
+             <item row="0" column="1">
+              <widget class="QPushButton" name="_buttonExportToPNG">
+               <property name="font">
+                <font>
+                 <weight>50</weight>
+                 <bold>false</bold>
+                </font>
+               </property>
+               <property name="text">
+                <string>Exporter</string>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="0">
+              <widget class="QLabel" name="label_37">
+               <property name="font">
+                <font>
+                 <weight>50</weight>
+                 <bold>false</bold>
+                </font>
+               </property>
+               <property name="text">
+                <string>Image affichée</string>
+               </property>
+              </widget>
              </item>
             </layout>
            </widget>

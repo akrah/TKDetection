@@ -81,6 +81,7 @@ private slots:
 	void exportToPgm3D();
 	void exportToV3D();
 	void exportToSdp();
+	void exportToPng();
 
 private:
 	void openNewBillon( const QString &fileName );
