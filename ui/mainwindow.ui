@@ -252,7 +252,7 @@
              <property name="geometry">
               <rect>
                <x>0</x>
-               <y>71</y>
+               <y>0</y>
                <width>390</width>
                <height>234</height>
               </rect>
@@ -397,8 +397,8 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>339</width>
-              <height>127</height>
+              <width>254</width>
+              <height>118</height>
              </rect>
             </property>
             <attribute name="label">
@@ -2186,7 +2186,7 @@ l'intervalle angulaire</string>
             </font>
            </property>
            <property name="currentIndex">
-            <number>5</number>
+            <number>4</number>
            </property>
            <widget class="QWidget" name="page">
             <property name="geometry">
@@ -2792,6 +2792,11 @@ l'intervalle angulaire</string>
                <item>
                 <property name="text">
                  <string>Nœuds du billon</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>Moelle du billon</string>
                 </property>
                </item>
               </widget>

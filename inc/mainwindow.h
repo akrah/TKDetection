@@ -113,6 +113,7 @@ private:
 	void exportPithOfCurrentKnotAreaToSdp();
 	void exportPithOfAllKnotAreaToSdp();
 	void exportPithOfAKnotAreaToSdp( QTextStream &stream, const TangentialTransform &tangentialTransform, const uint &numSliceInterval, const uint &numAngularInterval, const uint &knotID );
+	void exportPithOfBillonToSdp();
 
 	void exportCurrentSegmentedKnotToSdp( const bool &useSliceIntervalCoordinates = false );
 	void exportSegmentedKnotsOfCurrentSliceIntervalToSdp( const bool &useSliceIntervalCoordinates = false );

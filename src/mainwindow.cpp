@@ -1078,6 +1078,7 @@ void MainWindow::exportToSdp()
 		case 3 : exportCurrentSegmentedKnotToSdp( _ui->_checkBoxKeepBillonSliceNumber->isChecked() );	break;
 		case 4 : exportSegmentedKnotsOfCurrentSliceIntervalToSdp( _ui->_checkBoxKeepBillonSliceNumber->isChecked() ); break;
 		case 5 : exportAllSegmentedKnotsOfBillonToSdp(); break;
+		case 6 : exportPithOfBillonToSdp(); break;
 		default : break;
 	}
 }
@@ -1979,6 +1980,34 @@ void MainWindow::exportPithOfAKnotAreaToSdp( QTextStream &stream, const Tangenti
 		stream << qRound(destination.x()) << " "<< qRound(destination.y()) << " " << qRound(destination.z()) << endl;
 
 		origin += shiftStep;
+	}
+}
+
+void MainWindow::exportPithOfBillonToSdp()
+{
+	if ( _billon && _billon->hasPith() )
+	{
+		QString fileName = QFileDialog::getSaveFileName(this, tr("Exporter la moelle du billon en SDP"), "billonPith.sdp",
+														tr("Fichiers SDP (*.sdp);;Tous les fichiers (*.*)"));
+		if ( !fileName.isEmpty() )
+		{
+			QFile file(fileName);
+			if ( file.open(QIODevice::WriteOnly) )
+			{
+				QTextStream stream(&file);
+
+				stream << "# SDP (Sequence of Discrete Points)" << endl;
+				stream << "# x   y" << endl;
+
+				for ( int i=0 ; i<_billon->pith().size() ; ++i )
+				{
+					stream << _billon->pithCoord(i).x << " " << _billon->pithCoord(i).y << endl;
+				}
+				file.close();
+
+				QMessageBox::information(this,tr("exporter la moelle de tous les nœuds du billon en SDP"), tr("Export réussi !"));
+			}
+		}
 	}
 }
 
