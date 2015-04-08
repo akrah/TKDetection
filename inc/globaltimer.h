@@ -41,9 +41,8 @@ public:
 	void end();
 	void reset();
 
-	const QVector< _TimeStat_ > &times() const;
-
 	void print( QTextStream & stream );
+	void printTotal( QTextStream & stream );
 
 private:
 

@@ -252,7 +252,7 @@
              <property name="geometry">
               <rect>
                <x>0</x>
-               <y>0</y>
+               <y>62</y>
                <width>390</width>
                <height>234</height>
               </rect>
@@ -323,7 +323,7 @@
      <item row="1" column="0">
       <widget class="QTabWidget" name="_tabs">
        <property name="currentIndex">
-        <number>0</number>
+        <number>4</number>
        </property>
        <widget class="QWidget" name="tab_4">
         <attribute name="title">
@@ -396,7 +396,7 @@
             <property name="geometry">
              <rect>
               <x>0</x>
-              <y>-10</y>
+              <y>0</y>
               <width>327</width>
               <height>118</height>
              </rect>
@@ -2075,100 +2075,137 @@ coupes valides à extrapoler</string>
         <attribute name="title">
          <string>Processus</string>
         </attribute>
-        <layout class="QFormLayout" name="formLayout">
-         <item row="0" column="0">
-          <widget class="QLabel" name="label_11">
-           <property name="text">
-            <string>1. Moelle</string>
+        <layout class="QVBoxLayout" name="verticalLayout_18">
+         <item>
+          <layout class="QFormLayout" name="formLayout">
+           <property name="fieldGrowthPolicy">
+            <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
            </property>
-          </widget>
-         </item>
-         <item row="0" column="1">
-          <widget class="QPushButton" name="_buttonComputePith">
-           <property name="text">
-            <string>Calculer la moelle</string>
-           </property>
-          </widget>
-         </item>
-         <item row="1" column="1">
-          <layout class="QHBoxLayout" name="horizontalLayout_15">
-           <item>
-            <widget class="QComboBox" name="_comboSelectSliceInterval">
-             <item>
-              <property name="text">
-               <string>Aucun</string>
-              </property>
-             </item>
+           <item row="0" column="0">
+            <widget class="QLabel" name="label_11">
+             <property name="text">
+              <string>1. Moelle</string>
+             </property>
             </widget>
            </item>
-           <item>
-            <widget class="QPushButton" name="_buttonSelectSliceIntervalUpdate">
+           <item row="0" column="1">
+            <widget class="QPushButton" name="_buttonComputePith">
+             <property name="text">
+              <string>Calculer la moelle</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="0">
+            <widget class="QLabel" name="label_28">
              <property name="sizePolicy">
-              <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+              <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
                <horstretch>0</horstretch>
                <verstretch>0</verstretch>
               </sizepolicy>
              </property>
              <property name="text">
-              <string>Mettre à jour</string>
-             </property>
-            </widget>
-           </item>
-          </layout>
-         </item>
-         <item row="1" column="0">
-          <widget class="QLabel" name="label_28">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="text">
-            <string>2. Sélection de
+              <string>2. Sélection de
 l'intervalle de coupes</string>
-           </property>
-          </widget>
-         </item>
-         <item row="2" column="0">
-          <widget class="QLabel" name="label_4">
-           <property name="text">
-            <string>3. Sélection de
-l'intervalle angulaire</string>
-           </property>
-          </widget>
-         </item>
-         <item row="2" column="1">
-          <layout class="QHBoxLayout" name="horizontalLayout_19">
-           <item>
-            <widget class="QComboBox" name="_comboSelectSectorInterval">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
              </property>
-             <item>
-              <property name="text">
-               <string>Aucun</string>
-              </property>
-             </item>
             </widget>
            </item>
-           <item>
-            <widget class="QPushButton" name="_buttonSelectSectorIntervalUpdate">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
+           <item row="1" column="1">
+            <layout class="QHBoxLayout" name="horizontalLayout_15">
+             <item>
+              <widget class="QComboBox" name="_comboSelectSliceInterval">
+               <item>
+                <property name="text">
+                 <string>Aucun</string>
+                </property>
+               </item>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="_buttonSelectSliceIntervalUpdate">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="text">
+                <string>Mettre à jour</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item row="2" column="0">
+            <widget class="QLabel" name="label_4">
              <property name="text">
-              <string>Mettre à jour</string>
+              <string>3. Sélection de
+l'intervalle angulaire</string>
              </property>
             </widget>
+           </item>
+           <item row="2" column="1">
+            <layout class="QHBoxLayout" name="horizontalLayout_19">
+             <item>
+              <widget class="QComboBox" name="_comboSelectSectorInterval">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <item>
+                <property name="text">
+                 <string>Aucun</string>
+                </property>
+               </item>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="_buttonSelectSectorIntervalUpdate">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="text">
+                <string>Mettre à jour</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
            </item>
           </layout>
+         </item>
+         <item>
+          <widget class="QGroupBox" name="groupBox_2">
+           <property name="title">
+            <string>Temps de calculs</string>
+           </property>
+           <layout class="QVBoxLayout" name="verticalLayout_19">
+            <item>
+             <widget class="QPushButton" name="_buttonGlobalTimerPrint">
+              <property name="text">
+               <string>Afficher</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="_buttonGlobalTimerPrintTotal">
+              <property name="text">
+               <string>Afficher total global</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="_buttonGlobalTimerReset">
+              <property name="text">
+               <string>Reset</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </widget>
          </item>
         </layout>
        </widget>

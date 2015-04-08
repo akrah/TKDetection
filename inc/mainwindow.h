@@ -76,6 +76,10 @@ private slots:
 	void resetHistogramDefaultValuesZMotion();
 	void resetHistogramDefaultValuesZMotionAngular();
 
+	void resetGlobalTimer();
+	void printGlobaleTimer();
+	void printTotalGlobaleTimer();
+
 	void exportToOfs();
 	void exportHistograms();
 	void exportToPgm3D();

@@ -199,6 +199,10 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 	QObject::connect(_ui->_buttonSelectSliceIntervalUpdate, SIGNAL(clicked()), this, SLOT(selectCurrentSliceInterval()));
 	QObject::connect(_ui->_comboSelectSectorInterval, SIGNAL(currentIndexChanged(int)), this, SLOT(selectSectorInterval(int)));
 	QObject::connect(_ui->_buttonSelectSectorIntervalUpdate, SIGNAL(clicked()), this, SLOT(selectCurrentSectorInterval()));
+	// Temps de calculs
+	QObject::connect(_ui->_buttonGlobalTimerReset, SIGNAL(clicked()), this, SLOT(resetGlobalTimer()));
+	QObject::connect(_ui->_buttonGlobalTimerPrint, SIGNAL(clicked()), this, SLOT(printGlobaleTimer()));
+	QObject::connect(_ui->_buttonGlobalTimerPrintTotal, SIGNAL(clicked()), this, SLOT(printTotalGlobaleTimer()));
 
 	/********************************
 	* Évènements de l'onglet "Export"
@@ -1015,6 +1019,27 @@ void MainWindow::resetHistogramDefaultValuesZMotionAngular()
 	_ui->_spinHistogramMinimumWidthOfInterval_zMotionAngular->setValue(HISTOGRAM_ANGULAR_MINIMUM_WIDTH_OF_INTERVALS);
 	_ui->_spinHistogramDerivativeSearchPercentage_zMotionAngular->setValue(HISTOGRAM_ANGULAR_DERIVATIVE_SEARCH_PERCENTAGE);
 	_ui->_spinHistogramIntervalGap_zMotionAngular->setValue(HISTOGRAM_ANGULAR_INTERVAL_GAP);
+}
+
+/********/
+/*******************************************/
+/*******/
+
+void MainWindow::resetGlobalTimer()
+{
+	GlobalTimer::getInstance()->reset();
+}
+
+void MainWindow::printGlobaleTimer()
+{
+	QTextStream stream(stdout);
+	GlobalTimer::getInstance()->print(stream);
+}
+
+void MainWindow::printTotalGlobaleTimer()
+{
+	QTextStream stream(stdout);
+	GlobalTimer::getInstance()->printTotal(stream);
 }
 
 
@@ -2049,14 +2074,11 @@ void MainWindow::exportSegmentedKnotsOfCurrentSliceIntervalToSdp( const bool &us
 				stream << "# Coordinates of the segmented knot" << endl;
 				stream << "# x y z knotID" << endl;
 
-				GlobalTimer::getInstance()->reset();
 				for ( int sectorIndex=1 ; sectorIndex<_ui->_comboSelectSectorInterval->count() ; ++sectorIndex )
 				{
 					selectSectorInterval(sectorIndex, true);
 					exportSegmentedKnotToSdp(stream, _tangentialTransform, useSliceIntervalCoordinates, sectorIndex );
 				}
-				QTextStream streamOut(stdout);
-				GlobalTimer::getInstance()->print(streamOut);
 
 				file.close();
 				QMessageBox::information(this,tr("Export des nœud segmentés de l'intervalle de coupes courant en SDP"), tr("Export réussi !"));

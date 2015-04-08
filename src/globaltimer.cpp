@@ -35,11 +35,6 @@ void GlobalTimer::reset()
 	_currentLevel = 1;
 }
 
-const QVector< _TimeStat_ > &GlobalTimer::times() const
-{
-	return _times;
-}
-
 void GlobalTimer::print( QTextStream & stream )
 {
 	if (_times.isEmpty()) return;
@@ -67,4 +62,18 @@ void GlobalTimer::print( QTextStream & stream )
 		stream << qSetFieldWidth(TIMER_INDENT_WIDTH*(currentLevel-1)) << "" << qSetFieldWidth(TIMER_TITLE_WIDTH-TIMER_INDENT_WIDTH*(currentLevel-1)) << left << stat._name << qSetFieldWidth(8) << right << stat._duration << " ms" << endl;
 		timerIter++;
 	}
+}
+
+void GlobalTimer::printTotal( QTextStream & stream )
+{
+	if (_times.isEmpty()) return;
+	int total = 0;
+	for ( int i=0 ; i<_times.size()-1 ; ++i )
+	{
+		if ( _times[i]._level >= _times[i+1]._level )
+		{
+			total += _times[i]._duration;
+		}
+	}
+	stream << "Full total : " << total << " ms" << endl;
 }
