@@ -22,7 +22,7 @@ void SectorHistogram::construct( const Billon &billon, const Interval<uint> &sli
 {
 	clear();
 
-	if ( billon.hasPith() && sliceInterval.isValid() && sliceInterval.width() > 0 )
+	if ( billon.hasPith() && sliceInterval.isValid() && sliceInterval.width() >= 0 )
 	{
 		const int &width = billon.n_cols;
 		const int &height = billon.n_rows;

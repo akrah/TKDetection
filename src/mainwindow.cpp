@@ -221,6 +221,8 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 	QObject::connect(_ui->_buttonExportToSDP, SIGNAL(clicked()), this, SLOT(exportToSdp()));
 	// Onglet "Exporter en PNG"
 	QObject::connect(_ui->_buttonExportToPNG, SIGNAL(clicked()), this, SLOT(exportToPng()));
+	// Onglet "Export de l'image de Z-Mouvement 2D"
+	QObject::connect(_ui->_buttonExport2DZMotion, SIGNAL(clicked()), this, SLOT(export2DZMotion()));
 
 	/*************************************
 	* Évènements du panneau "Histogrammes"
@@ -841,12 +843,18 @@ void MainWindow::updateBillonPith()
 {
 	if ( _billon )
 	{
-		PithExtractorBoukadida pithExtractor( _ui->_spinPithSubWindowWidth_billon->value(), _ui->_spinPithSubWindowHeight_billon->value(),
-											  _ui->_spinPithMaximumShift_billon->value(), _ui->_spinPithSmoothingRadius_billon->value(),
-											  _ui->_spinPithMinimumWoodPercentage_billon->value(), Interval<int>( _ui->_spinPithMinIntensity_billon->value(), _ui->_spinPithMaxnIntensity_billon->value() ),
-											  _ui->_chechPithAscendingOrder_billon->isChecked(), TKD::LINEAR,
-											  _ui->_spinFirstSlicesToExtrapolate_billon->value(), _ui->_spinLastSlicesToExtrapolate_billon->value());
-		pithExtractor.process(*_billon);
+		_billonPithExtractor.setSubWindowWidth( _ui->_spinPithSubWindowWidth_billon->value() );
+		_billonPithExtractor.setSubWindowHeight( _ui->_spinPithSubWindowHeight_billon->value() );
+		_billonPithExtractor.setPithShift( _ui->_spinPithMaximumShift_billon->value() );
+		_billonPithExtractor.setSmoothingRadius( _ui->_spinPithSmoothingRadius_billon->value() );
+		_billonPithExtractor.setMinWoodPercentage( _ui->_spinPithMinimumWoodPercentage_billon->value() );
+		_billonPithExtractor.setIntensityInterval( Interval<int>( _ui->_spinPithMinIntensity_billon->value(), _ui->_spinPithMaxnIntensity_billon->value() ) );
+		_billonPithExtractor.setAscendingOrder( _ui->_chechPithAscendingOrder_billon->isChecked() );
+		_billonPithExtractor.setExtrapolation( TKD::LINEAR );
+		_billonPithExtractor.setFirstValidSlicesToExtrapolate( _ui->_spinFirstSlicesToExtrapolate_billon->value() );
+		_billonPithExtractor.setLastValidSlicesToExtrapolate( _ui->_spinLastSlicesToExtrapolate_billon->value() );
+
+		_billonPithExtractor.process(*_billon);
 		_treeRadius = BillonAlgorithms::restrictedAreaMeansRadius(*_billon,_ui->_spinRestrictedAreaResolution->value(),_ui->_spinRestrictedAreaThreshold->value(),
 																  _ui->_spinRestrictedAreaMinimumRadius->value()*_billon->n_cols/100.,
 																  _ui->_spinPercentageOfSlicesToIgnore->value()*_billon->n_slices/100.);
@@ -1093,6 +1101,53 @@ void MainWindow::exportToPng()
 		QMessageBox::information(this,tr("Export de l'image courante en PNG"), tr("Export réussi !"));
 	else
 		QMessageBox::warning(this,tr("Export de l'image courante en PNG"),tr("L'export a échoué : impossible de créer le ficher %1.").arg(fileName));
+}
+
+void MainWindow::export2DZMotion()
+{
+	if ( _billon && _billon->hasPith() )
+	{
+		QString fileName = QFileDialog::getSaveFileName(this, tr("Exporter l'image d'accumulation 2D du z-mouvement"), "zmotion2D.pgm",
+														tr("Fichiers PGM (*.pgm);;Tous les fichiers (*.*)"));
+		if ( !fileName.isEmpty() )
+		{
+			QFile file(fileName);
+			if ( file.open(QIODevice::WriteOnly) )
+			{
+				QTextStream stream(&file);
+
+				SectorHistogram sect;
+				const Interval<int> intensityInterval(_ui->_spinMinIntensity->value(), _ui->_spinMaxIntensity->value());
+				const Interval<uint> &validSlices =  _billonPithExtractor.validSlices();
+				std::cout << "Valid slices : " << std::endl;
+				std::cout << "    - by pithExtractor : [" << validSlices.min() << ", " << validSlices.max() << "]" << std::endl;
+				std::cout << "    - by percentage    : [" << _ui->_spinPercentageOfSlicesToIgnore->value()*_billon->n_slices/100. << ", " << _billon->n_slices-_ui->_spinPercentageOfSlicesToIgnore->value()*_billon->n_slices/100. << "]" << std::endl;
+
+				qreal max = 0;
+
+				stream << "P2" << endl;
+				stream << PieChartSingleton::getInstance()->nbSectors() << " " << validSlices.size() << endl;
+				stream << "20000" << endl;
+
+				for ( uint z=validSlices.min() ; z<validSlices.max() ; ++z )
+				{
+					sect.construct( *_billon, Interval<uint>(z,z), intensityInterval, _ui->_spinZMotionMin->value(), _treeRadius*_ui->_spinRestrictedAreaPercentage->value()/100. );
+					QVector<qreal>::ConstIterator sectIter = sect.constBegin();
+					QVector<qreal>::ConstIterator sectIterEnd = sect.constEnd();
+					while ( sectIter != sectIterEnd )
+					{
+						stream << *sectIter << " ";
+						max = qMax(max,*sectIter);
+						sectIter++;
+					}
+					stream << endl;
+				}
+				file.close();
+
+				QMessageBox::information(this,tr("Exporter l'image 2D du z-mouvement"), tr("Export réussi !"));
+			}
+		}
+	}
 }
 
 

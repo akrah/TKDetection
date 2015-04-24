@@ -82,6 +82,7 @@ private slots:
 	void exportToV3D();
 	void exportToSdp();
 	void exportToPng();
+	void export2DZMotion();
 
 private:
 	void openNewBillon( const QString &fileName );
@@ -152,6 +153,7 @@ private:
 
 	PlotEllipticalAccumulationHistogram *_plotEllipticalAccumulationHistogram;
 
+	PithExtractorBoukadida _billonPithExtractor;
 	PithExtractorBoukadida _knotPithExtractor;
 
 	TangentialTransform _tangentialTransform;

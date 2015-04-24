@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>699</width>
-    <height>542</height>
+    <width>697</width>
+    <height>573</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -149,7 +149,7 @@
              <property name="geometry">
               <rect>
                <x>106</x>
-               <y>186</y>
+               <y>202</y>
                <width>0</width>
                <height>0</height>
               </rect>
@@ -252,7 +252,7 @@
              <property name="geometry">
               <rect>
                <x>0</x>
-               <y>0</y>
+               <y>87</y>
                <width>390</width>
                <height>234</height>
               </rect>
@@ -286,7 +286,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>699</width>
+     <width>697</width>
      <height>25</height>
     </rect>
    </property>
@@ -397,8 +397,8 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>254</width>
-              <height>118</height>
+              <width>337</width>
+              <height>158</height>
              </rect>
             </property>
             <attribute name="label">
@@ -2186,7 +2186,7 @@ l'intervalle angulaire</string>
             </font>
            </property>
            <property name="currentIndex">
-            <number>4</number>
+            <number>6</number>
            </property>
            <widget class="QWidget" name="page">
             <property name="geometry">
@@ -2847,7 +2847,7 @@ l'intervalle angulaire</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>339</width>
+              <width>337</width>
               <height>71</height>
              </rect>
             </property>
@@ -2878,6 +2878,20 @@ l'intervalle angulaire</string>
                </property>
                <property name="text">
                 <string>Image affichée</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+           <widget class="QWidget" name="page_14">
+            <attribute name="label">
+             <string>Export de l'image de Z-Mouvement 2D</string>
+            </attribute>
+            <layout class="QVBoxLayout" name="verticalLayout_18">
+             <item>
+              <widget class="QPushButton" name="_buttonExport2DZMotion">
+               <property name="text">
+                <string>Exporter</string>
                </property>
               </widget>
              </item>
