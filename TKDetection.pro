@@ -71,6 +71,7 @@ SOURCES	=	src/main.cpp \
 			tst/test_intervalshistogram.cpp \
 			src/tiffreader.cpp \
 			src/v3dexport.cpp \
+			src/zmotionaccumulator.cpp \
 
 HEADERS	=	inc/billon.h \
 			inc/billonalgorithms.h \
@@ -111,6 +112,7 @@ HEADERS	=	inc/billon.h \
 			inc/tangentialtransform.h \
 			inc/tiffreader.h \
 			inc/v3dexport.h \
+			inc/zmotionaccumulator.h \
 
 FORMS =	ui/mainwindow.ui
 

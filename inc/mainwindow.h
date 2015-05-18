@@ -9,6 +9,7 @@
 #include "slicezoomer.h"
 #include "inc/pithextractorboukadida.h"
 #include "inc/tangentialtransform.h"
+#include "inc/zmotionaccumulator.h"
 
 namespace Ui
 {
@@ -52,6 +53,8 @@ private slots:
 	void dragInSliceView( const QPoint &movementVector );
 	void zoomInTangentialView( const qreal &zoomFactor, const qreal &zoomCoefficient );
 	void dragInTangentialView( const QPoint &movementVector );
+	void zoomInZMotionAccView( const qreal &zoomFactor, const qreal &zoomCoefficient );
+	void dragInZMotionAccView( const QPoint &movementVector );
 	void previousMaximumInSliceHistogram();
 	void nextMaximumInSliceHistogram();
 
@@ -72,6 +75,10 @@ private slots:
 	void updateKnotPithProfile();
 	void updateKnotEllipseRadiiHistogram();
 	void updateEllipticalAccumulationHistogram();
+
+	void updateBillonPithAcc();
+	void updateZMotionAcc();
+	void drawZMotionAcc();
 
 	void resetHistogramDefaultValuesZMotion();
 	void resetHistogramDefaultValuesZMotionAngular();
@@ -127,15 +134,20 @@ private:
 	Ui::MainWindow *_ui;
 	QLabel *_labelSliceView;
 	QLabel *_labelTangentialView;
+	QLabel *_labelZMotionAccView;
 
 	Billon *_billon;
 	Billon *_tangentialBillon;
+	Slice *_zMotionAccSlice;
 
 	QImage _mainPix;
 	SliceZoomer _sliceZoomer;
 
 	QImage _tangentialPix;
 	SliceZoomer _tangentialZoomer;
+
+	QImage _zMotionAccPix;
+	SliceZoomer _zMotionAccZoomer;
 
 	SliceView *_sliceView;
 
@@ -157,6 +169,8 @@ private:
 	PithExtractorBoukadida _knotPithExtractor;
 
 	TangentialTransform _tangentialTransform;
+
+	ZMotionAccumulator _zMotionAccumulator;
 
 	uint _currentSliceInterval;
 	uint _currentSectorInterval;

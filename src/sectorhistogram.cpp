@@ -62,7 +62,10 @@ void SectorHistogram::construct( const Billon &billon, const Interval<uint> &sli
 						diff = billon.zMotion(currentPos.x,currentPos.y,k);
 						if ( diff >= zMotionMin )
 						{
-							(*this)[PieChartSingleton::getInstance()->sectorIndexOfAngle( currentPithCoord.angle(currentPos) )] += diff-zMotionMin;
+							const uint sectorIndex = PieChartSingleton::getInstance()->sectorIndexOfAngle( currentPithCoord.angle(currentPos) );
+							(*this)[sectorIndex] += (diff-zMotionMin);
+//							(*this)[sectorIndex + (sectorIndex != PieChartSingleton::getInstance()->nbSectors())] += (diff-zMotionMin)/3;
+//							(*this)[sectorIndex==0 ? PieChartSingleton::getInstance()->nbSectors()-1 : sectorIndex-1] += (diff-zMotionMin)/3;
 						}
 					}
 					currentPos.x++;

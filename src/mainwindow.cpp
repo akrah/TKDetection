@@ -7,6 +7,7 @@
 #include "inc/define.h"
 #include "inc/dicomreader.h"
 #include "inc/ellipticalaccumulationhistogram.h"
+#include "inc/globalfunctions.h"
 #include "inc/knotellipseradiihistogram.h"
 #include "inc/knotpithprofile.h"
 #include "inc/pith.h"
@@ -27,6 +28,7 @@
 #include "inc/v3dexport.h"
 #include "inc/v3dreader.h"
 #include "inc/tiffreader.h"
+#include "inc/zmotionaccumulator.h"
 
 #include <QLabel>
 #include <QFileDialog>
@@ -42,8 +44,8 @@
 #include <qwt_polar_renderer.h>
 #include <qwt_polar_grid.h>
 
-MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::MainWindow), _labelSliceView(new QLabel), _labelTangentialView(new QLabel),
-	_billon(0), _tangentialBillon(0), _sliceView(new SliceView()),
+MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::MainWindow), _labelSliceView(new QLabel), _labelTangentialView(new QLabel), _labelZMotionAccView(new QLabel),
+	_billon(0), _tangentialBillon(0), _zMotionAccSlice(new Slice(0,0)), _sliceView(new SliceView()),
 	_sliceHistogram(new SliceHistogram()), _plotSliceHistogram(new PlotSliceHistogram()),
 	_sectorHistogram(new SectorHistogram()), _plotSectorHistogram(new PlotSectorHistogram()),
 	_knotPithProfile(new KnotPithProfile()), _plotKnotPithProfile(new PlotKnotPithProfile()),
@@ -69,6 +71,13 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 
 	_ui->_scrollTangentialView->setBackgroundRole(QPalette::Dark);
 	_ui->_scrollTangentialView->setWidget(_labelTangentialView);
+
+	_labelZMotionAccView->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
+	_labelZMotionAccView->setScaledContents(true);
+	_labelZMotionAccView->installEventFilter(&_zMotionAccZoomer);
+
+	_ui->_scrollZMotionAccView->setBackgroundRole(QPalette::Dark);
+	_ui->_scrollZMotionAccView->setWidget(_labelZMotionAccView);
 
 	_ui->_comboViewType->insertItem(TKD::CLASSIC,tr("Originale"));
 	_ui->_comboViewType->insertItem(TKD::Z_MOTION,tr("Z-mouvements"));
@@ -188,6 +197,15 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 	***********************************/
 	QObject::connect(_ui->_spinLowessBandWidth, SIGNAL(valueChanged(double)), this, SLOT(updateKnotEllipseRadiiHistogram()));
 
+	/*************************************
+	* Évènements de l'onglet "ZMotion Acc"
+	**************************************/
+	QObject::connect(_ui->_spinMaxMotionToDraw, SIGNAL(valueChanged(int)), _ui->_sliderMotionToDraw, SLOT(setUpperValue(int)));
+	QObject::connect(_ui->_sliderMotionToDraw, SIGNAL(upperValueChanged(int)), _ui->_spinMaxMotionToDraw, SLOT(setValue(int)));
+	QObject::connect(_ui->_sliderMotionToDraw, SIGNAL(upperValueChanged(int)), this, SLOT(drawZMotionAcc()));
+	QObject::connect(_ui->_spinMinMotionToDraw, SIGNAL(valueChanged(int)), _ui->_sliderMotionToDraw, SLOT(setLowerValue(int)));
+	QObject::connect(_ui->_sliderMotionToDraw, SIGNAL(lowerValueChanged(int)), _ui->_spinMinMotionToDraw, SLOT(setValue(int)));
+	QObject::connect(_ui->_sliderMotionToDraw, SIGNAL(lowerValueChanged(int)), this, SLOT(drawZMotionAcc()));
 
 	/***********************************
 	* Évènements de l'onglet "Processus"
@@ -197,6 +215,9 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 	QObject::connect(_ui->_buttonSelectSliceIntervalUpdate, SIGNAL(clicked()), this, SLOT(selectCurrentSliceInterval()));
 	QObject::connect(_ui->_comboSelectSectorInterval, SIGNAL(currentIndexChanged(int)), this, SLOT(selectSectorInterval(int)));
 	QObject::connect(_ui->_buttonSelectSectorIntervalUpdate, SIGNAL(clicked()), this, SLOT(selectCurrentSectorInterval()));
+
+	QObject::connect(_ui->_buttonComputePithAcc, SIGNAL(clicked()), this, SLOT(updateBillonPithAcc()));
+	QObject::connect(_ui->_buttonComputeZMotionAcc, SIGNAL(clicked()), this, SLOT(updateZMotionAcc()));
 
 	/********************************
 	* Évènements de l'onglet "Export"
@@ -239,6 +260,8 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 	QObject::connect(&_sliceZoomer, SIGNAL(isMovedFrom(QPoint)), this, SLOT(dragInSliceView(QPoint)));
 	QObject::connect(&_tangentialZoomer, SIGNAL(zoomFactorChanged(qreal,qreal)), this, SLOT(zoomInTangentialView(qreal,qreal)));
 	QObject::connect(&_tangentialZoomer, SIGNAL(isMovedFrom(QPoint)), this, SLOT(dragInTangentialView(QPoint)));
+	QObject::connect(&_zMotionAccZoomer, SIGNAL(zoomFactorChanged(qreal,qreal)), this, SLOT(zoomInZMotionAccView(qreal,qreal)));
+	QObject::connect(&_zMotionAccZoomer, SIGNAL(isMovedFrom(QPoint)), this, SLOT(dragInZMotionAccView(QPoint)));
 
 
 	// Raccourcis des actions du menu
@@ -266,8 +289,12 @@ MainWindow::~MainWindow()
 	delete _plotSliceHistogram;
 	delete _sliceHistogram;
 	delete _sliceView;
+	if ( _zMotionAccSlice ) delete _zMotionAccSlice;
 	if ( _tangentialBillon ) delete _tangentialBillon;
 	if ( _billon ) delete _billon;
+	if ( _labelZMotionAccView ) delete _labelZMotionAccView;
+	if ( _labelTangentialView ) delete _labelTangentialView;
+	if (_labelSliceView ) delete _labelSliceView;
 	PieChartSingleton::kill();
 }
 
@@ -359,9 +386,11 @@ void MainWindow::closeImage()
 
 	_mainPix = QImage(0,0,QImage::Format_ARGB32);
 	_tangentialPix = QImage(0,0,QImage::Format_ARGB32);
+	_zMotionAccPix = QImage(0,0,QImage::Format_ARGB32);
 	_treeRadius = 133.33;
 	_ui->_checkRadiusAroundPith->setText( QString::number(_treeRadius*_ui->_spinRestrictedAreaPercentage->value()/100.) );
 	updateSliceHistogram();
+	updateZMotionAcc();
 
 	_sectorHistogram->clear();
 	_plotSectorHistogram->update(*_sectorHistogram);
@@ -376,6 +405,7 @@ void MainWindow::closeImage()
 	enabledComponents();
 
 	drawSlice();
+	drawZMotionAcc();
 	setWindowTitle("TKDetection");
 }
 
@@ -647,6 +677,24 @@ void MainWindow::dragInTangentialView( const QPoint &movementVector )
 	if ( movementVector.y() ) scrollArea.verticalScrollBar()->setValue(scrollArea.verticalScrollBar()->value()-movementVector.y());
 }
 
+void MainWindow::zoomInZMotionAccView( const qreal &zoomFactor, const qreal &zoomCoefficient )
+{
+	_labelZMotionAccView->resize(zoomFactor * _zMotionAccPix.size());
+	_labelZMotionAccView->setPixmap( QPixmap::fromImage(_zMotionAccPix).scaledToWidth(zoomFactor*_zMotionAccPix.width(),Qt::FastTransformation) );
+	QScrollBar *hBar = _ui->_scrollZMotionAccView->horizontalScrollBar();
+	hBar->setValue(int(zoomCoefficient * hBar->value() + ((zoomCoefficient - 1) * hBar->pageStep()/2)));
+	QScrollBar *vBar = _ui->_scrollZMotionAccView->verticalScrollBar();
+	vBar->setValue(int(zoomCoefficient * vBar->value() + ((zoomCoefficient - 1) * vBar->pageStep()/2)));
+}
+
+void MainWindow::dragInZMotionAccView( const QPoint &movementVector )
+{
+	QScrollArea &scrollArea = *(_ui->_scrollZMotionAccView);
+	if ( movementVector.x() ) scrollArea.horizontalScrollBar()->setValue(scrollArea.horizontalScrollBar()->value()-movementVector.x());
+	if ( movementVector.y() ) scrollArea.verticalScrollBar()->setValue(scrollArea.verticalScrollBar()->value()-movementVector.y());
+}
+
+
 void MainWindow::previousMaximumInSliceHistogram()
 {
 	const uint nbMaximums = _sliceHistogram->nbMaximums();
@@ -841,6 +889,12 @@ void MainWindow::selectCurrentSectorInterval()
 
 void MainWindow::updateBillonPith()
 {
+	updateBillonPithAcc();
+	updateSliceHistogram();
+}
+
+void MainWindow::updateBillonPithAcc()
+{
 	if ( _billon )
 	{
 		_billonPithExtractor.setSubWindowWidth( _ui->_spinPithSubWindowWidth_billon->value() );
@@ -862,7 +916,6 @@ void MainWindow::updateBillonPith()
 		_ui->_spinHistogramNumberOfAngularSectors_zMotionAngular->setValue(TWO_PI*_treeRadius*_ui->_spinRestrictedAreaPercentage->value()/100.);
 	}
 	drawSlice();
-	updateSliceHistogram();
 }
 
 void MainWindow::updateSliceHistogram()
@@ -964,6 +1017,62 @@ void MainWindow::updateEllipticalAccumulationHistogram()
 	_plotEllipticalAccumulationHistogram->update( ellipticalHistogram );
 	_ui->_plotEllipticalAccumulationHistogram->setAxisScale(QwtPlot::xBottom,0,ellipticalHistogram.size());
 	_ui->_plotEllipticalAccumulationHistogram->replot();
+}
+
+void MainWindow::updateZMotionAcc()
+{
+	if ( _billon && _billon->hasPith() )
+	{
+		_zMotionAccumulator.setNbAngularSectors(_ui->_spinZMotionAccNbAngularSectors->value());
+		_zMotionAccumulator.setZMotionMin(_ui->_spinZMotionAccMin->value());
+		_zMotionAccumulator.setIntensityInterval(Interval<int>(_ui->_spinMinIntensity->value(), _ui->_spinMaxIntensity->value()));
+		_zMotionAccumulator.setRadiusAroundPith(_treeRadius*_ui->_spinRestrictedAreaPercentage->value()/100.);
+		_zMotionAccumulator.execute( *_billon, *_zMotionAccSlice, _billonPithExtractor.validSlices() );
+
+		_ui->_spinMaxMotionToDraw->setMaximum(_zMotionAccumulator.maxFindIntensity());
+		_ui->_sliderMotionToDraw->setMaximum(_zMotionAccumulator.maxFindIntensity());
+		_ui->_sliderMotionToDraw->setUpperValue(_zMotionAccumulator.maxFindIntensity());
+		_ui->_spinMinMotionToDraw->setMaximum(_zMotionAccumulator.maxFindIntensity());
+		_ui->_sliderMotionToDraw->setMinimum(0);
+		_ui->_sliderMotionToDraw->setLowerValue(0);
+	}
+	drawZMotionAcc();
+}
+
+void MainWindow::drawZMotionAcc()
+{
+	if ( _billon && _billon->hasPith() && _zMotionAccSlice )
+	{
+		const uint &width = _zMotionAccSlice->n_cols;
+		const uint &height = _zMotionAccSlice->n_rows;
+
+		_zMotionAccPix = QImage(width,height,QImage::Format_ARGB32);
+		_zMotionAccPix.fill(0xff000000);
+
+		QRgb * line = (QRgb *) _zMotionAccPix.bits();
+		uint color, i, j;
+
+		const int &minZmotionToDraw = _ui->_spinMinMotionToDraw->value();
+		const int &maxZmotionToDraw = _ui->_spinMaxMotionToDraw->value();
+
+		const qreal fact = 255.0/(maxZmotionToDraw-minZmotionToDraw);
+
+		for ( j=0 ; j<height ; ++j )
+		{
+			for ( i=0 ; i<width ; ++i )
+			{
+				color = (qMax(qMin(_zMotionAccSlice->at(i,j),maxZmotionToDraw),minZmotionToDraw)-minZmotionToDraw)*fact;
+				*(line++) = qRgb(color,color,color);
+			}
+		}
+	}
+	else
+	{
+		_zMotionAccPix = QImage(1,1,QImage::Format_ARGB32);
+	}
+
+	_labelZMotionAccView->resize( _zMotionAccZoomer.factor() * _zMotionAccPix.size() );
+	_labelZMotionAccView->setPixmap( QPixmap::fromImage(_zMotionAccPix).scaledToWidth(_zMotionAccZoomer.factor()*_zMotionAccPix.width(),Qt::FastTransformation) );
 }
 
 /********/
@@ -1127,21 +1236,27 @@ void MainWindow::export2DZMotion()
 
 				stream << "P2" << endl;
 				stream << PieChartSingleton::getInstance()->nbSectors() << " " << validSlices.size() << endl;
-				stream << "20000" << endl;
+				qint64 pos = stream.pos();
+				stream << "                " << endl;
 
 				for ( uint z=validSlices.min() ; z<validSlices.max() ; ++z )
 				{
 					sect.construct( *_billon, Interval<uint>(z,z), intensityInterval, _ui->_spinZMotionMin->value(), _treeRadius*_ui->_spinRestrictedAreaPercentage->value()/100. );
+//					TKD::meanSmoothingLoop<qreal>(sect.begin(),sect.end(),3);
 					QVector<qreal>::ConstIterator sectIter = sect.constBegin();
 					QVector<qreal>::ConstIterator sectIterEnd = sect.constEnd();
 					while ( sectIter != sectIterEnd )
 					{
-						stream << *sectIter << " ";
+						stream << (uint)(*sectIter) << " ";
 						max = qMax(max,*sectIter);
 						sectIter++;
 					}
 					stream << endl;
 				}
+
+				qDebug() << "Maximum de l'image de zMouvement 2D = " << max;
+				stream.seek(pos);
+				stream << (uint)(max);
 				file.close();
 
 				QMessageBox::information(this,tr("Exporter l'image 2D du z-mouvement"), tr("Export réussi !"));
