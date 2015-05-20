@@ -16,6 +16,7 @@ void ZMotionAccumulator::execute( const Billon &billon, Slice &slice, const Inte
 		slice.set_size(_nbAngularSectors,validSlices.size());
 
 		SectorHistogram sect;
+		uint oldNbAngularSectors = PieChartSingleton::getInstance()->nbSectors();
 		PieChartSingleton::getInstance()->setNumberOfAngularSectors(_nbAngularSectors);
 
 		_maxFindIntensity = 0;
@@ -34,6 +35,8 @@ void ZMotionAccumulator::execute( const Billon &billon, Slice &slice, const Inte
 				sliceIter++;
 			}
 		}
+
+		PieChartSingleton::getInstance()->setNumberOfAngularSectors(oldNbAngularSectors);
 	}
 }
 

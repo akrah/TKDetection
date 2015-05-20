@@ -1043,8 +1043,8 @@ void MainWindow::drawZMotionAcc()
 {
 	if ( _billon && _billon->hasPith() && _zMotionAccSlice )
 	{
-		const uint &width = _zMotionAccSlice->n_cols;
-		const uint &height = _zMotionAccSlice->n_rows;
+		const uint &width = _zMotionAccSlice->n_rows;
+		const uint &height = _zMotionAccSlice->n_cols;
 
 		_zMotionAccPix = QImage(width,height,QImage::Format_ARGB32);
 		_zMotionAccPix.fill(0xff000000);
@@ -1064,6 +1064,96 @@ void MainWindow::drawZMotionAcc()
 				color = (qMax(qMin(_zMotionAccSlice->at(i,j),maxZmotionToDraw),minZmotionToDraw)-minZmotionToDraw)*fact;
 				*(line++) = qRgb(color,color,color);
 			}
+		}
+
+		if ( _ui->_checkDrawKnotAreasOnZMotion2D->isChecked() && _sliceHistogram != 0 && _sliceHistogram->nbIntervals() > 0 )
+		{
+			QPainter painter(&_zMotionAccPix);
+
+			const uint &minValidSliceIndex = _billonPithExtractor.validSlices().min();
+//			QVector< Interval<uint> >::const_iterator sliceIntervalIter = _sliceHistogram->intervals().constBegin();
+
+//			while ( sliceIntervalIter != _sliceHistogram->intervals().constEnd() )
+//			{
+//				const Interval<uint> &interval = *sliceIntervalIter;
+//				painter.drawLine(0,interval.min()-minValidSliceIndex,width-1,interval.min()-minValidSliceIndex);
+//				painter.drawLine(0,interval.max()-minValidSliceIndex,width-1,interval.max()-minValidSliceIndex);
+//				sliceIntervalIter++;
+//			}
+
+//			if ( _currentSliceInterval && _sectorHistogram != 0 && _sectorHistogram->nbIntervals() > 0 )
+//			{
+//				QVector<QColor> colors;
+//				colors << Qt::blue << Qt::yellow << Qt::green << Qt::magenta << Qt::cyan << Qt::white;
+//				const int &nbAngularSectors = _sectorHistogram->nbIntervals();
+//				const int nbColors = colors.size();
+//				const int nbColorsToUse = qMax( nbAngularSectors>nbColors ? ((nbAngularSectors+1)/2)%nbColors : nbColors , 1 );
+
+//				const uint firstSliceIndex = _sliceHistogram->interval(_currentSliceInterval-1).min()-minValidSliceIndex;
+//				const uint lastSliceIndex = _sliceHistogram->interval(_currentSliceInterval-1).max()-minValidSliceIndex;
+//				QVector< Interval<uint> >::const_iterator angularIntervalIter = _sectorHistogram->intervals().constBegin();
+
+//				QColor currentColor;
+//				int colorIndex = 0;
+//				qreal coeffBillonToZMotion2D = _zMotionAccumulator.nbAngularSectors()/(qreal)PieChartSingleton::getInstance()->nbSectors();
+//				while ( angularIntervalIter != _sectorHistogram->intervals().constEnd() )
+//				{
+//					const Interval<uint> &interval = *angularIntervalIter;
+//					currentColor = colors[(colorIndex++)%nbColorsToUse];
+//					painter.setPen(currentColor);
+//					painter.drawLine(interval.min()*coeffBillonToZMotion2D+1, firstSliceIndex, interval.min()*coeffBillonToZMotion2D+1, lastSliceIndex);
+//					painter.drawLine(interval.max()*coeffBillonToZMotion2D-1, firstSliceIndex, interval.max()*coeffBillonToZMotion2D-1, lastSliceIndex);
+//					angularIntervalIter++;
+//				}
+//			}
+
+			QVector<QColor> colors;
+			colors << Qt::blue << Qt::yellow << Qt::green << Qt::magenta << Qt::cyan << Qt::white;
+			const int nbColors = colors.size();
+			int nbAngularSectors, nbColorsToUse, colorIndex;
+			QColor currentColor;
+
+			QVector< Interval<uint> >::const_iterator angularIntervalIter;
+			qreal coeffBillonToZMotion2D = _zMotionAccumulator.nbAngularSectors()/(qreal)PieChartSingleton::getInstance()->nbSectors();
+
+			uint oldSliceInterval = _currentSliceInterval;
+			uint firstSliceIndex, lastSliceIndex;
+			const int &nbSliceIntervals = _sliceHistogram->nbIntervals();
+
+			// Parcour de tous les intervalels de coupes
+			for ( int sliceIntervalleIndex = 0 ; sliceIntervalleIndex<nbSliceIntervals ; sliceIntervalleIndex++ )
+			{
+				const Interval<uint> &sliceInterval = _sliceHistogram->interval(sliceIntervalleIndex);
+				firstSliceIndex = sliceInterval.min()-minValidSliceIndex;
+				lastSliceIndex = sliceInterval.max()-minValidSliceIndex;
+
+				// Appel de la sélection de l'intervalle de coupe courant pour avoir les intervalles de secteurs angulaires
+				selectSliceInterval(sliceIntervalleIndex+1);
+				nbAngularSectors = _sectorHistogram->nbIntervals();
+				nbColorsToUse = qMax( nbAngularSectors>nbColors ? ((nbAngularSectors+1)/2)%nbColors : nbColors , 1 );
+				angularIntervalIter = _sectorHistogram->intervals().constBegin();
+				colorIndex = 0;
+
+				// Parcours de tous les intervalles de secteurs angulaires de l'intervalle de coupe courant
+				while ( angularIntervalIter != _sectorHistogram->intervals().constEnd() )
+				{
+					const Interval<uint> &interval = *angularIntervalIter;
+					currentColor = colors[(colorIndex++)%nbColorsToUse];
+
+					// Dessin de l'intervalle de secteur angulaires courant
+					painter.setPen(currentColor);
+					painter.drawLine(interval.min()*coeffBillonToZMotion2D+1, firstSliceIndex, interval.min()*coeffBillonToZMotion2D+1, lastSliceIndex);
+					painter.drawLine(interval.max()*coeffBillonToZMotion2D-1, firstSliceIndex, interval.max()*coeffBillonToZMotion2D-1, lastSliceIndex);
+					angularIntervalIter++;
+				}
+
+				// Dessins de l'intervalle de coupes
+				painter.setPen(Qt::red);
+				painter.drawLine(0,firstSliceIndex,width-1,firstSliceIndex);
+				painter.drawLine(0,lastSliceIndex,width-1,lastSliceIndex);
+			}
+			selectSliceInterval(oldSliceInterval);
+			painter.end();
 		}
 	}
 	else
@@ -1205,7 +1295,7 @@ void MainWindow::exportToPng()
 {
 	QString fileName = QFileDialog::getSaveFileName(this, tr("Exporter l'image courante en PNG"), "coupe.png",
 													tr("Fichiers PNG (*.png);;Tous les fichiers (*.*)"));
-	QImage &image = _ui->_tabsViews->currentWidget() == _ui->_tabBillon ?_mainPix:_tangentialPix;
+	QImage &image = _ui->_tabsViews->currentWidget() == _ui->_tabBillon ?_mainPix: _ui->_tabsViews->currentWidget() == _ui->_tabEllipses ? _tangentialPix : _zMotionAccPix;
 	if ( !fileName.isEmpty() && image.save(fileName) )
 		QMessageBox::information(this,tr("Export de l'image courante en PNG"), tr("Export réussi !"));
 	else
@@ -1235,9 +1325,12 @@ void MainWindow::export2DZMotion()
 				qreal max = 0;
 
 				stream << "P2" << endl;
-				stream << PieChartSingleton::getInstance()->nbSectors() << " " << validSlices.size() << endl;
+				stream << _zMotionAccumulator.nbAngularSectors() << " " << validSlices.size() << endl;
 				qint64 pos = stream.pos();
 				stream << "                " << endl;
+
+				uint oldNbAngularSectors = PieChartSingleton::getInstance()->nbSectors();
+				PieChartSingleton::getInstance()->setNumberOfAngularSectors(_zMotionAccumulator.nbAngularSectors());
 
 				for ( uint z=validSlices.min() ; z<validSlices.max() ; ++z )
 				{
@@ -1253,6 +1346,8 @@ void MainWindow::export2DZMotion()
 					}
 					stream << endl;
 				}
+
+				PieChartSingleton::getInstance()->setNumberOfAngularSectors(oldNbAngularSectors);
 
 				qDebug() << "Maximum de l'image de zMouvement 2D = " << max;
 				stream.seek(pos);
