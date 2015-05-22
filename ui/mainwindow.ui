@@ -2347,20 +2347,9 @@ l'intervalle angulaire</string>
             <string>Version Accumulation</string>
            </property>
            <layout class="QFormLayout" name="formLayout_16">
-            <item row="0" column="1">
-             <widget class="QPushButton" name="_buttonComputePithAcc">
-              <property name="text">
-               <string>Calculer la moelle</string>
-              </property>
-             </widget>
-            </item>
-            <item row="0" column="0">
-             <widget class="QLabel" name="label_49">
-              <property name="text">
-               <string>1. Moelle</string>
-              </property>
-             </widget>
-            </item>
+            <property name="fieldGrowthPolicy">
+             <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
+            </property>
             <item row="1" column="0">
              <widget class="QLabel" name="label_54">
               <property name="text">
@@ -2372,6 +2361,20 @@ l'intervalle angulaire</string>
              <widget class="QPushButton" name="_buttonComputeZMotionAcc">
               <property name="text">
                <string>Calculer l'accumulation</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="0">
+             <widget class="QLabel" name="label_49">
+              <property name="text">
+               <string>1. Moelle</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="1">
+             <widget class="QPushButton" name="_buttonComputePithAcc">
+              <property name="text">
+               <string>Calculer la moelle</string>
               </property>
              </widget>
             </item>
@@ -3106,8 +3109,27 @@ l'intervalle angulaire</string>
             <layout class="QVBoxLayout" name="verticalLayout_18">
              <item>
               <widget class="QPushButton" name="_buttonExport2DZMotion">
+               <property name="font">
+                <font>
+                 <weight>50</weight>
+                 <bold>false</bold>
+                </font>
+               </property>
                <property name="text">
-                <string>Exporter</string>
+                <string>Exporter l'image</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="_buttonExportOldKnotAreaCoordOnZMotion2DImage">
+               <property name="font">
+                <font>
+                 <weight>50</weight>
+                 <bold>false</bold>
+                </font>
+               </property>
+               <property name="text">
+                <string>Exporter les coorodnnées des zones de nœuds</string>
                </property>
               </widget>
              </item>

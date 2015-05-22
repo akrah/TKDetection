@@ -90,6 +90,7 @@ private slots:
 	void exportToSdp();
 	void exportToPng();
 	void export2DZMotion();
+	void export2DKnotAreaCoordinates();
 
 private:
 	void openNewBillon( const QString &fileName );

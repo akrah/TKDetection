@@ -206,6 +206,7 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 	QObject::connect(_ui->_spinMinMotionToDraw, SIGNAL(valueChanged(int)), _ui->_sliderMotionToDraw, SLOT(setLowerValue(int)));
 	QObject::connect(_ui->_sliderMotionToDraw, SIGNAL(lowerValueChanged(int)), _ui->_spinMinMotionToDraw, SLOT(setValue(int)));
 	QObject::connect(_ui->_sliderMotionToDraw, SIGNAL(lowerValueChanged(int)), this, SLOT(drawZMotionAcc()));
+	QObject::connect(_ui->_checkDrawKnotAreasOnZMotion2D, SIGNAL(clicked()), this, SLOT(drawZMotionAcc()));
 
 	/***********************************
 	* Évènements de l'onglet "Processus"
@@ -244,6 +245,7 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 	QObject::connect(_ui->_buttonExportToPNG, SIGNAL(clicked()), this, SLOT(exportToPng()));
 	// Onglet "Export de l'image de Z-Mouvement 2D"
 	QObject::connect(_ui->_buttonExport2DZMotion, SIGNAL(clicked()), this, SLOT(export2DZMotion()));
+	QObject::connect(_ui->_buttonExportOldKnotAreaCoordOnZMotion2DImage, SIGNAL(clicked()), this, SLOT(export2DKnotAreaCoordinates()));
 
 	/*************************************
 	* Évènements du panneau "Histogrammes"
@@ -1355,6 +1357,79 @@ void MainWindow::export2DZMotion()
 				file.close();
 
 				QMessageBox::information(this,tr("Exporter l'image 2D du z-mouvement"), tr("Export réussi !"));
+			}
+		}
+	}
+}
+
+void MainWindow::export2DKnotAreaCoordinates()
+{
+	if ( _billon && _billon->hasPith() )
+	{
+		QString fileName = QFileDialog::getSaveFileName(this, tr("Exporter les coordonnées des zones de nœuds dans l'image d'accumulation 2D du z-mouvement"), "zmotion2D_knotAresCoords.sdp",
+														tr("Fichiers SDP (*.sdp);;Tous les fichiers (*.*)"));
+		if ( !fileName.isEmpty() )
+		{
+			QFile file(fileName);
+			if ( file.open(QIODevice::WriteOnly) )
+			{
+				QTextStream stream(&file);
+
+				stream << "##### Anciennes zones de nœuds #####" << endl;
+				stream << "# Dimensions de l'image dasn laquelle ces coorodnnées sont valides" << endl;
+				stream << "# width (Nombre de secteurs angulaires) | height (nombres de coupes)" << endl;
+				stream << _zMotionAccumulator.nbAngularSectors() << " " << _billonPithExtractor.validSlices().size() << endl;
+				stream << endl;
+
+				stream << "# Nombre de zones de nœuds" << endl;
+				qint64 pos = stream.pos();
+				stream << "          " << endl;
+
+				stream << "# Liste des coordonnées min et max de toutes les zones de nœuds" << endl;
+				stream << "# xMin   yMin   xMax   yMax" << endl;
+
+				QVector< Interval<uint> >::const_iterator angularIntervalIter;
+				qreal coeffBillonToZMotion2D = _zMotionAccumulator.nbAngularSectors()/(qreal)PieChartSingleton::getInstance()->nbSectors();
+
+
+				const uint &minValidSliceIndex = _billonPithExtractor.validSlices().min();
+
+				uint oldSliceInterval = _currentSliceInterval;
+				uint firstSliceIndex, lastSliceIndex;
+				const int &nbSliceIntervals = _sliceHistogram->nbIntervals();
+				int nbCC = 0;
+
+				// Parcour de tous les intervalels de coupes
+				for ( int sliceIntervalleIndex = 0 ; sliceIntervalleIndex<nbSliceIntervals ; sliceIntervalleIndex++ )
+				{
+					const Interval<uint> &sliceInterval = _sliceHistogram->interval(sliceIntervalleIndex);
+					firstSliceIndex = sliceInterval.min()-minValidSliceIndex;
+					lastSliceIndex = sliceInterval.max()-minValidSliceIndex;
+
+					// Appel de la sélection de l'intervalle de coupe courant pour avoir les intervalles de secteurs angulaires
+					selectSliceInterval(sliceIntervalleIndex+1);
+					angularIntervalIter = _sectorHistogram->intervals().constBegin();
+
+					// Parcours de tous les intervalles de secteurs angulaires de l'intervalle de coupe courant
+					while ( angularIntervalIter != _sectorHistogram->intervals().constEnd() )
+					{
+						const Interval<uint> &interval = *angularIntervalIter;
+						nbCC++;
+
+						// Écriture des coordonnées min/max la zone de nœud courante
+						stream << (int)((interval.min()+1)*coeffBillonToZMotion2D) << " " << firstSliceIndex << " " <<
+								  (int)((interval.max()-1)*coeffBillonToZMotion2D) << " " << lastSliceIndex << endl;
+						angularIntervalIter++;
+					}
+				}
+
+				stream.seek(pos);
+				stream << nbCC;
+				file.close();
+
+				selectSliceInterval(oldSliceInterval);
+
+				QMessageBox::information(this,tr("Exporter des coordonnées des zones de nœuds dans l'image d'accumulation 2D du z-mouvement"), tr("Export réussi !"));
 			}
 		}
 	}
