@@ -1378,7 +1378,7 @@ void MainWindow::export2DKnotAreaCoordinates()
 				stream << "##### Anciennes zones de nœuds #####" << endl;
 				stream << "# Dimensions de l'image dasn laquelle ces coorodnnées sont valides" << endl;
 				stream << "# width (Nombre de secteurs angulaires) | height (nombres de coupes)" << endl;
-				stream << _zMotionAccumulator.nbAngularSectors() << " " << _billonPithExtractor.validSlices().size() << endl;
+				stream << "# " << _zMotionAccumulator.nbAngularSectors() << " " << _billonPithExtractor.validSlices().size() << endl;
 				stream << endl;
 
 				stream << "# Nombre de zones de nœuds" << endl;
@@ -1386,7 +1386,7 @@ void MainWindow::export2DKnotAreaCoordinates()
 				stream << "          " << endl;
 
 				stream << "# Liste des coordonnées min et max de toutes les zones de nœuds" << endl;
-				stream << "# xMin   yMin   xMax   yMax" << endl;
+				stream << "# xMin   yMin   xMax   yMax redColor greenColor blueColor" << endl;
 
 				QVector< Interval<uint> >::const_iterator angularIntervalIter;
 				qreal coeffBillonToZMotion2D = _zMotionAccumulator.nbAngularSectors()/(qreal)PieChartSingleton::getInstance()->nbSectors();
@@ -1399,6 +1399,12 @@ void MainWindow::export2DKnotAreaCoordinates()
 				const int &nbSliceIntervals = _sliceHistogram->nbIntervals();
 				int nbCC = 0;
 
+				QVector<QColor> colors;
+				colors << Qt::blue << Qt::yellow << Qt::green << Qt::magenta << Qt::cyan << Qt::white;
+				const int nbColors = colors.size();
+				int nbAngularSectors, nbColorsToUse, colorIndex;
+				QColor currentColor;
+
 				// Parcour de tous les intervalels de coupes
 				for ( int sliceIntervalleIndex = 0 ; sliceIntervalleIndex<nbSliceIntervals ; sliceIntervalleIndex++ )
 				{
@@ -1410,21 +1416,27 @@ void MainWindow::export2DKnotAreaCoordinates()
 					selectSliceInterval(sliceIntervalleIndex+1);
 					angularIntervalIter = _sectorHistogram->intervals().constBegin();
 
+					nbAngularSectors = _sectorHistogram->nbIntervals();
+					nbColorsToUse = qMax( nbAngularSectors>nbColors ? ((nbAngularSectors+1)/2)%nbColors : nbColors , 1 );
+					colorIndex = 0;
+
 					// Parcours de tous les intervalles de secteurs angulaires de l'intervalle de coupe courant
 					while ( angularIntervalIter != _sectorHistogram->intervals().constEnd() )
 					{
 						const Interval<uint> &interval = *angularIntervalIter;
 						nbCC++;
+						currentColor = colors[(colorIndex++)%nbColorsToUse];
 
 						// Écriture des coordonnées min/max la zone de nœud courante
 						stream << (int)((interval.min()+1)*coeffBillonToZMotion2D) << " " << firstSliceIndex << " " <<
-								  (int)((interval.max()-1)*coeffBillonToZMotion2D) << " " << lastSliceIndex << endl;
+								  (int)((interval.max()-1)*coeffBillonToZMotion2D) << " " << lastSliceIndex << " " <<
+								  currentColor.red() << " " << currentColor.green() << " " << currentColor.blue() << endl;
 						angularIntervalIter++;
 					}
 				}
 
 				stream.seek(pos);
-				stream << nbCC;
+				stream << "# " << nbCC;
 				file.close();
 
 				selectSliceInterval(oldSliceInterval);
@@ -2337,6 +2349,10 @@ void MainWindow::exportPithOfBillonToSdp()
 				QTextStream stream(&file);
 
 				stream << "# SDP (Sequence of Discrete Points)" << endl;
+				stream << "# Valid slice interval" << endl;
+				stream << "# zMin   zMax" << endl;
+				stream << _billonPithExtractor.validSlices().min() << " " << _billonPithExtractor.validSlices().max() << endl;
+				stream << "# Pith coords" << endl;
 				stream << "# x   y" << endl;
 
 				for ( int i=0 ; i<_billon->pith().size() ; ++i )
