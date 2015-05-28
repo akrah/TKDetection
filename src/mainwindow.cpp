@@ -1261,7 +1261,7 @@ void MainWindow::exportToPgm3D()
 		case 2: exportImageSliceIntervalToPgm3d();	break;
 		case 3: exportImageCartesianSliceIntervalToPgm3d();	break;
 
-	default: break;
+	default: QMessageBox::warning(this,tr("Exporter en PGM3D"),tr("Non disponible.")); break;
 	}
 }
 
@@ -1273,7 +1273,7 @@ void MainWindow::exportToV3D()
 //		case 0: exportCurrentSegmentedKnotToV3D();	break;
 //		case 1: exportSegmentedKnotsOfCurrentSliceIntervalToV3D();	break;
 //		case 2: exportAllSegmentedKnotsOfBillonToV3D(); break;
-		default: break;
+		default: QMessageBox::warning(this,tr("Exporter en V3D"),tr("Non disponible.")); break;
 	}
 }
 
@@ -1288,7 +1288,7 @@ void MainWindow::exportToSdp()
 		case 4 : exportSegmentedKnotsOfCurrentSliceIntervalToSdp( _ui->_checkBoxKeepBillonSliceNumber->isChecked() ); break;
 		case 5 : exportAllSegmentedKnotsOfBillonToSdp(); break;
 		case 6 : exportPithOfBillonToSdp(); break;
-		default : break;
+		default : QMessageBox::warning(this,tr("Exporter en SDP"),tr("Non disponible.")); break;
 	}
 }
 
