@@ -551,7 +551,7 @@ void MainWindow::drawTangentialView()
 {
 	if ( _tangentialBillon )
 	{
-		const TKD::ViewType viewType = static_cast<const TKD::ViewType>(_ui->_comboViewType->currentIndex())==TKD::HOUGH?TKD::HOUGH:TKD::CLASSIC;
+		const TKD::ViewType viewType = static_cast<const TKD::ViewType>(_ui->_comboViewType->currentIndex());
 		const TKD::ProjectionType projectionType = static_cast<const TKD::ProjectionType>( _ui->_comboProjectionType->currentIndex() );
 
 		const uint &currentSlice = projectionType == TKD::Y_PROJECTION?
@@ -1297,7 +1297,7 @@ void MainWindow::exportToPng()
 {
 	QString fileName = QFileDialog::getSaveFileName(this, tr("Exporter l'image courante en PNG"), "coupe.png",
 													tr("Fichiers PNG (*.png);;Tous les fichiers (*.*)"));
-	QImage &image = _ui->_tabsViews->currentWidget() == _ui->_tabBillon ?_mainPix: _ui->_tabsViews->currentWidget() == _ui->_tabEllipses ? _tangentialPix : _zMotionAccPix;
+	QImage &image = _ui->_tabsViews->currentWidget() == _ui->_tabBillon ?_mainPix: _ui->_tabsViews->currentWidget() == _ui->_tabTangential ? _tangentialPix : _zMotionAccPix;
 	if ( !fileName.isEmpty() && image.save(fileName) )
 		QMessageBox::information(this,tr("Export de l'image courante en PNG"), tr("Export réussi !"));
 	else
