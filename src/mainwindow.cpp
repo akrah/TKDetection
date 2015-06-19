@@ -8,6 +8,7 @@
 #include "inc/dicomreader.h"
 #include "inc/ellipticalaccumulationhistogram.h"
 #include "inc/globalfunctions.h"
+#include "inc/knotareadetector.h"
 #include "inc/knotellipseradiihistogram.h"
 #include "inc/knotpithprofile.h"
 #include "inc/pith.h"
@@ -1031,6 +1032,10 @@ void MainWindow::updateZMotionAcc()
 		_zMotionAccumulator.setRadiusAroundPith(_treeRadius*_ui->_spinRestrictedAreaPercentage->value()/100.);
 		_zMotionAccumulator.execute( *_billon, *_zMotionAccSlice, _billonPithExtractor.validSlices() );
 
+		_knotAreaDetector.setBinarizationThreshold(_ui->_spinSupportingAreaBinarization->value());
+		_knotAreaDetector.setMaxComponentDistance(_ui->_spinSupportingAreaDistance->value());
+		_knotAreaDetector.execute( *_zMotionAccSlice );
+
 		_ui->_spinMaxMotionToDraw->setMaximum(_zMotionAccumulator.maxFindIntensity());
 		_ui->_sliderMotionToDraw->setMaximum(_zMotionAccumulator.maxFindIntensity());
 		_ui->_sliderMotionToDraw->setUpperValue(_zMotionAccumulator.maxFindIntensity());
@@ -1068,11 +1073,17 @@ void MainWindow::drawZMotionAcc()
 			}
 		}
 
-		if ( _ui->_checkDrawKnotAreasOnZMotion2D->isChecked() && _sliceHistogram != 0 && _sliceHistogram->nbIntervals() > 0 )
+//		if ( _ui->_checkDrawKnotAreasOnZMotion2D->isChecked() && _sliceHistogram != 0 && _sliceHistogram->nbIntervals() > 0 )
+		if ( _knotAreaDetector.hasSupportingAreas() )
 		{
 			QPainter painter(&_zMotionAccPix);
 
-			const uint &minValidSliceIndex = _billonPithExtractor.validSlices().min();
+			// Commun aux deux premiers affichages
+//			const uint &minValidSliceIndex = _billonPithExtractor.validSlices().min();
+
+//***************************************************************************************************************************
+// Dessin du verticille courant.
+
 //			QVector< Interval<uint> >::const_iterator sliceIntervalIter = _sliceHistogram->intervals().constBegin();
 
 //			while ( sliceIntervalIter != _sliceHistogram->intervals().constEnd() )
@@ -1109,53 +1120,75 @@ void MainWindow::drawZMotionAcc()
 //				}
 //			}
 
+
+//***************************************************************************************************************************
+// Dessin de tous les verticilles.
+
+//			QVector<QColor> colors;
+//			colors << Qt::blue << Qt::yellow << Qt::green << Qt::magenta << Qt::cyan << Qt::white;
+//			const int nbColors = colors.size();
+//			int nbAngularSectors, nbColorsToUse, colorIndex;
+//			QColor currentColor;
+
+//			QVector< Interval<uint> >::const_iterator angularIntervalIter;
+//			qreal coeffBillonToZMotion2D = _zMotionAccumulator.nbAngularSectors()/(qreal)PieChartSingleton::getInstance()->nbSectors();
+
+//			uint oldSliceInterval = _currentSliceInterval;
+//			uint firstSliceIndex, lastSliceIndex;
+//			const int &nbSliceIntervals = _sliceHistogram->nbIntervals();
+
+//			// Parcour de tous les intervalels de coupes
+//			for ( int sliceIntervalleIndex = 0 ; sliceIntervalleIndex<nbSliceIntervals ; sliceIntervalleIndex++ )
+//			{
+//				const Interval<uint> &sliceInterval = _sliceHistogram->interval(sliceIntervalleIndex);
+//				firstSliceIndex = sliceInterval.min()-minValidSliceIndex;
+//				lastSliceIndex = sliceInterval.max()-minValidSliceIndex;
+
+//				// Appel de la sélection de l'intervalle de coupe courant pour avoir les intervalles de secteurs angulaires
+//				selectSliceInterval(sliceIntervalleIndex+1);
+//				nbAngularSectors = _sectorHistogram->nbIntervals();
+//				nbColorsToUse = qMax( nbAngularSectors>nbColors ? ((nbAngularSectors+1)/2)%nbColors : nbColors , 1 );
+//				angularIntervalIter = _sectorHistogram->intervals().constBegin();
+//				colorIndex = 0;
+
+//				// Parcours de tous les intervalles de secteurs angulaires de l'intervalle de coupe courant
+//				while ( angularIntervalIter != _sectorHistogram->intervals().constEnd() )
+//				{
+//					const Interval<uint> &interval = *angularIntervalIter;
+//					currentColor = colors[(colorIndex++)%nbColorsToUse];
+
+//					// Dessin de l'intervalle de secteur angulaires courant
+//					painter.setPen(currentColor);
+//					painter.drawLine(interval.min()*coeffBillonToZMotion2D+1, firstSliceIndex, interval.min()*coeffBillonToZMotion2D+1, lastSliceIndex);
+//					painter.drawLine(interval.max()*coeffBillonToZMotion2D-1, firstSliceIndex, interval.max()*coeffBillonToZMotion2D-1, lastSliceIndex);
+//					angularIntervalIter++;
+//				}
+
+//				// Dessins de l'intervalle de coupes
+//				painter.setPen(Qt::red);
+//				painter.drawLine(0,firstSliceIndex,width-1,firstSliceIndex);
+//				painter.drawLine(0,lastSliceIndex,width-1,lastSliceIndex);
+//			}
+//			selectSliceInterval(oldSliceInterval);
+//			painter.end();
+
+
+//***************************************************************************************************************************
+// Dessin des nouvelles zones de nœuds
+
 			QVector<QColor> colors;
 			colors << Qt::blue << Qt::yellow << Qt::green << Qt::magenta << Qt::cyan << Qt::white;
 			const int nbColors = colors.size();
-			int nbAngularSectors, nbColorsToUse, colorIndex;
 			QColor currentColor;
 
-			QVector< Interval<uint> >::const_iterator angularIntervalIter;
-			qreal coeffBillonToZMotion2D = _zMotionAccumulator.nbAngularSectors()/(qreal)PieChartSingleton::getInstance()->nbSectors();
-
-			uint oldSliceInterval = _currentSliceInterval;
-			uint firstSliceIndex, lastSliceIndex;
-			const int &nbSliceIntervals = _sliceHistogram->nbIntervals();
-
-			// Parcour de tous les intervalels de coupes
-			for ( int sliceIntervalleIndex = 0 ; sliceIntervalleIndex<nbSliceIntervals ; sliceIntervalleIndex++ )
+			QVectorIterator<QRect> supportingAreaIter(_knotAreaDetector.supportingAreaVector());
+			int colorIndex = 0;
+			while ( supportingAreaIter.hasNext() )
 			{
-				const Interval<uint> &sliceInterval = _sliceHistogram->interval(sliceIntervalleIndex);
-				firstSliceIndex = sliceInterval.min()-minValidSliceIndex;
-				lastSliceIndex = sliceInterval.max()-minValidSliceIndex;
-
-				// Appel de la sélection de l'intervalle de coupe courant pour avoir les intervalles de secteurs angulaires
-				selectSliceInterval(sliceIntervalleIndex+1);
-				nbAngularSectors = _sectorHistogram->nbIntervals();
-				nbColorsToUse = qMax( nbAngularSectors>nbColors ? ((nbAngularSectors+1)/2)%nbColors : nbColors , 1 );
-				angularIntervalIter = _sectorHistogram->intervals().constBegin();
-				colorIndex = 0;
-
-				// Parcours de tous les intervalles de secteurs angulaires de l'intervalle de coupe courant
-				while ( angularIntervalIter != _sectorHistogram->intervals().constEnd() )
-				{
-					const Interval<uint> &interval = *angularIntervalIter;
-					currentColor = colors[(colorIndex++)%nbColorsToUse];
-
-					// Dessin de l'intervalle de secteur angulaires courant
-					painter.setPen(currentColor);
-					painter.drawLine(interval.min()*coeffBillonToZMotion2D+1, firstSliceIndex, interval.min()*coeffBillonToZMotion2D+1, lastSliceIndex);
-					painter.drawLine(interval.max()*coeffBillonToZMotion2D-1, firstSliceIndex, interval.max()*coeffBillonToZMotion2D-1, lastSliceIndex);
-					angularIntervalIter++;
-				}
-
-				// Dessins de l'intervalle de coupes
-				painter.setPen(Qt::red);
-				painter.drawLine(0,firstSliceIndex,width-1,firstSliceIndex);
-				painter.drawLine(0,lastSliceIndex,width-1,lastSliceIndex);
+				currentColor = colors[(colorIndex++)%nbColors];
+				painter.setPen(currentColor);
+				painter.drawRect(supportingAreaIter.next());
 			}
-			selectSliceInterval(oldSliceInterval);
-			painter.end();
 		}
 	}
 	else

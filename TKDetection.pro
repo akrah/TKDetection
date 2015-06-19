@@ -45,6 +45,7 @@ SOURCES	=	src/main.cpp \
 			src/dicomreader.cpp \
 			src/ellipticalaccumulationhistogram.cpp \
 			src/globalfunctions.cpp \
+			src/knotareadetector.cpp \
 			src/knotellipseradiihistogram.cpp \
 			src/knotpithprofile.cpp \
 			src/lowess.cpp \
@@ -86,6 +87,7 @@ HEADERS	=	inc/billon.h \
 			inc/globalfunctions.h \
 			inc/histogram.h \
 			inc/interval.h \
+			inc/knotareadetector.h \
 			inc/knotellipseradiihistogram.h \
 			inc/knotpithprofile.h \
 			inc/lowess.h \

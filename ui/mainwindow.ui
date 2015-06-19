@@ -440,7 +440,7 @@
               <x>0</x>
               <y>0</y>
               <width>371</width>
-              <height>163</height>
+              <height>198</height>
              </rect>
             </property>
             <attribute name="label">
@@ -2119,45 +2119,94 @@ coupes valides à extrapoler</string>
         </attribute>
         <layout class="QVBoxLayout" name="verticalLayout_21">
          <item>
-          <layout class="QFormLayout" name="formLayout_17">
-           <item row="0" column="0">
-            <widget class="QLabel" name="label_55">
-             <property name="text">
-              <string>Z-Mouvement minimum</string>
-             </property>
-            </widget>
-           </item>
-           <item row="0" column="1">
-            <widget class="QSpinBox" name="_spinZMotionAccMin">
-             <property name="minimum">
-              <number>0</number>
-             </property>
-             <property name="maximum">
-              <number>3000</number>
-             </property>
-             <property name="value">
-              <number>200</number>
-             </property>
-            </widget>
-           </item>
-           <item row="1" column="0">
-            <widget class="QLabel" name="label_56">
-             <property name="text">
-              <string>Nombre de secteurs angulaires</string>
-             </property>
-            </widget>
-           </item>
-           <item row="1" column="1">
-            <widget class="QSpinBox" name="_spinZMotionAccNbAngularSectors">
-             <property name="maximum">
-              <number>3600</number>
-             </property>
-             <property name="value">
-              <number>500</number>
-             </property>
-            </widget>
-           </item>
-          </layout>
+          <widget class="QGroupBox" name="groupBox_5">
+           <property name="title">
+            <string>Image d'accumulation</string>
+           </property>
+           <layout class="QFormLayout" name="formLayout_19">
+            <item row="0" column="0">
+             <widget class="QLabel" name="label_55">
+              <property name="text">
+               <string>Z-Mouvement minimum</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="1">
+             <widget class="QSpinBox" name="_spinZMotionAccMin">
+              <property name="minimum">
+               <number>0</number>
+              </property>
+              <property name="maximum">
+               <number>3000</number>
+              </property>
+              <property name="value">
+               <number>200</number>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="0">
+             <widget class="QLabel" name="label_56">
+              <property name="text">
+               <string>Nombre de secteurs angulaires</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="1">
+             <widget class="QSpinBox" name="_spinZMotionAccNbAngularSectors">
+              <property name="maximum">
+               <number>3600</number>
+              </property>
+              <property name="value">
+               <number>500</number>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </widget>
+         </item>
+         <item>
+          <widget class="QGroupBox" name="groupBox_6">
+           <property name="title">
+            <string>Calcul des supports de nœuds</string>
+           </property>
+           <layout class="QFormLayout" name="formLayout_17">
+            <item row="0" column="0">
+             <widget class="QLabel" name="label_64">
+              <property name="text">
+               <string>Seuil de binarization</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="1">
+             <widget class="QSpinBox" name="_spinSupportingAreaBinarization">
+              <property name="maximum">
+               <number>20000</number>
+              </property>
+              <property name="value">
+               <number>100</number>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="0">
+             <widget class="QLabel" name="label_65">
+              <property name="text">
+               <string>Distance entre 2
+composantes connexes</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="1">
+             <widget class="QSpinBox" name="_spinSupportingAreaDistance">
+              <property name="maximum">
+               <number>100</number>
+              </property>
+              <property name="value">
+               <number>20</number>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </widget>
          </item>
          <item>
           <widget class="QGroupBox" name="groupBox_4">
@@ -3100,7 +3149,7 @@ l'intervalle angulaire</string>
               <x>0</x>
               <y>0</y>
               <width>371</width>
-              <height>76</height>
+              <height>111</height>
              </rect>
             </property>
             <attribute name="label">

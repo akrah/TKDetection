@@ -9,11 +9,11 @@ ZMotionAccumulator::ZMotionAccumulator() : _intensityInterval(Interval<int>(MINI
 {
 }
 
-void ZMotionAccumulator::execute( const Billon &billon, Slice &slice, const Interval<uint> &validSlices )
+void ZMotionAccumulator::execute(const Billon &billon, Slice &accumulationSlice, const Interval<uint> &validSlices )
 {
 	if ( billon.hasPith() )
 	{
-		slice.set_size(_nbAngularSectors,validSlices.size());
+		accumulationSlice.set_size(_nbAngularSectors,validSlices.size());
 
 		SectorHistogram sect;
 		uint oldNbAngularSectors = PieChartSingleton::getInstance()->nbSectors();
@@ -26,13 +26,13 @@ void ZMotionAccumulator::execute( const Billon &billon, Slice &slice, const Inte
 			sect.construct( billon, Interval<uint>(z,z), _intensityInterval, _zMotionMin, _radiusAroundPith );
 			QVector<qreal>::ConstIterator sectIter = sect.constBegin();
 			QVector<qreal>::ConstIterator sectIterEnd = sect.constEnd();
-			Slice::col_iterator sliceIter = slice.begin_col(z-validSlices.min());
+			Slice::col_iterator accumulationSliceIter = accumulationSlice.begin_col(z-validSlices.min());
 			while ( sectIter != sectIterEnd )
 			{
-				*sliceIter = (__billon_type__)(*sectIter);
+				*accumulationSliceIter = (__billon_type__)(*sectIter);
 				_maxFindIntensity = qMax(_maxFindIntensity,*sectIter);
 				sectIter++;
-				sliceIter++;
+				accumulationSliceIter++;
 			}
 		}
 

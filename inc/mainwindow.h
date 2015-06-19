@@ -7,6 +7,7 @@
 #include "def/def_billon.h"
 #include "def/def_coordinate.h"
 #include "slicezoomer.h"
+#include "inc/knotareadetector.h"
 #include "inc/pithextractorboukadida.h"
 #include "inc/tangentialtransform.h"
 #include "inc/zmotionaccumulator.h"
@@ -172,6 +173,7 @@ private:
 	TangentialTransform _tangentialTransform;
 
 	ZMotionAccumulator _zMotionAccumulator;
+	KnotAreaDetector _knotAreaDetector;
 
 	uint _currentSliceInterval;
 	uint _currentSectorInterval;
