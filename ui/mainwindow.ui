@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>731</width>
-    <height>578</height>
+    <height>653</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -149,7 +149,7 @@
              <property name="geometry">
               <rect>
                <x>106</x>
-               <y>204</y>
+               <y>242</y>
                <width>0</width>
                <height>0</height>
               </rect>
@@ -252,7 +252,7 @@
              <property name="geometry">
               <rect>
                <x>0</x>
-               <y>89</y>
+               <y>127</y>
                <width>390</width>
                <height>234</height>
               </rect>
@@ -279,7 +279,7 @@
       </widget>
       <widget class="QWidget" name="tab">
        <attribute name="title">
-        <string>Accumulation Z-mouvement</string>
+        <string>Carte d'accumulation</string>
        </attribute>
        <layout class="QVBoxLayout" name="verticalLayout_19">
         <item>
@@ -309,7 +309,7 @@
            <property name="geometry">
             <rect>
              <x>0</x>
-             <y>3</y>
+             <y>40</y>
              <width>241</width>
              <height>465</height>
             </rect>
@@ -440,7 +440,7 @@
               <x>0</x>
               <y>0</y>
               <width>371</width>
-              <height>198</height>
+              <height>238</height>
              </rect>
             </property>
             <attribute name="label">
@@ -1075,7 +1075,7 @@ sur une coupe valide</string>
               <x>0</x>
               <y>0</y>
               <width>417</width>
-              <height>292</height>
+              <height>294</height>
              </rect>
             </property>
             <attribute name="label">
@@ -2115,7 +2115,7 @@ coupes valides à extrapoler</string>
        </widget>
        <widget class="QWidget" name="tab_6">
         <attribute name="title">
-         <string>ZMotion Acc</string>
+         <string>Carte d'accumulation</string>
         </attribute>
         <layout class="QVBoxLayout" name="verticalLayout_21">
          <item>
@@ -2132,7 +2132,7 @@ coupes valides à extrapoler</string>
              </widget>
             </item>
             <item row="0" column="1">
-             <widget class="QSpinBox" name="_spinZMotionAccMin">
+             <widget class="QSpinBox" name="_spinZMotionMapMin">
               <property name="minimum">
                <number>0</number>
               </property>
@@ -2152,7 +2152,7 @@ coupes valides à extrapoler</string>
              </widget>
             </item>
             <item row="1" column="1">
-             <widget class="QSpinBox" name="_spinZMotionAccNbAngularSectors">
+             <widget class="QSpinBox" name="_spinZMotionMapNbAngularSectors">
               <property name="maximum">
                <number>3600</number>
               </property>
@@ -2205,6 +2205,21 @@ composantes connexes</string>
               </property>
              </widget>
             </item>
+            <item row="2" column="0">
+             <widget class="QLabel" name="label_49">
+              <property name="text">
+               <string>Nombre de pixel minimum
+d'une composante connexe</string>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="1">
+             <widget class="QSpinBox" name="_spinSupportingAreaMinSize">
+              <property name="maximum">
+               <number>100</number>
+              </property>
+             </widget>
+            </item>
            </layout>
           </widget>
          </item>
@@ -2225,35 +2240,19 @@ composantes connexes</string>
             <item row="1" column="1">
              <layout class="QHBoxLayout" name="horizontalLayout">
               <item>
-               <widget class="QSpinBox" name="_spinMinMotionToDraw">
-                <property name="maximum">
-                 <number>50000</number>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QxtSpanSlider" name="_sliderMotionToDraw">
-                <property name="maximum">
-                 <number>50000</number>
-                </property>
+               <widget class="QSlider" name="_sliderZMotionToDraw">
                 <property name="orientation">
                  <enum>Qt::Horizontal</enum>
                 </property>
-                <property name="upperValue" stdset="0">
-                 <number>20000</number>
-                </property>
-                <property name="upperPosition" stdset="0">
-                 <number>20000</number>
-                </property>
                </widget>
               </item>
               <item>
-               <widget class="QSpinBox" name="_spinMaxMotionToDraw">
+               <widget class="QSpinBox" name="_spinZMotionToDraw">
                 <property name="maximum">
-                 <number>50000</number>
+                 <number>1000</number>
                 </property>
                 <property name="value">
-                 <number>20000</number>
+                 <number>200</number>
                 </property>
                </widget>
               </item>
@@ -2268,7 +2267,7 @@ de nœuds</string>
              </widget>
             </item>
             <item row="2" column="1">
-             <widget class="QCheckBox" name="_checkDrawKnotAreasOnZMotion2D">
+             <widget class="QCheckBox" name="_checkDrawKnotAreasOnZMotionMap">
               <property name="text">
                <string/>
               </property>
@@ -2288,41 +2287,55 @@ de nœuds</string>
         </attribute>
         <layout class="QVBoxLayout" name="verticalLayout_20">
          <item>
+          <layout class="QFormLayout" name="formLayout_20">
+           <item row="0" column="0">
+            <widget class="QLabel" name="label_11">
+             <property name="text">
+              <string/>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="1">
+            <widget class="QPushButton" name="_buttonComputePith">
+             <property name="text">
+              <string>1. Calculer la moelle</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+         <item>
           <widget class="QGroupBox" name="groupBox_2">
            <property name="title">
-            <string>Version verticilles</string>
+            <string>Avec les verticilles</string>
            </property>
-           <layout class="QFormLayout" name="formLayout">
-            <item row="0" column="0">
-             <widget class="QLabel" name="label_11">
+           <layout class="QVBoxLayout" name="verticalLayout_23">
+            <item>
+             <widget class="QPushButton" name="_buttonUpdateSliceHistogram">
+              <property name="toolTip">
+               <string>Mettre à jour l'histogramme</string>
+              </property>
               <property name="text">
-               <string>1. Moelle</string>
+               <string>2. Détecter les verticilles</string>
               </property>
              </widget>
             </item>
-            <item row="1" column="0">
-             <widget class="QLabel" name="label_28">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="text">
-               <string>2. Sélection de
-l'intervalle de coupes</string>
-              </property>
-             </widget>
-            </item>
-            <item row="0" column="1">
-             <widget class="QPushButton" name="_buttonComputePith">
-              <property name="text">
-               <string>Calculer la moelle</string>
-              </property>
-             </widget>
-            </item>
-            <item row="1" column="1">
+            <item>
              <layout class="QHBoxLayout" name="horizontalLayout_15">
+              <item>
+               <widget class="QLabel" name="label_28">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="text">
+                 <string>3. Sélection du
+verticille</string>
+                </property>
+               </widget>
+              </item>
               <item>
                <widget class="QComboBox" name="_comboSelectSliceInterval">
                 <item>
@@ -2347,16 +2360,16 @@ l'intervalle de coupes</string>
               </item>
              </layout>
             </item>
-            <item row="2" column="0">
-             <widget class="QLabel" name="label_4">
-              <property name="text">
-               <string>3. Sélection de
-l'intervalle angulaire</string>
-              </property>
-             </widget>
-            </item>
-            <item row="2" column="1">
+            <item>
              <layout class="QHBoxLayout" name="horizontalLayout_19">
+              <item>
+               <widget class="QLabel" name="label_4">
+                <property name="text">
+                 <string>4. Sélection du
+secteur angulaire</string>
+                </property>
+               </widget>
+              </item>
               <item>
                <widget class="QComboBox" name="_comboSelectSectorInterval">
                 <property name="sizePolicy">
@@ -2393,42 +2406,59 @@ l'intervalle angulaire</string>
          <item>
           <widget class="QGroupBox" name="groupBox_3">
            <property name="title">
-            <string>Version Accumulation</string>
+            <string>Avec la cartes d'accumulation</string>
            </property>
-           <layout class="QFormLayout" name="formLayout_16">
-            <property name="fieldGrowthPolicy">
-             <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
-            </property>
-            <item row="1" column="0">
-             <widget class="QLabel" name="label_54">
+           <layout class="QVBoxLayout" name="verticalLayout_22">
+            <item>
+             <widget class="QPushButton" name="_buttonComputeZMotionMap">
               <property name="text">
-               <string>2. Image d'accumulation</string>
+               <string>2. Calculer la carte d'accumulation</string>
               </property>
              </widget>
             </item>
-            <item row="1" column="1">
-             <widget class="QPushButton" name="_buttonComputeZMotionAcc">
+            <item>
+             <widget class="QPushButton" name="_buttonComputeKnotAreas">
               <property name="text">
-               <string>Calculer l'accumulation</string>
+               <string>3. Calculer les zones de nœuds</string>
               </property>
              </widget>
             </item>
-            <item row="0" column="0">
-             <widget class="QLabel" name="label_49">
-              <property name="text">
-               <string>1. Moelle</string>
-              </property>
-             </widget>
-            </item>
-            <item row="0" column="1">
-             <widget class="QPushButton" name="_buttonComputePithAcc">
-              <property name="text">
-               <string>Calculer la moelle</string>
-              </property>
-             </widget>
+            <item>
+             <layout class="QHBoxLayout" name="horizontalLayout_18">
+              <item>
+               <widget class="QLabel" name="label_54">
+                <property name="text">
+                 <string>4. Sélection de la
+zone de nœuds</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QComboBox" name="_comboSelectKnotArea">
+                <item>
+                 <property name="text">
+                  <string>Aucune</string>
+                 </property>
+                </item>
+               </widget>
+              </item>
+             </layout>
             </item>
            </layout>
           </widget>
+         </item>
+         <item>
+          <spacer name="verticalSpacer_4">
+           <property name="orientation">
+            <enum>Qt::Vertical</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>20</width>
+             <height>40</height>
+            </size>
+           </property>
+          </spacer>
          </item>
         </layout>
        </widget>
@@ -3149,7 +3179,7 @@ l'intervalle angulaire</string>
               <x>0</x>
               <y>0</y>
               <width>371</width>
-              <height>111</height>
+              <height>151</height>
              </rect>
             </property>
             <attribute name="label">
@@ -3208,7 +3238,7 @@ l'intervalle angulaire</string>
         <enum>QTabWidget::South</enum>
        </property>
        <property name="currentIndex">
-        <number>4</number>
+        <number>0</number>
        </property>
        <widget class="QWidget" name="_tabSliceHistogram">
         <attribute name="title">
@@ -3244,12 +3274,9 @@ l'intervalle angulaire</string>
             </spacer>
            </item>
            <item>
-            <widget class="QPushButton" name="_buttonUpdateSliceHistogram">
-             <property name="toolTip">
-              <string>Mettre à jour l'histogramme</string>
-             </property>
+            <widget class="QLabel" name="label_67">
              <property name="text">
-              <string>Mettre à jour</string>
+              <string>Sélection des maximums</string>
              </property>
             </widget>
            </item>
@@ -3431,7 +3458,6 @@ l'intervalle angulaire</string>
   <tabstop>_buttonExportToSDP</tabstop>
   <tabstop>tabWidget</tabstop>
   <tabstop>_buttonPreviousMaximum</tabstop>
-  <tabstop>_buttonUpdateSliceHistogram</tabstop>
   <tabstop>_buttonNextMaximum</tabstop>
   <tabstop>_sliderSelectYSlice</tabstop>
   <tabstop>_scrollSliceView</tabstop>

@@ -6,7 +6,7 @@
 
 #include <QDebug>
 
-KnotAreaDetector::KnotAreaDetector() : _binarizationThreshold(100), _maximumConnectedComponentDistance(20)
+KnotAreaDetector::KnotAreaDetector() : _binarizationThreshold(100), _maximumConnectedComponentDistance(20), _minimumConnectedComponentSize(0)
 {
 }
 
@@ -21,18 +21,6 @@ void KnotAreaDetector::execute( const Slice &accumulationSlice )
 	QMap<int, QList<iCoord2D> > ccList;
 	// Compute thImage as the binarized image of imageAcc using tBin
 	computeLabelledImage( accumulationSlice, labelledSlice, ccList );
-
-//	QMapIterator<int, QList<iCoord2D> > iter(connectedComponentList);
-//	while ( iter.hasNext() )
-//	{
-//		iter.next();
-//		const QList<iCoord2D> &pixels = iter.value();
-//		qDebug() << "Composate num " << iter.key() ;
-//		for ( int i=0 ; i<pixels.size() ; ++i )
-//		{
-//			qDebug() << "   (" <<  pixels[i].x << ", " << pixels[i].y << ")";
-//		}
-//	}
 
 	// Sort all pixels of imageAcc by decreasing value order into sortedPixels
 	arma::Col<uint> sortedPixelIndex = arma::sort_index(arma::vectorise(accumulationSlice), "descend");
@@ -76,17 +64,20 @@ void KnotAreaDetector::execute( const Slice &accumulationSlice )
 	while ( supportingAreaMapIter.hasNext() )
 	{
 		supportingAreaMapIter.next();
-		QListIterator<iCoord2D> supportingAreaIter(supportingAreaMapIter.value());
-		if ( supportingAreaIter.hasNext() )
+		if ( supportingAreaMapIter.value().size() >= _minimumConnectedComponentSize )
 		{
-			const iCoord2D &firstCoord = supportingAreaIter.next();
-			supportingArea.setCoords( firstCoord.x, firstCoord.y, firstCoord.x, firstCoord.y );
-			while ( supportingAreaIter.hasNext() )
+			QListIterator<iCoord2D> supportingAreaIter(supportingAreaMapIter.value());
+			if ( supportingAreaIter.hasNext() )
 			{
-				const iCoord2D &coord = supportingAreaIter.next();
-				supportingArea.setCoords( qMin(supportingArea.left(), coord.x), qMin(supportingArea.top(), coord.y), qMax(supportingArea.right(), coord.x), qMax(supportingArea.bottom(), coord.y) );
+				const iCoord2D &firstCoord = supportingAreaIter.next();
+				supportingArea.setCoords( firstCoord.x, firstCoord.y, firstCoord.x, firstCoord.y );
+				while ( supportingAreaIter.hasNext() )
+				{
+					const iCoord2D &coord = supportingAreaIter.next();
+					supportingArea.setCoords( qMin(supportingArea.left(), coord.x), qMin(supportingArea.top(), coord.y), qMax(supportingArea.right(), coord.x), qMax(supportingArea.bottom(), coord.y) );
+				}
+				_supportingAreaVector.append(supportingArea);
 			}
-			_supportingAreaVector.append(supportingArea);
 		}
 	}
 }
@@ -212,9 +203,14 @@ const __billon_type__ &KnotAreaDetector::binarizationThreshold() const
 {
 	return _binarizationThreshold;
 }
-const qreal &KnotAreaDetector::maxComponentDistance() const
+const qreal &KnotAreaDetector::maximumConnectedComponentDistance() const
 {
 	return _maximumConnectedComponentDistance;
+}
+
+const uint &KnotAreaDetector::minimumConnectedComponentSize() const
+{
+	return _minimumConnectedComponentSize;
 }
 
 const QVector<QRect> &KnotAreaDetector::supportingAreaVector() const
@@ -232,7 +228,12 @@ void KnotAreaDetector::setBinarizationThreshold( const __billon_type__ &newThres
 	_binarizationThreshold = newThreshold;
 }
 
-void KnotAreaDetector::setMaxComponentDistance( const qreal &newDistance )
+void KnotAreaDetector::setMaximumConnectedComponentDistance( const qreal &newDistance )
 {
 	_maximumConnectedComponentDistance = newDistance;
+}
+
+void KnotAreaDetector::setMinimumConnectedComponentSize( const uint &size )
+{
+	_minimumConnectedComponentSize = size;
 }

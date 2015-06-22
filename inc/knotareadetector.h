@@ -20,18 +20,21 @@ public:
 	void findNearestConnectedComponent( const QList<iCoord2D> &currentCC, const QMap<int, QList<iCoord2D> > &supportingAreaList , int &ccMin, qreal &minDist );
 
 	const __billon_type__ &binarizationThreshold() const;
-	const qreal &maxComponentDistance() const;
+	const qreal &maximumConnectedComponentDistance() const;
+	const uint &minimumConnectedComponentSize() const;
 	const QVector<QRect> &supportingAreaVector() const;
 
 	bool hasSupportingAreas() const;
 
 	void setBinarizationThreshold( const __billon_type__ &newThreshold );
-	void setMaxComponentDistance( const qreal &newDistance );
+	void setMaximumConnectedComponentDistance( const qreal &newDistance );
+	void setMinimumConnectedComponentSize( const uint &size );
 
 
 private:
 	__billon_type__ _binarizationThreshold;
 	qreal _maximumConnectedComponentDistance;
+	uint _minimumConnectedComponentSize;
 
 	QVector<QRect> _supportingAreaVector;
 };

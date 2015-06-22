@@ -65,21 +65,21 @@ private slots:
 	void setTangentialYSlice( const int &yPosition );
 	void setSectorNumber( const int &value );
 
-	void selectSliceInterval( const int &index );
+	void selectSliceInterval( const int &index , const bool &draw = true );
 	void selectCurrentSliceInterval();
 	void selectSectorInterval( const int &index, const bool &draw = true );
 	void selectCurrentSectorInterval();
 
-	void updateBillonPith();
-	void updateSliceHistogram();
-	void updateSectorHistogram( const Interval<uint> &interval );
-	void updateKnotPithProfile();
-	void updateKnotEllipseRadiiHistogram();
+	void computeSliceHistogram();
+	void computeSectorHistogram( const Interval<uint> &interval );
+	void computeKnotPithProfile();
+	void computeKnotEllipseRadiiHistogram();
 	void updateEllipticalAccumulationHistogram();
 
-	void updateBillonPithAcc();
-	void updateZMotionAcc();
-	void drawZMotionAcc();
+	void computeBillonPith();
+	void computeZMotionMap();
+	void computeKnotAreas();
+	void drawZMotionMap();
 
 	void resetHistogramDefaultValuesZMotion();
 	void resetHistogramDefaultValuesZMotionAngular();
@@ -136,11 +136,11 @@ private:
 	Ui::MainWindow *_ui;
 	QLabel *_labelSliceView;
 	QLabel *_labelTangentialView;
-	QLabel *_labelZMotionAccView;
+	QLabel *_labelZMotionMapView;
 
 	Billon *_billon;
 	Billon *_tangentialBillon;
-	Slice *_zMotionAccSlice;
+	Slice *_zMotionMapSlice;
 
 	QImage _mainPix;
 	SliceZoomer _sliceZoomer;
@@ -148,8 +148,8 @@ private:
 	QImage _tangentialPix;
 	SliceZoomer _tangentialZoomer;
 
-	QImage _zMotionAccPix;
-	SliceZoomer _zMotionAccZoomer;
+	QImage _zMotionMapPix;
+	SliceZoomer _zMotionMapZoomer;
 
 	SliceView *_sliceView;
 
