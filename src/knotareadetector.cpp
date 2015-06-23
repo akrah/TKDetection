@@ -163,7 +163,7 @@ void KnotAreaDetector::computeLabelledImage( const Slice &accumulationSlice, Sli
 					label = labelledSlice(j,i);
 				}
 				if (!ccList.contains(label)) ccList[label] = QList<iCoord2D>();
-				ccList[label].append(iCoord2D(j,i));
+				ccList[label].append(iCoord2D(i,j));
 			}
 		}
 	}

@@ -9,6 +9,7 @@
 
 class PiePart;
 class QImage;
+class QColor;
 template <typename T> class Interval;
 
 class PieChart
@@ -26,6 +27,7 @@ public:
 
 	void draw( QImage &image, const uiCoord2D &center, const uint &sectorIdx, const TKD::ProjectionType &viewType ) const;
 	void draw( QImage &image, const uiCoord2D &center, const QVector<Interval<uint> > &angleIntervals, const TKD::ProjectionType &viewType ) const;
+	void draw2( QImage &image, const uiCoord2D &center, const QVector<Interval<uint> > &angleIntervals, const TKD::ProjectionType &viewType, const QVector<QColor> &colors ) const;
 
 private:
 	QVector<PiePart> _sectors;

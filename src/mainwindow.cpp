@@ -542,25 +542,37 @@ void MainWindow::drawSlice()
 			}
 			if ( _knotAreaDetector.hasSupportingAreas() && _ui->_comboSelectKnotArea->currentIndex() )
 			{
+				uint oldNbAngularSectors = PieChartSingleton::getInstance()->nbSectors();
+				PieChartSingleton::getInstance()->setNumberOfAngularSectors(_zMotionAccumulator.nbAngularSectors());
 				const PieChartSingleton &pieChart = *(PieChartSingleton::getInstance());
-				const qreal angleFactor = TWO_PI/(qreal)(_zMotionMapSlice->n_cols);
+				const qreal angleFactor = TWO_PI/(qreal)(_zMotionMapSlice->n_rows);
 				const uint &firstValidSlice = _billonPithExtractor.validSlices().min();
 
 				QVector< Interval<uint> > angleIntervalsToDraw;
+				QVector<QColor> intervalsColors;
+
+				QVector<QColor> colors;
+				colors << Qt::blue << Qt::yellow << Qt::green << Qt::magenta << Qt::cyan << Qt::white;
+				int nbColors = colors.size();
+				int colorIndex=0;
 
 				QVectorIterator<QRect> supportingAreaIter(_knotAreaDetector.supportingAreaVector());
 				while ( supportingAreaIter.hasNext() )
 				{
 					const QRect &currentSupportingArea = supportingAreaIter.next();
 //					const QRect &currentSupportingArea = _knotAreaDetector.supportingAreaVector()[_ui->_comboSelectKnotArea->currentIndex()-1];
-					if ( currentSupportingArea.top()+firstValidSlice <= currentSlice && currentSupportingArea.bottom()+firstValidSlice >= currentSlice )
+					if ( currentSupportingArea.left()+firstValidSlice <= currentSlice && currentSupportingArea.right()+firstValidSlice >= currentSlice )
 					{
-						Interval<uint> angleInterval( pieChart.sectorIndexOfAngle( currentSupportingArea.left()*angleFactor ), pieChart.sectorIndexOfAngle( currentSupportingArea.right()*angleFactor ) );
+						Interval<uint> angleInterval( pieChart.sectorIndexOfAngle( currentSupportingArea.top()*angleFactor ), pieChart.sectorIndexOfAngle( currentSupportingArea.bottom()*angleFactor ) );
 						angleIntervalsToDraw.append( angleInterval );
+						intervalsColors.append(colors[colorIndex%nbColors]);
 					}
+					colorIndex++;
 				}
 
-				pieChart.draw(_mainPix, pithCoord, angleIntervalsToDraw, projectionType);
+				pieChart.draw2(_mainPix, pithCoord, angleIntervalsToDraw, projectionType, intervalsColors );
+
+				PieChartSingleton::getInstance()->setNumberOfAngularSectors(oldNbAngularSectors);
 			}
 		}
 	}
@@ -1107,8 +1119,8 @@ void MainWindow::drawZMotionMap()
 {
 	if ( _billon && _billon->hasPith() && _zMotionMapSlice )
 	{
-		const uint &width = _zMotionMapSlice->n_rows;
-		const uint &height = _zMotionMapSlice->n_cols;
+		const uint &width = _zMotionMapSlice->n_cols;
+		const uint &height = _zMotionMapSlice->n_rows;
 
 		_zMotionMapPix = QImage(width,height,QImage::Format_ARGB32);
 		_zMotionMapPix.fill(0xff000000);
@@ -1123,7 +1135,7 @@ void MainWindow::drawZMotionMap()
 		{
 			for ( i=0 ; i<width ; ++i )
 			{
-				color = _zMotionMapSlice->at(i,j)>zMotionToDraw?255:0;
+				color = _zMotionMapSlice->at(j,i)>zMotionToDraw?255:0;
 				*(line++) = qRgb(color,color,color);
 			}
 		}

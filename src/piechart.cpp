@@ -177,3 +177,66 @@ void PieChart::draw( QImage &image, const uiCoord2D &center, const QVector< Inte
 		}
 	}
 }
+
+void PieChart::draw2(QImage &image, const uiCoord2D &center, const QVector< Interval<uint> > &angleIntervals, const TKD::ProjectionType & viewType, const QVector<QColor> & colors ) const
+{
+	if ( !angleIntervals.isEmpty() && angleIntervals.size() == colors.size() )
+	{
+		// Liste qui va contenir les angles des deux côté du secteur à dessiner
+		// Permet de factoriser le code de calcul des coordonnées juste en dessous
+		QVector<qreal> twoSides;
+		QVector< Interval<uint> >::ConstIterator interval;
+		for ( interval = angleIntervals.constBegin() ; interval < angleIntervals.constEnd() ; ++interval )
+		{
+			twoSides.append( sector((*interval).min()).maxAngle() );
+			twoSides.append( sector((*interval).max()).minAngle() );
+		}
+
+		// Dessin des deux côtés du secteur
+		const int &width = image.width();
+		const int &height = image.height();
+
+		QColor currentColor;
+		iCoord2D end;
+		qreal angle;
+		int colorIndex = 0;
+
+		QPainter painter(&image);
+		QVector<qreal>::ConstIterator side;
+		if ( viewType == TKD::Z_PROJECTION )
+		{
+			for ( side = twoSides.constBegin() ; side != twoSides.constEnd() ; ++side )
+			{
+				// Calcul des coordonnées du segment à tracer
+				currentColor = colors[colorIndex++/2];
+				painter.setPen(currentColor);
+				painter.setBrush(currentColor);
+				angle = *side;
+				end = center;
+				if ( qFuzzyCompare(angle,PI_ON_TWO) ) end.y = height;
+				else if ( qFuzzyCompare(angle,THREE_PI_ON_TWO) ) end.y = 0;
+				else
+				{
+					const qreal a = qTan(angle);
+					const qreal b = center.y - (a*center.x);
+					if ( (angle < PI_ON_TWO) || (angle > THREE_PI_ON_TWO) ) end = iCoord2D(width,a*width+b);
+					else end = iCoord2D(0,b);
+				}
+				// Tracé du segment
+				painter.drawLine(center.x,center.y,end.x,end.y);
+			}
+		}
+		else if ( viewType == TKD::POLAR_PROJECTION )
+		{
+			for ( side = twoSides.constBegin() ; side != twoSides.constEnd() ; ++side )
+			{
+				currentColor = colors[colorIndex++/2];
+				painter.setPen(currentColor);
+				painter.setBrush(currentColor);
+				angle = (*side)*width/TWO_PI;
+				// Tracé du segment
+				painter.drawLine(angle,0,angle,height);
+			}
+		}
+	}
+}
