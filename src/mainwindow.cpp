@@ -481,8 +481,7 @@ void MainWindow::drawSlice()
 				}
 				if ( _currentSectorInterval && _tangentialBillon )
 				{
-					QVector<QColor> colors;
-					colors << Qt::blue << Qt::yellow << Qt::green << Qt::magenta << Qt::cyan << Qt::white;
+					const QVector<QColor> &colors = TKD::KnotAreaColors;
 					const int nbColorsToUse = qMax( _sectorHistogram->intervals().size()>colors.size() ? ((_sectorHistogram->intervals().size()+1)/2)%colors.size() : colors.size() , 1 );
 					QColor currentColor = colors[(_currentSectorInterval-1)%nbColorsToUse];
 
@@ -540,9 +539,9 @@ void MainWindow::drawSlice()
 					painter.end();
 				}
 			}
-			if ( _knotAreaDetector.hasSupportingAreas() && _ui->_comboSelectKnotArea->currentIndex() )
+			if ( _knotAreaDetector.hasSupportingAreas() && _ui->_checkDrawKnotAreasOnZMotionMap->isChecked() )
 			{
-				uint oldNbAngularSectors = PieChartSingleton::getInstance()->nbSectors();
+				const uint oldNbAngularSectors = PieChartSingleton::getInstance()->nbSectors();
 				PieChartSingleton::getInstance()->setNumberOfAngularSectors(_zMotionAccumulator.nbAngularSectors());
 				const PieChartSingleton &pieChart = *(PieChartSingleton::getInstance());
 				const qreal angleFactor = TWO_PI/(qreal)(_zMotionMapSlice->n_rows);
@@ -551,9 +550,8 @@ void MainWindow::drawSlice()
 				QVector< Interval<uint> > angleIntervalsToDraw;
 				QVector<QColor> intervalsColors;
 
-				QVector<QColor> colors;
-				colors << Qt::blue << Qt::yellow << Qt::green << Qt::magenta << Qt::cyan << Qt::white;
-				int nbColors = colors.size();
+				const QVector<QColor> &colors = TKD::KnotAreaColors;
+				const int nbColors = colors.size();
 				int colorIndex=0;
 
 				QVectorIterator<QRect> supportingAreaIter(_knotAreaDetector.supportingAreaVector());
@@ -570,7 +568,7 @@ void MainWindow::drawSlice()
 					colorIndex++;
 				}
 
-				pieChart.draw2(_mainPix, pithCoord, angleIntervalsToDraw, projectionType, intervalsColors );
+				pieChart.draw(_mainPix, pithCoord, angleIntervalsToDraw, projectionType, intervalsColors );
 
 				PieChartSingleton::getInstance()->setNumberOfAngularSectors(oldNbAngularSectors);
 			}
@@ -638,8 +636,7 @@ void MainWindow::drawTangentialView()
 
 		if ( projectionType == TKD::Z_PROJECTION && _ui->_checkTangentialDrawEllipses->isChecked() )
 		{
-			QVector<QColor> colors;
-			colors << Qt::blue << Qt::yellow << Qt::green << Qt::magenta << Qt::cyan << Qt::white;
+			const QVector<QColor> &colors = TKD::KnotAreaColors;
 			const int nbKnotAreas = _sectorHistogram->intervals().size();
 			const int nbColorsToUse = qMax( nbKnotAreas>colors.size() ? ((nbKnotAreas+1)/2)%colors.size() : colors.size() , 1 );
 			const QColor currentColor = colors[(_currentSectorInterval-1)%nbColorsToUse];
@@ -1163,8 +1160,7 @@ void MainWindow::drawZMotionMap()
 
 //			if ( _currentSliceInterval && _sectorHistogram != 0 && _sectorHistogram->nbIntervals() > 0 )
 //			{
-//				QVector<QColor> colors;
-//				colors << Qt::blue << Qt::yellow << Qt::green << Qt::magenta << Qt::cyan << Qt::white;
+//				const QVector<QColor> &colors = TKD::KnotAreaColors;
 //				const int &nbAngularSectors = _sectorHistogram->nbIntervals();
 //				const int nbColors = colors.size();
 //				const int nbColorsToUse = qMax( nbAngularSectors>nbColors ? ((nbAngularSectors+1)/2)%nbColors : nbColors , 1 );
@@ -1191,8 +1187,7 @@ void MainWindow::drawZMotionMap()
 //***************************************************************************************************************************
 // Dessin de tous les verticilles.
 
-//			QVector<QColor> colors;
-//			colors << Qt::blue << Qt::yellow << Qt::green << Qt::magenta << Qt::cyan << Qt::white;
+//			const QVector<QColor> &colors = TKD::KnotAreaColors;
 //			const int nbColors = colors.size();
 //			int nbAngularSectors, nbColorsToUse, colorIndex;
 //			QColor currentColor;
@@ -1243,8 +1238,7 @@ void MainWindow::drawZMotionMap()
 //***************************************************************************************************************************
 // Dessin des nouvelles zones de nœuds
 
-			QVector<QColor> colors;
-			colors << Qt::blue << Qt::yellow << Qt::green << Qt::magenta << Qt::cyan << Qt::white;
+			const QVector<QColor> &colors = TKD::KnotAreaColors;
 			const int nbColors = colors.size();
 			QColor currentColor;
 
@@ -1508,8 +1502,7 @@ void MainWindow::export2DKnotAreaCoordinates()
 				const int &nbSliceIntervals = _sliceHistogram->nbIntervals();
 				int nbCC = 0;
 
-				QVector<QColor> colors;
-				colors << Qt::blue << Qt::yellow << Qt::green << Qt::magenta << Qt::cyan << Qt::white;
+				const QVector<QColor> &colors = TKD::KnotAreaColors;
 				const int nbColors = colors.size();
 				int nbAngularSectors, nbColorsToUse, colorIndex;
 				QColor currentColor;

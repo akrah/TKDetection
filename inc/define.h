@@ -2,6 +2,9 @@
 #define DEFINE_H
 
 #include <QtGlobal>
+#include <QVector>
+#include <QColor>
+#include <qnamespace.h>
 
 namespace TKD
 {
@@ -137,7 +140,7 @@ namespace TKD
 
 
 /*************************************
- * Enumerations
+ * Structures
  *************************************/
 
 	struct HistogramParameters
@@ -149,6 +152,15 @@ namespace TKD
 		uint minimumWidthOfIntervals;
 		bool loop;
 	};
+
+	struct structKnotAreaColors
+	{
+		QVector<QColor> colors;
+		structKnotAreaColors() { colors << Qt::blue << Qt::yellow << Qt::green << Qt::magenta << Qt::cyan << Qt::white; }
+	};
+
+	const QVector<QColor> KnotAreaColors = structKnotAreaColors().colors;
 }
+
 
 #endif // DEFINE_H

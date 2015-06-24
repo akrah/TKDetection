@@ -26,8 +26,7 @@ public:
 	void setNumberOfAngularSectors( const uint &nbSectors );
 
 	void draw( QImage &image, const uiCoord2D &center, const uint &sectorIdx, const TKD::ProjectionType &viewType ) const;
-	void draw( QImage &image, const uiCoord2D &center, const QVector<Interval<uint> > &angleIntervals, const TKD::ProjectionType &viewType ) const;
-	void draw2( QImage &image, const uiCoord2D &center, const QVector<Interval<uint> > &angleIntervals, const TKD::ProjectionType &viewType, const QVector<QColor> &colors ) const;
+	void draw( QImage &image, const uiCoord2D &center, const QVector<Interval<uint> > &angleIntervals, const TKD::ProjectionType &viewType, const QVector<QColor> &colors = TKD::KnotAreaColors ) const;
 
 private:
 	QVector<PiePart> _sectors;
