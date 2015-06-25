@@ -29,6 +29,7 @@ public:
 	void setBinarizationThreshold( const __billon_type__ &newThreshold );
 	void setMaximumConnectedComponentDistance( const qreal &newDistance );
 	void setMinimumConnectedComponentSize( const uint &size );
+	void clearKnotAreas();
 
 
 private:

@@ -13,7 +13,7 @@ KnotAreaDetector::KnotAreaDetector() : _binarizationThreshold(100), _maximumConn
 void KnotAreaDetector::execute( const Slice &accumulationSlice )
 {
 	// Initialize supportingAreaList to an empty list
-	_supportingAreaVector.clear();
+	clearKnotAreas();
 
 	// Binarized version of accumulationSlice with _binarizationThreshold threshold
 	Slice labelledSlice( accumulationSlice.n_rows, accumulationSlice.n_cols, arma::fill::zeros );
@@ -236,4 +236,9 @@ void KnotAreaDetector::setMaximumConnectedComponentDistance( const qreal &newDis
 void KnotAreaDetector::setMinimumConnectedComponentSize( const uint &size )
 {
 	_minimumConnectedComponentSize = size;
+}
+
+void KnotAreaDetector::clearKnotAreas()
+{
+	_supportingAreaVector.clear();
 }

@@ -539,7 +539,7 @@ void MainWindow::drawSlice()
 					painter.end();
 				}
 			}
-			if ( _knotAreaDetector.hasSupportingAreas() && _ui->_checkDrawKnotAreasOnZMotionMap->isChecked() )
+			if ( _zMotionMapSlice && _knotAreaDetector.hasSupportingAreas() && _ui->_checkDrawKnotAreasOnZMotionMap->isChecked() )
 			{
 				const uint oldNbAngularSectors = PieChartSingleton::getInstance()->nbSectors();
 				PieChartSingleton::getInstance()->setNumberOfAngularSectors(_zMotionAccumulator.nbAngularSectors());
@@ -1066,7 +1066,9 @@ void MainWindow::computeZMotionMap()
 	{
 		delete _zMotionMapSlice;
 		_zMotionMapSlice = 0;
+		_knotAreaDetector.clearKnotAreas();
 	}
+
 	if ( _billon && _billon->hasPith() )
 	{
 		_zMotionMapSlice = new Slice(0,0);
@@ -1114,7 +1116,7 @@ void MainWindow::computeKnotAreas()
 
 void MainWindow::drawZMotionMap()
 {
-	if ( _billon && _billon->hasPith() && _zMotionMapSlice )
+	if ( _zMotionMapSlice )
 	{
 		const uint &width = _zMotionMapSlice->n_cols;
 		const uint &height = _zMotionMapSlice->n_rows;
