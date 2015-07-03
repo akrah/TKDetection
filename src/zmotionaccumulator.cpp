@@ -4,20 +4,19 @@
 #include "inc/piechart.h"
 #include "inc/sectorhistogram.h"
 
-ZMotionAccumulator::ZMotionAccumulator() : _intensityInterval(Interval<int>(MINIMUM_INTENSITY,MAXIMUM_INTENSITY)),
-	_zMotionMin(MINIMUM_Z_MOTION), _radiusAroundPith(100), _nbAngularSectors(RESTRICTED_AREA_DEFAULT_RESOLUTION), _maxFindIntensity(0.)
+ZMotionAccumulator::ZMotionAccumulator() : _pieChart(PieChart(500)), _intensityInterval(Interval<int>(MINIMUM_INTENSITY,MAXIMUM_INTENSITY)),
+	_zMotionMin(MINIMUM_Z_MOTION), _radiusAroundPith(100), _maxFindIntensity(0.)
 {
 }
 
-void ZMotionAccumulator::execute(const Billon &billon, Slice &accumulationSlice, const Interval<uint> &validSlices )
+void ZMotionAccumulator::execute( const Billon &billon, Slice &accumulationSlice, const Interval<uint> &validSlices )
 {
 	if ( billon.hasPith() )
 	{
-		accumulationSlice.set_size(_nbAngularSectors,validSlices.size());
+		accumulationSlice.set_size(_pieChart.nbSectors(),validSlices.size());
 
 		SectorHistogram sect;
-		uint oldNbAngularSectors = PieChartSingleton::getInstance()->nbSectors();
-		PieChartSingleton::getInstance()->setNumberOfAngularSectors(_nbAngularSectors);
+		sect.pieChart().setNumberOfAngularSectors(_pieChart.nbSectors());
 
 		_maxFindIntensity = 0;
 
@@ -35,9 +34,17 @@ void ZMotionAccumulator::execute(const Billon &billon, Slice &accumulationSlice,
 				accumulationSliceIter++;
 			}
 		}
-
-		PieChartSingleton::getInstance()->setNumberOfAngularSectors(oldNbAngularSectors);
 	}
+}
+
+PieChart &ZMotionAccumulator::pieChart()
+{
+	return _pieChart;
+}
+
+const PieChart &ZMotionAccumulator::pieChart() const
+{
+	return _pieChart;
 }
 
 const Interval<int> &ZMotionAccumulator::intensityOInterval() const
@@ -53,11 +60,6 @@ const uint &ZMotionAccumulator::zMotionMin() const
 const uint &ZMotionAccumulator::radiusAroundPith() const
 {
 	return _radiusAroundPith;
-}
-
-const uint &ZMotionAccumulator::nbAngularSectors() const
-{
-	return _nbAngularSectors;
 }
 
 const qreal &ZMotionAccumulator::maxFindIntensity() const
@@ -80,7 +82,3 @@ void ZMotionAccumulator::setRadiusAroundPith( const uint radius )
 	_radiusAroundPith = radius;
 }
 
-void ZMotionAccumulator::setNbAngularSectors( const uint &nbAngularSectors )
-{
-	_nbAngularSectors = nbAngularSectors;
-}

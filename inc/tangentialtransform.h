@@ -5,6 +5,7 @@
 #include "def/def_coordinate.h"
 #include "interval.h"
 #include "inc/coordinate.h"
+#include "inc/piechart.h"
 
 #include <QtGlobal>
 #include <QQuaternion>
@@ -16,11 +17,11 @@ public:
 	TangentialTransform( const TangentialTransform &tangentialTransform );
 	virtual ~TangentialTransform();
 
-	Billon* execute(const Billon &billon );
+	Billon* execute( const Billon &billon, const PieChart &pieChart );
 
 	void setSliceInterval( const Billon &billon, const Interval<uint> &sliceInterval );
-	void setAngularInterval( const Billon &billon, const Interval<uint> &angularInterval );
-	void updateIntervals( const Billon &billon, const Interval<uint> &sliceInterval, const Interval<uint> &angularInterval );
+	void setAngularInterval( const Billon &billon, const Interval<uint> &angularInterval , const PieChart &pieChart );
+	void updateIntervals( const Billon &billon, const Interval<uint> &sliceInterval, const Interval<uint> &angularInterval , const PieChart &pieChart );
 
 	void setMinIntensity( const int &minIntensity );
 	void enableTrilinearInterpolation( bool enable );

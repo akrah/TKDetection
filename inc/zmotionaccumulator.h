@@ -3,6 +3,7 @@
 
 #include "def/def_billon.h"
 #include "inc/interval.h"
+#include "inc/piechart.h"
 
 #include <QtGlobal>
 
@@ -13,23 +14,23 @@ public:
 
 	void execute( const Billon &billon, Slice &accumulationSlice, const Interval<uint> &validSlices );
 
+	PieChart &pieChart();
+	const PieChart &pieChart() const;
 	const Interval<int> &intensityOInterval() const;
 	const uint &zMotionMin() const;
 	const uint &radiusAroundPith() const;
-	const uint &nbAngularSectors() const;
 	const qreal &maxFindIntensity() const;
 
 	void setIntensityInterval( const Interval<int> interval );
 	void setZMotionMin( const uint & min );
 	void setRadiusAroundPith( const uint radius );
-	void setNbAngularSectors( const uint &nbAngularSectors );
 
 
 private:
+	PieChart _pieChart;
 	Interval<int> _intensityInterval;
 	uint _zMotionMin;
 	uint _radiusAroundPith;
-	uint _nbAngularSectors;
 
 	qreal _maxFindIntensity;
 };

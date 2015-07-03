@@ -34,11 +34,11 @@ void TangentialTransform::setSliceInterval( const Billon &billon, const Interval
 	_origin = QVector3D(billon.pithCoord(midSliceInterval).x, billon.pithCoord(midSliceInterval).y, midSliceInterval);
 }
 
-void TangentialTransform::setAngularInterval( const Billon &billon, const Interval<uint> &angularInterval )
+void TangentialTransform::setAngularInterval( const Billon &billon, const Interval<uint> &angularInterval, const PieChart &pieChart )
 {
 	_currentAngularInterval = angularInterval;
-	_angularRange = (_currentAngularInterval.max() + (_currentAngularInterval.isValid() ? 0. : PieChartSingleton::getInstance()->nbSectors())) - _currentAngularInterval.min() + 1;
-	_bisectorOrientation = (_currentAngularInterval.min()+_angularRange/2.)*PieChartSingleton::getInstance()->angleStep();
+	_angularRange = (_currentAngularInterval.max() + (_currentAngularInterval.isValid() ? 0. : pieChart.nbSectors())) - _currentAngularInterval.min() + 1;
+	_bisectorOrientation = (_currentAngularInterval.min()+_angularRange/2.)*pieChart.angleStep();
 	_quaterZ = QQuaternion::fromAxisAndAngle( 0., 0., 1., _bisectorOrientation*RAD_TO_DEG_FACT );
 
 	/* Recherche de l'écorce dans la direction de la bissectrice du secteur angulaire sur la coupe au milieu de l'intervalle de coupes */
@@ -55,10 +55,10 @@ void TangentialTransform::setAngularInterval( const Billon &billon, const Interv
 	_shiftStep = _quaterRot.rotatedVector( QVector3D( 0., 0., 1. ) );
 }
 
-void TangentialTransform::updateIntervals( const Billon &billon, const Interval<uint> &sliceInterval, const Interval<uint> &angularInterval )
+void TangentialTransform::updateIntervals( const Billon &billon, const Interval<uint> &sliceInterval, const Interval<uint> &angularInterval, const PieChart &pieChart )
 {
 	setSliceInterval(billon,sliceInterval);
-	setAngularInterval(billon,angularInterval);
+	setAngularInterval(billon,angularInterval,pieChart);
 }
 
 void TangentialTransform::setMinIntensity( const int &minIntensity )
@@ -145,15 +145,15 @@ QVector3D TangentialTransform::shiftStep( const qreal &stepInZ ) const
 	return _quaterRot.rotatedVector( QVector3D( 0., 0., stepInZ ) );
 }
 
-Billon* TangentialTransform::execute( const Billon &billon )
+Billon* TangentialTransform::execute( const Billon &billon , const PieChart &pieChart )
 {
 	/* Hauteur et largeur des coupes transversales */
-	const int &billonWidthMinusOne = billon.n_cols-1;
-	const int &billonHeightMinusOne = billon.n_rows-1;
-	const int &billonDepthMinusOne = billon.n_slices-1;
+	const int billonWidthMinusOne = billon.n_cols-1;
+	const int billonHeightMinusOne = billon.n_rows-1;
+	const int billonDepthMinusOne = billon.n_slices-1;
 
 	/* Hauteur et largeur des coupes tangentielles */
-	const uint width = qFloor(2 * qTan(_angularRange*PieChartSingleton::getInstance()->angleStep()/2.) * _depth);
+	const uint width = qFloor(2 * qTan(_angularRange*pieChart.angleStep()/2.) * _depth);
 	const uint height = _currentSliceInterval.size()+1;
 	const int widthOnTwo = qFloor(width/2.);
 	const int heightOnTwo = qFloor(height/2.);

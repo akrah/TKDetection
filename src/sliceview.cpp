@@ -287,50 +287,36 @@ void SliceView::drawHoughSlice( QImage &image, const Billon &billon, const uint 
 
 	const int &width = billon.n_cols;
 	const int &height = billon.n_rows;
-	const int &depth = billon.n_slices;
+	const int widthMinusOne = width-1;
+	const int heightMinusOne = height-1;
 
 	QRgb * line = (QRgb *) image.bits();
 	int color;
 	int i,j;
-
 
 	/********************************************************************/
 
 	const Slice &slice = billon.slice(sliceIndex);
 
 	// Calcul des orientations en chaque pixel avec les filtres de Sobel
-	arma::Mat<qreal> orientations( height, width );
-	arma::Mat<qreal> sobelNorm( height, width );
-
-	const int semiWidth = qFloor(width/2.);
-	const int semiAdaptativeWidth = qFloor(semiWidth*(sliceIndex/static_cast<qreal>(depth)));
-	const int iMin = qMax(semiWidth-semiAdaptativeWidth+1,0);
-	const int iMax = semiWidth+semiAdaptativeWidth-1;
-
-	if ( semiAdaptativeWidth<3 || height<3 ) return;
-
-	arma::Col<qreal> sobelNormVec(qMax((2*semiAdaptativeWidth-2)*(height-2),0));
+	arma::Mat<qreal> orientations( height, width, arma::fill::zeros );
+	arma::Col<qreal> sobelNormVec((width-2)*(height-2), arma::fill::zeros );
 	arma::Col<qreal>::iterator sobelNormVecIt = sobelNormVec.begin();
 
-	qreal sobelX, sobelY, norm;
+	qreal sobelX, sobelY;
 
 	const qreal &xDim = billon.voxelWidth();
 	const qreal &yDim = billon.voxelHeight();
 	const qreal voxelRatio = qPow(xDim/yDim,2);
 
-	int nbNegativeNorm;
-
-	orientations.fill(0);
-	sobelNorm.fill(0.);
-	nbNegativeNorm = 0;
 	if (billon.hasPith())
 	{
-		for ( j=1 ; j<height-1 ; ++j )
+		for ( j=1 ; j<heightMinusOne ; ++j )
 		{
-			for ( i=iMin ; i<iMax ; ++i )
+			for ( i=1 ; i<widthMinusOne ; ++i )
 			{
-				if ( j>=qMax(1.,billon.pithCoord(sliceIndex).y-30) && j<qMin(height-1.,billon.pithCoord(sliceIndex).y+30) &&
-					 i>=qMax((double)iMin,billon.pithCoord(sliceIndex).x-30) && i<qMin((double)iMax,billon.pithCoord(sliceIndex).x+30) )
+				if ( j>=qMax(1.,billon.pithCoord(sliceIndex).y-30) && j<qMin((qreal)heightMinusOne,billon.pithCoord(sliceIndex).y+30) &&
+					 i>=qMax(1.,billon.pithCoord(sliceIndex).x-30) && i<qMin((qreal)widthMinusOne,billon.pithCoord(sliceIndex).x+30) )
 				{
 					sobelX = slice( j-1, i-1 ) - slice( j-1, i+1 ) +
 							 2* (slice( j, i-1 ) - slice( j, i+1 )) +
@@ -339,24 +325,17 @@ void SliceView::drawHoughSlice( QImage &image, const Billon &billon, const uint 
 							 2 * (slice( j+1, i ) - slice( j-1, i )) +
 							 slice( j+1, i+1 ) - slice( j-1, i+1 );
 					orientations(j,i) = qFuzzyIsNull(sobelX) ? 9999999999./1. : sobelY/sobelX*voxelRatio;
-					norm = qPow(sobelX,2) + qPow(sobelY,2);
-					*sobelNormVecIt++ = norm;
-					nbNegativeNorm += qFuzzyIsNull(norm);
+					*sobelNormVecIt = qPow(sobelX,2) + qPow(sobelY,2);
 				}
-				else
-				{
-					orientations(j,i) = 0.;
-					*sobelNormVecIt++ = 0.;
-					nbNegativeNorm++;
-				}
+				sobelNormVecIt++;
 			}
 		}
 	}
 	else
 	{
-		for ( j=1 ; j<height-1 ; ++j )
+		for ( j=1 ; j<heightMinusOne ; ++j )
 		{
-			for ( i=iMin ; i<iMax ; ++i )
+			for ( i=1 ; i<widthMinusOne ; ++i )
 			{
 				sobelX = slice( j-1, i-1 ) - slice( j-1, i+1 ) +
 						 2* (slice( j, i-1 ) - slice( j, i+1 )) +
@@ -365,26 +344,23 @@ void SliceView::drawHoughSlice( QImage &image, const Billon &billon, const uint 
 						 2 * (slice( j+1, i ) - slice( j-1, i )) +
 						 slice( j+1, i+1 ) - slice( j-1, i+1 );
 				orientations(j,i) = qFuzzyIsNull(sobelX) ? 9999999999./1. : sobelY/sobelX*voxelRatio;
-				norm = qPow(sobelX,2) + qPow(sobelY,2);
-				*sobelNormVecIt++ = norm;
-				nbNegativeNorm += qFuzzyIsNull(norm);
+				*sobelNormVecIt++ = qPow(sobelX,2) + qPow(sobelY,2);
 			}
 		}
 	}
 
 	const arma::Col<qreal> sobelNormSort = arma::sort( sobelNormVec );
-	const qreal &medianVal = sobelNormSort( (sobelNormSort.n_elem + nbNegativeNorm)*0.4 );
+	const qreal &medianVal = sobelNormSort( sobelNormSort.n_elem*0.4 );
 
 	// Calcul des accumulation des droites suivant les orientations
-	arma::Mat<int> accuSlice( height, width );
-	accuSlice.fill(0);
+	arma::Mat<int> accuSlice( height, width, arma::fill::zeros );
 
 	qreal x, y, orientation, orientationInv;
 	sobelNormVecIt = sobelNormVec.begin();
 
-	for ( j=1 ; j<height-1 ; ++j )
+	for ( j=1 ; j<heightMinusOne ; ++j )
 	{
-		for ( i=iMin ; i<iMax ; ++i )
+		for ( i=1 ; i<widthMinusOne ; ++i )
 		{
 			if ( *sobelNormVecIt++ > medianVal )
 			{
@@ -438,7 +414,6 @@ void SliceView::drawHoughSlice( QImage &image, const Billon &billon, const uint 
 			}
 		}
 	}
-
 
 
 	const qreal fact = 255.0/(sobelNormSort.n_elem?accuSlice.max():1.);

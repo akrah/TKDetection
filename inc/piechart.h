@@ -32,32 +32,4 @@ private:
 	QVector<PiePart> _sectors;
 };
 
-class PieChartSingleton : public PieChart
-{
-private:
-	PieChartSingleton() : PieChart(360) {}
-	~PieChartSingleton () {}
-
-public:
-
-	// Fonctions de création et destruction du singleton
-	static PieChartSingleton *getInstance()
-	{
-		if ( !_singleton ) _singleton =  new PieChartSingleton();
-		return _singleton;
-	}
-
-	static void kill()
-	{
-		if (_singleton)
-		{
-			delete _singleton;
-			_singleton = 0;
-		}
-	}
-
-private:
-	static PieChartSingleton *_singleton;
-};
-
 #endif // PIECHART_H

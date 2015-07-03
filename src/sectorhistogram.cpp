@@ -5,7 +5,7 @@
 
 #include <qmath.h>
 
-SectorHistogram::SectorHistogram() : Histogram<qreal>()
+SectorHistogram::SectorHistogram() : Histogram<qreal>(), _pieChart(PieChart(500))
 {
 }
 
@@ -22,13 +22,13 @@ void SectorHistogram::construct( const Billon &billon, const Interval<uint> &sli
 {
 	clear();
 
-	if ( billon.hasPith() && sliceInterval.isValid() && sliceInterval.width() >= 0 )
+	if ( billon.hasPith() && sliceInterval.isValid() )
 	{
 		const int &width = billon.n_cols;
 		const int &height = billon.n_rows;
 		const qreal squareRadius = qPow(radiusAroundPith,2);
 
-		fill(0.,PieChartSingleton::getInstance()->nbSectors());
+		fill(0.,_pieChart.nbSectors());
 
 		QVector<int> circleLines;
 		circleLines.reserve(2*radiusAroundPith+1);
@@ -62,10 +62,10 @@ void SectorHistogram::construct( const Billon &billon, const Interval<uint> &sli
 						diff = billon.zMotion(currentPos.x,currentPos.y,k);
 						if ( diff >= zMotionMin )
 						{
-							const uint sectorIndex = PieChartSingleton::getInstance()->sectorIndexOfAngle( currentPithCoord.angle(currentPos) );
+							const uint sectorIndex = _pieChart.sectorIndexOfAngle( currentPithCoord.angle(currentPos) );
 							(*this)[sectorIndex] += (diff-zMotionMin);
-//							(*this)[sectorIndex + (sectorIndex != PieChartSingleton::getInstance()->nbSectors())] += (diff-zMotionMin)/3;
-//							(*this)[sectorIndex==0 ? PieChartSingleton::getInstance()->nbSectors()-1 : sectorIndex-1] += (diff-zMotionMin)/3;
+//							(*this)[sectorIndex + (sectorIndex != _pieChart.nbSectors())] += (diff-zMotionMin)/3;
+//							(*this)[sectorIndex==0 ? _pieChart.nbSectors()-1 : sectorIndex-1] += (diff-zMotionMin)/3;
 						}
 					}
 					currentPos.x++;
@@ -81,7 +81,7 @@ void SectorHistogram::computeMaximumsAndIntervals(const uint &smoothingRadius, c
 {
 	Histogram<qreal>::computeMaximumsAndIntervals( smoothingRadius, minimumHeightPercentageOfMaximum, derivativesPercentage, minimumWidthOfIntervals, loop );
 
-	const uint &nbSectors = PieChartSingleton::getInstance()->nbSectors();
+	const uint &nbSectors = _pieChart.nbSectors();
 	uint min, max;
 	for ( int i=0 ; i<_intervals.size() ; ++i )
 	{
@@ -91,4 +91,14 @@ void SectorHistogram::computeMaximumsAndIntervals(const uint &smoothingRadius, c
 		interval.setMin(min<intervalGap?nbSectors+min-intervalGap:min-intervalGap);
 		interval.setMax(max>nbSectors-1-intervalGap?max+intervalGap-nbSectors:max+intervalGap);
 	}
+}
+
+PieChart &SectorHistogram::pieChart()
+{
+	return _pieChart;
+}
+
+const PieChart &SectorHistogram::pieChart() const
+{
+	return _pieChart;
 }

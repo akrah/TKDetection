@@ -45,14 +45,15 @@
 #include <qwt_polar_renderer.h>
 #include <qwt_polar_grid.h>
 
-MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::MainWindow), _labelSliceView(new QLabel), _labelTangentialView(new QLabel), _labelZMotionMapView(new QLabel),
-	_billon(0), _tangentialBillon(0), _zMotionMapSlice(new Slice(0,0)), _sliceView(new SliceView()),
+MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::MainWindow), _labelSliceView(new QLabel),
+	_labelTangentialView(new QLabel), _labelZMotionMapView(new QLabel), _labelTangentialZMotionMapView(new QLabel),
+	_billon(0), _tangentialBillon(0), _zMotionMapSlice(0), _tangentialZMotionMapBillon(0), _sliceView(new SliceView()),
 	_sliceHistogram(new SliceHistogram()), _plotSliceHistogram(new PlotSliceHistogram()),
 	_sectorHistogram(new SectorHistogram()), _plotSectorHistogram(new PlotSectorHistogram()),
 	_knotPithProfile(new KnotPithProfile()), _plotKnotPithProfile(new PlotKnotPithProfile()),
 	_knotEllipseRadiiHistogram(new KnotEllipseRadiiHistogram), _plotKnotEllipseRadiiHistogram(new PlotKnotEllipseRadiiHistogram),
 	_plotEllipticalAccumulationHistogram(new PlotEllipticalAccumulationHistogram()), _tangentialTransform( -900, true ),
-	_currentSliceInterval(0), _currentSectorInterval(0), _currentMaximum(0), _currentSector(0), _treeRadius(0)
+	_currentSliceInterval(0), _currentSectorInterval(0), _currentKnotArea(0), _currentMaximum(0), _currentSector(0), _treeRadius(0)
 {
 	_ui->setupUi(this);
 	setWindowTitle("TKDetection");
@@ -79,6 +80,13 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 
 	_ui->_scrollZMotionAccView->setBackgroundRole(QPalette::Dark);
 	_ui->_scrollZMotionAccView->setWidget(_labelZMotionMapView);
+
+	_labelTangentialZMotionMapView->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
+	_labelTangentialZMotionMapView->setScaledContents(true);
+	_labelTangentialZMotionMapView->installEventFilter(&_tangentialZMotionMapZoomer);
+
+	_ui->_scrollTangentialZMotionMapView->setBackgroundRole(QPalette::Dark);
+	_ui->_scrollTangentialZMotionMapView->setWidget(_labelTangentialZMotionMapView);
 
 	_ui->_comboViewType->insertItem(TKD::CLASSIC,tr("Originale"));
 	_ui->_comboViewType->insertItem(TKD::Z_MOTION,tr("Z-mouvements"));
@@ -122,9 +130,12 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 	QObject::connect(_ui->_sliderSelectSlice, SIGNAL(valueChanged(int)), this, SLOT(setSlice(int)));
 	QObject::connect(_ui->_sliderSelectYSlice, SIGNAL(valueChanged(int)), this, SLOT(setYSlice(int)));
 	QObject::connect(_ui->_buttonZoomInitial, SIGNAL(clicked()), &_sliceZoomer, SLOT(resetZoom()));
-	// Onglet "Coupes tangentielles
+	// Onglet "Coupes tangentielles"
 	QObject::connect(_ui->_sliderSelectTangentialSlice, SIGNAL(valueChanged(int)), this, SLOT(setTangentialSlice(int)));
 	QObject::connect(_ui->_sliderSelectTangentialYSlice, SIGNAL(valueChanged(int)), this, SLOT(setTangentialYSlice(int)));
+	// Onglet "Coupes tangentielles" de la carte d'accumulation
+	QObject::connect(_ui->_sliderSelectTangentialZMotionMapSlice, SIGNAL(valueChanged(int)), this, SLOT(setTangentialSlice(int)));
+	QObject::connect(_ui->_sliderSelectTangentialZMotionMapYSlice, SIGNAL(valueChanged(int)), this, SLOT(setTangentialYSlice(int)));
 
 	/*********************************************
 	* Évènements de l'onglet "General"
@@ -199,8 +210,9 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 	QObject::connect(_ui->_spinLowessBandWidth, SIGNAL(valueChanged(double)), this, SLOT(computeKnotEllipseRadiiHistogram()));
 
 	/*************************************
-	* Évènements de l'onglet "ZMotion Acc"
+	* Évènements de l'onglet "Carte d'accumulation"
 	**************************************/
+	QObject::connect(_ui->_spinZMotionMapNbAngularSectors, SIGNAL(valueChanged(int)), this, SLOT(setMapSectorNumber(int)));
 	QObject::connect(_ui->_spinZMotionToDraw, SIGNAL(valueChanged(int)), _ui->_sliderZMotionToDraw, SLOT(setValue(int)));
 	QObject::connect(_ui->_sliderZMotionToDraw, SIGNAL(valueChanged(int)), _ui->_spinZMotionToDraw, SLOT(setValue(int)));
 	QObject::connect(_ui->_sliderZMotionToDraw, SIGNAL(valueChanged(int)), this, SLOT(drawZMotionMap()));
@@ -218,6 +230,7 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 	QObject::connect(_ui->_buttonComputeZMotionMap, SIGNAL(clicked()), this, SLOT(computeZMotionMap()));
 	QObject::connect(_ui->_buttonComputeKnotAreas, SIGNAL(clicked()), this, SLOT(computeKnotAreas()));
 	QObject::connect(_ui->_comboSelectKnotArea, SIGNAL(currentIndexChanged(int)), this, SLOT(drawZMotionMap()));
+	QObject::connect(_ui->_comboSelectKnotArea, SIGNAL(currentIndexChanged(int)), this, SLOT(selectKnotArea(int)));
 
 	/********************************
 	* Évènements de l'onglet "Export"
@@ -290,13 +303,14 @@ MainWindow::~MainWindow()
 	delete _plotSliceHistogram;
 	delete _sliceHistogram;
 	delete _sliceView;
+	if ( _tangentialZMotionMapBillon ) delete _tangentialZMotionMapBillon;
 	if ( _zMotionMapSlice ) delete _zMotionMapSlice;
 	if ( _tangentialBillon ) delete _tangentialBillon;
 	if ( _billon ) delete _billon;
+	if ( _labelTangentialZMotionMapView ) delete _labelTangentialZMotionMapView;
 	if ( _labelZMotionMapView ) delete _labelZMotionMapView;
 	if ( _labelTangentialView ) delete _labelTangentialView;
 	if (_labelSliceView ) delete _labelSliceView;
-	PieChartSingleton::kill();
 }
 
 
@@ -315,7 +329,7 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *event)
 			{
 				iCoord2D pos = iCoord2D(mouseEvent->x(),mouseEvent->y())/_sliceZoomer.factor();
 				qDebug() << "Position (i,j) = " << pos.x << " , " << pos.y << " )";
-				_currentSector = PieChartSingleton::getInstance()->sectorIndexOfAngle( _billon->pithCoord(_ui->_sliderSelectSlice->value()).angle(uiCoord2D(mouseEvent->x(),mouseEvent->y())/_sliceZoomer.factor()) );
+				_currentSector = _sectorHistogram->pieChart().sectorIndexOfAngle( _billon->pithCoord(_ui->_sliderSelectSlice->value()).angle(uiCoord2D(mouseEvent->x(),mouseEvent->y())/_sliceZoomer.factor()) );
 				_plotSectorHistogram->moveCursor(_currentSector);
 				_ui->_plotSectorHistogram->replot();
 				_ui->_polarSectorHistogram->replot();
@@ -405,6 +419,7 @@ void MainWindow::closeImage()
 	_ui->_polarSectorHistogram->replot();
 
 	computeKnotPithProfile();
+	computeKnotEllipseRadiiHistogram();
 	updateEllipticalAccumulationHistogram();
 
 	selectSectorInterval(0);
@@ -474,10 +489,11 @@ void MainWindow::drawSlice()
 										_sliceHistogram->interval(_currentSliceInterval-1).containsClosed(currentSlice));
 			if ( inDrawingArea )
 			{
+				const PieChart &pieChart = _sectorHistogram->pieChart();
 				if ( !_sectorHistogram->isEmpty() )
 				{
-					PieChartSingleton::getInstance()->draw(_mainPix, pithCoord, _sectorHistogram->intervals(), projectionType);
-					PieChartSingleton::getInstance()->draw(_mainPix, pithCoord, _currentSector, projectionType);
+					pieChart.draw(_mainPix, pithCoord, _sectorHistogram->intervals(), projectionType);
+					pieChart.draw(_mainPix, pithCoord, _currentSector, projectionType);
 				}
 				if ( _currentSectorInterval && _tangentialBillon )
 				{
@@ -541,9 +557,7 @@ void MainWindow::drawSlice()
 			}
 			if ( _zMotionMapSlice && _knotAreaDetector.hasSupportingAreas() && _ui->_checkDrawKnotAreasOnZMotionMap->isChecked() )
 			{
-				const uint oldNbAngularSectors = PieChartSingleton::getInstance()->nbSectors();
-				PieChartSingleton::getInstance()->setNumberOfAngularSectors(_zMotionAccumulator.nbAngularSectors());
-				const PieChartSingleton &pieChart = *(PieChartSingleton::getInstance());
+				const PieChart &pieChartZMotionMap = _zMotionAccumulator.pieChart();
 				const qreal angleFactor = TWO_PI/(qreal)(_zMotionMapSlice->n_rows);
 				const uint &firstValidSlice = _billonPithExtractor.validSlices().min();
 
@@ -561,16 +575,14 @@ void MainWindow::drawSlice()
 //					const QRect &currentSupportingArea = _knotAreaDetector.supportingAreaVector()[_ui->_comboSelectKnotArea->currentIndex()-1];
 					if ( currentSupportingArea.left()+firstValidSlice <= currentSlice && currentSupportingArea.right()+firstValidSlice >= currentSlice )
 					{
-						Interval<uint> angleInterval( pieChart.sectorIndexOfAngle( currentSupportingArea.top()*angleFactor ), pieChart.sectorIndexOfAngle( currentSupportingArea.bottom()*angleFactor ) );
+						Interval<uint> angleInterval( pieChartZMotionMap.sectorIndexOfAngle( currentSupportingArea.top()*angleFactor ), pieChartZMotionMap.sectorIndexOfAngle( currentSupportingArea.bottom()*angleFactor ) );
 						angleIntervalsToDraw.append( angleInterval );
 						intervalsColors.append(colors[colorIndex%nbColors]);
 					}
 					colorIndex++;
 				}
 
-				pieChart.draw(_mainPix, pithCoord, angleIntervalsToDraw, projectionType, intervalsColors );
-
-				PieChartSingleton::getInstance()->setNumberOfAngularSectors(oldNbAngularSectors);
+				pieChartZMotionMap.draw(_mainPix, pithCoord, angleIntervalsToDraw, projectionType, intervalsColors );
 			}
 		}
 	}
@@ -732,6 +744,23 @@ void MainWindow::dragInZMotionAccView( const QPoint &movementVector )
 	if ( movementVector.y() ) scrollArea.verticalScrollBar()->setValue(scrollArea.verticalScrollBar()->value()-movementVector.y());
 }
 
+void MainWindow::zoomInTangentialZMotionMapView( const qreal &zoomFactor, const qreal &zoomCoefficient )
+{
+	_labelTangentialZMotionMapView->resize(zoomFactor * _tangentialZMotionMapPix.size());
+	_labelTangentialZMotionMapView->setPixmap( QPixmap::fromImage(_tangentialZMotionMapPix).scaledToWidth(zoomFactor*_tangentialZMotionMapPix.width(),Qt::FastTransformation) );
+	QScrollBar *hBar = _ui->_scrollTangentialZMotionMapView->horizontalScrollBar();
+	hBar->setValue(int(zoomCoefficient * hBar->value() + ((zoomCoefficient - 1) * hBar->pageStep()/2)));
+	QScrollBar *vBar = _ui->_scrollTangentialZMotionMapView->verticalScrollBar();
+	vBar->setValue(int(zoomCoefficient * vBar->value() + ((zoomCoefficient - 1) * vBar->pageStep()/2)));
+}
+
+void MainWindow::dragInTangentialZMotionMapView( const QPoint &movementVector )
+{
+	QScrollArea &scrollArea = *(_ui->_scrollTangentialZMotionMapView);
+	if ( movementVector.x() ) scrollArea.horizontalScrollBar()->setValue(scrollArea.horizontalScrollBar()->value()-movementVector.x());
+	if ( movementVector.y() ) scrollArea.verticalScrollBar()->setValue(scrollArea.verticalScrollBar()->value()-movementVector.y());
+}
+
 
 void MainWindow::previousMaximumInSliceHistogram()
 {
@@ -802,8 +831,14 @@ void MainWindow::setTangentialYSlice( const int & )
 
 void MainWindow::setSectorNumber( const int &value )
 {
-	PieChartSingleton::getInstance()->setNumberOfAngularSectors(value);
+	_sectorHistogram->pieChart().setNumberOfAngularSectors(value);
 }
+
+void MainWindow::setMapSectorNumber( const int &value )
+{
+	_zMotionAccumulator.pieChart().setNumberOfAngularSectors(value);
+}
+
 
 
 /********/
@@ -812,7 +847,7 @@ void MainWindow::setSectorNumber( const int &value )
 
 void MainWindow::selectSliceInterval( const int &index, const bool &draw )
 {
-	_currentSliceInterval = index;
+	_currentSliceInterval = qMax(index,0);
 
 	if ( _tangentialBillon )
 	{
@@ -828,6 +863,7 @@ void MainWindow::selectSliceInterval( const int &index, const bool &draw )
 
 	if ( index > 0 && index <= static_cast<int>(_sliceHistogram->nbIntervals()) )
 	{
+		const PieChart &pieChart = _sectorHistogram->pieChart();
 		const Interval<uint> &sliceInterval = _sliceHistogram->interval(index-1);
 		computeSectorHistogram(sliceInterval);
 		_ui->_sliderSelectSlice->setValue(sliceInterval.mid());
@@ -839,8 +875,8 @@ void MainWindow::selectSliceInterval( const int &index, const bool &draw )
 			for ( int i=0 ; i<angularIntervals.size() ; ++i )
 			{
 				const Interval<uint> &currentAngularInterval = angularIntervals[i];
-				minAngle = PieChartSingleton::getInstance()->sector(currentAngularInterval.min()).minAngle()*RAD_TO_DEG_FACT;
-				maxAngle = PieChartSingleton::getInstance()->sector(currentAngularInterval.max()).maxAngle()*RAD_TO_DEG_FACT;
+				minAngle = pieChart.sector(currentAngularInterval.min()).minAngle()*RAD_TO_DEG_FACT;
+				maxAngle = pieChart.sector(currentAngularInterval.max()).maxAngle()*RAD_TO_DEG_FACT;
 				_ui->_comboSelectSectorInterval->addItem(tr("Secteur %1 : [ %2, %3 ] (%4 degres)").arg(i).arg(minAngle).arg(maxAngle)
 														 .arg(currentAngularInterval.isValid()?maxAngle-minAngle:maxAngle-minAngle+360.));
 			}
@@ -872,7 +908,7 @@ void MainWindow::selectSectorInterval( const int &index, const bool &draw )
 
 	if ( index > 0 && index <= static_cast<int>(_sectorHistogram->nbIntervals()) && _billon->hasPith() )
 	{
-		const uint nbAngularSectors = PieChartSingleton::getInstance()->nbSectors();
+		const uint nbAngularSectors = _sectorHistogram->pieChart().nbSectors();
 		const Interval<uint> &sectorInterval = _sectorHistogram->interval(index-1);
 		uint semiAngularRange = ((sectorInterval.max() + (sectorInterval.isValid() ? 0. : nbAngularSectors)) - sectorInterval.min())/2;
 		uint maximumIndex = _sectorHistogram->maximumIndex(index-1);
@@ -888,8 +924,8 @@ void MainWindow::selectSectorInterval( const int &index, const bool &draw )
 
 		_tangentialTransform.setMinIntensity( intensityInterval.min() );
 		_tangentialTransform.enableTrilinearInterpolation( _ui->_checkTrilinearInterpolation->isChecked() );
-		_tangentialTransform.setAngularInterval( *_billon, centeredSectorInterval );
-		_tangentialBillon = _tangentialTransform.execute( *_billon );
+		_tangentialTransform.setAngularInterval( *_billon, centeredSectorInterval, _sectorHistogram->pieChart() );
+		_tangentialBillon = _tangentialTransform.execute( *_billon, _sectorHistogram->pieChart() );
 
 		_knotPithExtractor.setSubWindowWidth( _ui->_spinPithSubWindowWidth_knot->value() );
 		_knotPithExtractor.setSubWindowHeight( _ui->_spinPithSubWindowHeight_knot->value() );
@@ -919,8 +955,8 @@ void MainWindow::selectSectorInterval( const int &index, const bool &draw )
 			_ui->_sliderSelectTangentialYSlice->setValue(0);
 			_ui->_sliderSelectTangentialYSlice->blockSignals(false);
 		}
-		computeKnotPithProfile();
-		computeKnotEllipseRadiiHistogram();
+		computeKnotPithProfile( _tangentialBillon );
+		computeKnotEllipseRadiiHistogram( _tangentialBillon );
 		enabledComponents();
 		drawTangentialView();
 		drawSlice();
@@ -930,6 +966,71 @@ void MainWindow::selectSectorInterval( const int &index, const bool &draw )
 void MainWindow::selectCurrentSectorInterval()
 {
 	selectSectorInterval(_ui->_comboSelectSectorInterval->currentIndex());
+}
+
+void MainWindow::selectKnotArea( const int &index, const bool &draw )
+{
+	_currentKnotArea = index;
+
+	if ( _tangentialZMotionMapBillon )
+	{
+		delete _tangentialZMotionMapBillon;
+		_tangentialZMotionMapBillon = 0;
+	}
+
+	const QVector<QRect> &supportingAreas = _knotAreaDetector.supportingAreaVector();
+
+	if ( _billon->hasPith() && index > 0 && index <= supportingAreas.size() )
+	{
+		const QRect &supportingArea = supportingAreas[index-1];
+		const Interval<uint> sliceInterval( supportingArea.left()+_billonPithExtractor.validSlices().min(), supportingArea.right()+_billonPithExtractor.validSlices().min() );
+		const Interval<uint> sectorInterval( supportingArea.top(), supportingArea.bottom() );
+
+		_tangentialTransform.setMinIntensity( _ui->_spinMinIntensity->value() );
+		_tangentialTransform.enableTrilinearInterpolation( _ui->_checkTrilinearInterpolation->isChecked() );
+		_tangentialTransform.setSliceInterval( *_billon, sliceInterval );
+		_tangentialTransform.setAngularInterval( *_billon, sectorInterval, _zMotionAccumulator.pieChart() );
+		_tangentialZMotionMapBillon = _tangentialTransform.execute( *_billon, _zMotionAccumulator.pieChart() );
+
+		_knotPithExtractor.setSubWindowWidth( _ui->_spinPithSubWindowWidth_knot->value() );
+		_knotPithExtractor.setSubWindowHeight( _ui->_spinPithSubWindowHeight_knot->value() );
+		_knotPithExtractor.setPithShift( _ui->_spinPithMaximumShift_knot->value() );
+		_knotPithExtractor.setSmoothingRadius( _ui->_spinPithSmoothingRadius_knot->value() );
+		_knotPithExtractor.setMinWoodPercentage( _ui->_spinPithMinimumWoodPercentage_knot->value() );
+		_knotPithExtractor.setIntensityInterval( Interval<int>( _ui->_spinPithMinIntensity_knot->value(), _ui->_spinPithMaxIntensity_knot->value() ) );
+		_knotPithExtractor.setAscendingOrder( _ui->_chechPithAscendingOrder_knot->isChecked() );
+		_knotPithExtractor.setExtrapolation( TKD::SLOPE_DIRECTION );
+		_knotPithExtractor.setFirstValidSlicesToExtrapolate( _ui->_spinFirstSlicesToExtrapolate_knot->value() );
+		_knotPithExtractor.setLastValidSlicesToExtrapolate( _ui->_spinLastSlicesToExtrapolate_knot->value() );
+
+		_knotPithExtractor.process(*_tangentialZMotionMapBillon,true);
+	}
+
+	if (draw)
+	{
+		if ( _tangentialZMotionMapBillon )
+		{
+			_ui->_sliderSelectTangentialZMotionMapSlice->blockSignals(true);
+			_ui->_sliderSelectTangentialZMotionMapSlice->setMaximum(_tangentialZMotionMapBillon->n_slices>0?_tangentialZMotionMapBillon->n_slices-1:0);
+			_ui->_sliderSelectTangentialZMotionMapSlice->setValue(0);
+			_ui->_sliderSelectTangentialZMotionMapYSlice->blockSignals(false);
+
+			_ui->_sliderSelectTangentialZMotionMapYSlice->blockSignals(true);
+			_ui->_sliderSelectTangentialZMotionMapYSlice->setRange(0,_tangentialZMotionMapBillon->n_rows>0?_tangentialZMotionMapBillon->n_rows-1:0);
+			_ui->_sliderSelectTangentialZMotionMapYSlice->setValue(0);
+			_ui->_sliderSelectTangentialZMotionMapYSlice->blockSignals(false);
+		}
+		computeKnotPithProfile( _tangentialZMotionMapBillon );
+		computeKnotEllipseRadiiHistogram( _tangentialZMotionMapBillon );
+		enabledComponents();
+		drawTangentialView();
+		drawSlice();
+	}
+}
+
+void MainWindow::selectCurrentKnotArea()
+{
+
 }
 
 void MainWindow::computeBillonPith()
@@ -1015,13 +1116,13 @@ void MainWindow::computeSectorHistogram( const Interval<uint> &interval )
 	_ui->_polarSectorHistogram->replot();
 }
 
-void MainWindow::computeKnotPithProfile()
+void MainWindow::computeKnotPithProfile( const Billon *billon )
 {
 	_knotPithProfile->clear();
 
-	if ( _tangentialBillon && _tangentialBillon->hasPith() )
+	if ( billon && billon->hasPith() )
 	{
-		_knotPithProfile->construct( _tangentialBillon->pith(), _ui->_spinKnotPithProfileSmoothingRadius->value() );
+		_knotPithProfile->construct( billon->pith(), _ui->_spinKnotPithProfileSmoothingRadius->value() );
 	}
 
 	_plotKnotPithProfile->update( *_knotPithProfile );
@@ -1030,13 +1131,13 @@ void MainWindow::computeKnotPithProfile()
 	_ui->_plotKnotPithProfile->replot();
 }
 
-void MainWindow::computeKnotEllipseRadiiHistogram()
+void MainWindow::computeKnotEllipseRadiiHistogram(const Billon *billon )
 {
 	_knotEllipseRadiiHistogram->clear();
 
-	if ( _tangentialBillon && _tangentialBillon->hasPith() && _knotPithProfile->size() )
+	if ( billon && billon->hasPith() && _knotPithProfile->size() )
 	{
-		_knotEllipseRadiiHistogram->construct( *_tangentialBillon, *_knotPithProfile, _knotPithExtractor.validSlices(),
+		_knotEllipseRadiiHistogram->construct( *billon, *_knotPithProfile, _knotPithExtractor.validSlices(),
 											   _ui->_spinLowessBandWidth->value(), _ui->_spinEllipticalAccumulationSmoothingRadius->value(),
 											   _ui->_spinLowessIqrCoefficient->value(), _ui->_spinLowessPercentagOfFirstValidSlicesToExtrapolate->value(),
 											   _ui->_spinLowessPercentagOfLastValidSlicesToExtrapolate->value() );
@@ -1072,7 +1173,6 @@ void MainWindow::computeZMotionMap()
 	if ( _billon && _billon->hasPith() )
 	{
 		_zMotionMapSlice = new Slice(0,0);
-		_zMotionAccumulator.setNbAngularSectors(_ui->_spinZMotionMapNbAngularSectors->value());
 		_zMotionAccumulator.setZMotionMin(_ui->_spinZMotionMapMin->value());
 		_zMotionAccumulator.setIntensityInterval(Interval<int>(_ui->_spinMinIntensity->value(), _ui->_spinMaxIntensity->value()));
 		_zMotionAccumulator.setRadiusAroundPith(_treeRadius*_ui->_spinRestrictedAreaPercentage->value()/100.);
@@ -1173,7 +1273,7 @@ void MainWindow::drawZMotionMap()
 
 //				QColor currentColor;
 //				int colorIndex = 0;
-//				qreal coeffBillonToZMotion2D = _zMotionAccumulator.nbAngularSectors()/(qreal)PieChartSingleton::getInstance()->nbSectors();
+//				qreal coeffBillonToZMotion2D = _zMotionAccumulator.nbAngularSectors()/(qreal)_zMotionAccumulator.pieChart().nbSectors();
 //				while ( angularIntervalIter != _sectorHistogram->intervals().constEnd() )
 //				{
 //					const Interval<uint> &interval = *angularIntervalIter;
@@ -1195,7 +1295,7 @@ void MainWindow::drawZMotionMap()
 //			QColor currentColor;
 
 //			QVector< Interval<uint> >::const_iterator angularIntervalIter;
-//			qreal coeffBillonToZMotion2D = _zMotionAccumulator.nbAngularSectors()/(qreal)PieChartSingleton::getInstance()->nbSectors();
+//			qreal coeffBillonToZMotion2D = _zMotionAccumulator.nbAngularSectors()/(qreal)_zMotionAccumulator.pieChart().nbSectors();
 
 //			uint oldSliceInterval = _currentSliceInterval;
 //			uint firstSliceIndex, lastSliceIndex;
@@ -1432,12 +1532,9 @@ void MainWindow::export2DZMotion()
 				qreal max = 0;
 
 				stream << "P2" << endl;
-				stream << _zMotionAccumulator.nbAngularSectors() << " " << validSlices.size() << endl;
+				stream << _zMotionAccumulator.pieChart().nbSectors() << " " << validSlices.size() << endl;
 				qint64 pos = stream.pos();
 				stream << "                " << endl;
-
-				uint oldNbAngularSectors = PieChartSingleton::getInstance()->nbSectors();
-				PieChartSingleton::getInstance()->setNumberOfAngularSectors(_zMotionAccumulator.nbAngularSectors());
 
 				for ( uint z=validSlices.min() ; z<validSlices.max() ; ++z )
 				{
@@ -1453,8 +1550,6 @@ void MainWindow::export2DZMotion()
 					}
 					stream << endl;
 				}
-
-				PieChartSingleton::getInstance()->setNumberOfAngularSectors(oldNbAngularSectors);
 
 				qDebug() << "Maximum de l'image de zMouvement 2D = " << max;
 				stream.seek(pos);
@@ -1483,7 +1578,7 @@ void MainWindow::export2DKnotAreaCoordinates()
 				stream << "##### Anciennes zones de nœuds #####" << endl;
 				stream << "# Dimensions de l'image dasn laquelle ces coorodnnées sont valides" << endl;
 				stream << "# width (Nombre de secteurs angulaires) | height (nombres de coupes)" << endl;
-				stream << "# " << _zMotionAccumulator.nbAngularSectors() << " " << _billonPithExtractor.validSlices().size() << endl;
+				stream << "# " << _zMotionAccumulator.pieChart().nbSectors() << " " << _billonPithExtractor.validSlices().size() << endl;
 				stream << endl;
 
 				stream << "# Nombre de zones de nœuds" << endl;
@@ -1494,7 +1589,7 @@ void MainWindow::export2DKnotAreaCoordinates()
 				stream << "# xMin   yMin   xMax   yMax redColor greenColor blueColor" << endl;
 
 				QVector< Interval<uint> >::const_iterator angularIntervalIter;
-				qreal coeffBillonToZMotion2D = _zMotionAccumulator.nbAngularSectors()/(qreal)PieChartSingleton::getInstance()->nbSectors();
+				qreal coeffBillonToZMotion2D = _zMotionAccumulator.pieChart().nbSectors()/(qreal)_zMotionAccumulator.pieChart().nbSectors();
 
 
 				const uint &minValidSliceIndex = _billonPithExtractor.validSlices().min();
@@ -1786,6 +1881,7 @@ void MainWindow::exportAllKnotAreasToOfs()
 	QString fileName = QFileDialog::getSaveFileName(this, tr("Exporter en .ofs"), "output.ofs", tr("Fichiers de données (*.ofs);;Tous les fichiers (*.*)"));
 	if ( !fileName.isEmpty() )
 	{
+		const PieChart &pieChart = _sectorHistogram->pieChart();
 		const QVector< Interval<uint> > &sliceIntervals = _sliceHistogram->intervals();
 		QVector< QVector< Interval<qreal> > > angleIntervals(sliceIntervals.size());
 		for ( int i=0 ; i<sliceIntervals.size() ; ++i )
@@ -1794,7 +1890,7 @@ void MainWindow::exportAllKnotAreasToOfs()
 			for ( int j=0 ; j<_sectorHistogram->intervals().size() ; ++j )
 			{
 				const Interval<uint> &sectorInterval = _sectorHistogram->interval(j);
-				angleIntervals[i].append( Interval<qreal>( PieChartSingleton::getInstance()->sector(sectorInterval.min()).minAngle(), PieChartSingleton::getInstance()->sector(sectorInterval.max()).maxAngle() ) );
+				angleIntervals[i].append( Interval<qreal>( pieChart.sector(sectorInterval.min()).minAngle(), pieChart.sector(sectorInterval.max()).maxAngle() ) );
 			}
 		}
 
@@ -1833,8 +1929,8 @@ void MainWindow::exportAllKnotAreasToOfs()
 //		{
 //			QTextStream stream(&file);
 //			OfsExport::writeHeader( stream );
-//			OfsExport::processOnSector( stream, *_knotBillon, _ui->_spinExportNbEdges->value(), _treeRadius, sliceInterval, Interval<qreal>( PieChartSingleton::getInstance()->sector(sectorInterval.min()).minAngle(),
-//										PieChartSingleton::getInstance()->sector(sectorInterval.max()).maxAngle() ), false );
+//			OfsExport::processOnSector( stream, *_knotBillon, _ui->_spinExportNbEdges->value(), _treeRadius, sliceInterval, Interval<qreal>( _sectorHistogram->pieChart().sector(sectorInterval.min()).minAngle(),
+//										_sectoHostogram->pieChart()->sector(sectorInterval.max()).maxAngle() ), false );
 //			QMessageBox::information(this,tr("Export en .ofs"), tr("Terminé avec succés !"));
 //			file.close();
 //		}

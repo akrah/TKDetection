@@ -56,6 +56,8 @@ private slots:
 	void dragInTangentialView( const QPoint &movementVector );
 	void zoomInZMotionAccView( const qreal &zoomFactor, const qreal &zoomCoefficient );
 	void dragInZMotionAccView( const QPoint &movementVector );
+	void zoomInTangentialZMotionMapView( const qreal &zoomFactor, const qreal &zoomCoefficient );
+	void dragInTangentialZMotionMapView( const QPoint &movementVector );
 	void previousMaximumInSliceHistogram();
 	void nextMaximumInSliceHistogram();
 
@@ -64,16 +66,19 @@ private slots:
 	void setTangentialSlice( const int &sliceIndex );
 	void setTangentialYSlice( const int &yPosition );
 	void setSectorNumber( const int &value );
+	void setMapSectorNumber( const int &value );
 
 	void selectSliceInterval( const int &index , const bool &draw = true );
 	void selectCurrentSliceInterval();
 	void selectSectorInterval( const int &index, const bool &draw = true );
 	void selectCurrentSectorInterval();
+	void selectKnotArea( const int &index, const bool &draw = true );
+	void selectCurrentKnotArea();
 
 	void computeSliceHistogram();
 	void computeSectorHistogram( const Interval<uint> &interval );
-	void computeKnotPithProfile();
-	void computeKnotEllipseRadiiHistogram();
+	void computeKnotPithProfile( const Billon *billon = 0 );
+	void computeKnotEllipseRadiiHistogram( const Billon *billon = 0 );
 	void updateEllipticalAccumulationHistogram();
 
 	void computeBillonPith();
@@ -137,10 +142,12 @@ private:
 	QLabel *_labelSliceView;
 	QLabel *_labelTangentialView;
 	QLabel *_labelZMotionMapView;
+	QLabel *_labelTangentialZMotionMapView;
 
 	Billon *_billon;
 	Billon *_tangentialBillon;
 	Slice *_zMotionMapSlice;
+	Billon *_tangentialZMotionMapBillon;
 
 	QImage _mainPix;
 	SliceZoomer _sliceZoomer;
@@ -150,6 +157,9 @@ private:
 
 	QImage _zMotionMapPix;
 	SliceZoomer _zMotionMapZoomer;
+
+	QImage _tangentialZMotionMapPix;
+	SliceZoomer _tangentialZMotionMapZoomer;
 
 	SliceView *_sliceView;
 
@@ -177,6 +187,7 @@ private:
 
 	uint _currentSliceInterval;
 	uint _currentSectorInterval;
+	uint _currentKnotArea;
 	int _currentMaximum;
 	uint _currentSector;
 	qreal _treeRadius;
