@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>731</width>
+    <width>724</width>
     <height>653</height>
    </rect>
   </property>
@@ -370,7 +370,33 @@
         </item>
         <item>
          <layout class="QGridLayout" name="gridLayout_5">
-          <item row="0" column="1">
+          <item row="2" column="2">
+           <widget class="QSlider" name="_sliderSelectTangentialZMotionMapSlice">
+            <property name="maximum">
+             <number>0</number>
+            </property>
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="tickPosition">
+             <enum>QSlider::TicksAbove</enum>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QSlider" name="_sliderSelectTangentialZMotionMapYSlice">
+            <property name="maximum">
+             <number>0</number>
+            </property>
+            <property name="orientation">
+             <enum>Qt::Vertical</enum>
+            </property>
+            <property name="tickPosition">
+             <enum>QSlider::TicksBelow</enum>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="2">
            <widget class="QScrollArea" name="_scrollTangentialZMotionMapView">
             <property name="frameShape">
              <enum>QFrame::NoFrame</enum>
@@ -405,32 +431,6 @@
             </widget>
            </widget>
           </item>
-          <item row="0" column="0">
-           <widget class="QSlider" name="_sliderSelectTangentialZMotionMapYSlice">
-            <property name="maximum">
-             <number>0</number>
-            </property>
-            <property name="orientation">
-             <enum>Qt::Vertical</enum>
-            </property>
-            <property name="tickPosition">
-             <enum>QSlider::TicksBelow</enum>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="1">
-           <widget class="QSlider" name="_sliderSelectTangentialZMotionMapSlice">
-            <property name="maximum">
-             <number>0</number>
-            </property>
-            <property name="orientation">
-             <enum>Qt::Horizontal</enum>
-            </property>
-            <property name="tickPosition">
-             <enum>QSlider::TicksAbove</enum>
-            </property>
-           </widget>
-          </item>
          </layout>
         </item>
        </layout>
@@ -444,7 +444,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>731</width>
+     <width>724</width>
      <height>25</height>
     </rect>
    </property>
@@ -481,7 +481,7 @@
      <item row="1" column="0">
       <widget class="QTabWidget" name="_tabs">
        <property name="currentIndex">
-        <number>4</number>
+        <number>5</number>
        </property>
        <widget class="QWidget" name="tab_4">
         <attribute name="title">

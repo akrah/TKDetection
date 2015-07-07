@@ -43,11 +43,11 @@ SOURCES	=	src/main.cpp \
 			src/billonalgorithms.cpp \
 			src/connexcomponentextractor.cpp \
 			src/dicomreader.cpp \
-			src/ellipticalaccumulationhistogram.cpp \
+			src/segmentation/ellipticalaccumulationhistogram.cpp \
 			src/globalfunctions.cpp \
 			src/knotareadetector.cpp \
-			src/knotellipseradiihistogram.cpp \
-			src/knotpithprofile.cpp \
+			src/segmentation/knotellipseradiihistogram.cpp \
+			src/segmentation/knotpithprofile.cpp \
 			src/lowess.cpp \
 			src/mainwindow.cpp \
 			src/ofsexport.cpp \
@@ -57,9 +57,9 @@ SOURCES	=	src/main.cpp \
 			src/pith.cpp \
 			src/pithextractor.cpp \
 			src/pithextractorboukadida.cpp \
-			src/plotellipticalaccumulationhistogram.cpp \
-			src/plotknotellipseradiihistogram.cpp \
-			src/plotknotpithprofile.cpp \
+			src/segmentation/plotellipticalaccumulationhistogram.cpp \
+			src/segmentation/plotknotellipseradiihistogram.cpp \
+			src/segmentation/plotknotpithprofile.cpp \
 			src/plotsectorhistogram.cpp \
 			src/plotslicehistogram.cpp \
 			src/pointpolarseriesdata.cpp \
@@ -68,7 +68,7 @@ SOURCES	=	src/main.cpp \
 			src/slicehistogram.cpp \
 			src/sliceview.cpp \
 			src/slicezoomer.cpp \
-			src/tangentialtransform.cpp \
+			src/segmentation/tangentialtransform.cpp \
 			tst/test_intervalshistogram.cpp \
 			src/tiffreader.cpp \
 			src/v3dexport.cpp \
@@ -83,13 +83,13 @@ HEADERS	=	inc/billon.h \
 			def/def_coordinate.h \
 			def/def_opticalflow.h \
 			inc/dicomreader.h \
-			inc/ellipticalaccumulationhistogram.h \
+			inc/segmentation/ellipticalaccumulationhistogram.h \
 			inc/globalfunctions.h \
 			inc/histogram.h \
 			inc/interval.h \
 			inc/knotareadetector.h \
-			inc/knotellipseradiihistogram.h \
-			inc/knotpithprofile.h \
+			inc/segmentation/knotellipseradiihistogram.h \
+			inc/segmentation/knotpithprofile.h \
 			inc/lowess.h \
 			inc/mainwindow.h \
 			inc/ofsexport.h \
@@ -99,9 +99,9 @@ HEADERS	=	inc/billon.h \
 			inc/pith.h \
 			inc/pithextractor.h \
 			inc/pithextractorboukadida.h \
-			inc/plotellipticalaccumulationhistogram.h \
-			inc/plotknotellipseradiihistogram.h \
-			inc/plotknotpithprofile.h \
+			inc/segmentation/plotellipticalaccumulationhistogram.h \
+			inc/segmentation/plotknotellipseradiihistogram.h \
+			inc/segmentation/plotknotpithprofile.h \
 			inc/plotsectorhistogram.h \
 			inc/plotslicehistogram.h \
 			inc/pointpolarseriesdata.h \
@@ -111,7 +111,7 @@ HEADERS	=	inc/billon.h \
 			inc/sliceview.h \
 			inc/slicezoomer.h \
 			tst/test_intervalshistogram.h \
-			inc/tangentialtransform.h \
+			inc/segmentation/tangentialtransform.h \
 			inc/tiffreader.h \
 			inc/v3dexport.h \
 			inc/zmotionaccumulator.h \
