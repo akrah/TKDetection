@@ -1,6 +1,6 @@
-#include "inc/plotknotpithprofile.h"
+#include "inc/segmentation/plotknotpithprofile.h"
 
-#include "inc/knotpithprofile.h"
+#include "inc/segmentation/knotpithprofile.h"
 #include "inc/define.h"
 
 PlotKnotPithProfile::PlotKnotPithProfile()

@@ -4,8 +4,12 @@
 #include <QObject>
 #include <QPoint>
 
-#define ZOOM_COEF_IN  1.25
-#define ZOOM_COEF_OUT 0.8
+#define ZOOM_COEF_IN    1.25
+#define ZOOM_COEF_OUT    .8
+#define ZOOM_OUT_ON_IN   .64
+
+#define ZOOM_MAX_FACTOR 8.
+#define ZOOM_MIN_FACTOR  .1
 
 class SliceZoomer : public QObject
 {

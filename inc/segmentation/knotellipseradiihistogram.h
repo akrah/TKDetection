@@ -5,7 +5,7 @@
 #include "def/def_coordinate.h"
 
 #include "inc/histogram.h"
-#include "inc/ellipticalaccumulationhistogram.h"
+#include "inc/segmentation/ellipticalaccumulationhistogram.h"
 
 class KnotPithProfile;
 

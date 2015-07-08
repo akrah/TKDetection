@@ -55,7 +55,6 @@ SOURCES	=	src/main.cpp \
 			src/piechart.cpp \
 			src/piepart.cpp \
 			src/pith.cpp \
-			src/pithextractor.cpp \
 			src/pithextractorboukadida.cpp \
 			src/segmentation/plotellipticalaccumulationhistogram.cpp \
 			src/segmentation/plotknotellipseradiihistogram.cpp \
@@ -66,7 +65,8 @@ SOURCES	=	src/main.cpp \
 			src/sectorhistogram.cpp \
 			src/slicealgorithm.cpp \
 			src/slicehistogram.cpp \
-			src/sliceview.cpp \
+			src/slicepainter.cpp \
+			src/sliceui.cpp \
 			src/slicezoomer.cpp \
 			src/segmentation/tangentialtransform.cpp \
 			tst/test_intervalshistogram.cpp \
@@ -97,7 +97,6 @@ HEADERS	=	inc/billon.h \
 			inc/piepart.h \
 			inc/piechart.h \
 			inc/pith.h \
-			inc/pithextractor.h \
 			inc/pithextractorboukadida.h \
 			inc/segmentation/plotellipticalaccumulationhistogram.h \
 			inc/segmentation/plotknotellipseradiihistogram.h \
@@ -108,7 +107,8 @@ HEADERS	=	inc/billon.h \
 			inc/sectorhistogram.h \
 			inc/slicealgorithm.h \
 			inc/slicehistogram.h \
-			inc/sliceview.h \
+			inc/slicepainter.h \
+			inc/sliceui.h \
 			inc/slicezoomer.h \
 			tst/test_intervalshistogram.h \
 			inc/segmentation/tangentialtransform.h \

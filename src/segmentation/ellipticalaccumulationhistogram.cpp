@@ -1,4 +1,4 @@
-#include "inc/ellipticalaccumulationhistogram.h"
+#include "inc/segmentation/ellipticalaccumulationhistogram.h"
 
 #include "inc/billon.h"
 #include "inc/globalfunctions.h"

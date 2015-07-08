@@ -1,4 +1,4 @@
-#include "inc/sliceview.h"
+#include "inc/slicepainter.h"
 
 #include "def/def_opticalflow.h"
 #include "inc/billon.h"
@@ -10,7 +10,7 @@
 #include <QPainter>
 #include <QVector2D>
 
-SliceView::SliceView()
+SlicePainter::SlicePainter()
 {
 }
 
@@ -18,7 +18,7 @@ SliceView::SliceView()
  * Public setters
  *******************************/
 
-void SliceView::drawSlice(QImage &image, const Billon &billon, const TKD::ViewType &sliceType, const uint &sliceIndex, const Interval<int> &intensityInterval,
+void SlicePainter::drawSlice(QImage &image, const Billon &billon, const TKD::ViewType &sliceType, const uint &sliceIndex, const Interval<int> &intensityInterval,
 						  const uint &zMotionMin, const uint &angularResolution, const TKD::ProjectionType &axe, const qreal &ellipticityRate )
 {
 	switch (axe)
@@ -98,7 +98,7 @@ void SliceView::drawSlice(QImage &image, const Billon &billon, const TKD::ViewTy
  * Private functions
  *******************************/
 
-void SliceView::drawCurrentSlice(QImage &image, const Billon &billon, const uint &sliceIndex, const Interval<int> &intensityInterval,
+void SlicePainter::drawCurrentSlice(QImage &image, const Billon &billon, const uint &sliceIndex, const Interval<int> &intensityInterval,
 								  const uint &angularResolution, const TKD::ProjectionType &axe, const qreal &ellipticityRate )
 {
 	const uint &width = billon.n_cols;
@@ -184,7 +184,7 @@ void SliceView::drawCurrentSlice(QImage &image, const Billon &billon, const uint
 
 		rCoord2D center, edge;
 		rVec2D direction;
-		int nbCircularPoints = 0;
+		uint nbCircularPoints = 0;
 
 		for ( k=0 ; k<depth ; ++k)
 		{
@@ -203,7 +203,7 @@ void SliceView::drawCurrentSlice(QImage &image, const Billon &billon, const uint
 	}
 }
 
-void SliceView::drawMovementSlice( QImage &image, const Billon &billon, const uint &sliceIndex, const Interval<int> &intensityInterval,
+void SlicePainter::drawMovementSlice( QImage &image, const Billon &billon, const uint &sliceIndex, const Interval<int> &intensityInterval,
 								   const uint &zMotionMin, const uint &angularResolution, const TKD::ProjectionType &axe )
 {
 	const uint &width = billon.n_cols;
@@ -281,7 +281,7 @@ void SliceView::drawMovementSlice( QImage &image, const Billon &billon, const ui
 	}
 }
 
-void SliceView::drawHoughSlice( QImage &image, const Billon &billon, const uint &sliceIndex, const TKD::ProjectionType &axe )
+void SlicePainter::drawHoughSlice( QImage &image, const Billon &billon, const uint &sliceIndex, const TKD::ProjectionType &axe )
 {
 	if ( axe != TKD::Z_PROJECTION ) return;
 

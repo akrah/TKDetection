@@ -6,26 +6,26 @@
 #include "inc/billonalgorithms.h"
 #include "inc/define.h"
 #include "inc/dicomreader.h"
-#include "inc/ellipticalaccumulationhistogram.h"
+#include "inc/segmentation/ellipticalaccumulationhistogram.h"
 #include "inc/globalfunctions.h"
 #include "inc/knotareadetector.h"
-#include "inc/knotellipseradiihistogram.h"
-#include "inc/knotpithprofile.h"
+#include "inc/segmentation/knotellipseradiihistogram.h"
+#include "inc/segmentation/knotpithprofile.h"
 #include "inc/pith.h"
 #include "inc/pithextractorboukadida.h"
 #include "inc/ofsexport.h"
 #include "inc/pgm3dexport.h"
 #include "inc/piechart.h"
 #include "inc/piepart.h"
-#include "inc/plotellipticalaccumulationhistogram.h"
-#include "inc/plotknotellipseradiihistogram.h"
-#include "inc/plotknotpithprofile.h"
+#include "inc/segmentation/plotellipticalaccumulationhistogram.h"
+#include "inc/segmentation/plotknotellipseradiihistogram.h"
+#include "inc/segmentation/plotknotpithprofile.h"
 #include "inc/plotsectorhistogram.h"
 #include "inc/plotslicehistogram.h"
 #include "inc/sectorhistogram.h"
 #include "inc/slicealgorithm.h"
 #include "inc/slicehistogram.h"
-#include "inc/sliceview.h"
+#include "inc/slicepainter.h"
 #include "inc/v3dexport.h"
 #include "inc/v3dreader.h"
 #include "inc/tiffreader.h"
@@ -45,12 +45,11 @@
 #include <qwt_polar_renderer.h>
 #include <qwt_polar_grid.h>
 
-MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::MainWindow), _labelSliceView(new QLabel),
-	_labelTangentialView(new QLabel), _labelZMotionMapView(new QLabel), _labelTangentialZMotionMapView(new QLabel),
-	_billon(0), _tangentialBillon(0), _zMotionMapSlice(0), _tangentialZMotionMapBillon(0), _sliceView(new SliceView()),
-	_sliceHistogram(new SliceHistogram()), _plotSliceHistogram(new PlotSliceHistogram()),
-	_sectorHistogram(new SectorHistogram()), _plotSectorHistogram(new PlotSectorHistogram()),
-	_knotPithProfile(new KnotPithProfile()), _plotKnotPithProfile(new PlotKnotPithProfile()),
+MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::MainWindow),
+	_billon(0), _tangentialBillon(0), _zMotionMapSlice(0), _tangentialZMotionMapBillon(0), _slicePainter(new SlicePainter),
+	_sliceHistogram(new SliceHistogram), _plotSliceHistogram(new PlotSliceHistogram),
+	_sectorHistogram(new SectorHistogram), _plotSectorHistogram(new PlotSectorHistogram),
+	_knotPithProfile(new KnotPithProfile), _plotKnotPithProfile(new PlotKnotPithProfile),
 	_knotEllipseRadiiHistogram(new KnotEllipseRadiiHistogram), _plotKnotEllipseRadiiHistogram(new PlotKnotEllipseRadiiHistogram),
 	_plotEllipticalAccumulationHistogram(new PlotEllipticalAccumulationHistogram()), _tangentialTransform( -900, true ),
 	_currentSliceInterval(0), _currentSectorInterval(0), _currentKnotArea(0), _currentMaximum(0), _currentSector(0), _treeRadius(0)
@@ -59,34 +58,13 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 	setWindowTitle("TKDetection");
 
 	// Paramétrisation des composant graphiques
-	_labelSliceView->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
-	_labelSliceView->setScaledContents(true);
-	_labelSliceView->installEventFilter(&_sliceZoomer);
-	_labelSliceView->installEventFilter(this);
+	_ui->_gridBillonSliceView->addWidget(&_billonSliceUI,0,1);
+	_ui->_gridTangentialSliceView->addWidget(&_tangentialSliceUI,0,1);
+	_ui->_tabZMotionMap->layout()->addWidget(&_zMotionMapSliceUI);
+	_ui->_gridTangentialZMotionMapSliceView->addWidget(&_tangentialZMotionMapSliceUI,0,1);
 
-	_ui->_scrollSliceView->setBackgroundRole(QPalette::Dark);
-	_ui->_scrollSliceView->setWidget(_labelSliceView);
+	_billonSliceUI.installLabelEventFilter(this);
 
-	_labelTangentialView->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
-	_labelTangentialView->setScaledContents(true);
-	_labelTangentialView->installEventFilter(&_tangentialZoomer);
-
-	_ui->_scrollTangentialView->setBackgroundRole(QPalette::Dark);
-	_ui->_scrollTangentialView->setWidget(_labelTangentialView);
-
-	_labelZMotionMapView->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
-	_labelZMotionMapView->setScaledContents(true);
-	_labelZMotionMapView->installEventFilter(&_zMotionMapZoomer);
-
-	_ui->_scrollZMotionAccView->setBackgroundRole(QPalette::Dark);
-	_ui->_scrollZMotionAccView->setWidget(_labelZMotionMapView);
-
-	_labelTangentialZMotionMapView->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
-	_labelTangentialZMotionMapView->setScaledContents(true);
-	_labelTangentialZMotionMapView->installEventFilter(&_tangentialZMotionMapZoomer);
-
-	_ui->_scrollTangentialZMotionMapView->setBackgroundRole(QPalette::Dark);
-	_ui->_scrollTangentialZMotionMapView->setWidget(_labelTangentialZMotionMapView);
 
 	_ui->_comboViewType->insertItem(TKD::CLASSIC,tr("Originale"));
 	_ui->_comboViewType->insertItem(TKD::Z_MOTION,tr("Z-mouvements"));
@@ -129,7 +107,7 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 	// Onglet "Billon"
 	QObject::connect(_ui->_sliderSelectSlice, SIGNAL(valueChanged(int)), this, SLOT(setSlice(int)));
 	QObject::connect(_ui->_sliderSelectYSlice, SIGNAL(valueChanged(int)), this, SLOT(setYSlice(int)));
-	QObject::connect(_ui->_buttonZoomInitial, SIGNAL(clicked()), &_sliceZoomer, SLOT(resetZoom()));
+	QObject::connect(_ui->_buttonZoomInitial, SIGNAL(clicked()), &_billonSliceUI.zoomer(), SLOT(resetZoom()));
 	// Onglet "Coupes tangentielles"
 	QObject::connect(_ui->_sliderSelectTangentialSlice, SIGNAL(valueChanged(int)), this, SLOT(setTangentialSlice(int)));
 	QObject::connect(_ui->_sliderSelectTangentialYSlice, SIGNAL(valueChanged(int)), this, SLOT(setTangentialYSlice(int)));
@@ -267,16 +245,6 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 	QObject::connect(_ui->_buttonNextMaximum, SIGNAL(clicked()), this, SLOT(nextMaximumInSliceHistogram()));
 	QObject::connect(_ui->_buttonUpdateSliceHistogram, SIGNAL(clicked()), this, SLOT(computeSliceHistogram()));
 
-	/*******************
-	* Évènements du zoom
-	********************/
-	QObject::connect(&_sliceZoomer, SIGNAL(zoomFactorChanged(qreal,qreal)), this, SLOT(zoomInSliceView(qreal,qreal)));
-	QObject::connect(&_sliceZoomer, SIGNAL(isMovedFrom(QPoint)), this, SLOT(dragInSliceView(QPoint)));
-	QObject::connect(&_tangentialZoomer, SIGNAL(zoomFactorChanged(qreal,qreal)), this, SLOT(zoomInTangentialView(qreal,qreal)));
-	QObject::connect(&_tangentialZoomer, SIGNAL(isMovedFrom(QPoint)), this, SLOT(dragInTangentialView(QPoint)));
-	QObject::connect(&_zMotionMapZoomer, SIGNAL(zoomFactorChanged(qreal,qreal)), this, SLOT(zoomInZMotionAccView(qreal,qreal)));
-	QObject::connect(&_zMotionMapZoomer, SIGNAL(isMovedFrom(QPoint)), this, SLOT(dragInZMotionAccView(QPoint)));
-
 
 	// Raccourcis des actions du menu
 	_ui->_actionOpenDicom->setShortcut(Qt::CTRL + Qt::Key_O);
@@ -302,15 +270,11 @@ MainWindow::~MainWindow()
 	delete _sectorHistogram;
 	delete _plotSliceHistogram;
 	delete _sliceHistogram;
-	delete _sliceView;
+	delete _slicePainter;
 	if ( _tangentialZMotionMapBillon ) delete _tangentialZMotionMapBillon;
 	if ( _zMotionMapSlice ) delete _zMotionMapSlice;
 	if ( _tangentialBillon ) delete _tangentialBillon;
 	if ( _billon ) delete _billon;
-	if ( _labelTangentialZMotionMapView ) delete _labelTangentialZMotionMapView;
-	if ( _labelZMotionMapView ) delete _labelZMotionMapView;
-	if ( _labelTangentialView ) delete _labelTangentialView;
-	if (_labelSliceView ) delete _labelSliceView;
 }
 
 
@@ -320,16 +284,16 @@ MainWindow::~MainWindow()
 
 bool MainWindow::eventFilter(QObject *obj, QEvent *event)
 {
-	if ( obj == _labelSliceView && _billon && _billon->hasPith() )
+	if ( obj == &_billonSliceUI.label() && _billon && _billon->hasPith() )
 	{
 		if ( event->type() == QEvent::MouseButtonRelease )
 		{
 			const QMouseEvent *mouseEvent = static_cast<const QMouseEvent*>(event);
 			if ( (mouseEvent->button() == Qt::LeftButton) )
 			{
-				iCoord2D pos = iCoord2D(mouseEvent->x(),mouseEvent->y())/_sliceZoomer.factor();
+				iCoord2D pos = iCoord2D(mouseEvent->x(),mouseEvent->y())/_billonSliceUI.zoomer().factor();
 				qDebug() << "Position (i,j) = " << pos.x << " , " << pos.y << " )";
-				_currentSector = _sectorHistogram->pieChart().sectorIndexOfAngle( _billon->pithCoord(_ui->_sliderSelectSlice->value()).angle(uiCoord2D(mouseEvent->x(),mouseEvent->y())/_sliceZoomer.factor()) );
+				_currentSector = _sectorHistogram->pieChart().sectorIndexOfAngle( _billon->pithCoord(_ui->_sliderSelectSlice->value()).angle(uiCoord2D(mouseEvent->x(),mouseEvent->y())/_billonSliceUI.zoomer().factor()) );
 				_plotSectorHistogram->moveCursor(_currentSector);
 				_ui->_plotSectorHistogram->replot();
 				_ui->_polarSectorHistogram->replot();
@@ -405,9 +369,9 @@ void MainWindow::closeImage()
 		_zMotionMapSlice = 0;
 	}
 
-	_mainPix = QImage(0,0,QImage::Format_ARGB32);
-	_tangentialPix = QImage(0,0,QImage::Format_ARGB32);
-	_zMotionMapPix = QImage(0,0,QImage::Format_ARGB32);
+	_billonSliceUI.resizeBlackImage(0,0);
+	_tangentialSliceUI.resizeBlackImage(0,0);
+	_zMotionMapSliceUI.resizeBlackImage(0,0);
 	_treeRadius = 133.33;
 	_ui->_checkRadiusAroundPith->setText( QString::number(_treeRadius*_ui->_spinRestrictedAreaPercentage->value()/100.) );
 	computeSliceHistogram();
@@ -463,20 +427,19 @@ void MainWindow::drawSlice()
 			default : width = _billon->n_cols; height = _billon->n_rows; break;
 		}
 
-		_mainPix = QImage(width,height,QImage::Format_ARGB32);
-		_mainPix.fill(0xff000000);
+		_billonSliceUI.resizeBlackImage(width,height);
 
-		_sliceView->drawSlice(_mainPix, *_billon, viewType, currentSlice, Interval<int>(_ui->_spinMinIntensity->value(), _ui->_spinMaxIntensity->value()),
+		_slicePainter->drawSlice(_billonSliceUI.image(), *_billon, viewType, currentSlice, Interval<int>(_ui->_spinMinIntensity->value(), _ui->_spinMaxIntensity->value()),
 					  _ui->_spinZMotionMin->value(), _ui->_spinCartesianAngularResolution->value(), projectionType);
 
 		if ( (projectionType == TKD::Z_PROJECTION || projectionType == TKD::POLAR_PROJECTION) && _billon->hasPith() )
 		{
-			if ( projectionType == TKD::Z_PROJECTION )  _billon->pith().draw(_mainPix,currentSlice);
+			if ( projectionType == TKD::Z_PROJECTION )  _billon->pith().draw(_billonSliceUI.image(),currentSlice);
 
 			if ( _ui->_checkRadiusAroundPith->isChecked() && _treeRadius > 0 )
 			{
 				const qreal restrictedRadius = _treeRadius*_ui->_spinRestrictedAreaPercentage->value()/100.;
-				QPainter painter(&_mainPix);
+				QPainter painter(&_billonSliceUI.image());
 				painter.setPen(Qt::yellow);
 				if ( projectionType == TKD::Z_PROJECTION )
 					painter.drawEllipse(pithCoord.x-restrictedRadius,pithCoord.y-restrictedRadius,2*restrictedRadius,2*restrictedRadius);
@@ -492,8 +455,8 @@ void MainWindow::drawSlice()
 				const PieChart &pieChart = _sectorHistogram->pieChart();
 				if ( !_sectorHistogram->isEmpty() )
 				{
-					pieChart.draw(_mainPix, pithCoord, _sectorHistogram->intervals(), projectionType);
-					pieChart.draw(_mainPix, pithCoord, _currentSector, projectionType);
+					pieChart.draw(_billonSliceUI.image(), pithCoord, _sectorHistogram->intervals(), projectionType);
+					pieChart.draw(_billonSliceUI.image(), pithCoord, _currentSector, projectionType);
 				}
 				if ( _currentSectorInterval && _tangentialBillon )
 				{
@@ -515,7 +478,7 @@ void MainWindow::drawSlice()
 					QVector3D initial, destination;
 					qreal a,b,x, y,ellipticityRate,ellipseXCenter,ellipseYCenter;
 
-					QPainter painter(&_mainPix);
+					QPainter painter(&_billonSliceUI.image());
 
 					initial.setZ(0.);
 					for ( uint k=0 ; k<nbTangentialSlice ; ++k )
@@ -582,18 +545,17 @@ void MainWindow::drawSlice()
 					colorIndex++;
 				}
 
-				pieChartZMotionMap.draw(_mainPix, pithCoord, angleIntervalsToDraw, projectionType, intervalsColors );
+				pieChartZMotionMap.draw(_billonSliceUI.image(), pithCoord, angleIntervalsToDraw, projectionType, intervalsColors );
 			}
 		}
 	}
 	else
 	{
 		_ui->_labelSliceNumber->setText(tr("Aucune"));
-		_mainPix = QImage(1,1,QImage::Format_ARGB32);
+		_billonSliceUI.resizeBlackImage(1,1);
 	}
 
-	_labelSliceView->resize( _sliceZoomer.factor() * _mainPix.size() );
-	_labelSliceView->setPixmap( QPixmap::fromImage(_mainPix).scaledToWidth(_sliceZoomer.factor()*_mainPix.width(),Qt::FastTransformation) );
+	_billonSliceUI.updateLabel();
 }
 
 void MainWindow::drawTangentialView()
@@ -640,10 +602,9 @@ void MainWindow::drawTangentialView()
 			default : width = _tangentialBillon->n_cols; height = _tangentialBillon->n_rows; break;
 		}
 
-		_tangentialPix = QImage(width,height,QImage::Format_ARGB32);
-		_tangentialPix.fill(0xff000000);
+		_tangentialSliceUI.resizeBlackImage(width,height);
 
-		_sliceView->drawSlice( _tangentialPix, *_tangentialBillon, viewType, currentSlice, Interval<int>(_ui->_spinMinIntensity->value(), _ui->_spinMaxIntensity->value()),
+		_slicePainter->drawSlice( _tangentialSliceUI.image(), *_tangentialBillon, viewType, currentSlice, Interval<int>(_ui->_spinMinIntensity->value(), _ui->_spinMaxIntensity->value()),
 							   _ui->_spinZMotionMin->value(), _ui->_spinCartesianAngularResolution->value(), projectionType, ellipticityRate);
 
 		if ( projectionType == TKD::Z_PROJECTION && _ui->_checkTangentialDrawEllipses->isChecked() )
@@ -655,7 +616,7 @@ void MainWindow::drawTangentialView()
 
 			const qreal knotAreaLine = currentSlice * qFloor(width/2.) / static_cast<qreal>(depth);
 
-			QPainter painter(&_tangentialPix);
+			QPainter painter(&_tangentialSliceUI.image());
 			painter.setPen(currentColor);
 			painter.drawLine(width/2.-knotAreaLine-1,0,width/2.-knotAreaLine-1,height);
 			painter.drawLine(width/2.+knotAreaLine,0,width/2.+knotAreaLine,height);
@@ -663,7 +624,7 @@ void MainWindow::drawTangentialView()
 
 			if ( _tangentialBillon->hasPith() )
 			{
-				_tangentialBillon->pith().draw(_tangentialPix,currentSlice, 2);
+				_tangentialBillon->pith().draw(_tangentialSliceUI.image(),currentSlice, 2);
 			}
 
 			const qreal ellipseWidth = _knotEllipseRadiiHistogram->lowessData()[currentSlice];
@@ -672,7 +633,7 @@ void MainWindow::drawTangentialView()
 //			const qreal ellipseWidth2 = _knotEllipseRadiiHistogram->ellipticalHistogram(currentSlice).maximums()[0];
 //			const qreal ellipseHeight2 = ellipseWidth2*ellipticityRate;
 
-			painter.begin(&_tangentialPix);
+			painter.begin(&_tangentialSliceUI.image());
 			painter.setPen(currentColor);
 			painter.drawEllipse(QPointF(pithCoord.x,pithCoord.y),ellipseWidth,ellipseHeight);
 //			painter.setPen(Qt::green);
@@ -685,82 +646,11 @@ void MainWindow::drawTangentialView()
 	else
 	{
 		_ui->_labelTangentialSliceNumber->setText(tr("Aucune"));
-		_tangentialPix = QImage(1,1,QImage::Format_ARGB32);
+		_tangentialSliceUI.resizeBlackImage(1,1);
 	}
 
-	_labelTangentialView->resize(_tangentialZoomer.factor() * _tangentialPix.size());
-	_labelTangentialView->setPixmap( QPixmap::fromImage(_tangentialPix).scaledToWidth(_tangentialZoomer.factor()*_tangentialPix.width(),Qt::FastTransformation ) );
+	_tangentialSliceUI.updateLabel();
 }
-
-
-void MainWindow::zoomInSliceView( const qreal &zoomFactor, const qreal &zoomCoefficient )
-{
-	_labelSliceView->resize(zoomFactor * _mainPix.size());
-	_labelSliceView->setPixmap( QPixmap::fromImage(_mainPix).scaledToWidth(zoomFactor*_mainPix.width(),Qt::FastTransformation) );
-	QScrollBar *hBar = _ui->_scrollSliceView->horizontalScrollBar();
-	hBar->setValue(int(zoomCoefficient * hBar->value() + ((zoomCoefficient - 1) * hBar->pageStep()/2)));
-	QScrollBar *vBar = _ui->_scrollSliceView->verticalScrollBar();
-	vBar->setValue(int(zoomCoefficient * vBar->value() + ((zoomCoefficient - 1) * vBar->pageStep()/2)));
-}
-
-void MainWindow::dragInSliceView( const QPoint &movementVector )
-{
-	QScrollArea &scrollArea = *(_ui->_scrollSliceView);
-	if ( movementVector.x() ) scrollArea.horizontalScrollBar()->setValue(scrollArea.horizontalScrollBar()->value()-movementVector.x());
-	if ( movementVector.y() ) scrollArea.verticalScrollBar()->setValue(scrollArea.verticalScrollBar()->value()-movementVector.y());
-}
-
-void MainWindow::zoomInTangentialView( const qreal &zoomFactor, const qreal &zoomCoefficient )
-{
-	_labelTangentialView->resize(zoomFactor * _tangentialPix.size());
-	_labelTangentialView->setPixmap( QPixmap::fromImage(_tangentialPix).scaledToWidth(zoomFactor*_tangentialPix.width(),Qt::FastTransformation) );
-	QScrollBar *hBar = _ui->_scrollTangentialView->horizontalScrollBar();
-	hBar->setValue(int(zoomCoefficient * hBar->value() + ((zoomCoefficient - 1) * hBar->pageStep()/2)));
-	QScrollBar *vBar = _ui->_scrollTangentialView->verticalScrollBar();
-	vBar->setValue(int(zoomCoefficient * vBar->value() + ((zoomCoefficient - 1) * vBar->pageStep()/2)));
-}
-
-void MainWindow::dragInTangentialView( const QPoint &movementVector )
-{
-	QScrollArea &scrollArea = *(_ui->_scrollTangentialView);
-	if ( movementVector.x() ) scrollArea.horizontalScrollBar()->setValue(scrollArea.horizontalScrollBar()->value()-movementVector.x());
-	if ( movementVector.y() ) scrollArea.verticalScrollBar()->setValue(scrollArea.verticalScrollBar()->value()-movementVector.y());
-}
-
-void MainWindow::zoomInZMotionAccView( const qreal &zoomFactor, const qreal &zoomCoefficient )
-{
-	_labelZMotionMapView->resize(zoomFactor * _zMotionMapPix.size());
-	_labelZMotionMapView->setPixmap( QPixmap::fromImage(_zMotionMapPix).scaledToWidth(zoomFactor*_zMotionMapPix.width(),Qt::FastTransformation) );
-	QScrollBar *hBar = _ui->_scrollZMotionAccView->horizontalScrollBar();
-	hBar->setValue(int(zoomCoefficient * hBar->value() + ((zoomCoefficient - 1) * hBar->pageStep()/2)));
-	QScrollBar *vBar = _ui->_scrollZMotionAccView->verticalScrollBar();
-	vBar->setValue(int(zoomCoefficient * vBar->value() + ((zoomCoefficient - 1) * vBar->pageStep()/2)));
-}
-
-void MainWindow::dragInZMotionAccView( const QPoint &movementVector )
-{
-	QScrollArea &scrollArea = *(_ui->_scrollZMotionAccView);
-	if ( movementVector.x() ) scrollArea.horizontalScrollBar()->setValue(scrollArea.horizontalScrollBar()->value()-movementVector.x());
-	if ( movementVector.y() ) scrollArea.verticalScrollBar()->setValue(scrollArea.verticalScrollBar()->value()-movementVector.y());
-}
-
-void MainWindow::zoomInTangentialZMotionMapView( const qreal &zoomFactor, const qreal &zoomCoefficient )
-{
-	_labelTangentialZMotionMapView->resize(zoomFactor * _tangentialZMotionMapPix.size());
-	_labelTangentialZMotionMapView->setPixmap( QPixmap::fromImage(_tangentialZMotionMapPix).scaledToWidth(zoomFactor*_tangentialZMotionMapPix.width(),Qt::FastTransformation) );
-	QScrollBar *hBar = _ui->_scrollTangentialZMotionMapView->horizontalScrollBar();
-	hBar->setValue(int(zoomCoefficient * hBar->value() + ((zoomCoefficient - 1) * hBar->pageStep()/2)));
-	QScrollBar *vBar = _ui->_scrollTangentialZMotionMapView->verticalScrollBar();
-	vBar->setValue(int(zoomCoefficient * vBar->value() + ((zoomCoefficient - 1) * vBar->pageStep()/2)));
-}
-
-void MainWindow::dragInTangentialZMotionMapView( const QPoint &movementVector )
-{
-	QScrollArea &scrollArea = *(_ui->_scrollTangentialZMotionMapView);
-	if ( movementVector.x() ) scrollArea.horizontalScrollBar()->setValue(scrollArea.horizontalScrollBar()->value()-movementVector.x());
-	if ( movementVector.y() ) scrollArea.verticalScrollBar()->setValue(scrollArea.verticalScrollBar()->value()-movementVector.y());
-}
-
 
 void MainWindow::previousMaximumInSliceHistogram()
 {
@@ -1221,10 +1111,9 @@ void MainWindow::drawZMotionMap()
 		const uint &width = _zMotionMapSlice->n_cols;
 		const uint &height = _zMotionMapSlice->n_rows;
 
-		_zMotionMapPix = QImage(width,height,QImage::Format_ARGB32);
-		_zMotionMapPix.fill(0xff000000);
+		_zMotionMapSliceUI.resizeBlackImage(width,height);
 
-		QRgb * line = (QRgb *) _zMotionMapPix.bits();
+		QRgb * line = (QRgb *) _zMotionMapSliceUI.image().bits();
 		QRgb color;
 		uint i, j;
 
@@ -1242,7 +1131,7 @@ void MainWindow::drawZMotionMap()
 //		if ( _ui->_checkDrawKnotAreasOnZMotion2D->isChecked() && _sliceHistogram != 0 && _sliceHistogram->nbIntervals() > 0 )
 		if ( _ui->_checkDrawKnotAreasOnZMotionMap->isChecked() && _knotAreaDetector.hasSupportingAreas() )
 		{
-			QPainter painter(&_zMotionMapPix);
+			QPainter painter(&_zMotionMapSliceUI.image());
 
 			// Commun aux deux premiers affichages
 //			const uint &minValidSliceIndex = _billonPithExtractor.validSlices().min();
@@ -1365,11 +1254,10 @@ void MainWindow::drawZMotionMap()
 	}
 	else
 	{
-		_zMotionMapPix = QImage(1,1,QImage::Format_ARGB32);
+		_zMotionMapSliceUI.resizeBlackImage(1,1);
 	}
 
-	_labelZMotionMapView->resize( _zMotionMapZoomer.factor() * _zMotionMapPix.size() );
-	_labelZMotionMapView->setPixmap( QPixmap::fromImage(_zMotionMapPix).scaledToWidth(_zMotionMapZoomer.factor()*_zMotionMapPix.width(),Qt::FastTransformation) );
+	_zMotionMapSliceUI.updateLabel();
 }
 
 /********/
@@ -1502,7 +1390,7 @@ void MainWindow::exportToPng()
 {
 	QString fileName = QFileDialog::getSaveFileName(this, tr("Exporter l'image courante en PNG"), "coupe.png",
 													tr("Fichiers PNG (*.png);;Tous les fichiers (*.*)"));
-	QImage &image = _ui->_tabsViews->currentWidget() == _ui->_tabBillon ?_mainPix: _ui->_tabsViews->currentWidget() == _ui->_tabTangential ? _tangentialPix : _zMotionMapPix;
+	QImage &image = _ui->_tabsViews->currentWidget() == _ui->_tabBillon ?_billonSliceUI.image(): _ui->_tabsViews->currentWidget() == _ui->_tabTangential ? _tangentialSliceUI.image() : _zMotionMapSliceUI.image();
 	if ( !fileName.isEmpty() && image.save(fileName) )
 		QMessageBox::information(this,tr("Export de l'image courante en PNG"), tr("Export réussi !"));
 	else
@@ -1664,13 +1552,14 @@ void MainWindow::openNewBillon( const QString &fileName )
 	}
 	if ( _billon )
 	{
-		_mainPix = QImage(_billon->n_cols, _billon->n_rows,QImage::Format_ARGB32);
+		_billonSliceUI.resizeBlackImage(_billon->n_cols, _billon->n_rows);
 	}
 	else
 	{
-		_mainPix = QImage(0,0,QImage::Format_ARGB32);
+		_billonSliceUI.resizeBlackImage(0,0);
 	}
-	_tangentialPix = QImage(0,0,QImage::Format_ARGB32);
+
+	_tangentialSliceUI.resizeBlackImage(0,0);
 }
 
 void MainWindow::initComponentsValues() {

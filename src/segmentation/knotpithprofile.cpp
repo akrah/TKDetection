@@ -1,4 +1,4 @@
-#include "inc/knotpithprofile.h"
+#include "inc/segmentation/knotpithprofile.h"
 
 #include "inc/pith.h"
 #include "inc/coordinate.h"

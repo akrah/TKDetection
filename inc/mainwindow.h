@@ -9,7 +9,8 @@
 #include "slicezoomer.h"
 #include "inc/knotareadetector.h"
 #include "inc/pithextractorboukadida.h"
-#include "inc/tangentialtransform.h"
+#include "inc/sliceui.h"
+#include "inc/segmentation/tangentialtransform.h"
 #include "inc/zmotionaccumulator.h"
 
 namespace Ui
@@ -29,7 +30,7 @@ class PlotSectorHistogram;
 class PlotSliceHistogram;
 class SectorHistogram;
 class SliceHistogram;
-class SliceView;
+class SlicePainter;
 
 template <typename T> class Interval;
 
@@ -50,14 +51,6 @@ private slots:
 
 	void drawSlice();
 	void drawTangentialView();
-	void zoomInSliceView( const qreal &zoomFactor, const qreal &zoomCoefficient );
-	void dragInSliceView( const QPoint &movementVector );
-	void zoomInTangentialView( const qreal &zoomFactor, const qreal &zoomCoefficient );
-	void dragInTangentialView( const QPoint &movementVector );
-	void zoomInZMotionAccView( const qreal &zoomFactor, const qreal &zoomCoefficient );
-	void dragInZMotionAccView( const QPoint &movementVector );
-	void zoomInTangentialZMotionMapView( const qreal &zoomFactor, const qreal &zoomCoefficient );
-	void dragInTangentialZMotionMapView( const QPoint &movementVector );
 	void previousMaximumInSliceHistogram();
 	void nextMaximumInSliceHistogram();
 
@@ -139,29 +132,18 @@ private:
 
 private:
 	Ui::MainWindow *_ui;
-	QLabel *_labelSliceView;
-	QLabel *_labelTangentialView;
-	QLabel *_labelZMotionMapView;
-	QLabel *_labelTangentialZMotionMapView;
+
+	SliceUI _billonSliceUI;
+	SliceUI _tangentialSliceUI;
+	SliceUI _zMotionMapSliceUI;
+	SliceUI _tangentialZMotionMapSliceUI;
 
 	Billon *_billon;
 	Billon *_tangentialBillon;
 	Slice *_zMotionMapSlice;
 	Billon *_tangentialZMotionMapBillon;
 
-	QImage _mainPix;
-	SliceZoomer _sliceZoomer;
-
-	QImage _tangentialPix;
-	SliceZoomer _tangentialZoomer;
-
-	QImage _zMotionMapPix;
-	SliceZoomer _zMotionMapZoomer;
-
-	QImage _tangentialZMotionMapPix;
-	SliceZoomer _tangentialZMotionMapZoomer;
-
-	SliceView *_sliceView;
+	SlicePainter *_slicePainter;
 
 	SliceHistogram *_sliceHistogram;
 	PlotSliceHistogram *_plotSliceHistogram;

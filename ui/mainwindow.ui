@@ -82,7 +82,7 @@
          </layout>
         </item>
         <item>
-         <layout class="QGridLayout" name="gridLayout">
+         <layout class="QGridLayout" name="_gridBillonSliceView">
           <item row="1" column="1">
            <widget class="QSlider" name="_sliderSelectSlice">
             <property name="maximum">
@@ -117,44 +117,6 @@
             <property name="tickPosition">
              <enum>QSlider::TicksBelow</enum>
             </property>
-           </widget>
-          </item>
-          <item row="0" column="1">
-           <widget class="QScrollArea" name="_scrollSliceView">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Ignored" vsizetype="Ignored">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="frameShape">
-             <enum>QFrame::NoFrame</enum>
-            </property>
-            <property name="frameShadow">
-             <enum>QFrame::Plain</enum>
-            </property>
-            <property name="lineWidth">
-             <number>0</number>
-            </property>
-            <property name="verticalScrollBarPolicy">
-             <enum>Qt::ScrollBarAlwaysOn</enum>
-            </property>
-            <property name="horizontalScrollBarPolicy">
-             <enum>Qt::ScrollBarAlwaysOn</enum>
-            </property>
-            <property name="alignment">
-             <set>Qt::AlignCenter</set>
-            </property>
-            <widget class="QWidget" name="scrollAreaWidgetContents">
-             <property name="geometry">
-              <rect>
-               <x>106</x>
-               <y>242</y>
-               <width>0</width>
-               <height>0</height>
-              </rect>
-             </property>
-            </widget>
            </widget>
           </item>
          </layout>
@@ -214,7 +176,7 @@
          </layout>
         </item>
         <item>
-         <layout class="QGridLayout" name="gridLayout_2">
+         <layout class="QGridLayout" name="_gridTangentialSliceView">
           <item row="1" column="1">
            <widget class="QSlider" name="_sliderSelectTangentialSlice">
             <property name="maximum">
@@ -226,38 +188,6 @@
             <property name="tickPosition">
              <enum>QSlider::TicksAbove</enum>
             </property>
-           </widget>
-          </item>
-          <item row="0" column="1">
-           <widget class="QScrollArea" name="_scrollTangentialView">
-            <property name="frameShape">
-             <enum>QFrame::NoFrame</enum>
-            </property>
-            <property name="frameShadow">
-             <enum>QFrame::Plain</enum>
-            </property>
-            <property name="lineWidth">
-             <number>0</number>
-            </property>
-            <property name="verticalScrollBarPolicy">
-             <enum>Qt::ScrollBarAlwaysOn</enum>
-            </property>
-            <property name="horizontalScrollBarPolicy">
-             <enum>Qt::ScrollBarAlwaysOn</enum>
-            </property>
-            <property name="alignment">
-             <set>Qt::AlignCenter</set>
-            </property>
-            <widget class="QWidget" name="scrollAreaWidgetContents_2">
-             <property name="geometry">
-              <rect>
-               <x>0</x>
-               <y>127</y>
-               <width>390</width>
-               <height>234</height>
-              </rect>
-             </property>
-            </widget>
            </widget>
           </item>
           <item row="0" column="0">
@@ -277,47 +207,11 @@
         </item>
        </layout>
       </widget>
-      <widget class="QWidget" name="tab">
+      <widget class="QWidget" name="_tabZMotionMap">
        <attribute name="title">
         <string>Carte d'accumulation</string>
        </attribute>
-       <layout class="QVBoxLayout" name="verticalLayout_19">
-        <item>
-         <widget class="QScrollArea" name="_scrollZMotionAccView">
-          <property name="frameShape">
-           <enum>QFrame::NoFrame</enum>
-          </property>
-          <property name="frameShadow">
-           <enum>QFrame::Plain</enum>
-          </property>
-          <property name="lineWidth">
-           <number>0</number>
-          </property>
-          <property name="verticalScrollBarPolicy">
-           <enum>Qt::ScrollBarAlwaysOn</enum>
-          </property>
-          <property name="horizontalScrollBarPolicy">
-           <enum>Qt::ScrollBarAlwaysOn</enum>
-          </property>
-          <property name="widgetResizable">
-           <bool>false</bool>
-          </property>
-          <property name="alignment">
-           <set>Qt::AlignCenter</set>
-          </property>
-          <widget class="QWidget" name="scrollAreaWidgetContents_3">
-           <property name="geometry">
-            <rect>
-             <x>0</x>
-             <y>40</y>
-             <width>241</width>
-             <height>465</height>
-            </rect>
-           </property>
-          </widget>
-         </widget>
-        </item>
-       </layout>
+       <layout class="QVBoxLayout" name="verticalLayout_19"/>
       </widget>
       <widget class="QWidget" name="tab_8">
        <attribute name="title">
@@ -369,7 +263,7 @@
          </layout>
         </item>
         <item>
-         <layout class="QGridLayout" name="gridLayout_5">
+         <layout class="QGridLayout" name="_gridTangentialZMotionMapSliceView">
           <item row="2" column="2">
            <widget class="QSlider" name="_sliderSelectTangentialZMotionMapSlice">
             <property name="maximum">
@@ -394,41 +288,6 @@
             <property name="tickPosition">
              <enum>QSlider::TicksBelow</enum>
             </property>
-           </widget>
-          </item>
-          <item row="1" column="2">
-           <widget class="QScrollArea" name="_scrollTangentialZMotionMapView">
-            <property name="frameShape">
-             <enum>QFrame::NoFrame</enum>
-            </property>
-            <property name="frameShadow">
-             <enum>QFrame::Plain</enum>
-            </property>
-            <property name="lineWidth">
-             <number>0</number>
-            </property>
-            <property name="verticalScrollBarPolicy">
-             <enum>Qt::ScrollBarAlwaysOn</enum>
-            </property>
-            <property name="horizontalScrollBarPolicy">
-             <enum>Qt::ScrollBarAlwaysOn</enum>
-            </property>
-            <property name="widgetResizable">
-             <bool>false</bool>
-            </property>
-            <property name="alignment">
-             <set>Qt::AlignCenter</set>
-            </property>
-            <widget class="QWidget" name="scrollAreaWidgetContents_4">
-             <property name="geometry">
-              <rect>
-               <x>0</x>
-               <y>0</y>
-               <width>217</width>
-               <height>515</height>
-              </rect>
-             </property>
-            </widget>
            </widget>
           </item>
          </layout>
@@ -555,8 +414,8 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>371</width>
-              <height>238</height>
+              <width>254</width>
+              <height>118</height>
              </rect>
             </property>
             <attribute name="label">
@@ -1191,7 +1050,7 @@ sur une coupe valide</string>
               <x>0</x>
               <y>0</y>
               <width>417</width>
-              <height>294</height>
+              <height>292</height>
              </rect>
             </property>
             <attribute name="label">
@@ -3294,8 +3153,8 @@ zone de nœuds</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>371</width>
-              <height>151</height>
+              <width>350</width>
+              <height>76</height>
              </rect>
             </property>
             <attribute name="label">
@@ -3576,7 +3435,6 @@ zone de nœuds</string>
   <tabstop>_buttonPreviousMaximum</tabstop>
   <tabstop>_buttonNextMaximum</tabstop>
   <tabstop>_sliderSelectYSlice</tabstop>
-  <tabstop>_scrollSliceView</tabstop>
   <tabstop>_buttonZoomInitial</tabstop>
   <tabstop>_sliderSelectSlice</tabstop>
  </tabstops>

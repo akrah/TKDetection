@@ -1,6 +1,6 @@
-#include "inc/plotellipticalaccumulationhistogram.h"
+#include "inc/segmentation/plotellipticalaccumulationhistogram.h"
 
-#include "inc/ellipticalaccumulationhistogram.h"
+#include "inc/segmentation/ellipticalaccumulationhistogram.h"
 
 PlotEllipticalAccumulationHistogram::PlotEllipticalAccumulationHistogram()
 {

@@ -3,7 +3,7 @@
 
 #include "def/def_billon.h"
 #include "def/def_coordinate.h"
-#include "interval.h"
+#include "inc/interval.h"
 #include "inc/coordinate.h"
 #include "inc/piechart.h"
 

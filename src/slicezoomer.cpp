@@ -3,7 +3,7 @@
 #include <QMouseEvent>
 #include <QDebug>
 
-SliceZoomer::SliceZoomer(QObject *parent) : QObject(parent), _isDraging(false), _zoomFactor(1), _pointStartDrag(-1,-1) {
+SliceZoomer::SliceZoomer(QObject *parent) : QObject(parent), _isDraging(false), _zoomFactor(1), _zoomCoefficient(0), _pointStartDrag(-1,-1) {
 }
 
 qreal SliceZoomer::factor() const
@@ -49,11 +49,16 @@ bool SliceZoomer::eventFilter(QObject *obj, QEvent *event)
 			{
 				const QWheelEvent *wheelEvent = static_cast<const QWheelEvent*>(event);
 				const int wheelDelta = wheelEvent->delta();
-				if ( _zoomFactor > 0.1 && wheelDelta )
+				if ( wheelDelta )
 				{
-					_zoomFactor *= wheelDelta>0 ? ZOOM_COEF_IN : ZOOM_COEF_OUT;
-					_zoomCoefficient = wheelDelta>0 ? ZOOM_COEF_IN : ZOOM_COEF_OUT;
-					emit zoomFactorChanged(_zoomFactor,_zoomCoefficient);
+					const qreal newZoomCoefficient = wheelDelta>0 ? ZOOM_COEF_IN : ZOOM_COEF_OUT;
+					const qreal newZoomFactor = _zoomFactor * newZoomCoefficient;
+					if ( newZoomFactor > ZOOM_MIN_FACTOR && newZoomFactor < ZOOM_MAX_FACTOR )
+					{
+						_zoomCoefficient = newZoomCoefficient;
+						_zoomFactor = newZoomFactor;
+						emit zoomFactorChanged(newZoomFactor,newZoomCoefficient);
+					}
 				}
 			}
 			break;
@@ -66,7 +71,7 @@ bool SliceZoomer::eventFilter(QObject *obj, QEvent *event)
 void SliceZoomer::resetZoom()
 {
 	_isDraging = false;
-	_zoomCoefficient = _zoomFactor<1. ? ZOOM_COEF_IN*(1./(ZOOM_COEF_IN*_zoomFactor)) : ZOOM_COEF_OUT*(1./(ZOOM_COEF_IN*_zoomFactor));
+	_zoomCoefficient = 1./_zoomFactor;
 	_zoomFactor = 1.;
 	emit zoomFactorChanged(_zoomFactor,_zoomCoefficient);
 }

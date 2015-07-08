@@ -1,7 +1,7 @@
-#include "inc/knotellipseradiihistogram.h"
+#include "inc/segmentation/knotellipseradiihistogram.h"
 
 #include "inc/billon.h"
-#include "inc/knotpithprofile.h"
+#include "inc/segmentation/knotpithprofile.h"
 #include "inc/lowess.h"
 
 #include <QtGlobal>

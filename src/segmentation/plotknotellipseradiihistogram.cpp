@@ -1,6 +1,6 @@
-#include "inc/plotknotellipseradiihistogram.h"
+#include "inc/segmentation/plotknotellipseradiihistogram.h"
 
-#include "inc/knotellipseradiihistogram.h"
+#include "inc/segmentation/knotellipseradiihistogram.h"
 
 PlotKnotEllipseRadiiHistogram::PlotKnotEllipseRadiiHistogram()
 {

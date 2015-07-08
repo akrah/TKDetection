@@ -1,4 +1,4 @@
-#include "inc/tangentialtransform.h"
+#include "inc/segmentation/tangentialtransform.h"
 
 #include <qmath.h>
 
