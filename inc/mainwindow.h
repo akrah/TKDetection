@@ -7,7 +7,7 @@
 #include "def/def_billon.h"
 #include "def/def_coordinate.h"
 #include "slicezoomer.h"
-#include "inc/detection/knotareadetector.h"
+#include "inc/detection/oldknotareadetector.h"
 #include "inc/pithextractorboukadida.h"
 #include "inc/sliceui.h"
 #include "inc/segmentation/tangentialgenerator.h"

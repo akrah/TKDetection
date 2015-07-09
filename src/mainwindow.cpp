@@ -5,7 +5,7 @@
 #include "inc/billon.h"
 #include "inc/billonalgorithms.h"
 #include "inc/define.h"
-#include "inc/detection/knotareadetector.h"
+#include "inc/detection/oldknotareadetector.h"
 #include "inc/detection/plotsectorhistogram.h"
 #include "inc/detection/plotslicehistogram.h"
 #include "inc/detection/sectorhistogram.h"
@@ -518,7 +518,7 @@ void MainWindow::drawSlice()
 					painter.end();
 				}
 			}
-			if ( _zMotionMapSlice && _knotAreaDetector.hasSupportingAreas() && _ui->_checkDrawKnotAreasOnZMotionMap->isChecked() )
+			if ( _zMotionMapSlice && _oldKnotAreaDetector.hasSupportingAreas() && _ui->_checkDrawKnotAreasOnZMotionMap->isChecked() )
 			{
 				const PieChart &pieChartZMotionMap = _zMotionAccumulator.pieChart();
 				const qreal angleFactor = TWO_PI/(qreal)(_zMotionMapSlice->n_rows);
@@ -531,7 +531,7 @@ void MainWindow::drawSlice()
 				const int nbColors = colors.size();
 				int colorIndex=0;
 
-				QVectorIterator<QRect> supportingAreaIter(_knotAreaDetector.supportingAreaVector());
+				QVectorIterator<QRect> supportingAreaIter(_oldKnotAreaDetector.supportingAreaVector());
 				while ( supportingAreaIter.hasNext() )
 				{
 					const QRect &currentSupportingArea = supportingAreaIter.next();
@@ -868,7 +868,7 @@ void MainWindow::selectKnotArea( const int &index, const bool &draw )
 		_tangentialZMotionMapBillon = 0;
 	}
 
-	const QVector<QRect> &supportingAreas = _knotAreaDetector.supportingAreaVector();
+	const QVector<QRect> &supportingAreas = _oldKnotAreaDetector.supportingAreaVector();
 
 	if ( _billon->hasPith() && index > 0 && index <= supportingAreas.size() )
 	{
@@ -1057,7 +1057,7 @@ void MainWindow::computeZMotionMap()
 	{
 		delete _zMotionMapSlice;
 		_zMotionMapSlice = 0;
-		_knotAreaDetector.clearKnotAreas();
+		_oldKnotAreaDetector.clearKnotAreas();
 	}
 
 	if ( _billon && _billon->hasPith() )
@@ -1079,10 +1079,10 @@ void MainWindow::computeKnotAreas()
 {
 	if ( _zMotionMapSlice )
 	{
-		_knotAreaDetector.setBinarizationThreshold(_ui->_spinSupportingAreaBinarization->value());
-		_knotAreaDetector.setMaximumConnectedComponentDistance(_ui->_spinSupportingAreaDistance->value());
-		_knotAreaDetector.setMinimumConnectedComponentSize(_ui->_spinSupportingAreaMinSize->value());
-		_knotAreaDetector.execute( *_zMotionMapSlice );
+		_oldKnotAreaDetector.setBinarizationThreshold(_ui->_spinSupportingAreaBinarization->value());
+		_oldKnotAreaDetector.setMaximumConnectedComponentDistance(_ui->_spinSupportingAreaDistance->value());
+		_oldKnotAreaDetector.setMinimumConnectedComponentSize(_ui->_spinSupportingAreaMinSize->value());
+		_oldKnotAreaDetector.execute( *_zMotionMapSlice );
 	}
 
 	_ui->_comboSelectKnotArea->blockSignals(true);
@@ -1090,9 +1090,9 @@ void MainWindow::computeKnotAreas()
 	_ui->_comboSelectKnotArea->addItem(tr("Aucune"));
 	_ui->_comboSelectKnotArea->blockSignals(false);
 
-	if ( _zMotionMapSlice && _knotAreaDetector.hasSupportingAreas() )
+	if ( _zMotionMapSlice && _oldKnotAreaDetector.hasSupportingAreas() )
 	{
-		const QVector<QRect> &supportingAreas = _knotAreaDetector.supportingAreaVector();
+		const QVector<QRect> &supportingAreas = _oldKnotAreaDetector.supportingAreaVector();
 
 		for ( int i=0 ; i<supportingAreas.size() ; ++i )
 		{
@@ -1129,7 +1129,7 @@ void MainWindow::drawZMotionMap()
 		}
 
 //		if ( _ui->_checkDrawKnotAreasOnZMotion2D->isChecked() && _sliceHistogram != 0 && _sliceHistogram->nbIntervals() > 0 )
-		if ( _ui->_checkDrawKnotAreasOnZMotionMap->isChecked() && _knotAreaDetector.hasSupportingAreas() )
+		if ( _ui->_checkDrawKnotAreasOnZMotionMap->isChecked() && _oldKnotAreaDetector.hasSupportingAreas() )
 		{
 			QPainter painter(&_zMotionMapSliceUI.image());
 
@@ -1233,7 +1233,7 @@ void MainWindow::drawZMotionMap()
 			const int nbColors = colors.size();
 			QColor currentColor;
 
-			QVectorIterator<QRect> supportingAreaIter(_knotAreaDetector.supportingAreaVector());
+			QVectorIterator<QRect> supportingAreaIter(_oldKnotAreaDetector.supportingAreaVector());
 			int colorIndex = 0;
 			while ( supportingAreaIter.hasNext() )
 			{
@@ -1245,7 +1245,7 @@ void MainWindow::drawZMotionMap()
 			if ( _ui->_comboSelectKnotArea->currentIndex() )
 			{
 				uint currentSupportingAreaIndex = _ui->_comboSelectKnotArea->currentIndex()-1;
-				const QRect &currentSupportingArea =_knotAreaDetector.supportingAreaVector()[currentSupportingAreaIndex];
+				const QRect &currentSupportingArea =_oldKnotAreaDetector.supportingAreaVector()[currentSupportingAreaIndex];
 				painter.setPen(QPen(colors[currentSupportingAreaIndex%nbColors],4));
 				painter.drawRect(currentSupportingArea);
 			}

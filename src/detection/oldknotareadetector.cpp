@@ -1,4 +1,4 @@
-#include "inc/knotareadetector.h"
+#include "inc/detection/oldknotareadetector.h"
 
 #include "inc/coordinate.h"
 
@@ -6,11 +6,11 @@
 
 #include <QDebug>
 
-KnotAreaDetector::KnotAreaDetector() : _binarizationThreshold(100), _maximumConnectedComponentDistance(20), _minimumConnectedComponentSize(0)
+OldKnotAreaDetector::OldKnotAreaDetector() : _binarizationThreshold(100), _maximumConnectedComponentDistance(20), _minimumConnectedComponentSize(0)
 {
 }
 
-void KnotAreaDetector::execute( const Slice &accumulationSlice )
+void OldKnotAreaDetector::execute( const Slice &accumulationSlice )
 {
 	// Initialize supportingAreaList to an empty list
 	clearKnotAreas();
@@ -64,7 +64,7 @@ void KnotAreaDetector::execute( const Slice &accumulationSlice )
 	while ( supportingAreaMapIter.hasNext() )
 	{
 		supportingAreaMapIter.next();
-		if ( supportingAreaMapIter.value().size() >= _minimumConnectedComponentSize )
+		if ( supportingAreaMapIter.value().size() >= (int)_minimumConnectedComponentSize )
 		{
 			QListIterator<iCoord2D> supportingAreaIter(supportingAreaMapIter.value());
 			if ( supportingAreaIter.hasNext() )
@@ -82,7 +82,7 @@ void KnotAreaDetector::execute( const Slice &accumulationSlice )
 	}
 }
 
-void KnotAreaDetector::computeLabelledImage( const Slice &accumulationSlice, Slice &labelledSlice, QMap<int, QList<iCoord2D> > &ccList )
+void OldKnotAreaDetector::computeLabelledImage( const Slice &accumulationSlice, Slice &labelledSlice, QMap<int, QList<iCoord2D> > &ccList )
 {
 	QMap<int, int> tableEquiv;
 	QList<int> voisinage;
@@ -169,7 +169,7 @@ void KnotAreaDetector::computeLabelledImage( const Slice &accumulationSlice, Sli
 	}
 }
 
-void KnotAreaDetector::findNearestConnectedComponent( const QList<iCoord2D> &currentCC, const QMap<int, QList<iCoord2D> > &supportingAreaMap, int &ccMin, qreal &minDist )
+void OldKnotAreaDetector::findNearestConnectedComponent( const QList<iCoord2D> &currentCC, const QMap<int, QList<iCoord2D> > &supportingAreaMap, int &ccMin, qreal &minDist )
 {
 	qreal distance;
 	minDist = 999999;
@@ -199,46 +199,46 @@ void KnotAreaDetector::findNearestConnectedComponent( const QList<iCoord2D> &cur
 	}
 }
 
-const __billon_type__ &KnotAreaDetector::binarizationThreshold() const
+const __billon_type__ &OldKnotAreaDetector::binarizationThreshold() const
 {
 	return _binarizationThreshold;
 }
-const qreal &KnotAreaDetector::maximumConnectedComponentDistance() const
+const qreal &OldKnotAreaDetector::maximumConnectedComponentDistance() const
 {
 	return _maximumConnectedComponentDistance;
 }
 
-const uint &KnotAreaDetector::minimumConnectedComponentSize() const
+const uint &OldKnotAreaDetector::minimumConnectedComponentSize() const
 {
 	return _minimumConnectedComponentSize;
 }
 
-const QVector<QRect> &KnotAreaDetector::supportingAreaVector() const
+const QVector<QRect> &OldKnotAreaDetector::supportingAreaVector() const
 {
 	return _supportingAreaVector;
 }
 
-bool KnotAreaDetector::hasSupportingAreas() const
+bool OldKnotAreaDetector::hasSupportingAreas() const
 {
 	return !_supportingAreaVector.isEmpty();
 }
 
-void KnotAreaDetector::setBinarizationThreshold( const __billon_type__ &newThreshold )
+void OldKnotAreaDetector::setBinarizationThreshold( const __billon_type__ &newThreshold )
 {
 	_binarizationThreshold = newThreshold;
 }
 
-void KnotAreaDetector::setMaximumConnectedComponentDistance( const qreal &newDistance )
+void OldKnotAreaDetector::setMaximumConnectedComponentDistance( const qreal &newDistance )
 {
 	_maximumConnectedComponentDistance = newDistance;
 }
 
-void KnotAreaDetector::setMinimumConnectedComponentSize( const uint &size )
+void OldKnotAreaDetector::setMinimumConnectedComponentSize( const uint &size )
 {
 	_minimumConnectedComponentSize = size;
 }
 
-void KnotAreaDetector::clearKnotAreas()
+void OldKnotAreaDetector::clearKnotAreas()
 {
 	_supportingAreaVector.clear();
 }
