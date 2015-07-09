@@ -1,11 +1,11 @@
-#include "inc/plotsectorhistogram.h"
+#include "inc/detection/plotsectorhistogram.h"
 
 #include "inc/coordinate.h"
 #include "inc/define.h"
 #include "inc/piechart.h"
 #include "inc/piepart.h"
 #include "inc/pointpolarseriesdata.h"
-#include "inc/sectorhistogram.h"
+#include "inc/detection/sectorhistogram.h"
 
 #include <qwt_polar_plot.h>
 #include <qwt_plot.h>

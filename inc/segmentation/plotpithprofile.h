@@ -3,21 +3,21 @@
 
 #include <qwt_plot_histogram.h>
 
-class KnotPithProfile;
+class PithProfile;
 class QwtPlot;
 
-class PlotKnotPithProfile
+class PlotPithProfile
 {
 public:
-	PlotKnotPithProfile();
-	~PlotKnotPithProfile();
+	PlotPithProfile();
+	~PlotPithProfile();
 
 	void attach( QwtPlot * const plot );
 	void clear();
 
 	void moveCursor( const uint & sliceIndex );
 
-	void update( const KnotPithProfile & histogram );
+	void update( const PithProfile & histogram );
 
 private:
 	QwtPlotHistogram _histogramData;

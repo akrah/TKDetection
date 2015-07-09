@@ -2,8 +2,8 @@
 #define SECTORHISTOGRAM_H
 
 #include "def/def_billon.h"
-#include "histogram.h"
-#include "piechart.h"
+#include "inc/histogram.h"
+#include "inc/piechart.h"
 
 class SectorHistogram : public Histogram<qreal>
 {

@@ -42,12 +42,14 @@ TRANSLATIONS = TKDetection_en.ts
 SOURCES	=	src/main.cpp \
 			src/billonalgorithms.cpp \
 			src/connexcomponentextractor.cpp \
+			src/detection/knotareadetector.cpp \
+			src/detection/plotsectorhistogram.cpp \
+			src/detection/plotslicehistogram.cpp \
+			src/detection/sectorhistogram.cpp \
+			src/detection/slicehistogram.cpp \
+			src/detection/zmotionaccumulator.cpp \
 			src/dicomreader.cpp \
-			src/segmentation/ellipticalaccumulationhistogram.cpp \
 			src/globalfunctions.cpp \
-			src/knotareadetector.cpp \
-			src/segmentation/knotellipseradiihistogram.cpp \
-			src/segmentation/knotpithprofile.cpp \
 			src/lowess.cpp \
 			src/mainwindow.cpp \
 			src/ofsexport.cpp \
@@ -56,23 +58,21 @@ SOURCES	=	src/main.cpp \
 			src/piepart.cpp \
 			src/pith.cpp \
 			src/pithextractorboukadida.cpp \
-			src/segmentation/plotellipticalaccumulationhistogram.cpp \
-			src/segmentation/plotknotellipseradiihistogram.cpp \
-			src/segmentation/plotknotpithprofile.cpp \
-			src/plotsectorhistogram.cpp \
-			src/plotslicehistogram.cpp \
 			src/pointpolarseriesdata.cpp \
-			src/sectorhistogram.cpp \
 			src/slicealgorithm.cpp \
-			src/slicehistogram.cpp \
 			src/slicepainter.cpp \
 			src/sliceui.cpp \
 			src/slicezoomer.cpp \
-			src/segmentation/tangentialtransform.cpp \
+			src/segmentation/ellipseradiihistogram.cpp \
+			src/segmentation/ellipticalaccumulationhistogram.cpp \
+			src/segmentation/pithprofile.cpp \
+			src/segmentation/plotellipseradiihistogram.cpp \
+			src/segmentation/plotellipticalaccumulationhistogram.cpp \
+			src/segmentation/plotpithprofile.cpp \
+			src/segmentation/tangentialgenerator.cpp \
 			tst/test_intervalshistogram.cpp \
 			src/tiffreader.cpp \
 			src/v3dexport.cpp \
-			src/zmotionaccumulator.cpp \
 
 HEADERS	=	inc/billon.h \
 			inc/billonalgorithms.h \
@@ -82,14 +82,16 @@ HEADERS	=	inc/billon.h \
 			def/def_billon.h \
 			def/def_coordinate.h \
 			def/def_opticalflow.h \
+			inc/detection/knotareadetector.h \
+			inc/detection/plotsectorhistogram.h \
+			inc/detection/plotslicehistogram.h \
+			inc/detection/sectorhistogram.h \
+			inc/detection/slicehistogram.h \
+			inc/detection/zmotionaccumulator.h \
 			inc/dicomreader.h \
-			inc/segmentation/ellipticalaccumulationhistogram.h \
 			inc/globalfunctions.h \
 			inc/histogram.h \
 			inc/interval.h \
-			inc/knotareadetector.h \
-			inc/segmentation/knotellipseradiihistogram.h \
-			inc/segmentation/knotpithprofile.h \
 			inc/lowess.h \
 			inc/mainwindow.h \
 			inc/ofsexport.h \
@@ -97,24 +99,22 @@ HEADERS	=	inc/billon.h \
 			inc/piepart.h \
 			inc/piechart.h \
 			inc/pith.h \
-			inc/pithextractorboukadida.h \
-			inc/segmentation/plotellipticalaccumulationhistogram.h \
-			inc/segmentation/plotknotellipseradiihistogram.h \
-			inc/segmentation/plotknotpithprofile.h \
-			inc/plotsectorhistogram.h \
-			inc/plotslicehistogram.h \
 			inc/pointpolarseriesdata.h \
-			inc/sectorhistogram.h \
+			inc/pithextractorboukadida.h \
+			inc/segmentation/ellipticalaccumulationhistogram.h \
+			inc/segmentation/ellipseradiihistogram.h \
+			inc/segmentation/pithprofile.h \
+			inc/segmentation/plotellipticalaccumulationhistogram.h \
+			inc/segmentation/plotellipseradiihistogram.h \
+			inc/segmentation/plotpithprofile.h \
+			inc/segmentation/tangentialgenerator.h \
 			inc/slicealgorithm.h \
-			inc/slicehistogram.h \
 			inc/slicepainter.h \
 			inc/sliceui.h \
 			inc/slicezoomer.h \
 			tst/test_intervalshistogram.h \
-			inc/segmentation/tangentialtransform.h \
 			inc/tiffreader.h \
 			inc/v3dexport.h \
-			inc/zmotionaccumulator.h \
 
 FORMS =	ui/mainwindow.ui
 

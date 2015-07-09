@@ -1,15 +1,15 @@
-#include "inc/segmentation/knotpithprofile.h"
+#include "inc/segmentation/pithprofile.h"
 
 #include "inc/pith.h"
 #include "inc/coordinate.h"
 
 #include "inc/globalfunctions.h"
 
-KnotPithProfile::KnotPithProfile() : Histogram<qreal>()
+PithProfile::PithProfile() : Histogram<qreal>()
 {
 }
 
-KnotPithProfile::~KnotPithProfile()
+PithProfile::~PithProfile()
 {
 }
 
@@ -17,7 +17,7 @@ KnotPithProfile::~KnotPithProfile()
  * Public setters
  **********************************/
 
-void KnotPithProfile::construct( const Pith &pith, const uint &smoothingRadius )
+void PithProfile::construct( const Pith &pith, const uint &smoothingRadius )
 {
 	int size = pith.size();
 	resize(size);

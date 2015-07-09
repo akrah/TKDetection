@@ -7,11 +7,11 @@
 #include "def/def_billon.h"
 #include "def/def_coordinate.h"
 #include "slicezoomer.h"
-#include "inc/knotareadetector.h"
+#include "inc/detection/knotareadetector.h"
 #include "inc/pithextractorboukadida.h"
 #include "inc/sliceui.h"
-#include "inc/segmentation/tangentialtransform.h"
-#include "inc/zmotionaccumulator.h"
+#include "inc/segmentation/tangentialgenerator.h"
+#include "inc/detection/zmotionaccumulator.h"
 
 namespace Ui
 {
@@ -20,12 +20,12 @@ namespace Ui
 
 class QLabel;
 
-class KnotEllipseRadiiHistogram;
-class KnotPithProfile;
+class EllipseRadiiHistogram;
+class PithProfile;
 class PieChart;
 class PlotEllipticalAccumulationHistogram;
-class PlotKnotEllipseRadiiHistogram;
-class PlotKnotPithProfile;
+class PlotEllipseRadiiHistogram;
+class PlotPithProfile;
 class PlotSectorHistogram;
 class PlotSliceHistogram;
 class SectorHistogram;
@@ -120,13 +120,13 @@ private:
 	void exportPithOfCurrentKnotToSdp();
 	void exportPithOfCurrentKnotAreaToSdp();
 	void exportPithOfAllKnotAreaToSdp();
-	void exportPithOfAKnotAreaToSdp( QTextStream &stream, const TangentialTransform &tangentialTransform, const uint &numSliceInterval, const uint &numAngularInterval, const uint &knotID );
+	void exportPithOfAKnotAreaToSdp( QTextStream &stream, const TangentialGenerator &tangentialTransform, const uint &numSliceInterval, const uint &numAngularInterval, const uint &knotID );
 	void exportPithOfBillonToSdp();
 
 	void exportCurrentSegmentedKnotToSdp( const bool &useSliceIntervalCoordinates = false );
 	void exportSegmentedKnotsOfCurrentSliceIntervalToSdp( const bool &useSliceIntervalCoordinates = false );
 	void exportAllSegmentedKnotsOfBillonToSdp();
-	void exportSegmentedKnotToSdp( QTextStream &stream, const TangentialTransform &tangentialTransform, const bool &useSliceIntervalCoordinates , const int & knotId = 1 );
+	void exportSegmentedKnotToSdp( QTextStream &stream, const TangentialGenerator &tangentialTransform, const bool &useSliceIntervalCoordinates , const int & knotId = 1 );
 
 //	void exportSegmentedKnotsOfCurrentSliceIntervalToSdpOldAlgo( bool keepBillonSliceNumber = false );
 
@@ -151,21 +151,20 @@ private:
 	SectorHistogram *_sectorHistogram;
 	PlotSectorHistogram * _plotSectorHistogram;
 
-	KnotPithProfile *_knotPithProfile;
-	PlotKnotPithProfile *_plotKnotPithProfile;
+	PithProfile *_knotPithProfile;
+	PlotPithProfile *_plotKnotPithProfile;
 
-	KnotEllipseRadiiHistogram * _knotEllipseRadiiHistogram;
-	PlotKnotEllipseRadiiHistogram * _plotKnotEllipseRadiiHistogram;
-
+	EllipseRadiiHistogram * _knotEllipseRadiiHistogram;
+	PlotEllipseRadiiHistogram * _plotKnotEllipseRadiiHistogram;
 	PlotEllipticalAccumulationHistogram *_plotEllipticalAccumulationHistogram;
 
 	PithExtractorBoukadida _billonPithExtractor;
 	PithExtractorBoukadida _knotPithExtractor;
 
-	TangentialTransform _tangentialTransform;
+	TangentialGenerator _tangentialTransform;
 
 	ZMotionAccumulator _zMotionAccumulator;
-	KnotAreaDetector _knotAreaDetector;
+	OldKnotAreaDetector _oldKnotAreaDetector;
 
 	uint _currentSliceInterval;
 	uint _currentSectorInterval;

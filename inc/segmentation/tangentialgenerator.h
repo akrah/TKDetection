@@ -1,5 +1,5 @@
-#ifndef TANGENTIALTRANSFORM_H
-#define TANGENTIALTRANSFORM_H
+#ifndef TANGENTIALGENERATOR_H
+#define TANGENTIALGENERATOR_H
 
 #include "def/def_billon.h"
 #include "def/def_coordinate.h"
@@ -10,12 +10,12 @@
 #include <QtGlobal>
 #include <QQuaternion>
 
-class TangentialTransform
+class TangentialGenerator
 {
 public:
-	TangentialTransform(const int &minIntensity, const bool &trilinearInterpolation );
-	TangentialTransform( const TangentialTransform &tangentialTransform );
-	virtual ~TangentialTransform();
+	TangentialGenerator( const int &minIntensity, const bool &trilinearInterpolation );
+	TangentialGenerator( const TangentialGenerator &tangentialGenerator );
+	virtual ~TangentialGenerator();
 
 	Billon* execute( const Billon &billon, const PieChart &pieChart );
 
@@ -66,4 +66,4 @@ protected:
 	QVector3D _shiftStep;
 };
 
-#endif // TANGENTIALTRANSFORM_H
+#endif // TANGENTIALGENERATOR_H

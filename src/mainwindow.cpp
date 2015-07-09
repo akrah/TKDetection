@@ -5,31 +5,31 @@
 #include "inc/billon.h"
 #include "inc/billonalgorithms.h"
 #include "inc/define.h"
+#include "inc/detection/knotareadetector.h"
+#include "inc/detection/plotsectorhistogram.h"
+#include "inc/detection/plotslicehistogram.h"
+#include "inc/detection/sectorhistogram.h"
+#include "inc/detection/slicehistogram.h"
+#include "inc/detection/zmotionaccumulator.h"
 #include "inc/dicomreader.h"
-#include "inc/segmentation/ellipticalaccumulationhistogram.h"
 #include "inc/globalfunctions.h"
-#include "inc/knotareadetector.h"
-#include "inc/segmentation/knotellipseradiihistogram.h"
-#include "inc/segmentation/knotpithprofile.h"
 #include "inc/pith.h"
 #include "inc/pithextractorboukadida.h"
 #include "inc/ofsexport.h"
 #include "inc/pgm3dexport.h"
 #include "inc/piechart.h"
 #include "inc/piepart.h"
+#include "inc/segmentation/ellipticalaccumulationhistogram.h"
+#include "inc/segmentation/ellipseradiihistogram.h"
+#include "inc/segmentation/pithprofile.h"
 #include "inc/segmentation/plotellipticalaccumulationhistogram.h"
-#include "inc/segmentation/plotknotellipseradiihistogram.h"
-#include "inc/segmentation/plotknotpithprofile.h"
-#include "inc/plotsectorhistogram.h"
-#include "inc/plotslicehistogram.h"
-#include "inc/sectorhistogram.h"
+#include "inc/segmentation/plotellipseradiihistogram.h"
+#include "inc/segmentation/plotpithprofile.h"
 #include "inc/slicealgorithm.h"
-#include "inc/slicehistogram.h"
 #include "inc/slicepainter.h"
 #include "inc/v3dexport.h"
 #include "inc/v3dreader.h"
 #include "inc/tiffreader.h"
-#include "inc/zmotionaccumulator.h"
 
 #include <QLabel>
 #include <QFileDialog>
@@ -49,8 +49,8 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 	_billon(0), _tangentialBillon(0), _zMotionMapSlice(0), _tangentialZMotionMapBillon(0), _slicePainter(new SlicePainter),
 	_sliceHistogram(new SliceHistogram), _plotSliceHistogram(new PlotSliceHistogram),
 	_sectorHistogram(new SectorHistogram), _plotSectorHistogram(new PlotSectorHistogram),
-	_knotPithProfile(new KnotPithProfile), _plotKnotPithProfile(new PlotKnotPithProfile),
-	_knotEllipseRadiiHistogram(new KnotEllipseRadiiHistogram), _plotKnotEllipseRadiiHistogram(new PlotKnotEllipseRadiiHistogram),
+	_knotPithProfile(new PithProfile), _plotKnotPithProfile(new PlotPithProfile),
+	_knotEllipseRadiiHistogram(new EllipseRadiiHistogram), _plotKnotEllipseRadiiHistogram(new PlotEllipseRadiiHistogram),
 	_plotEllipticalAccumulationHistogram(new PlotEllipticalAccumulationHistogram()), _tangentialTransform( -900, true ),
 	_currentSliceInterval(0), _currentSectorInterval(0), _currentKnotArea(0), _currentMaximum(0), _currentSector(0), _treeRadius(0)
 {
@@ -2370,7 +2370,7 @@ void  MainWindow::exportPithOfCurrentKnotAreaToSdp()
 	}
 }
 
-void MainWindow::exportPithOfAKnotAreaToSdp( QTextStream &stream, const TangentialTransform &tangentialTransform, const uint &numSliceInterval, const uint &numAngularInterval, const uint &knotID )
+void MainWindow::exportPithOfAKnotAreaToSdp( QTextStream &stream, const TangentialGenerator &tangentialTransform, const uint &numSliceInterval, const uint &numAngularInterval, const uint &knotID )
 {
 	stream << "# SDP (Sequence of Discrete Points)" << endl;
 	stream << "#" << endl;
@@ -2575,7 +2575,7 @@ void MainWindow::exportAllSegmentedKnotsOfBillonToSdp()
 }
 
 
-void MainWindow::exportSegmentedKnotToSdp( QTextStream &stream, const TangentialTransform &tangentialTransform, const bool &useSliceIntervalCoordinates, const int &knotId )
+void MainWindow::exportSegmentedKnotToSdp( QTextStream &stream, const TangentialGenerator &tangentialTransform, const bool &useSliceIntervalCoordinates, const int &knotId )
 {
 	const int &width = _tangentialBillon->n_cols;
 	const int &height = _tangentialBillon->n_rows;

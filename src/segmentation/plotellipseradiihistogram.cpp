@@ -1,8 +1,8 @@
-#include "inc/segmentation/plotknotellipseradiihistogram.h"
+#include "inc/segmentation/plotellipseradiihistogram.h"
 
-#include "inc/segmentation/knotellipseradiihistogram.h"
+#include "inc/segmentation/ellipseradiihistogram.h"
 
-PlotKnotEllipseRadiiHistogram::PlotKnotEllipseRadiiHistogram()
+PlotEllipseRadiiHistogram::PlotEllipseRadiiHistogram()
 {
 	_histogramCursor.setBrush(Qt::red);
 	_histogramCursor.setPen(QPen(Qt::red));
@@ -10,11 +10,11 @@ PlotKnotEllipseRadiiHistogram::PlotKnotEllipseRadiiHistogram()
 	_histogramSmoothed.setPen(QPen(Qt::blue));
 }
 
-PlotKnotEllipseRadiiHistogram::~PlotKnotEllipseRadiiHistogram()
+PlotEllipseRadiiHistogram::~PlotEllipseRadiiHistogram()
 {
 }
 
-void PlotKnotEllipseRadiiHistogram::attach( QwtPlot * const plot )
+void PlotEllipseRadiiHistogram::attach( QwtPlot * const plot )
 {
 	if ( plot )
 	{
@@ -24,7 +24,7 @@ void PlotKnotEllipseRadiiHistogram::attach( QwtPlot * const plot )
 	}
 }
 
-void PlotKnotEllipseRadiiHistogram::clear()
+void PlotEllipseRadiiHistogram::clear()
 {
 	const QVector<QwtIntervalSample> emptyData(0);
 	_histogramData.setSamples(emptyData);
@@ -34,7 +34,7 @@ void PlotKnotEllipseRadiiHistogram::clear()
 	_histogramSmoothed.setSamples(emptyCurve);
 }
 
-void PlotKnotEllipseRadiiHistogram::moveCursor( const uint & radiusIndex )
+void PlotEllipseRadiiHistogram::moveCursor( const uint & radiusIndex )
 {
 	static QVector<QwtIntervalSample> datasCursor(1);
 	static QwtIntervalSample &datasCursorInterval = datasCursor[0];
@@ -43,7 +43,7 @@ void PlotKnotEllipseRadiiHistogram::moveCursor( const uint & radiusIndex )
 	_histogramCursor.setSamples(datasCursor);
 }
 
-void PlotKnotEllipseRadiiHistogram::update( const KnotEllipseRadiiHistogram & histogram )
+void PlotEllipseRadiiHistogram::update( const EllipseRadiiHistogram & histogram )
 {
 	QVector<QwtIntervalSample> datasHistogram(0);
 	QVector<QPointF> datasHistogramSmoothed(0);

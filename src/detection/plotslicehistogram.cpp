@@ -1,5 +1,5 @@
-#include "inc/plotslicehistogram.h"
-#include "inc/slicehistogram.h"
+#include "inc/detection/plotslicehistogram.h"
+#include "inc/detection/slicehistogram.h"
 
 PlotSliceHistogram::PlotSliceHistogram()
 {

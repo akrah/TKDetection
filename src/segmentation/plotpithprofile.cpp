@@ -1,19 +1,19 @@
-#include "inc/segmentation/plotknotpithprofile.h"
+#include "inc/segmentation/plotpithprofile.h"
 
-#include "inc/segmentation/knotpithprofile.h"
+#include "inc/segmentation/pithprofile.h"
 #include "inc/define.h"
 
-PlotKnotPithProfile::PlotKnotPithProfile()
+PlotPithProfile::PlotPithProfile()
 {
 	_histogramCursor.setBrush(Qt::red);
 	_histogramCursor.setPen(QPen(Qt::red));
 }
 
-PlotKnotPithProfile::~PlotKnotPithProfile()
+PlotPithProfile::~PlotPithProfile()
 {
 }
 
-void PlotKnotPithProfile::attach( QwtPlot * const plot )
+void PlotPithProfile::attach( QwtPlot * const plot )
 {
 	if ( plot )
 	{
@@ -22,14 +22,14 @@ void PlotKnotPithProfile::attach( QwtPlot * const plot )
 	}
 }
 
-void PlotKnotPithProfile::clear()
+void PlotPithProfile::clear()
 {
 	const QVector<QwtIntervalSample> emptyData(0);
 	_histogramData.setSamples(emptyData);
 	_histogramCursor.setSamples(emptyData);
 }
 
-void PlotKnotPithProfile::moveCursor( const uint & sliceIndex )
+void PlotPithProfile::moveCursor( const uint & sliceIndex )
 {
 	static QVector<QwtIntervalSample> datasCursor(1);
 	static QwtIntervalSample &datasCursorInterval = datasCursor[0];
@@ -38,7 +38,7 @@ void PlotKnotPithProfile::moveCursor( const uint & sliceIndex )
 	_histogramCursor.setSamples(datasCursor);
 }
 
-void PlotKnotPithProfile::update( const KnotPithProfile & histogram )
+void PlotPithProfile::update( const PithProfile & histogram )
 {
 	QVector<QwtIntervalSample> datasHistogram(0);
 	if ( histogram.size() > 0 )

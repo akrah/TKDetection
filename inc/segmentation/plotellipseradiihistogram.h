@@ -5,20 +5,20 @@
 #include <qwt_plot_curve.h>
 
 class QwtPlot;
-class KnotEllipseRadiiHistogram;
+class EllipseRadiiHistogram;
 
-class PlotKnotEllipseRadiiHistogram
+class PlotEllipseRadiiHistogram
 {
 public:
-	PlotKnotEllipseRadiiHistogram();
-	~PlotKnotEllipseRadiiHistogram();
+	PlotEllipseRadiiHistogram();
+	~PlotEllipseRadiiHistogram();
 
 	void attach( QwtPlot * const plot );
 	void clear();
 
 	void moveCursor( const uint & radiusIndex );
 
-	void update( const KnotEllipseRadiiHistogram & histogram );
+	void update( const EllipseRadiiHistogram & histogram );
 
 private:
 	QwtPlotHistogram _histogramData;

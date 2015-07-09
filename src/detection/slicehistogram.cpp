@@ -1,4 +1,4 @@
-#include "inc/slicehistogram.h"
+#include "inc/detection/slicehistogram.h"
 
 #include "inc/billon.h"
 

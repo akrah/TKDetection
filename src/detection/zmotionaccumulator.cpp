@@ -1,8 +1,8 @@
-#include "inc/zmotionaccumulator.h"
+#include "inc/detection/zmotionaccumulator.h"
 
 #include "inc/billon.h"
 #include "inc/piechart.h"
-#include "inc/sectorhistogram.h"
+#include "inc/detection/sectorhistogram.h"
 
 ZMotionAccumulator::ZMotionAccumulator() : _pieChart(PieChart(500)), _intensityInterval(Interval<int>(MINIMUM_INTENSITY,MAXIMUM_INTENSITY)),
 	_zMotionMin(MINIMUM_Z_MOTION), _radiusAroundPith(100), _maxFindIntensity(0.)

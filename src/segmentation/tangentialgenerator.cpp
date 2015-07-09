@@ -1,11 +1,11 @@
-#include "inc/segmentation/tangentialtransform.h"
+#include "inc/segmentation/tangentialgenerator.h"
 
 #include <qmath.h>
 
 #include "inc/billon.h"
 #include "inc/piechart.h"
 
-TangentialTransform::TangentialTransform( const int &minIntensity, const bool &trilinearInterpolation ) :
+TangentialGenerator::TangentialGenerator( const int &minIntensity, const bool &trilinearInterpolation ) :
 	_minIntensity(minIntensity), _trilinearInterpolation(trilinearInterpolation),
 	_currentSliceInterval(Interval<uint>(0,0)), _currentAngularInterval(Interval<uint>(0,0)),
 	_origin(QVector3D(0,0,0)), _angularRange(0.), _bisectorOrientation(0.), _depth(0.),
@@ -15,26 +15,26 @@ TangentialTransform::TangentialTransform( const int &minIntensity, const bool &t
 {
 }
 
-TangentialTransform::TangentialTransform( const TangentialTransform &tT ) :
-	_minIntensity(tT._minIntensity), _trilinearInterpolation(tT._trilinearInterpolation),
-	_currentSliceInterval(tT._currentSliceInterval), _currentAngularInterval(tT._currentAngularInterval),
-	_origin(tT._origin), _angularRange(tT._angularRange), _bisectorOrientation(tT._bisectorOrientation), _depth(tT._depth),
-	_quaterX(tT._quaterX), _quaterY(tT._quaterY),
-	_quaterZ(tT._quaterZ), _quaterRot( tT._quaterRot ),
-	_shiftStep( tT._shiftStep )
+TangentialGenerator::TangentialGenerator( const TangentialGenerator &tangentialGenerator ) :
+	_minIntensity(tangentialGenerator._minIntensity), _trilinearInterpolation(tangentialGenerator._trilinearInterpolation),
+	_currentSliceInterval(tangentialGenerator._currentSliceInterval), _currentAngularInterval(tangentialGenerator._currentAngularInterval),
+	_origin(tangentialGenerator._origin), _angularRange(tangentialGenerator._angularRange), _bisectorOrientation(tangentialGenerator._bisectorOrientation), _depth(tangentialGenerator._depth),
+	_quaterX(tangentialGenerator._quaterX), _quaterY(tangentialGenerator._quaterY),
+	_quaterZ(tangentialGenerator._quaterZ), _quaterRot(tangentialGenerator._quaterRot),
+	_shiftStep(tangentialGenerator._shiftStep)
 {
 }
 
-TangentialTransform::~TangentialTransform() {}
+TangentialGenerator::~TangentialGenerator() {}
 
-void TangentialTransform::setSliceInterval( const Billon &billon, const Interval<uint> &sliceInterval )
+void TangentialGenerator::setSliceInterval( const Billon &billon, const Interval<uint> &sliceInterval )
 {
 	_currentSliceInterval = sliceInterval;
 	const uint midSliceInterval = sliceInterval.mid();
 	_origin = QVector3D(billon.pithCoord(midSliceInterval).x, billon.pithCoord(midSliceInterval).y, midSliceInterval);
 }
 
-void TangentialTransform::setAngularInterval( const Billon &billon, const Interval<uint> &angularInterval, const PieChart &pieChart )
+void TangentialGenerator::setAngularInterval( const Billon &billon, const Interval<uint> &angularInterval, const PieChart &pieChart )
 {
 	_currentAngularInterval = angularInterval;
 	_angularRange = (_currentAngularInterval.max() + (_currentAngularInterval.isValid() ? 0. : pieChart.nbSectors())) - _currentAngularInterval.min() + 1;
@@ -55,97 +55,97 @@ void TangentialTransform::setAngularInterval( const Billon &billon, const Interv
 	_shiftStep = _quaterRot.rotatedVector( QVector3D( 0., 0., 1. ) );
 }
 
-void TangentialTransform::updateIntervals( const Billon &billon, const Interval<uint> &sliceInterval, const Interval<uint> &angularInterval, const PieChart &pieChart )
+void TangentialGenerator::updateIntervals( const Billon &billon, const Interval<uint> &sliceInterval, const Interval<uint> &angularInterval, const PieChart &pieChart )
 {
 	setSliceInterval(billon,sliceInterval);
 	setAngularInterval(billon,angularInterval,pieChart);
 }
 
-void TangentialTransform::setMinIntensity( const int &minIntensity )
+void TangentialGenerator::setMinIntensity( const int &minIntensity )
 {
 	_minIntensity = minIntensity;
 }
 
-void TangentialTransform::enableTrilinearInterpolation( bool enable )
+void TangentialGenerator::enableTrilinearInterpolation( bool enable )
 {
 	_trilinearInterpolation = enable;
 }
 
-const int &TangentialTransform::minIntensity() const
+const int &TangentialGenerator::minIntensity() const
 {
 	return _minIntensity;
 }
 
-const bool &TangentialTransform::trilinearInterpolation() const
+const bool &TangentialGenerator::trilinearInterpolation() const
 {
 	return _trilinearInterpolation;
 }
 
-const Interval<uint> &TangentialTransform::currentSliceInterval() const
+const Interval<uint> &TangentialGenerator::currentSliceInterval() const
 {
 	return _currentSliceInterval;
 }
-const Interval<uint> &TangentialTransform::currentAngularInterval() const
+const Interval<uint> &TangentialGenerator::currentAngularInterval() const
 {
 	return _currentAngularInterval;
 }
 
-const QVector3D &TangentialTransform::origin() const
+const QVector3D &TangentialGenerator::origin() const
 {
 	return _origin;
 }
 
-QVector3D TangentialTransform::originRelativeToSliceInterval() const
+QVector3D TangentialGenerator::originRelativeToSliceInterval() const
 {
 	return QVector3D( _origin.x(), _origin.y(), _origin.z()-_currentSliceInterval.min() );
 }
 
-const qreal &TangentialTransform::angularRange() const
+const qreal &TangentialGenerator::angularRange() const
 {
 	return _angularRange;
 }
 
-const qreal &TangentialTransform::bisectorOrientation() const
+const qreal &TangentialGenerator::bisectorOrientation() const
 {
 	return _bisectorOrientation;
 }
 
-const qreal &TangentialTransform::depth() const
+const qreal &TangentialGenerator::depth() const
 {
 	return _depth;
 }
 
-const QQuaternion &TangentialTransform::quaterX() const
+const QQuaternion &TangentialGenerator::quaterX() const
 {
 	return _quaterX;
 }
 
-const QQuaternion &TangentialTransform::quaterY() const
+const QQuaternion &TangentialGenerator::quaterY() const
 {
 	return _quaterY;
 }
 
-const QQuaternion &TangentialTransform::quaterZ() const
+const QQuaternion &TangentialGenerator::quaterZ() const
 {
 	return _quaterZ;
 }
 
-const QQuaternion &TangentialTransform::quaterRot() const
+const QQuaternion &TangentialGenerator::quaterRot() const
 {
 	return _quaterRot;
 }
 
-const QVector3D &TangentialTransform::shiftStep() const
+const QVector3D &TangentialGenerator::shiftStep() const
 {
 	return _shiftStep;
 }
 
-QVector3D TangentialTransform::shiftStep( const qreal &stepInZ ) const
+QVector3D TangentialGenerator::shiftStep( const qreal &stepInZ ) const
 {
 	return _quaterRot.rotatedVector( QVector3D( 0., 0., stepInZ ) );
 }
 
-Billon* TangentialTransform::execute( const Billon &billon , const PieChart &pieChart )
+Billon* TangentialGenerator::execute( const Billon &billon , const PieChart &pieChart )
 {
 	/* Hauteur et largeur des coupes transversales */
 	const int billonWidthMinusOne = billon.n_cols-1;

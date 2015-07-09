@@ -1,32 +1,32 @@
-#include "inc/segmentation/knotellipseradiihistogram.h"
+#include "inc/segmentation/ellipseradiihistogram.h"
 
 #include "inc/billon.h"
-#include "inc/segmentation/knotpithprofile.h"
+#include "inc/segmentation/pithprofile.h"
 #include "inc/lowess.h"
 
 #include <QtGlobal>
 
-KnotEllipseRadiiHistogram::KnotEllipseRadiiHistogram()
+EllipseRadiiHistogram::EllipseRadiiHistogram()
 {
 }
 
-KnotEllipseRadiiHistogram::~KnotEllipseRadiiHistogram()
+EllipseRadiiHistogram::~EllipseRadiiHistogram()
 {
 }
 
-const EllipticalAccumulationHistogram & KnotEllipseRadiiHistogram::ellipticalHistogram( const int &sliceIndex ) const
+const EllipticalAccumulationHistogram & EllipseRadiiHistogram::ellipticalHistogram( const int &sliceIndex ) const
 {
 	Q_ASSERT_X( sliceIndex<_ellipticalHistograms.size(), QObject::tr("ellipticalHistogram( uint sliceIndex )").toStdString().c_str(), QObject::tr("sliceIndex trop grand").toStdString().c_str() );
 	return _ellipticalHistograms[sliceIndex];
 }
 
-const QVector<qreal> &KnotEllipseRadiiHistogram::lowessData() const
+const QVector<qreal> &EllipseRadiiHistogram::lowessData() const
 {
 	return _lowessData;
 }
 
 
-void KnotEllipseRadiiHistogram::construct( const Billon &tangentialBillon, const KnotPithProfile &knotPithProfile, const Interval<uint> &validSlices,
+void EllipseRadiiHistogram::construct( const Billon &tangentialBillon, const PithProfile &knotPithProfile, const Interval<uint> &validSlices,
 										   const qreal & lowessBandWidth, const uint &smoothingRadius, const qreal &iqrCoeff,
 										   const uint &percentageOfFirstValidSlicesToExtrapolate, const uint &percentageOfLastValidSlicesToExtrapolate  )
 {
@@ -69,7 +69,7 @@ void KnotEllipseRadiiHistogram::construct( const Billon &tangentialBillon, const
 		_lowessData = *this;
 }
 
-void KnotEllipseRadiiHistogram::extrapolation( const Interval<uint> &validSlices, const uint &percentageOfFirstValidSlicesToExtrapolate,
+void EllipseRadiiHistogram::extrapolation( const Interval<uint> &validSlices, const uint &percentageOfFirstValidSlicesToExtrapolate,
 											   const uint &percentageOfLastValidSlicesToExtrapolate )
 {
 	const int size = this->size();
@@ -113,7 +113,7 @@ void KnotEllipseRadiiHistogram::extrapolation( const Interval<uint> &validSlices
 	}
 }
 
-void KnotEllipseRadiiHistogram::outlierInterpolation( const QVector<qreal> &residus, const qreal &iqrCoeff )
+void EllipseRadiiHistogram::outlierInterpolation( const QVector<qreal> &residus, const qreal &iqrCoeff )
 {
 	const int &size = this->size();
 

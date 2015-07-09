@@ -1,4 +1,4 @@
-#include "inc/sectorhistogram.h"
+#include "inc/detection/sectorhistogram.h"
 
 #include "inc/billon.h"
 #include "inc/piechart.h"
