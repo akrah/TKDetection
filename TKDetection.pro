@@ -41,8 +41,7 @@ TRANSLATIONS = TKDetection_en.ts
 #---------#
 SOURCES	=	src/main.cpp \
 			src/billonalgorithms.cpp \
-			src/connexcomponentextractor.cpp \
-			src/detection/knotareadetector.cpp \
+			src/detection/oldknotareadetector.cpp \
 			src/detection/plotsectorhistogram.cpp \
 			src/detection/plotslicehistogram.cpp \
 			src/detection/sectorhistogram.cpp \
@@ -76,13 +75,12 @@ SOURCES	=	src/main.cpp \
 
 HEADERS	=	inc/billon.h \
 			inc/billonalgorithms.h \
-			inc/connexcomponentextractor.h \
 			inc/coordinate.h \
 			inc/define.h \
 			def/def_billon.h \
 			def/def_coordinate.h \
 			def/def_opticalflow.h \
-			inc/detection/knotareadetector.h \
+			inc/detection/oldknotareadetector.h \
 			inc/detection/plotsectorhistogram.h \
 			inc/detection/plotslicehistogram.h \
 			inc/detection/sectorhistogram.h \

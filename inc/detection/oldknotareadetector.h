@@ -9,10 +9,10 @@
 #include <QRect>
 #include <QMap>
 
-class KnotAreaDetector
+class OldKnotAreaDetector
 {
 public:
-	KnotAreaDetector();
+	OldKnotAreaDetector();
 
 	void execute( const Slice &accumulationSlice );
 
