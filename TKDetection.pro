@@ -10,7 +10,7 @@
 
 # Version d'ITK installée : itk3 | itk4
 ITK_VERSION = itk4
-ITK_NUMBER =  4.5
+ITK_NUMBER = 4.8
 
 
 #                                                                #
@@ -22,7 +22,7 @@ ITK_NUMBER =  4.5
 TEMPLATE	=	app
 QT			*=	core gui xml
 CONFIG		*=	warn_on
-CONFIG		*=	qwt qxt qwtpolar $${ITK_VERSION}
+CONFIG		*=	qwt qxt qwtpolar $${ITK_VERSION} $${ITK_NUMBER}
 QXT			=	core gui widgets
 
 # Répertoires
@@ -179,8 +179,11 @@ else:itk4 {
 						-litkzlib-$${ITK_NUMBER} \
 					-litkgdcmCommon-$${ITK_NUMBER} \
 					-litkgdcmuuid-$${ITK_NUMBER} \
-					-litkopenjpeg-$${ITK_NUMBER} \
-					-litkgdcmjpeg12-$${ITK_NUMBER} \
+
+	4.8  {	LIBS *=	-litkgdcmcharls-$${ITK_NUMBER} -litkgdcmopenjpeg-$${ITK_NUMBER} }
+	else {	LIBS *=	-litkopenjpeg-$${ITK_NUMBER} }
+
+	LIBS *= 		-litkgdcmjpeg12-$${ITK_NUMBER} \
 					-litkgdcmjpeg16-$${ITK_NUMBER} \
 					-litkgdcmjpeg8-$${ITK_NUMBER} \
 				-lITKIOImageBase-$${ITK_NUMBER} \
@@ -192,6 +195,7 @@ else:itk4 {
 				-lITKIOTIFF-$${ITK_NUMBER} \
 					-litktiff-$${ITK_NUMBER} \
 					-litkjpeg-$${ITK_NUMBER} \
+					-lITKVNLInstantiation-$${ITK_NUMBER} \
 				-ldl \
 				-lexpat
 }
