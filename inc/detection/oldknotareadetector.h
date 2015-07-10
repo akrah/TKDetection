@@ -1,5 +1,5 @@
-#ifndef KNOTAREADETECTOR_H
-#define KNOTAREADETECTOR_H
+#ifndef OLDKNOTAREADETECTOR_H
+#define OLDKNOTAREADETECTOR_H
 
 #include "def/def_billon.h"
 #include "def/def_coordinate.h"
@@ -40,4 +40,4 @@ private:
 	QVector<QRect> _supportingAreaVector;
 };
 
-#endif // KNOTAREADETECTOR_H
+#endif // OLDKNOTAREADETECTOR_H
