@@ -23,7 +23,7 @@ void OldKnotAreaDetector::execute( const Slice &accumulationSlice )
 	computeLabelledImage( accumulationSlice, labelledSlice, ccList );
 
 	// Sort all pixels of imageAcc by decreasing value order into sortedPixels
-	arma::Col<uint> sortedPixelIndex = arma::sort_index(arma::vectorise(accumulationSlice), "descend");
+	arma::uvec sortedPixelIndex = arma::sort_index(arma::vectorise(accumulationSlice), "descend");
 
 	// The support of each detected knot area
 	QMap<int, QList<iCoord2D> > supportingAreaMap;

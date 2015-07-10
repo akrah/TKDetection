@@ -13,9 +13,9 @@ Dependencies list
 
 |   |            Library                  |  Tested version  |   |          Library            |  Tested version  |   |        Library              |  Tested version  |
 |:-:|:-----------------------------------:|:----------------:|---|:---------------------------:|:----------------:|---|:---------------------------:|:----------------:|
-| 1 | [Qt](#1-qt)                         |       4.8        | 4 | [Qwt](#4-qwt)               |      6.0.2       | 7 | [GSL](#8-gsl)               |       1.15       |
-| 2 | [Armadillo](#2-armadillo)           |     4.600.4      | 5 | [Qxt](#5-qxt)               |      0.6.2       |   |                             |                  |
-| 3 | [InsightToolkit](#3-insighttoolkit) |      4.5.2       | 6 | [QwtPolar](#6-qwtpolar)     |      1.0.1       |   |                             |                  |
+| 1 | [Qt](#1-qt)                         |       4.8        | 4 | [Qwt](#4-qwt)               |      6.0.2       | 7 | [GSL](#8-gsl)               |       1.16       |
+| 2 | [Armadillo](#2-armadillo)           |     5.200.2      | 5 | [Qxt](#5-qxt)               |      0.6.2       |   |                             |                  |
+| 3 | [InsightToolkit](#3-insighttoolkit) |      4.8.0       | 6 | [QwtPolar](#6-qwtpolar)     |      1.0.1       |   |                             |                  |
 
 
 

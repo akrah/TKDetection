@@ -281,10 +281,12 @@ uiCoord2D PithExtractorBoukadida::transHough( const Slice &slice, qreal &lineOnM
 
 	// Valeur et coordonnée du maximum de accuSlice
 	uiCoord2D pithCoord(width/2,height/2);
+	arma::uword pithX, pithY;
 	if (nbContourPoints)
 	{
-		lineOnMaxRatio = accuSlice.max(pithCoord.y,pithCoord.x)/static_cast<qreal>(nbContourPoints);
-		pithCoord.x += minX;
+		lineOnMaxRatio = accuSlice.max(pithY,pithX)/static_cast<qreal>(nbContourPoints);
+		pithCoord.x = pithX+minX;
+		pithCoord.y = pithY;
 	}
 
 	return pithCoord;

@@ -19,23 +19,22 @@ ITK_NUMBER = 4.8
 
 # Configuration
 #--------------#
-TEMPLATE	=	app
-QT			*=	core gui xml
-CONFIG		*=	warn_on
-CONFIG		*=	qwt qxt qwtpolar $${ITK_VERSION} $${ITK_NUMBER}
-QXT			=	core gui widgets
+TEMPLATE	=  app
+QT			*= core gui xml
+CONFIG		*= warn_on
+
+CONFIG		*= qwt qxt qwtpolar $${ITK_VERSION} $${ITK_NUMBER}
+QXT			*= core gui widgets
 
 # Répertoires
 #------------#
-TARGET				= TKDetection
-macx:MOC_DIR		= .moc
-macx:OBJECTS_DIR	= .obj
-CONFIG  += qxt
-QXT     += core gui
+TARGET		= TKDetection
+MOC_DIR		= moc
+OBJECTS_DIR	= obj
 
 # Traductions
 #------------#
-TRANSLATIONS = TKDetection_en.ts
+TRANSLATIONS	= TKDetection_en.ts
 
 # Fichiers
 #---------#
@@ -118,18 +117,28 @@ FORMS =	ui/mainwindow.ui
 
 # Directives compilateur
 #-----------------------#
-QMAKE_CXXFLAGS *= -std=c++0x
-macx:QMAKE_CC=/usr/bin/gcc
-macx:QMAKE_CXX=/usr/bin/g++
+QMAKE_CXXFLAGS	*= -std=c++0x
 
 
 # Librairies externes
 #--------------------#
-INCLUDEPATH *=	/usr/include/ /usr/local/include/
+INCLUDEPATH		*=	/usr/include/ \
+					/usr/local/include/
+QMAKE_LIBDIR	*=	/usr/local/lib/
 
-QMAKE_LIBDIR *=	/usr/local/lib/
 
-LIBS *= -larmadillo -lgsl -lgslcblas
+# Armadillo
+#---------#
+DEFINES	+=	ARMA_DONT_USE_WRAPPER
+LIBS	*=	-larmadillo \
+			-lopenblas \
+			-llapack
+
+# GSL
+#---#
+LIBS *=	-lgsl \
+		-lgslcblas
+
 
 # ITK
 #----#
@@ -172,30 +181,30 @@ else:itk4 {
 	INCLUDEPATH	*=	$${ITK_PATH}/
 
 	LIBS *= -lITKIOGDCM-$${ITK_NUMBER} \
-				-litkgdcmDICT-$${ITK_NUMBER} \
-				-litkgdcmMSFF-$${ITK_NUMBER} \
-					-litkgdcmIOD-$${ITK_NUMBER} \
-					-litkgdcmDSED-$${ITK_NUMBER} \
-						-litkzlib-$${ITK_NUMBER} \
-					-litkgdcmCommon-$${ITK_NUMBER} \
-					-litkgdcmuuid-$${ITK_NUMBER} \
+			-litkgdcmDICT-$${ITK_NUMBER} \
+			-litkgdcmMSFF-$${ITK_NUMBER} \
+			-litkgdcmIOD-$${ITK_NUMBER} \
+			-litkgdcmDSED-$${ITK_NUMBER} \
+			-litkzlib-$${ITK_NUMBER} \
+			-litkgdcmCommon-$${ITK_NUMBER} \
+			-litkgdcmuuid-$${ITK_NUMBER} \
 
 	4.8  {	LIBS *=	-litkgdcmcharls-$${ITK_NUMBER} -litkgdcmopenjpeg-$${ITK_NUMBER} }
 	else {	LIBS *=	-litkopenjpeg-$${ITK_NUMBER} }
 
-	LIBS *= 		-litkgdcmjpeg12-$${ITK_NUMBER} \
-					-litkgdcmjpeg16-$${ITK_NUMBER} \
-					-litkgdcmjpeg8-$${ITK_NUMBER} \
-				-lITKIOImageBase-$${ITK_NUMBER} \
-					-lITKCommon-$${ITK_NUMBER} \
-						-litksys-$${ITK_NUMBER} \
-						-litkvnl_algo-$${ITK_NUMBER} \
-						-litkv3p_netlib-$${ITK_NUMBER} \
-						-litkvnl-$${ITK_NUMBER} \
-				-lITKIOTIFF-$${ITK_NUMBER} \
-					-litktiff-$${ITK_NUMBER} \
-					-litkjpeg-$${ITK_NUMBER} \
-					-lITKVNLInstantiation-$${ITK_NUMBER} \
-				-ldl \
-				-lexpat
+	LIBS *=	-litkgdcmjpeg12-$${ITK_NUMBER} \
+			-litkgdcmjpeg16-$${ITK_NUMBER} \
+			-litkgdcmjpeg8-$${ITK_NUMBER} \
+			-lITKIOImageBase-$${ITK_NUMBER} \
+			-lITKCommon-$${ITK_NUMBER} \
+			-litksys-$${ITK_NUMBER} \
+			-litkvnl_algo-$${ITK_NUMBER} \
+			-litkv3p_netlib-$${ITK_NUMBER} \
+			-litkvnl-$${ITK_NUMBER} \
+			-lITKIOTIFF-$${ITK_NUMBER} \
+			-litktiff-$${ITK_NUMBER} \
+			-litkjpeg-$${ITK_NUMBER} \
+			-lITKVNLInstantiation-$${ITK_NUMBER} \
+			-ldl \
+			-lexpat
 }
