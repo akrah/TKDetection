@@ -10,8 +10,7 @@ PithExtractorBoukadida::PithExtractorBoukadida( const int &subWindowWidth, const
 												const qreal &firstValidSliceToExtrapolate, const qreal &lastValidSliceToExtrapolate ) :
 	_subWindowWidth(subWindowWidth), _subWindowHeight(subWindowHeight), _pithShift(pithShift), _smoothingRadius(smoothingRadius),
 	_minWoodPercentage(minWoodPercentage), _intensityInterval(intensityInterval), _ascendingOrder(ascendingOrder),
-	_extrapolation(extrapolationType), _validSlices(0,0),
-	_firstValidSliceToExtrapolate(firstValidSliceToExtrapolate), _lastValidSliceToExtrapolate(lastValidSliceToExtrapolate)
+	_extrapolation(extrapolationType), _firstValidSliceToExtrapolate(firstValidSliceToExtrapolate), _lastValidSliceToExtrapolate(lastValidSliceToExtrapolate)
 {
 }
 
@@ -19,49 +18,44 @@ PithExtractorBoukadida::~PithExtractorBoukadida()
 {
 }
 
-int PithExtractorBoukadida::subWindowWidth() const
+const int &PithExtractorBoukadida::subWindowWidth() const
 {
 	return _subWindowWidth;
 }
 
-int PithExtractorBoukadida::subWindowHeight() const
+const int &PithExtractorBoukadida::subWindowHeight() const
 {
 	return _subWindowHeight;
 }
 
-qreal PithExtractorBoukadida::pithShift() const
+const qreal &PithExtractorBoukadida::pithShift() const
 {
 	return _pithShift;
 }
 
-uint PithExtractorBoukadida::smoothingRadius() const
+const uint &PithExtractorBoukadida::smoothingRadius() const
 {
 	return _smoothingRadius;
 }
 
-qreal PithExtractorBoukadida::minWoodPercentage() const
+const qreal &PithExtractorBoukadida::minWoodPercentage() const
 {
 	return _minWoodPercentage;
 }
 
-Interval<int> PithExtractorBoukadida::intensityInterval() const
+const Interval<int> &PithExtractorBoukadida::intensityInterval() const
 {
 	return _intensityInterval;
 }
 
-bool PithExtractorBoukadida::ascendingOrder() const
+const bool &PithExtractorBoukadida::ascendingOrder() const
 {
 	return _ascendingOrder;
 }
 
-TKD::ExtrapolationType PithExtractorBoukadida::extrapolation() const
+const TKD::ExtrapolationType &PithExtractorBoukadida::extrapolation() const
 {
 	return _extrapolation;
-}
-
-const Interval<uint> & PithExtractorBoukadida::validSlices() const
-{
-	return _validSlices;
 }
 
 const uint &PithExtractorBoukadida::firstValidSlicesToExtrapolate() const
@@ -126,21 +120,22 @@ void PithExtractorBoukadida::setLastValidSlicesToExtrapolate( const uint &percen
 
 void PithExtractorBoukadida::process( Billon &billon, const bool &adaptativeWidth )
 {
-	const int widthMinusOne = billon.n_cols-1;
-	const int heightMinusOne = billon.n_rows-1;
-	const int &depth = billon.n_slices;
+	const uint widthMinusOne = billon.n_cols-1;
+	const uint heightMinusOne = billon.n_rows-1;
+	const uint &depth = billon.n_slices;
 
 	const rCoord2D voxelDims(billon.voxelWidth(),billon.voxelHeight());
 	const qreal &xDim = voxelDims.x;
 	const qreal &yDim = voxelDims.y;
 
-	const int semiSubWindowWidth = qFloor(_subWindowWidth/(2.*xDim));
-	const int semiSubWindowHeight = qFloor(_subWindowHeight/(2.*yDim));
+	const uint semiSubWindowWidth = qFloor(_subWindowWidth/(2.*xDim));
+	const uint semiSubWindowHeight = qFloor(_subWindowHeight/(2.*yDim));
 	const int kIncrement = (_ascendingOrder?1:-1);
 
 	Pith &pith = billon._pith;
+	Interval<uint> &validSlices = billon._validSlices;
 
-	int k;
+	uint k;
 
 	pith.clear();
 	pith.resize(depth);
@@ -155,13 +150,13 @@ void PithExtractorBoukadida::process( Billon &billon, const bool &adaptativeWidt
 	fillBillonBackground( billonFillBackground, backgroundProportions, _intensityInterval, adaptativeWidth );
 
 	qDebug() << "Step 3] Detect interval of valid slices";
-	detectValidSliceInterval( backgroundProportions );
-	const int &firstValidSliceIndex = _validSlices.min();
-	const int &lastValidSliceIndex = _validSlices.max();
+	detectValidSliceInterval( validSlices, backgroundProportions );
+	const uint &firstValidSliceIndex = validSlices.min();
+	const uint &lastValidSliceIndex = validSlices.max();
 	const int firstSliceOrdered = _ascendingOrder?firstValidSliceIndex:lastValidSliceIndex;
 	qDebug() << "[ " << firstValidSliceIndex << ", " << lastValidSliceIndex << " ]";
 
-	if ( _validSlices.size() < _smoothingRadius )
+	if ( validSlices.size() < _smoothingRadius )
 	{
 		qDebug() << "   => No valid slices, detection stopped";
 		return;
@@ -183,9 +178,9 @@ void PithExtractorBoukadida::process( Billon &billon, const bool &adaptativeWidt
 		const rCoord2D &previousPith = pith[k-kIncrement];
 
 		subWindowStart.x = qMax(qFloor(previousPith.x-semiSubWindowWidth),0);
-		subWindowEnd.x = qMin(qFloor(previousPith.x+semiSubWindowWidth),widthMinusOne);
+		subWindowEnd.x = qMin((uint)qFloor(previousPith.x+semiSubWindowWidth),widthMinusOne);
 		subWindowStart.y = qMax(qFloor(previousPith.y-semiSubWindowHeight),0);
-		subWindowEnd.y = qMin(qFloor(previousPith.y+semiSubWindowHeight),heightMinusOne);
+		subWindowEnd.y = qMin((uint)qFloor(previousPith.y+semiSubWindowHeight),heightMinusOne);
 		currentPithCoord = transHough( currentSlice.submat( subWindowStart.y, subWindowStart.x, subWindowEnd.y, subWindowEnd.x ), nbLineByMaxRatio[k],
 									   voxelDims, 1.0 )
 						   + subWindowStart;
@@ -202,7 +197,7 @@ void PithExtractorBoukadida::process( Billon &billon, const bool &adaptativeWidt
 
 	// Interpolation des coupes valides
 	qDebug() << "Step 6] Interpolation of valid slices";
-	interpolation( pith, nbLineByMaxRatio, _validSlices );
+	interpolation( pith, nbLineByMaxRatio, validSlices );
 
 	// Lissage
 	qDebug() << "Step 7] Smoothing of valid slices";
@@ -213,8 +208,8 @@ void PithExtractorBoukadida::process( Billon &billon, const bool &adaptativeWidt
 
 	const int slopeDistance = 3;
 
-	const int firstValidSliceIndexToExtrapolate = firstValidSliceIndex+(lastValidSliceIndex-firstValidSliceIndex)*_firstValidSliceToExtrapolate/100.;
-	const int lastValidSliceIndexToExtrapolate = lastValidSliceIndex-(lastValidSliceIndex-firstValidSliceIndex)*_lastValidSliceToExtrapolate/100.;
+	const uint firstValidSliceIndexToExtrapolate = firstValidSliceIndex+(lastValidSliceIndex-firstValidSliceIndex)*_firstValidSliceToExtrapolate/100.;
+	const uint lastValidSliceIndexToExtrapolate = lastValidSliceIndex-(lastValidSliceIndex-firstValidSliceIndex)*_lastValidSliceToExtrapolate/100.;
 
 	const rCoord2D firstValidCoord = pith[firstValidSliceIndexToExtrapolate];
 	const rCoord2D lastValidCoord = pith[lastValidSliceIndexToExtrapolate];
@@ -227,7 +222,7 @@ void PithExtractorBoukadida::process( Billon &billon, const bool &adaptativeWidt
 	{
 		case TKD::LINEAR:
 			qDebug() << "  Linear extrapolation";
-			for ( k=firstValidSliceIndexToExtrapolate-1 ; k>=0 ; --k )
+			for ( k=0 ; k<firstValidSliceIndexToExtrapolate ; ++k )
 			{
 				pith[k] = firstValidCoord;
 			}
@@ -238,12 +233,15 @@ void PithExtractorBoukadida::process( Billon &billon, const bool &adaptativeWidt
 			break;
 		case TKD::SLOPE_DIRECTION:
 			qDebug() <<  "  In slope direction extrapolation";
-			for ( k=firstValidSliceIndexToExtrapolate-1 ; k>=0 ; --k )
+			for ( k=firstValidSliceIndexToExtrapolate-1 ; k>0 ; --k )
 			{
 				pith[k] = pith[k+1] + firstValidCoordSlope;
 				pith[k].x = qMin(qMax(pith[k].x,0.),static_cast<qreal>(widthMinusOne));
 				pith[k].y = qMin(qMax(pith[k].y,0.),static_cast<qreal>(heightMinusOne));
 			}
+			pith[0] = pith[1] + firstValidCoordSlope;
+			pith[0].x = qMin(qMax(pith[0].x,0.),static_cast<qreal>(widthMinusOne));
+			pith[0].y = qMin(qMax(pith[0].y,0.),static_cast<qreal>(heightMinusOne));
 			for ( k=lastValidSliceIndexToExtrapolate+1 ; k<depth ; ++k )
 			{
 				pith[k] = pith[k-1] + lastValidCoordSlope;
@@ -481,7 +479,7 @@ void PithExtractorBoukadida::fillBillonBackground( Billon &billonToFill, QVector
 	}
 }
 
-void PithExtractorBoukadida::detectValidSliceInterval( const QVector<qreal> &backgroundProportions )
+void PithExtractorBoukadida::detectValidSliceInterval( Interval<uint> &validSlices, const QVector<qreal> &backgroundProportions )
 {
 	const uint &nbSlices = backgroundProportions.size();
 	const qreal backgroundPercentage = (100.-_minWoodPercentage)/100.;
@@ -489,10 +487,10 @@ void PithExtractorBoukadida::detectValidSliceInterval( const QVector<qreal> &bac
 
 	sliceIndex = 0;
 	while ( sliceIndex<nbSlices && backgroundProportions[sliceIndex] > backgroundPercentage ) sliceIndex++;
-	_validSlices.setMin(qMin(sliceIndex,nbSlices-1));
+	validSlices.setMin(qMin(sliceIndex,nbSlices-1));
 
-	const uint &minValid = _validSlices.min();
+	const uint &minValid = validSlices.min();
 	sliceIndex = nbSlices-1;
 	while ( sliceIndex>minValid && backgroundProportions[sliceIndex] > backgroundPercentage ) sliceIndex--;
-	_validSlices.setMax(sliceIndex);
+	validSlices.setMax(sliceIndex);
 }

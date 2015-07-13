@@ -30,20 +30,34 @@ public:
 	uint nbIntervals() const;
 	const Interval<uint> &interval( uint i ) const;
 	uint intervalIndex( uint i ) const;
-	T thresholdOfMaximums( const int &percentage ) const;
+	T thresholdOfMaximums() const;
 	T firstdDerivated( int i, bool loop ) const;
 
+	const uint &smoothingRadius() const;
+	const qreal &minimumHeightPercentageOfMaximum() const;
+	const qreal &derivativesPercentage() const;
+	const uint &minimumIntervalWidth() const;
+
+	void setSmoothingRadius( const uint &radius );
+	void setMinimumHeightPercentageOfMaximum( const uint &percentage );
+	void setDerivativesPercentage( const uint &percentage );
+	void setMinimumIntervalWidth( const uint &width );
+
 	void clear();
-	void computeMaximumsAndIntervals(const uint &smoothingRadius, const int & minimumHeightPercentageOfMaximum,
-									  const int & derivativesPercentage, const int &minimumWidthOfIntervals, const bool & loop );
+	void computeMaximumsAndIntervals( const bool & loop );
 
 protected:
-	virtual void computeMaximums( const int &minimumHeightPercentageOfMaximum, const int &neighborhoodOfMaximums, const bool &loop );
-	virtual void computeIntervals(const int &derivativesPercentage, const uint &minimumWidthOfIntervals, const bool &loop );
+	virtual void computeMaximums( const bool &loop );
+	virtual void computeIntervals( const bool &loop );
 
 protected:
 	QVector<uint> _maximums;
 	QVector< Interval<uint> > _intervals;
+
+	uint _smoothingRadius;
+	qreal _minimumHeightPercentageOfMaximum;
+	qreal _derivativesPercentage;
+	uint _minimumIntervalWidth;
 };
 
 template <typename T>
@@ -138,11 +152,11 @@ inline const Interval<uint> &Histogram<T>::interval( uint i ) const
 }
 
 template <typename T>
-T Histogram<T>::thresholdOfMaximums( const int & percentage ) const
+T Histogram<T>::thresholdOfMaximums() const
 {
 	const T min = this->min();
 	const T max = this->max();
-	return (max-min)*(percentage/100.)+min;
+	return (max-min)*_minimumHeightPercentageOfMaximum+min;
 }
 
 template <typename T>
@@ -153,6 +167,56 @@ T Histogram<T>::firstdDerivated( int i, bool loop ) const
 	return i && i<this->size()-1 ? (*this)[i+1] - (*this)[i-1] :
 								   loop ? ( i ? (*this)[0] - (*this)[this->size()-2] : (*this)[1] - (*this)[this->size()-1] ) :
 										  T() ;
+}
+
+template <typename T>
+const uint &Histogram<T>::smoothingRadius() const
+{
+	return _smoothingRadius;
+}
+
+template <typename T>
+const qreal &Histogram<T>::minimumHeightPercentageOfMaximum() const
+{
+	return _minimumHeightPercentageOfMaximum;
+}
+
+template <typename T>
+const qreal &Histogram<T>::derivativesPercentage() const
+{
+	return _derivativesPercentage;
+}
+
+template <typename T>
+const uint &Histogram<T>::minimumIntervalWidth() const
+{
+	return _minimumIntervalWidth;
+}
+
+
+template <typename T>
+void Histogram<T>::setSmoothingRadius( const uint &radius )
+{
+	_smoothingRadius = radius;
+}
+
+template <typename T>
+void Histogram<T>::setMinimumHeightPercentageOfMaximum( const uint &percentage )
+{
+	_minimumHeightPercentageOfMaximum = percentage/100.;
+}
+
+template <typename T>
+void Histogram<T>::setDerivativesPercentage( const uint &percentage )
+{
+	Q_ASSERT_X( percentage <= 100 , "Histogram<T>::setDerivativesPercentage", "percentage doit être compris entre 0 et 100." );
+	_derivativesPercentage = percentage/100.;
+}
+
+template <typename T>
+void Histogram<T>::setMinimumIntervalWidth( const uint &width )
+{
+	_minimumIntervalWidth = width;
 }
 
 /**********************************
@@ -167,10 +231,9 @@ void Histogram<T>::clear()
 }
 
 template <typename T>
-void Histogram<T>::computeMaximumsAndIntervals( const uint & smoothingRadius, const int & minimumHeightPercentageOfMaximum,
-												const int & derivativesPercentage, const int &minimumWidthOfIntervals, const bool & loop )
+void Histogram<T>::computeMaximumsAndIntervals( const bool & loop )
 {
-	TKD::meanSmoothing<T>( this->begin(), this->end(), smoothingRadius, loop );
+	TKD::meanSmoothing<T>( this->begin(), this->end(), _smoothingRadius, loop );
 	/******************************************************/
 	/* Soustraction de la valeur min à toutes les valeurs */
 	typename QVector<T>::iterator begin = this->begin();
@@ -178,20 +241,21 @@ void Histogram<T>::computeMaximumsAndIntervals( const uint & smoothingRadius, co
 	T min = this->min();
 	while ( begin != end ) (*begin++) -= min;
 	/******************************************************/
-	computeMaximums( minimumHeightPercentageOfMaximum, minimumWidthOfIntervals/2, loop );
-	computeIntervals( derivativesPercentage, minimumWidthOfIntervals, loop );
+	computeMaximums( loop );
+	computeIntervals( loop );
 }
 
 /**********************************
  * Private setters
  **********************************/
 template <typename T>
-void Histogram<T>::computeMaximums( const int & minimumHeightPercentageOfMaximum, const int & neighborhoodOfMaximums, const bool & loop )
+void Histogram<T>::computeMaximums( const bool & loop )
 {
 	_maximums.clear();
 	int size = this->size();
 	if ( size > 0 )
 	{
+		const uint neighborhoodOfMaximums = _minimumIntervalWidth/2;
 		QVector<T> copy;
 		copy.reserve(this->size()+2*neighborhoodOfMaximums);
 		if ( loop )
@@ -220,7 +284,7 @@ void Histogram<T>::computeMaximums( const int & minimumHeightPercentageOfMaximum
 		}
 
 		const int end = this->size()+neighborhoodOfMaximums;
-		const T thresholdOfMaximums = this->thresholdOfMaximums(minimumHeightPercentageOfMaximum);
+		const T thresholdOfMaximums = this->thresholdOfMaximums();
 
 		T value;
 		int cursor;
@@ -231,7 +295,7 @@ void Histogram<T>::computeMaximums( const int & minimumHeightPercentageOfMaximum
 			value = copy[i];
 			if ( value > thresholdOfMaximums )
 			{
-				cursor = qMin(2,neighborhoodOfMaximums);
+				cursor = qMin((uint)2,neighborhoodOfMaximums);
 				isMax = false;
 				do
 				{
@@ -250,7 +314,7 @@ void Histogram<T>::computeMaximums( const int & minimumHeightPercentageOfMaximum
 }
 
 template <typename T>
-void Histogram<T>::computeIntervals( const int & derivativesPercentage, const uint & minimumWidthOfIntervals, const bool & loop )
+void Histogram<T>::computeIntervals( const bool & loop )
 {
 	_intervals.clear();
 	if ( _maximums.isEmpty() ) return;
@@ -273,7 +337,7 @@ void Histogram<T>::computeIntervals( const int & derivativesPercentage, const ui
 			if ( loop ) cursorStart = 0;
 			else cursorStart = cursorMin;
 		}
-		derivativeThreshold = (*this)[cursorMin]*derivativesPercentage/100.;
+		derivativeThreshold = (*this)[cursorMin]*_derivativesPercentage;
 		while ( cursorMin != cursorStart && (*this)[cursorMin] > derivativeThreshold )
 		{
 			if ( cursorMin ) cursorMin--;
@@ -326,7 +390,7 @@ void Histogram<T>::computeIntervals( const int & derivativesPercentage, const ui
 		// Ajout et fusion de l'intervalle courant
 		if ( _intervals.isEmpty() )
 		{
-			if ( (cursor.isValid() ? cursor.width() : histoSize-(cursor.min()-cursor.max())) > minimumWidthOfIntervals ) _intervals.append(cursor);
+			if ( (cursor.isValid() ? cursor.width() : histoSize-(cursor.min()-cursor.max())) > _minimumIntervalWidth ) _intervals.append(cursor);
 		}
 		else
 		{
@@ -346,7 +410,7 @@ void Histogram<T>::computeIntervals( const int & derivativesPercentage, const ui
 					cursorMin = last.max();
 					cursor.setMin(cursorMin);
 				}
-				if ( (cursor.isValid() ? cursor.width() : histoSize-(cursor.min()-cursor.max())) > minimumWidthOfIntervals ) _intervals.append(cursor);
+				if ( (cursor.isValid() ? cursor.width() : histoSize-(cursor.min()-cursor.max())) > _minimumIntervalWidth ) _intervals.append(cursor);
 				else
 				{
 					if ( (*this)[_maximums[i]]>(*this)[_maximums[i-1]] ) _maximums[i-1] = _maximums[i];

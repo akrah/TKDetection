@@ -18,7 +18,7 @@ public:
 	const EllipticalAccumulationHistogram & ellipticalHistogram( const int & sliceIndex ) const;
 	const QVector<qreal> &lowessData() const;
 
-	void construct( const Billon &tangentialBillon, const PithProfile &knotPithProfile, const Interval<uint> &validSlices,
+	void construct(const Billon &tangentialBillon, const PithProfile &knotPithProfile,
 					const qreal & lowessBandWidth, const uint &smoothingRadius, const qreal &iqrCoeff,
 					const uint &percentageOfFirstValidSlicesToExtrapolate, const uint &percentageOfLastValidSlicesToExtrapolate );
 

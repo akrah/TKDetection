@@ -76,10 +76,9 @@ void SectorHistogram::construct( const Billon &billon, const Interval<uint> &sli
 	}
 }
 
-void SectorHistogram::computeMaximumsAndIntervals(const uint &smoothingRadius, const int & minimumHeightPercentageOfMaximum, const int & derivativesPercentage,
-												   const int &minimumWidthOfIntervals, const uint &intervalGap, const bool & loop )
+void SectorHistogram::computeMaximumsAndIntervals( const uint &intervalGap, const bool & loop )
 {
-	Histogram<qreal>::computeMaximumsAndIntervals( smoothingRadius, minimumHeightPercentageOfMaximum, derivativesPercentage, minimumWidthOfIntervals, loop );
+	Histogram<qreal>::computeMaximumsAndIntervals( loop );
 
 	const uint &nbSectors = _pieChart.nbSectors();
 	uint min, max;

@@ -7,16 +7,16 @@
 
 namespace BillonAlgorithms
 {
-	qreal restrictedAreaMeansRadius(const Billon &billon, const uint &nbDirections, const int &intensityThreshold, const uint &minimumRadius, const uint &nbSlicesToIgnore )
+	qreal restrictedAreaMeansRadius(const Billon &billon, const uint &nbDirections, const int &intensityThreshold, const uint &minimumRadius )
 	{
 		Q_ASSERT_X( nbDirections>0 , "BillonTpl<T>::getRestrictedAreaMeansRadius", "nbPolygonPoints arguments equals to 0 => division by zero" );
 
 		if ( !billon.hasPith() )
 			return 1;
 
-		const int &width = billon.n_cols;
-		const int &height = billon.n_rows;
-		const int depth = billon.n_slices-nbSlicesToIgnore;
+		const uint &width = billon.n_cols;
+		const uint &height = billon.n_rows;
+		const Interval<uint> &validSlice = billon.validSlices();
 		const qreal angleIncrement = TWO_PI/static_cast<qreal>(nbDirections);
 
 		rCoord2D center, edge;
@@ -24,7 +24,7 @@ namespace BillonAlgorithms
 		qreal orientation, currentNorm;
 
 		qreal radius = width;
-		for ( int k=nbSlicesToIgnore ; k<depth ; ++k )
+		for ( uint k=validSlice.min() ; k<validSlice.max() ; ++k )
 		{
 			const Slice &currentSlice = billon.slice(k);
 			center.x = billon.pithCoord(k).x;

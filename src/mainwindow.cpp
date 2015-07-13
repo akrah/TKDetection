@@ -163,8 +163,6 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 	QObject::connect(_ui->_spinHistogramMinimumWidthOfInterval_zMotion, SIGNAL(valueChanged(int)), _ui->_sliderHistogramMinimumWidthOfInterval_zMotion, SLOT(setValue(int)));
 	QObject::connect(_ui->_sliderHistogramDerivativeSearchPercentage_zMotion, SIGNAL(valueChanged(int)), _ui->_spinHistogramDerivativeSearchPercentage_zMotion, SLOT(setValue(int)));
 	QObject::connect(_ui->_spinHistogramDerivativeSearchPercentage_zMotion, SIGNAL(valueChanged(int)), _ui->_sliderHistogramDerivativeSearchPercentage_zMotion, SLOT(setValue(int)));
-	QObject::connect(_ui->_sliderHistogramPercentageOfSlicesToIgnore_zMotion, SIGNAL(valueChanged(int)), _ui->_spinHistogramPercentageOfSlicesToIgnore_zMotion, SLOT(setValue(int)));
-	QObject::connect(_ui->_spinHistogramPercentageOfSlicesToIgnore_zMotion, SIGNAL(valueChanged(int)), _ui->_sliderHistogramPercentageOfSlicesToIgnore_zMotion, SLOT(setValue(int)));
 	QObject::connect(_ui->_buttonHistogramResetDefaultValuesZMotion, SIGNAL(clicked()), this, SLOT(resetHistogramDefaultValuesZMotion()));
 	// Onglet "Z-Mouvement par secteur angulaire"
 	QObject::connect(_ui->_sliderHistogramNumberOfAngularSectors_zMotionAngular, SIGNAL(valueChanged(int)), _ui->_spinHistogramNumberOfAngularSectors_zMotionAngular, SLOT(setValue(int)));
@@ -522,7 +520,7 @@ void MainWindow::drawSlice()
 			{
 				const PieChart &pieChartZMotionMap = _zMotionAccumulator.pieChart();
 				const qreal angleFactor = TWO_PI/(qreal)(_zMotionMapSlice->n_rows);
-				const uint &firstValidSlice = _billonPithExtractor.validSlices().min();
+				const uint &firstValidSlice = _billon->validSlices().min();
 
 				QVector< Interval<uint> > angleIntervalsToDraw;
 				QVector<QColor> intervalsColors;
@@ -873,7 +871,7 @@ void MainWindow::selectKnotArea( const int &index, const bool &draw )
 	if ( _billon->hasPith() && index > 0 && index <= supportingAreas.size() )
 	{
 		const QRect &supportingArea = supportingAreas[index-1];
-		const Interval<uint> sliceInterval( supportingArea.left()+_billonPithExtractor.validSlices().min(), supportingArea.right()+_billonPithExtractor.validSlices().min() );
+		const Interval<uint> sliceInterval( supportingArea.left()+_billon->validSlices().min(), supportingArea.right()+_billon->validSlices().min() );
 		const Interval<uint> sectorInterval( supportingArea.top(), supportingArea.bottom() );
 
 		_tangentialTransform.setMinIntensity( _ui->_spinMinIntensity->value() );
@@ -940,8 +938,7 @@ void MainWindow::computeBillonPith()
 
 		_billonPithExtractor.process(*_billon);
 		_treeRadius = BillonAlgorithms::restrictedAreaMeansRadius(*_billon,_ui->_spinRestrictedAreaResolution->value(),_ui->_spinRestrictedAreaThreshold->value(),
-																  _ui->_spinRestrictedAreaMinimumRadius->value()*_billon->n_cols/100.,
-																  _ui->_spinPercentageOfSlicesToIgnore->value()*_billon->n_slices/100.);
+																  _ui->_spinRestrictedAreaMinimumRadius->value()*_billon->n_cols/100.);
 		_ui->_checkRadiusAroundPith->setText( QString::number(_treeRadius*_ui->_spinRestrictedAreaPercentage->value()/100.) );
 		_ui->_spinHistogramNumberOfAngularSectors_zMotionAngular->setValue(TWO_PI*_treeRadius*_ui->_spinRestrictedAreaPercentage->value()/100.);
 	}
@@ -956,15 +953,15 @@ void MainWindow::computeSliceHistogram()
 	if ( _billon && _billon->hasPith() )
 	{
 		_sliceHistogram->construct(*_billon, Interval<int>(_ui->_spinMinIntensity->value(),_ui->_spinMaxIntensity->value()),
-								   _ui->_spinZMotionMin->value(), _ui->_spinHistogramPercentageOfSlicesToIgnore_zMotion->value()*_billon->n_slices/100., _treeRadius*_ui->_spinRestrictedAreaPercentage->value()/100.);
-		_sliceHistogram->computeMaximumsAndIntervals( _ui->_spinHistogramSmoothingRadius_zMotion->value(),
-													  _ui->_spinHistogramMinimumHeightOfMaximum_zMotion->value(),
-													  _ui->_spinHistogramDerivativeSearchPercentage_zMotion->value(),
-													  _ui->_spinHistogramMinimumWidthOfInterval_zMotion->value(), false);
+								   _ui->_spinZMotionMin->value(), _treeRadius*_ui->_spinRestrictedAreaPercentage->value()/100.);
+//		_sliceHistogram->computeMaximumsAndIntervals( _ui->_spinHistogramSmoothingRadius_zMotion->value(),
+//													  _ui->_spinHistogramMinimumHeightOfMaximum_zMotion->value(),
+//													  _ui->_spinHistogramDerivativeSearchPercentage_zMotion->value(),
+//													  _ui->_spinHistogramMinimumWidthOfInterval_zMotion->value(), false); TODO
 	}
 	_plotSliceHistogram->update( *_sliceHistogram );
 	_plotSliceHistogram->moveCursor( _ui->_sliderSelectSlice->value() );
-	_plotSliceHistogram->updatePercentageCurve( _sliceHistogram->thresholdOfMaximums( _ui->_spinHistogramMinimumHeightOfMaximum_zMotion->value() ) );
+	_plotSliceHistogram->updatePercentageCurve( _sliceHistogram->thresholdOfMaximums()); // TODO _ui->_spinHistogramMinimumHeightOfMaximum_zMotion->value() ) );
 	_ui->_plotSliceHistogram->setAxisScale(QwtPlot::xBottom,0,_sliceHistogram->size());
 	_ui->_plotSliceHistogram->replot();
 
@@ -994,11 +991,11 @@ void MainWindow::computeSectorHistogram( const Interval<uint> &interval )
 		_sectorHistogram->construct( *_billon, interval, Interval<int>(_ui->_spinMinIntensity->value(),_ui->_spinMaxIntensity->value()),
 									 _ui->_spinZMotionMin->value(), _treeRadius*_ui->_spinRestrictedAreaPercentage->value()/100.);
 		qreal coeffDegToSize = _ui->_spinHistogramNumberOfAngularSectors_zMotionAngular->value()/360.;
-		_sectorHistogram->computeMaximumsAndIntervals( _ui->_spinHistogramSmoothingRadius_zMotionAngular->value()*coeffDegToSize,
-													   _ui->_spinHistogramMinimumHeightOfMaximum_zMotionAngular->value(),
-													   _ui->_spinHistogramDerivativeSearchPercentage_zMotionAngular->value(),
-													   _ui->_spinHistogramMinimumWidthOfInterval_zMotionAngular->value()*coeffDegToSize,
-													   _ui->_spinHistogramIntervalGap_zMotionAngular->value(), true );
+//		_sectorHistogram->computeMaximumsAndIntervals( _ui->_spinHistogramSmoothingRadius_zMotionAngular->value()*coeffDegToSize,
+//													   _ui->_spinHistogramMinimumHeightOfMaximum_zMotionAngular->value(),
+//													   _ui->_spinHistogramDerivativeSearchPercentage_zMotionAngular->value(),
+//													   _ui->_spinHistogramMinimumWidthOfInterval_zMotionAngular->value()*coeffDegToSize,
+//													   _ui->_spinHistogramIntervalGap_zMotionAngular->value(), true ); TODO
 	}
 
 	_plotSectorHistogram->update(*_sectorHistogram);
@@ -1027,7 +1024,7 @@ void MainWindow::computeKnotEllipseRadiiHistogram(const Billon *billon )
 
 	if ( billon && billon->hasPith() && _knotPithProfile->size() )
 	{
-		_knotEllipseRadiiHistogram->construct( *billon, *_knotPithProfile, _knotPithExtractor.validSlices(),
+		_knotEllipseRadiiHistogram->construct( *billon, *_knotPithProfile,
 											   _ui->_spinLowessBandWidth->value(), _ui->_spinEllipticalAccumulationSmoothingRadius->value(),
 											   _ui->_spinLowessIqrCoefficient->value(), _ui->_spinLowessPercentagOfFirstValidSlicesToExtrapolate->value(),
 											   _ui->_spinLowessPercentagOfLastValidSlicesToExtrapolate->value() );
@@ -1066,7 +1063,7 @@ void MainWindow::computeZMotionMap()
 		_zMotionAccumulator.setZMotionMin(_ui->_spinZMotionMapMin->value());
 		_zMotionAccumulator.setIntensityInterval(Interval<int>(_ui->_spinMinIntensity->value(), _ui->_spinMaxIntensity->value()));
 		_zMotionAccumulator.setRadiusAroundPith(_treeRadius*_ui->_spinRestrictedAreaPercentage->value()/100.);
-		_zMotionAccumulator.execute( *_billon, *_zMotionMapSlice, _billonPithExtractor.validSlices() );
+		_zMotionAccumulator.execute( *_billon, *_zMotionMapSlice, _billon->validSlices() );
 
 		_ui->_spinZMotionToDraw->setMaximum(_zMotionAccumulator.maxFindIntensity());
 		_ui->_sliderZMotionToDraw->setMaximum(_zMotionAccumulator.maxFindIntensity());
@@ -1270,7 +1267,6 @@ void MainWindow::resetHistogramDefaultValuesZMotion()
 	_ui->_spinHistogramMinimumHeightOfMaximum_zMotion->setValue(HISTOGRAM_PERCENTAGE_OF_MINIMUM_HEIGHT_OF_MAXIMUM);
 	_ui->_spinHistogramMinimumWidthOfInterval_zMotion->setValue(HISTOGRAM_MINIMUM_WIDTH_OF_INTERVALS);
 	_ui->_spinHistogramDerivativeSearchPercentage_zMotion->setValue(HISTOGRAM_DERIVATIVE_SEARCH_PERCENTAGE);
-	_ui->_spinHistogramPercentageOfSlicesToIgnore_zMotion->setValue(HISTOGRAM_PERCENTAGE_OF_SLICES_TO_IGNORE);
 }
 
 void MainWindow::resetHistogramDefaultValuesZMotionAngular()
@@ -1412,10 +1408,8 @@ void MainWindow::export2DZMotion()
 
 				SectorHistogram sect;
 				const Interval<int> intensityInterval(_ui->_spinMinIntensity->value(), _ui->_spinMaxIntensity->value());
-				const Interval<uint> &validSlices =  _billonPithExtractor.validSlices();
-				std::cout << "Valid slices : " << std::endl;
-				std::cout << "    - by pithExtractor : [" << validSlices.min() << ", " << validSlices.max() << "]" << std::endl;
-				std::cout << "    - by percentage    : [" << _ui->_spinPercentageOfSlicesToIgnore->value()*_billon->n_slices/100. << ", " << _billon->n_slices-_ui->_spinPercentageOfSlicesToIgnore->value()*_billon->n_slices/100. << "]" << std::endl;
+				const Interval<uint> &validSlices =  _billon->validSlices();
+				std::cout << "Valid slices : [" << validSlices.min() << ", " << validSlices.max() << "]" << std::endl;
 
 				qreal max = 0;
 
@@ -1466,7 +1460,7 @@ void MainWindow::export2DKnotAreaCoordinates()
 				stream << "##### Anciennes zones de nœuds #####" << endl;
 				stream << "# Dimensions de l'image dasn laquelle ces coorodnnées sont valides" << endl;
 				stream << "# width (Nombre de secteurs angulaires) | height (nombres de coupes)" << endl;
-				stream << "# " << _zMotionAccumulator.pieChart().nbSectors() << " " << _billonPithExtractor.validSlices().size() << endl;
+				stream << "# " << _zMotionAccumulator.pieChart().nbSectors() << " " << _billon->validSlices().size() << endl;
 				stream << endl;
 
 				stream << "# Nombre de zones de nœuds" << endl;
@@ -1480,7 +1474,7 @@ void MainWindow::export2DKnotAreaCoordinates()
 				qreal coeffBillonToZMotion2D = _zMotionAccumulator.pieChart().nbSectors()/(qreal)_zMotionAccumulator.pieChart().nbSectors();
 
 
-				const uint &minValidSliceIndex = _billonPithExtractor.validSlices().min();
+				const uint &minValidSliceIndex = _billon->validSlices().min();
 
 				uint oldSliceInterval = _currentSliceInterval;
 				uint firstSliceIndex, lastSliceIndex;
@@ -2458,7 +2452,7 @@ void MainWindow::exportPithOfBillonToSdp()
 				stream << "# SDP (Sequence of Discrete Points)" << endl;
 				stream << "# Valid slice interval" << endl;
 				stream << "# zMin   zMax" << endl;
-				stream << _billonPithExtractor.validSlices().min() << " " << _billonPithExtractor.validSlices().max() << endl;
+				stream << _billon->validSlices().min() << " " << _billon->validSlices().max() << endl;
 				stream << "# Pith coords" << endl;
 				stream << "# x   y" << endl;
 

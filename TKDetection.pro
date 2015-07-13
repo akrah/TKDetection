@@ -72,7 +72,7 @@ SOURCES	=	src/main.cpp \
 			tst/test_intervalshistogram.cpp \
 			src/tiffreader.cpp \
 			src/v3dexport.cpp \
-    src/detection/knotbywhorldetector.cpp
+	src/detection/knotbywhorldetector.cpp
 
 HEADERS	=	inc/billon.h \
 			inc/billonalgorithms.h \
@@ -80,7 +80,6 @@ HEADERS	=	inc/billon.h \
 			inc/define.h \
 			def/def_billon.h \
 			def/def_coordinate.h \
-			def/def_opticalflow.h \
 			inc/detection/knotareadetector.h \
 			inc/detection/oldknotareadetector.h \
 			inc/detection/plotsectorhistogram.h \
@@ -115,7 +114,7 @@ HEADERS	=	inc/billon.h \
 			tst/test_intervalshistogram.h \
 			inc/tiffreader.h \
 			inc/v3dexport.h \
-    inc/detection/knotbywhorldetector.h
+	inc/detection/knotbywhorldetector.h
 
 FORMS =	ui/mainwindow.ui
 

@@ -26,12 +26,12 @@ public:
 	~PithExtractorBoukadida();
 
 	/**
-	 * \fn		Pith* process( const icube &image, const int &sliceMin, const int &sliceMax )
-	 * \brief	Extrait la moelle d'une matrice sous forme d'une liste des coordonnées des voxels qui la compose.
+	 * \fn		void process( Billon &billon, const bool &adaptativeWidth = false )
+	 * \brief	Extrait la moelle du billon sous la forme d'une liste de coordonnées.
 	 *          Cette classe implémente l'algorithme proposé par Boukadida et al., 2012.
-	 * \param	image Image 2D
-	 * \param	sliceMin Première coupe à traiter
-	 * \param	sliceMax Dernière coupe à traiter
+	 * \param	billon Image vokumique du tronc
+	 * \param	adaptativeWidth vrai si la largeur des coupe doit varier linéairement de 0 pour la première coupe à la largeur du volume pour la dernière coupe.
+	 *                          Doit être mis à vrai dans le cas des coupes tangentielles.
 	 */
 	void process( Billon &billon , const bool &adaptativeWidth = false );
 
@@ -42,55 +42,49 @@ public:
 	 * \fn		int subWindowWidth()
 	 * \return	la largeur de la fenêtre du voisinage de la moelle
 	 */
-	int subWindowWidth() const;
+	const int &subWindowWidth() const;
 
 	/**
 	 * \fn		int subWindowHeight()
 	 * \return	la hauteur de la fenêtre du voisinage de la moelle
 	 */
-	int subWindowHeight() const;
+	const int &subWindowHeight() const;
 
 	/**
 	 * \fn		int pithShift()
 	 * \return	Décalage autorisé de la position de la moelle entre deux coupes consécutives
 	 */
-	qreal pithShift() const;
+	const qreal &pithShift() const;
 
 	/**
 	 * \fn		uint smoothingRadius()
 	 * \return	Rayon de lissage de la moelle (en nombre de coupes)
 	 */
-	uint smoothingRadius() const;
+	const uint &smoothingRadius() const;
 
 	/**
 	 * \fn		qreal minPercentageOfWood()
 	 * \return	Pourcentage de bois minimum présent sur une coupe pour la considérer comme valide
 	 */
-	qreal minWoodPercentage() const;
+	const qreal &minWoodPercentage() const;
 
 	/**
 	 * \fn		Interval<int> intensityInterval()
 	 * \return	Interval d'intensité à prednre en compte pour la transformée de Hough
 	 */
-	Interval<int> intensityInterval() const;
+	const Interval<int> &intensityInterval() const;
 
 	/**
 	 * \fn		bool ascendingOrder();
 	 * \return	True if pith extraction on slices taken in ascending order, false otherwise
 	 */
-	bool ascendingOrder() const;
+	const bool &ascendingOrder() const;
 
 	/**
 	 * \fn		bool extrapolation()
 	 * \return	True if slices outside the valid interval could be interpolated
 	 */
-	TKD::ExtrapolationType extrapolation() const;
-
-	/**
-	 * \fn		const Interval<uint> &validSlices()
-	 * \return	The interval of valid slices
-	 */
-	const Interval<uint> &validSlices() const;
+	const TKD::ExtrapolationType &extrapolation() const;
 
 	/**
 	 * \fn		const qreal &firstValidSlicesToExtrapolate()
@@ -196,7 +190,7 @@ private:
 
 	void fillBillonBackground( Billon &billonToFill, QVector<qreal> &backgroundProportions, const Interval<int> &intensityInterval, const bool &adaptativeWidth ) const;
 
-	void detectValidSliceInterval( const QVector<qreal> &backgroundProportions );
+	void detectValidSliceInterval( Interval<uint> &validSlices, const QVector<qreal> &backgroundProportions );
 
 private:
 	int _subWindowWidth;					/*!< Largeur de la fenêtre de voisinage */
@@ -209,7 +203,6 @@ private:
 	bool _ascendingOrder;					/*!< Ordre de traitement des coupes (ascending order if true, descending order otherwise */
 	TKD::ExtrapolationType _extrapolation;	/*!< Extrapoler la position de la moelle en dehors de l'intervalle de coupes valides */
 
-	Interval<uint> _validSlices;			/*!< Intervalle de coupes valides */
 	uint _firstValidSliceToExtrapolate;		/*!< Poucentage de coupes valides à interpeler en début de moelle */
 	uint _lastValidSliceToExtrapolate;		/*!< Poucentage de coupes valides à interpeler en fin de moelle */
 };

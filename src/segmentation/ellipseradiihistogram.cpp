@@ -26,7 +26,7 @@ const QVector<qreal> &EllipseRadiiHistogram::lowessData() const
 }
 
 
-void EllipseRadiiHistogram::construct( const Billon &tangentialBillon, const PithProfile &knotPithProfile, const Interval<uint> &validSlices,
+void EllipseRadiiHistogram::construct( const Billon &tangentialBillon, const PithProfile &knotPithProfile,
 										   const qreal & lowessBandWidth, const uint &smoothingRadius, const qreal &iqrCoeff,
 										   const uint &percentageOfFirstValidSlicesToExtrapolate, const uint &percentageOfLastValidSlicesToExtrapolate  )
 {
@@ -54,7 +54,7 @@ void EllipseRadiiHistogram::construct( const Billon &tangentialBillon, const Pit
 		(*this)[k] = ellipticalHistogram.detectedRadius();
 	}
 
-	extrapolation(validSlices,percentageOfFirstValidSlicesToExtrapolate,percentageOfLastValidSlicesToExtrapolate);
+	extrapolation(tangentialBillon.validSlices(),percentageOfFirstValidSlicesToExtrapolate,percentageOfLastValidSlicesToExtrapolate);
 
 	// LOESS
 	if ( !qFuzzyIsNull(lowessBandWidth) )
