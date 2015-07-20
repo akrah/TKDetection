@@ -21,7 +21,6 @@ void SliceHistogram::construct( const Billon &billon, const Interval<int> &inten
 	const int width = billon.n_cols;
 	const int height = billon.n_rows;
 	const int depth = billon.n_slices;
-	const int radiusMax = radiusAroundPith+1;
 	const qreal squareRadius = qPow(radiusAroundPith,2);
 
 	clear();
@@ -29,22 +28,23 @@ void SliceHistogram::construct( const Billon &billon, const Interval<int> &inten
 
 	QVector<int> circleLines;
 	circleLines.reserve(2*radiusAroundPith+1);
-	for ( int lineIndex=-radiusAroundPith ; lineIndex<radiusMax ; ++lineIndex )
+	for ( int lineIndex=-radiusAroundPith ; lineIndex<=radiusAroundPith ; ++lineIndex )
 	{
 		circleLines.append(qSqrt(squareRadius-qPow(lineIndex,2)));
 	}
 
 	const Interval<uint> &validSlices = billon.validSlices();
+	const uint &lastSlice = validSlices.max();
 	int i, j, iRadius, iRadiusMax;
 	uint diff, k;
 	iCoord2D currentPos;
 	qreal cumul;
 
-	for ( k=validSlices.min() ; k<validSlices.max() ; ++k )
+	for ( k=validSlices.min() ; k<lastSlice ; ++k )
 	{
 		cumul = 0.;
 		currentPos.y = billon.pithCoord(k).y-radiusAroundPith;
-		for ( j=-radiusAroundPith ; j<radiusMax ; ++j, currentPos.y++ )
+		for ( j=-radiusAroundPith ; j<=radiusAroundPith ; ++j, currentPos.y++ )
 		{
 			iRadius = circleLines[j+radiusAroundPith];
 			iRadiusMax = iRadius+1;

@@ -3,6 +3,7 @@
 
 #include "def/def_billon.h"
 #include "inc/interval.h"
+#include "inc/piechart.h"
 
 #include <QVector>
 #include <QRect>
@@ -18,6 +19,9 @@ public:
 
 	const QVector<QRect> &knotAreas() const;
 
+	const PieChart &pieChart() const;
+	void setSectorNumber( const uint &nbAngularSectors );
+
 	const Interval<int> &intensityInterval() const;
 	void setIntensityInterval( const Interval<int> interval );
 
@@ -27,9 +31,11 @@ public:
 	const qreal &treeRadius() const;
 	void setTreeRadius( const qreal &radius );
 
-
 protected:
 	QVector<QRect> _knotAreas;
+
+	PieChart _pieChart;
+
 	Interval<int> _intensityInterval;
 	uint _zMotionMin;
 	qreal _treeRadius;

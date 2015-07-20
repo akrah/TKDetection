@@ -15,12 +15,31 @@ public:
 	void execute( const Billon &billon );
 	void clear();
 
+	void updateSliceHistogram( const Billon &billon );
+	void updateSectorHistograms( const Billon &billon );
+	void updateSectorHistogram( const Billon &billon, const uint &whorlIndex );
+
 	const SliceHistogram &sliceHistogram() const;
-	const SectorHistogram &sectorHistogram( const uint &whorlId ) const;
+	const SectorHistogram &sectorHistogram( const uint &whorlIndex ) const;
+
+	void setSliceHistogramParameters( const uint &smoothingRadius,
+									  const uint &minimumHeightOfMaximums,
+									  const uint &derivativeSearchPercentage,
+									  const uint &minimumWidthOfInterval );
+
+	void setSectorHistogramsParameters( const uint &smoothingRadius,
+										const uint &minimumHeightOfMaximums,
+										const uint &derivativeSearchPercentage,
+										const uint &minimumWidthOfInterval );
 
 private:
 	SliceHistogram _sliceHistogram;
 	QVector<SectorHistogram> _sectorHistograms;
+
+	uint _sectorHist_smoothingRadius;
+	uint _sectorHist_minimumHeightOfMaximums;
+	uint _sectorHist_derivativeSearchPercentage;
+	uint _sectorHist_minimumWidthOfInterval;
 };
 
 #endif // KNOTBYWHORLDETECTOR_H

@@ -13,19 +13,20 @@ void ZMotionAccumulator::execute( const Billon &billon, Slice &accumulationSlice
 {
 	if ( billon.hasPith() )
 	{
+		const uint &firstSlice = validSlices.min();
+		const uint &lastSlice = validSlices.max();
 		accumulationSlice.set_size(_pieChart.nbSectors(),validSlices.size());
 
-		SectorHistogram sect;
-		sect.pieChart().setNumberOfAngularSectors(_pieChart.nbSectors());
+		SectorHistogram sect(_pieChart);
 
 		_maxFindIntensity = 0;
 
-		for ( uint z=validSlices.min() ; z<validSlices.max() ; ++z )
+		for ( uint z=firstSlice ; z<lastSlice ; ++z )
 		{
 			sect.construct( billon, Interval<uint>(z,z), _intensityInterval, _zMotionMin, _radiusAroundPith );
 			QVector<qreal>::ConstIterator sectIter = sect.constBegin();
 			QVector<qreal>::ConstIterator sectIterEnd = sect.constEnd();
-			Slice::col_iterator accumulationSliceIter = accumulationSlice.begin_col(z-validSlices.min());
+			Slice::col_iterator accumulationSliceIter = accumulationSlice.begin_col(z-firstSlice);
 			while ( sectIter != sectIterEnd )
 			{
 				*accumulationSliceIter = (__billon_type__)(*sectIter);

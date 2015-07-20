@@ -72,7 +72,7 @@ BillonTpl<T>::BillonTpl() :
 
 template< typename T >
 BillonTpl<T>::BillonTpl( const uint &width, const uint &height, const uint &depth ) :
-	arma::Cube<T>(height,width,depth), _pith(0), _validSlices(0,depth), _valueInterval(T(0),T(0)), _voxelDims(1.,1.,1.) {}
+	arma::Cube<T>(height,width,depth), _pith(0), _validSlices(0,depth-1), _valueInterval(T(0),T(0)), _voxelDims(1.,1.,1.) {}
 
 template< typename T >
 BillonTpl<T>::BillonTpl( const BillonTpl<T> &billon ) :

@@ -2,7 +2,7 @@
 
 #include "inc/define.h"
 
-KnotAreaDetector::KnotAreaDetector() : _intensityInterval(MINIMUM_INTENSITY,MAXIMUM_INTENSITY), _zMotionMin(MINIMUM_Z_MOTION) {}
+KnotAreaDetector::KnotAreaDetector() : _pieChart(PieChart(500)), _intensityInterval(MINIMUM_INTENSITY,MAXIMUM_INTENSITY), _zMotionMin(MINIMUM_Z_MOTION), _treeRadius(100) {}
 KnotAreaDetector::~KnotAreaDetector() {}
 
 void KnotAreaDetector::clear()
@@ -13,6 +13,16 @@ void KnotAreaDetector::clear()
 const QVector<QRect> &KnotAreaDetector::knotAreas() const
 {
 	return _knotAreas;
+}
+
+const PieChart &KnotAreaDetector::pieChart() const
+{
+	return _pieChart;
+}
+
+void KnotAreaDetector::setSectorNumber( const uint &nbAngularSectors )
+{
+	_pieChart.setNumberOfAngularSectors(nbAngularSectors);
 }
 
 const Interval<int> &KnotAreaDetector::intensityInterval() const

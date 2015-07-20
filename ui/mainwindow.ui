@@ -21,7 +21,7 @@
        <enum>QTabWidget::West</enum>
       </property>
       <property name="currentIndex">
-       <number>3</number>
+       <number>0</number>
       </property>
       <property name="documentMode">
        <bool>true</bool>
@@ -407,15 +407,15 @@
          <item>
           <widget class="QToolBox" name="toolBox_3">
            <property name="currentIndex">
-            <number>0</number>
+            <number>1</number>
            </property>
            <widget class="QWidget" name="page_10">
             <property name="geometry">
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>364</width>
-              <height>238</height>
+              <width>254</width>
+              <height>118</height>
              </rect>
             </property>
             <attribute name="label">
@@ -649,59 +649,6 @@ du repère polaire</string>
               </layout>
              </item>
              <item row="2" column="0">
-              <widget class="QLabel" name="label_25">
-               <property name="font">
-                <font>
-                 <weight>50</weight>
-                 <bold>false</bold>
-                </font>
-               </property>
-               <property name="text">
-                <string>Pourcentage du
-rayon moyen</string>
-               </property>
-              </widget>
-             </item>
-             <item row="2" column="1">
-              <layout class="QHBoxLayout" name="horizontalLayout_11">
-               <item>
-                <widget class="QSlider" name="_sliderRestrictedAreaPercentage">
-                 <property name="font">
-                  <font>
-                   <weight>50</weight>
-                   <bold>false</bold>
-                  </font>
-                 </property>
-                 <property name="maximum">
-                  <number>100</number>
-                 </property>
-                 <property name="value">
-                  <number>95</number>
-                 </property>
-                 <property name="orientation">
-                  <enum>Qt::Horizontal</enum>
-                 </property>
-                </widget>
-               </item>
-               <item>
-                <widget class="QSpinBox" name="_spinRestrictedAreaPercentage">
-                 <property name="font">
-                  <font>
-                   <weight>50</weight>
-                   <bold>false</bold>
-                  </font>
-                 </property>
-                 <property name="maximum">
-                  <number>100</number>
-                 </property>
-                 <property name="value">
-                  <number>90</number>
-                 </property>
-                </widget>
-               </item>
-              </layout>
-             </item>
-             <item row="3" column="0">
               <widget class="QLabel" name="label_51">
                <property name="text">
                 <string>Rayon minimum
@@ -710,7 +657,7 @@ résolution de l'image)</string>
                </property>
               </widget>
              </item>
-             <item row="3" column="1">
+             <item row="2" column="1">
               <layout class="QHBoxLayout" name="horizontalLayout_43">
                <item>
                 <widget class="QSlider" name="_sliderRestrictedAreaMinimumRadius">
@@ -737,7 +684,7 @@ résolution de l'image)</string>
                </item>
               </layout>
              </item>
-             <item row="4" column="0">
+             <item row="3" column="0">
               <widget class="QLabel" name="label_20">
                <property name="font">
                 <font>
@@ -751,7 +698,7 @@ zone restreinte</string>
                </property>
               </widget>
              </item>
-             <item row="4" column="1">
+             <item row="3" column="1">
               <widget class="QCheckBox" name="_checkRadiusAroundPith">
                <property name="font">
                 <font>
@@ -771,8 +718,8 @@ zone restreinte</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>364</width>
-              <height>238</height>
+              <width>204</width>
+              <height>66</height>
              </rect>
             </property>
             <attribute name="label">
@@ -1035,7 +982,7 @@ sur une coupe valide</string>
               <x>0</x>
               <y>0</y>
               <width>417</width>
-              <height>294</height>
+              <height>292</height>
              </rect>
             </property>
             <attribute name="label">
@@ -1523,7 +1470,7 @@ sur une coupe valide</string>
             <property name="geometry">
              <rect>
               <x>0</x>
-              <y>-85</y>
+              <y>0</y>
               <width>392</width>
               <height>280</height>
              </rect>
@@ -1847,8 +1794,8 @@ sur une coupe valide</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>364</width>
-              <height>207</height>
+              <width>185</width>
+              <height>45</height>
              </rect>
             </property>
             <attribute name="label">
@@ -1891,8 +1838,8 @@ sur une coupe valide</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>364</width>
-              <height>207</height>
+              <width>185</width>
+              <height>45</height>
              </rect>
             </property>
             <attribute name="label">
@@ -2203,22 +2150,11 @@ de nœuds</string>
         </attribute>
         <layout class="QVBoxLayout" name="verticalLayout_20">
          <item>
-          <layout class="QFormLayout" name="formLayout_20">
-           <item row="0" column="0">
-            <widget class="QLabel" name="label_11">
-             <property name="text">
-              <string/>
-             </property>
-            </widget>
-           </item>
-           <item row="0" column="1">
-            <widget class="QPushButton" name="_buttonComputePith">
-             <property name="text">
-              <string>1. Calculer la moelle</string>
-             </property>
-            </widget>
-           </item>
-          </layout>
+          <widget class="QPushButton" name="_buttonComputePith">
+           <property name="text">
+            <string>1. Calculer la moelle</string>
+           </property>
+          </widget>
          </item>
          <item>
           <widget class="QGroupBox" name="groupBox_2">
@@ -2237,6 +2173,13 @@ de nœuds</string>
              </widget>
             </item>
             <item>
+             <widget class="QPushButton" name="_buttonUpdateSectorHistograms">
+              <property name="text">
+               <string>3. Détecter les intervalles angulaires</string>
+              </property>
+             </widget>
+            </item>
+            <item>
              <layout class="QHBoxLayout" name="horizontalLayout_15">
               <item>
                <widget class="QLabel" name="label_28">
@@ -2247,8 +2190,8 @@ de nœuds</string>
                  </sizepolicy>
                 </property>
                 <property name="text">
-                 <string>3. Sélection du
-verticille</string>
+                 <string>4. Sélection
+du verticille</string>
                 </property>
                </widget>
               </item>
@@ -2261,27 +2204,20 @@ verticille</string>
                 </item>
                </widget>
               </item>
-              <item>
-               <widget class="QPushButton" name="_buttonSelectSliceIntervalUpdate">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
-                </property>
-                <property name="text">
-                 <string>Mettre à jour</string>
-                </property>
-               </widget>
-              </item>
              </layout>
             </item>
             <item>
              <layout class="QHBoxLayout" name="horizontalLayout_19">
               <item>
                <widget class="QLabel" name="label_4">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
                 <property name="text">
-                 <string>4. Sélection du
+                 <string>5. Sélection du
 secteur angulaire</string>
                 </property>
                </widget>
@@ -2299,19 +2235,6 @@ secteur angulaire</string>
                   <string>Aucun</string>
                  </property>
                 </item>
-               </widget>
-              </item>
-              <item>
-               <widget class="QPushButton" name="_buttonSelectSectorIntervalUpdate">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
-                </property>
-                <property name="text">
-                 <string>Mettre à jour</string>
-                </property>
                </widget>
               </item>
              </layout>
@@ -2343,6 +2266,12 @@ secteur angulaire</string>
              <layout class="QHBoxLayout" name="horizontalLayout_18">
               <item>
                <widget class="QLabel" name="label_54">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
                 <property name="text">
                  <string>4. Sélection de la
 zone de nœuds</string>
@@ -3334,7 +3263,6 @@ zone de nœuds</string>
   <tabstop>_spinRestrictedAreaResolution</tabstop>
   <tabstop>_sliderRestrictedAreaThreshold</tabstop>
   <tabstop>_spinRestrictedAreaThreshold</tabstop>
-  <tabstop>_spinRestrictedAreaPercentage</tabstop>
   <tabstop>_sliderZMotionMin</tabstop>
   <tabstop>_spinZMotionMin</tabstop>
   <tabstop>_sliderHistogramSmoothingRadius_zMotion</tabstop>
@@ -3350,7 +3278,6 @@ zone de nœuds</string>
   <tabstop>_spinHistogramIntervalGap_zMotionAngular</tabstop>
   <tabstop>_comboSelectSliceInterval</tabstop>
   <tabstop>_comboSelectSectorInterval</tabstop>
-  <tabstop>_buttonSelectSectorIntervalUpdate</tabstop>
   <tabstop>_comboExportHistoType</tabstop>
   <tabstop>_buttonExportHistograms</tabstop>
   <tabstop>_comboExportHistoFormat</tabstop>

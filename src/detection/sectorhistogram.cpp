@@ -9,6 +9,10 @@ SectorHistogram::SectorHistogram() : Histogram<qreal>(), _pieChart(PieChart(500)
 {
 }
 
+SectorHistogram::SectorHistogram( const PieChart &pieChart ) : Histogram<qreal>(), _pieChart(pieChart)
+{
+}
+
 SectorHistogram::~SectorHistogram()
 {
 }
@@ -20,9 +24,11 @@ SectorHistogram::~SectorHistogram()
 void SectorHistogram::construct( const Billon &billon, const Interval<uint> &sliceInterval, const Interval<int> &intensity,
 								 const uint &zMotionMin, const int &radiusAroundPith )
 {
+	Q_ASSERT_X( sliceInterval.isValid(), "void SectorHistogram::construct( ... )" , "L'interval de coupes n'est pas valide." );
+
 	clear();
 
-	if ( billon.hasPith() && sliceInterval.isValid() )
+	if ( billon.hasPith() )
 	{
 		const int &width = billon.n_cols;
 		const int &height = billon.n_rows;
@@ -76,28 +82,18 @@ void SectorHistogram::construct( const Billon &billon, const Interval<uint> &sli
 	}
 }
 
-void SectorHistogram::computeMaximumsAndIntervals( const uint &intervalGap, const bool & loop )
-{
-	Histogram<qreal>::computeMaximumsAndIntervals( loop );
-
-	const uint &nbSectors = _pieChart.nbSectors();
-	uint min, max;
-	for ( int i=0 ; i<_intervals.size() ; ++i )
-	{
-		Interval<uint> &interval = _intervals[i];
-		min = interval.min();
-		max = interval.max();
-		interval.setMin(min<intervalGap?nbSectors+min-intervalGap:min-intervalGap);
-		interval.setMax(max>nbSectors-1-intervalGap?max+intervalGap-nbSectors:max+intervalGap);
-	}
-}
-
-PieChart &SectorHistogram::pieChart()
-{
-	return _pieChart;
-}
-
 const PieChart &SectorHistogram::pieChart() const
 {
 	return _pieChart;
 }
+
+void SectorHistogram::setPieChart( const PieChart &pieChart )
+{
+	_pieChart = pieChart;
+}
+
+void SectorHistogram::setSectorNumber( const uint &nbSectors )
+{
+	_pieChart.setNumberOfAngularSectors(nbSectors);
+}
+

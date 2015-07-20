@@ -12,7 +12,7 @@ class ZMotionAccumulator
 public:
 	ZMotionAccumulator();
 
-	void execute( const Billon &billon, Slice &accumulationSlice, const Interval<uint> &validSlices );
+	void execute( const Billon &billon, Slice &accumulationSlice , const Interval<uint> &validSlices );
 
 	PieChart &pieChart();
 	const PieChart &pieChart() const;

@@ -12,6 +12,7 @@
 #include "inc/sliceui.h"
 #include "inc/segmentation/tangentialgenerator.h"
 #include "inc/detection/zmotionaccumulator.h"
+#include "inc/detection/knotbywhorldetector.h"
 
 namespace Ui
 {
@@ -28,8 +29,6 @@ class PlotEllipseRadiiHistogram;
 class PlotPithProfile;
 class PlotSectorHistogram;
 class PlotSliceHistogram;
-class SectorHistogram;
-class SliceHistogram;
 class SlicePainter;
 
 template <typename T> class Interval;
@@ -61,20 +60,19 @@ private slots:
 	void setSectorNumber( const int &value );
 	void setMapSectorNumber( const int &value );
 
+	void computeBillonPith();
+	void computeSliceHistogram();
+	void computeSectorHistograms();
+
 	void selectSliceInterval( const int &index , const bool &draw = true );
-	void selectCurrentSliceInterval();
 	void selectSectorInterval( const int &index, const bool &draw = true );
-	void selectCurrentSectorInterval();
 	void selectKnotArea( const int &index, const bool &draw = true );
 	void selectCurrentKnotArea();
 
-	void computeSliceHistogram();
-	void computeSectorHistogram( const Interval<uint> &interval );
 	void computeKnotPithProfile( const Billon *billon = 0 );
 	void computeKnotEllipseRadiiHistogram( const Billon *billon = 0 );
 	void updateEllipticalAccumulationHistogram();
 
-	void computeBillonPith();
 	void computeZMotionMap();
 	void computeKnotAreas();
 	void drawZMotionMap();
@@ -145,10 +143,8 @@ private:
 
 	SlicePainter *_slicePainter;
 
-	SliceHistogram *_sliceHistogram;
+	KnotByWhorlDetector _knotByWhorlDetector;
 	PlotSliceHistogram *_plotSliceHistogram;
-
-	SectorHistogram *_sectorHistogram;
 	PlotSectorHistogram * _plotSectorHistogram;
 
 	PithProfile *_knotPithProfile;

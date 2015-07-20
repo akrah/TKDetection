@@ -16,7 +16,8 @@ namespace BillonAlgorithms
 
 		const uint &width = billon.n_cols;
 		const uint &height = billon.n_rows;
-		const Interval<uint> &validSlice = billon.validSlices();
+		const Interval<uint> &validSlices = billon.validSlices();
+		const uint &lastSlice = validSlices.max();
 		const qreal angleIncrement = TWO_PI/static_cast<qreal>(nbDirections);
 
 		rCoord2D center, edge;
@@ -24,7 +25,7 @@ namespace BillonAlgorithms
 		qreal orientation, currentNorm;
 
 		qreal radius = width;
-		for ( uint k=validSlice.min() ; k<validSlice.max() ; ++k )
+		for ( uint k=validSlices.min() ; k<lastSlice ; ++k )
 		{
 			const Slice &currentSlice = billon.slice(k);
 			center.x = billon.pithCoord(k).x;
