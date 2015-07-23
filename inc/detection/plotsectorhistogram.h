@@ -1,17 +1,16 @@
 #ifndef PLOTSECTORHISTOGRAM_H
 #define PLOTSECTORHISTOGRAM_H
 
-#include "def/def_coordinate.h"
+#include "inc/plothistogram.h"
+#include "inc/detection/sectorhistogram.h"
 
-#include <qwt_polar_curve.h>
 #include <qwt_plot_histogram.h>
 #include <qwt_plot_curve.h>
+#include <qwt_polar_curve.h>
 
-class SectorHistogram;
 class PointPolarSeriesData;
-class QwtPlot;
 
-class PlotSectorHistogram
+class PlotSectorHistogram : public PlotHistogram
 {
 public:
 	PlotSectorHistogram();
@@ -21,14 +20,14 @@ public:
 	void attach( QwtPlot * const plot );
 	void clear();
 
-	void update(const SectorHistogram &histogram);
+	void update( const Histogram<qreal> &histogram );
 
 	void moveCursor( const uint &index );
 
 private:
-	void updateDatas(const SectorHistogram &histogram);
-	void updateMaximums( const SectorHistogram &histogram);
-	void updateIntervals(const SectorHistogram &histogram);
+	void updateDatas( const SectorHistogram &histogram );
+	void updateMaximums(  const SectorHistogram &histogram );
+	void updateIntervals( const SectorHistogram &histogram );
 
 private:
 	QwtPlotHistogram _histogramData;

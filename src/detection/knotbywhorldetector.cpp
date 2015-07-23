@@ -16,6 +16,24 @@ void KnotByWhorlDetector::execute( const Billon &billon )
 {
 	updateSliceHistogram( billon );
 	updateSectorHistograms( billon );
+	computeKnotAreas();
+}
+
+void KnotByWhorlDetector::computeKnotAreas()
+{
+	KnotAreaDetector::clear();
+	if ( _sliceHistogram.isEmpty() || _sectorHistograms.isEmpty() || _sliceHistogram.nbIntervals() != static_cast<uint>(_sectorHistograms.size()) ) return;
+
+	uint k, i;
+	for ( k=0 ; k<_sliceHistogram.nbIntervals() ; ++k )
+	{
+		const Interval<uint> sliceInterval = _sliceHistogram.interval(k);
+		const SectorHistogram &sectorHistogram = _sectorHistograms[k];
+		for ( i=0 ; i<sectorHistogram.nbIntervals() ; ++i )
+		{
+			_knotAreas.append( QRect( sliceInterval.min(), sectorHistogram.interval(i).min(), sliceInterval.width(), sectorHistogram.interval(i).width() ) );
+		}
+	}
 }
 
 void KnotByWhorlDetector::clear()
@@ -23,6 +41,44 @@ void KnotByWhorlDetector::clear()
 	KnotAreaDetector::clear();
 	_sliceHistogram.clear();
 	_sectorHistograms.clear();
+}
+
+const SliceHistogram &KnotByWhorlDetector::sliceHistogram() const
+{
+	return _sliceHistogram;
+}
+
+const SectorHistogram &KnotByWhorlDetector::sectorHistogram( const uint &whorlIndex ) const
+{
+	Q_ASSERT_X( whorlIndex<static_cast<uint>(_sectorHistograms.size()) , "const SectorHistogram & sectorHistogram( const uint &whorlIndex )" , "whorlIndex doit être inférieur au nombre de verticilles" );
+	return _sectorHistograms[whorlIndex];
+}
+
+bool KnotByWhorlDetector::hasSectorHistograms() const
+{
+	return !_sectorHistograms.isEmpty();
+}
+
+void KnotByWhorlDetector::setSliceHistogramParameters( const uint &smoothingRadius,
+								  const uint &minimumHeightOfMaximums,
+								  const uint &derivativeSearchPercentage,
+								  const uint &minimumWidthOfInterval )
+{
+	_sliceHistogram.setSmoothingRadius(smoothingRadius);
+	_sliceHistogram.setMinimumHeightPercentageOfMaximum(minimumHeightOfMaximums);
+	_sliceHistogram.setDerivativesPercentage(derivativeSearchPercentage);
+	_sliceHistogram.setMinimumIntervalWidth(minimumWidthOfInterval);
+}
+
+void KnotByWhorlDetector::setSectorHistogramsParameters( const uint &smoothingRadius,
+								  const uint &minimumHeightOfMaximums,
+								  const uint &derivativeSearchPercentage,
+								  const uint &minimumWidthOfInterval )
+{
+	_sectorHist_smoothingRadius = smoothingRadius;
+	_sectorHist_minimumHeightOfMaximums = minimumHeightOfMaximums;
+	_sectorHist_derivativeSearchPercentage = derivativeSearchPercentage;
+	_sectorHist_minimumWidthOfInterval = minimumWidthOfInterval;
 }
 
 void KnotByWhorlDetector::updateSliceHistogram( const Billon &billon )
@@ -39,6 +95,8 @@ void KnotByWhorlDetector::updateSliceHistogram( const Billon &billon )
 
 void KnotByWhorlDetector::updateSectorHistograms( const Billon &billon )
 {
+	_sectorHistograms.clear();
+
 	if ( ! _sliceHistogram.nbIntervals() ) return;
 
 	const uint nbWhorls = _sliceHistogram.nbIntervals();
@@ -81,37 +139,4 @@ void KnotByWhorlDetector::updateSectorHistogram( const Billon &billon, const uin
 
 	// Compute angular intervals of knots for this whorl
 	sectorHistogram.computeMaximumsAndIntervals(true);
-}
-
-const SliceHistogram &KnotByWhorlDetector::sliceHistogram() const
-{
-	return _sliceHistogram;
-}
-
-const SectorHistogram &KnotByWhorlDetector::sectorHistogram( const uint &whorlIndex ) const
-{
-	Q_ASSERT_X( whorlIndex<static_cast<uint>(_sectorHistograms.size()) , "const SectorHistogram & sectorHistogram( const uint &whorlIndex )" , "whorlIndex doit être inférieur au nombre de verticilles" );
-	return _sectorHistograms[whorlIndex];
-}
-
-void KnotByWhorlDetector::setSliceHistogramParameters( const uint &smoothingRadius,
-								  const uint &minimumHeightOfMaximums,
-								  const uint &derivativeSearchPercentage,
-								  const uint &minimumWidthOfInterval )
-{
-	_sliceHistogram.setSmoothingRadius(smoothingRadius);
-	_sliceHistogram.setMinimumHeightPercentageOfMaximum(minimumHeightOfMaximums);
-	_sliceHistogram.setDerivativesPercentage(derivativeSearchPercentage);
-	_sliceHistogram.setMinimumIntervalWidth(minimumWidthOfInterval);
-}
-
-void KnotByWhorlDetector::setSectorHistogramsParameters( const uint &smoothingRadius,
-								  const uint &minimumHeightOfMaximums,
-								  const uint &derivativeSearchPercentage,
-								  const uint &minimumWidthOfInterval )
-{
-	_sectorHist_smoothingRadius = smoothingRadius;
-	_sectorHist_minimumHeightOfMaximums = minimumHeightOfMaximums;
-	_sectorHist_derivativeSearchPercentage = derivativeSearchPercentage;
-	_sectorHist_minimumWidthOfInterval = minimumWidthOfInterval;
 }

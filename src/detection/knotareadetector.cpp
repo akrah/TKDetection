@@ -15,6 +15,11 @@ const QVector<QRect> &KnotAreaDetector::knotAreas() const
 	return _knotAreas;
 }
 
+bool KnotAreaDetector::hasKnotAreas() const
+{
+	return !_knotAreas.isEmpty();
+}
+
 const PieChart &KnotAreaDetector::pieChart() const
 {
 	return _pieChart;

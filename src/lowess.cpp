@@ -150,8 +150,8 @@ void Lowess::compute( const QVector<qreal> &datas, QVector<qreal> &interpolatedD
 		gsl_vector_set(x, 2, qPow(i,2));
 		gsl_blas_ddot(x, c, &y);
 
-		interpolatedDatas[i] = y;
 		residus[i] = datas[i]-y;
+		interpolatedDatas[i] = y;
 	}
 
 

@@ -21,6 +21,7 @@ public:
 	const uint &radiusAroundPith() const;
 	const qreal &maxFindIntensity() const;
 
+	void setPieChart( const PieChart &pieChart );
 	void setIntensityInterval( const Interval<int> interval );
 	void setZMotionMin( const uint & min );
 	void setRadiusAroundPith( const uint radius );

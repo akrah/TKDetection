@@ -15,12 +15,9 @@ public:
 	void execute( const Billon &billon );
 	void clear();
 
-	void updateSliceHistogram( const Billon &billon );
-	void updateSectorHistograms( const Billon &billon );
-	void updateSectorHistogram( const Billon &billon, const uint &whorlIndex );
-
 	const SliceHistogram &sliceHistogram() const;
 	const SectorHistogram &sectorHistogram( const uint &whorlIndex ) const;
+	bool hasSectorHistograms() const;
 
 	void setSliceHistogramParameters( const uint &smoothingRadius,
 									  const uint &minimumHeightOfMaximums,
@@ -31,6 +28,12 @@ public:
 										const uint &minimumHeightOfMaximums,
 										const uint &derivativeSearchPercentage,
 										const uint &minimumWidthOfInterval );
+
+private:
+	void computeKnotAreas();
+	void updateSliceHistogram( const Billon &billon );
+	void updateSectorHistograms( const Billon &billon );
+	void updateSectorHistogram( const Billon &billon, const uint &whorlIndex );
 
 private:
 	SliceHistogram _sliceHistogram;

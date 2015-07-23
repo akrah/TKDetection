@@ -11,28 +11,27 @@ ZMotionAccumulator::ZMotionAccumulator() : _pieChart(PieChart(500)), _intensityI
 
 void ZMotionAccumulator::execute( const Billon &billon, Slice &accumulationSlice, const Interval<uint> &validSlices )
 {
+	_maxFindIntensity = 0;
 	if ( billon.hasPith() )
 	{
 		const uint &firstSlice = validSlices.min();
 		const uint &lastSlice = validSlices.max();
 		accumulationSlice.set_size(_pieChart.nbSectors(),validSlices.size());
 
-		SectorHistogram sect(_pieChart);
-
-		_maxFindIntensity = 0;
+		SectorHistogram hist(_pieChart);
 
 		for ( uint z=firstSlice ; z<lastSlice ; ++z )
 		{
-			sect.construct( billon, Interval<uint>(z,z), _intensityInterval, _zMotionMin, _radiusAroundPith );
-			QVector<qreal>::ConstIterator sectIter = sect.constBegin();
-			QVector<qreal>::ConstIterator sectIterEnd = sect.constEnd();
-			Slice::col_iterator accumulationSliceIter = accumulationSlice.begin_col(z-firstSlice);
-			while ( sectIter != sectIterEnd )
+			hist.construct( billon, Interval<uint>(z,z), _intensityInterval, _zMotionMin, _radiusAroundPith );
+			QVector<qreal>::ConstIterator histIter = hist.constBegin();
+			const QVector<qreal>::ConstIterator histEnd = hist.constEnd();
+			Slice::col_iterator accSliceIter = accumulationSlice.begin_col(z-firstSlice);
+			while ( histIter != histEnd )
 			{
-				*accumulationSliceIter = (__billon_type__)(*sectIter);
-				_maxFindIntensity = qMax(_maxFindIntensity,*sectIter);
-				sectIter++;
-				accumulationSliceIter++;
+				*accSliceIter = (__billon_type__)(*histIter);
+				_maxFindIntensity = qMax(_maxFindIntensity,*histIter);
+				++histIter;
+				++accSliceIter;
 			}
 		}
 	}
@@ -68,6 +67,11 @@ const qreal &ZMotionAccumulator::maxFindIntensity() const
 	return _maxFindIntensity;
 }
 
+void ZMotionAccumulator::setPieChart( const PieChart &pieChart )
+{
+	_pieChart = pieChart;
+}
+
 void ZMotionAccumulator::setIntensityInterval( const Interval<int> interval )
 {
 	_intensityInterval = interval;
@@ -82,4 +86,3 @@ void ZMotionAccumulator::setRadiusAroundPith( const uint radius )
 {
 	_radiusAroundPith = radius;
 }
-

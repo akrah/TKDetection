@@ -4,32 +4,32 @@
 #include <QMainWindow>
 #include <QTextStream>
 
+#include <qwt_plot.h>
+
 #include "def/def_billon.h"
 #include "def/def_coordinate.h"
-#include "slicezoomer.h"
-#include "inc/detection/oldknotareadetector.h"
-#include "inc/pithextractorboukadida.h"
-#include "inc/sliceui.h"
-#include "inc/segmentation/tangentialgenerator.h"
-#include "inc/detection/zmotionaccumulator.h"
 #include "inc/detection/knotbywhorldetector.h"
+#include "inc/detection/knotbyzmotionmapdetector.h"
+#include "inc/detection/plotslicehistogram.h"
+#include "inc/detection/plotsectorhistogram.h"
+#include "inc/pithextractorboukadida.h"
+#include "inc/plothistogram.h"
+#include "inc/segmentation/tangentialgenerator.h"
+#include "inc/segmentation/pithprofile.h"
+#include "inc/segmentation/ellipseradiihistogram.h"
+#include "inc/sliceui.h"
+#include "slicezoomer.h"
 
 namespace Ui
 {
 	class MainWindow;
 }
 
-class QLabel;
-
-class EllipseRadiiHistogram;
-class PithProfile;
-class PieChart;
 class PlotEllipticalAccumulationHistogram;
 class PlotEllipseRadiiHistogram;
 class PlotPithProfile;
-class PlotSectorHistogram;
-class PlotSliceHistogram;
 class SlicePainter;
+class QComboBox;
 
 template <typename T> class Interval;
 
@@ -49,9 +49,8 @@ private slots:
 	void closeImage();
 
 	void drawSlice();
-	void drawTangentialView();
-	void previousMaximumInSliceHistogram();
-	void nextMaximumInSliceHistogram();
+	void drawTangentialSlice();
+	void drawZMotionMap();
 
 	void setSlice( const int &sliceIndex );
 	void setYSlice( const int &yPosition );
@@ -60,22 +59,19 @@ private slots:
 	void setSectorNumber( const int &value );
 	void setMapSectorNumber( const int &value );
 
-	void computeBillonPith();
-	void computeSliceHistogram();
-	void computeSectorHistograms();
+	void computeBillonPith( const bool &draw = true );
+	void computeSliceAndSectorHistograms( const bool &draw = true );
 
-	void selectSliceInterval( const int &index , const bool &draw = true );
+	void selectSliceInterval( const int &index );
 	void selectSectorInterval( const int &index, const bool &draw = true );
 	void selectKnotArea( const int &index, const bool &draw = true );
 	void selectCurrentKnotArea();
 
-	void computeKnotPithProfile( const Billon *billon = 0 );
-	void computeKnotEllipseRadiiHistogram( const Billon *billon = 0 );
+	void computeKnotPithProfile( const Billon &billon, const bool &draw = true );
+	void computeKnotEllipseRadiiHistogram( const Billon &billon, const bool &draw = true );
 	void updateEllipticalAccumulationHistogram();
 
-	void computeZMotionMap();
-	void computeKnotAreas();
-	void drawZMotionMap();
+	void computeZMotionMapKnotAreas( const bool &draw = true );
 
 	void resetHistogramDefaultValuesZMotion();
 	void resetHistogramDefaultValuesZMotionAngular();
@@ -94,6 +90,13 @@ private:
 	void initComponentsValues();
 	void updateUiComponentsValues();
 	void enabledComponents();
+
+	void updatePlotHistogram( PlotHistogram &plotHistogram, QwtPlot &uiPlotHistogram, const Histogram<qreal> &histogram, const int &cursorPosition );
+	void updatePlotSliceHistogram();
+	void updatePlotSectorHistogram();
+	void resetPlotSectorHistogram();
+	void resetComboBox( QComboBox &comboBox );
+	void updateComboBox( QComboBox &comboBox, const Histogram<qreal> &histogram );
 
 	void exportPithToOfs( const bool &onCurrentSliceInterval );
 	void exportCompleteBillonToOfs();
@@ -138,19 +141,18 @@ private:
 
 	Billon *_billon;
 	Billon *_tangentialBillon;
-	Slice *_zMotionMapSlice;
 	Billon *_tangentialZMotionMapBillon;
 
 	SlicePainter *_slicePainter;
 
 	KnotByWhorlDetector _knotByWhorlDetector;
-	PlotSliceHistogram *_plotSliceHistogram;
-	PlotSectorHistogram * _plotSectorHistogram;
+	PlotSliceHistogram _plotSliceHistogram;
+	PlotSectorHistogram _plotSectorHistogram;
 
-	PithProfile *_knotPithProfile;
+	PithProfile _knotPithProfile;
 	PlotPithProfile *_plotKnotPithProfile;
 
-	EllipseRadiiHistogram * _knotEllipseRadiiHistogram;
+	EllipseRadiiHistogram  _knotEllipseRadiiHistogram;
 	PlotEllipseRadiiHistogram * _plotKnotEllipseRadiiHistogram;
 	PlotEllipticalAccumulationHistogram *_plotEllipticalAccumulationHistogram;
 
@@ -159,13 +161,11 @@ private:
 
 	TangentialGenerator _tangentialTransform;
 
-	ZMotionAccumulator _zMotionAccumulator;
-	OldKnotAreaDetector _oldKnotAreaDetector;
+	KnotByZMotionMapDetector _knotByZMotionMapDetector;
 
 	uint _currentSliceInterval;
 	uint _currentSectorInterval;
 	uint _currentKnotArea;
-	int _currentMaximum;
 	uint _currentSector;
 	qreal _treeRadius;
 };

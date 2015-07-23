@@ -1,12 +1,11 @@
 #ifndef PLOTKNOTPITHPROFILE_H
 #define PLOTKNOTPITHPROFILE_H
 
+#include "inc/plothistogram.h"
+
 #include <qwt_plot_histogram.h>
 
-class PithProfile;
-class QwtPlot;
-
-class PlotPithProfile
+class PlotPithProfile : public PlotHistogram
 {
 public:
 	PlotPithProfile();
@@ -15,9 +14,9 @@ public:
 	void attach( QwtPlot * const plot );
 	void clear();
 
-	void moveCursor( const uint & sliceIndex );
+	void update( const Histogram<qreal> &histogram );
 
-	void update( const PithProfile & histogram );
+	void moveCursor( const uint & sliceIndex );
 
 private:
 	QwtPlotHistogram _histogramData;

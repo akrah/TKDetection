@@ -41,7 +41,8 @@ TRANSLATIONS	= TKDetection_en.ts
 SOURCES	=	src/main.cpp \
 			src/billonalgorithms.cpp \
 			src/detection/knotareadetector.cpp \
-			src/detection/oldknotareadetector.cpp \
+			src/detection/knotbywhorldetector.cpp \
+			src/detection/knotbyzmotionmapdetector.cpp \
 			src/detection/plotsectorhistogram.cpp \
 			src/detection/plotslicehistogram.cpp \
 			src/detection/sectorhistogram.cpp \
@@ -57,6 +58,7 @@ SOURCES	=	src/main.cpp \
 			src/piepart.cpp \
 			src/pith.cpp \
 			src/pithextractorboukadida.cpp \
+			src/plothistogram.cpp \
 			src/pointpolarseriesdata.cpp \
 			src/slicealgorithm.cpp \
 			src/slicepainter.cpp \
@@ -72,7 +74,6 @@ SOURCES	=	src/main.cpp \
 			tst/test_intervalshistogram.cpp \
 			src/tiffreader.cpp \
 			src/v3dexport.cpp \
-	src/detection/knotbywhorldetector.cpp
 
 HEADERS	=	inc/billon.h \
 			inc/billonalgorithms.h \
@@ -81,7 +82,8 @@ HEADERS	=	inc/billon.h \
 			def/def_billon.h \
 			def/def_coordinate.h \
 			inc/detection/knotareadetector.h \
-			inc/detection/oldknotareadetector.h \
+			inc/detection/knotbywhorldetector.h \
+			inc/detection/knotbyzmotionmapdetector.h \
 			inc/detection/plotsectorhistogram.h \
 			inc/detection/plotslicehistogram.h \
 			inc/detection/sectorhistogram.h \
@@ -98,6 +100,7 @@ HEADERS	=	inc/billon.h \
 			inc/piepart.h \
 			inc/piechart.h \
 			inc/pith.h \
+			inc/plothistogram.h \
 			inc/pointpolarseriesdata.h \
 			inc/pithextractorboukadida.h \
 			inc/segmentation/ellipticalaccumulationhistogram.h \
@@ -114,13 +117,12 @@ HEADERS	=	inc/billon.h \
 			tst/test_intervalshistogram.h \
 			inc/tiffreader.h \
 			inc/v3dexport.h \
-	inc/detection/knotbywhorldetector.h
 
 FORMS =	ui/mainwindow.ui
 
 # Directives compilateur
 #-----------------------#
-QMAKE_CXXFLAGS	*= -std=c++0x
+QMAKE_CXXFLAGS	*= -std=c++11
 
 
 # Librairies externes

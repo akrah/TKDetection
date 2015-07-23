@@ -1,12 +1,11 @@
 #ifndef PLOTELLIPTICALACCUMULATIONHISTOGRAM_H
 #define PLOTELLIPTICALACCUMULATIONHISTOGRAM_H
 
+#include "inc/plothistogram.h"
+
 #include <qwt_plot_histogram.h>
 
-class EllipticalAccumulationHistogram;
-class QwtPlot;
-
-class PlotEllipticalAccumulationHistogram
+class PlotEllipticalAccumulationHistogram : public PlotHistogram
 {
 public:
 	PlotEllipticalAccumulationHistogram();
@@ -15,13 +14,13 @@ public:
 	void attach( QwtPlot * const plot );
 	void clear();
 
+	void update( const Histogram<qreal> &histogram );
+
 	void moveCursor( const uint & radiusIndex );
 
-	void update( const EllipticalAccumulationHistogram & histogram );
-
 private:
-	void updateDatas( const EllipticalAccumulationHistogram & histogram );
-	void updateMaximums( const EllipticalAccumulationHistogram & histogram );
+	void updateDatas( const Histogram<qreal> &histogram );
+	void updateMaximums( const Histogram<qreal> &histogram );
 
 private:
 	QwtPlotHistogram _histogramData;

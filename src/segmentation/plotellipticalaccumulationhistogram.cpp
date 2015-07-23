@@ -42,13 +42,13 @@ void PlotEllipticalAccumulationHistogram::moveCursor( const uint & radiusIndex )
 	_histogramCursor.setSamples(datasCursor);
 }
 
-void PlotEllipticalAccumulationHistogram::update( const EllipticalAccumulationHistogram & histogram )
+void PlotEllipticalAccumulationHistogram::update( const Histogram<qreal> &histogram )
 {
 	updateDatas( histogram );
 	updateMaximums( histogram );
 }
 
-void PlotEllipticalAccumulationHistogram::updateDatas( const EllipticalAccumulationHistogram & histogram )
+void PlotEllipticalAccumulationHistogram::updateDatas( const Histogram<qreal> &histogram )
 {
 	QVector<QwtIntervalSample> datasHistogram(0);
 	if ( histogram.size() > 0 )
@@ -66,7 +66,7 @@ void PlotEllipticalAccumulationHistogram::updateDatas( const EllipticalAccumulat
 	_histogramData.setSamples(datasHistogram);
 }
 
-void PlotEllipticalAccumulationHistogram::updateMaximums( const EllipticalAccumulationHistogram & histogram )
+void PlotEllipticalAccumulationHistogram::updateMaximums( const Histogram<qreal> &histogram )
 {
 	QVector<QwtIntervalSample> datasMaximums(0);
 	if ( histogram.nbMaximums() > 0 )

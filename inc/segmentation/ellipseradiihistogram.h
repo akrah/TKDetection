@@ -16,7 +16,6 @@ public:
 	virtual ~EllipseRadiiHistogram();
 
 	const EllipticalAccumulationHistogram & ellipticalHistogram( const int & sliceIndex ) const;
-	const QVector<qreal> &lowessData() const;
 
 	void construct(const Billon &tangentialBillon, const PithProfile &knotPithProfile,
 					const qreal & lowessBandWidth, const uint &smoothingRadius, const qreal &iqrCoeff,
@@ -29,7 +28,6 @@ private:
 
 private:
 	QVector<EllipticalAccumulationHistogram> _ellipticalHistograms;
-	QVector<qreal> _lowessData;
 };
 
 #endif // KNOTELLIPSERADIIHISTOGRAM_H

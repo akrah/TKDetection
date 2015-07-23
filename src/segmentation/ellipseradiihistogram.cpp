@@ -20,12 +20,6 @@ const EllipticalAccumulationHistogram & EllipseRadiiHistogram::ellipticalHistogr
 	return _ellipticalHistograms[sliceIndex];
 }
 
-const QVector<qreal> &EllipseRadiiHistogram::lowessData() const
-{
-	return _lowessData;
-}
-
-
 void EllipseRadiiHistogram::construct( const Billon &tangentialBillon, const PithProfile &knotPithProfile,
 										   const qreal & lowessBandWidth, const uint &smoothingRadius, const qreal &iqrCoeff,
 										   const uint &percentageOfFirstValidSlicesToExtrapolate, const uint &percentageOfLastValidSlicesToExtrapolate  )
@@ -38,7 +32,6 @@ void EllipseRadiiHistogram::construct( const Billon &tangentialBillon, const Pit
 	if ( !nbSlices ) return;
 
 	this->resize(nbSlices);
-	_lowessData.resize(nbSlices);
 	_ellipticalHistograms.resize(nbSlices);
 
 //	const int &firstValidSliceIndex = validSlices.min();
@@ -61,12 +54,12 @@ void EllipseRadiiHistogram::construct( const Billon &tangentialBillon, const Pit
 	{
 		QVector<qreal> residus;
 		Lowess lowess(lowessBandWidth);
-		lowess.compute( *this, _lowessData, residus );
+		lowess.compute( *this, *this, residus );
 		outlierInterpolation( residus, iqrCoeff );
-		lowess.compute( *this, _lowessData, residus );
+		lowess.compute( *this, *this, residus );
 	}
-	else
-		_lowessData = *this;
+//	else
+//		_lowessData = *this;
 }
 
 void EllipseRadiiHistogram::extrapolation( const Interval<uint> &validSlices, const uint &percentageOfFirstValidSlicesToExtrapolate,
@@ -130,7 +123,6 @@ void EllipseRadiiHistogram::outlierInterpolation( const QVector<qreal> &residus,
 
 	for ( int k=0 ; k<size ; ++k )
 	{
-		(*this)[k] = _lowessData[k];
 		if ( !inlierInterval.containsOpen(residus[k]) )
 		{
 			startSliceIndex = k++;
@@ -149,7 +141,7 @@ void EllipseRadiiHistogram::outlierInterpolation( const QVector<qreal> &residus,
 																	: 0.;
 			for ( newK = startSliceIndex ; newK <= k ; ++newK, currentInterpolatedRadius += interpolationStep )
 			{
-				(*this)[newK] = _lowessData[newK] = currentInterpolatedRadius;
+				(*this)[newK] = currentInterpolatedRadius;
 			}
 		}
 	}

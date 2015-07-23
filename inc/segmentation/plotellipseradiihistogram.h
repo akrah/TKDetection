@@ -1,13 +1,12 @@
 #ifndef PLOTKNOTELLIPSERADIIHISTOGRAM_H
 #define PLOTKNOTELLIPSERADIIHISTOGRAM_H
 
+#include "inc/plothistogram.h"
+
 #include <qwt_plot_histogram.h>
 #include <qwt_plot_curve.h>
 
-class QwtPlot;
-class EllipseRadiiHistogram;
-
-class PlotEllipseRadiiHistogram
+class PlotEllipseRadiiHistogram : public PlotHistogram
 {
 public:
 	PlotEllipseRadiiHistogram();
@@ -16,9 +15,9 @@ public:
 	void attach( QwtPlot * const plot );
 	void clear();
 
-	void moveCursor( const uint & radiusIndex );
+	void update( const Histogram<qreal> & histogram );
 
-	void update( const EllipseRadiiHistogram & histogram );
+	void moveCursor( const uint & radiusIndex );
 
 private:
 	QwtPlotHistogram _histogramData;

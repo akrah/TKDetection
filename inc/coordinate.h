@@ -1,6 +1,8 @@
 #ifndef COORDINATE_H
 #define COORDINATE_H
 
+#include "def/def_coordinate.h"
+
 #include <qmath.h>
 #include <ostream>
 

@@ -34,16 +34,7 @@ void PlotEllipseRadiiHistogram::clear()
 	_histogramSmoothed.setSamples(emptyCurve);
 }
 
-void PlotEllipseRadiiHistogram::moveCursor( const uint & radiusIndex )
-{
-	static QVector<QwtIntervalSample> datasCursor(1);
-	static QwtIntervalSample &datasCursorInterval = datasCursor[0];
-	datasCursorInterval.interval.setInterval(radiusIndex,radiusIndex+1);
-	datasCursorInterval.value = radiusIndex<_histogramData.dataSize() ? _histogramData.sample(radiusIndex).value : 0;
-	_histogramCursor.setSamples(datasCursor);
-}
-
-void PlotEllipseRadiiHistogram::update( const EllipseRadiiHistogram & histogram )
+void PlotEllipseRadiiHistogram::update( const Histogram<qreal> &histogram )
 {
 	QVector<QwtIntervalSample> datasHistogram(0);
 	QVector<QPointF> datasHistogramSmoothed(0);
@@ -53,7 +44,7 @@ void PlotEllipseRadiiHistogram::update( const EllipseRadiiHistogram & histogram 
 		datasHistogramSmoothed.reserve(histogram.size());
 		int i=0;
 		QVector<qreal>::ConstIterator begin = histogram.begin();
-		QVector<qreal>::ConstIterator beginSmoothed = histogram.lowessData().begin();
+		QVector<qreal>::ConstIterator beginSmoothed = histogram.begin();
 		const QVector<qreal>::ConstIterator end = histogram.end();
 		while ( begin != end )
 		{
@@ -64,4 +55,13 @@ void PlotEllipseRadiiHistogram::update( const EllipseRadiiHistogram & histogram 
 	}
 	_histogramData.setSamples(datasHistogram);
 	_histogramSmoothed.setSamples(datasHistogramSmoothed);
+}
+
+void PlotEllipseRadiiHistogram::moveCursor( const uint & radiusIndex )
+{
+	static QVector<QwtIntervalSample> datasCursor(1);
+	static QwtIntervalSample &datasCursorInterval = datasCursor[0];
+	datasCursorInterval.interval.setInterval(radiusIndex,radiusIndex+1);
+	datasCursorInterval.value = radiusIndex<_histogramData.dataSize() ? _histogramData.sample(radiusIndex).value : 0;
+	_histogramCursor.setSamples(datasCursor);
 }

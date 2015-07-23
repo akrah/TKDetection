@@ -2163,19 +2163,12 @@ de nœuds</string>
            </property>
            <layout class="QVBoxLayout" name="verticalLayout_23">
             <item>
-             <widget class="QPushButton" name="_buttonUpdateSliceHistogram">
+             <widget class="QPushButton" name="_buttonUpdateSliceAndSectorHistograms">
               <property name="toolTip">
                <string>Mettre à jour l'histogramme</string>
               </property>
               <property name="text">
-               <string>2. Détecter les verticilles</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QPushButton" name="_buttonUpdateSectorHistograms">
-              <property name="text">
-               <string>3. Détecter les intervalles angulaires</string>
+               <string>2. Détecter les zones de nœuds</string>
               </property>
              </widget>
             </item>
@@ -2190,7 +2183,7 @@ de nœuds</string>
                  </sizepolicy>
                 </property>
                 <property name="text">
-                 <string>4. Sélection
+                 <string>3. Sélection
 du verticille</string>
                 </property>
                </widget>
@@ -2217,7 +2210,7 @@ du verticille</string>
                  </sizepolicy>
                 </property>
                 <property name="text">
-                 <string>5. Sélection du
+                 <string>4. Sélection du
 secteur angulaire</string>
                 </property>
                </widget>
@@ -2249,16 +2242,9 @@ secteur angulaire</string>
            </property>
            <layout class="QVBoxLayout" name="verticalLayout_22">
             <item>
-             <widget class="QPushButton" name="_buttonComputeZMotionMap">
+             <widget class="QPushButton" name="_buttonComputeZMotionMapKnotAreas">
               <property name="text">
-               <string>2. Calculer la carte d'accumulation</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QPushButton" name="_buttonComputeKnotAreas">
-              <property name="text">
-               <string>3. Calculer les zones de nœuds</string>
+               <string>2. Detecter les zones de nœuds</string>
               </property>
              </widget>
             </item>
@@ -3089,66 +3075,9 @@ zone de nœuds</string>
         <attribute name="title">
          <string>1. Z-Mouvement par coupe</string>
         </attribute>
-        <layout class="QVBoxLayout" name="verticalLayout_17">
+        <layout class="QHBoxLayout" name="horizontalLayout_4">
          <item>
           <widget class="QwtPlot" name="_plotSliceHistogram"/>
-         </item>
-         <item>
-          <layout class="QHBoxLayout" name="horizontalLayout_4">
-           <item>
-            <widget class="QPushButton" name="_buttonPreviousMaximum">
-             <property name="toolTip">
-              <string>Aller au maximum précédent</string>
-             </property>
-             <property name="text">
-              <string>&lt;--</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <spacer name="horizontalSpacer_3">
-             <property name="orientation">
-              <enum>Qt::Horizontal</enum>
-             </property>
-             <property name="sizeHint" stdset="0">
-              <size>
-               <width>40</width>
-               <height>20</height>
-              </size>
-             </property>
-            </spacer>
-           </item>
-           <item>
-            <widget class="QLabel" name="label_67">
-             <property name="text">
-              <string>Sélection des maximums</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <spacer name="horizontalSpacer_4">
-             <property name="orientation">
-              <enum>Qt::Horizontal</enum>
-             </property>
-             <property name="sizeHint" stdset="0">
-              <size>
-               <width>40</width>
-               <height>20</height>
-              </size>
-             </property>
-            </spacer>
-           </item>
-           <item>
-            <widget class="QPushButton" name="_buttonNextMaximum">
-             <property name="toolTip">
-              <string>Aller au maximum suivant</string>
-             </property>
-             <property name="text">
-              <string>--&gt;</string>
-             </property>
-            </widget>
-           </item>
-          </layout>
          </item>
         </layout>
        </widget>
@@ -3298,8 +3227,6 @@ zone de nœuds</string>
   <tabstop>_comboExportToSdpType</tabstop>
   <tabstop>_buttonExportToSDP</tabstop>
   <tabstop>tabWidget</tabstop>
-  <tabstop>_buttonPreviousMaximum</tabstop>
-  <tabstop>_buttonNextMaximum</tabstop>
   <tabstop>_sliderSelectYSlice</tabstop>
   <tabstop>_buttonZoomInitial</tabstop>
   <tabstop>_sliderSelectSlice</tabstop>

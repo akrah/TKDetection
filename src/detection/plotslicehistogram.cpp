@@ -62,14 +62,14 @@ void PlotSliceHistogram::updatePercentageCurve( const uint & thresholdOfMaximums
 	_curvePercentage.setSamples(x,y,2);
 }
 
-void PlotSliceHistogram::update( const SliceHistogram & histogram )
+void PlotSliceHistogram::update(const Histogram<qreal> &histogram )
 {
 	updateDatas( histogram );
 	updateMaximums( histogram );
 	updateIntervals( histogram );
 }
 
-void PlotSliceHistogram::updateDatas( const SliceHistogram &histogram )
+void PlotSliceHistogram::updateDatas( const Histogram<qreal> &histogram )
 {
 	QVector<QwtIntervalSample> datasHistogram(0);
 	if ( histogram.size() > 0 )
@@ -87,7 +87,7 @@ void PlotSliceHistogram::updateDatas( const SliceHistogram &histogram )
 	_histogramData.setSamples(datasHistogram);
 }
 
-void PlotSliceHistogram::updateMaximums( const SliceHistogram & histogram )
+void PlotSliceHistogram::updateMaximums( const Histogram<qreal> & histogram )
 {
 	QVector<QwtIntervalSample> datasMaximums(0);
 	if ( histogram.nbMaximums() > 0 )
@@ -105,7 +105,7 @@ void PlotSliceHistogram::updateMaximums( const SliceHistogram & histogram )
 	_histogramMaximums.setSamples(datasMaximums);
 }
 
-void PlotSliceHistogram::updateIntervals( const SliceHistogram & histogram )
+void PlotSliceHistogram::updateIntervals( const Histogram<qreal> & histogram )
 {
 	QVector<QwtIntervalSample> dataIntervals(0);
 	if ( histogram.nbIntervals() > 0 )
