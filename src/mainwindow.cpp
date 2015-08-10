@@ -285,22 +285,10 @@ void MainWindow::openDicom()
 	QString folderName = QFileDialog::getExistingDirectory(this,tr("Sélection du répertoire DICOM"),QDir::homePath(),QFileDialog::ShowDirsOnly);
 	if ( folderName.isEmpty() ) return;
 
-	bool ok = false;
-	const QString inverse = tr("Inversé");
-	QString text = QInputDialog::getItem(this, tr("Ordre de chargement des coupes du billon"), tr("Ordre :"), QStringList() << tr("De lecture du fichier") << inverse, 0, false,&ok);
-	if ( !ok || text.isEmpty() ) return;
-
-	Billon *billon = DicomReader::read(folderName,!text.compare(inverse));
+	Billon *billon = DicomReader::read( folderName );
 	if ( !billon ) return;
 
-	closeImage();
-	_billon = billon;
-	updateUiComponentsValues();
-	enabledComponents();
-
-	setWindowTitle(QString("TKDetection - %1").arg(folderName.section(QDir::separator(),-1)));
-
-	drawSlice();
+	postOpenFile( folderName, billon );
 }
 
 void MainWindow::openTiff()
@@ -308,17 +296,10 @@ void MainWindow::openTiff()
 	QString fileName = QFileDialog::getOpenFileName(0,tr("Sélection du fichier TIF"),QDir::homePath(),tr("Images TIFF (*.tiff *.tif)"));
 	if ( fileName.isEmpty() ) return;
 
-	Billon *billon = TiffReader::read(fileName);
+	Billon *billon = TiffReader::read( fileName );
 	if ( !billon ) return;
 
-	closeImage();
-	_billon = billon;
-	updateUiComponentsValues();
-	enabledComponents();
-
-	setWindowTitle(QString("TKDetection - %1").arg(fileName.section(QDir::separator(),-1)));
-
-	drawSlice();
+	postOpenFile( fileName, billon );
 }
 
 void MainWindow::closeImage()
@@ -338,10 +319,12 @@ void MainWindow::closeImage()
 	_billonSliceUI.resizeBlackImage(0,0);
 	_tangentialSliceUI.resizeBlackImage(0,0);
 	_zMotionMapSliceUI.resizeBlackImage(0,0);
+
 	_treeRadius = 133.33;
 	_ui->_checkRadiusAroundPith->setText( QString::number(_treeRadius) );
 
 	_knotByWhorlDetector.clear();
+	updatePlotSliceHistogram();
 	resetPlotSectorHistogram();
 
 	_knotByZMotionMapDetector.clear();
@@ -420,7 +403,7 @@ void MainWindow::drawSlice()
 				if ( !sectorHistogram.isEmpty() )
 				{
 					pieChart.draw(_billonSliceUI.image(), pithCoord, sectorHistogram.intervals(), projectionType);
-					pieChart.draw(_billonSliceUI.image(), pithCoord, _currentSector, projectionType);
+//					pieChart.draw(_billonSliceUI.image(), pithCoord, _currentSector, projectionType);
 				}
 				if ( _currentSectorInterval && _tangentialBillon )
 				{
@@ -734,6 +717,12 @@ void MainWindow::setMapSectorNumber( const int &value )
 
 void MainWindow::computeBillonPith( const bool &draw )
 {
+	_knotByWhorlDetector.clear();
+	_currentSliceInterval = 0;
+	_currentSectorInterval = 0;
+
+	_knotByZMotionMapDetector.clear();
+
 	if ( _billon )
 	{
 		_billonPithExtractor.setSubWindowWidth( _ui->_spinPithSubWindowWidth_billon->value() );
@@ -749,7 +738,9 @@ void MainWindow::computeBillonPith( const bool &draw )
 
 		_billonPithExtractor.process(*_billon);
 
-		_treeRadius = BillonAlgorithms::restrictedAreaMeansRadius(*_billon,_ui->_spinRestrictedAreaResolution->value(),_ui->_spinRestrictedAreaThreshold->value(),
+		_treeRadius = BillonAlgorithms::restrictedAreaMeansRadius(*_billon,
+																  _ui->_spinRestrictedAreaResolution->value(),
+																  _ui->_spinRestrictedAreaThreshold->value(),
 																  _ui->_spinRestrictedAreaMinimumRadius->value()*_billon->n_cols/100.);
 	}
 
@@ -757,8 +748,18 @@ void MainWindow::computeBillonPith( const bool &draw )
 	{
 		_ui->_checkRadiusAroundPith->setText( QString::number(_treeRadius) );
 		_ui->_spinHistogramNumberOfAngularSectors_zMotionAngular->setValue(TWO_PI*_treeRadius);
-		drawSlice();
+
+		updatePlotSliceHistogram();
+		resetComboBox(*(_ui->_comboSelectSliceInterval));
+
+		resetPlotSectorHistogram();
+		resetComboBox(*(_ui->_comboSelectSectorInterval));
+
 		enabledComponents();
+
+		drawSlice();
+		drawTangentialSlice();
+		drawZMotionMap();
 	}
 }
 
@@ -799,6 +800,10 @@ void MainWindow::computeSliceAndSectorHistograms( const bool &draw )
 		resetComboBox(*(_ui->_comboSelectSectorInterval));
 
 		enabledComponents();
+
+		drawSlice();
+		drawTangentialSlice();
+		drawZMotionMap();
 	}
 }
 
@@ -1325,6 +1330,16 @@ void MainWindow::openNewBillon( const QString &fileName )
 	_tangentialSliceUI.resizeBlackImage(0,0);
 }
 
+void MainWindow::postOpenFile(const QString &filename , Billon * billon)
+{
+	closeImage();
+	_billon = billon;
+	updateUiComponentsValues();
+	enabledComponents();
+	setWindowTitle(QString("TKDetection - %1").arg(filename.section(QDir::separator(),-1)));
+	drawSlice();
+}
+
 void MainWindow::initComponentsValues() {
 	_ui->_spanSliderIntensityInterval->setMinimum(MINIMUM_INTENSITY);
 	_ui->_spanSliderIntensityInterval->setLowerValue(MINIMUM_INTENSITY);
@@ -1467,8 +1482,7 @@ void MainWindow::updatePlotSectorHistogram()
 
 void MainWindow::resetPlotSectorHistogram()
 {
-	_plotSectorHistogram.update(SectorHistogram());
-	_ui->_plotSectorHistogram->replot();
+	updatePlotHistogram( _plotSectorHistogram, *(_ui->_plotSectorHistogram), SectorHistogram(), _currentSector );
 	_ui->_polarSectorHistogram->replot();
 }
 

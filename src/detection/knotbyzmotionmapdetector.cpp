@@ -30,6 +30,7 @@ void KnotByZMotionMapDetector::execute( const Billon &billon )
 void KnotByZMotionMapDetector::clear()
 {
 	_knotAreas.clear();
+	_zMotionMap.reset();
 }
 
 const Slice &KnotByZMotionMapDetector::zMotionMap() const

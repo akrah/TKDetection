@@ -87,6 +87,7 @@ private slots:
 
 private:
 	void openNewBillon( const QString &fileName );
+	void postOpenFile( const QString &filename, Billon *billon );
 	void initComponentsValues();
 	void updateUiComponentsValues();
 	void enabledComponents();
@@ -149,6 +150,8 @@ private:
 	PlotSliceHistogram _plotSliceHistogram;
 	PlotSectorHistogram _plotSectorHistogram;
 
+	KnotByZMotionMapDetector _knotByZMotionMapDetector;
+
 	PithProfile _knotPithProfile;
 	PlotPithProfile *_plotKnotPithProfile;
 
@@ -161,7 +164,6 @@ private:
 
 	TangentialGenerator _tangentialTransform;
 
-	KnotByZMotionMapDetector _knotByZMotionMapDetector;
 
 	uint _currentSliceInterval;
 	uint _currentSectorInterval;

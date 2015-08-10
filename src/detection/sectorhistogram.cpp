@@ -58,7 +58,7 @@ void SectorHistogram::construct( const Billon &billon, const Interval<uint> &sli
 			for ( circlesLinesIterator = circleLines.constBegin() ; circlesLinesIterator != circleLines.constEnd() ; ++circlesLinesIterator )
 			{
 				iRadius = *circlesLinesIterator;
-				currentPos.x = currentPithCoord.x-iRadius;
+				currentPos.x = currentPithCoord.x-iRadius; // TODO : Est-ce que les types qreal -> int est vraiment nécessaire ?
 				iRadius += currentPithCoord.x;
 				while ( currentPos.x <= iRadius )
 				{
