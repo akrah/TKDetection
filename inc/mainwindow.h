@@ -162,7 +162,7 @@ private:
 	PithExtractorBoukadida _billonPithExtractor;
 	PithExtractorBoukadida _knotPithExtractor;
 
-	TangentialGenerator _tangentialTransform;
+	TangentialGenerator _tangentialGenerator;
 
 
 	uint _currentSliceInterval;

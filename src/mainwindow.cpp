@@ -45,7 +45,7 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 	_billon(0), _tangentialBillon(0), _tangentialZMotionMapBillon(0), _slicePainter(new SlicePainter),
 	_plotKnotPithProfile(new PlotPithProfile), _plotKnotEllipseRadiiHistogram(new PlotEllipseRadiiHistogram),
 	_plotEllipticalAccumulationHistogram(new PlotEllipticalAccumulationHistogram()),
-	_tangentialTransform( -900, true ),	_currentSliceInterval(0), _currentSectorInterval(0), _currentKnotArea(0), _currentSector(0), _treeRadius(0)
+	_tangentialGenerator( -900, true ),	_currentSliceInterval(0), _currentSectorInterval(0), _currentKnotArea(0), _currentSector(0), _treeRadius(0)
 {
 	_ui->setupUi(this);
 	setWindowTitle("TKDetection");
@@ -417,10 +417,10 @@ void MainWindow::drawSlice()
 					const int heightOnTwo = qFloor(_tangentialBillon->n_rows/2.);
 					const qreal voxelRatio = _tangentialBillon->voxelWidth()/_tangentialBillon->voxelHeight();
 
-					const QQuaternion &quaterRot = _tangentialTransform.quaterRot();
-					const QVector3D shiftStep = _tangentialTransform.shiftStep( 1. );
+					const QQuaternion &quaterRot = _tangentialGenerator.quaterRot();
+					const QVector3D shiftStep = _tangentialGenerator.shiftStep( 1. );
 
-					QVector3D origin( _tangentialTransform.origin() );
+					QVector3D origin( _tangentialGenerator.origin() );
 					QVector3D initial, destination;
 					qreal a,b,x, y,ellipticityRate,ellipseXCenter,ellipseYCenter;
 
@@ -864,12 +864,12 @@ void MainWindow::selectSectorInterval( const int &index, const bool &draw )
 
 		const Interval<int> intensityInterval(_ui->_spinMinIntensity->value(), _ui->_spinMaxIntensity->value());
 
-		_tangentialTransform.setSliceInterval( *_billon, _knotByWhorlDetector.sliceHistogram().interval(_currentSliceInterval-1) );
-		_tangentialTransform.setMinIntensity( intensityInterval.min() );
-		_tangentialTransform.enableTrilinearInterpolation( _ui->_checkTrilinearInterpolation->isChecked() );
-		_tangentialTransform.setAngularInterval( *_billon, centeredSectorInterval, sectorHistogram.pieChart() );
+		_tangentialGenerator.setSliceInterval( *_billon, _knotByWhorlDetector.sliceHistogram().interval(_currentSliceInterval-1) );
+		_tangentialGenerator.setMinIntensity( intensityInterval.min() );
+		_tangentialGenerator.enableTrilinearInterpolation( _ui->_checkTrilinearInterpolation->isChecked() );
+		_tangentialGenerator.setAngularInterval( *_billon, centeredSectorInterval, sectorHistogram.pieChart() );
 
-		_tangentialBillon = _tangentialTransform.execute( *_billon, sectorHistogram.pieChart() );
+		_tangentialBillon = _tangentialGenerator.execute( *_billon, sectorHistogram.pieChart() );
 
 		if ( _tangentialBillon )
 		{
@@ -929,11 +929,11 @@ void MainWindow::selectKnotArea( const int &index, const bool &draw )
 		const Interval<uint> sliceInterval( supportingArea.left()+_billon->validSlices().min(), supportingArea.right()+_billon->validSlices().min() );
 		const Interval<uint> sectorInterval( supportingArea.top(), supportingArea.bottom() );
 
-		_tangentialTransform.setMinIntensity( _ui->_spinMinIntensity->value() );
-		_tangentialTransform.enableTrilinearInterpolation( _ui->_checkTrilinearInterpolation->isChecked() );
-		_tangentialTransform.setSliceInterval( *_billon, sliceInterval );
-		_tangentialTransform.setAngularInterval( *_billon, sectorInterval, _knotByZMotionMapDetector.pieChart() );
-		_tangentialZMotionMapBillon = _tangentialTransform.execute( *_billon, _knotByZMotionMapDetector.pieChart() );
+		_tangentialGenerator.setMinIntensity( _ui->_spinMinIntensity->value() );
+		_tangentialGenerator.enableTrilinearInterpolation( _ui->_checkTrilinearInterpolation->isChecked() );
+		_tangentialGenerator.setSliceInterval( *_billon, sliceInterval );
+		_tangentialGenerator.setAngularInterval( *_billon, sectorInterval, _knotByZMotionMapDetector.pieChart() );
+		_tangentialZMotionMapBillon = _tangentialGenerator.execute( *_billon, _knotByZMotionMapDetector.pieChart() );
 
 		_knotPithExtractor.setSubWindowWidth( _ui->_spinPithSubWindowWidth_knot->value() );
 		_knotPithExtractor.setSubWindowHeight( _ui->_spinPithSubWindowHeight_knot->value() );
@@ -2129,7 +2129,7 @@ void  MainWindow::exportPithOfAllKnotAreaToSdp()
 					qDebug() << "processing sector: " << sectorIndex;
 					selectSectorInterval(sectorIndex, true);
 					//_ui->_comboSelectSectorInterval->setCurrentIndex(sectorIndex);
-					exportPithOfAKnotAreaToSdp(stream, _tangentialTransform, intervalIndex-1, sectorIndex-1, knotID);
+					exportPithOfAKnotAreaToSdp(stream, _tangentialGenerator, intervalIndex-1, sectorIndex-1, knotID);
 					qDebug() << "processing sector: " << sectorIndex << "/" <<_ui->_comboSelectSectorInterval->count()-1<< " [done]";
 					knotID++;
 				}
@@ -2155,7 +2155,7 @@ void  MainWindow::exportPithOfCurrentKnotToSdp()
 			if ( file.open(QIODevice::WriteOnly) )
 			{
 				QTextStream stream(&file);
-				exportPithOfAKnotAreaToSdp(stream, _tangentialTransform, _ui->_comboSelectSliceInterval->currentIndex()-1, _ui->_comboSelectSectorInterval->currentIndex()-1, 0);
+				exportPithOfAKnotAreaToSdp(stream, _tangentialGenerator, _ui->_comboSelectSliceInterval->currentIndex()-1, _ui->_comboSelectSectorInterval->currentIndex()-1, 0);
 				file.close();
 				QMessageBox::information(this,tr("Exporter la moelle de la zone de nœud courante en SDP"), tr("Export réussi !"));
 
@@ -2186,7 +2186,7 @@ void  MainWindow::exportPithOfCurrentKnotAreaToSdp()
 					qDebug() << "processing sector: " << sectorIndex;
 					selectSectorInterval(sectorIndex, true);
 					//_ui->_comboSelectSectorInterval->setCurrentIndex(sectorIndex);
-					exportPithOfAKnotAreaToSdp(stream, _tangentialTransform, _ui->_comboSelectSliceInterval->currentIndex()-1, sectorIndex-1, knotID);
+					exportPithOfAKnotAreaToSdp(stream, _tangentialGenerator, _ui->_comboSelectSliceInterval->currentIndex()-1, sectorIndex-1, knotID);
 					qDebug() << "processing sector: " << sectorIndex << "/" <<_ui->_comboSelectSectorInterval->count()-1<< " [done]";
 					knotID++;
 				}
@@ -2317,7 +2317,7 @@ void MainWindow::exportCurrentSegmentedKnotToSdp( const bool &useSliceIntervalCo
 				stream << "#" << endl;
 				stream << "# Coordinates of the segmented knot" << endl;
 				stream << "# x y z knotID" << endl;
-				exportSegmentedKnotToSdp( stream, _tangentialTransform , useSliceIntervalCoordinates);
+				exportSegmentedKnotToSdp( stream, _tangentialGenerator , useSliceIntervalCoordinates);
 				file.close();
 				QMessageBox::information(this,tr("Export du nœud courant segmenté en SDP"), tr("Export réussi !"));
 			}
@@ -2348,7 +2348,7 @@ void MainWindow::exportSegmentedKnotsOfCurrentSliceIntervalToSdp( const bool &us
 				for ( int sectorIndex=1 ; sectorIndex<_ui->_comboSelectSectorInterval->count() ; ++sectorIndex )
 				{
 					selectSectorInterval(sectorIndex, true);
-					exportSegmentedKnotToSdp(stream, _tangentialTransform, useSliceIntervalCoordinates, sectorIndex );
+					exportSegmentedKnotToSdp(stream, _tangentialGenerator, useSliceIntervalCoordinates, sectorIndex );
 				}
 
 				file.close();
@@ -2387,7 +2387,7 @@ void MainWindow::exportAllSegmentedKnotsOfBillonToSdp()
 					for ( sectorIndex=1 ; sectorIndex< _ui->_comboSelectSectorInterval->count() ; ++sectorIndex )
 					{
 						selectSectorInterval(sectorIndex,false);
-						exportSegmentedKnotToSdp(stream, _tangentialTransform, false, knotID++);
+						exportSegmentedKnotToSdp(stream, _tangentialGenerator, false, knotID++);
 					}
 				}
 
