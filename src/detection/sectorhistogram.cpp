@@ -2,6 +2,7 @@
 
 #include "inc/billon.h"
 #include "inc/piechart.h"
+#include "inc/globalfunctions.h"
 
 #include <qmath.h>
 
@@ -32,16 +33,10 @@ void SectorHistogram::construct( const Billon &billon, const Interval<uint> &sli
 	{
 		const int &width = billon.n_cols;
 		const int &height = billon.n_rows;
-		const qreal squareRadius = qPow(radiusAroundPith,2);
 
 		fill(0.,_pieChart.nbSectors());
 
-		QVector<int> circleLines;
-		circleLines.reserve(2*radiusAroundPith+1);
-		for ( int lineIndex=-radiusAroundPith ; lineIndex<=radiusAroundPith ; ++lineIndex )
-		{
-			circleLines.append(qSqrt(squareRadius-qPow(lineIndex,2)));
-		}
+		QVector<int> circleLines = TKD::circleLines(radiusAroundPith);
 
 		QVector<int>::ConstIterator circlesLinesIterator;
 		int iRadius;

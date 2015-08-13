@@ -487,10 +487,10 @@ void PithExtractorBoukadida::detectValidSliceInterval( Interval<uint> &validSlic
 
 	sliceIndex = 0;
 	while ( sliceIndex<nbSlices && backgroundProportions[sliceIndex] > backgroundPercentage ) sliceIndex++;
-	validSlices.setMin(qMin(sliceIndex,nbSlices-1));
+	validSlices.setMin(qMin(sliceIndex+_smoothingRadius,nbSlices-1));
 
 	const uint &minValid = validSlices.min();
 	sliceIndex = nbSlices-1;
 	while ( sliceIndex>minValid && backgroundProportions[sliceIndex] > backgroundPercentage ) sliceIndex--;
-	validSlices.setMax(sliceIndex);
+	validSlices.setMax(sliceIndex-_smoothingRadius);
 }

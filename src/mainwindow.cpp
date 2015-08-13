@@ -403,12 +403,12 @@ void MainWindow::drawSlice()
 				if ( !sectorHistogram.isEmpty() )
 				{
 					pieChart.draw(_billonSliceUI.image(), pithCoord, sectorHistogram.intervals(), projectionType);
-//					pieChart.draw(_billonSliceUI.image(), pithCoord, _currentSector, projectionType);
+					pieChart.draw(_billonSliceUI.image(), pithCoord, _currentSector, projectionType);
 				}
 				if ( _currentSectorInterval && _tangentialBillon )
 				{
 					const QVector<QColor> &colors = TKD::KnotAreaColors;
-					const int nbColorsToUse = qMax( sectorHistogram.intervals().size()>colors.size() ? ((sectorHistogram.intervals().size()+1)/2)%colors.size() : colors.size() , 1 );
+					const int nbColorsToUse = qMax( sectorHistogram.nbIntervals()>colors.size() ? ((sectorHistogram.nbIntervals()+1)/2)%colors.size() : colors.size() , 1 );
 					QColor currentColor = colors[(_currentSectorInterval-1)%nbColorsToUse];
 
 					const qreal sliceIntervalMax = _knotByWhorlDetector.sliceHistogram().interval(_currentSliceInterval-1).max();
@@ -556,7 +556,7 @@ void MainWindow::drawTangentialSlice()
 		if ( projectionType == TKD::Z_PROJECTION && _ui->_checkTangentialDrawEllipses->isChecked() )
 		{
 			const QVector<QColor> &colors = TKD::KnotAreaColors;
-			const int nbKnotAreas = _knotByWhorlDetector.sectorHistogram(_currentSliceInterval-1).intervals().size();
+			const int nbKnotAreas = _knotByWhorlDetector.sectorHistogram(_currentSliceInterval-1).nbIntervals();
 			const int nbColorsToUse = qMax( nbKnotAreas>colors.size() ? ((nbKnotAreas+1)/2)%colors.size() : colors.size() , 1 );
 			const QColor currentColor = colors[(_currentSectorInterval-1)%nbColorsToUse];
 
@@ -850,24 +850,13 @@ void MainWindow::selectSectorInterval( const int &index, const bool &draw )
 	const SectorHistogram &sectorHistogram = _knotByWhorlDetector.sectorHistogram(_currentSliceInterval-1);
 	if ( index > 0 && index <= static_cast<int>(sectorHistogram.nbIntervals()) )
 	{
-		const uint nbAngularSectors = sectorHistogram.pieChart().nbSectors();
-		const Interval<uint> &sectorInterval = sectorHistogram.interval(index-1);
-		uint semiAngularRange = ((sectorInterval.max() + (sectorInterval.isValid() ? 0. : nbAngularSectors)) - sectorInterval.min())/2;
-		const uint maximumIndex = sectorHistogram.maximumIndex(index-1);
-		Interval<uint> centeredSectorInterval( maximumIndex-semiAngularRange, maximumIndex+semiAngularRange );
-		if ( maximumIndex<semiAngularRange ) centeredSectorInterval.setMin( nbAngularSectors + maximumIndex - semiAngularRange );
-		if ( centeredSectorInterval.max() > nbAngularSectors-1 ) centeredSectorInterval.setMax( centeredSectorInterval.max() - nbAngularSectors );
-
-		if ( maximumIndex < sectorInterval.min()+semiAngularRange ) centeredSectorInterval.setMin(sectorInterval.min());
-		else if ( maximumIndex > sectorInterval.min()+semiAngularRange ) centeredSectorInterval.setMax(sectorInterval.max());
-		semiAngularRange = ((centeredSectorInterval.max() + (centeredSectorInterval.isValid() ? 0. : nbAngularSectors)) - centeredSectorInterval.min())/2.;
-
+		const Interval<uint> centeredSectorInterval = _knotByWhorlDetector.centeredSectorInterval( _currentSliceInterval-1, index-1 );
 		const Interval<int> intensityInterval(_ui->_spinMinIntensity->value(), _ui->_spinMaxIntensity->value());
 
 		_tangentialGenerator.setSliceInterval( *_billon, _knotByWhorlDetector.sliceHistogram().interval(_currentSliceInterval-1) );
-		_tangentialGenerator.setMinIntensity( intensityInterval.min() );
-		_tangentialGenerator.enableTrilinearInterpolation( _ui->_checkTrilinearInterpolation->isChecked() );
 		_tangentialGenerator.setAngularInterval( *_billon, centeredSectorInterval, sectorHistogram.pieChart() );
+		_tangentialGenerator.enableTrilinearInterpolation( _ui->_checkTrilinearInterpolation->isChecked() );
+		_tangentialGenerator.setMinIntensity( intensityInterval.min() );
 
 		_tangentialBillon = _tangentialGenerator.execute( *_billon, sectorHistogram.pieChart() );
 

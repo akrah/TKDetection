@@ -15,6 +15,14 @@ const QVector<QRect> &KnotAreaDetector::knotAreas() const
 	return _knotAreas;
 }
 
+const QRect &KnotAreaDetector::knotArea( const uint &areaIndex ) const
+{
+	Q_ASSERT_X( (int)areaIndex<_knotAreas.size(),
+				"const QRect &knotArea( const uint &areaIndex )",
+				"areaIndex doit être inférieur au nombre de zones de nœuds" );
+	return _knotAreas[areaIndex];
+}
+
 bool KnotAreaDetector::hasKnotAreas() const
 {
 	return !_knotAreas.isEmpty();

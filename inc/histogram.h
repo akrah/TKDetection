@@ -6,6 +6,7 @@
 
 #include <QVector>
 #include <QTextStream>
+#include <QDebug>
 
 /*######################################################
   # DECLARATION
@@ -319,7 +320,7 @@ void Histogram<T>::computeIntervals( const bool & loop )
 	_intervals.clear();
 	if ( _maximums.isEmpty() ) return;
 
-	uint cursorMax, cursorMin, cursorStart;
+	uint cursorMax, cursorMin, cursorEnd;
 	T derivativeThreshold;
 	Interval<uint> cursor;
 	const uint histoSize = this->size();
@@ -329,22 +330,24 @@ void Histogram<T>::computeIntervals( const bool & loop )
 	{
 		// Detection des bornes de l'intervalle courant
 		cursorMin = cursorMax =_maximums[i];
+		derivativeThreshold = (*this)[cursorMin]*_derivativesPercentage;
 
 		// Détection de la borne inf de l'intervalle
-		cursorStart = cursorMin+1;
-		if ( cursorStart == histoSize )
+		cursorEnd = cursorMin+1;
+		if ( cursorEnd == histoSize )
 		{
-			if ( loop ) cursorStart = 0;
-			else cursorStart = cursorMin;
+			if ( loop ) cursorEnd = 0;
+			else cursorEnd = cursorMin;
 		}
-		derivativeThreshold = (*this)[cursorMin]*_derivativesPercentage;
-		while ( cursorMin != cursorStart && (*this)[cursorMin] > derivativeThreshold )
+		// Tant que cursorMin n'est pas revenu au point de départ et que les valeurs sont supérieures au seuil, on recule cursorMin
+		while ( cursorMin != cursorEnd && (*this)[cursorMin] > derivativeThreshold )
 		{
 			if ( cursorMin ) cursorMin--;
-			else if ( loop ) cursorMin = histoSizeMinusOne;
+			else if ( loop ) cursorMin = histoSizeMinusOne; // Si on arrive a 0, on boucle seuelement si loop est vrai
 			else break;
 		}
-		while ( cursorMin != cursorStart && firstdDerivated(cursorMin,loop) > 0.5 )
+		// On continue à rechercher la borne min tant qu'on est pas revenu au point de départ et que la dérivée est supérieure à 0.5
+		while ( cursorMin != cursorEnd && firstdDerivated(cursorMin,loop) > 0.5 )
 		{
 			if ( cursorMin ) cursorMin--;
 			else if ( loop ) cursorMin = histoSizeMinusOne;
@@ -352,16 +355,16 @@ void Histogram<T>::computeIntervals( const bool & loop )
 		}
 
 		// Détection de la borne sup de l'intervalle
-		cursorStart = cursorMax;
-		if ( cursorStart ) cursorStart--;
-		else if ( loop ) cursorStart = histoSizeMinusOne;
-
-		while ( cursorMax != cursorStart && (*this)[cursorMax] > derivativeThreshold )
+		cursorEnd = cursorMax;
+		if ( cursorEnd ) cursorEnd--;
+		else if ( loop ) cursorEnd = histoSizeMinusOne;
+		// Tant que cursorMax n'est pas revenu au point de départ et que les valeurs sont supérieures au seuil, on avance cursorMax
+		while ( cursorMax != cursorEnd && (*this)[cursorMax] > derivativeThreshold )
 		{
 			cursorMax++;
 			if ( cursorMax == histoSize )
 			{
-				if ( loop ) cursorMax = 0;
+				if ( loop ) cursorMax = 0; // Si cursorMax atteint la fin de l'histogramme, on boucle seulement si loop est vrai
 				else
 				{
 					cursorMax--;
@@ -369,12 +372,13 @@ void Histogram<T>::computeIntervals( const bool & loop )
 				}
 			}
 		}
-		while ( cursorMax != cursorStart && firstdDerivated(cursorMax,loop) < -0.5 )
+		// On continue à rechercher la borne min tant qu'on est pas revenu au point de départ et que la dérivée est inférieure à -0.5
+		while ( cursorMax != cursorEnd && firstdDerivated(cursorMax,loop) < -0.5 )
 		{
 			cursorMax++;
 			if ( cursorMax == histoSize )
 			{
-				if ( loop ) cursorMax = 0;
+				if ( loop ) cursorMax = 0; // Si cursorMax atteint la fin de l'histogramme, on boucle seulement si loop est vrai
 				else
 				{
 					cursorMax--;
@@ -391,12 +395,14 @@ void Histogram<T>::computeIntervals( const bool & loop )
 		if ( _intervals.isEmpty() )
 		{
 			if ( (cursor.isValid() ? cursor.width() : histoSize-(cursor.min()-cursor.max())) > _minimumIntervalWidth ) _intervals.append(cursor);
+//			qDebug() << "** Interval " << i << " : [" << cursor.min() << ", " << cursor.max() << "]";
 		}
 		else
 		{
 			const Interval<uint> &last = _intervals.last();
 			if ( last.max() >= cursorMax && !(!cursor.isValid() && last.isValid()) )
 			{
+//				qDebug() << "** Interval " << i << " : [" << cursor.min() << ", " << cursor.max() << "] => [" << last.min() << ", " << last.max() << "]";
 				cursor = last;
 				cursorMin = last.min();
 				cursorMax = last.max();
@@ -405,14 +411,21 @@ void Histogram<T>::computeIntervals( const bool & loop )
 			}
 			else
 			{
-				if ( !(cursor.isValid() || last.isValid()) || last.max() >= cursor.min() )
+//				qDebug() << "** Interval " << i << " : [" << cursor.min() << ", " << cursor.max() << "] from [" << last.min() << ", " << last.max() << "]";
+				if ( !(cursor.isValid() || last.isValid()) || last.max() > cursor.min() )
 				{
 					cursorMin = last.max();
 					cursor.setMin(cursorMin);
+//					qDebug() << "** => New " << i << " : [" << cursor.min() << ", " << cursor.max() << "]";
 				}
-				if ( (cursor.isValid() ? cursor.width() : histoSize-(cursor.min()-cursor.max())) > _minimumIntervalWidth ) _intervals.append(cursor);
+				if ( (cursor.isValid() ? cursor.width() : histoSize-(cursor.min()-cursor.max())) > _minimumIntervalWidth )
+				{
+//					qDebug() << "** => Ok";
+					_intervals.append(cursor);
+				}
 				else
 				{
+//					qDebug() << "** => Garde l'ancien";
 					if ( (*this)[_maximums[i]]>(*this)[_maximums[i-1]] ) _maximums[i-1] = _maximums[i];
 					_maximums.remove(i--);
 				}

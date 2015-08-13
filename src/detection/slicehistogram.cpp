@@ -21,17 +21,11 @@ void SliceHistogram::construct( const Billon &billon, const Interval<int> &inten
 	const int width = billon.n_cols;
 	const int height = billon.n_rows;
 	const int depth = billon.n_slices;
-	const qreal squareRadius = qPow(radiusAroundPith,2);
 
 	clear();
 	resize(depth-1);
 
-	QVector<int> circleLines;
-	circleLines.reserve(2*radiusAroundPith+1);
-	for ( int lineIndex=-radiusAroundPith ; lineIndex<=radiusAroundPith ; ++lineIndex )
-	{
-		circleLines.append(qSqrt(squareRadius-qPow(lineIndex,2)));
-	}
+	QVector<int> circleLines = TKD::circleLines(radiusAroundPith);
 
 	const Interval<uint> &validSlices = billon.validSlices();
 	const uint &lastSlice = validSlices.max();

@@ -525,7 +525,7 @@ du repère polaire</string>
               <x>0</x>
               <y>0</y>
               <width>364</width>
-              <height>238</height>
+              <height>266</height>
              </rect>
             </property>
             <attribute name="label">
@@ -785,7 +785,7 @@ zone restreinte</string>
               <x>0</x>
               <y>0</y>
               <width>424</width>
-              <height>305</height>
+              <height>322</height>
              </rect>
             </property>
             <attribute name="label">
@@ -1248,7 +1248,7 @@ sur une coupe valide</string>
               <x>0</x>
               <y>0</y>
               <width>392</width>
-              <height>205</height>
+              <height>223</height>
              </rect>
             </property>
             <attribute name="label">
@@ -2080,6 +2080,9 @@ d'une composante connexe</string>
              <widget class="QSpinBox" name="_spinSupportingAreaMinSize">
               <property name="maximum">
                <number>100</number>
+              </property>
+              <property name="value">
+               <number>15</number>
               </property>
              </widget>
             </item>
@@ -3010,7 +3013,7 @@ zone de nœuds</string>
               <x>0</x>
               <y>0</y>
               <width>364</width>
-              <height>151</height>
+              <height>179</height>
              </rect>
             </property>
             <attribute name="label">

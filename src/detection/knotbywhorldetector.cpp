@@ -24,14 +24,39 @@ void KnotByWhorlDetector::computeKnotAreas()
 	KnotAreaDetector::clear();
 	if ( _sliceHistogram.isEmpty() || _sectorHistograms.isEmpty() || _sliceHistogram.nbIntervals() != static_cast<uint>(_sectorHistograms.size()) ) return;
 
-	uint k, i;
+	const uint nbAngularSectors = _pieChart.nbSectors();
+
+	uint k, i, maximumIndex, minimumIndex, maxValIndex, width;
 	for ( k=0 ; k<_sliceHistogram.nbIntervals() ; ++k )
 	{
 		const Interval<uint> sliceInterval = _sliceHistogram.interval(k);
 		const SectorHistogram &sectorHistogram = _sectorHistograms[k];
 		for ( i=0 ; i<sectorHistogram.nbIntervals() ; ++i )
 		{
-			_knotAreas.append( QRect( sliceInterval.min(), sectorHistogram.interval(i).min(), sliceInterval.width(), sectorHistogram.interval(i).width() ) );
+			qDebug() << "Interval " << i << " : [" << sectorHistogram.interval(i).min() << ", " << sectorHistogram.interval(i).max() << "]";
+			const Interval<uint> &sectorInterval = sectorHistogram.interval(i);
+			minimumIndex = sectorInterval.min();
+			maximumIndex = sectorInterval.max();
+			maxValIndex = sectorHistogram.maximumIndex(i);
+			if ( !sectorInterval.isValid() )
+			{
+				maximumIndex += nbAngularSectors;
+				if ( maxValIndex < minimumIndex ) maxValIndex += nbAngularSectors;
+			}
+			width = maximumIndex-minimumIndex+1;
+			_knotAreas.append( QRect( sliceInterval.min(), maxValIndex-width/2, sliceInterval.width(), width ) );
+
+//			const Interval<uint> &sectorInterval = sectorHistogram.interval(i);
+//			semiAngularRange = ((sectorInterval.max() + (sectorInterval.isValid() ? 0. : nbAngularSectors)) - sectorInterval.min())/2;
+//			maximumIndex = sectorHistogram.maximumIndex(i);
+//			Interval<uint> centeredSectorInterval( maximumIndex-semiAngularRange, maximumIndex+semiAngularRange );
+//			if ( maximumIndex<semiAngularRange ) centeredSectorInterval.setMin( nbAngularSectors + maximumIndex - semiAngularRange );
+//			if ( centeredSectorInterval.max() > nbAngularSectors-1 ) centeredSectorInterval.setMax( centeredSectorInterval.max() - nbAngularSectors );
+
+//			if ( maximumIndex < sectorInterval.min()+semiAngularRange ) centeredSectorInterval.setMin(sectorInterval.min());
+//			else if ( maximumIndex > sectorInterval.min()+semiAngularRange ) centeredSectorInterval.setMax(sectorInterval.max());
+//			_knotAreas.append( QRect( sliceInterval.min(), centeredSectorInterval.min(), sliceInterval.width(), centeredSectorInterval.width() ) );
+//			_knotAreas.append( QRect( sliceInterval.min(), sectorHistogram.interval(i).min(), sliceInterval.width(), sectorHistogram.interval(i).width() ) );
 		}
 	}
 }
@@ -57,6 +82,25 @@ const SectorHistogram &KnotByWhorlDetector::sectorHistogram( const uint &whorlIn
 bool KnotByWhorlDetector::hasSectorHistograms() const
 {
 	return !_sectorHistograms.isEmpty();
+}
+
+const QRect &KnotByWhorlDetector::knotArea( const uint &whorlIndex, const uint &angularIntervalIndex ) const
+{
+	Q_ASSERT_X( whorlIndex<_sliceHistogram.nbIntervals() && angularIntervalIndex<_sectorHistograms[whorlIndex].nbIntervals() ,
+				"const QVector<QRect> &knotAreas( const uint &whorlIndex, const uint &angularIntervalIndex )",
+				"whorlIndex doit être inférieur au nombre de verticilles et angularIntervalIndex doit être inférieur au nombre d'intervalles angulaire de ce vergicille.");
+	uint knotAreaIndex = angularIntervalIndex;
+	for ( uint i=0 ; i<whorlIndex ; ++i )
+	{
+		knotAreaIndex += _sectorHistograms[whorlIndex].nbIntervals();
+	}
+	return _knotAreas[knotAreaIndex];
+}
+
+const Interval<uint> KnotByWhorlDetector::centeredSectorInterval( const uint &whorlIndex, const uint &angularIntervalIndex ) const
+{
+	const QRect &centeredRect = knotArea( whorlIndex, angularIntervalIndex );
+	return Interval<uint>( centeredRect.top(), centeredRect.bottom()-(centeredRect.bottom() > (int)_pieChart.nbSectors() ? _pieChart.nbSectors() : 0) );
 }
 
 void KnotByWhorlDetector::setSliceHistogramParameters( const uint &smoothingRadius,

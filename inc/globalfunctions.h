@@ -12,6 +12,8 @@ namespace TKD
 {
 	__billon_type__ restrictedValue( __billon_type__ value , const Interval<int> &intensityInterval );
 
+	QVector<int> circleLines( const int &radius );
+
 	template<typename T >
 	void meanSmoothingOld( const typename QVector<T>::iterator &begin, const typename QVector<T>::iterator &end, const uint &smoothingRadius, const bool &loop = false )
 	{

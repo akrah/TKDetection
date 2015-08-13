@@ -19,6 +19,9 @@ public:
 	const SectorHistogram &sectorHistogram( const uint &whorlIndex ) const;
 	bool hasSectorHistograms() const;
 
+	const QRect &knotArea( const uint &whorlIndex, const uint &angularIntervalIndex ) const;
+	const Interval<uint> centeredSectorInterval( const uint &whorlIndex, const uint &angularIntervalIndex ) const;
+
 	void setSliceHistogramParameters( const uint &smoothingRadius,
 									  const uint &minimumHeightOfMaximums,
 									  const uint &derivativeSearchPercentage,

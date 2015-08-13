@@ -18,6 +18,7 @@ public:
 	virtual void clear();
 
 	const QVector<QRect> &knotAreas() const;
+	const QRect &knotArea( const uint &areaIndex ) const;
 	bool hasKnotAreas() const;
 
 	const PieChart &pieChart() const;
