@@ -84,7 +84,7 @@ bool KnotByWhorlDetector::hasSectorHistograms() const
 	return !_sectorHistograms.isEmpty();
 }
 
-const QRect &KnotByWhorlDetector::knotArea( const uint &whorlIndex, const uint &angularIntervalIndex ) const
+uint KnotByWhorlDetector::knotAreaIndex( const uint &whorlIndex, const uint &angularIntervalIndex ) const
 {
 	Q_ASSERT_X( whorlIndex<_sliceHistogram.nbIntervals() && angularIntervalIndex<_sectorHistograms[whorlIndex].nbIntervals() ,
 				"const QVector<QRect> &knotAreas( const uint &whorlIndex, const uint &angularIntervalIndex )",
@@ -92,9 +92,14 @@ const QRect &KnotByWhorlDetector::knotArea( const uint &whorlIndex, const uint &
 	uint knotAreaIndex = angularIntervalIndex;
 	for ( uint i=0 ; i<whorlIndex ; ++i )
 	{
-		knotAreaIndex += _sectorHistograms[whorlIndex].nbIntervals();
+		knotAreaIndex += _sectorHistograms[i].nbIntervals();
 	}
-	return _knotAreas[knotAreaIndex];
+	return knotAreaIndex;
+}
+
+const QRect &KnotByWhorlDetector::knotArea( const uint &whorlIndex, const uint &angularIntervalIndex ) const
+{
+	return _knotAreas[knotAreaIndex(whorlIndex,angularIntervalIndex)];
 }
 
 const Interval<uint> KnotByWhorlDetector::centeredSectorInterval( const uint &whorlIndex, const uint &angularIntervalIndex ) const

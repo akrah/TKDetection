@@ -22,6 +22,7 @@ public:
 	void setSliceInterval( const Billon &billon, const Interval<uint> &sliceInterval );
 	void setAngularInterval( const Billon &billon, const Interval<uint> &angularInterval , const PieChart &pieChart );
 	void updateIntervals( const Billon &billon, const Interval<uint> &sliceInterval, const Interval<uint> &angularInterval , const PieChart &pieChart );
+	//void setKnotArea( const Billon &billon, const QRect &knotArea, const PieChart &pieChart ); TODO
 
 	void setMinIntensity( const int &minIntensity );
 	void enableTrilinearInterpolation( bool enable );

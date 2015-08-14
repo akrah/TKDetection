@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>724</width>
-    <height>653</height>
+    <width>668</width>
+    <height>619</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -303,7 +303,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>724</width>
+     <width>668</width>
      <height>25</height>
     </rect>
    </property>
@@ -524,8 +524,8 @@ du repère polaire</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>364</width>
-              <height>266</height>
+              <width>308</width>
+              <height>238</height>
              </rect>
             </property>
             <attribute name="label">
@@ -785,7 +785,7 @@ zone restreinte</string>
               <x>0</x>
               <y>0</y>
               <width>424</width>
-              <height>322</height>
+              <height>305</height>
              </rect>
             </property>
             <attribute name="label">
@@ -1248,7 +1248,7 @@ sur une coupe valide</string>
               <x>0</x>
               <y>0</y>
               <width>392</width>
-              <height>223</height>
+              <height>205</height>
              </rect>
             </property>
             <attribute name="label">
@@ -2160,6 +2160,41 @@ de nœuds</string>
           </widget>
          </item>
          <item>
+          <layout class="QHBoxLayout" name="horizontalLayout_11">
+           <property name="bottomMargin">
+            <number>0</number>
+           </property>
+           <item>
+            <widget class="QLabel" name="label_11">
+             <property name="text">
+              <string>Méthode</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <layout class="QVBoxLayout" name="verticalLayout_17">
+             <item>
+              <widget class="QRadioButton" name="_radioWithWhorls">
+               <property name="text">
+                <string>Avec verticilles</string>
+               </property>
+               <property name="checked">
+                <bool>true</bool>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QRadioButton" name="_radioWithAccumulationMap">
+               <property name="text">
+                <string>Avec carte d'accumulation</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+          </layout>
+         </item>
+         <item>
           <widget class="QGroupBox" name="groupBox_2">
            <property name="title">
             <string>Avec les verticilles</string>
@@ -3012,8 +3047,8 @@ zone de nœuds</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>364</width>
-              <height>179</height>
+              <width>350</width>
+              <height>139</height>
              </rect>
             </property>
             <attribute name="label">

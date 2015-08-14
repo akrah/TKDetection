@@ -16,7 +16,7 @@ void ZMotionAccumulator::execute( const Billon &billon, Slice &accumulationSlice
 	{
 		const uint &firstSlice = validSlices.min();
 		const uint &lastSlice = validSlices.max();
-		accumulationSlice.set_size(_pieChart.nbSectors(),validSlices.size());
+		accumulationSlice.zeros(_pieChart.nbSectors(),billon.n_slices);
 
 		SectorHistogram hist(_pieChart);
 
