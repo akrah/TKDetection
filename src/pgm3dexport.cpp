@@ -77,7 +77,7 @@ namespace Pgm3dExport
 		const int firstSlice = slicesInterval.min();
 		const int lastSlice = slicesInterval.max();
 		const int minValue = intensityInterval.min();
-		const qreal fact = 255.0/(intensityInterval.size());
+		const qreal fact = 255.0/(intensityInterval.count());
 		const int shift = resolution-1;
 
 		unsigned int width=angularResolution/resolution;
@@ -85,7 +85,7 @@ namespace Pgm3dExport
 
 		stream << "P3D" << endl;
 		stream << "#!VoxelDim " << billon.voxelWidth() << ' ' << billon.voxelHeight() << ' ' << billon.voxelDepth() << endl;
-		stream << width << " " << height/resolution << " " <<   slicesInterval.width()+1<< endl;
+		stream << width << " " << height/resolution << " " <<   slicesInterval.count() << endl;
 		stream << "255" << endl;
 
 		QDataStream dStream(stream.device());
@@ -127,11 +127,11 @@ namespace Pgm3dExport
 		const int height = billon.n_rows;
 		const int minValue = intensityInterval.min();
 		const int shift = resolution-1;
-		const qreal fact = 255.0/(intensityInterval.size());
+		const qreal fact = 255.0/(intensityInterval.count());
 
 		stream << "P3D" << endl;
 		stream << "#!VoxelDim " << billon.voxelWidth() << ' ' << billon.voxelHeight() << ' ' << billon.voxelDepth() << endl;
-		stream << width/resolution << " " << height/resolution << " " <<  slicesInterval.width()+1 << endl;
+		stream << width/resolution << " " << height/resolution << " " <<  slicesInterval.count() << endl;
 		stream << "255" << endl;
 
 		QDataStream dStream(stream.device());

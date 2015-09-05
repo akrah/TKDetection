@@ -35,6 +35,7 @@ uint PieChart::nbSectors() const
 
 const PiePart &PieChart::sector( const uint &index ) const
 {
+	Q_ASSERT_X( index<nbSectors() , "const PiePart &PieChart::sector( const uint &index )", "sector index greater than sector number" );
 	return _sectors[index];
 }
 

@@ -84,7 +84,7 @@ BillonTpl<T>::BillonTpl( const BillonTpl<T> &billon, const Interval<uint> &slice
 {
 	if ( billon.hasPith() )
 	{
-		_pith = billon._pith.mid(sliceInterval.min(),sliceInterval.width()+1);
+		_pith = billon._pith.mid(sliceInterval.min(),sliceInterval.count());
 		_validSlices.setMin( sliceInterval.min()>=billon._validSlices.min() ? 0 : billon._validSlices.min()-sliceInterval.min() );
 		_validSlices.setMax( sliceInterval.max()>=billon._validSlices.max() ? billon._validSlices.max()-sliceInterval.min() : sliceInterval.max()-sliceInterval.min() );
 	}

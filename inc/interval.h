@@ -18,21 +18,22 @@ public:
 	const T &min() const;
 	const T &max() const;
 	const T mid() const;
-	T size() const;
 	T width() const;
+	T count() const;
 	bool containsClosed( const T & value ) const;
 	bool containsClosed( const Interval & interval ) const;
 	bool containsOpen( const T & value ) const;
 	bool containsOpen( const Interval & interval ) const;
 	bool intersect( const Interval &interval ) const;
-	bool isValid() const;
-	Interval<T> inverted() const;
+	Interval<T> looped( const T &upperBound ) const;
 
 	Interval<T>& operator =( const Interval& other );
 
 	void setMin( const T &min );
 	void setMax( const T &max );
 	void setBounds( const T &min, const T &max );
+
+//	bool isValid() const;
 
 protected:
 	T _min;
@@ -42,7 +43,7 @@ protected:
 template <typename T>
 bool operator ==( Interval<T> first, Interval<T> second )
 {
-	return (first.min() == second.min()) && (first.max() == second.max());
+	return !(first != second);
 }
 
 template <typename T>
@@ -93,74 +94,51 @@ inline const T Interval<T>::mid() const
 }
 
 template <typename T>
-inline T Interval<T>::size() const
+inline T Interval<T>::width() const
 {
 	return _max - _min;
 }
 
 template <typename T>
-inline T Interval<T>::width() const
+inline T Interval<T>::count() const
 {
-	return this->size();
+	return _max - _min + 1;
 }
 
 template <typename T>
 inline bool Interval<T>::containsClosed( const T &value ) const
 {
-	if ( this->isValid() ) return (value >= _min) && (value <= _max);
-	return (value >= _min) || (value <= _max);
+	return (value >= _min) && (value <= _max);
 }
 
 template <typename T>
 inline bool Interval<T>::containsClosed( const Interval &interval ) const
 {
-	if ( this->isValid() ) return interval.isValid() && (interval._min >= _min) && (interval._max <= _max);
-	else
-	{
-		if ( interval.isValid() ) return (interval._min >= _min) || (interval._max <= _max);
-		return (interval._min >= _min) && (interval._max <= _max);
-	}
+	return (interval._min >= _min) && (interval._max <= _max);
 }
 
 template <typename T>
 inline bool Interval<T>::containsOpen( const T &value ) const
 {
-	if ( this->isValid() ) return (value > _min) && (value < _max);
-	return (value > _min) || (value < _max);
+	return (value > _min) && (value < _max);
 }
 
 template <typename T>
 inline bool Interval<T>::containsOpen( const Interval &interval ) const
 {
-	if ( this->isValid() ) return interval.isValid() && (interval._min > _min) && (interval._max < _max);
-	else
-	{
-		if ( interval.isValid() ) return (interval._min > _min) || (interval._max < _max);
-		return (interval._min > _min) && (interval._max < _max);
-	}
+	return (interval._min > _min) && (interval._max < _max);
 }
 
 template <typename T>
 bool Interval<T>::intersect( const Interval &interval ) const
 {
-	if ( this->isValid() )
-	{
-		if ( interval.isValid() ) return !((interval._max < _min) || (interval._min > _max));
-		return (interval._min <= _max) || (interval._max >= _min);
-	}
-	return !interval.isValid() || (_min <= interval._max) || (_max >= interval._min);
+	return !((interval._max < _min) || (interval._min > _max));
 }
 
 template <typename T>
-inline bool Interval<T>::isValid() const
+Interval<T> Interval<T>::looped( const T &upperBound ) const
 {
-	return _min<=_max;
-}
-
-template <typename T>
-inline Interval<T> Interval<T>::inverted() const
-{
-	return Interval(_max,_min);
+	return Interval<T>(_min,_max-upperBound);
 }
 
 /**********************************

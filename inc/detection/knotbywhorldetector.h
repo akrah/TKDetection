@@ -21,7 +21,7 @@ public:
 
 	using KnotAreaDetector::knotArea;
 	uint knotAreaIndex( const uint &whorlIndex, const uint &angularIntervalIndex ) const;
-	const QRect &knotArea( const uint &whorlIndex, const uint &angularIntervalIndex ) const;
+	const KnotArea &knotArea( const uint &whorlIndex, const uint &angularIntervalIndex ) const;
 	const Interval<uint> centeredSectorInterval( const uint &whorlIndex, const uint &angularIntervalIndex ) const;
 
 	void setSliceHistogramParameters( const uint &smoothingRadius,

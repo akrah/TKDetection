@@ -10,12 +10,12 @@ void KnotAreaDetector::clear()
 	_knotAreas.clear();
 }
 
-const QVector<QRect> &KnotAreaDetector::knotAreas() const
+const QVector<KnotArea> &KnotAreaDetector::knotAreas() const
 {
 	return _knotAreas;
 }
 
-const QRect &KnotAreaDetector::knotArea( const uint &areaIndex ) const
+const KnotArea &KnotAreaDetector::knotArea( const uint &areaIndex ) const
 {
 	Q_ASSERT_X( (int)areaIndex<_knotAreas.size(),
 				"const QRect &knotArea( const uint &areaIndex )",

@@ -3,10 +3,10 @@
 
 #include "def/def_billon.h"
 #include "inc/interval.h"
+#include "inc/knotarea.h"
 #include "inc/piechart.h"
 
 #include <QVector>
-#include <QRect>
 
 class KnotAreaDetector
 {
@@ -17,8 +17,8 @@ public:
 	virtual void execute( const Billon &billon ) = 0;
 	virtual void clear();
 
-	const QVector<QRect> &knotAreas() const;
-	const QRect &knotArea( const uint &areaIndex ) const;
+	const QVector<KnotArea> &knotAreas() const;
+	const KnotArea &knotArea( const uint &areaIndex ) const;
 	bool hasKnotAreas() const;
 
 	const PieChart &pieChart() const;
@@ -34,7 +34,7 @@ public:
 	void setTreeRadius( const qreal &radius );
 
 protected:
-	QVector<QRect> _knotAreas;
+	QVector<KnotArea> _knotAreas;
 
 	PieChart _pieChart;
 

@@ -50,6 +50,7 @@ SOURCES	=	src/main.cpp \
 			src/detection/zmotionaccumulator.cpp \
 			src/dicomreader.cpp \
 			src/globalfunctions.cpp \
+			src/knotarea.cpp \
 			src/lowess.cpp \
 			src/mainwindow.cpp \
 			src/ofsexport.cpp \
@@ -93,6 +94,7 @@ HEADERS	=	inc/billon.h \
 			inc/globalfunctions.h \
 			inc/histogram.h \
 			inc/interval.h \
+			inc/knotarea.h \
 			inc/lowess.h \
 			inc/mainwindow.h \
 			inc/ofsexport.h \

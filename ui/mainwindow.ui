@@ -407,15 +407,15 @@
          <item>
           <widget class="QToolBox" name="toolBox_3">
            <property name="currentIndex">
-            <number>1</number>
+            <number>0</number>
            </property>
            <widget class="QWidget" name="page_10">
             <property name="geometry">
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>254</width>
-              <height>118</height>
+              <width>308</width>
+              <height>238</height>
              </rect>
             </property>
             <attribute name="label">
@@ -1470,9 +1470,9 @@ sur une coupe valide</string>
             <property name="geometry">
              <rect>
               <x>0</x>
-              <y>0</y>
+              <y>-19</y>
               <width>392</width>
-              <height>280</height>
+              <height>240</height>
              </rect>
             </property>
             <attribute name="label">
@@ -1482,6 +1482,58 @@ sur une coupe valide</string>
              <property name="fieldGrowthPolicy">
               <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
              </property>
+             <item row="0" column="0">
+              <widget class="QLabel" name="label_3">
+               <property name="font">
+                <font>
+                 <weight>50</weight>
+                 <bold>false</bold>
+                </font>
+               </property>
+               <property name="text">
+                <string>Nombre de secteurs angulaires</string>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="1">
+              <layout class="QHBoxLayout" name="horizontalLayout_45">
+               <item>
+                <widget class="QSlider" name="_sliderHistogramNumberOfAngularSectors_zMotionAngular">
+                 <property name="font">
+                  <font>
+                   <weight>50</weight>
+                   <bold>false</bold>
+                  </font>
+                 </property>
+                 <property name="maximum">
+                  <number>1500</number>
+                 </property>
+                 <property name="value">
+                  <number>720</number>
+                 </property>
+                 <property name="orientation">
+                  <enum>Qt::Horizontal</enum>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QSpinBox" name="_spinHistogramNumberOfAngularSectors_zMotionAngular">
+                 <property name="font">
+                  <font>
+                   <weight>50</weight>
+                   <bold>false</bold>
+                  </font>
+                 </property>
+                 <property name="maximum">
+                  <number>1500</number>
+                 </property>
+                 <property name="value">
+                  <number>720</number>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
              <item row="1" column="0">
               <widget class="QLabel" name="label_50">
                <property name="font">
@@ -1675,7 +1727,7 @@ sur une coupe valide</string>
                </item>
               </layout>
              </item>
-             <item row="7" column="1">
+             <item row="5" column="1">
               <widget class="QPushButton" name="_buttonHistogramResetDefaultValuesZMotionAngular">
                <property name="font">
                 <font>
@@ -1688,105 +1740,6 @@ sur une coupe valide</string>
                </property>
               </widget>
              </item>
-             <item row="5" column="1">
-              <layout class="QHBoxLayout" name="horizontalLayout_33">
-               <item>
-                <widget class="QSlider" name="_sliderHistogramIntervalGap_zMotionAngular">
-                 <property name="maximum">
-                  <number>15</number>
-                 </property>
-                 <property name="value">
-                  <number>0</number>
-                 </property>
-                 <property name="orientation">
-                  <enum>Qt::Horizontal</enum>
-                 </property>
-                </widget>
-               </item>
-               <item>
-                <widget class="QSpinBox" name="_spinHistogramIntervalGap_zMotionAngular">
-                 <property name="font">
-                  <font>
-                   <weight>50</weight>
-                   <bold>false</bold>
-                  </font>
-                 </property>
-                 <property name="maximum">
-                  <number>15</number>
-                 </property>
-                 <property name="value">
-                  <number>0</number>
-                 </property>
-                </widget>
-               </item>
-              </layout>
-             </item>
-             <item row="5" column="0">
-              <widget class="QLabel" name="label_45">
-               <property name="font">
-                <font>
-                 <weight>50</weight>
-                 <bold>false</bold>
-                </font>
-               </property>
-               <property name="text">
-                <string>Écart ajouté aux intervalles
-(en degrés.)</string>
-               </property>
-              </widget>
-             </item>
-             <item row="0" column="0">
-              <widget class="QLabel" name="label_3">
-               <property name="font">
-                <font>
-                 <weight>50</weight>
-                 <bold>false</bold>
-                </font>
-               </property>
-               <property name="text">
-                <string>Nombre de secteurs angulaires</string>
-               </property>
-              </widget>
-             </item>
-             <item row="0" column="1">
-              <layout class="QHBoxLayout" name="horizontalLayout_45">
-               <item>
-                <widget class="QSlider" name="_sliderHistogramNumberOfAngularSectors_zMotionAngular">
-                 <property name="font">
-                  <font>
-                   <weight>50</weight>
-                   <bold>false</bold>
-                  </font>
-                 </property>
-                 <property name="maximum">
-                  <number>1500</number>
-                 </property>
-                 <property name="value">
-                  <number>720</number>
-                 </property>
-                 <property name="orientation">
-                  <enum>Qt::Horizontal</enum>
-                 </property>
-                </widget>
-               </item>
-               <item>
-                <widget class="QSpinBox" name="_spinHistogramNumberOfAngularSectors_zMotionAngular">
-                 <property name="font">
-                  <font>
-                   <weight>50</weight>
-                   <bold>false</bold>
-                  </font>
-                 </property>
-                 <property name="maximum">
-                  <number>1500</number>
-                 </property>
-                 <property name="value">
-                  <number>720</number>
-                 </property>
-                </widget>
-               </item>
-              </layout>
-             </item>
             </layout>
            </widget>
            <widget class="QWidget" name="page_2">
@@ -1794,8 +1747,8 @@ sur une coupe valide</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>185</width>
-              <height>45</height>
+              <width>308</width>
+              <height>207</height>
              </rect>
             </property>
             <attribute name="label">
@@ -1838,8 +1791,8 @@ sur une coupe valide</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>185</width>
-              <height>45</height>
+              <width>308</width>
+              <height>207</height>
              </rect>
             </property>
             <attribute name="label">
@@ -2003,7 +1956,7 @@ coupes valides à extrapoler</string>
                <number>3000</number>
               </property>
               <property name="value">
-               <number>200</number>
+               <number>100</number>
               </property>
              </widget>
             </item>
@@ -2046,7 +1999,7 @@ coupes valides à extrapoler</string>
                <number>20000</number>
               </property>
               <property name="value">
-               <number>100</number>
+               <number>500</number>
               </property>
              </widget>
             </item>
@@ -2064,7 +2017,7 @@ composantes connexes</string>
                <number>100</number>
               </property>
               <property name="value">
-               <number>20</number>
+               <number>5</number>
               </property>
              </widget>
             </item>
@@ -2107,6 +2060,12 @@ d'une composante connexe</string>
              <layout class="QHBoxLayout" name="horizontalLayout">
               <item>
                <widget class="QSlider" name="_sliderZMotionToDraw">
+                <property name="maximum">
+                 <number>2000</number>
+                </property>
+                <property name="value">
+                 <number>500</number>
+                </property>
                 <property name="orientation">
                  <enum>Qt::Horizontal</enum>
                 </property>
@@ -2118,7 +2077,7 @@ d'une composante connexe</string>
                  <number>1000</number>
                 </property>
                 <property name="value">
-                 <number>200</number>
+                 <number>500</number>
                 </property>
                </widget>
               </item>
@@ -3241,8 +3200,6 @@ zone de nœuds</string>
   <tabstop>_sliderHistogramDerivativeSearchPercentage_zMotion</tabstop>
   <tabstop>_spinHistogramDerivativeSearchPercentage_zMotion</tabstop>
   <tabstop>_buttonHistogramResetDefaultValuesZMotion</tabstop>
-  <tabstop>_sliderHistogramIntervalGap_zMotionAngular</tabstop>
-  <tabstop>_spinHistogramIntervalGap_zMotionAngular</tabstop>
   <tabstop>_comboSelectSliceInterval</tabstop>
   <tabstop>_comboSelectSectorInterval</tabstop>
   <tabstop>_comboExportHistoType</tabstop>

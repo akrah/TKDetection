@@ -166,8 +166,6 @@ MainWindow::MainWindow( QWidget *parent ) : QMainWindow(parent), _ui(new Ui::Mai
 	QObject::connect(_ui->_spinHistogramMinimumWidthOfInterval_zMotionAngular, SIGNAL(valueChanged(int)), _ui->_sliderHistogramMinimumWidthOfInterval_zMotionAngular, SLOT(setValue(int)));
 	QObject::connect(_ui->_sliderHistogramDerivativeSearchPercentage_zMotionAngular, SIGNAL(valueChanged(int)), _ui->_spinHistogramDerivativeSearchPercentage_zMotionAngular, SLOT(setValue(int)));
 	QObject::connect(_ui->_spinHistogramDerivativeSearchPercentage_zMotionAngular, SIGNAL(valueChanged(int)), _ui->_sliderHistogramDerivativeSearchPercentage_zMotionAngular, SLOT(setValue(int)));
-	QObject::connect(_ui->_sliderHistogramIntervalGap_zMotionAngular, SIGNAL(valueChanged(int)), _ui->_spinHistogramIntervalGap_zMotionAngular, SLOT(setValue(int)));
-	QObject::connect(_ui->_spinHistogramIntervalGap_zMotionAngular, SIGNAL(valueChanged(int)), _ui->_sliderHistogramIntervalGap_zMotionAngular, SLOT(setValue(int)));
 	QObject::connect(_ui->_buttonHistogramResetDefaultValuesZMotionAngular, SIGNAL(clicked()), this, SLOT(resetHistogramDefaultValuesZMotionAngular()));
 
 	/**********************************
@@ -345,171 +343,6 @@ void MainWindow::closeImage()
 /*******************************************/
 /*******/
 
-//void MainWindow::drawSlice()
-//{
-//	if ( _billon )
-//	{
-//		const TKD::ViewType viewType = static_cast<const TKD::ViewType>(_ui->_comboViewType->currentIndex());
-//		const TKD::ProjectionType projectionType = static_cast<const TKD::ProjectionType>( _ui->_comboProjectionType->currentIndex() );
-
-//		const uint &currentSlice = projectionType == TKD::Y_PROJECTION ? _billon->n_rows-_ui->_sliderSelectYSlice->value()-1:_ui->_sliderSelectSlice->value();
-//		const rCoord2D &pithCoord = _billon->hasPith()?_billon->pithCoord(_ui->_sliderSelectSlice->value()):rCoord2D(_billon->n_cols/2,_billon->n_rows/2);
-//		uint width, height;
-
-//		switch (projectionType)
-//		{
-//			case TKD::POLAR_PROJECTION :
-//				if (_billon->hasPith() ) {
-//					height = qMin(qMin(pithCoord.x,_billon->n_cols-pithCoord.x-1),qMin(pithCoord.y,_billon->n_rows-pithCoord.y-1));
-//				}
-//				else {
-//					height = qMin(_billon->n_cols/2,_billon->n_rows/2);
-//				}
-//				width = _ui->_spinCartesianAngularResolution->value();
-//				break;
-//			case TKD::Y_PROJECTION : width = _billon->n_cols; height = _billon->n_slices; break;
-//			case TKD::CYLINDRIC_PROJECTION : width = _ui->_spinCartesianAngularResolution->value()+1; height = _billon->n_slices; break;
-//			case TKD::Z_PROJECTION :
-//			default : width = _billon->n_cols; height = _billon->n_rows; break;
-//		}
-
-//		_billonSliceUI.resizeBlackImage(width,height);
-
-//		_slicePainter->drawSlice(_billonSliceUI.image(), *_billon, viewType, currentSlice, Interval<int>(_ui->_spinMinIntensity->value(), _ui->_spinMaxIntensity->value()),
-//					  _ui->_spinZMotionMin->value(), _ui->_spinCartesianAngularResolution->value(), projectionType);
-
-//		if ( (projectionType == TKD::Z_PROJECTION || projectionType == TKD::POLAR_PROJECTION) && _billon->hasPith() )
-//		{
-//			// Dessin de la croix de la moelle
-//			if ( projectionType == TKD::Z_PROJECTION )  _billon->pith().draw(_billonSliceUI.image(),currentSlice);
-
-//			// Dessin du cercle dans lequel l'accumulation du z-mouvement est effectuée
-//			if ( _ui->_checkRadiusAroundPith->isChecked() && _treeRadius > 0 )
-//			{
-//				const qreal restrictedRadius = _treeRadius;
-//				QPainter painter(&_billonSliceUI.image());
-//				painter.setPen(Qt::yellow);
-//				if ( projectionType == TKD::Z_PROJECTION )
-//					painter.drawEllipse(pithCoord.x-restrictedRadius,pithCoord.y-restrictedRadius,2*restrictedRadius,2*restrictedRadius);
-//				else
-//					painter.drawLine(0,restrictedRadius,width,restrictedRadius);
-//				painter.end();
-//			}
-
-//			const bool inDrawingArea = (_currentSliceInterval &&
-//										_knotByWhorlDetector.sliceHistogram().interval(_currentSliceInterval-1).containsClosed(currentSlice));
-//			if ( inDrawingArea )
-//			{
-//				const PieChart &pieChart = _knotByWhorlDetector.pieChart();
-//				const SectorHistogram &sectorHistogram = _knotByWhorlDetector.sectorHistogram(_currentSliceInterval-1);
-
-//				// Dessin des secteurs angulaire + le curseur angulaire
-//				if ( !sectorHistogram.isEmpty() )
-//				{
-//					pieChart.draw(_billonSliceUI.image(), pithCoord, sectorHistogram.intervals(), projectionType);
-//					pieChart.draw(_billonSliceUI.image(), pithCoord, _currentSector, projectionType);
-//				}
-
-//				// Dessin du contour de la section du nœud sélectionné sur la coupe courante
-//				if ( _currentSectorInterval && _tangentialBillon )
-//				{
-//					const QVector<QColor> &colors = TKD::KnotAreaColors;
-//					const int nbColorsToUse = qMax( (int)sectorHistogram.nbIntervals()>colors.size() ? ((sectorHistogram.nbIntervals()+1)/2)%colors.size() : colors.size() , (uint)1 );
-//					QColor currentColor = colors[(_currentSectorInterval-1)%nbColorsToUse];
-
-//					const qreal sliceIntervalMax = _knotByWhorlDetector.sliceHistogram().interval(_currentSliceInterval-1).max();
-//					const uint &nbTangentialSlices = _tangentialBillon->n_slices;
-//					const int widthOnTwo = qFloor(_tangentialBillon->n_cols/2.);
-//					const int heightOnTwo = qFloor(_tangentialBillon->n_rows/2.);
-//					const qreal voxelRatio = _tangentialBillon->voxelWidth()/_tangentialBillon->voxelHeight();
-
-//					const QQuaternion &quaterRot = _tangentialGenerator.quaterRot();
-//					const QVector3D shiftStep = _tangentialGenerator.shiftStep( 1. );
-
-//					QVector3D origin( _tangentialGenerator.origin() );
-//					QVector3D initial, destination;
-//					qreal a,b,x, y,ellipticityRate,ellipseXCenter,ellipseYCenter;
-
-//					QPainter painter(&_billonSliceUI.image());
-
-//					initial.setZ(0.);
-//					for ( uint k=0 ; k<nbTangentialSlices ; ++k )
-//					{
-//						ellipticityRate = voxelRatio / _knotPithProfile[k];
-//						ellipseXCenter = _tangentialBillon->pithCoord(k).x - widthOnTwo;
-//						ellipseYCenter = _tangentialBillon->pithCoord(k).y - heightOnTwo;
-
-//						painter.setPen(currentColor);
-
-//						// Draw knot contour
-//						a = _knotEllipseRadiiHistogram[k];
-//						b = a*ellipticityRate;
-//						y = sliceIntervalMax - currentSlice -_tangentialBillon->pithCoord(k).y;
-//						if ( y <= b )
-//						{
-//							x = qSqrt( (1-qPow(y/b,2)) * qPow(a,2) );
-
-//							initial.setX( ellipseXCenter + x );
-//							initial.setY( ellipseYCenter + y );
-//							destination = quaterRot.rotatedVector(initial) + origin;
-//							painter.drawPoint( qRound(destination.x()), qRound(destination.y()) );
-
-//							initial.setX( ellipseXCenter - x );
-//							destination = quaterRot.rotatedVector(initial) + origin;
-//							painter.drawPoint( qRound(destination.x()), qRound(destination.y()) );
-//						}
-//						// Draw knot pith
-//						initial.setX( ellipseXCenter );
-//						initial.setY( ellipseYCenter );
-//						destination = quaterRot.rotatedVector(initial) + origin;
-//						if ( qRound(_tangentialBillon->pithCoord(k).y) == static_cast<int>(sliceIntervalMax-currentSlice) )
-//							painter.setPen(Qt::red);
-//						painter.drawPoint( qRound(destination.x()), qRound(destination.y()) );
-//						origin += shiftStep;
-//					}
-//					painter.end();
-//				}
-//			}
-//			if ( _knotByZMotionMapDetector.hasKnotAreas() && _ui->_checkDrawKnotAreasOnZMotionMap->isChecked() )
-//			{
-//				const PieChart &pieChartZMotionMap = _knotByZMotionMapDetector.pieChart();
-//				const qreal angleFactor = TWO_PI/(qreal)(pieChartZMotionMap.nbSectors());
-//				const uint &firstValidSlice = _billon->validSlices().min();
-
-//				QVector< Interval<uint> > angleIntervalsToDraw;
-//				QVector<QColor> intervalsColors;
-
-//				const QVector<QColor> &colors = TKD::KnotAreaColors;
-//				const int nbColors = colors.size();
-//				int colorIndex=0;
-
-//				QVectorIterator<QRect> knotAreaIter(_knotByZMotionMapDetector.knotAreas());
-//				while ( knotAreaIter.hasNext() )
-//				{
-//					const QRect &currentKnotArea = knotAreaIter.next();
-////					const QRect &currentSupportingArea = _knotAreaDetector.supportingAreaVector()[_ui->_comboSelectKnotArea->currentIndex()-1];
-//					if ( currentKnotArea.left()+firstValidSlice <= currentSlice && currentKnotArea.right()+firstValidSlice >= currentSlice )
-//					{
-//						Interval<uint> angleInterval( pieChartZMotionMap.sectorIndexOfAngle( currentKnotArea.top()*angleFactor ), pieChartZMotionMap.sectorIndexOfAngle( currentKnotArea.bottom()*angleFactor ) );
-//						angleIntervalsToDraw.append( angleInterval );
-//						intervalsColors.append(colors[colorIndex%nbColors]);
-//					}
-//					colorIndex++;
-//				}
-
-//				pieChartZMotionMap.draw(_billonSliceUI.image(), pithCoord, angleIntervalsToDraw, projectionType, intervalsColors );
-//			}
-//		}
-//	}
-//	else
-//	{
-//		_ui->_labelSliceNumber->setText(tr("Aucune"));
-//		_billonSliceUI.resizeBlackImage(1,1);
-//	}
-
-//	_billonSliceUI.updateLabel();
-//}
-
 void MainWindow::drawSlice()
 {
 	if ( _billon )
@@ -578,13 +411,13 @@ void MainWindow::drawSlice()
 				const int nbColors = colors.size();
 				int colorIndex=0;
 
-				QVectorIterator<QRect> knotAreaIter(_knotByWhorlDetector.knotAreas());
+				QVectorIterator<KnotArea> knotAreaIter(_knotByWhorlDetector.knotAreas());
 				while ( knotAreaIter.hasNext() )
 				{
-					const QRect &currentKnotArea = knotAreaIter.next();
-					if ( currentKnotArea.left() <= currentSlice && currentKnotArea.right() >= currentSlice )
+					const KnotArea &currentKnotArea = knotAreaIter.next();
+					if ( currentKnotArea.firstSlice() <= currentSlice && currentKnotArea.lastSlice() >= currentSlice )
 					{
-						Interval<uint> angleInterval( pieChartWhorls.sectorIndexOfAngle( currentKnotArea.top()*angleFactor ), pieChartWhorls.sectorIndexOfAngle( currentKnotArea.bottom()*angleFactor ) );
+						Interval<uint> angleInterval( pieChartWhorls.sectorIndexOfAngle( currentKnotArea.firstSector()*angleFactor ), pieChartWhorls.sectorIndexOfAngle( currentKnotArea.lastSector()*angleFactor ) );
 						angleIntervalsToDraw.append( angleInterval );
 						intervalsColors.append(colors[colorIndex%nbColors]);
 					}
@@ -598,12 +431,12 @@ void MainWindow::drawSlice()
 				if ( _currentSectorInterval && _tangentialBillon )
 				{
 					const uint knotAreaIndex = _knotByWhorlDetector.knotAreaIndex( _currentSliceInterval-1, _currentSectorInterval-1 );
-					const QRect &areaRect = _knotByWhorlDetector.knotArea(knotAreaIndex);
+					const KnotArea &area = _knotByWhorlDetector.knotArea(knotAreaIndex);
 
-					if ( areaRect.left() <= currentSlice && areaRect.right() >= currentSlice )
+					if ( area.sliceInterval().containsClosed(currentSlice) )
 					{
 						QColor currentColor = colors[knotAreaIndex%nbColors];
-						const qreal sliceIndexInTangentialBillon = areaRect.right() - currentSlice;
+						const qreal sliceIndexInTangentialBillon = area.lastSlice() - currentSlice;
 						const uint &nbTangentialSlices = _tangentialBillon->n_slices;
 						const int widthOnTwo = qFloor(_tangentialBillon->n_cols/2.);
 						const int heightOnTwo = qFloor(_tangentialBillon->n_rows/2.);
@@ -669,13 +502,13 @@ void MainWindow::drawSlice()
 				const int nbColors = colors.size();
 				int colorIndex=0;
 
-				QVectorIterator<QRect> knotAreaIter(_knotByZMotionMapDetector.knotAreas());
+				QVectorIterator<KnotArea> knotAreaIter(_knotByZMotionMapDetector.knotAreas());
 				while ( knotAreaIter.hasNext() )
 				{
-					const QRect &currentKnotArea = knotAreaIter.next();
-					if ( currentKnotArea.left() <= currentSlice && currentKnotArea.right() >= currentSlice )
+					const KnotArea &currentKnotArea = knotAreaIter.next();
+					if ( currentKnotArea.sliceInterval().containsClosed(currentSlice) )
 					{
-						Interval<uint> angleInterval( pieChartZMotionMap.sectorIndexOfAngle( currentKnotArea.top()*angleFactor ), pieChartZMotionMap.sectorIndexOfAngle( currentKnotArea.bottom()*angleFactor ) );
+						Interval<uint> angleInterval( pieChartZMotionMap.sectorIndexOfAngle( currentKnotArea.firstSector()*angleFactor ), pieChartZMotionMap.sectorIndexOfAngle( currentKnotArea.lastSector()*angleFactor ) );
 						angleIntervalsToDraw.append( angleInterval );
 						intervalsColors.append(colors[colorIndex%nbColors]);
 					}
@@ -747,9 +580,8 @@ void MainWindow::drawTangentialSlice()
 		if ( projectionType == TKD::Z_PROJECTION && _ui->_checkTangentialDrawEllipses->isChecked() )
 		{
 			const QVector<QColor> &colors = TKD::KnotAreaColors;
-			const int nbKnotAreas = _knotByWhorlDetector.sectorHistogram(_currentSliceInterval-1).nbIntervals();
-			const int nbColorsToUse = qMax( nbKnotAreas>colors.size() ? ((nbKnotAreas+1)/2)%colors.size() : colors.size() , 1 );
-			const QColor currentColor = colors[(_currentSectorInterval-1)%nbColorsToUse];
+			const int nbColorsToUse = colors.size();
+			const QColor currentColor = colors[(_currentKnotArea-1)%nbColorsToUse];
 
 			const qreal knotAreaLine = currentSlice * qFloor(width/2.) / static_cast<qreal>(depth);
 
@@ -823,21 +655,21 @@ void MainWindow::drawZMotionMap()
 			const int nbColors = colors.size();
 			QColor currentColor;
 
-			QVectorIterator<QRect> knotAreaIter(_knotByZMotionMapDetector.knotAreas());
+			QVectorIterator<KnotArea> knotAreaIter(_knotByZMotionMapDetector.knotAreas());
 			int colorIndex = 0;
 			while ( knotAreaIter.hasNext() )
 			{
 				currentColor = colors[(colorIndex++)%nbColors];
 				painter.setPen(currentColor);
-				painter.drawRect(knotAreaIter.next());
+				painter.drawRect(knotAreaIter.next().toQRect());
 			}
 
 			if ( _ui->_comboSelectKnotArea->currentIndex() )
 			{
 				uint currentKnotAreaIndex = _ui->_comboSelectKnotArea->currentIndex()-1;
-				const QRect &currentSupportingArea =_knotByZMotionMapDetector.knotAreas()[currentKnotAreaIndex];
+				const KnotArea &currentSupportingArea =_knotByZMotionMapDetector.knotAreas()[currentKnotAreaIndex];
 				painter.setPen(QPen(colors[currentKnotAreaIndex%nbColors],4));
-				painter.drawRect(currentSupportingArea);
+				painter.drawRect(currentSupportingArea.toQRect());
 			}
 			painter.end();
 		}
@@ -1011,11 +843,11 @@ void MainWindow::selectSliceInterval( const int &index )
 	_ui->_sliderSelectTangentialSlice->setValue(0);
 
 	resetComboBox(*(_ui->_comboSelectSectorInterval));
-	if ( index > 0 && index <= static_cast<int>(_knotByWhorlDetector.sliceHistogram().nbIntervals()) )
+	if ( _currentSliceInterval <= _knotByWhorlDetector.sliceHistogram().nbIntervals() )
 	{
 		updatePlotSectorHistogram();
 		updateComboBox( *(_ui->_comboSelectSectorInterval), _knotByWhorlDetector.sectorHistogram(_currentSliceInterval-1) );
-		_ui->_sliderSelectSlice->setValue(_knotByWhorlDetector.sliceHistogram().interval(index-1).mid());
+		_ui->_sliderSelectSlice->setValue(_knotByWhorlDetector.sliceHistogram().interval(_currentSliceInterval-1).mid());
 	}
 	else
 	{
@@ -1039,9 +871,9 @@ void MainWindow::selectSectorInterval( const int &index, const bool &draw )
 	}
 
 	const SectorHistogram &sectorHistogram = _knotByWhorlDetector.sectorHistogram(_currentSliceInterval-1);
-	if ( index > 0 && index <= static_cast<int>(sectorHistogram.nbIntervals()) )
+	if ( _currentSectorInterval > 0 && _currentSectorInterval <= sectorHistogram.nbIntervals() )
 	{
-		const Interval<uint> centeredSectorInterval = _knotByWhorlDetector.centeredSectorInterval( _currentSliceInterval-1, index-1 );
+		const Interval<uint> centeredSectorInterval = _knotByWhorlDetector.centeredSectorInterval( _currentSliceInterval-1, _currentSectorInterval-1 );
 		const Interval<int> intensityInterval(_ui->_spinMinIntensity->value(), _ui->_spinMaxIntensity->value());
 
 		_tangentialGenerator.updateIntervals( *_billon, _knotByWhorlDetector.sliceHistogram().interval(_currentSliceInterval-1), centeredSectorInterval, sectorHistogram.pieChart() );
@@ -1092,7 +924,7 @@ void MainWindow::selectSectorInterval( const int &index, const bool &draw )
 
 void MainWindow::selectKnotArea( const int &index, const bool &draw )
 {
-	_currentKnotArea = index;
+	_currentKnotArea = qMax(index,0);
 
 	if ( _tangentialZMotionMapBillon )
 	{
@@ -1100,33 +932,38 @@ void MainWindow::selectKnotArea( const int &index, const bool &draw )
 		_tangentialZMotionMapBillon = 0;
 	}
 
-	const QVector<QRect> &supportingAreas = _knotByZMotionMapDetector.knotAreas();
-
-	if ( _billon->hasPith() && index > 0 && index <= supportingAreas.size() )
+	const QVector<KnotArea> &supportingAreas = _knotByZMotionMapDetector.knotAreas();
+	if ( _currentKnotArea > 0 && _currentKnotArea <= supportingAreas.size() )
 	{
-		const QRect &supportingArea = supportingAreas[index-1];
-		const Interval<uint> sliceInterval( supportingArea.left()+_billon->validSlices().min(), supportingArea.right()+_billon->validSlices().min() );
-		const Interval<uint> sectorInterval( supportingArea.top(), supportingArea.bottom() );
+		const KnotArea &supportingArea = supportingAreas[index-1];
+		const Interval<uint> &sliceInterval = supportingArea.sliceInterval();
+		const Interval<uint> &sectorInterval = supportingArea.sectorInterval();
 
-		_tangentialGenerator.setMinIntensity( _ui->_spinMinIntensity->value() );
+		_tangentialGenerator.updateIntervals( *_billon, sliceInterval, sectorInterval, _knotByZMotionMapDetector.pieChart() );
 		_tangentialGenerator.enableTrilinearInterpolation( _ui->_checkTrilinearInterpolation->isChecked() );
-		_tangentialGenerator.setSliceInterval( *_billon, sliceInterval );
-		_tangentialGenerator.setAngularInterval( *_billon, sectorInterval, _knotByZMotionMapDetector.pieChart() );
+		_tangentialGenerator.setMinIntensity( _ui->_spinMinIntensity->value() );
+
 		_tangentialZMotionMapBillon = _tangentialGenerator.execute( *_billon, _knotByZMotionMapDetector.pieChart() );
 
-		_knotPithExtractor.setSubWindowWidth( _ui->_spinPithSubWindowWidth_knot->value() );
-		_knotPithExtractor.setSubWindowHeight( _ui->_spinPithSubWindowHeight_knot->value() );
-		_knotPithExtractor.setPithShift( _ui->_spinPithMaximumShift_knot->value() );
-		_knotPithExtractor.setSmoothingRadius( _ui->_spinPithSmoothingRadius_knot->value() );
-		_knotPithExtractor.setMinWoodPercentage( _ui->_spinPithMinimumWoodPercentage_knot->value() );
-		_knotPithExtractor.setIntensityInterval( Interval<int>( _ui->_spinPithMinIntensity_knot->value(), _ui->_spinPithMaxIntensity_knot->value() ) );
-		_knotPithExtractor.setAscendingOrder( _ui->_chechPithAscendingOrder_knot->isChecked() );
-		_knotPithExtractor.setExtrapolation( TKD::SLOPE_DIRECTION );
-		_knotPithExtractor.setFirstValidSlicesToExtrapolate( _ui->_spinFirstSlicesToExtrapolate_knot->value() );
-		_knotPithExtractor.setLastValidSlicesToExtrapolate( _ui->_spinLastSlicesToExtrapolate_knot->value() );
+		if ( _tangentialZMotionMapBillon )
+		{
+			_knotPithExtractor.setSubWindowWidth( _ui->_spinPithSubWindowWidth_knot->value() );
+			_knotPithExtractor.setSubWindowHeight( _ui->_spinPithSubWindowHeight_knot->value() );
+			_knotPithExtractor.setPithShift( _ui->_spinPithMaximumShift_knot->value() );
+			_knotPithExtractor.setSmoothingRadius( _ui->_spinPithSmoothingRadius_knot->value() );
+			_knotPithExtractor.setMinWoodPercentage( _ui->_spinPithMinimumWoodPercentage_knot->value() );
+			_knotPithExtractor.setIntensityInterval( Interval<int>( _ui->_spinPithMinIntensity_knot->value(), _ui->_spinPithMaxIntensity_knot->value() ) );
+			_knotPithExtractor.setAscendingOrder( _ui->_chechPithAscendingOrder_knot->isChecked() );
+			_knotPithExtractor.setExtrapolation( TKD::SLOPE_DIRECTION );
+			_knotPithExtractor.setFirstValidSlicesToExtrapolate( _ui->_spinFirstSlicesToExtrapolate_knot->value() );
+			_knotPithExtractor.setLastValidSlicesToExtrapolate( _ui->_spinLastSlicesToExtrapolate_knot->value() );
 
-		_knotPithExtractor.process(*_tangentialZMotionMapBillon,true);
+			_knotPithExtractor.process(*_tangentialZMotionMapBillon,true);
+		}
 	}
+
+	computeKnotPithProfile( *_tangentialZMotionMapBillon );
+	computeKnotEllipseRadiiHistogram( *_tangentialZMotionMapBillon );
 
 	if (draw)
 	{
@@ -1142,8 +979,6 @@ void MainWindow::selectKnotArea( const int &index, const bool &draw )
 			_ui->_sliderSelectTangentialZMotionMapYSlice->setValue(0);
 			_ui->_sliderSelectTangentialZMotionMapYSlice->blockSignals(false);
 		}
-		computeKnotPithProfile( *_tangentialZMotionMapBillon );
-		computeKnotEllipseRadiiHistogram( *_tangentialZMotionMapBillon );
 		enabledComponents();
 		drawTangentialSlice();
 		drawSlice();
@@ -1223,11 +1058,11 @@ void MainWindow::computeZMotionMapKnotAreas( const bool &draw )
 			_ui->_sliderZMotionToDraw->setMaximum(_knotByZMotionMapDetector.maxFindIntensity());
 
 
-			const QVector<QRect> &knotAreas = _knotByZMotionMapDetector.knotAreas();
+			const QVector<KnotArea> &knotAreas = _knotByZMotionMapDetector.knotAreas();
 			for ( int i=0 ; i<knotAreas.size() ; ++i )
 			{
-				const QRect &area = knotAreas[i];
-				_ui->_comboSelectKnotArea->addItem(tr("Zone en (%1, %2) : %3 px²").arg(area.top()).arg(area.left()).arg(area.width()*area.height()));
+				const KnotArea &area = knotAreas[i];
+				_ui->_comboSelectKnotArea->addItem(tr("Zone en (%1, %2) : %3x%4 px").arg(area.firstSlice()).arg(area.firstSector()).arg(area.nbSlices()).arg(area.nbSlices()));
 			}
 		}
 
@@ -1256,7 +1091,6 @@ void MainWindow::resetHistogramDefaultValuesZMotionAngular()
 	_ui->_spinHistogramMinimumHeightOfMaximum_zMotionAngular->setValue(HISTOGRAM_ANGULAR_PERCENTAGE_OF_MINIMUM_HEIGHT_OF_MAXIMUM);
 	_ui->_spinHistogramMinimumWidthOfInterval_zMotionAngular->setValue(HISTOGRAM_ANGULAR_MINIMUM_WIDTH_OF_INTERVALS);
 	_ui->_spinHistogramDerivativeSearchPercentage_zMotionAngular->setValue(HISTOGRAM_ANGULAR_DERIVATIVE_SEARCH_PERCENTAGE);
-	_ui->_spinHistogramIntervalGap_zMotionAngular->setValue(HISTOGRAM_ANGULAR_INTERVAL_GAP);
 }
 
 
@@ -1394,11 +1228,11 @@ void MainWindow::export2DZMotion()
 				qreal max = 0;
 
 				stream << "P2" << endl;
-				stream << _knotByZMotionMapDetector.pieChart().nbSectors() << " " << validSlices.size() << endl;
+				stream << _knotByZMotionMapDetector.pieChart().nbSectors() << " " << validSlices.count() << endl;
 				qint64 pos = stream.pos();
 				stream << "                " << endl;
 
-				for ( uint z=validSlices.min() ; z<validSlices.max() ; ++z )
+				for ( uint z=validSlices.min() ; z<=validSlices.max() ; ++z )
 				{
 					sect.construct( *_billon, Interval<uint>(z,z), intensityInterval, _ui->_spinZMotionMin->value(), _treeRadius );
 //					TKD::meanSmoothingLoop<qreal>(sect.begin(),sect.end(),3);
@@ -1437,12 +1271,12 @@ void MainWindow::export2DKnotAreaCoordinates()
 			{
 				QTextStream stream(&file);
 
-				const QVector<QRect> &knotAreas = _knotByWhorlDetector.knotAreas();
+				const QVector<KnotArea> &knotAreas = _knotByWhorlDetector.knotAreas();
 
 				stream << "##### Anciennes zones de nœuds #####" << endl;
 				stream << "# Dimensions de l'image dasn laquelle ces coordonnées sont valides" << endl;
 				stream << "# width (Nombre de secteurs angulaires) | height (nombres de coupes)" << endl;
-				stream << "# " << _knotByWhorlDetector.pieChart().nbSectors() << " " << _billon->validSlices().size() << endl;
+				stream << "# " << _knotByWhorlDetector.pieChart().nbSectors() << " " << _billon->validSlices().count() << endl;
 				stream << endl;
 
 				stream << "# Nombre de zones de nœuds" << endl;
@@ -1455,21 +1289,20 @@ void MainWindow::export2DKnotAreaCoordinates()
 
 				const QVector<QColor> &colors = TKD::KnotAreaColors;
 				const int nbColors = colors.size();
-				const int nbColorsToUse = qMax( 1, knotAreas.size()>nbColors ? ((knotAreas.size()+1)/2)%nbColors : nbColors );
 				QColor currentColor;
 
-				QVectorIterator<QRect> knotAreasIter(knotAreas);
+				QVectorIterator<KnotArea> knotAreasIter(knotAreas);
 				int colorIndex = 0;
 
 				// Parcours de tous les intervalles de secteurs angulaires de l'intervalle de coupe courant
 				while ( knotAreasIter.hasNext() )
 				{
-					const QRect &knotArea = knotAreasIter.next();
-					currentColor = colors[(colorIndex++)%nbColorsToUse];
+					const KnotArea &knotArea = knotAreasIter.next();
+					currentColor = colors[(colorIndex++)%nbColors];
 
 					// Écriture des coordonnées min/max de la zone de nœud courante
-					stream << knotArea.left() << " " << knotArea.top() << " " <<
-							  knotArea.right() << " " << knotArea.bottom() << " " <<
+					stream << knotArea.firstSlice() << " " << knotArea.firstSector() << " " <<
+							  knotArea.lastSlice() << " " << knotArea.lastSector() << " " <<
 							  currentColor.red() << " " << currentColor.green() << " " << currentColor.blue() << endl;
 				}
 

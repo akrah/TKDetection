@@ -156,7 +156,7 @@ void PithExtractorBoukadida::process( Billon &billon, const bool &adaptativeWidt
 	const int firstSliceOrdered = _ascendingOrder?firstValidSliceIndex:lastValidSliceIndex;
 	qDebug() << "[ " << firstValidSliceIndex << ", " << lastValidSliceIndex << " ]";
 
-	if ( validSlices.size() < _smoothingRadius )
+	if ( validSlices.count() < _smoothingRadius )
 	{
 		qDebug() << "   => No valid slices, detection stopped";
 		return;

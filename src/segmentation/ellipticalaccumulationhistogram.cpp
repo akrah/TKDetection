@@ -193,10 +193,11 @@ void EllipticalAccumulationHistogram::findFirstMaximumAndNextMinimum()
 
 	lag = 1;
 
+	// TODO : S'assurer que CompareSlope et slope accèdent à des vazleurs existantes du vecteur !!!
 	maximumIndex += lag;
-	qreal comparedSlope = (*this)[maximumIndex-lag]+(*this)[maximumIndex-lag-1]-(*this)[maximumIndex+lag]-(*this)[maximumIndex+lag+1];
+	qreal comparedSlope = (*this)[maximumIndex-lag]+(*this)[maximumIndex-lag-1]-(*this)[maximumIndex+lag]-(*this)[qMin(maximumIndex+lag+1,uint(size-1))];
 	++maximumIndex;
-	qreal slope = (*this)[maximumIndex-lag]+(*this)[maximumIndex-lag-1]-(*this)[maximumIndex+lag]-(*this)[maximumIndex+lag+1];
+	qreal slope = (*this)[maximumIndex-lag]+(*this)[maximumIndex-lag-1]-(*this)[maximumIndex+lag]-(*this)[qMin(maximumIndex+lag+1,uint(size-1))];
 	while (maximumIndex<size-lag-2 && slope>=comparedSlope)
 	{
 		comparedSlope = slope;

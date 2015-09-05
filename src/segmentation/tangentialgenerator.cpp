@@ -37,13 +37,13 @@ void TangentialGenerator::setSliceInterval( const Billon &billon, const Interval
 void TangentialGenerator::setAngularInterval( const Billon &billon, const Interval<uint> &angularInterval, const PieChart &pieChart )
 {
 	_currentAngularInterval = angularInterval;
-	_angularRange = (_currentAngularInterval.max() + (_currentAngularInterval.isValid() ? 0. : pieChart.nbSectors())) - _currentAngularInterval.min() + 1;
+	_angularRange = _currentAngularInterval.count();
 	_bisectorOrientation = (_currentAngularInterval.min()+_angularRange/2.)*pieChart.angleStep();
 	_quaterZ = QQuaternion::fromAxisAndAngle( 0., 0., 1., _bisectorOrientation*RAD_TO_DEG_FACT );
 
 	/* Recherche de l'écorce dans la direction de la bissectrice du secteur angulaire sur la coupe au milieu de l'intervalle de coupes */
 	const rVec2D direction(qCos(_bisectorOrientation),qSin(_bisectorOrientation));
-	rCoord2D originPith( _origin.x(), _origin.y() );
+	const rCoord2D originPith( _origin.x(), _origin.y() );
 	rCoord2D edge = originPith + direction*30;
 	while ( edge.x>0 && edge.y>0 && edge.x<billon.n_cols && edge.y<billon.n_rows && billon.slice(_origin.z())(edge.y,edge.x) > _minIntensity )
 	{
@@ -59,6 +59,12 @@ void TangentialGenerator::updateIntervals( const Billon &billon, const Interval<
 {
 	setSliceInterval(billon,sliceInterval);
 	setAngularInterval(billon,angularInterval,pieChart);
+}
+
+void TangentialGenerator::setKnotArea( const Billon &billon, const QRect &knotArea, const PieChart &pieChart )
+{
+	setSliceInterval( billon, Interval<uint>(knotArea.left(),knotArea.right()) );
+	setAngularInterval( billon, Interval<uint>(knotArea.top(),knotArea.bottom()), pieChart );
 }
 
 void TangentialGenerator::setMinIntensity( const int &minIntensity )
@@ -154,7 +160,7 @@ Billon* TangentialGenerator::execute( const Billon &billon , const PieChart &pie
 
 	/* Hauteur et largeur des coupes tangentielles */
 	const uint width = qFloor(2 * qTan(_angularRange*pieChart.angleStep()/2.) * _depth);
-	const uint height = _currentSliceInterval.size()+1;
+	const uint height = _currentSliceInterval.count();
 	const int widthOnTwo = qFloor(width/2.);
 	const int heightOnTwo = qFloor(height/2.);
 

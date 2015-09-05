@@ -25,7 +25,7 @@ void ZMotionAccumulator::execute( const Billon &billon, Slice &accumulationSlice
 			hist.construct( billon, Interval<uint>(z,z), _intensityInterval, _zMotionMin, _radiusAroundPith );
 			QVector<qreal>::ConstIterator histIter = hist.constBegin();
 			const QVector<qreal>::ConstIterator histEnd = hist.constEnd();
-			Slice::col_iterator accSliceIter = accumulationSlice.begin_col(z-firstSlice);
+			Slice::col_iterator accSliceIter = accumulationSlice.begin_col(z);
 			while ( histIter != histEnd )
 			{
 				*accSliceIter = (__billon_type__)(*histIter);

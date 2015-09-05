@@ -314,6 +314,128 @@ void Histogram<T>::computeMaximums( const bool & loop )
 	}
 }
 
+//template <typename T>
+//void Histogram<T>::computeIntervals( const bool & loop )
+//{
+//	_intervals.clear();
+//	if ( _maximums.isEmpty() ) return;
+
+//	uint cursorMax, cursorMin, cursorEnd;
+//	T derivativeThreshold;
+//	Interval<uint> cursor;
+//	const uint histoSize = this->size();
+//	const uint histoSizeMinusOne = histoSize - 1;
+
+//	for ( int i=0 ; i<static_cast<int>(nbMaximums()) ; ++i )
+//	{
+//		// Detection des bornes de l'intervalle courant
+//		cursorMin = cursorMax =_maximums[i];
+//		derivativeThreshold = (*this)[cursorMin]*_derivativesPercentage;
+
+//		// Détection de la borne inf de l'intervalle
+//		cursorEnd = cursorMin+1;
+//		if ( cursorEnd == histoSize )
+//		{
+//			if ( loop ) cursorEnd = 0;
+//			else cursorEnd = cursorMin;
+//		}
+//		// Tant que cursorMin n'est pas revenu au point de départ et que les valeurs sont supérieures au seuil, on recule cursorMin
+//		while ( cursorMin != cursorEnd && (*this)[cursorMin] > derivativeThreshold )
+//		{
+//			if ( cursorMin ) cursorMin--;
+//			else if ( loop ) cursorMin = histoSizeMinusOne; // Si on arrive a 0, on boucle seuelement si loop est vrai
+//			else break;
+//		}
+//		// On continue à rechercher la borne min tant qu'on est pas revenu au point de départ et que la dérivée est supérieure à 0.5
+//		while ( cursorMin != cursorEnd && firstdDerivated(cursorMin,loop) > 0.5 )
+//		{
+//			if ( cursorMin ) cursorMin--;
+//			else if ( loop ) cursorMin = histoSizeMinusOne;
+//			else break;
+//		}
+
+//		// Détection de la borne sup de l'intervalle
+//		cursorEnd = cursorMax;
+//		if ( cursorEnd ) cursorEnd--;
+//		else if ( loop ) cursorEnd = histoSizeMinusOne;
+//		// Tant que cursorMax n'est pas revenu au point de départ et que les valeurs sont supérieures au seuil, on avance cursorMax
+//		while ( cursorMax != cursorEnd && (*this)[cursorMax] > derivativeThreshold )
+//		{
+//			cursorMax++;
+//			if ( cursorMax == histoSize )
+//			{
+//				if ( loop ) cursorMax = 0; // Si cursorMax atteint la fin de l'histogramme, on boucle seulement si loop est vrai
+//				else
+//				{
+//					cursorMax--;
+//					break;
+//				}
+//			}
+//		}
+//		// On continue à rechercher la borne min tant qu'on est pas revenu au point de départ et que la dérivée est inférieure à -0.5
+//		while ( cursorMax != cursorEnd && firstdDerivated(cursorMax,loop) < -0.5 )
+//		{
+//			cursorMax++;
+//			if ( cursorMax == histoSize )
+//			{
+//				if ( loop ) cursorMax = 0; // Si cursorMax atteint la fin de l'histogramme, on boucle seulement si loop est vrai
+//				else
+//				{
+//					cursorMax--;
+//					break;
+//				}
+//			}
+//		}
+//		if ( cursorMax ) cursorMax--;
+//		else if (loop) cursorMax = histoSizeMinusOne;
+
+//		cursor.setBounds(cursorMin,cursorMax);
+
+//		// Ajout et fusion de l'intervalle courant
+//		if ( _intervals.isEmpty() )
+//		{
+//			if ( (cursor.isValid() ? cursor.width() : histoSize-(cursor.min()-cursor.max())) > _minimumIntervalWidth ) _intervals.append(cursor);
+////			qDebug() << "** Interval " << i << " : [" << cursor.min() << ", " << cursor.max() << "]";
+//		}
+//		else
+//		{
+//			const Interval<uint> &last = _intervals.last();
+//			if ( last.max() >= cursorMax && !(!cursor.isValid() && last.isValid()) )
+//			{
+////				qDebug() << "** Interval " << i << " : [" << cursor.min() << ", " << cursor.max() << "] => [" << last.min() << ", " << last.max() << "]";
+//				cursor = last;
+//				cursorMin = last.min();
+//				cursorMax = last.max();
+//				if ( (*this)[_maximums[i]]>(*this)[_maximums[i-1]] ) _maximums[i-1] = _maximums[i];
+//				_maximums.remove(i--);
+//			}
+//			else
+//			{
+////				qDebug() << "** Interval " << i << " : [" << cursor.min() << ", " << cursor.max() << "] from [" << last.min() << ", " << last.max() << "]";
+//				if ( !(cursor.isValid() || last.isValid()) || last.max() > cursor.min() )
+//				{
+//					cursorMin = last.max();
+//					cursor.setMin(cursorMin);
+////					qDebug() << "** => New " << i << " : [" << cursor.min() << ", " << cursor.max() << "]";
+//				}
+//				if ( (cursor.isValid() ? cursor.width() : histoSize-(cursor.min()-cursor.max())) > _minimumIntervalWidth )
+//				{
+////					qDebug() << "** => Ok";
+//					_intervals.append(cursor);
+//				}
+//				else
+//				{
+////					qDebug() << "** => Garde l'ancien";
+//					if ( (*this)[_maximums[i]]>(*this)[_maximums[i-1]] ) _maximums[i-1] = _maximums[i];
+//					_maximums.remove(i--);
+//				}
+//			}
+//		}
+//	}
+//	if ( _intervals.size() > 1 && _intervals.last() == _intervals.first() ) _intervals.pop_back();
+//}
+
+
 template <typename T>
 void Histogram<T>::computeIntervals( const bool & loop )
 {
@@ -326,7 +448,7 @@ void Histogram<T>::computeIntervals( const bool & loop )
 	const uint histoSize = this->size();
 	const uint histoSizeMinusOne = histoSize - 1;
 
-	for ( int i=0 ; i<static_cast<int>(nbMaximums()) ; ++i )
+	for ( uint i=0 ; i<nbMaximums() ; ++i )
 	{
 		// Detection des bornes de l'intervalle courant
 		cursorMin = cursorMax =_maximums[i];
@@ -389,50 +511,122 @@ void Histogram<T>::computeIntervals( const bool & loop )
 		if ( cursorMax ) cursorMax--;
 		else if (loop) cursorMax = histoSizeMinusOne;
 
-		cursor.setBounds(cursorMin,cursorMax);
+		if ( cursorMin<cursorMax )
+		{
+			cursor.setBounds(cursorMin,cursorMax);
+		}
+		else
+		{
+			cursor.setBounds(cursorMin,cursorMax+histoSize);
+		}
 
 		// Ajout et fusion de l'intervalle courant
 		if ( _intervals.isEmpty() )
 		{
-			if ( (cursor.isValid() ? cursor.width() : histoSize-(cursor.min()-cursor.max())) > _minimumIntervalWidth ) _intervals.append(cursor);
+			if ( cursor.width() > _minimumIntervalWidth ) _intervals.append(cursor);
 //			qDebug() << "** Interval " << i << " : [" << cursor.min() << ", " << cursor.max() << "]";
 		}
 		else
 		{
 			const Interval<uint> &last = _intervals.last();
-			if ( last.max() >= cursorMax && !(!cursor.isValid() && last.isValid()) )
+			// Si l'intervalle courant contient le précédent
+			if ( cursor.containsClosed( last ) )
 			{
 //				qDebug() << "** Interval " << i << " : [" << cursor.min() << ", " << cursor.max() << "] => [" << last.min() << ", " << last.max() << "]";
-				cursor = last;
-				cursorMin = last.min();
-				cursorMax = last.max();
-				if ( (*this)[_maximums[i]]>(*this)[_maximums[i-1]] ) _maximums[i-1] = _maximums[i];
+				_intervals.last().setBounds(cursorMin,cursorMax);
+				_maximums.remove(--i);
+			}
+			// Si l'intervalle précédent contient l'intervalle courant
+			else if ( last.containsClosed( cursor ) )
+			{
 				_maximums.remove(i--);
 			}
 			else
 			{
-//				qDebug() << "** Interval " << i << " : [" << cursor.min() << ", " << cursor.max() << "] from [" << last.min() << ", " << last.max() << "]";
-				if ( !(cursor.isValid() || last.isValid()) || last.max() > cursor.min() )
+				// Si l'intervalle courant et le précédent s'intersectent
+				if ( last.intersect(cursor) )
 				{
-					cursorMin = last.max();
-					cursor.setMin(cursorMin);
-//					qDebug() << "** => New " << i << " : [" << cursor.min() << ", " << cursor.max() << "]";
+					// Si le maximum précédent est plus grand que le maximum courant
+					if ( _maximums[i-1] > _maximums[i] )
+					{
+						cursor.setMin(last.max());
+					}
+					// Si le maximum courant est supérieur au maximum précédent
+					else
+					{
+						_intervals.last().setMax(cursorMin);
+						if ( _intervals.last().width() <= _minimumIntervalWidth )
+						{
+							_intervals.pop_back();
+							_maximums.remove(--i);
+						}
+					}
 				}
-				if ( (cursor.isValid() ? cursor.width() : histoSize-(cursor.min()-cursor.max())) > _minimumIntervalWidth )
+				// Dans tous les cas on ajoute l'intervalle courant s'il a la taille minimum requise
+				if ( cursor.width() > _minimumIntervalWidth )
 				{
 //					qDebug() << "** => Ok";
 					_intervals.append(cursor);
 				}
+				// Sinon on supprime le maximum correspondant
 				else
 				{
-//					qDebug() << "** => Garde l'ancien";
-					if ( (*this)[_maximums[i]]>(*this)[_maximums[i-1]] ) _maximums[i-1] = _maximums[i];
 					_maximums.remove(i--);
 				}
 			}
 		}
 	}
-	if ( _intervals.size() > 1 && _intervals.last() == _intervals.first() ) _intervals.pop_back();
+	if ( _intervals.size() > 1 && _intervals.last() == _intervals.first() )
+	{
+		_intervals.pop_back();
+		_maximums.pop_back();
+	}
+	// Si l'histogramme est circulaire et que le premier intervalle contient 0
+	if ( loop && this->size() > 1 && _intervals.first().max() > this->size() && _intervals.last().max() > this->size() )
+	{
+		const Interval<uint> &first = _intervals.first();
+		const Interval<uint> &last = _intervals.last();
+		// Si le premier intervalle contient le dernier
+		if ( first.containsClosed( last ) )
+		{
+//				qDebug() << "** Interval " << i << " : [" << cursor.min() << ", " << cursor.max() << "] => [" << last.min() << ", " << last.max() << "]";
+			_intervals.pop_back();
+			_maximums.pop_back();
+		}
+		// Si le dernier intervalle contient le premier
+		else if ( last.containsClosed( first ) )
+		{
+			_intervals.pop_front();
+			_maximums.pop_front();
+		}
+		else
+		{
+			// Si le premier intervalle et le dernier s'intersectent
+			if ( last.intersect(first) )
+			{
+				// Si le premier maximum est plus grand que le dernier
+				if ( _maximums.first() > _maximums.last() )
+				{
+					_intervals.last().setMin(first.max());
+					if ( _intervals.last().width() <= _minimumIntervalWidth )
+					{
+						_intervals.pop_back();
+						_maximums.pop_back();
+					}
+				}
+				// Si le dernier maximum est plus grand que le premier
+				else
+				{
+					_intervals.first().setMax(last.min());
+					if ( _intervals.first().width() <= _minimumIntervalWidth )
+					{
+						_intervals.pop_front();
+						_maximums.pop_front();
+					}
+				}
+			}
+		}
+	}
 }
 
 #endif // HISTOGRAM_H

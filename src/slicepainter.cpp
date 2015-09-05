@@ -104,7 +104,7 @@ void SlicePainter::drawCurrentSlice(QImage &image, const Billon &billon, const u
 	const uint &height = billon.n_rows;
 	const uint &depth = billon.n_slices;
 	const int &minIntensity = intensityInterval.min();
-	const qreal fact = 255.0/intensityInterval.size();
+	const qreal fact = 255.0/intensityInterval.count();
 
 	QRgb * line = (QRgb *) image.bits();
 	int color;

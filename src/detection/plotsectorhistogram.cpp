@@ -185,7 +185,7 @@ void PlotSectorHistogram::updateMaximums(const SectorHistogram &histogram )
 	_histogramMaximums.setSamples(curveHistogramMaximumsDatas);
 }
 
-void PlotSectorHistogram::updateIntervals( const SectorHistogram &histogram)
+void PlotSectorHistogram::updateIntervals( const SectorHistogram &histogram )
 {
 	_datasCurveIntervals->clear();
 	QVector<QwtIntervalSample> curveHistogramIntervalsDatas;
@@ -203,9 +203,9 @@ void PlotSectorHistogram::updateIntervals( const SectorHistogram &histogram)
 			const Interval<uint> &currentInterval = *begin++;
 			min = currentInterval.min();
 			max = currentInterval.max();
-			if ( currentInterval.isValid() )
+			_datasCurveIntervals->append(QwtPointPolar( pieChart.sector(min).minAngle(), 0. ));
+			if ( max<pieChart.nbSectors() )
 			{
-				_datasCurveIntervals->append(QwtPointPolar( pieChart.sector(min).minAngle(), 0. ));
 				for ( i=min ; i<=max ; ++i )
 				{
 					const PiePart &currentSector = pieChart.sector(i);
@@ -213,11 +213,10 @@ void PlotSectorHistogram::updateIntervals( const SectorHistogram &histogram)
 					_datasCurveIntervals->append(QwtPointPolar(currentSector.maxAngle(), histogram[i]));
 					curveHistogramIntervalsDatas.append(QwtIntervalSample( histogram[i],i,i+1));
 				}
-				_datasCurveIntervals->append(QwtPointPolar( pieChart.sector(max).maxAngle(), 0. ));
 			}
 			else
 			{
-				_datasCurveIntervals->append(QwtPointPolar( pieChart.sector(min).minAngle(), 0. ));
+				max = max-nbSectors;
 				for ( i=min ; i<nbSectors ; ++i )
 				{
 					const PiePart &currentSector = pieChart.sector(i);
@@ -232,9 +231,9 @@ void PlotSectorHistogram::updateIntervals( const SectorHistogram &histogram)
 					_datasCurveIntervals->append(QwtPointPolar(currentSector.maxAngle(), histogram[i]));
 					curveHistogramIntervalsDatas.append(QwtIntervalSample( histogram[i],i,i+1));
 				}
-				_datasCurveIntervals->append(QwtPointPolar( pieChart.sector(max).maxAngle(), 0. ));
 			}
-			qDebug() << "  [ " << min << ", " << max << " ] => [" << pieChart.sector(min).minAngle()*RAD_TO_DEG_FACT << ", " << pieChart.sector(max).maxAngle()*RAD_TO_DEG_FACT << "] avec largeur = " << (max>min?max-min:360-min+max);
+			_datasCurveIntervals->append(QwtPointPolar( pieChart.sector(max).maxAngle(), 0. ));
+			qDebug() << "  [ " << min << ", " << max << " ] => [" << pieChart.sector(min).minAngle()*RAD_TO_DEG_FACT << ", " << pieChart.sector(max).maxAngle()*RAD_TO_DEG_FACT << "] avec largeur = " << (max>min?max-min:nbSectors-min+max);
 		}
 	}
 	_histogramIntervals.setSamples(curveHistogramIntervalsDatas);

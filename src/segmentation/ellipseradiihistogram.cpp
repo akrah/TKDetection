@@ -69,8 +69,8 @@ void EllipseRadiiHistogram::extrapolation( const Interval<uint> &validSlices, co
 
 	if ( !size ) return;
 
-	const int firstValidSliceIndex = validSlices.min()+validSlices.size()*(percentageOfFirstValidSlicesToExtrapolate/100.);
-	const int lastValidSliceIndex = validSlices.max()-validSlices.size()*(percentageOfLastValidSlicesToExtrapolate/100.);
+	const int firstValidSliceIndex = validSlices.min()+validSlices.count()*(percentageOfFirstValidSlicesToExtrapolate/100.);
+	const int lastValidSliceIndex = validSlices.max()-validSlices.count()*(percentageOfLastValidSlicesToExtrapolate/100.);
 
 	qreal compareZero, compareOne, compareTwo;
 

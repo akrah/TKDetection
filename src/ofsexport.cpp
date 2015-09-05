@@ -34,14 +34,14 @@ namespace OfsExport
 	void processOnPith( QTextStream &stream, const Billon &billon, const Interval<uint> &sliceInterval, const int &nbEdgesPerSlice, const int &radiusOfTubes, const bool &normalized )
 	{
 		computeAndWriteSectorEdges( stream, billon, nbEdgesPerSlice, radiusOfTubes, sliceInterval, Interval<qreal>(0,TWO_PI), normalized );
-		computeAndWriteEdgesLinks( stream, nbEdgesPerSlice, sliceInterval.width()+1, true );
+		computeAndWriteEdgesLinks( stream, nbEdgesPerSlice, sliceInterval.count(), true );
 	}
 
 	void processOnSector( QTextStream &stream, const Billon &billon, const int &nbEdgesPerSlice, const uint &radius, const Interval<uint> &sliceInterval,
 						  const Interval<qreal> &angleInterval, const bool &normalized )
 	{
 		computeAndWriteSectorEdges( stream, billon, nbEdgesPerSlice, radius, sliceInterval, angleInterval, normalized );
-		computeAndWriteEdgesLinks( stream, nbEdgesPerSlice, sliceInterval.width()+1, true );
+		computeAndWriteEdgesLinks( stream, nbEdgesPerSlice, sliceInterval.count(), true );
 	}
 
 	void processOnAllSectorInAllIntervals( QTextStream &stream, const Billon &billon, const uint &nbEdgesPerSlice, const uint &radius,
@@ -59,7 +59,7 @@ namespace OfsExport
 
 		for ( k=0 ; k<sliceIntervals.size() ; ++k )
 		{
-			const int nbSlices = sliceIntervals[k].size()+1;
+			const int nbSlices = sliceIntervals[k].count();
 			const uint nbPoints = nbEdgesPerSlice*nbSlices;
 
 			sumNbLinks += 2*(nbEdgesPerSlice+nbPoints);
@@ -107,7 +107,7 @@ namespace OfsExport
 								  const uint & circleResolution, const bool &normalized, const bool &displayBegEndFaces )
 	{
 		writeExportedVertex(stream, billon, vectVertex, sliceInterval, circleResolution, normalized, displayBegEndFaces);
-		computeAndWriteEdgesLinks( stream, circleResolution, sliceInterval.width()+1, displayBegEndFaces );
+		computeAndWriteEdgesLinks( stream, circleResolution, sliceInterval.count(), displayBegEndFaces );
 	}
 
 
@@ -119,7 +119,7 @@ namespace OfsExport
 		{
 			const int width = billon.n_cols;
 			const int height = billon.n_rows;
-			const qreal nbSlices = sliceInterval.width()+1;
+			const qreal nbSlices = sliceInterval.count();
 			const qreal depthShift = 1./( normalized ? qreal(nbSlices-1) : 1. );
 			const qreal angleShift = (angleInterval.min()<angleInterval.max()?angleInterval.max()-angleInterval.min():angleInterval.max()+TWO_PI-angleInterval.min())/(qreal)(nbEdges);
 			const rCoord2D norm = normalized ? rCoord2D(width,height) : rCoord2D(1.,1.);
@@ -181,7 +181,7 @@ namespace OfsExport
 			for ( i=0 ; i<sliceIntervals.size() ; ++i )
 			{
 				const Interval<uint> &sliceInterval = sliceIntervals[i];
-				const qreal nbSlices = sliceInterval.width()+1;
+				const qreal nbSlices = sliceInterval.count();
 
 				const QVector< Interval<qreal> > &angleIntervalsOfCurrentSliceInterval = angleIntervals[i];
 				for ( j=0 ; j<angleIntervalsOfCurrentSliceInterval.size() ; j++ )
@@ -227,7 +227,7 @@ namespace OfsExport
 		{
 			const int width = billon.n_cols;
 			const int height = billon.n_rows;
-			const qreal nbSlices = sliceInterval.width()+1;
+			const qreal nbSlices = sliceInterval.count();
 			const qreal depthShift = 1./(normalized ? (qreal)nbSlices : 1.);
 			int pos=0;
 

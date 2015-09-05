@@ -90,7 +90,7 @@ void KnotByZMotionMapDetector::computeKnotAreas()
 	// Binarized version of accumulationSlice with _binarizationThreshold threshold
 	Slice labelledSlice( _zMotionMap.n_rows, _zMotionMap.n_cols, arma::fill::zeros );
 	// List of connected components of thImage
-	QMap<int, QList<iCoord2D> > ccList;
+	QMap<int, QList<uiCoord2D> > ccList;
 	// Compute thImage as the binarized image of imageAcc using tBin
 	computeLabelledImage( _zMotionMap, labelledSlice, ccList );
 
@@ -98,7 +98,7 @@ void KnotByZMotionMapDetector::computeKnotAreas()
 	arma::uvec sortedPixelIndex = arma::sort_index(arma::vectorise(_zMotionMap), "descend");
 
 	// The support of each detected knot area
-	QMap<int, QList<iCoord2D> > supportingAreaMap;
+	QMap<int, QList<uiCoord2D> > supportingAreaMap;
 
 	// List of processed connected components of ccList
 	QList<int> ccProcessedList;
@@ -131,22 +131,22 @@ void KnotByZMotionMapDetector::computeKnotAreas()
 		}
 	}
 
-	QMapIterator<int, QList<iCoord2D> > supportingAreaMapIter(supportingAreaMap);
-	QRect supportingArea;
+	QMapIterator<int, QList<uiCoord2D> > supportingAreaMapIter(supportingAreaMap);
+	KnotArea supportingArea;
 	while ( supportingAreaMapIter.hasNext() )
 	{
 		supportingAreaMapIter.next();
 		if ( supportingAreaMapIter.value().size() >= (int)_minimumConnectedComponentSize )
 		{
-			QListIterator<iCoord2D> supportingAreaIter(supportingAreaMapIter.value());
+			QListIterator<uiCoord2D> supportingAreaIter(supportingAreaMapIter.value());
 			if ( supportingAreaIter.hasNext() )
 			{
-				const iCoord2D &firstCoord = supportingAreaIter.next();
-				supportingArea.setCoords( firstCoord.x, firstCoord.y, firstCoord.x, firstCoord.y );
+				const uiCoord2D &firstCoord = supportingAreaIter.next();
+				supportingArea.setBoundsFromSize( firstCoord.x, firstCoord.y, 1, 1 );
 				while ( supportingAreaIter.hasNext() )
 				{
-					const iCoord2D &coord = supportingAreaIter.next();
-					supportingArea.setCoords( qMin(supportingArea.left(), coord.x), qMin(supportingArea.top(), coord.y), qMax(supportingArea.right(), coord.x), qMax(supportingArea.bottom(), coord.y) );
+					const uiCoord2D &coord = supportingAreaIter.next();
+					supportingArea.setBounds( qMin(supportingArea.firstSlice(), coord.x), qMin(supportingArea.firstSector(), coord.y), qMax(supportingArea.lastSlice(), coord.x), qMax(supportingArea.lastSector(), coord.y) );
 				}
 				_knotAreas.append(supportingArea);
 			}
@@ -154,7 +154,7 @@ void KnotByZMotionMapDetector::computeKnotAreas()
 	}
 }
 
-void KnotByZMotionMapDetector::computeLabelledImage( const Slice &accumulationSlice, Slice &labelledSlice, QMap<int, QList<iCoord2D> > &ccList )
+void KnotByZMotionMapDetector::computeLabelledImage( const Slice &accumulationSlice, Slice &labelledSlice, QMap<int, QList<uiCoord2D> > &ccList )
 {
 	QMap<int, int> tableEquiv;
 	QList<int> voisinage;
@@ -234,32 +234,32 @@ void KnotByZMotionMapDetector::computeLabelledImage( const Slice &accumulationSl
 					labelledSlice(j,i) = tableEquiv[label];
 					label = labelledSlice(j,i);
 				}
-				if (!ccList.contains(label)) ccList[label] = QList<iCoord2D>();
-				ccList[label].append(iCoord2D(i,j));
+				if (!ccList.contains(label)) ccList[label] = QList<uiCoord2D>();
+				ccList[label].append(uiCoord2D(i,j));
 			}
 		}
 	}
 }
 
-int KnotByZMotionMapDetector::findNearestConnectedComponent( const QList<iCoord2D> &currentCC, const QMap<int, QList<iCoord2D> > &supportingAreaMap, qreal &minDist )
+int KnotByZMotionMapDetector::findNearestConnectedComponent( const QList<uiCoord2D> &currentCC, const QMap<int, QList<uiCoord2D> > &supportingAreaMap, qreal &minDist )
 {
 	qreal distance;
 	minDist = 999999;
 	int ccMin = -1;
 
-	QMapIterator< int, QList<iCoord2D> > supportingAreaMapIter(supportingAreaMap);
+	QMapIterator< int, QList<uiCoord2D> > supportingAreaMapIter(supportingAreaMap);
 	while ( supportingAreaMapIter.hasNext() )
 	{
 		supportingAreaMapIter.next();
 		int currentCCIndex = supportingAreaMapIter.key();
-		QListIterator<iCoord2D> currentSupportingAreaIter(supportingAreaMapIter.value());
+		QListIterator<uiCoord2D> currentSupportingAreaIter(supportingAreaMapIter.value());
 		while ( currentSupportingAreaIter.hasNext() )
 		{
-			const iCoord2D &comparedCoord = currentSupportingAreaIter.next();
-			QListIterator<iCoord2D> currentCCIter(currentCC);
+			const uiCoord2D &comparedCoord = currentSupportingAreaIter.next();
+			QListIterator<uiCoord2D> currentCCIter(currentCC);
 			while ( currentCCIter.hasNext() )
 			{
-				const iCoord2D &currentCoord = currentCCIter.next();
+				const uiCoord2D &currentCoord = currentCCIter.next();
 				distance = comparedCoord.euclideanDistance(currentCoord);
 				if ( distance < minDist )
 				{

@@ -25,8 +25,6 @@ SectorHistogram::~SectorHistogram()
 void SectorHistogram::construct( const Billon &billon, const Interval<uint> &sliceInterval, const Interval<int> &intensity,
 								 const uint &zMotionMin, const int &radiusAroundPith )
 {
-	Q_ASSERT_X( sliceInterval.isValid(), "void SectorHistogram::construct( ... )" , "L'interval de coupes n'est pas valide." );
-
 	clear();
 
 	if ( billon.hasPith() )

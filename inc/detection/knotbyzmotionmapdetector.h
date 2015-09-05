@@ -33,8 +33,8 @@ public:
 
 private:
 	void computeKnotAreas();
-	void computeLabelledImage( const Slice &accumulationSlice, Slice &labelledSlice , QMap<int, QList<iCoord2D> > &ccList );
-	int findNearestConnectedComponent(const QList<iCoord2D> &currentCC, const QMap<int, QList<iCoord2D> > &supportingAreaList , qreal &minDist );
+	void computeLabelledImage( const Slice &accumulationSlice, Slice &labelledSlice , QMap<int, QList<uiCoord2D> > &ccList );
+	int findNearestConnectedComponent(const QList<uiCoord2D> &currentCC, const QMap<int, QList<uiCoord2D> > &supportingAreaList , qreal &minDist );
 
 private:
 	Slice _zMotionMap;
