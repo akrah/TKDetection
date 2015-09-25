@@ -31,7 +31,7 @@ void KnotByWhorlDetector::computeKnotAreas()
 		const SectorHistogram &sectorHistogram = _sectorHistograms[k];
 		for ( i=0 ; i<sectorHistogram.nbIntervals() ; ++i )
 		{
-			qDebug() << "Interval " << i << " : [" << sectorHistogram.interval(i).min() << ", " << sectorHistogram.interval(i).max() << "]";
+//			qDebug() << "Interval " << i << " : [" << sectorHistogram.interval(i).min() << ", " << sectorHistogram.interval(i).max() << "]";
 			const Interval<uint> &sectorInterval = sectorHistogram.interval(i);
 			maxValIndex = sectorHistogram.maximumIndex(i);
 			angularWidth = sectorInterval.width();

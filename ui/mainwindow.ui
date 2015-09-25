@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>668</width>
-    <height>619</height>
+    <height>675</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -304,7 +304,7 @@
      <x>0</x>
      <y>0</y>
      <width>668</width>
-     <height>25</height>
+     <height>29</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFichier">
@@ -340,7 +340,7 @@
      <item row="1" column="0">
       <widget class="QTabWidget" name="_tabs">
        <property name="currentIndex">
-        <number>5</number>
+        <number>2</number>
        </property>
        <widget class="QWidget" name="tab_4">
         <attribute name="title">
@@ -414,8 +414,8 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>308</width>
-              <height>238</height>
+              <width>312</width>
+              <height>262</height>
              </rect>
             </property>
             <attribute name="label">
@@ -524,8 +524,8 @@ du repère polaire</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>308</width>
-              <height>238</height>
+              <width>268</width>
+              <height>204</height>
              </rect>
             </property>
             <attribute name="label">
@@ -718,7 +718,7 @@ zone restreinte</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>204</width>
+              <width>196</width>
               <height>66</height>
              </rect>
             </property>
@@ -777,7 +777,7 @@ zone restreinte</string>
          <item>
           <widget class="QToolBox" name="toolBox_4">
            <property name="currentIndex">
-            <number>0</number>
+            <number>1</number>
            </property>
            <widget class="QWidget" name="page_7">
             <property name="geometry">
@@ -785,7 +785,7 @@ zone restreinte</string>
               <x>0</x>
               <y>0</y>
               <width>424</width>
-              <height>305</height>
+              <height>342</height>
              </rect>
             </property>
             <attribute name="label">
@@ -981,8 +981,8 @@ sur une coupe valide</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>417</width>
-              <height>292</height>
+              <width>421</width>
+              <height>326</height>
              </rect>
             </property>
             <attribute name="label">
@@ -1247,8 +1247,8 @@ sur une coupe valide</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>392</width>
-              <height>205</height>
+              <width>377</width>
+              <height>233</height>
              </rect>
             </property>
             <attribute name="label">
@@ -1470,9 +1470,9 @@ sur une coupe valide</string>
             <property name="geometry">
              <rect>
               <x>0</x>
-              <y>-19</y>
-              <width>392</width>
-              <height>240</height>
+              <y>0</y>
+              <width>377</width>
+              <height>266</height>
              </rect>
             </property>
             <attribute name="label">
@@ -1747,8 +1747,8 @@ sur une coupe valide</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>308</width>
-              <height>207</height>
+              <width>186</width>
+              <height>49</height>
              </rect>
             </property>
             <attribute name="label">
@@ -1791,8 +1791,8 @@ sur une coupe valide</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>308</width>
-              <height>207</height>
+              <width>312</width>
+              <height>227</height>
              </rect>
             </property>
             <attribute name="label">
@@ -2311,8 +2311,8 @@ zone de nœuds</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>381</width>
-              <height>86</height>
+              <width>366</width>
+              <height>94</height>
              </rect>
             </property>
             <attribute name="label">
@@ -2402,8 +2402,8 @@ zone de nœuds</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>323</width>
-              <height>176</height>
+              <width>315</width>
+              <height>191</height>
              </rect>
             </property>
             <attribute name="label">
@@ -2611,8 +2611,8 @@ zone de nœuds</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>340</width>
-              <height>154</height>
+              <width>331</width>
+              <height>172</height>
              </rect>
             </property>
             <attribute name="label">
@@ -2800,8 +2800,8 @@ zone de nœuds</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>265</width>
-              <height>83</height>
+              <width>258</width>
+              <height>90</height>
              </rect>
             </property>
             <attribute name="label">
@@ -2866,8 +2866,8 @@ zone de nœuds</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>343</width>
-              <height>111</height>
+              <width>334</width>
+              <height>122</height>
              </rect>
             </property>
             <attribute name="label">
@@ -2965,8 +2965,8 @@ zone de nœuds</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>210</width>
-              <height>44</height>
+              <width>203</width>
+              <height>47</height>
              </rect>
             </property>
             <attribute name="label">
@@ -3006,8 +3006,8 @@ zone de nœuds</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>350</width>
-              <height>139</height>
+              <width>341</width>
+              <height>151</height>
              </rect>
             </property>
             <attribute name="label">

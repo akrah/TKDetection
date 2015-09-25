@@ -266,7 +266,7 @@ void Histogram<T>::computeMaximums( const bool & loop )
 				copy << (*this)[i];
 			}
 			copy << (*this);
-			for ( int i=0 ; i<neighborhoodOfMaximums ; ++i )
+			for ( uint i=0 ; i<neighborhoodOfMaximums ; ++i )
 			{
 				copy << (*this)[i];
 			}
@@ -278,7 +278,7 @@ void Histogram<T>::computeMaximums( const bool & loop )
 				copy << (*this)[0];
 			}
 			copy << (*this);
-			for ( int i=0 ; i<neighborhoodOfMaximums ; ++i )
+			for ( uint i=0 ; i<neighborhoodOfMaximums ; ++i )
 			{
 				copy << (*this)[size-1];
 			}

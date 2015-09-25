@@ -114,7 +114,7 @@ void PlotSliceHistogram::updateIntervals( const Histogram<qreal> & histogram )
 		uint i, min, max;
 		QVector< Interval<uint> >::ConstIterator begin = histogram.intervals().begin();
 		const QVector< Interval<uint> >::ConstIterator end = histogram.intervals().end();
-		qDebug() << "Intervalles de nœuds :";
+//		qDebug() << "Intervalles de nœuds :";
 		while ( begin != end )
 		{
 			min = (*begin).min();
@@ -124,7 +124,7 @@ void PlotSliceHistogram::updateIntervals( const Histogram<qreal> & histogram )
 				dataIntervals.append(QwtIntervalSample(histogram[i],i,i+1));
 			}
 			begin++;
-			qDebug() << "  [ " << min << ", " << max << " ] avec largeur = " << max-min;
+//			qDebug() << "  [ " << min << ", " << max << " ] avec largeur = " << max-min;
 		}
 	}
 	_histogramIntervals.setSamples(dataIntervals);

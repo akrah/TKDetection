@@ -121,25 +121,21 @@ void EllipseRadiiHistogram::outlierInterpolation( const QVector<qreal> &residus,
 	int startSliceIndex, newK, startSliceIndexMinusOne;
 	qreal interpolationStep, currentInterpolatedRadius;
 
-	for ( int k=0 ; k<size ; ++k )
+	for ( int k=1 ; k<size-1 ; ++k )
 	{
 		if ( !inlierInterval.containsOpen(residus[k]) )
 		{
 			startSliceIndex = k++;
-			startSliceIndexMinusOne = startSliceIndex?startSliceIndex-1:0;
+			startSliceIndexMinusOne = startSliceIndex-1;
 
-			while ( k<size && !inlierInterval.containsOpen(residus[k]) ) ++k;
-			--k;
+			while ( k<size-1 && !inlierInterval.containsOpen(residus[k]) ) ++k;
 			k = qMin(k,size-2);
 
-			qDebug() << "Outlier interpolation [" << startSliceIndex << ", " << k << "]";
+//			qDebug() << "Outlier interpolation [" << startSliceIndex << ", " << k << "]";
 
-			interpolationStep = startSliceIndex && k<size-1 ? ((*this)[k+1] - (*this)[startSliceIndexMinusOne]) / static_cast<qreal>( k+1-startSliceIndexMinusOne )
-															: (*this)[k+1] / static_cast<qreal>( k+1 );
-
-			currentInterpolatedRadius = startSliceIndex && k<size-1 ? (*this)[startSliceIndexMinusOne] + interpolationStep
-																	: 0.;
-			for ( newK = startSliceIndex ; newK <= k ; ++newK, currentInterpolatedRadius += interpolationStep )
+			interpolationStep = ((*this)[k] - (*this)[startSliceIndexMinusOne]) / static_cast<qreal>( k-startSliceIndexMinusOne );
+			currentInterpolatedRadius = (*this)[startSliceIndexMinusOne] + interpolationStep;
+			for ( newK = startSliceIndex ; newK < k ; ++newK, currentInterpolatedRadius += interpolationStep )
 			{
 				(*this)[newK] = currentInterpolatedRadius;
 			}

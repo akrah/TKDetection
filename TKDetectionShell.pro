@@ -38,7 +38,7 @@ TRANSLATIONS	= TKDetection_en.ts
 
 # Fichiers
 #---------#
-SOURCES	=	src/main.cpp \
+SOURCES	=	src/mainshell.cpp \
 			src/billonalgorithms.cpp \
 			src/detection/knotareadetector.cpp \
 			src/detection/knotbywhorldetector.cpp \
