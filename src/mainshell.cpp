@@ -15,66 +15,66 @@
 #include "inc/segmentation/pithprofile.h"
 #include "inc/segmentation/ellipseradiihistogram.h"
 
+/*********************************************************
+ * Déclaration des strctures pour les paramètres des algos
+ * *******************************************************/
 struct Params_Global {
 	int minIntensity = MINIMUM_INTENSITY;
 	int maxIntensity = MAXIMUM_INTENSITY;
 	int minZMotion = MINIMUM_Z_MOTION;
-};
+} p_global;
 
 struct Params_PithDetectionBillon {
-	int minIntensity = MINIMUM_INTENSITY;
-	int maxIntensity = MAXIMUM_INTENSITY;
-	int minZMotion = MINIMUM_Z_MOTION;
-	int subWindowWidth = NEIGHBORHOOD_WINDOW_WIDTH_BILLON ;
-	int subWindowHeight = NEIGHBORHOOD_WINDOW_HEIGHT_BILLON ;
-	int pithShift = PITH_LAG_BILLON ;
-	int smoothingRadius = PITH_SMOOTHING_BILLON ;
-	int minimumWoodPercentage = MIN_WOOD_PERCENTAGE_BILLON ;
-	bool useAscendingOrder = ASCENDING_ORDER_BILLON ;
-	bool useExtrapolation = TKD::LINEAR ;
-};
-
+	int subWindowWidth = NEIGHBORHOOD_WINDOW_WIDTH_BILLON;
+	int subWindowHeight = NEIGHBORHOOD_WINDOW_HEIGHT_BILLON;
+	int pithShift = PITH_LAG_BILLON;
+	int smoothingRadius = PITH_SMOOTHING_BILLON;
+	int minimumWoodPercentage = MIN_WOOD_PERCENTAGE_BILLON;
+	bool useAscendingOrder = ASCENDING_ORDER_BILLON;
+	int extrapolationType = TKD::LINEAR;
+	int percentageOfFirstValidSlicesToExtrapolate = 0;
+	int percentageOfLastValidSlicesToExtrapolate = 0;
+} p_pithDetectionBillon;
 
 struct Params_RestrictedArea {
 	int nbDirections = RESTRICTED_AREA_DEFAULT_RESOLUTION;
 	int barkValue = MINIMUM_INTENSITY;
 	int minRadius = 5;
-};
+} p_restrictedArea;
 
 struct Params_SliceHistogram {
 	int smoothingRadius = HISTOGRAM_SMOOTHING_RADIUS;
 	int minimumHeightOfMaximums = HISTOGRAM_PERCENTAGE_OF_MINIMUM_HEIGHT_OF_MAXIMUM;
 	int derivativeSearchPercentage = HISTOGRAM_DERIVATIVE_SEARCH_PERCENTAGE;
 	int minimumWidthOfIntervals = HISTOGRAM_MINIMUM_WIDTH_OF_INTERVALS;
-};
+} p_sliceHistogram;
 
 struct Params_SectorHistogram {
 	int smoothingRadius = HISTOGRAM_ANGULAR_SMOOTHING_RADIUS;
 	int minimumHeightOfMaximums = HISTOGRAM_ANGULAR_PERCENTAGE_OF_MINIMUM_HEIGHT_OF_MAXIMUM;
 	int derivativeSearchPercentage = HISTOGRAM_ANGULAR_DERIVATIVE_SEARCH_PERCENTAGE;
 	int minimumWidthOfIntervals = HISTOGRAM_ANGULAR_MINIMUM_WIDTH_OF_INTERVALS;
-};
+} p_sectorHistogram;
 
 struct Params_PithDetectionKnot {
-	int subWindowWidth = NEIGHBORHOOD_WINDOW_WIDTH_KNOT ;
-	int subWindowHeight = NEIGHBORHOOD_WINDOW_HEIGHT_KNOT ;
-	int pithShift = PITH_LAG_KNOT ;
-	int smoothingRadius = PITH_SMOOTHING_KNOT ;
-	int minimumWoodPercentage = MIN_WOOD_PERCENTAGE_KNOT ;
-	bool useAscendingOrder = ASCENDING_ORDER_KNOT ;
-	bool useExtrapolation = TKD::SLOPE_DIRECTION ;
-	int percentageOfFirstValidSlicesToExtrapolate = FIRST_VALID_SLICES_TO_EXTRAPOLATE_KNOT ;
-	int percentageOfLastValidSlicesToExtrapolate = LAST_VALID_SLICES_TO_EXTRAPOLATE_KNOT ;
-};
+	int subWindowWidth = NEIGHBORHOOD_WINDOW_WIDTH_KNOT;
+	int subWindowHeight = NEIGHBORHOOD_WINDOW_HEIGHT_KNOT;
+	int pithShift = PITH_LAG_KNOT;
+	int smoothingRadius = PITH_SMOOTHING_KNOT;
+	int minimumWoodPercentage = MIN_WOOD_PERCENTAGE_KNOT;
+	bool useAscendingOrder = ASCENDING_ORDER_KNOT;
+	int extrapolationType = TKD::SLOPE_DIRECTION;
+	int percentageOfFirstValidSlicesToExtrapolate = FIRST_VALID_SLICES_TO_EXTRAPOLATE_KNOT;
+	int percentageOfLastValidSlicesToExtrapolate = LAST_VALID_SLICES_TO_EXTRAPOLATE_KNOT;
+} p_pithDetectionKnot;
 
 struct Params_TangentialGenerator {
 	bool useTrilinearInterpolation = true;
-};
+} p_tangentialGenerator;
 
 struct Params_PithProfile {
 	int smoothingRadius = 2;
-};
-
+} p_pithProfile;
 
 struct Params_EllipticalHistograms {
 	int lowessBandWidth = 33;
@@ -82,8 +82,12 @@ struct Params_EllipticalHistograms {
 	int lowessPercentageOfFirstValidSlicesToExtrapolate = 5;
 	int lowessPercentageOfLastValidSlicesToExtrapolate = 0;
 	int smoothingRadius = 0;
-};
+} p_ellipticalHistograms;
 
+
+/**************************************************
+ * Déclaration des fonctions appellées dans le main
+ * ************************************************/
 void computeBillonPith( Billon& billon, qreal &treeRadius );
 void detectKnotsByWhorls( const Billon &billon , KnotAreaDetector* knotByWhorlDetector, const qreal &treeRadius );
 void segmentKnots( const Billon &billon, const KnotAreaDetector &detector );
@@ -91,6 +95,10 @@ Billon* segmentKnotArea( const Billon &billon, const KnotArea &supportingArea,
 						 const PieChart& pieChart, TangentialGenerator &tangentialGenerator,
 						 PithExtractorBoukadida& knotPithExtractor );
 
+
+/*********************
+ * Fonciton principale
+ * *******************/
 int main( int argc, char *argv[] )
 {
 	QTextCodec::setCodecForTr(QTextCodec::codecForName("UTF-8"));
@@ -100,65 +108,63 @@ int main( int argc, char *argv[] )
 	qDebug() << "1) Lecture es paramètres...";
 	QSettings settings("tkd_shell.ini",QSettings::IniFormat);
 
-	Params_Global::minIntensity = MINIMUM_INTENSITY;
-	Params_Global::maxIntensity = MAXIMUM_INTENSITY;
-	Params_Global::minZMotion = MINIMUM_Z_MOTION;
+	p_global.minIntensity = settings.value("General/minIntensity",MINIMUM_INTENSITY).toInt();
+	p_global.maxIntensity = settings.value("General/",MAXIMUM_INTENSITY).toInt();
+	p_global.minZMotion = settings.value("General/",MINIMUM_Z_MOTION).toInt();
 
-	Params_PithDetectionBillon::subWindowWidth = NEIGHBORHOOD_WINDOW_WIDTH_BILLON ;
-	Params_PithDetectionBillon::subWindowHeight = NEIGHBORHOOD_WINDOW_HEIGHT_BILLON ;
-	Params_PithDetectionBillon::pithShift = PITH_LAG_BILLON ;
-	Params_PithDetectionBillon::smoothingRadius = PITH_SMOOTHING_BILLON ;
-	Params_PithDetectionBillon::minimumWoodPercentage = MIN_WOOD_PERCENTAGE_BILLON ;
-	Params_PithDetectionBillon::useAscendingOrder = ASCENDING_ORDER_BILLON ;
-	Params_PithDetectionBillon::useExtrapolation = TKD::LINEAR ;
+	p_pithDetectionBillon.subWindowWidth = settings.value("PithDetectionBillon/subWindowWidth",NEIGHBORHOOD_WINDOW_WIDTH_BILLON).toInt();
+	p_pithDetectionBillon.subWindowHeight = settings.value("PithDetectionBillon/subWindowHeight",NEIGHBORHOOD_WINDOW_HEIGHT_BILLON).toInt();
+	p_pithDetectionBillon.pithShift = settings.value("PithDetectionBillon/pithShift",PITH_LAG_BILLON).toInt();
+	p_pithDetectionBillon.smoothingRadius = settings.value("PithDetectionBillon/smoothingRadius",PITH_SMOOTHING_BILLON).toInt();
+	p_pithDetectionBillon.minimumWoodPercentage = settings.value("PithDetectionBillon/minimumWoodPercentage",MIN_WOOD_PERCENTAGE_BILLON).toInt();
+	p_pithDetectionBillon.useAscendingOrder = settings.value("PithDetectionBillon/useAscendingOrder",ASCENDING_ORDER_BILLON).toBool();
+	p_pithDetectionBillon.extrapolationType = settings.value("PithDetectionBillon/extrapolationType",TKD::LINEAR).toInt();
+	p_pithDetectionBillon.percentageOfFirstValidSlicesToExtrapolate = settings.value("PithDetectionBillon/percentageOfFirstValidSlicesToExtrapolate",0).toInt();
+	p_pithDetectionBillon.percentageOfLastValidSlicesToExtrapolate = settings.value("PithDetectionBillon/percentageOfLastValidSlicesToExtrapolate",0).toInt();
 
-	Params_RestrictedArea::nbDirections = RESTRICTED_AREA_DEFAULT_RESOLUTION;
-	Params_RestrictedArea::barkValue = MINIMUM_INTENSITY;
-	Params_RestrictedArea::minRadius = 5;
+	p_restrictedArea.nbDirections = settings.value("RestrictedArea/nbDirections",RESTRICTED_AREA_DEFAULT_RESOLUTION).toInt();
+	p_restrictedArea.barkValue = settings.value("RestrictedArea/barkValue",MINIMUM_INTENSITY).toInt();
+	p_restrictedArea.minRadius = settings.value("RestrictedArea/minRadius",5).toInt();
 
-	Params_SliceHistogram::smoothingRadius = HISTOGRAM_SMOOTHING_RADIUS;
-	Params_SliceHistogram::minimumHeightOfMaximums = HISTOGRAM_PERCENTAGE_OF_MINIMUM_HEIGHT_OF_MAXIMUM;
-	Params_SliceHistogram::derivativeSearchPercentage = HISTOGRAM_DERIVATIVE_SEARCH_PERCENTAGE;
-	Params_SliceHistogram::minimumWidthOfIntervals = HISTOGRAM_MINIMUM_WIDTH_OF_INTERVALS;
+	p_sliceHistogram.smoothingRadius = settings.value("SliceHistogram/smoothingRadius",HISTOGRAM_SMOOTHING_RADIUS).toInt();
+	p_sliceHistogram.minimumHeightOfMaximums = settings.value("SliceHistogram/minimumHeightOfMaximums",HISTOGRAM_PERCENTAGE_OF_MINIMUM_HEIGHT_OF_MAXIMUM).toInt();
+	p_sliceHistogram.derivativeSearchPercentage = settings.value("SliceHistogram/derivativeSearchPercentage",HISTOGRAM_DERIVATIVE_SEARCH_PERCENTAGE).toInt();
+	p_sliceHistogram.minimumWidthOfIntervals = settings.value("SliceHistogram/minimumWidthOfIntervals",HISTOGRAM_MINIMUM_WIDTH_OF_INTERVALS).toInt();
 
-	Params_SectorHistogram::smoothingRadius = HISTOGRAM_ANGULAR_SMOOTHING_RADIUS;
-	Params_SectorHistogram::minimumHeightOfMaximums = HISTOGRAM_ANGULAR_PERCENTAGE_OF_MINIMUM_HEIGHT_OF_MAXIMUM;
-	Params_SectorHistogram::derivativeSearchPercentage = HISTOGRAM_ANGULAR_DERIVATIVE_SEARCH_PERCENTAGE;
-	Params_SectorHistogram::minimumWidthOfIntervals = HISTOGRAM_ANGULAR_MINIMUM_WIDTH_OF_INTERVALS;
+	p_sectorHistogram.smoothingRadius = settings.value("SectorHistogram/smoothingRadius",HISTOGRAM_ANGULAR_SMOOTHING_RADIUS).toInt();
+	p_sectorHistogram.minimumHeightOfMaximums = settings.value("SectorHistogram/minimumHeightOfMaximums",HISTOGRAM_ANGULAR_PERCENTAGE_OF_MINIMUM_HEIGHT_OF_MAXIMUM).toInt();
+	p_sectorHistogram.derivativeSearchPercentage = settings.value("SectorHistogram/derivativeSearchPercentage",HISTOGRAM_ANGULAR_DERIVATIVE_SEARCH_PERCENTAGE).toInt();
+	p_sectorHistogram.minimumWidthOfIntervals = settings.value("SectorHistogram/minimumWidthOfIntervals",HISTOGRAM_ANGULAR_MINIMUM_WIDTH_OF_INTERVALS).toInt();
 
-	Params_PithDetectionKnot::subWindowWidth = NEIGHBORHOOD_WINDOW_WIDTH_KNOT ;
-	Params_PithDetectionKnot::subWindowHeight = NEIGHBORHOOD_WINDOW_HEIGHT_KNOT ;
-	Params_PithDetectionKnot::pithShift = PITH_LAG_KNOT ;
-	Params_PithDetectionKnot::smoothingRadius = PITH_SMOOTHING_KNOT ;
-	Params_PithDetectionKnot::minimumWoodPercentage = MIN_WOOD_PERCENTAGE_KNOT ;
-	Params_PithDetectionKnot::useAscendingOrder = ASCENDING_ORDER_KNOT ;
-	Params_PithDetectionKnot::useExtrapolation = TKD::SLOPE_DIRECTION ;
-	Params_PithDetectionKnot::percentageOfFirstValidSlicesToExtrapolate = FIRST_VALID_SLICES_TO_EXTRAPOLATE_KNOT ;
-	Params_PithDetectionKnot::percentageOfLastValidSlicesToExtrapolate = LAST_VALID_SLICES_TO_EXTRAPOLATE_KNOT ;
+	p_pithDetectionKnot.subWindowWidth = settings.value("PithDetectionKnot/subWindowWidth",NEIGHBORHOOD_WINDOW_WIDTH_KNOT).toInt();
+	p_pithDetectionKnot.subWindowHeight = settings.value("PithDetectionKnot/subWindowHeight",NEIGHBORHOOD_WINDOW_HEIGHT_KNOT).toInt();
+	p_pithDetectionKnot.pithShift = settings.value("PithDetectionKnot/pithShift",PITH_LAG_KNOT).toInt();
+	p_pithDetectionKnot.smoothingRadius = settings.value("PithDetectionKnot/smoothingRadius",PITH_SMOOTHING_KNOT).toInt();
+	p_pithDetectionKnot.minimumWoodPercentage = settings.value("PithDetectionKnot/minimumWoodPercentage",MIN_WOOD_PERCENTAGE_KNOT).toInt();
+	p_pithDetectionKnot.useAscendingOrder = settings.value("PithDetectionKnot/useAscendingOrder",ASCENDING_ORDER_KNOT).toBool();
+	p_pithDetectionKnot.extrapolationType = settings.value("PithDetectionKnot/extrapolationType",TKD::SLOPE_DIRECTION).toInt();
+	p_pithDetectionKnot.percentageOfFirstValidSlicesToExtrapolate = settings.value("PithDetectionKnot/percentageOfFirstValidSlicesToExtrapolate",FIRST_VALID_SLICES_TO_EXTRAPOLATE_KNOT).toInt();
+	p_pithDetectionKnot.percentageOfLastValidSlicesToExtrapolate = settings.value("PithDetectionKnot/percentageOfLastValidSlicesToExtrapolate",LAST_VALID_SLICES_TO_EXTRAPOLATE_KNOT).toInt();
 
-	Params_TangentialGenerator::useTrilinearInterpolation = true;
+	p_tangentialGenerator.useTrilinearInterpolation = settings.value("TangentialGenerator/useTrilinearInterpolation",true).toBool();
 
-	Params_PithProfile::smoothingRadius = 2;
+	p_pithProfile.smoothingRadius = settings.value("PithProfile/smoothingRadius",2).toInt();
 
-	Params_EllipticalHistograms::lowessBandWidth = 33;
-	Params_EllipticalHistograms::lowessIqrCoefficient  = 1;
-	Params_EllipticalHistograms::lowessPercentageOfFirstValidSlicesToExtrapolate = 5;
-	Params_EllipticalHistograms::lowessPercentageOfLastValidSlicesToExtrapolate = 0;
-	Params_EllipticalHistograms::smoothingRadius = 0;
-
-	return 0;
+	p_ellipticalHistograms.lowessBandWidth = settings.value("EllipticalHistograms/lowessBandWidth",33).toInt();
+	p_ellipticalHistograms.lowessIqrCoefficient  = settings.value("EllipticalHistograms/lowessIqrCoefficient ",1).toInt();
+	p_ellipticalHistograms.lowessPercentageOfFirstValidSlicesToExtrapolate = settings.value("EllipticalHistograms/lowessPercentageOfFirstValidSlicesToExtrapolate",5).toInt();
+	p_ellipticalHistograms.lowessPercentageOfLastValidSlicesToExtrapolate = settings.value("EllipticalHistograms/lowessPercentageOfLastValidSlicesToExtrapolate",0).toInt();
+	p_ellipticalHistograms.smoothingRadius = settings.value("EllipticalHistograms/smoothingRadius",0).toInt();
 
 	Billon *_billon = 0;
-	KnotAreaDetector* _knotByWhorlDetector = new KnotByWhorlDetector;
 
 	/********************************************************************/
-	qDebug() << "1) Lecture du dicom...";
+	qDebug() << "2) Lecture du dicom...";
 
-	QString folderName("/home/akrah/LaBRI/Images/PoumonsIRM/TEST_GD2/1/8/");
+	QString folderName("plop");
 	if ( folderName.isEmpty() )
 	{
 		qDebug() << "ERREUR : le répertoire spécifié n'existe pas.";
-		delete _knotByWhorlDetector;
 		return 1;
 	}
 
@@ -166,33 +172,32 @@ int main( int argc, char *argv[] )
 	if ( !_billon )
 	{
 		qDebug() << "ERREUR : le chargement de l'image a échoué.";
-		delete _knotByWhorlDetector;
 		return 2;
 	}
 
 	/********************************************************************/
-	qDebug() << "2) Calcul de la moelle du tronc...";
+	qDebug() << "3) Calcul de la moelle du tronc...";
 
 	qreal _treeRadius;
-
 	computeBillonPith( *_billon, _treeRadius );
+
 	if ( !_billon->hasPith() )
 	{
 		qDebug() << "ERREUR : la moelle du tronc n'a pas pu être calculée.";
 		delete _billon;
-		delete _knotByWhorlDetector;
 		return 3;
 	}
 
 	/********************************************************************/
-	qDebug() << "2) Détection des zones de nœuds...";
+	qDebug() << "4) Détection des zones de nœuds...";
 
+	KnotAreaDetector* _knotByWhorlDetector = new KnotByWhorlDetector;
 	detectKnotsByWhorls( *_billon, _knotByWhorlDetector, _treeRadius );
 
 	/********************************************************************/
-	qDebug() << "2) Segmentation des zones de nœuds...";
+	qDebug() << "5) Segmentation des zones de nœuds...";
 
-	segmentKnots(*_billon,*_knotByWhorlDetector);
+	segmentKnots( *_billon,*_knotByWhorlDetector );
 
 	/********************************************************************/
 	qDebug() << "";
@@ -207,69 +212,68 @@ int main( int argc, char *argv[] )
 	return 0;
 }
 
+/****************************************************
+ * Implémentation des fonctions appellées par le main
+ * **************************************************/
 void computeBillonPith( Billon& billon, qreal &treeRadius )
 {
 	 PithExtractorBoukadida _billonPithExtractor;
 
-	_billonPithExtractor.setSubWindowWidth( NEIGHBORHOOD_WINDOW_WIDTH_BILLON );
-	_billonPithExtractor.setSubWindowHeight( NEIGHBORHOOD_WINDOW_HEIGHT_BILLON );
-	_billonPithExtractor.setPithShift( PITH_LAG_BILLON );
-	_billonPithExtractor.setSmoothingRadius( PITH_SMOOTHING_BILLON );
-	_billonPithExtractor.setMinWoodPercentage( MIN_WOOD_PERCENTAGE_BILLON );
-	_billonPithExtractor.setIntensityInterval( Interval<int>( MINIMUM_INTENSITY, MAXIMUM_INTENSITY ) );
-	_billonPithExtractor.setAscendingOrder( ASCENDING_ORDER_BILLON );
-	_billonPithExtractor.setExtrapolation( TKD::LINEAR );
-	_billonPithExtractor.setFirstValidSlicesToExtrapolate( FIRST_VALID_SLICES_TO_EXTRAPOLATE_BILLON );
-	_billonPithExtractor.setLastValidSlicesToExtrapolate( LAST_VALID_SLICES_TO_EXTRAPOLATE_BILLON );
+	_billonPithExtractor.setSubWindowWidth( p_pithDetectionBillon.subWindowWidth );
+	_billonPithExtractor.setSubWindowHeight( p_pithDetectionBillon.subWindowHeight );
+	_billonPithExtractor.setPithShift( p_pithDetectionBillon.pithShift );
+	_billonPithExtractor.setSmoothingRadius( p_pithDetectionBillon.smoothingRadius );
+	_billonPithExtractor.setMinWoodPercentage( p_pithDetectionBillon.minimumWoodPercentage );
+	_billonPithExtractor.setIntensityInterval( Interval<int>( p_global.minIntensity, p_global.maxIntensity ) );
+	_billonPithExtractor.setAscendingOrder( p_pithDetectionBillon.useAscendingOrder );
+	_billonPithExtractor.setExtrapolation( static_cast<TKD::ExtrapolationType>(p_pithDetectionBillon.extrapolationType) );
+	_billonPithExtractor.setFirstValidSlicesToExtrapolate( p_pithDetectionBillon.percentageOfFirstValidSlicesToExtrapolate );
+	_billonPithExtractor.setLastValidSlicesToExtrapolate( p_pithDetectionBillon.percentageOfLastValidSlicesToExtrapolate );
 
 	_billonPithExtractor.process( billon );
 
-	treeRadius = BillonAlgorithms::restrictedAreaMeansRadius(billon,
-															 RESTRICTED_AREA_DEFAULT_RESOLUTION,
-															 RESTRICTED_AREA_DEFAULT_THRESHOLD,
-															 5*billon.n_cols/100.);
+	treeRadius = BillonAlgorithms::restrictedAreaMeansRadius( billon,
+															  p_restrictedArea.nbDirections,
+															  p_restrictedArea.barkValue,
+															  p_restrictedArea.minRadius*billon.n_cols/100.);
 }
 
 void detectKnotsByWhorls( const Billon &billon, KnotAreaDetector* knotByWhorlDetector, const qreal &treeRadius )
 {
-	knotByWhorlDetector->setIntensityInterval( Interval<int>(MINIMUM_INTENSITY,MAXIMUM_INTENSITY) );
-	knotByWhorlDetector->setZMotionMin( MINIMUM_Z_MOTION );
+	knotByWhorlDetector->setIntensityInterval( Interval<int>(p_global.minIntensity,p_global.maxIntensity) );
+	knotByWhorlDetector->setZMotionMin( p_global.minZMotion );
 	knotByWhorlDetector->setTreeRadius( treeRadius );
 	static_cast<KnotByWhorlDetector*>(knotByWhorlDetector)->setSliceHistogramParameters(
-				HISTOGRAM_SMOOTHING_RADIUS,
-				HISTOGRAM_PERCENTAGE_OF_MINIMUM_HEIGHT_OF_MAXIMUM,
-				HISTOGRAM_DERIVATIVE_SEARCH_PERCENTAGE,
-				HISTOGRAM_MINIMUM_WIDTH_OF_INTERVALS);
+				p_sliceHistogram.smoothingRadius,
+				p_sliceHistogram.minimumHeightOfMaximums,
+				p_sliceHistogram.derivativeSearchPercentage,
+				p_sliceHistogram.minimumWidthOfIntervals);
 
 	const qreal coeffDegToSize = knotByWhorlDetector->pieChart().nbSectors()/360.;
 	static_cast<KnotByWhorlDetector*>(knotByWhorlDetector)->setSectorHistogramsParameters(
-				HISTOGRAM_ANGULAR_SMOOTHING_RADIUS*coeffDegToSize,
-				HISTOGRAM_ANGULAR_PERCENTAGE_OF_MINIMUM_HEIGHT_OF_MAXIMUM,
-				HISTOGRAM_ANGULAR_DERIVATIVE_SEARCH_PERCENTAGE,
-				HISTOGRAM_ANGULAR_MINIMUM_WIDTH_OF_INTERVALS*coeffDegToSize);
+				p_sectorHistogram.smoothingRadius*coeffDegToSize,
+				p_sectorHistogram.minimumHeightOfMaximums,
+				p_sectorHistogram.derivativeSearchPercentage,
+				p_sectorHistogram.minimumWidthOfIntervals*coeffDegToSize);
 
 	knotByWhorlDetector->execute( billon );
 }
 
 void segmentKnots( const Billon &billon, const KnotAreaDetector &detector )
 {
-	const bool enableTrilinearInterpolation = true;
-
-	TangentialGenerator tangentialGenerator(-900, true);
-	tangentialGenerator.enableTrilinearInterpolation( enableTrilinearInterpolation );
-	tangentialGenerator.setMinIntensity( MINIMUM_INTENSITY );
+	TangentialGenerator tangentialGenerator( p_global.minIntensity, p_tangentialGenerator.useTrilinearInterpolation );
 
 	PithExtractorBoukadida knotPithExtractor;
-	knotPithExtractor.setSubWindowWidth( NEIGHBORHOOD_WINDOW_WIDTH_KNOT );
-	knotPithExtractor.setSubWindowHeight( NEIGHBORHOOD_WINDOW_HEIGHT_KNOT );
-	knotPithExtractor.setPithShift( PITH_LAG_KNOT );
-	knotPithExtractor.setSmoothingRadius( PITH_SMOOTHING_KNOT );
-	knotPithExtractor.setMinWoodPercentage( MIN_WOOD_PERCENTAGE_KNOT );
-	knotPithExtractor.setIntensityInterval( Interval<int>( MINIMUM_INTENSITY, MAXIMUM_INTENSITY ) );
-	knotPithExtractor.setAscendingOrder( ASCENDING_ORDER_KNOT );
-	knotPithExtractor.setExtrapolation( TKD::SLOPE_DIRECTION );
-	knotPithExtractor.setFirstValidSlicesToExtrapolate( FIRST_VALID_SLICES_TO_EXTRAPOLATE_KNOT );
-	knotPithExtractor.setLastValidSlicesToExtrapolate( LAST_VALID_SLICES_TO_EXTRAPOLATE_KNOT );
+	knotPithExtractor.setSubWindowWidth( p_pithDetectionKnot.subWindowWidth );
+	knotPithExtractor.setSubWindowHeight( p_pithDetectionKnot.subWindowHeight );
+	knotPithExtractor.setPithShift( p_pithDetectionKnot.pithShift );
+	knotPithExtractor.setSmoothingRadius( p_pithDetectionKnot.smoothingRadius );
+	knotPithExtractor.setMinWoodPercentage( p_pithDetectionKnot.minimumWoodPercentage );
+	knotPithExtractor.setIntensityInterval( Interval<int>( p_global.minIntensity, p_global.maxIntensity ) );
+	knotPithExtractor.setAscendingOrder( p_pithDetectionKnot.useAscendingOrder );
+	knotPithExtractor.setExtrapolation( static_cast<TKD::ExtrapolationType>(p_pithDetectionKnot.extrapolationType) );
+	knotPithExtractor.setFirstValidSlicesToExtrapolate( p_pithDetectionKnot.percentageOfFirstValidSlicesToExtrapolate );
+	knotPithExtractor.setLastValidSlicesToExtrapolate( p_pithDetectionKnot.percentageOfLastValidSlicesToExtrapolate );
 
 	Billon* tangentialBillon = 0;
 
@@ -304,14 +308,6 @@ Billon* segmentKnotArea( const Billon &billon, const KnotArea &supportingArea,
 						 const PieChart& pieChart, TangentialGenerator &tangentialGenerator,
 						 PithExtractorBoukadida& knotPithExtractor )
 {
-	const int pithProfileSmoothing = 2;
-
-	const int lowessBandWidth = 33;
-	const int lowessIqrCoefficient  = 1;
-	const int lowessPercentageOfFirstValidSlicesToExtrapolate = 5;
-	const int lowessPercentageOfLastValidSlicesToExtrapolate = 0;
-	const int ellipticalAccumulationSmoothingRadius = 0;
-
 	Billon* tangentialBillon = 0;
 	PithProfile knotPithProfile;
 	EllipseRadiiHistogram knotEllipseRadiiHistogram;
@@ -326,22 +322,20 @@ Billon* segmentKnotArea( const Billon &billon, const KnotArea &supportingArea,
 	if ( tangentialBillon )
 	{
 		knotPithExtractor.process(*tangentialBillon,true);
-	}
-
-	if ( tangentialBillon->hasPith() )
-	{
-		knotPithProfile.construct( tangentialBillon->pith(), pithProfileSmoothing );
-	}
-
-	if ( tangentialBillon->hasPith() && knotPithProfile.size() )
-	{
-		knotEllipseRadiiHistogram.construct( *tangentialBillon,
-											 knotPithProfile,
-											 lowessBandWidth,
-											 ellipticalAccumulationSmoothingRadius,
-											 lowessIqrCoefficient,
-											 lowessPercentageOfFirstValidSlicesToExtrapolate,
-											 lowessPercentageOfLastValidSlicesToExtrapolate );
+		if ( tangentialBillon->hasPith() )
+		{
+			knotPithProfile.construct( tangentialBillon->pith(), p_pithProfile.smoothingRadius );
+			if ( knotPithProfile.size() )
+			{
+				knotEllipseRadiiHistogram.construct( *tangentialBillon,
+													 knotPithProfile,
+													 p_ellipticalHistograms.lowessBandWidth,
+													 p_ellipticalHistograms.smoothingRadius,
+													 p_ellipticalHistograms.lowessIqrCoefficient,
+													 p_ellipticalHistograms.lowessPercentageOfFirstValidSlicesToExtrapolate,
+													 p_ellipticalHistograms.lowessPercentageOfLastValidSlicesToExtrapolate );
+			}
+		}
 	}
 
 	return tangentialBillon;
