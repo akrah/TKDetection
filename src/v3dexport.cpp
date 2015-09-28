@@ -1,6 +1,11 @@
 #include "inc/v3dexport.h"
 
 #include "inc/billon.h"
+#include "inc/knotarea.h"
+#include "inc/segmentation/tangentialgenerator.h"
+#include "inc/segmentation/pithprofile.h"
+#include "inc/segmentation/ellipseradiihistogram.h"
+#include "inc/coordinate.h"
 
 #include <QXmlStreamWriter>
 #include <QFile>
@@ -11,18 +16,6 @@ namespace V3DExport
 	namespace
 	{
 		void writeTag( QXmlStreamWriter &stream, const QString &name, const QString &value );
-	}
-
-	void process( QFile &file, const Billon &billon )
-	{
-		QXmlStreamWriter stream;
-		init(file,stream);
-		appendTags( stream, billon );
-		appendPith( stream, billon, 0 );
-		startComponents(stream);
-		appendComponent( stream, billon, 0, 1 );
-		endComponents(stream);
-		close(stream);
 	}
 
 	void init( QFile &file, QXmlStreamWriter &stream )
@@ -53,6 +46,8 @@ namespace V3DExport
 		writeTag(stream,"voxelwidth",QString::number(billon.voxelWidth()));
 		writeTag(stream,"voxelheight",QString::number(billon.voxelHeight()));
 		writeTag(stream,"voxeldepth",QString::number(billon.voxelDepth()));
+		writeTag(stream,"minvalue",QString::number(billon.minValue()));
+		writeTag(stream,"maxvalue",QString::number(billon.maxValue()));
 		stream.writeEndElement();
 	}
 
@@ -61,52 +56,54 @@ namespace V3DExport
 		stream.writeStartElement("components");
 	}
 
-	void appendComponent( QXmlStreamWriter &stream, const Billon &billon, const uint &firstSlicePos, const int &index )
+	void appendSegmentedKnotArea( QXmlStreamWriter &stream, const uint &knotAreaIndex,
+								  const Billon &tangentialBillon, const TangentialGenerator &tangentialGenerator )
 	{
-		const uint &width = billon.n_cols;
-		const uint &height = billon.n_rows;
-		const uint &depth = billon.n_slices;
+		stream.writeStartElement("knotarea");
+		stream.writeAttribute("id",QString::number(knotAreaIndex));
+		stream.writeAttribute("nbtangentialslices",QString::number(tangentialBillon.n_slices));
 
-		uint i, j, k;
-
-		stream.writeStartElement("component");
-		stream.writeAttribute("id",QString::number(index));
-		stream.writeAttribute("valmax",QString::number(billon.maxValue()));
-		stream.writeAttribute("valmin",QString::number(billon.minValue()));
+		// Recherche des coordonnées min et max de la zone de nœud en x et y
+		const QVector3D &origin = tangentialGenerator.origin();
+		const QVector3D destLeftCoord = tangentialGenerator.rotate( QVector3D(0, 0, 0) );
+		const QVector3D destRightCoord = tangentialGenerator.rotate( QVector3D(0, tangentialGenerator.width()-1, 0) );
 
 		//coord minimum
 		stream.writeStartElement("coord");
 		stream.writeAttribute("name","minimum");
-		stream.writeTextElement("x",QString::number(0));
-		stream.writeTextElement("y",QString::number(0));
-		stream.writeTextElement("z",QString::number(firstSlicePos));
+		stream.writeTextElement("x",QString::number(qMin(origin.x(),qMin(destLeftCoord.x(),destRightCoord.x()))));
+		stream.writeTextElement("y",QString::number(qMin(origin.y(),qMin(destLeftCoord.y(),destRightCoord.y()))));
+		stream.writeTextElement("z",QString::number(tangentialGenerator.currentSliceInterval().min()));
 		stream.writeEndElement();
 
-		//coord maximum
+		// coord maximum
 		stream.writeStartElement("coord");
 		stream.writeAttribute("name","maximum");
-		stream.writeTextElement("x",QString::number(width-1));
-		stream.writeTextElement("y",QString::number(height-1));
-		stream.writeTextElement("z",QString::number(firstSlicePos+billon.n_slices-1));
+		stream.writeTextElement("x",QString::number(qMax(origin.x(),qMax(destLeftCoord.x(),destRightCoord.x()))));
+		stream.writeTextElement("y",QString::number(qMax(origin.y(),qMax(destLeftCoord.y(),destRightCoord.y()))));
+		stream.writeTextElement("z",QString::number(tangentialGenerator.currentSliceInterval().max()));
 		stream.writeEndElement();
 
+		// moelle du nœud
+		appendTangentialPith( stream, tangentialBillon.pith(), tangentialGenerator );
+
 		//binarydata
-		stream.writeStartElement("binarydata");
-		stream.writeAttribute("encoding","16");
-		stream.writeCharacters("");
-		QDataStream voxelStream(stream.device());
-		for ( k=0; k<depth; ++k )
-		{
-			const Slice &slice = billon.slice(k);
-			for ( j=0; j<height; ++j )
-			{
-				for ( i=0; i<width; ++i )
-				{
-					voxelStream << (qint16)(slice(j,i));
-				}
-			}
-		}
-		stream.writeEndElement();
+//		stream.writeStartElement("binarydata");
+//		stream.writeAttribute("encoding","16");
+//		stream.writeCharacters("");
+//		QDataStream voxelStream(stream.device());
+//		for ( k=0; k<depth; ++k )
+//		{
+//			const Slice &slice = tangentialBillon.slice(k);
+//			for ( j=0; j<height; ++j )
+//			{
+//				for ( i=0; i<width; ++i )
+//				{
+//					voxelStream << (qint16)(slice(j,i));
+//				}
+//			}
+//		}
+//		stream.writeEndElement();
 
 		stream.writeEndElement();
 	}
@@ -116,7 +113,7 @@ namespace V3DExport
 		stream.writeEndElement();
 	}
 
-	void appendPith( QXmlStreamWriter &stream, const Billon &billon, const uint &firstSlicePos )
+	void appendBillonPith( QXmlStreamWriter &stream, const Billon &billon, const uint &firstSlicePos )
 	{
 		if ( !billon.pith().isEmpty() )
 		{
@@ -128,6 +125,27 @@ namespace V3DExport
 				stream.writeTextElement("x",QString::number(pith[k].x));
 				stream.writeTextElement("y",QString::number(pith[k].y));
 				stream.writeTextElement("z",QString::number(k+firstSlicePos));
+				stream.writeEndElement();
+			}
+			stream.writeEndElement();
+		}
+	}
+
+	void appendTangentialPith( QXmlStreamWriter &stream, const Pith &pith, const TangentialGenerator &tangentialGenerator )
+	{
+		if ( !pith.isEmpty() )
+		{
+			QVector3D initCoord, destCoord;
+
+			stream.writeStartElement("pith");
+			for ( int k=0 ; k<pith.size() ; ++k )
+			{
+				initCoord = QVector3D(pith[k].x, pith[k].y, k);
+				destCoord = tangentialGenerator.rotate( initCoord );
+				stream.writeStartElement("coord");
+				stream.writeTextElement("x",QString::number(destCoord.x()));
+				stream.writeTextElement("y",QString::number(destCoord.y()));
+				stream.writeTextElement("z",QString::number(destCoord.z()));
 				stream.writeEndElement();
 			}
 			stream.writeEndElement();

@@ -20,15 +20,15 @@ ITK_NUMBER = 4.8
 # Configuration
 #--------------#
 TEMPLATE	=  app
-QT			*= core gui xml
+QT			*= core
 CONFIG		*= warn_on
 
-CONFIG		*= qwt qxt qwtpolar $${ITK_VERSION} $${ITK_NUMBER}
-QXT			*= core gui widgets
+CONFIG		*= qxt $${ITK_VERSION} $${ITK_NUMBER}
+QXT			*= core
 
 # Répertoires
 #------------#
-TARGET		= TKDetection
+TARGET		= TKDetectionShell
 MOC_DIR		= moc
 OBJECTS_DIR	= obj
 
@@ -43,8 +43,6 @@ SOURCES	=	src/mainshell.cpp \
 			src/detection/knotareadetector.cpp \
 			src/detection/knotbywhorldetector.cpp \
 			src/detection/knotbyzmotionmapdetector.cpp \
-			src/detection/plotsectorhistogram.cpp \
-			src/detection/plotslicehistogram.cpp \
 			src/detection/sectorhistogram.cpp \
 			src/detection/slicehistogram.cpp \
 			src/detection/zmotionaccumulator.cpp \
@@ -52,28 +50,15 @@ SOURCES	=	src/mainshell.cpp \
 			src/globalfunctions.cpp \
 			src/knotarea.cpp \
 			src/lowess.cpp \
-			src/mainwindow.cpp \
-			src/ofsexport.cpp \
-			src/pgm3dexport.cpp \
 			src/piechart.cpp \
 			src/piepart.cpp \
 			src/pith.cpp \
 			src/pithextractorboukadida.cpp \
-			src/plothistogram.cpp \
-			src/pointpolarseriesdata.cpp \
 			src/slicealgorithm.cpp \
-			src/slicepainter.cpp \
-			src/sliceui.cpp \
-			src/slicezoomer.cpp \
 			src/segmentation/ellipseradiihistogram.cpp \
 			src/segmentation/ellipticalaccumulationhistogram.cpp \
 			src/segmentation/pithprofile.cpp \
-			src/segmentation/plotellipseradiihistogram.cpp \
-			src/segmentation/plotellipticalaccumulationhistogram.cpp \
-			src/segmentation/plotpithprofile.cpp \
 			src/segmentation/tangentialgenerator.cpp \
-			tst/test_intervalshistogram.cpp \
-			src/tiffreader.cpp \
 			src/v3dexport.cpp \
 
 HEADERS	=	inc/billon.h \
@@ -85,8 +70,6 @@ HEADERS	=	inc/billon.h \
 			inc/detection/knotareadetector.h \
 			inc/detection/knotbywhorldetector.h \
 			inc/detection/knotbyzmotionmapdetector.h \
-			inc/detection/plotsectorhistogram.h \
-			inc/detection/plotslicehistogram.h \
 			inc/detection/sectorhistogram.h \
 			inc/detection/slicehistogram.h \
 			inc/detection/zmotionaccumulator.h \
@@ -96,31 +79,16 @@ HEADERS	=	inc/billon.h \
 			inc/interval.h \
 			inc/knotarea.h \
 			inc/lowess.h \
-			inc/mainwindow.h \
-			inc/ofsexport.h \
-			inc/pgm3dexport.h \
 			inc/piepart.h \
 			inc/piechart.h \
 			inc/pith.h \
-			inc/plothistogram.h \
-			inc/pointpolarseriesdata.h \
 			inc/pithextractorboukadida.h \
 			inc/segmentation/ellipticalaccumulationhistogram.h \
 			inc/segmentation/ellipseradiihistogram.h \
 			inc/segmentation/pithprofile.h \
-			inc/segmentation/plotellipticalaccumulationhistogram.h \
-			inc/segmentation/plotellipseradiihistogram.h \
-			inc/segmentation/plotpithprofile.h \
 			inc/segmentation/tangentialgenerator.h \
 			inc/slicealgorithm.h \
-			inc/slicepainter.h \
-			inc/sliceui.h \
-			inc/slicezoomer.h \
-			tst/test_intervalshistogram.h \
-			inc/tiffreader.h \
 			inc/v3dexport.h \
-
-FORMS =	ui/mainwindow.ui
 
 # Directives compilateur
 #-----------------------#
@@ -131,9 +99,7 @@ QMAKE_CXXFLAGS	*= -std=c++11
 #--------------------#
 INCLUDEPATH		*=	/usr/include/ \
 					/usr/local/include/ \
-					/usr/local/qwt-6.1.2/include/ \
-					/usr/local/qwtpolar-1.1.1/include/ \
-					/usr/local/Qxt/include/QxtGui/
+					/usr/local/Qxt/include/QxtCore/
 QMAKE_LIBDIR	*=	/usr/local/lib/
 
 

@@ -1,10 +1,14 @@
+#include <QCoreApplication>
 #include <QTextCodec>
 #include <QSettings>
 
+#include <QxtCommandOptions>
+#include <QFile>
+#include <QDir>
+#include <QXmlStreamWriter>
+
 #include "def/def_billon.h"
 #include "inc/billon.h"
-
-#include "inc/define.h"
 
 #include "inc/dicomreader.h"
 #include "inc/pithextractorboukadida.h"
@@ -15,85 +19,32 @@
 #include "inc/segmentation/pithprofile.h"
 #include "inc/segmentation/ellipseradiihistogram.h"
 
-/*********************************************************
- * Déclaration des strctures pour les paramètres des algos
- * *******************************************************/
-struct Params_Global {
-	int minIntensity = MINIMUM_INTENSITY;
-	int maxIntensity = MAXIMUM_INTENSITY;
-	int minZMotion = MINIMUM_Z_MOTION;
-} p_global;
+#include "inc/options.h"
 
-struct Params_PithDetectionBillon {
-	int subWindowWidth = NEIGHBORHOOD_WINDOW_WIDTH_BILLON;
-	int subWindowHeight = NEIGHBORHOOD_WINDOW_HEIGHT_BILLON;
-	int pithShift = PITH_LAG_BILLON;
-	int smoothingRadius = PITH_SMOOTHING_BILLON;
-	int minimumWoodPercentage = MIN_WOOD_PERCENTAGE_BILLON;
-	bool useAscendingOrder = ASCENDING_ORDER_BILLON;
-	int extrapolationType = TKD::LINEAR;
-	int percentageOfFirstValidSlicesToExtrapolate = 0;
-	int percentageOfLastValidSlicesToExtrapolate = 0;
-} p_pithDetectionBillon;
+#include "inc/v3dexport.h"
 
-struct Params_RestrictedArea {
-	int nbDirections = RESTRICTED_AREA_DEFAULT_RESOLUTION;
-	int barkValue = MINIMUM_INTENSITY;
-	int minRadius = 5;
-} p_restrictedArea;
-
-struct Params_SliceHistogram {
-	int smoothingRadius = HISTOGRAM_SMOOTHING_RADIUS;
-	int minimumHeightOfMaximums = HISTOGRAM_PERCENTAGE_OF_MINIMUM_HEIGHT_OF_MAXIMUM;
-	int derivativeSearchPercentage = HISTOGRAM_DERIVATIVE_SEARCH_PERCENTAGE;
-	int minimumWidthOfIntervals = HISTOGRAM_MINIMUM_WIDTH_OF_INTERVALS;
-} p_sliceHistogram;
-
-struct Params_SectorHistogram {
-	int smoothingRadius = HISTOGRAM_ANGULAR_SMOOTHING_RADIUS;
-	int minimumHeightOfMaximums = HISTOGRAM_ANGULAR_PERCENTAGE_OF_MINIMUM_HEIGHT_OF_MAXIMUM;
-	int derivativeSearchPercentage = HISTOGRAM_ANGULAR_DERIVATIVE_SEARCH_PERCENTAGE;
-	int minimumWidthOfIntervals = HISTOGRAM_ANGULAR_MINIMUM_WIDTH_OF_INTERVALS;
-} p_sectorHistogram;
-
-struct Params_PithDetectionKnot {
-	int subWindowWidth = NEIGHBORHOOD_WINDOW_WIDTH_KNOT;
-	int subWindowHeight = NEIGHBORHOOD_WINDOW_HEIGHT_KNOT;
-	int pithShift = PITH_LAG_KNOT;
-	int smoothingRadius = PITH_SMOOTHING_KNOT;
-	int minimumWoodPercentage = MIN_WOOD_PERCENTAGE_KNOT;
-	bool useAscendingOrder = ASCENDING_ORDER_KNOT;
-	int extrapolationType = TKD::SLOPE_DIRECTION;
-	int percentageOfFirstValidSlicesToExtrapolate = FIRST_VALID_SLICES_TO_EXTRAPOLATE_KNOT;
-	int percentageOfLastValidSlicesToExtrapolate = LAST_VALID_SLICES_TO_EXTRAPOLATE_KNOT;
-} p_pithDetectionKnot;
-
-struct Params_TangentialGenerator {
-	bool useTrilinearInterpolation = true;
-} p_tangentialGenerator;
-
-struct Params_PithProfile {
-	int smoothingRadius = 2;
-} p_pithProfile;
-
-struct Params_EllipticalHistograms {
-	int lowessBandWidth = 33;
-	int lowessIqrCoefficient  = 1;
-	int lowessPercentageOfFirstValidSlicesToExtrapolate = 5;
-	int lowessPercentageOfLastValidSlicesToExtrapolate = 0;
-	int smoothingRadius = 0;
-} p_ellipticalHistograms;
-
+#define DEFAULT_OUTPUT_FILENAME "output.v3d"
+#define DEFAULT_PARAMS_FILENAME "tkd_shell.ini"
 
 /**************************************************
  * Déclaration des fonctions appellées dans le main
  * ************************************************/
-void computeBillonPith( Billon& billon, qreal &treeRadius );
-void detectKnotsByWhorls( const Billon &billon , KnotAreaDetector* knotByWhorlDetector, const qreal &treeRadius );
-void segmentKnots( const Billon &billon, const KnotAreaDetector &detector );
-Billon* segmentKnotArea( const Billon &billon, const KnotArea &supportingArea,
-						 const PieChart& pieChart, TangentialGenerator &tangentialGenerator,
+void computeBillonPith( Billon &billon,
+						qreal &treeRadius );
+void detectKnotsByWhorls( const Billon &billon,
+						  KnotAreaDetector* knotByWhorlDetector,
+						  const qreal &treeRadius );
+void segmentAndExportKnots( const Billon &billon,
+							const QString &outputFileName,
+							const KnotAreaDetector &detector );
+Billon* segmentKnotArea( const Billon &billon,
+						 const KnotArea &supportingArea,
+						 const PieChart& pieChart,
+						 TangentialGenerator &tangentialGenerator,
 						 PithExtractorBoukadida& knotPithExtractor );
+void exportSegmentedKnotAreaToV3D(const Billon &tangentialBillon,
+								const QString &outputFileName,
+								const QVector<KnotArea> &knotAreas );
 
 
 /*********************
@@ -104,9 +55,74 @@ int main( int argc, char *argv[] )
 	QTextCodec::setCodecForTr(QTextCodec::codecForName("UTF-8"));
 	QTextCodec::setCodecForCStrings(QTextCodec::codecForName("UTF-8"));
 
+	QCoreApplication app(argc,argv);
+	app.setApplicationName("TKDetection");
+	app.setApplicationVersion(QObject::tr("Version Shell 1.0"));
+
+
 	/********************************************************************/
-	qDebug() << "1) Lecture es paramètres...";
-	QSettings settings("tkd_shell.ini",QSettings::IniFormat);
+	// Gestion des arguments de la ligne de commande
+	QxtCommandOptions options;
+	options.setParamStyle(QxtCommandOptions::Space);
+
+	options.addSection(QObject::tr("Obligatoires"));
+	options.add("input", QObject::tr("Image DICOM du billon à segmenter"),QxtCommandOptions::ValueRequired);
+	options.alias("input","i");
+
+	options.addSection(QObject::tr("Optionnels"));
+	options.add("output", QObject::tr("Nom du ficher qui contiendra les nœuds segmentés au format V3D (Défaut : %1)").arg(DEFAULT_OUTPUT_FILENAME),QxtCommandOptions::ValueRequired);
+	options.alias("output","o");
+	options.add("params", QObject::tr("Fichier contenant l'ensemble des paramètres des différentes étapes au format INI (Défaut : %1)").arg(DEFAULT_PARAMS_FILENAME),QxtCommandOptions::ValueRequired);
+	options.alias("params","p");
+
+	options.addSection(QObject::tr("Autres"));
+	options.add("help", QObject::tr("Afficher ce texte"),QxtCommandOptions::NoValue);
+	options.alias("help", "h");
+
+	options.parse(QCoreApplication::arguments());
+	if ( !options.parameters().size() || options.count("help") || options.showUnrecognizedWarning() )
+	{
+		std::cout << QCoreApplication::applicationName().toStdString() << std::endl
+				  << QCoreApplication::applicationVersion().toStdString() << std::endl;
+		options.showUsage();
+		return -1;
+	}
+
+	QString inputFileName;
+	if ( !options.count("input") )
+	{
+		std::cout << QObject::tr("ERREUR : vous devez spécifier l'image à segmenter").toStdString() << std::endl;
+		options.showUsage();
+		return -1;
+	}
+	inputFileName = options.value("input").toString();
+
+	QString paramsFileName = options.count("params") ? options.value("params").toString() : DEFAULT_PARAMS_FILENAME;
+	if ( !QFile(paramsFileName).exists() )
+	{
+		std::cout << QObject::tr("ERREUR : le fichier de paramètres %1 n'a pas été trouvé").arg(paramsFileName).toStdString() << std::endl;
+		options.showUsage();
+		return -1;
+	}
+
+	QString outputFileName = options.count("output") ? options.value("output").toString() : DEFAULT_OUTPUT_FILENAME;
+	if ( QFile(outputFileName).exists() )
+	{
+		std::string eraseExistingOutput;
+		std::cout << QObject::tr("ATTENTION : le fichier de sortie \"%1\" existe déjà. Êtes-vous sûr de vouloir l'écraser ? (y/n) ").arg(outputFileName).toStdString();
+		std::cin >> eraseExistingOutput;
+		if ( eraseExistingOutput == "n" )
+		{
+			std::cout << QObject::tr("C'est bien ce qu'il me semblait... J'ai bien fait de demander !").toStdString() << std::endl;
+			return -1;
+		}
+		else
+			std::cout << QObject::tr("Ok, le fichier sera écrasé !").toStdString() << std::endl;
+	}
+
+	/********************************************************************/
+	std::cout << "1) Lecture des paramètres..." << std::endl;
+	QSettings settings(paramsFileName,QSettings::IniFormat);
 
 	p_global.minIntensity = settings.value("General/minIntensity",MINIMUM_INTENSITY).toInt();
 	p_global.maxIntensity = settings.value("General/",MAXIMUM_INTENSITY).toInt();
@@ -159,49 +175,48 @@ int main( int argc, char *argv[] )
 	Billon *_billon = 0;
 
 	/********************************************************************/
-	qDebug() << "2) Lecture du dicom...";
+	std::cout << "2) Lecture du dicom..." << std::endl;
 
-	QString folderName("plop");
-	if ( folderName.isEmpty() )
+	QDir folder(inputFileName);
+	if ( !folder.exists() )
 	{
-		qDebug() << "ERREUR : le répertoire spécifié n'existe pas.";
-		return 1;
+		std::cout << QObject::tr("ERREUR : le répertoire DICOM \"%1\" n'existe pas.").arg(folder.path()).toStdString() << std::endl;
+		return -1;
 	}
 
-	_billon = DicomReader::read( folderName );
+	_billon = DicomReader::read( folder.path() );
 	if ( !_billon )
 	{
-		qDebug() << "ERREUR : le chargement de l'image a échoué.";
-		return 2;
+		std::cout << "ERREUR : le chargement de l'image a échoué." << std::endl;
+		return -1;
 	}
 
 	/********************************************************************/
-	qDebug() << "3) Calcul de la moelle du tronc...";
+	std::cout << "3) Calcul de la moelle du tronc..." << std::endl;
 
 	qreal _treeRadius;
 	computeBillonPith( *_billon, _treeRadius );
 
 	if ( !_billon->hasPith() )
 	{
-		qDebug() << "ERREUR : la moelle du tronc n'a pas pu être calculée.";
+		std::cout << "ERREUR : la moelle du tronc n'a pas pu être calculée." << std::endl;
 		delete _billon;
-		return 3;
+		return -1;
 	}
 
 	/********************************************************************/
-	qDebug() << "4) Détection des zones de nœuds...";
+	std::cout << "4) Détection des zones de nœuds..." << std::endl;
 
 	KnotAreaDetector* _knotByWhorlDetector = new KnotByWhorlDetector;
 	detectKnotsByWhorls( *_billon, _knotByWhorlDetector, _treeRadius );
 
 	/********************************************************************/
-	qDebug() << "5) Segmentation des zones de nœuds...";
+	std::cout << "5) Segmentation et exportation des zones de nœuds..." << std::endl;
 
-	segmentKnots( *_billon,*_knotByWhorlDetector );
+	segmentAndExportKnots( *_billon,outputFileName,*_knotByWhorlDetector );
 
 	/********************************************************************/
-	qDebug() << "";
-	qDebug() << "Finit !";
+	std::cout << std::endl << "Fini !" << std::endl;
 
 	delete _knotByWhorlDetector;
 	if ( _billon )
@@ -259,8 +274,21 @@ void detectKnotsByWhorls( const Billon &billon, KnotAreaDetector* knotByWhorlDet
 	knotByWhorlDetector->execute( billon );
 }
 
-void segmentKnots( const Billon &billon, const KnotAreaDetector &detector )
+void segmentAndExportKnots( const Billon &billon, const QString &outputFileName, const KnotAreaDetector &detector )
 {
+//	QFile file(outputFileName);
+//	if ( !file.open(QIODevice::WriteOnly) )
+//	{
+//		std::cout << QObject::tr("ERREUR : le répertoire DICOM \"%1\" n'existe pas.").arg(folder.path()).toStdString() << std::endl;
+//		return -1;
+//	}
+//		QXmlStreamWriter stream(&file);
+//		V3DExport::init(file,stream);
+
+//		V3DExport::appendTags( stream, tangentialBillon );
+//		V3DExport::appendBillonPith( stream, tangentialBillon, 0 );
+
+
 	TangentialGenerator tangentialGenerator( p_global.minIntensity, p_tangentialGenerator.useTrilinearInterpolation );
 
 	PithExtractorBoukadida knotPithExtractor;
@@ -280,20 +308,22 @@ void segmentKnots( const Billon &billon, const KnotAreaDetector &detector )
 	const int nbKnotAreas = detector.knotAreas().size();
 	int i = 0;
 
+
 	QVectorIterator<KnotArea> supportingAreasIter(detector.knotAreas());
 	while ( supportingAreasIter.hasNext() )
 	{
-		qDebug() << "    Noeud " << i++ << " / " << nbKnotAreas << " ...";
+		std::cout << "    Noeud " << i++ << " / " << nbKnotAreas << " ..." << std::endl;
 		const KnotArea &supportingArea = supportingAreasIter.next();
 		tangentialBillon = segmentKnotArea( billon, supportingArea, detector.pieChart(), tangentialGenerator, knotPithExtractor );
 		if ( tangentialBillon )
 		{
-			qDebug() << "        -> OK !";
+//			exportSegmentedKnotAreaToV3D( tangentialBillon, QString("plop%1.v3d").arg(i),  );
+			std::cout << "        -> OK !" << std::endl;
 			delete tangentialBillon;
 		}
 		else
 		{
-			qDebug() << "        -> NONNNNNNNNNNNNNNNNNNNNNNNNNNN !!!";
+			std::cout << "        -> NONNNNNNNNNNNNNNNNNNNNNNNNNNN !!!" << std::endl;
 		}
 		tangentialBillon = 0;
 	}
@@ -308,7 +338,7 @@ Billon* segmentKnotArea( const Billon &billon, const KnotArea &supportingArea,
 						 const PieChart& pieChart, TangentialGenerator &tangentialGenerator,
 						 PithExtractorBoukadida& knotPithExtractor )
 {
-	Billon* tangentialBillon = 0;
+	Billon* knotBillon = 0;
 	PithProfile knotPithProfile;
 	EllipseRadiiHistogram knotEllipseRadiiHistogram;
 
@@ -317,17 +347,17 @@ Billon* segmentKnotArea( const Billon &billon, const KnotArea &supportingArea,
 
 	tangentialGenerator.updateIntervals( billon, sliceInterval, sectorInterval, pieChart );
 
-	tangentialBillon = tangentialGenerator.execute( billon, pieChart );
+	knotBillon = tangentialGenerator.execute( billon );
 
-	if ( tangentialBillon )
+	if ( knotBillon )
 	{
-		knotPithExtractor.process(*tangentialBillon,true);
-		if ( tangentialBillon->hasPith() )
+		knotPithExtractor.process(*knotBillon,true);
+		if ( knotBillon->hasPith() )
 		{
-			knotPithProfile.construct( tangentialBillon->pith(), p_pithProfile.smoothingRadius );
+			knotPithProfile.construct( knotBillon->pith(), p_pithProfile.smoothingRadius );
 			if ( knotPithProfile.size() )
 			{
-				knotEllipseRadiiHistogram.construct( *tangentialBillon,
+				knotEllipseRadiiHistogram.construct( *knotBillon,
 													 knotPithProfile,
 													 p_ellipticalHistograms.lowessBandWidth,
 													 p_ellipticalHistograms.smoothingRadius,
@@ -338,5 +368,40 @@ Billon* segmentKnotArea( const Billon &billon, const KnotArea &supportingArea,
 		}
 	}
 
-	return tangentialBillon;
+	return knotBillon;
+}
+
+void exportSegmentedKnotAreaToV3D( const Billon &tangentialBillon, const QString &outputFileName, const QVector<KnotArea> &knotAreas )
+{
+//	if ( tangentialBillon.hasPith() )
+//	{
+//		QFile file(outputFileName);
+//		if ( file.open(QIODevice::WriteOnly) )
+//		{
+//			QXmlStreamWriter stream(&file);
+//			V3DExport::init(file,stream);
+
+//			V3DExport::appendTags( stream, tangentialBillon );
+//			V3DExport::appendBillonPith( stream, tangentialBillon, 0 );
+
+//			QVectorIterator<KnotArea> knotAreaIter(knotAreas);
+
+//			V3DExport::startComponents(stream);
+//			int counter = 1;
+//			while ( knotAreaIter.hasNext() )
+//			{
+//				const KnotArea &knotArea = knotAreaIter.next();
+//				V3DExport::appendSegmentedKnotArea( stream, _knotBillon, _knotBillon->zPos(), counter++ );
+//			}
+//			V3DExport::endComponents(stream);
+
+//			V3DExport::close(stream);
+
+//			file.close();
+
+//			QMessageBox::information(this,tr("Exporter tous les nœuds segmentés du billon en V3D"), tr("Export réussi !"));
+//		}
+//		else QMessageBox::warning(this,tr("Exporter tous les nœuds segmentés du billon en V3D"),tr("L'export a échoué : impossible de créer le ficher %1.").arg(outputFileName));
+//	}
+//	else QMessageBox::warning(this,tr("Exporter tous les nœuds segmentés du billon en V3D"),tr("L'export a échoué : la moelle n'est pas calculée."));
 }

@@ -8,7 +8,7 @@
 TangentialGenerator::TangentialGenerator( const int &minIntensity, const bool &trilinearInterpolation ) :
 	_minIntensity(minIntensity), _trilinearInterpolation(trilinearInterpolation),
 	_currentSliceInterval(Interval<uint>(0,0)), _currentAngularInterval(Interval<uint>(0,0)),
-	_origin(QVector3D(0,0,0)), _angularRange(0.), _bisectorOrientation(0.), _depth(0.),
+	_origin(QVector3D(0,0,0)), _angularRange(0.), _bisectorOrientation(0.), _depth(0.), _width(0), _height(0), _lateralShift(0), _verticalShift(0),
 	_quaterX(QQuaternion::fromAxisAndAngle( 1., 0., 0., -90.)), _quaterY(QQuaternion::fromAxisAndAngle( 0., 1., 0., 90.)),
 	_quaterZ(QQuaternion::fromAxisAndAngle( 0., 0., 1., 0.)), _quaterRot( _quaterX*_quaterY*_quaterZ ),
 	_shiftStep(_quaterRot.rotatedVector(QVector3D( 0., 0., 1. )))
@@ -18,7 +18,9 @@ TangentialGenerator::TangentialGenerator( const int &minIntensity, const bool &t
 TangentialGenerator::TangentialGenerator( const TangentialGenerator &tangentialGenerator ) :
 	_minIntensity(tangentialGenerator._minIntensity), _trilinearInterpolation(tangentialGenerator._trilinearInterpolation),
 	_currentSliceInterval(tangentialGenerator._currentSliceInterval), _currentAngularInterval(tangentialGenerator._currentAngularInterval),
-	_origin(tangentialGenerator._origin), _angularRange(tangentialGenerator._angularRange), _bisectorOrientation(tangentialGenerator._bisectorOrientation), _depth(tangentialGenerator._depth),
+	_origin(tangentialGenerator._origin), _angularRange(tangentialGenerator._angularRange), _bisectorOrientation(tangentialGenerator._bisectorOrientation),
+	_depth(tangentialGenerator._depth), _width(tangentialGenerator._width), _height(tangentialGenerator._height),
+	_lateralShift(tangentialGenerator._lateralShift), _verticalShift(tangentialGenerator._verticalShift),
 	_quaterX(tangentialGenerator._quaterX), _quaterY(tangentialGenerator._quaterY),
 	_quaterZ(tangentialGenerator._quaterZ), _quaterRot(tangentialGenerator._quaterRot),
 	_shiftStep(tangentialGenerator._shiftStep)
@@ -30,6 +32,8 @@ TangentialGenerator::~TangentialGenerator() {}
 void TangentialGenerator::setSliceInterval( const Billon &billon, const Interval<uint> &sliceInterval )
 {
 	_currentSliceInterval = sliceInterval;
+	_height = sliceInterval.count();
+	_verticalShift = -qFloor(_height/2.);
 	const uint midSliceInterval = sliceInterval.mid();
 	_origin = QVector3D(billon.pithCoord(midSliceInterval).x, billon.pithCoord(midSliceInterval).y, midSliceInterval);
 }
@@ -50,6 +54,8 @@ void TangentialGenerator::setAngularInterval( const Billon &billon, const Interv
 		edge += direction;
 	}
 	_depth = rVec2D(edge-originPith).norm();
+	_width = qFloor(2 * qTan(_angularRange*pieChart.angleStep()/2.) * _depth);
+	_lateralShift = -qFloor(_width/2.);
 
 	_quaterRot = _quaterZ * _quaterX * _quaterY;
 	_shiftStep = _quaterRot.rotatedVector( QVector3D( 0., 0., 1. ) );
@@ -121,6 +127,26 @@ const qreal &TangentialGenerator::depth() const
 	return _depth;
 }
 
+const int &TangentialGenerator::width() const
+{
+	return _width;
+}
+
+const int &TangentialGenerator::height() const
+{
+	return _height;
+}
+
+const int &TangentialGenerator::lateralShift() const
+{
+	return _lateralShift;
+}
+
+const int &TangentialGenerator::vertcalShift() const
+{
+	return _verticalShift;
+}
+
 const QQuaternion &TangentialGenerator::quaterX() const
 {
 	return _quaterX;
@@ -151,25 +177,29 @@ QVector3D TangentialGenerator::shiftStep( const qreal &stepInZ ) const
 	return _quaterRot.rotatedVector( QVector3D( 0., 0., stepInZ ) );
 }
 
-Billon* TangentialGenerator::execute( const Billon &billon , const PieChart &pieChart )
+QVector3D TangentialGenerator::rotate( const iCoord3D &initialCoord ) const
+{
+	return _quaterRot.rotatedVector( QVector3D( initialCoord.x-_lateralShift, initialCoord.y-_lateralShift, 0 ) ) + (_origin + _shiftStep*initialCoord.z);
+}
+
+QVector3D TangentialGenerator::rotate( const QVector3D &initialCoord ) const
+{
+	return _quaterRot.rotatedVector( QVector3D( initialCoord.x()-_lateralShift, initialCoord.y()-_lateralShift, 0 ) ) + (_origin + _shiftStep*initialCoord.z());
+}
+
+Billon* TangentialGenerator::execute( const Billon &billon )
 {
 	/* Hauteur et largeur des coupes transversales */
 	const int billonWidthMinusOne = billon.n_cols-1;
 	const int billonHeightMinusOne = billon.n_rows-1;
 	const int billonDepthMinusOne = billon.n_slices-1;
 
-	/* Hauteur et largeur des coupes tangentielles */
-	const uint width = qFloor(2 * qTan(_angularRange*pieChart.angleStep()/2.) * _depth);
-	const uint height = _currentSliceInterval.count();
-	const int widthOnTwo = qFloor(width/2.);
-	const int heightOnTwo = qFloor(height/2.);
-
 	const uint nbSlices = qCeil(_depth);
 
 	// Inversion width et height pour correspondre à la rotation de 90°
 //	const qreal cosBisector = qCos(_bisectorOrientation);
 //	const qreal sinBisector = qSin(_bisectorOrientation);
-	Billon * tangentialBillon = new Billon(width,height,nbSlices);
+	Billon * tangentialBillon = new Billon(_width,_height,nbSlices);
 //	tangentialBillon->setVoxelSize( qSqrt(qPow(billon.voxelWidth()*cosBisector,2)+qPow(billon.voxelHeight()*sinBisector,2)),
 //									billon.voxelDepth(),
 //									(billon.voxelWidth()*billon.voxelHeight())/qSqrt(qPow(billon.voxelWidth()*cosBisector,2)+qPow(billon.voxelHeight()*sinBisector,2)) );
@@ -181,7 +211,7 @@ Billon* TangentialGenerator::execute( const Billon &billon , const PieChart &pie
 	QVector3D origin(_origin);
 	QVector3D initial, destination;
 
-	const qreal semiKnotAreaWidthCoeff = widthOnTwo / static_cast<qreal>( nbSlices );
+	const qreal semiKnotAreaWidthCoeff = _lateralShift / static_cast<qreal>( nbSlices );
 	int j, i, iStart, iEnd;
 
 	int x0,y0,z0;
@@ -193,12 +223,12 @@ Billon* TangentialGenerator::execute( const Billon &billon , const PieChart &pie
 	for ( uint k=0 ; k<nbSlices ; ++k )
 	{
 		Slice &slice = tangentialBillon->slice(k);
-		iEnd = qMin(qRound(semiKnotAreaWidthCoeff*k),widthOnTwo);
+		iEnd = qMin(qRound(semiKnotAreaWidthCoeff*k),_lateralShift);
 		iStart = -iEnd;
 		for ( i=iStart ; i<iEnd ; ++i )
 		{
 			initial.setX(i);
-			for ( j=-heightOnTwo ; j<heightOnTwo ; ++j )
+			for ( j=-_verticalShift ; j<_verticalShift ; ++j )
 			{
 				initial.setY(j);
 				destination = _quaterRot.rotatedVector(initial) + origin;
@@ -221,12 +251,12 @@ Billon* TangentialGenerator::execute( const Billon &billon , const PieChart &pie
 						yFront = (1.-y0Dist)*xFrontTop + y0Dist*xFrontBottom;
 						yBack = (1.-y0Dist)*xBackTop + y0Dist*xBackBottom;
 						// Rotation de 90° dans le sens horaire pour correspondre à l'orientation de l'article
-						slice(j+heightOnTwo,i+widthOnTwo) = (1.-z0Dist)*yFront + z0Dist*yBack;
+						slice(j+_verticalShift,i+_lateralShift) = (1.-z0Dist)*yFront + z0Dist*yBack;
 					}
 					else
 					{
 						// Rotation de 90° dans le sens horaire pour correspondre à l'orientation de l'article
-						slice(j+heightOnTwo,i+widthOnTwo) =	billon(y0,x0,z0);
+						slice(j+_verticalShift,i+_lateralShift) =	billon(y0,x0,z0);
 					}
 				}
 			}

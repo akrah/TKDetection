@@ -119,6 +119,7 @@ HEADERS	=	inc/billon.h \
 			tst/test_intervalshistogram.h \
 			inc/tiffreader.h \
 			inc/v3dexport.h \
+    inc/options.h
 
 FORMS =	ui/mainwindow.ui
 
