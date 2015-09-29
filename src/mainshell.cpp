@@ -312,7 +312,7 @@ void segmentAndExportKnots( const Billon &billon, const QString &outputDirName, 
 	EllipseRadiiHistogram knotEllipseRadiiHistogram;
 
 	const int nbKnotAreas = detector.knotAreas().size();
-	int i = 0;
+	int i = 1;
 
 	QXmlStreamWriter stream(&globalFile);
 	V3DExport::init(globalFile,stream);
