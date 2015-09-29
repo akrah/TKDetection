@@ -11,7 +11,7 @@ TangentialGenerator::TangentialGenerator( const int &minIntensity, const bool &t
 	_origin(QVector3D(0,0,0)), _angularRange(0.), _bisectorOrientation(0.), _depth(0.), _width(0), _height(0), _lateralShift(0), _verticalShift(0),
 	_quaterX(QQuaternion::fromAxisAndAngle( 1., 0., 0., -90.)), _quaterY(QQuaternion::fromAxisAndAngle( 0., 1., 0., 90.)),
 	_quaterZ(QQuaternion::fromAxisAndAngle( 0., 0., 1., 0.)), _quaterRot( _quaterX*_quaterY*_quaterZ ),
-	_shiftStep(_quaterRot.rotatedVector(QVector3D( 0., 0., 1. )))
+	_zShiftStep(_quaterRot.rotatedVector(QVector3D( 0., 0., 1. )))
 {
 }
 
@@ -23,7 +23,7 @@ TangentialGenerator::TangentialGenerator( const TangentialGenerator &tangentialG
 	_lateralShift(tangentialGenerator._lateralShift), _verticalShift(tangentialGenerator._verticalShift),
 	_quaterX(tangentialGenerator._quaterX), _quaterY(tangentialGenerator._quaterY),
 	_quaterZ(tangentialGenerator._quaterZ), _quaterRot(tangentialGenerator._quaterRot),
-	_shiftStep(tangentialGenerator._shiftStep)
+	_zShiftStep(tangentialGenerator._zShiftStep)
 {
 }
 
@@ -58,7 +58,7 @@ void TangentialGenerator::setAngularInterval( const Billon &billon, const Interv
 	_lateralShift = -qFloor(_width/2.);
 
 	_quaterRot = _quaterZ * _quaterX * _quaterY;
-	_shiftStep = _quaterRot.rotatedVector( QVector3D( 0., 0., 1. ) );
+	_zShiftStep = _quaterRot.rotatedVector( QVector3D( 0., 0., 1. ) );
 }
 
 void TangentialGenerator::updateIntervals( const Billon &billon, const Interval<uint> &sliceInterval, const Interval<uint> &angularInterval, const PieChart &pieChart )
@@ -167,24 +167,24 @@ const QQuaternion &TangentialGenerator::quaterRot() const
 	return _quaterRot;
 }
 
-const QVector3D &TangentialGenerator::shiftStep() const
+const QVector3D &TangentialGenerator::zShiftStep() const
 {
-	return _shiftStep;
+	return _zShiftStep;
 }
 
-QVector3D TangentialGenerator::shiftStep( const qreal &stepInZ ) const
+QVector3D TangentialGenerator::zShiftStep( const qreal &stepInZ ) const
 {
 	return _quaterRot.rotatedVector( QVector3D( 0., 0., stepInZ ) );
 }
 
 QVector3D TangentialGenerator::rotate( const iCoord3D &initialCoord ) const
 {
-	return _quaterRot.rotatedVector( QVector3D( initialCoord.x-_lateralShift, initialCoord.y-_lateralShift, 0 ) ) + (_origin + _shiftStep*initialCoord.z);
+	return _quaterRot.rotatedVector( QVector3D( initialCoord.x-_lateralShift, initialCoord.y-_lateralShift, 0 ) ) + (_origin + _zShiftStep*initialCoord.z);
 }
 
 QVector3D TangentialGenerator::rotate( const QVector3D &initialCoord ) const
 {
-	return _quaterRot.rotatedVector( QVector3D( initialCoord.x()-_lateralShift, initialCoord.y()-_lateralShift, 0 ) ) + (_origin + _shiftStep*initialCoord.z());
+	return _quaterRot.rotatedVector( QVector3D( initialCoord.x()-_lateralShift, initialCoord.y()-_lateralShift, 0 ) ) + (_origin + _zShiftStep*initialCoord.z());
 }
 
 Billon* TangentialGenerator::execute( const Billon &billon )
@@ -261,7 +261,7 @@ Billon* TangentialGenerator::execute( const Billon &billon )
 				}
 			}
 		}
-		origin += _shiftStep;
+		origin += _zShiftStep;
 	}
 
 	return tangentialBillon;

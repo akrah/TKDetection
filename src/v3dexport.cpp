@@ -51,13 +51,8 @@ namespace V3DExport
 		stream.writeEndElement();
 	}
 
-	void startComponents( QXmlStreamWriter &stream )
-	{
-		stream.writeStartElement("components");
-	}
-
-	void appendSegmentedKnotArea( QXmlStreamWriter &stream, const uint &knotAreaIndex,
-								  const Billon &tangentialBillon, const TangentialGenerator &tangentialGenerator )
+	void appendKnotArea( QXmlStreamWriter &stream, const uint &knotAreaIndex,
+						 const Billon &tangentialBillon, const TangentialGenerator &tangentialGenerator )
 	{
 		stream.writeStartElement("knotarea");
 		stream.writeAttribute("id",QString::number(knotAreaIndex));
@@ -65,55 +60,32 @@ namespace V3DExport
 
 		// Recherche des coordonnées min et max de la zone de nœud en x et y
 		const QVector3D &origin = tangentialGenerator.origin();
-		const QVector3D destLeftCoord = tangentialGenerator.rotate( QVector3D(0, 0, 0) );
-		const QVector3D destRightCoord = tangentialGenerator.rotate( QVector3D(0, tangentialGenerator.width()-1, 0) );
+		const QVector3D destLeftCoord = tangentialGenerator.rotate( QVector3D(0, 0, tangentialBillon.n_slices) );
+		const QVector3D destRightCoord = tangentialGenerator.rotate( QVector3D(0, tangentialGenerator.width()-1, tangentialBillon.n_slices) );
 
 		//coord minimum
 		stream.writeStartElement("coord");
-		stream.writeAttribute("name","minimum");
-		stream.writeTextElement("x",QString::number(qMin(origin.x(),qMin(destLeftCoord.x(),destRightCoord.x()))));
-		stream.writeTextElement("y",QString::number(qMin(origin.y(),qMin(destLeftCoord.y(),destRightCoord.y()))));
-		stream.writeTextElement("z",QString::number(tangentialGenerator.currentSliceInterval().min()));
+			stream.writeAttribute("name","minimum");
+			stream.writeTextElement("x",QString::number(qMin(origin.x(),qMin(destLeftCoord.x(),destRightCoord.x()))));
+			stream.writeTextElement("y",QString::number(qMin(origin.y(),qMin(destLeftCoord.y(),destRightCoord.y()))));
+			stream.writeTextElement("z",QString::number(tangentialGenerator.currentSliceInterval().min()));
 		stream.writeEndElement();
 
 		// coord maximum
 		stream.writeStartElement("coord");
-		stream.writeAttribute("name","maximum");
-		stream.writeTextElement("x",QString::number(qMax(origin.x(),qMax(destLeftCoord.x(),destRightCoord.x()))));
-		stream.writeTextElement("y",QString::number(qMax(origin.y(),qMax(destLeftCoord.y(),destRightCoord.y()))));
-		stream.writeTextElement("z",QString::number(tangentialGenerator.currentSliceInterval().max()));
+			stream.writeAttribute("name","maximum");
+			stream.writeTextElement("x",QString::number(qMax(origin.x(),qMax(destLeftCoord.x(),destRightCoord.x()))));
+			stream.writeTextElement("y",QString::number(qMax(origin.y(),qMax(destLeftCoord.y(),destRightCoord.y()))));
+			stream.writeTextElement("z",QString::number(tangentialGenerator.currentSliceInterval().max()));
 		stream.writeEndElement();
 
 		// moelle du nœud
 		appendTangentialPith( stream, tangentialBillon.pith(), tangentialGenerator );
 
-		//binarydata
-//		stream.writeStartElement("binarydata");
-//		stream.writeAttribute("encoding","16");
-//		stream.writeCharacters("");
-//		QDataStream voxelStream(stream.device());
-//		for ( k=0; k<depth; ++k )
-//		{
-//			const Slice &slice = tangentialBillon.slice(k);
-//			for ( j=0; j<height; ++j )
-//			{
-//				for ( i=0; i<width; ++i )
-//				{
-//					voxelStream << (qint16)(slice(j,i));
-//				}
-//			}
-//		}
-//		stream.writeEndElement();
-
 		stream.writeEndElement();
 	}
 
-	void endComponents( QXmlStreamWriter &stream )
-	{
-		stream.writeEndElement();
-	}
-
-	void appendBillonPith( QXmlStreamWriter &stream, const Billon &billon, const uint &firstSlicePos )
+	void appendBillonPith( QXmlStreamWriter &stream, const Billon &billon )
 	{
 		if ( !billon.pith().isEmpty() )
 		{
@@ -124,7 +96,7 @@ namespace V3DExport
 				stream.writeStartElement("coord");
 				stream.writeTextElement("x",QString::number(pith[k].x));
 				stream.writeTextElement("y",QString::number(pith[k].y));
-				stream.writeTextElement("z",QString::number(k+firstSlicePos));
+				stream.writeTextElement("z",QString::number(k));
 				stream.writeEndElement();
 			}
 			stream.writeEndElement();
@@ -141,7 +113,7 @@ namespace V3DExport
 			for ( int k=0 ; k<pith.size() ; ++k )
 			{
 				initCoord = QVector3D(pith[k].x, pith[k].y, k);
-				destCoord = tangentialGenerator.rotate( initCoord );
+				destCoord = tangentialGenerator.rotate( QVector3D(pith[k].x, pith[k].y, k) );
 				stream.writeStartElement("coord");
 				stream.writeTextElement("x",QString::number(destCoord.x()));
 				stream.writeTextElement("y",QString::number(destCoord.y()));

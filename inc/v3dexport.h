@@ -18,10 +18,8 @@ namespace V3DExport
 	void close( QXmlStreamWriter &stream );
 
 	void appendTags( QXmlStreamWriter &stream, const Billon &billon );
-	void startComponents( QXmlStreamWriter &stream );
-	void appendSegmentedKnotArea( QXmlStreamWriter &stream, const uint &knotAreaIndex, const Billon &tangentialBillon, const TangentialGenerator &tangentialGenerator );
-	void endComponents( QXmlStreamWriter &stream );
-	void appendBillonPith( QXmlStreamWriter &stream, const Billon &billon , const uint &firstSlicePos );
+	void appendKnotArea( QXmlStreamWriter &stream, const uint &knotAreaIndex, const Billon &tangentialBillon, const TangentialGenerator &tangentialGenerator );
+	void appendBillonPith( QXmlStreamWriter &stream, const Billon &billon );
 	void appendTangentialPith( QXmlStreamWriter &stream, const Pith &pith, const TangentialGenerator &tangentialGenerator );
 }
 

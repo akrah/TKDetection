@@ -443,7 +443,7 @@ void MainWindow::drawSlice()
 						const qreal voxelRatio = _tangentialBillon->voxelWidth()/_tangentialBillon->voxelHeight();
 
 						const QQuaternion &quaterRot = _tangentialGenerator.quaterRot();
-						const QVector3D shiftStep = _tangentialGenerator.shiftStep( 1. );
+						const QVector3D shiftStep = _tangentialGenerator.zShiftStep( 1. );
 
 						QVector3D origin( _tangentialGenerator.origin() );
 						QVector3D initial, destination;
@@ -2235,7 +2235,7 @@ void MainWindow::exportPithOfAKnotAreaToSdp( QTextStream &stream, const Tangenti
 	const qreal semiKnotAreaWidthCoeff = widthOnTwo / static_cast<qreal>( nbSlices );
 
 	const QQuaternion &quaterRot = tangentialTransform.quaterRot();
-	const QVector3D shiftStep = tangentialTransform.shiftStep( 1. );
+	const QVector3D shiftStep = tangentialTransform.zShiftStep( 1. );
 
 	QVector3D origin( tangentialTransform.origin() );
 	QVector3D initial, destination;
@@ -2434,7 +2434,7 @@ void MainWindow::exportSegmentedKnotToSdp( QTextStream &stream, const Tangential
 	const qreal voxelRatio = _tangentialBillon->voxelWidth()/_tangentialBillon->voxelHeight();
 
 	const QQuaternion &quaterRot = tangentialTransform.quaterRot();
-	const QVector3D shiftStep = tangentialTransform.shiftStep( 1. );
+	const QVector3D shiftStep = tangentialTransform.zShiftStep( 1. );
 
 	QVector3D origin( useSliceIntervalCoordinates?tangentialTransform.originRelativeToSliceInterval():tangentialTransform.origin() );
 	QVector3D initial, destination;

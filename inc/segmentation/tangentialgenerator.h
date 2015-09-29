@@ -48,8 +48,8 @@ public:
 	const QQuaternion &quaterZ() const;
 	const QQuaternion &quaterRot() const;
 
-	const QVector3D &shiftStep() const;
-	QVector3D shiftStep( const qreal &stepInZ ) const;
+	const QVector3D &zShiftStep() const;
+	QVector3D zShiftStep( const qreal &stepInZ ) const;
 
 	QVector3D rotate( const iCoord3D &initialCoord ) const;
 	QVector3D rotate( const QVector3D &initialCoord ) const;
@@ -75,7 +75,7 @@ protected:
 	QQuaternion _quaterZ;
 	QQuaternion _quaterRot;
 
-	QVector3D _shiftStep;
+	QVector3D _zShiftStep;
 };
 
 #endif // TANGENTIALGENERATOR_H

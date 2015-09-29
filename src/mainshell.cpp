@@ -23,8 +23,10 @@
 
 #include "inc/v3dexport.h"
 
-#define DEFAULT_OUTPUT_FILENAME "output.v3d"
-#define DEFAULT_PARAMS_FILENAME "tkd_shell.ini"
+#define DEFAULT_OUTPUT_DIRNAME	"TKDShell_Output"
+#define DEFAULT_PARAMS_FILENAME	"tkd_shell.ini"
+#define DEFAULT_KNOTFILE_BASE	"knot%1.pgm3d"
+#define DEFAULT_GLOBALFILENAME	"global.v3d"
 
 /**************************************************
  * Déclaration des fonctions appellées dans le main
@@ -35,16 +37,21 @@ void detectKnotsByWhorls( const Billon &billon,
 						  KnotAreaDetector* knotByWhorlDetector,
 						  const qreal &treeRadius );
 void segmentAndExportKnots( const Billon &billon,
-							const QString &outputFileName,
+							const QString &outputDirName,
 							const KnotAreaDetector &detector );
 Billon* segmentKnotArea( const Billon &billon,
 						 const KnotArea &supportingArea,
 						 const PieChart& pieChart,
 						 TangentialGenerator &tangentialGenerator,
-						 PithExtractorBoukadida& knotPithExtractor );
-void exportSegmentedKnotAreaToV3D(const Billon &tangentialBillon,
-								const QString &outputFileName,
-								const QVector<KnotArea> &knotAreas );
+						 PithExtractorBoukadida& knotPithExtractor,
+						 PithProfile &knotPithProfile,
+						 EllipseRadiiHistogram &knotEllipseRadiiHistogram);
+void exportSegmentedKnotToSDP( const Billon &tangentialBillon,
+									 const TangentialGenerator &tangentialGenerator,
+									 const uint &knotIndex,
+									 const QDir &outputDir,
+									 const PithProfile& knotPithProfile,
+									 const EllipseRadiiHistogram& knotEllipseRadiiHistogram );
 
 
 /*********************
@@ -70,7 +77,7 @@ int main( int argc, char *argv[] )
 	options.alias("input","i");
 
 	options.addSection(QObject::tr("Optionnels"));
-	options.add("output", QObject::tr("Nom du ficher qui contiendra les nœuds segmentés au format V3D (Défaut : %1)").arg(DEFAULT_OUTPUT_FILENAME),QxtCommandOptions::ValueRequired);
+	options.add("output", QObject::tr("Nom du répertoire qui contiendra les fichiers des nœuds segmentés au format V3D et PGM3D (Défaut : %1)").arg(DEFAULT_OUTPUT_DIRNAME),QxtCommandOptions::ValueRequired);
 	options.alias("output","o");
 	options.add("params", QObject::tr("Fichier contenant l'ensemble des paramètres des différentes étapes au format INI (Défaut : %1)").arg(DEFAULT_PARAMS_FILENAME),QxtCommandOptions::ValueRequired);
 	options.alias("params","p");
@@ -91,7 +98,7 @@ int main( int argc, char *argv[] )
 	QString inputFileName;
 	if ( !options.count("input") )
 	{
-		std::cout << QObject::tr("ERREUR : vous devez spécifier l'image à segmenter").toStdString() << std::endl;
+		std::cout << QObject::tr("ERREUR : vous devez spécifier le répertoire contenant une image DICOM à segmenter").toStdString() << std::endl;
 		options.showUsage();
 		return -1;
 	}
@@ -105,11 +112,11 @@ int main( int argc, char *argv[] )
 		return -1;
 	}
 
-	QString outputFileName = options.count("output") ? options.value("output").toString() : DEFAULT_OUTPUT_FILENAME;
-	if ( QFile(outputFileName).exists() )
+	QString outputDirName = options.count("output") ? options.value("output").toString() : DEFAULT_OUTPUT_DIRNAME;
+	if ( QDir(outputDirName).exists() )
 	{
 		std::string eraseExistingOutput;
-		std::cout << QObject::tr("ATTENTION : le fichier de sortie \"%1\" existe déjà. Êtes-vous sûr de vouloir l'écraser ? (y/n) ").arg(outputFileName).toStdString();
+		std::cout << QObject::tr("ATTENTION : le répertoire de sortie \"%1\" existe déjà. Êtes-vous sûr de vouloir écraser les fichiers présents dans ce répertoire ? (y/n) ").arg(outputDirName).toStdString();
 		std::cin >> eraseExistingOutput;
 		if ( eraseExistingOutput == "n" )
 		{
@@ -117,7 +124,7 @@ int main( int argc, char *argv[] )
 			return -1;
 		}
 		else
-			std::cout << QObject::tr("Ok, le fichier sera écrasé !").toStdString() << std::endl;
+			std::cout << QObject::tr("Ok, le contenu du répertoire sera écrasé !").toStdString() << std::endl;
 	}
 
 	/********************************************************************/
@@ -213,7 +220,7 @@ int main( int argc, char *argv[] )
 	/********************************************************************/
 	std::cout << "5) Segmentation et exportation des zones de nœuds..." << std::endl;
 
-	segmentAndExportKnots( *_billon,outputFileName,*_knotByWhorlDetector );
+	segmentAndExportKnots( *_billon,outputDirName,*_knotByWhorlDetector );
 
 	/********************************************************************/
 	std::cout << std::endl << "Fini !" << std::endl;
@@ -274,20 +281,17 @@ void detectKnotsByWhorls( const Billon &billon, KnotAreaDetector* knotByWhorlDet
 	knotByWhorlDetector->execute( billon );
 }
 
-void segmentAndExportKnots( const Billon &billon, const QString &outputFileName, const KnotAreaDetector &detector )
+void segmentAndExportKnots( const Billon &billon, const QString &outputDirName, const KnotAreaDetector &detector )
 {
-//	QFile file(outputFileName);
-//	if ( !file.open(QIODevice::WriteOnly) )
-//	{
-//		std::cout << QObject::tr("ERREUR : le répertoire DICOM \"%1\" n'existe pas.").arg(folder.path()).toStdString() << std::endl;
-//		return -1;
-//	}
-//		QXmlStreamWriter stream(&file);
-//		V3DExport::init(file,stream);
+	QDir outputDir(outputDirName);
+	outputDir.mkpath(".");
 
-//		V3DExport::appendTags( stream, tangentialBillon );
-//		V3DExport::appendBillonPith( stream, tangentialBillon, 0 );
-
+	QFile globalFile(outputDir.filePath(DEFAULT_GLOBALFILENAME));
+	if ( !globalFile.open(QIODevice::WriteOnly) )
+	{
+		std::cout << QObject::tr("ERREUR : le fichier global \"%1\" n'a pas pu être créé.").arg(globalFile.fileName()).toStdString() << std::endl;
+		return;
+	}
 
 	TangentialGenerator tangentialGenerator( p_global.minIntensity, p_tangentialGenerator.useTrilinearInterpolation );
 
@@ -304,9 +308,17 @@ void segmentAndExportKnots( const Billon &billon, const QString &outputFileName,
 	knotPithExtractor.setLastValidSlicesToExtrapolate( p_pithDetectionKnot.percentageOfLastValidSlicesToExtrapolate );
 
 	Billon* tangentialBillon = 0;
+	PithProfile knotPihtProfile;
+	EllipseRadiiHistogram knotEllipseRadiiHistogram;
 
 	const int nbKnotAreas = detector.knotAreas().size();
 	int i = 0;
+
+	QXmlStreamWriter stream(&globalFile);
+	V3DExport::init(globalFile,stream);
+
+	V3DExport::appendTags( stream, billon );
+	V3DExport::appendBillonPith( stream, billon );
 
 
 	QVectorIterator<KnotArea> supportingAreasIter(detector.knotAreas());
@@ -314,10 +326,12 @@ void segmentAndExportKnots( const Billon &billon, const QString &outputFileName,
 	{
 		std::cout << "    Noeud " << i++ << " / " << nbKnotAreas << " ..." << std::endl;
 		const KnotArea &supportingArea = supportingAreasIter.next();
-		tangentialBillon = segmentKnotArea( billon, supportingArea, detector.pieChart(), tangentialGenerator, knotPithExtractor );
+		tangentialBillon = segmentKnotArea( billon, supportingArea, detector.pieChart(), tangentialGenerator,
+											knotPithExtractor, knotPihtProfile, knotEllipseRadiiHistogram );
 		if ( tangentialBillon )
 		{
-//			exportSegmentedKnotAreaToV3D( tangentialBillon, QString("plop%1.v3d").arg(i),  );
+			V3DExport::appendKnotArea( stream, i, *tangentialBillon, tangentialGenerator );
+			exportSegmentedKnotToSDP( *tangentialBillon, tangentialGenerator, i, outputDir, knotPihtProfile, knotEllipseRadiiHistogram );
 			std::cout << "        -> OK !" << std::endl;
 			delete tangentialBillon;
 		}
@@ -336,11 +350,10 @@ void segmentAndExportKnots( const Billon &billon, const QString &outputFileName,
 
 Billon* segmentKnotArea( const Billon &billon, const KnotArea &supportingArea,
 						 const PieChart& pieChart, TangentialGenerator &tangentialGenerator,
-						 PithExtractorBoukadida& knotPithExtractor )
+						 PithExtractorBoukadida& knotPithExtractor,
+						 PithProfile &knotPithProfile, EllipseRadiiHistogram &knotEllipseRadiiHistogram )
 {
 	Billon* knotBillon = 0;
-	PithProfile knotPithProfile;
-	EllipseRadiiHistogram knotEllipseRadiiHistogram;
 
 	const Interval<uint> &sliceInterval = supportingArea.sliceInterval();
 	const Interval<uint> &sectorInterval = supportingArea.sectorInterval();
@@ -371,37 +384,69 @@ Billon* segmentKnotArea( const Billon &billon, const KnotArea &supportingArea,
 	return knotBillon;
 }
 
-void exportSegmentedKnotAreaToV3D( const Billon &tangentialBillon, const QString &outputFileName, const QVector<KnotArea> &knotAreas )
+void exportSegmentedKnotToSDP( const Billon &tangentialBillon, const TangentialGenerator &tangentialGenerator,
+									 const uint &knotIndex, const QDir &outputDir, const PithProfile &knotPithProfile,
+									 const EllipseRadiiHistogram &knotEllipseRadiiHistogram )
 {
-//	if ( tangentialBillon.hasPith() )
-//	{
-//		QFile file(outputFileName);
-//		if ( file.open(QIODevice::WriteOnly) )
-//		{
-//			QXmlStreamWriter stream(&file);
-//			V3DExport::init(file,stream);
+	QFile knotFile(outputDir.filePath(QString(DEFAULT_KNOTFILE_BASE).arg(knotIndex)));
+	if ( !knotFile.open(QIODevice::WriteOnly) )
+	{
+		std::cout << QObject::tr("ERREUR : le fichier du nœud %1 \"%2\" n'a pas pu être créé.").arg(knotIndex).arg(knotFile.fileName()).toStdString() << std::endl;
+		return;
+	}
 
-//			V3DExport::appendTags( stream, tangentialBillon );
-//			V3DExport::appendBillonPith( stream, tangentialBillon, 0 );
+	// Recherche des coordonnées min et max de la zone de nœud en x et y
+	const QVector3D &origin = tangentialGenerator.origin();
+	const QVector3D destLeftCoord = tangentialGenerator.rotate( QVector3D(0, 0, tangentialBillon.n_slices) );
+	const QVector3D destRightCoord = tangentialGenerator.rotate( QVector3D(0, tangentialGenerator.width()-1, tangentialBillon.n_slices) );
 
-//			QVectorIterator<KnotArea> knotAreaIter(knotAreas);
+	const iCoord3D minCoord(
+				qMin(origin.x(),qMin(destLeftCoord.x(),destRightCoord.x())),
+				qMin(origin.y(),qMin(destLeftCoord.y(),destRightCoord.y())),
+				tangentialGenerator.currentSliceInterval().min());
 
-//			V3DExport::startComponents(stream);
-//			int counter = 1;
-//			while ( knotAreaIter.hasNext() )
-//			{
-//				const KnotArea &knotArea = knotAreaIter.next();
-//				V3DExport::appendSegmentedKnotArea( stream, _knotBillon, _knotBillon->zPos(), counter++ );
-//			}
-//			V3DExport::endComponents(stream);
+	// coord maximum
+	const iCoord3D maxCoord(
+				qMax(origin.x(),qMax(destLeftCoord.x(),destRightCoord.x())),
+				qMax(origin.y(),qMax(destLeftCoord.y(),destRightCoord.y())),
+				tangentialGenerator.currentSliceInterval().max());
 
-//			V3DExport::close(stream);
+	QTextStream stream(&knotFile);
+	stream << "SDP" << endl;
+	stream << "# Dimension des voxels" << endl;
+	stream << tangentialBillon.voxelWidth() << ' ' << tangentialBillon.voxelHeight() << ' ' << tangentialBillon.voxelDepth() << endl;
+	stream << "# Dimension du volume" << endl;
+	stream << maxCoord.x-minCoord.x << " " << maxCoord.y-minCoord.y << " " << maxCoord.z-minCoord.z << endl;
+	stream << "# Position minimum dans le billon" << endl;
+	stream << minCoord.x << " " << minCoord.y << " " << minCoord.z << endl;
+	stream << "# Position maximum dans le billon" << endl;
+	stream << maxCoord.x << " " << maxCoord.y << " " << maxCoord.z << endl;
+	stream << endl;
 
-//			file.close();
+	const uint &nbSlices = tangentialBillon.n_slices;
+	const qreal voxelRatio = tangentialBillon.voxelWidth()/tangentialBillon.voxelHeight();
 
-//			QMessageBox::information(this,tr("Exporter tous les nœuds segmentés du billon en V3D"), tr("Export réussi !"));
-//		}
-//		else QMessageBox::warning(this,tr("Exporter tous les nœuds segmentés du billon en V3D"),tr("L'export a échoué : impossible de créer le ficher %1.").arg(outputFileName));
-//	}
-//	else QMessageBox::warning(this,tr("Exporter tous les nœuds segmentés du billon en V3D"),tr("L'export a échoué : la moelle n'est pas calculée."));
+	QVector3D destination;
+	qreal a,b,x,y,xStart,xEnd,ellipticityRate,ellipseXCenter,ellipseYCenter;
+
+	for ( uint k=0 ; k<nbSlices ; ++k )
+	{
+		ellipticityRate = voxelRatio / knotPithProfile[k];
+		ellipseXCenter = tangentialBillon.pithCoord(k).x;
+		ellipseYCenter = tangentialBillon.pithCoord(k).y;
+
+		// Draw knot contour
+		a = knotEllipseRadiiHistogram[k];
+		b = a*ellipticityRate;
+		for ( y=0 ; y<=b ; ++y )
+		{
+			xStart = qSqrt( (1-qPow(y/b,2)) * qPow(a,2) );
+			xEnd = -xStart;
+			for ( x=xStart ; x<=xEnd ; ++x )
+			{
+				destination = tangentialGenerator.rotate( iCoord3D(ellipseXCenter+x,ellipseYCenter+y,k) );
+				destination = tangentialGenerator.rotate( iCoord3D(ellipseXCenter+x,ellipseYCenter-y,k) );
+			}
+		}
+	}
 }
