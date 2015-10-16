@@ -385,8 +385,8 @@ Billon* segmentKnotArea( const Billon &billon, const KnotArea &supportingArea,
 }
 
 void exportSegmentedKnotToSDP( const Billon &tangentialBillon, const TangentialGenerator &tangentialGenerator,
-									 const uint &knotIndex, const QDir &outputDir, const PithProfile &knotPithProfile,
-									 const EllipseRadiiHistogram &knotEllipseRadiiHistogram )
+								 const uint &knotIndex, const QDir &outputDir, const PithProfile &knotPithProfile,
+								 const EllipseRadiiHistogram &knotEllipseRadiiHistogram )
 {
 	QFile knotFile(outputDir.filePath(QString(DEFAULT_KNOTFILE_BASE).arg(knotIndex)));
 	if ( !knotFile.open(QIODevice::WriteOnly) )
@@ -445,7 +445,7 @@ void exportSegmentedKnotToSDP( const Billon &tangentialBillon, const TangentialG
 			for ( x=xStart ; x<=xEnd ; ++x )
 			{
 				destination = tangentialGenerator.rotate( iCoord3D(ellipseXCenter+x,ellipseYCenter+y,k) );
-				destination = tangentialGenerator.rotate( iCoord3D(ellipseXCenter+x,ellipseYCenter-y,k) );
+				stream << destination.x() << " " << destination.y() << " " << destination.z() << endl;
 			}
 		}
 	}
