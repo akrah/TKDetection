@@ -38,8 +38,8 @@ public:
 	const qreal &angularRange() const;
 	const qreal &bisectorOrientation() const;
 	const qreal &depth() const;
-	const int &width() const;
-	const int &height() const;
+	const uint &width() const;
+	const uint &height() const;
 	const int &lateralShift() const;
 	const int &vertcalShift() const;
 

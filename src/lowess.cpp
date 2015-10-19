@@ -36,7 +36,7 @@ void Lowess::compute( const QVector<qreal> &datas, QVector<qreal> &interpolatedD
 	if ( !size ) return;
 
 	// Loess neighborhood parameter.
-	// XXX: Careful, alpha is assume to be <= 1 here.
+	// XXX: Careful, alpha (_bandWidth) is assume to be <= 1 here.
 	const uint q = qFloor(size * _bandWidth);
 
 	// Working arrays. Yes we need both distances and sortedDistances.

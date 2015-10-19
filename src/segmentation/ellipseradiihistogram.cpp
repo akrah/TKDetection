@@ -50,13 +50,14 @@ void EllipseRadiiHistogram::construct( const Billon &tangentialBillon, const Pit
 	extrapolation(tangentialBillon.validSlices(),percentageOfFirstValidSlicesToExtrapolate,percentageOfLastValidSlicesToExtrapolate);
 
 	// LOESS
+	// Careful : lowessBandWidth must be 0 <= lowessBandWidth <= 1
 	if ( !qFuzzyIsNull(lowessBandWidth) )
 	{
-		QVector<qreal> residus;
+		QVector<qreal> residus, interpolatedValues;
 		Lowess lowess(lowessBandWidth);
-		lowess.compute( *this, *this, residus );
+		lowess.compute( *this, interpolatedValues, residus );
 		outlierInterpolation( residus, iqrCoeff );
-		lowess.compute( *this, *this, residus );
+		lowess.compute( interpolatedValues, *this, residus );
 	}
 //	else
 //		_lowessData = *this;

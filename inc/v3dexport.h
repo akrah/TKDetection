@@ -9,6 +9,8 @@ class QFile;
 class Pith;
 template<typename T> class Interval;
 class TangentialGenerator;
+class PithProfile;
+class EllipseRadiiHistogram;
 
 class QXmlStreamWriter;
 
@@ -18,9 +20,11 @@ namespace V3DExport
 	void close( QXmlStreamWriter &stream );
 
 	void appendTags( QXmlStreamWriter &stream, const Billon &billon );
-	void appendKnotArea( QXmlStreamWriter &stream, const uint &knotAreaIndex, const Billon &tangentialBillon, const TangentialGenerator &tangentialGenerator );
+	void appendKnotArea( QXmlStreamWriter &stream, const uint &knotAreaIndex, const Billon &tangentialBillon, const TangentialGenerator &tangentialGenerator,
+						 const PithProfile& knotPithProfile, const EllipseRadiiHistogram& knotEllipseRadiiHistogram);
 	void appendBillonPith( QXmlStreamWriter &stream, const Billon &billon );
-	void appendTangentialPith( QXmlStreamWriter &stream, const Pith &pith, const TangentialGenerator &tangentialGenerator );
+	void appendTangentialPith( QXmlStreamWriter &stream, const Billon& tangentialBillon, const TangentialGenerator &tangentialGenerator,
+							   const PithProfile& knotPithProfile, const EllipseRadiiHistogram& knotEllipseRadiiHistogram);
 }
 
 #endif // V3DEXPORT_H

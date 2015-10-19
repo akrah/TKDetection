@@ -6,6 +6,8 @@
 #include "inc/segmentation/pithprofile.h"
 #include "inc/segmentation/ellipseradiihistogram.h"
 #include "inc/coordinate.h"
+#include "inc/segmentation/pithprofile.h"
+#include "inc/segmentation/ellipseradiihistogram.h"
 
 #include <QXmlStreamWriter>
 #include <QFile>
@@ -52,7 +54,8 @@ namespace V3DExport
 	}
 
 	void appendKnotArea( QXmlStreamWriter &stream, const uint &knotAreaIndex,
-						 const Billon &tangentialBillon, const TangentialGenerator &tangentialGenerator )
+						 const Billon &tangentialBillon, const TangentialGenerator &tangentialGenerator,
+						 const PithProfile &knotPithProfile, const EllipseRadiiHistogram &knotEllipseRadiiHistogram )
 	{
 		stream.writeStartElement("knotarea");
 		stream.writeAttribute("id",QString::number(knotAreaIndex));
@@ -63,24 +66,32 @@ namespace V3DExport
 		const QVector3D destLeftCoord = tangentialGenerator.rotate( QVector3D(0, 0, tangentialBillon.n_slices) );
 		const QVector3D destRightCoord = tangentialGenerator.rotate( QVector3D(0, tangentialGenerator.width()-1, tangentialBillon.n_slices) );
 
-		//coord minimum
-		stream.writeStartElement("coord");
-			stream.writeAttribute("name","minimum");
-			stream.writeTextElement("x",QString::number(qMin(origin.x(),qMin(destLeftCoord.x(),destRightCoord.x()))));
-			stream.writeTextElement("y",QString::number(qMin(origin.y(),qMin(destLeftCoord.y(),destRightCoord.y()))));
-			stream.writeTextElement("z",QString::number(tangentialGenerator.currentSliceInterval().min()));
+		// position de la boite englobante du nœud
+		const int minX = qMin(origin.x(),qMin(destLeftCoord.x(),destRightCoord.x()));
+		const int minY = qMin(origin.y(),qMin(destLeftCoord.y(),destRightCoord.y()));
+		const int minZ = tangentialGenerator.currentSliceInterval().min();
+		stream.writeStartElement("boundingBoxPosition");
+			stream.writeTextElement("x",QString::number(minX));
+			stream.writeTextElement("y",QString::number(minY));
+			stream.writeTextElement("z",QString::number(minZ));
 		stream.writeEndElement();
 
-		// coord maximum
-		stream.writeStartElement("coord");
-			stream.writeAttribute("name","maximum");
-			stream.writeTextElement("x",QString::number(qMax(origin.x(),qMax(destLeftCoord.x(),destRightCoord.x()))));
-			stream.writeTextElement("y",QString::number(qMax(origin.y(),qMax(destLeftCoord.y(),destRightCoord.y()))));
-			stream.writeTextElement("z",QString::number(tangentialGenerator.currentSliceInterval().max()));
+		// dimension du le boite englobante du nœud
+		stream.writeStartElement("boundingBoxSize");
+			stream.writeTextElement("x",QString::number(qMax(origin.x(),qMax(destLeftCoord.x(),destRightCoord.x()))-minX));
+			stream.writeTextElement("y",QString::number(qMax(origin.y(),qMax(destLeftCoord.y(),destRightCoord.y()))-minY));
+			stream.writeTextElement("z",QString::number(tangentialGenerator.currentSliceInterval().max()-minZ));
+		stream.writeEndElement();
+
+		// dimension des voxels
+		stream.writeStartElement("voxelDimensions");
+			stream.writeTextElement("x",QString::number(tangentialBillon.voxelWidth()));
+			stream.writeTextElement("y",QString::number(tangentialBillon.voxelHeight()));
+			stream.writeTextElement("z",QString::number(tangentialBillon.voxelDepth()));
 		stream.writeEndElement();
 
 		// moelle du nœud
-		appendTangentialPith( stream, tangentialBillon.pith(), tangentialGenerator );
+		appendTangentialPith( stream, tangentialBillon, tangentialGenerator, knotPithProfile, knotEllipseRadiiHistogram );
 
 		stream.writeEndElement();
 	}
@@ -103,10 +114,14 @@ namespace V3DExport
 		}
 	}
 
-	void appendTangentialPith( QXmlStreamWriter &stream, const Pith &pith, const TangentialGenerator &tangentialGenerator )
+	void appendTangentialPith( QXmlStreamWriter &stream, const Billon &tangentialBillon, const TangentialGenerator &tangentialGenerator,
+							   const PithProfile &knotPithProfile, const EllipseRadiiHistogram &knotEllipseRadiiHistogram )
 	{
+		const Pith &pith = tangentialBillon.pith();
 		if ( !pith.isEmpty() )
 		{
+			const qreal voxelRatio = tangentialBillon.voxelWidth()/tangentialBillon.voxelHeight();
+
 			QVector3D initCoord, destCoord;
 
 			stream.writeStartElement("pith");
@@ -115,9 +130,11 @@ namespace V3DExport
 				initCoord = QVector3D(pith[k].x, pith[k].y, k);
 				destCoord = tangentialGenerator.rotate( QVector3D(pith[k].x, pith[k].y, k) );
 				stream.writeStartElement("coord");
-				stream.writeTextElement("x",QString::number(destCoord.x()));
-				stream.writeTextElement("y",QString::number(destCoord.y()));
-				stream.writeTextElement("z",QString::number(destCoord.z()));
+					stream.writeAttribute("ellipticityRate",QString::number(voxelRatio / knotPithProfile[k]));
+					stream.writeAttribute("firstRadius",QString::number(knotEllipseRadiiHistogram[k]));
+					stream.writeTextElement("x",QString::number(destCoord.x()));
+					stream.writeTextElement("y",QString::number(destCoord.y()));
+					stream.writeTextElement("z",QString::number(destCoord.z()));
 				stream.writeEndElement();
 			}
 			stream.writeEndElement();

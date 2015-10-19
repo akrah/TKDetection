@@ -28,6 +28,7 @@ public:
 
 	const T &minValue() const;
 	const T &maxValue() const;
+	const Interval<T> &valueInterval() const;
 	const qreal &voxelWidth() const;
 	const qreal &voxelHeight() const;
 	const qreal &voxelDepth() const;
@@ -109,6 +110,12 @@ template< typename T >
 const T &BillonTpl<T>::maxValue() const
 {
 	return _valueInterval.max();
+}
+
+template< typename T >
+const Interval<T> &BillonTpl<T>::valueInterval() const
+{
+	return _valueInterval;
 }
 
 template< typename T >

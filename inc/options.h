@@ -44,6 +44,12 @@ struct Params_SectorHistogram {
 	int minimumWidthOfIntervals = HISTOGRAM_ANGULAR_MINIMUM_WIDTH_OF_INTERVALS;
 } p_sectorHistogram;
 
+struct Params_ZMotionMap {
+	int binarizationThreshold = ZMOTIONMAP_BINARIZATION_THRESHOLD;
+	int maximumConnectedComponentDistance = ZMOTIONMAP_MAXIMUM_CONNECTED_COMPONENT_DISTANCE;
+	int minimumConnectedComponentSize = ZMOTIONMAP_MINIMUM_CONNECTED_COMPONENT_SIZE;
+} p_zMotionMap;
+
 struct Params_PithDetectionKnot {
 	int subWindowWidth = NEIGHBORHOOD_WINDOW_WIDTH_KNOT;
 	int subWindowHeight = NEIGHBORHOOD_WINDOW_HEIGHT_KNOT;

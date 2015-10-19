@@ -33,7 +33,7 @@ void TangentialGenerator::setSliceInterval( const Billon &billon, const Interval
 {
 	_currentSliceInterval = sliceInterval;
 	_height = sliceInterval.count();
-	_verticalShift = -qFloor(_height/2.);
+	_verticalShift = qFloor(_height/2.);
 	const uint midSliceInterval = sliceInterval.mid();
 	_origin = QVector3D(billon.pithCoord(midSliceInterval).x, billon.pithCoord(midSliceInterval).y, midSliceInterval);
 }
@@ -55,7 +55,7 @@ void TangentialGenerator::setAngularInterval( const Billon &billon, const Interv
 	}
 	_depth = rVec2D(edge-originPith).norm();
 	_width = qFloor(2 * qTan(_angularRange*pieChart.angleStep()/2.) * _depth);
-	_lateralShift = -qFloor(_width/2.);
+	_lateralShift = qFloor(_width/2.);
 
 	_quaterRot = _quaterZ * _quaterX * _quaterY;
 	_zShiftStep = _quaterRot.rotatedVector( QVector3D( 0., 0., 1. ) );
@@ -127,12 +127,12 @@ const qreal &TangentialGenerator::depth() const
 	return _depth;
 }
 
-const int &TangentialGenerator::width() const
+const uint &TangentialGenerator::width() const
 {
 	return _width;
 }
 
-const int &TangentialGenerator::height() const
+const uint &TangentialGenerator::height() const
 {
 	return _height;
 }
@@ -179,12 +179,12 @@ QVector3D TangentialGenerator::zShiftStep( const qreal &stepInZ ) const
 
 QVector3D TangentialGenerator::rotate( const iCoord3D &initialCoord ) const
 {
-	return _quaterRot.rotatedVector( QVector3D( initialCoord.x-_lateralShift, initialCoord.y-_lateralShift, 0 ) ) + (_origin + _zShiftStep*initialCoord.z);
+	return _quaterRot.rotatedVector( QVector3D( initialCoord.x-_lateralShift, initialCoord.y-_verticalShift, 0 ) ) + (_origin + _zShiftStep*initialCoord.z);
 }
 
 QVector3D TangentialGenerator::rotate( const QVector3D &initialCoord ) const
 {
-	return _quaterRot.rotatedVector( QVector3D( initialCoord.x()-_lateralShift, initialCoord.y()-_lateralShift, 0 ) ) + (_origin + _zShiftStep*initialCoord.z());
+	return _quaterRot.rotatedVector( QVector3D( initialCoord.x()-_lateralShift, initialCoord.y()-_verticalShift, 0 ) ) + (_origin + _zShiftStep*initialCoord.z());
 }
 
 Billon* TangentialGenerator::execute( const Billon &billon )
@@ -206,6 +206,7 @@ Billon* TangentialGenerator::execute( const Billon &billon )
 	tangentialBillon->setVoxelSize( billon.voxelWidth(),
 									billon.voxelDepth(),
 									billon.voxelHeight() );
+	tangentialBillon->setValueInterval( billon.valueInterval() );
 	tangentialBillon->fill(_minIntensity);
 
 	QVector3D origin(_origin);

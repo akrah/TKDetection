@@ -771,6 +771,7 @@ void MainWindow::computeBillonPith( const bool &draw )
 	{
 		_ui->_checkRadiusAroundPith->setText( QString::number(_treeRadius) );
 		_ui->_spinHistogramNumberOfAngularSectors_zMotionAngular->setValue(TWO_PI*_treeRadius);
+		_ui->_spinZMotionMapNbAngularSectors->setValue(TWO_PI*_treeRadius);
 
 		updatePlotSliceHistogram();
 		resetComboBox(*(_ui->_comboSelectSliceInterval));
@@ -1038,10 +1039,9 @@ void MainWindow::computeZMotionMapKnotAreas( const bool &draw )
 
 	if ( _billon && _billon->hasPith() )
 	{
-		_knotByZMotionMapDetector.setZMotionAccumulatorParameters(
-					Interval<int>(_ui->_spinMinIntensity->value(), _ui->_spinMaxIntensity->value()),
-					_ui->_spinZMotionMapMin->value(),
-					_treeRadius	);
+		_knotByZMotionMapDetector.setIntensityInterval( Interval<int>(_ui->_spinMinIntensity->value(),_ui->_spinMaxIntensity->value()) );
+		_knotByZMotionMapDetector.setZMotionMin( _ui->_spinZMotionMapMin->value() );
+		_knotByZMotionMapDetector.setTreeRadius( _treeRadius );
 		_knotByZMotionMapDetector.setBinarizationThreshold(_ui->_spinSupportingAreaBinarization->value());
 		_knotByZMotionMapDetector.setMaximumConnectedComponentDistance(_ui->_spinSupportingAreaDistance->value());
 		_knotByZMotionMapDetector.setMinimumConnectedComponentSize(_ui->_spinSupportingAreaMinSize->value());

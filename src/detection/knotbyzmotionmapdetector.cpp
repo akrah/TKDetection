@@ -21,6 +21,10 @@ void KnotByZMotionMapDetector::execute( const Billon &billon )
 	clear();
 
 	// Compute the map of z-motion accumulation
+	_zMotionAccumulator.setPieChart( _pieChart );
+	_zMotionAccumulator.setIntensityInterval( _intensityInterval );
+	_zMotionAccumulator.setZMotionMin( _zMotionMin );
+	_zMotionAccumulator.setRadiusAroundPith( _treeRadius );
 	_zMotionAccumulator.execute( billon, _zMotionMap, billon.validSlices() );
 
 	// Detect knot areas from _zMotionMap
@@ -70,16 +74,6 @@ void KnotByZMotionMapDetector::setMaximumConnectedComponentDistance(const qreal 
 void KnotByZMotionMapDetector::setMinimumConnectedComponentSize( const uint &size )
 {
 	_minimumConnectedComponentSize = size;
-}
-
-void KnotByZMotionMapDetector::setZMotionAccumulatorParameters( const Interval<int> &intensityInterval,
-																const uint &zMotionMin,
-																const uint &radiusAroundPith )
-{
-	_zMotionAccumulator.setPieChart( _pieChart );
-	_zMotionAccumulator.setIntensityInterval( intensityInterval );
-	_zMotionAccumulator.setZMotionMin( zMotionMin );
-	_zMotionAccumulator.setRadiusAroundPith( radiusAroundPith );
 }
 
 void KnotByZMotionMapDetector::computeKnotAreas()

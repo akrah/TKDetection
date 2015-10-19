@@ -14,6 +14,7 @@
 #include "inc/pithextractorboukadida.h"
 #include "inc/billonalgorithms.h"
 #include "inc/detection/knotbywhorldetector.h"
+#include "inc/detection/knotbyzmotionmapdetector.h"
 
 #include "inc/segmentation/tangentialgenerator.h"
 #include "inc/segmentation/pithprofile.h"
@@ -23,35 +24,50 @@
 
 #include "inc/v3dexport.h"
 
-#define DEFAULT_OUTPUT_DIRNAME	"TKDShell_Output"
-#define DEFAULT_PARAMS_FILENAME	"tkd_shell.ini"
-#define DEFAULT_KNOTFILE_BASE	"knot%1.pgm3d"
-#define DEFAULT_GLOBALFILENAME	"global.v3d"
+#define DEFAULT_OUTPUT_DIRNAME		"TKDShell_Output"
+#define DEFAULT_PARAMS_FILENAME		"tkd_shell.ini"
+#define DEFAULT_DETECTION_METHOD	"whorls"
+#define DEFAULT_KNOTFILE_BASE		"knot%1.pgm3d"
+#define DEFAULT_GLOBALFILENAME		"global.v3d"
 
 /**************************************************
  * Déclaration des fonctions appellées dans le main
  * ************************************************/
-void computeBillonPith( Billon &billon,
-						qreal &treeRadius );
-void detectKnotsByWhorls( const Billon &billon,
-						  KnotAreaDetector* knotByWhorlDetector,
-						  const qreal &treeRadius );
-void segmentAndExportKnots( const Billon &billon,
-							const QString &outputDirName,
-							const KnotAreaDetector &detector );
-Billon* segmentKnotArea( const Billon &billon,
-						 const KnotArea &supportingArea,
-						 const PieChart& pieChart,
-						 TangentialGenerator &tangentialGenerator,
-						 PithExtractorBoukadida& knotPithExtractor,
-						 PithProfile &knotPithProfile,
-						 EllipseRadiiHistogram &knotEllipseRadiiHistogram);
-void exportSegmentedKnotToSDP( const Billon &tangentialBillon,
-									 const TangentialGenerator &tangentialGenerator,
-									 const uint &knotIndex,
-									 const QDir &outputDir,
-									 const PithProfile& knotPithProfile,
-									 const EllipseRadiiHistogram& knotEllipseRadiiHistogram );
+void computeBillonPith(
+		Billon &billon,
+		qreal &treeRadius );
+
+void detectKnotsByWhorls(
+		const Billon &billon,
+		KnotAreaDetector* knotByWhorlDetector,
+		const qreal &treeRadius );
+
+void detectKnotsByZMotionMap(
+		const Billon &billon,
+		KnotAreaDetector* knotByWhorlDetector,
+		const qreal &treeRadius );
+
+void segmentAndExportKnots(
+		const Billon &billon,
+		const QString &outputDirName,
+		const KnotAreaDetector &detector );
+
+Billon* segmentKnotArea(
+		const Billon &billon,
+		const KnotArea &supportingArea,
+		const PieChart& pieChart,
+		TangentialGenerator &tangentialGenerator,
+		PithExtractorBoukadida& knotPithExtractor,
+		PithProfile &knotPithProfile,
+		EllipseRadiiHistogram &knotEllipseRadiiHistogram);
+
+void exportSegmentedKnotToSDP(
+		const Billon &tangentialBillon,
+		const TangentialGenerator &tangentialGenerator,
+		const uint &knotIndex,
+		const QDir &outputDir,
+		const PithProfile& knotPithProfile,
+		const EllipseRadiiHistogram& knotEllipseRadiiHistogram );
 
 
 /*********************
@@ -81,6 +97,8 @@ int main( int argc, char *argv[] )
 	options.alias("output","o");
 	options.add("params", QObject::tr("Fichier contenant l'ensemble des paramètres des différentes étapes au format INI (Défaut : %1)").arg(DEFAULT_PARAMS_FILENAME),QxtCommandOptions::ValueRequired);
 	options.alias("params","p");
+	options.add("method", QObject::tr("Choix de la méthode de détection des zones de nœuds. Peut être \"whorls\" ou \"zMotionMap\"  (Défaut : %1)").arg(DEFAULT_DETECTION_METHOD),QxtCommandOptions::ValueRequired);
+	options.alias("method","m");
 
 	options.addSection(QObject::tr("Autres"));
 	options.add("help", QObject::tr("Afficher ce texte"),QxtCommandOptions::NoValue);
@@ -112,18 +130,26 @@ int main( int argc, char *argv[] )
 		return -1;
 	}
 
+	QString detectionMethod = options.count("method") ? options.value("method").toString() : DEFAULT_DETECTION_METHOD;
+	if ( detectionMethod != "whorls" && detectionMethod != "zMotionMap" )
+	{
+		std::cout << QObject::tr("ERREUR : la méthode de détection des zones de nœuds '%1' n'existe pas. Elle peut valoir 'whorls' ou 'zMotionMap'").arg(detectionMethod).toStdString() << std::endl;
+		options.showUsage();
+		return -1;
+	}
+
 	QString outputDirName = options.count("output") ? options.value("output").toString() : DEFAULT_OUTPUT_DIRNAME;
 	if ( QDir(outputDirName).exists() )
 	{
-		std::string eraseExistingOutput;
+//		std::string eraseExistingOutput;
 		std::cout << QObject::tr("ATTENTION : le répertoire de sortie \"%1\" existe déjà. Êtes-vous sûr de vouloir écraser les fichiers présents dans ce répertoire ? (y/n) ").arg(outputDirName).toStdString();
-		std::cin >> eraseExistingOutput;
-		if ( eraseExistingOutput == "n" )
-		{
-			std::cout << QObject::tr("C'est bien ce qu'il me semblait... J'ai bien fait de demander !").toStdString() << std::endl;
-			return -1;
-		}
-		else
+//		std::cin >> eraseExistingOutput;
+//		if ( eraseExistingOutput == "n" )
+//		{
+//			std::cout << QObject::tr("C'est bien ce qu'il me semblait... J'ai bien fait de demander !").toStdString() << std::endl;
+//			return -1;
+//		}
+//		else
 			std::cout << QObject::tr("Ok, le contenu du répertoire sera écrasé !").toStdString() << std::endl;
 	}
 
@@ -158,6 +184,10 @@ int main( int argc, char *argv[] )
 	p_sectorHistogram.minimumHeightOfMaximums = settings.value("SectorHistogram/minimumHeightOfMaximums",HISTOGRAM_ANGULAR_PERCENTAGE_OF_MINIMUM_HEIGHT_OF_MAXIMUM).toInt();
 	p_sectorHistogram.derivativeSearchPercentage = settings.value("SectorHistogram/derivativeSearchPercentage",HISTOGRAM_ANGULAR_DERIVATIVE_SEARCH_PERCENTAGE).toInt();
 	p_sectorHistogram.minimumWidthOfIntervals = settings.value("SectorHistogram/minimumWidthOfIntervals",HISTOGRAM_ANGULAR_MINIMUM_WIDTH_OF_INTERVALS).toInt();
+
+	p_zMotionMap.binarizationThreshold = settings.value("ZMotionMap/binarizationThreshold",ZMOTIONMAP_BINARIZATION_THRESHOLD).toInt();
+	p_zMotionMap.maximumConnectedComponentDistance = settings.value("ZMotionMap/maximumConnectedComponentDistance",ZMOTIONMAP_MAXIMUM_CONNECTED_COMPONENT_DISTANCE).toInt();
+	p_zMotionMap.minimumConnectedComponentSize = settings.value("ZMotionMap/minimumConnectedComponentDistance",ZMOTIONMAP_MINIMUM_CONNECTED_COMPONENT_SIZE).toInt();
 
 	p_pithDetectionKnot.subWindowWidth = settings.value("PithDetectionKnot/subWindowWidth",NEIGHBORHOOD_WINDOW_WIDTH_KNOT).toInt();
 	p_pithDetectionKnot.subWindowHeight = settings.value("PithDetectionKnot/subWindowHeight",NEIGHBORHOOD_WINDOW_HEIGHT_KNOT).toInt();
@@ -214,18 +244,28 @@ int main( int argc, char *argv[] )
 	/********************************************************************/
 	std::cout << "4) Détection des zones de nœuds..." << std::endl;
 
-	KnotAreaDetector* _knotByWhorlDetector = new KnotByWhorlDetector;
-	detectKnotsByWhorls( *_billon, _knotByWhorlDetector, _treeRadius );
+	KnotAreaDetector* _knotAreaDetector;
+
+	if ( detectionMethod == "whorls" )
+	{
+		_knotAreaDetector = new KnotByWhorlDetector;
+		detectKnotsByWhorls( *_billon, _knotAreaDetector, _treeRadius );
+	}
+	else
+	{
+		_knotAreaDetector = new KnotByZMotionMapDetector;
+		detectKnotsByZMotionMap( *_billon, _knotAreaDetector, _treeRadius );
+	}
 
 	/********************************************************************/
 	std::cout << "5) Segmentation et exportation des zones de nœuds..." << std::endl;
 
-	segmentAndExportKnots( *_billon,outputDirName,*_knotByWhorlDetector );
+	segmentAndExportKnots( *_billon,outputDirName,*_knotAreaDetector );
 
 	/********************************************************************/
 	std::cout << std::endl << "Fini !" << std::endl;
 
-	delete _knotByWhorlDetector;
+	delete _knotAreaDetector;
 	if ( _billon )
 	{
 		delete _billon;
@@ -265,6 +305,8 @@ void detectKnotsByWhorls( const Billon &billon, KnotAreaDetector* knotByWhorlDet
 	knotByWhorlDetector->setIntensityInterval( Interval<int>(p_global.minIntensity,p_global.maxIntensity) );
 	knotByWhorlDetector->setZMotionMin( p_global.minZMotion );
 	knotByWhorlDetector->setTreeRadius( treeRadius );
+	knotByWhorlDetector->setSectorNumber( TWO_PI*treeRadius );
+
 	static_cast<KnotByWhorlDetector*>(knotByWhorlDetector)->setSliceHistogramParameters(
 				p_sliceHistogram.smoothingRadius,
 				p_sliceHistogram.minimumHeightOfMaximums,
@@ -279,6 +321,19 @@ void detectKnotsByWhorls( const Billon &billon, KnotAreaDetector* knotByWhorlDet
 				p_sectorHistogram.minimumWidthOfIntervals*coeffDegToSize);
 
 	knotByWhorlDetector->execute( billon );
+}
+
+void detectKnotsByZMotionMap( const Billon &billon, KnotAreaDetector* knotByZMotionMapDetector, const qreal &treeRadius )
+{
+	knotByZMotionMapDetector->setIntensityInterval( Interval<int>(p_global.minIntensity,p_global.maxIntensity) );
+	knotByZMotionMapDetector->setZMotionMin( p_global.minZMotion );
+	knotByZMotionMapDetector->setTreeRadius( treeRadius );
+	knotByZMotionMapDetector->setSectorNumber( TWO_PI*treeRadius );
+	static_cast<KnotByZMotionMapDetector*>(knotByZMotionMapDetector)->setBinarizationThreshold( p_zMotionMap.binarizationThreshold );
+	static_cast<KnotByZMotionMapDetector*>(knotByZMotionMapDetector)->setMaximumConnectedComponentDistance( p_zMotionMap.maximumConnectedComponentDistance );
+	static_cast<KnotByZMotionMapDetector*>(knotByZMotionMapDetector)->setMinimumConnectedComponentSize( p_zMotionMap.minimumConnectedComponentSize );
+
+	knotByZMotionMapDetector->execute( billon );
 }
 
 void segmentAndExportKnots( const Billon &billon, const QString &outputDirName, const KnotAreaDetector &detector )
@@ -312,7 +367,7 @@ void segmentAndExportKnots( const Billon &billon, const QString &outputDirName, 
 	EllipseRadiiHistogram knotEllipseRadiiHistogram;
 
 	const int nbKnotAreas = detector.knotAreas().size();
-	int i = 1;
+	int i = 0;
 
 	QXmlStreamWriter stream(&globalFile);
 	V3DExport::init(globalFile,stream);
@@ -324,13 +379,13 @@ void segmentAndExportKnots( const Billon &billon, const QString &outputDirName, 
 	QVectorIterator<KnotArea> supportingAreasIter(detector.knotAreas());
 	while ( supportingAreasIter.hasNext() )
 	{
-		std::cout << "    Noeud " << i++ << " / " << nbKnotAreas << " ..." << std::endl;
+		std::cout << "    Noeud " << ++i << " / " << nbKnotAreas << " ..." << std::endl;
 		const KnotArea &supportingArea = supportingAreasIter.next();
 		tangentialBillon = segmentKnotArea( billon, supportingArea, detector.pieChart(), tangentialGenerator,
 											knotPithExtractor, knotPihtProfile, knotEllipseRadiiHistogram );
 		if ( tangentialBillon )
 		{
-			V3DExport::appendKnotArea( stream, i, *tangentialBillon, tangentialGenerator );
+			V3DExport::appendKnotArea( stream, i, *tangentialBillon, tangentialGenerator, knotPihtProfile, knotEllipseRadiiHistogram );
 			exportSegmentedKnotToSDP( *tangentialBillon, tangentialGenerator, i, outputDir, knotPihtProfile, knotEllipseRadiiHistogram );
 			std::cout << "        -> OK !" << std::endl;
 			delete tangentialBillon;
@@ -372,7 +427,7 @@ Billon* segmentKnotArea( const Billon &billon, const KnotArea &supportingArea,
 			{
 				knotEllipseRadiiHistogram.construct( *knotBillon,
 													 knotPithProfile,
-													 p_ellipticalHistograms.lowessBandWidth,
+													 p_ellipticalHistograms.lowessBandWidth/100.,
 													 p_ellipticalHistograms.smoothingRadius,
 													 p_ellipticalHistograms.lowessIqrCoefficient,
 													 p_ellipticalHistograms.lowessPercentageOfFirstValidSlicesToExtrapolate,
@@ -385,11 +440,11 @@ Billon* segmentKnotArea( const Billon &billon, const KnotArea &supportingArea,
 }
 
 void exportSegmentedKnotToSDP( const Billon &tangentialBillon, const TangentialGenerator &tangentialGenerator,
-								 const uint &knotIndex, const QDir &outputDir, const PithProfile &knotPithProfile,
-								 const EllipseRadiiHistogram &knotEllipseRadiiHistogram )
+							   const uint &knotIndex, const QDir &outputDir, const PithProfile &knotPithProfile,
+							   const EllipseRadiiHistogram &knotEllipseRadiiHistogram )
 {
 	QFile knotFile(outputDir.filePath(QString(DEFAULT_KNOTFILE_BASE).arg(knotIndex)));
-	if ( !knotFile.open(QIODevice::WriteOnly) )
+	if ( !knotFile.open(QIODevice::Append) )
 	{
 		std::cout << QObject::tr("ERREUR : le fichier du nœud %1 \"%2\" n'a pas pu être créé.").arg(knotIndex).arg(knotFile.fileName()).toStdString() << std::endl;
 		return;
@@ -413,14 +468,12 @@ void exportSegmentedKnotToSDP( const Billon &tangentialBillon, const TangentialG
 
 	QTextStream stream(&knotFile);
 	stream << "SDP" << endl;
-	stream << "# Dimension des voxels" << endl;
-	stream << tangentialBillon.voxelWidth() << ' ' << tangentialBillon.voxelHeight() << ' ' << tangentialBillon.voxelDepth() << endl;
-	stream << "# Dimension du volume" << endl;
-	stream << maxCoord.x-minCoord.x << " " << maxCoord.y-minCoord.y << " " << maxCoord.z-minCoord.z << endl;
-	stream << "# Position minimum dans le billon" << endl;
-	stream << minCoord.x << " " << minCoord.y << " " << minCoord.z << endl;
-	stream << "# Position maximum dans le billon" << endl;
-	stream << maxCoord.x << " " << maxCoord.y << " " << maxCoord.z << endl;
+	stream << "## Position de le boite englobante" << endl;
+	stream << "# " << minCoord.x << " " << minCoord.y << " " << minCoord.z << endl;
+	stream << "## Dimension de la boite englobante" << endl;
+	stream << "# " << maxCoord.x-minCoord.x << " " << maxCoord.y-minCoord.y << " " << maxCoord.z-minCoord.z << endl;
+	stream << "## Dimension des voxels" << endl;
+	stream << "# " << tangentialBillon.voxelWidth() << ' ' << tangentialBillon.voxelHeight() << ' ' << tangentialBillon.voxelDepth() << endl;
 	stream << endl;
 
 	const uint &nbSlices = tangentialBillon.n_slices;
@@ -440,11 +493,13 @@ void exportSegmentedKnotToSDP( const Billon &tangentialBillon, const TangentialG
 		b = a*ellipticityRate;
 		for ( y=0 ; y<=b ; ++y )
 		{
-			xStart = qSqrt( (1-qPow(y/b,2)) * qPow(a,2) );
-			xEnd = -xStart;
+			xEnd = qSqrt( (1-qPow(y/b,2)) * qPow(a,2) );
+			xStart = -xEnd;
 			for ( x=xStart ; x<=xEnd ; ++x )
 			{
 				destination = tangentialGenerator.rotate( iCoord3D(ellipseXCenter+x,ellipseYCenter+y,k) );
+				stream << destination.x() << " " << destination.y() << " " << destination.z() << endl;
+				destination = tangentialGenerator.rotate( iCoord3D(ellipseXCenter+x,ellipseYCenter-y,k) );
 				stream << destination.x() << " " << destination.y() << " " << destination.z() << endl;
 			}
 		}
