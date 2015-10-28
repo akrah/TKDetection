@@ -27,7 +27,7 @@
 #define DEFAULT_OUTPUT_DIRNAME		"TKDShell_Output"
 #define DEFAULT_PARAMS_FILENAME		"tkd_shell.ini"
 #define DEFAULT_DETECTION_METHOD	"whorls"
-#define DEFAULT_KNOTFILE_BASE		"knot%1.pgm3d"
+#define DEFAULT_KNOTFILE_BASE		"knot%1.sdp"
 #define DEFAULT_GLOBALFILENAME		"global.v3d"
 
 /**************************************************
@@ -158,8 +158,8 @@ int main( int argc, char *argv[] )
 	QSettings settings(paramsFileName,QSettings::IniFormat);
 
 	p_global.minIntensity = settings.value("General/minIntensity",MINIMUM_INTENSITY).toInt();
-	p_global.maxIntensity = settings.value("General/",MAXIMUM_INTENSITY).toInt();
-	p_global.minZMotion = settings.value("General/",MINIMUM_Z_MOTION).toInt();
+	p_global.maxIntensity = settings.value("General/maxIntensity",MAXIMUM_INTENSITY).toInt();
+	p_global.minZMotion = settings.value("General/minZMotion",MINIMUM_Z_MOTION).toInt();
 
 	p_pithDetectionBillon.subWindowWidth = settings.value("PithDetectionBillon/subWindowWidth",NEIGHBORHOOD_WINDOW_WIDTH_BILLON).toInt();
 	p_pithDetectionBillon.subWindowHeight = settings.value("PithDetectionBillon/subWindowHeight",NEIGHBORHOOD_WINDOW_HEIGHT_BILLON).toInt();

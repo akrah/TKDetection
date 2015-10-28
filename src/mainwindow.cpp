@@ -877,11 +877,11 @@ void MainWindow::selectSectorInterval( const int &index, const bool &draw )
 		const Interval<uint> centeredSectorInterval = _knotByWhorlDetector.centeredSectorInterval( _currentSliceInterval-1, _currentSectorInterval-1 );
 		const Interval<int> intensityInterval(_ui->_spinMinIntensity->value(), _ui->_spinMaxIntensity->value());
 
-		_tangentialGenerator.updateIntervals( *_billon, _knotByWhorlDetector.sliceHistogram().interval(_currentSliceInterval-1), centeredSectorInterval, sectorHistogram.pieChart() );
 		_tangentialGenerator.enableTrilinearInterpolation( _ui->_checkTrilinearInterpolation->isChecked() );
 		_tangentialGenerator.setMinIntensity( intensityInterval.min() );
+		_tangentialGenerator.updateIntervals( *_billon, _knotByWhorlDetector.sliceHistogram().interval(_currentSliceInterval-1), centeredSectorInterval, sectorHistogram.pieChart() );
 
-		_tangentialBillon = _tangentialGenerator.execute( *_billon, sectorHistogram.pieChart() );
+		_tangentialBillon = _tangentialGenerator.execute( *_billon );
 
 		if ( _tangentialBillon )
 		{
@@ -944,7 +944,7 @@ void MainWindow::selectKnotArea( const int &index, const bool &draw )
 		_tangentialGenerator.enableTrilinearInterpolation( _ui->_checkTrilinearInterpolation->isChecked() );
 		_tangentialGenerator.setMinIntensity( _ui->_spinMinIntensity->value() );
 
-		_tangentialZMotionMapBillon = _tangentialGenerator.execute( *_billon, _knotByZMotionMapDetector.pieChart() );
+		_tangentialZMotionMapBillon = _tangentialGenerator.execute( *_billon );
 
 		if ( _tangentialZMotionMapBillon )
 		{
