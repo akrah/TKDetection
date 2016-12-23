@@ -157,9 +157,11 @@ int main( int argc, char *argv[] )
 	std::cout << "1) Lecture des paramètres..." << std::endl;
 	QSettings settings(paramsFileName,QSettings::IniFormat);
 
-	p_global.minIntensity = settings.value("General/minIntensity",MINIMUM_INTENSITY).toInt();
-	p_global.maxIntensity = settings.value("General/maxIntensity",MAXIMUM_INTENSITY).toInt();
-	p_global.minZMotion = settings.value("General/minZMotion",MINIMUM_Z_MOTION).toInt();
+	QStringList test = settings.allKeys();
+
+	p_global.minIntensity = settings.value("Global/minIntensity",MINIMUM_INTENSITY).toInt();
+	p_global.maxIntensity = settings.value("Global/maxIntensity",MAXIMUM_INTENSITY).toInt();
+	p_global.minZMotion = settings.value("Global/minZMotion",MINIMUM_Z_MOTION).toInt();
 
 	p_pithDetectionBillon.subWindowWidth = settings.value("PithDetectionBillon/subWindowWidth",NEIGHBORHOOD_WINDOW_WIDTH_BILLON).toInt();
 	p_pithDetectionBillon.subWindowHeight = settings.value("PithDetectionBillon/subWindowHeight",NEIGHBORHOOD_WINDOW_HEIGHT_BILLON).toInt();
@@ -208,6 +210,8 @@ int main( int argc, char *argv[] )
 	p_ellipticalHistograms.lowessPercentageOfFirstValidSlicesToExtrapolate = settings.value("EllipticalHistograms/lowessPercentageOfFirstValidSlicesToExtrapolate",5).toInt();
 	p_ellipticalHistograms.lowessPercentageOfLastValidSlicesToExtrapolate = settings.value("EllipticalHistograms/lowessPercentageOfLastValidSlicesToExtrapolate",0).toInt();
 	p_ellipticalHistograms.smoothingRadius = settings.value("EllipticalHistograms/smoothingRadius",0).toInt();
+
+	return 0;
 
 	Billon *_billon = 0;
 

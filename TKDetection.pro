@@ -10,7 +10,7 @@
 
 # Version d'ITK installée : itk3 | itk4
 ITK_VERSION = itk4
-ITK_NUMBER = 4.8
+ITK_NUMBER = 4.9
 
 
 #                                                                #
@@ -119,7 +119,7 @@ HEADERS	=	inc/billon.h \
 			tst/test_intervalshistogram.h \
 			inc/tiffreader.h \
 			inc/v3dexport.h \
-    inc/options.h
+	inc/options.h
 
 FORMS =	ui/mainwindow.ui
 
@@ -201,6 +201,7 @@ else:itk4 {
 			-litkgdcmuuid-$${ITK_NUMBER} \
 
 	4.8  {	LIBS *=	-litkgdcmcharls-$${ITK_NUMBER} -litkgdcmopenjpeg-$${ITK_NUMBER} }
+	4.9  { LIBS += -litkgdcmcharls-$${ITK_NUMBER} -litkgdcmopenjpeg-$${ITK_NUMBER} -lITKEXPAT-$${ITK_NUMBER} }
 	else {	LIBS *=	-litkopenjpeg-$${ITK_NUMBER} }
 
 	LIBS *=	-litkgdcmjpeg12-$${ITK_NUMBER} \

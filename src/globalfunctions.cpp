@@ -9,7 +9,7 @@ namespace TKD
 {
 	__billon_type__ restrictedValue( __billon_type__ value , const Interval<int> &intensityInterval )
 	{
-		return intensityInterval.containsOpen(value) ? value : intensityInterval.min();
+		return intensityInterval.containsOpen(value) ? value : value > intensityInterval.max() ? intensityInterval.max() : intensityInterval.min();
 	}
 
 	QVector<int> circleLines( const int &radius )

@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>668</width>
-    <height>675</height>
+    <width>616</width>
+    <height>589</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -21,7 +21,7 @@
        <enum>QTabWidget::West</enum>
       </property>
       <property name="currentIndex">
-       <number>0</number>
+       <number>1</number>
       </property>
       <property name="documentMode">
        <bool>true</bool>
@@ -303,8 +303,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>668</width>
-     <height>29</height>
+     <width>616</width>
+     <height>20</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFichier">
@@ -340,7 +340,7 @@
      <item row="1" column="0">
       <widget class="QTabWidget" name="_tabs">
        <property name="currentIndex">
-        <number>2</number>
+        <number>5</number>
        </property>
        <widget class="QWidget" name="tab_4">
         <attribute name="title">
@@ -407,15 +407,15 @@
          <item>
           <widget class="QToolBox" name="toolBox_3">
            <property name="currentIndex">
-            <number>0</number>
+            <number>2</number>
            </property>
            <widget class="QWidget" name="page_10">
             <property name="geometry">
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>312</width>
-              <height>262</height>
+              <width>233</width>
+              <height>105</height>
              </rect>
             </property>
             <attribute name="label">
@@ -524,8 +524,8 @@ du repère polaire</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>268</width>
-              <height>204</height>
+              <width>248</width>
+              <height>160</height>
              </rect>
             </property>
             <attribute name="label">
@@ -718,8 +718,8 @@ zone restreinte</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>196</width>
-              <height>66</height>
+              <width>177</width>
+              <height>54</height>
              </rect>
             </property>
             <attribute name="label">
@@ -784,8 +784,8 @@ zone restreinte</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>424</width>
-              <height>342</height>
+              <width>392</width>
+              <height>272</height>
              </rect>
             </property>
             <attribute name="label">
@@ -981,8 +981,8 @@ sur une coupe valide</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>421</width>
-              <height>326</height>
+              <width>387</width>
+              <height>261</height>
              </rect>
             </property>
             <attribute name="label">
@@ -1247,8 +1247,8 @@ sur une coupe valide</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>377</width>
-              <height>233</height>
+              <width>348</width>
+              <height>184</height>
              </rect>
             </property>
             <attribute name="label">
@@ -1471,8 +1471,8 @@ sur une coupe valide</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>377</width>
-              <height>266</height>
+              <width>348</width>
+              <height>210</height>
              </rect>
             </property>
             <attribute name="label">
@@ -1747,8 +1747,8 @@ sur une coupe valide</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>186</width>
-              <height>49</height>
+              <width>173</width>
+              <height>42</height>
              </rect>
             </property>
             <attribute name="label">
@@ -1791,8 +1791,8 @@ sur une coupe valide</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>312</width>
-              <height>227</height>
+              <width>173</width>
+              <height>42</height>
              </rect>
             </property>
             <attribute name="label">
@@ -2311,8 +2311,8 @@ zone de nœuds</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>366</width>
-              <height>94</height>
+              <width>341</width>
+              <height>78</height>
              </rect>
             </property>
             <attribute name="label">
@@ -2402,8 +2402,8 @@ zone de nœuds</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>315</width>
-              <height>191</height>
+              <width>289</width>
+              <height>157</height>
              </rect>
             </property>
             <attribute name="label">
@@ -2611,8 +2611,8 @@ zone de nœuds</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>331</width>
-              <height>172</height>
+              <width>309</width>
+              <height>139</height>
              </rect>
             </property>
             <attribute name="label">
@@ -2800,8 +2800,8 @@ zone de nœuds</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>258</width>
-              <height>90</height>
+              <width>240</width>
+              <height>76</height>
              </rect>
             </property>
             <attribute name="label">
@@ -2866,8 +2866,8 @@ zone de nœuds</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>334</width>
-              <height>122</height>
+              <width>310</width>
+              <height>103</height>
              </rect>
             </property>
             <attribute name="label">
@@ -2965,8 +2965,8 @@ zone de nœuds</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>203</width>
-              <height>47</height>
+              <width>194</width>
+              <height>41</height>
              </rect>
             </property>
             <attribute name="label">
@@ -3006,8 +3006,8 @@ zone de nœuds</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>341</width>
-              <height>151</height>
+              <width>308</width>
+              <height>70</height>
              </rect>
             </property>
             <attribute name="label">
@@ -3074,7 +3074,26 @@ zone de nœuds</string>
         </attribute>
         <layout class="QHBoxLayout" name="horizontalLayout_4">
          <item>
-          <widget class="QwtPlot" name="_plotSliceHistogram"/>
+          <widget class="QwtPlot" name="_plotSliceHistogram">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>100</width>
+             <height>10</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>999999</width>
+             <height>999998</height>
+            </size>
+           </property>
+          </widget>
          </item>
         </layout>
        </widget>
