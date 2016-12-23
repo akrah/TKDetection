@@ -1,4 +1,11 @@
-#include <QApplication>
+#include <QtGlobal>
+
+#if QT_VERSION >= QT_VERSION_CHECK(4, 9, 9)
+	#include <QtWidgets/QApplication>
+#else
+	#include <QApplication>
+#endif
+
 #include <QTextCodec>
 #include <QTranslator>
 
