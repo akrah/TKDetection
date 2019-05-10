@@ -11,11 +11,11 @@ TKDetection is a software to detect and segment wood knots.
 Dependencies list
 -----------------
 
-|   |            Library                  |  Tested version  |   |          Library            |  Tested version  |   |        Library              |  Tested version  |
-|:-:|:-----------------------------------:|:----------------:|---|:---------------------------:|:----------------:|---|:---------------------------:|:----------------:|
-| 1 | [Qt](#1-qt)                         |       4.8        | 4 | [Qwt](#4-qwt)               |      6.0.2       | 7 | [GSL](#8-gsl)               |       1.15       |
-| 2 | [Armadillo](#2-armadillo)           |     4.600.4      | 5 | [Qxt](#5-qxt)               |      0.6.2       |   |                             |                  |
-| 3 | [InsightToolkit](#3-insighttoolkit) |      4.5.2       | 6 | [QwtPolar](#6-qwtpolar)     |      1.0.1       |   |                             |                  |
+|   |            Library                  |  Tested version  |   |          Library            |  Tested version  |
+|:-:|:-----------------------------------:|:----------------:|---|:---------------------------:|:----------------:|
+| 1 | [Qt](#1-qt)                         |     5.12.2       | 4 | [Qwt](#4-qwt)               |      6.1.4       |
+| 2 | [Armadillo](#2-armadillo)           |     9.200.7      | 5 | [QwtPolar](#6-qwtpolar)     |      1.1.1       |
+| 3 | [InsightToolkit](#3-insighttoolkit) |      4.13        | 6 | [GSL](#8-gsl)               |      2.5         |
 
 
 
@@ -41,13 +41,13 @@ Install "build-essential", "cmake" and "git" packages.
 
 
 ~~~
-  sudo apt-get install build-essential cmake git
+  sudo apt install build-essential cmake git
 ~~~
 
 It is recommended to install the libraries LAPACK, BLAS, ATLAS, and Boost to improve the performances, in particular for the matrix sum and product of Armadillo.
 
 ~~~
-  sudo apt-get install liblapack-dev libblas-dev libatlas-dev libatlas-base-dev libboost-dev libboost-all-dev
+  sudo apt install liblapack-dev libblas-dev libatlas-dev libatlas-base-dev libboost-dev libboost-all-dev
 ~~~
 
 
@@ -58,7 +58,7 @@ Install the *qtcreator* package available on the *Universe* repository.
 This meta-package install the set of Qt dependencies.
 
 ~~~
-  sudo apt-get install qtcreator
+  sudo apt install qtcreator
 ~~~
 
 
@@ -97,7 +97,7 @@ Replace *x.y.z* by the downloaded version number:
   tar xvf InsightToolkit-x.y.z.tar.gz
   mkdir InsightToolkit-x.y.z/build
   cd InsightToolkit-x.y.z/build
-  cmake .. -DCMAKE_CXX_FLAGS="-std=c++0x" -DCMAKE_BUILD_TYPE="Release" -DBUILD_EXAMPLES=false -DBUILD_TESTING=false -DITK_BUILD_ALL_MODULES=false -DITK_BUILD_DEFAULT_MODULES=false -DITKGroup_Core=true -DITKGroup_IO=true
+  cmake .. -DCMAKE_CXX_FLAGS="-std=c++14" -DCMAKE_BUILD_TYPE="Release" -DBUILD_EXAMPLES=false -DBUILD_TESTING=false
   make
   sudo make install
 ~~~
@@ -114,10 +114,10 @@ If a problem appear with *tif_config.h* and/or *tif_dir.h* (typically with ITK 4
 ### 4. Qwt
 [Top](#tkdetection)
 
-Use the version available on the *Main* repository. 
+Use the version available on the *Main* repository.
 
 ~~~
-  sudo apt-get install libqwt-dev
+  sudo apt install libqwt-qt5-dev
 ~~~
 
 If problems appear, you can install the version available on the website http://sourceforge.net/projects/qwt/files/qwt/x.y.z/ :
@@ -134,17 +134,17 @@ If problems appear, you can install the version available on the website http://
 ##### If you have a problem during the TKDetection compilation step:
 
 1.  Check that the following files exist:
-    - /usr/share/qt4/mkspecs/features/qwt.prf
-    - /usr/share/qt4/mkspecs/features/qwtconfig.pri
-    - /usr/share/qt4/mkspecs/features/qwtfunctions.pri
-    - /usr/share/qt4/mkspecs/features/qwtmathml.prf
+    - /usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/qwt.prf
+    - /usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/qwtconfig.pri
+    - /usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/qwtfunctions.pri
+    - /usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/qwtmathml.prf
 
   If they do not exist:
   ~~~
-      sudo ln -s /usr/local/qwt-x.y.z/features/qwt.prf /usr/share/qt4/mkspecs/features/
-      sudo ln -s /usr/local/qwtpolar-x.y.z/features/qwtconfig.pri /usr/share/qt4/mkspecs/features/
-      sudo ln -s /usr/local/qwtpolar-x.y.z/features/qwtfunctions.pri /usr/share/qt4/mkspecs/features/
-      sudo ln -s /usr/local/qwtpolar-x.y.z/features/qwtmathml.pri /usr/share/qt4/mkspecs/features/
+      sudo ln -s /usr/local/qwt-x.y.z/features/qwt.prf /usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/
+      sudo ln -s /usr/local/qwtpolar-x.y.z/features/qwtconfig.pri /usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/
+      sudo ln -s /usr/local/qwtpolar-x.y.z/features/qwtfunctions.pri /usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/
+      sudo ln -s /usr/local/qwtpolar-x.y.z/features/qwtmathml.pri /usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/
   ~~~
 
 2.  if 1. does not resolve the problem:
@@ -160,40 +160,7 @@ If problems appear, you can install the version available on the website http://
       sudo ln -s /usr/local/qwt-x.y.z/lib/libqwtmathml.so.x.y.z /usr/lib/
   ~~~
 
-### 5. Qxt
-[Top](#tkdetection)
-
-Use the version available on the *Main* repository. 
-
-~~~
-  sudo apt-get install libqxt-dev
-~~~
-
-If the repository version does not install the configuration files *qxt.prf* and *qxtvars.prf* required by TKDetection.pro,
-you can install the version available on the website http://www.libqxt.org.
-
-
-Replace *xxxxxxxxx* by the downloaded file number.
-
-~~~
-  tar xvf libqxt-libqxt-xxxxxxxxx.tar.bz2
-  cd libqxt-libqxt-xxxxxxxxx/
-  ./configure
-  make
-  sudo make install
-~~~
-
-If Qxt widgets does not appear on QtDesigner:
-
-~~~
-  sudo ln -s /usr/local/Qxt/lib/libQxtGui.so.0 /usr/lib/
-  sudo ln -s /usr/local/Qxt/lib/libQxtCore.so.0 /usr/lib/
-~~~
-  
-Restart QtDesigner.
-
-
-### 6. QwtPolar
+### 5. QwtPolar
 [Top](#tkdetection)
 
 Use the version available on the website http://sourceforge.net/projects/qwtpolar.
@@ -212,13 +179,13 @@ Replace *x.y.z* by the downloaded version number:
 ##### If you have a problem during the TKDetection compilation step:
 
 1.  Check that the following files exist:
-    - /usr/share/qt4/mkspecs/features/qwtpolar.prf
-    - /usr/share/qt4/mkspecs/features/qwtpolarconfig.pri
+    - /usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/qwtpolar.prf
+    - /usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/qwtpolarconfig.pri
 
   If they do not exist:
   ~~~
-      sudo ln -s /usr/local/qwtpolar-x.y.z/features/qwtpolar.prf /usr/share/qt4/mkspecs/features/
-      sudo ln -s /usr/local/qwtpolar-x.y.z/features/qwtpolarconfig.pri /usr/share/qt4/mkspecs/features/
+      sudo ln -s /usr/local/qwtpolar-x.y.z/features/qwtpolar.prf /usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/
+      sudo ln -s /usr/local/qwtpolar-x.y.z/features/qwtpolarconfig.pri /usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/
   ~~~
 
 2.  if 1. does not resolve the problem:
@@ -235,17 +202,17 @@ Replace *x.y.z* by the downloaded version number:
 Don't forget to replace *x.y.z* by the downloaded version number:
 
 ~~~
-  sudo cp /usr/local/qwtpolar-x.y.z/plugins/designer/libqwt_polar_designer_plugin.so /usr/lib/x86_64-linux-gnu/qt4/plugins/designer/
+  sudo cp /usr/local/qwtpolar-x.y.z/plugins/designer/libqwt_polar_designer_plugin.so /usr/lib/x86_64-linux-gnu/qt5/plugins/designer/
 ~~~
 
 
-### 8. GSL
+### 6. GSL
 [Top](#tkdetection)
 
 The Gnu Standard Library (GSL) is present in the Ubuntu Main repository:
 
 ~~~
-  sudo apt-get install libgsl0-dev
+  sudo apt install libgsl-dev
 ~~~
 
 TKDetection installation

@@ -1,4 +1,4 @@
-#include <qapplication.h>
+#include <QApplication>
 #include <DGtal/base/Common.h>
 #include <DGtal/io/viewers/Viewer3D.h>
 #include "DGtal/io/readers/VolReader.h"
@@ -47,10 +47,10 @@ int main(int argc, char** argv)
 
   typedef DGtal::ImageContainerBySTLVector<DGtal::Z2i::Domain,  unsigned char > Image2D;
   typedef DGtal::ImageContainerBySTLVector<DGtal::Z3i::Domain,  unsigned char > Image3D;
-  typedef DGtal::ConstImageAdapter<Image3D, Image2D::Domain, DGtal::Projector< DGtal::Z3i::Space>,
-				   Image3D::Value,  DGtal::DefaultFunctor >  SliceImageAdapter;
+  typedef DGtal::ConstImageAdapter<Image3D, Image2D::Domain, DGtal::functors::Projector< DGtal::Z3i::Space>,
+				   Image3D::Value,  DGtal::functors::Identity >  SliceImageAdapter;
 
-  typedef DGtal::Viewer3D<Z3i::Space, Z3i::KSpace> My3DViewer;  
+  typedef DGtal::Viewer3D<Z3i::Space, Z3i::KSpace> My3DViewer;
   // parse command line ----------------------------------------------
   po::options_description general_opt("Allowed options are: ");
   general_opt.add_options()
@@ -60,7 +60,7 @@ int main(int argc, char** argv)
     ("sliceZ",po::value<unsigned int>(), "add a SliceZ image of number <arg>" )
     ("sliceY",po::value<unsigned int>(), "add a SliceY image of number <arg>" )
     ("sliceX",po::value<unsigned int>(), "add a SliceX image of number <arg>" )
-	
+
     ("trunkBark-mesh,t", po::value<std::string>(), "mesh of the trunk bark in format OFS non normalized (.ofs)" )
 	("marrow-mesh,a", po::value<std::string>(), "mesh of trunk marrow  in format OFS non normalized (.ofs)" )
     ("scaleX,x",  po::value<float>()->default_value(1.0), "set the scale value in the X direction (default 1.0)" )
@@ -112,31 +112,32 @@ int main(int argc, char** argv)
   viewer.show();
 
 
-  
+  DGtal::functors::Identity identity;
+
   if(vm.count("volImageName") &&(vm.count("sliceX")||vm.count("sliceY")||vm.count("sliceZ"))){
     string imageName = vm["volImageName"].as<std::string>();
     Image3D img = GenericReader<Image3D>::import(imageName);
-    
+
     int nbImage=0;
     if(vm.count("sliceX")){
       unsigned int sliceNum = vm["sliceX"].as<unsigned int>();
-      DGtal::Projector<DGtal::Z2i::Space>  invFunctorX; invFunctorX.initRemoveOneDim(0);
-      DGtal::Z2i::Domain domain2DX(invFunctorX(img.domain().lowerBound()), 
+      DGtal::functors::Projector<DGtal::Z2i::Space>  invFunctorX; invFunctorX.initRemoveOneDim(0);
+      DGtal::Z2i::Domain domain2DX(invFunctorX(img.domain().lowerBound()),
 				   invFunctorX(img.domain().upperBound()));
-      DGtal::Projector<DGtal::Z3i::Space> aSliceFunctorX(sliceNum); aSliceFunctorX.initAddOneDim(0);
-      SliceImageAdapter sliceImageX(img, domain2DX, aSliceFunctorX, DGtal::DefaultFunctor());
+      DGtal::functors::Projector<DGtal::Z3i::Space> aSliceFunctorX(sliceNum); aSliceFunctorX.initAddOneDim(0);
+      SliceImageAdapter sliceImageX(img, domain2DX, aSliceFunctorX, identity);
       viewer << sliceImageX;
       viewer << DGtal::UpdateImagePosition<Z3i::Space, Z3i::KSpace>(nbImage, My3DViewer::xDirection, sliceNum, 0.0,0.0 );
       nbImage++;
     }
-    
+
     if(vm.count("sliceZ")){
       unsigned int sliceNum = vm["sliceZ"].as<unsigned int>();
-      DGtal::Projector<DGtal::Z2i::Space>  invFunctorZ; invFunctorZ.initRemoveOneDim(2);
-      DGtal::Z2i::Domain domain2DZ(invFunctorZ(img.domain().lowerBound()), 
+      DGtal::functors::Projector<DGtal::Z2i::Space>  invFunctorZ; invFunctorZ.initRemoveOneDim(2);
+      DGtal::Z2i::Domain domain2DZ(invFunctorZ(img.domain().lowerBound()),
 				   invFunctorZ(img.domain().upperBound()));
-      DGtal::Projector<DGtal::Z3i::Space> aSliceFunctorZ(sliceNum); aSliceFunctorZ.initAddOneDim(2);
-      SliceImageAdapter sliceImageZ(img, domain2DZ, aSliceFunctorZ, DGtal::DefaultFunctor());
+      DGtal::functors::Projector<DGtal::Z3i::Space> aSliceFunctorZ(sliceNum); aSliceFunctorZ.initAddOneDim(2);
+      SliceImageAdapter sliceImageZ(img, domain2DZ, aSliceFunctorZ, identity);
       viewer << sliceImageZ;
       viewer << DGtal::UpdateImagePosition<Z3i::Space, Z3i::KSpace>(nbImage, My3DViewer::zDirection,  0.0,0.0, sliceNum );
       nbImage++;
@@ -144,18 +145,18 @@ int main(int argc, char** argv)
 
     if(vm.count("sliceY")){
       unsigned int sliceNum = vm["sliceY"].as<unsigned int>();
-      DGtal::Projector<DGtal::Z2i::Space>  invFunctorY; invFunctorY.initRemoveOneDim(1);
-      DGtal::Z2i::Domain domain2DY(invFunctorY(img.domain().lowerBound()), 
+      DGtal::functors::Projector<DGtal::Z2i::Space>  invFunctorY; invFunctorY.initRemoveOneDim(1);
+      DGtal::Z2i::Domain domain2DY(invFunctorY(img.domain().lowerBound()),
 				   invFunctorY(img.domain().upperBound()));
 
-      DGtal::Projector<DGtal::Z3i::Space> aSliceFunctorY(sliceNum); aSliceFunctorY.initAddOneDim(1);
-      SliceImageAdapter sliceImageY(img, domain2DY, aSliceFunctorY, DGtal::DefaultFunctor());
+      DGtal::functors::Projector<DGtal::Z3i::Space> aSliceFunctorY(sliceNum); aSliceFunctorY.initAddOneDim(1);
+      SliceImageAdapter sliceImageY(img, domain2DY, aSliceFunctorY, identity);
       viewer << sliceImageY;
       viewer << DGtal::UpdateImagePosition<Z3i::Space, Z3i::KSpace>(nbImage, My3DViewer::yDirection, 0.0, sliceNum,0.0 );
       nbImage++;
-      
+
     }
-    
+
   }
 
 
@@ -227,7 +228,7 @@ int main(int argc, char** argv)
 	    display= display && (vectConnectedSCell.at(i).size()>=minSize);
 	  }
 	  if(vm.count("filterMaxZ") || vm.count("filterMaxY") || vm.count("filterMaxX")){
-	    RealPoint barycenter =  getBarycenter(K,vectConnectedSCell.at(i)); 	    
+	    RealPoint barycenter =  getBarycenter(K,vectConnectedSCell.at(i));
 	    if(vm.count("filterMaxZ")){
 	      int maxZ = vm["filterMaxZ"].as<int>();
 	      display=display && (barycenter[2]<= maxZ);
@@ -240,7 +241,7 @@ int main(int argc, char** argv)
 	      int maxY = vm["filterMaxX"].as<int>();
 	      display=display && (barycenter[0]<= maxY);
 	    }
-	    
+
 	  }
 	  if(display){
 	    cptComp++;

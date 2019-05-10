@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>699</width>
-    <height>542</height>
+    <width>819</width>
+    <height>974</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -148,8 +148,8 @@
             <widget class="QWidget" name="scrollAreaWidgetContents">
              <property name="geometry">
               <rect>
-               <x>106</x>
-               <y>186</y>
+               <x>102</x>
+               <y>398</y>
                <width>0</width>
                <height>0</height>
               </rect>
@@ -252,7 +252,7 @@
              <property name="geometry">
               <rect>
                <x>0</x>
-               <y>0</y>
+               <y>284</y>
                <width>390</width>
                <height>234</height>
               </rect>
@@ -286,8 +286,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>699</width>
-     <height>25</height>
+     <width>819</width>
+     <height>24</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFichier">
@@ -323,7 +323,7 @@
      <item row="1" column="0">
       <widget class="QTabWidget" name="_tabs">
        <property name="currentIndex">
-        <number>5</number>
+        <number>0</number>
        </property>
        <widget class="QWidget" name="tab_4">
         <attribute name="title">
@@ -390,15 +390,15 @@
          <item>
           <widget class="QToolBox" name="toolBox_3">
            <property name="currentIndex">
-            <number>0</number>
+            <number>2</number>
            </property>
            <widget class="QWidget" name="page_10">
             <property name="geometry">
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>254</width>
-              <height>118</height>
+              <width>461</width>
+              <height>131</height>
              </rect>
             </property>
             <attribute name="label">
@@ -507,8 +507,8 @@ du repère polaire</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>278</width>
-              <height>259</height>
+              <width>447</width>
+              <height>274</height>
              </rect>
             </property>
             <attribute name="label">
@@ -769,8 +769,8 @@ zone restreinte</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>204</width>
-              <height>66</height>
+              <width>461</width>
+              <height>131</height>
              </rect>
             </property>
             <attribute name="label">
@@ -835,8 +835,8 @@ zone restreinte</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>424</width>
-              <height>305</height>
+              <width>427</width>
+              <height>316</height>
              </rect>
             </property>
             <attribute name="label">
@@ -1032,8 +1032,8 @@ sur une coupe valide</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>417</width>
-              <height>292</height>
+              <width>447</width>
+              <height>301</height>
              </rect>
             </property>
             <attribute name="label">
@@ -1298,8 +1298,8 @@ sur une coupe valide</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>392</width>
-              <height>245</height>
+              <width>447</width>
+              <height>259</height>
              </rect>
             </property>
             <attribute name="label">
@@ -1566,8 +1566,8 @@ sur une coupe valide</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>392</width>
-              <height>280</height>
+              <width>380</width>
+              <height>295</height>
              </rect>
             </property>
             <attribute name="label">
@@ -1890,7 +1890,7 @@ sur une coupe valide</string>
               <x>0</x>
               <y>0</y>
               <width>185</width>
-              <height>45</height>
+              <height>46</height>
              </rect>
             </property>
             <attribute name="label">
@@ -1933,8 +1933,8 @@ sur une coupe valide</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>185</width>
-              <height>45</height>
+              <width>184</width>
+              <height>46</height>
              </rect>
             </property>
             <attribute name="label">
@@ -2186,14 +2186,14 @@ l'intervalle angulaire</string>
             </font>
            </property>
            <property name="currentIndex">
-            <number>4</number>
+            <number>5</number>
            </property>
            <widget class="QWidget" name="page">
             <property name="geometry">
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>381</width>
+              <width>375</width>
               <height>86</height>
              </rect>
             </property>
@@ -2284,8 +2284,8 @@ l'intervalle angulaire</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>323</width>
-              <height>176</height>
+              <width>315</width>
+              <height>177</height>
              </rect>
             </property>
             <attribute name="label">
@@ -2493,8 +2493,8 @@ l'intervalle angulaire</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>340</width>
-              <height>154</height>
+              <width>335</width>
+              <height>159</height>
              </rect>
             </property>
             <attribute name="label">
@@ -2682,8 +2682,8 @@ l'intervalle angulaire</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>265</width>
-              <height>83</height>
+              <width>261</width>
+              <height>84</height>
              </rect>
             </property>
             <attribute name="label">
@@ -2748,8 +2748,8 @@ l'intervalle angulaire</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>343</width>
-              <height>111</height>
+              <width>338</width>
+              <height>115</height>
              </rect>
             </property>
             <attribute name="label">
@@ -2847,8 +2847,8 @@ l'intervalle angulaire</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>339</width>
-              <height>71</height>
+              <width>461</width>
+              <height>70</height>
              </rect>
             </property>
             <attribute name="label">
@@ -2907,7 +2907,7 @@ l'intervalle angulaire</string>
         <enum>QTabWidget::South</enum>
        </property>
        <property name="currentIndex">
-        <number>4</number>
+        <number>0</number>
        </property>
        <widget class="QWidget" name="_tabSliceHistogram">
         <attribute name="title">
@@ -3080,7 +3080,13 @@ l'intervalle angulaire</string>
   <customwidget>
    <class>QxtSpanSlider</class>
    <extends>QSlider</extends>
-   <header>QxtSpanSlider</header>
+   <header>inc/qxtspanslider.h</header>
+   <slots>
+    <signal>lowerValueChanged(int)</signal>
+    <signal>upperValueChanged(int)</signal>
+    <slot>setLowerValue(int)</slot>
+    <slot>setUpperValue(int)</slot>
+   </slots>
   </customwidget>
  </customwidgets>
  <tabstops>

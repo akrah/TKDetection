@@ -5,6 +5,7 @@
 #include <QXmlStreamWriter>
 #include <QFile>
 #include <QDebug>
+#include <QDataStream>
 
 namespace V3DExport
 {

@@ -8,9 +8,8 @@
 #
 #-------------------------------------------------------
 
-# Version d'ITK installée : itk3 | itk4
-ITK_VERSION = itk4
-ITK_NUMBER =  4.5
+# Version d'ITK installée
+ITK_NUMBER =  4.13
 
 
 #                                                                #
@@ -20,18 +19,15 @@ ITK_NUMBER =  4.5
 # Configuration
 #--------------#
 TEMPLATE	=	app
-QT			*=	core gui xml
+QT			*=	widgets gui printsupport
 CONFIG		*=	warn_on
-CONFIG		*=	qwt qxt qwtpolar $${ITK_VERSION}
-QXT			=	core gui widgets
+CONFIG		*=	qwt qwtpolar $${ITK_NUMBER}
 
 # Répertoires
 #------------#
-TARGET				= TKDetection
-macx:MOC_DIR		= .moc
-macx:OBJECTS_DIR	= .obj
-CONFIG  += qxt
-QXT     += core gui
+TARGET		= TKDetection
+MOC_DIR		= moc
+OBJECTS_DIR	= obj
 
 # Traductions
 #------------#
@@ -62,6 +58,7 @@ SOURCES	=	src/main.cpp \
 			src/plotsectorhistogram.cpp \
 			src/plotslicehistogram.cpp \
 			src/pointpolarseriesdata.cpp \
+			src/qxtspanslider.cpp \
 			src/sectorhistogram.cpp \
 			src/slicealgorithm.cpp \
 			src/slicehistogram.cpp \
@@ -102,6 +99,9 @@ HEADERS	=	inc/billon.h \
 			inc/plotsectorhistogram.h \
 			inc/plotslicehistogram.h \
 			inc/pointpolarseriesdata.h \
+			inc/qxtglobal.h \
+			inc/qxtspanslider.h \
+			inc/qxtspanslider_p.h \
 			inc/sectorhistogram.h \
 			inc/slicealgorithm.h \
 			inc/slicehistogram.h \
@@ -116,80 +116,71 @@ FORMS =	ui/mainwindow.ui
 
 # Directives compilateur
 #-----------------------#
-QMAKE_CXXFLAGS *= -std=c++0x
-macx:QMAKE_CC=/usr/bin/gcc
-macx:QMAKE_CXX=/usr/bin/g++
-
+QMAKE_CXXFLAGS *= -std=c++14
 
 # Librairies externes
 #--------------------#
-INCLUDEPATH *=	/usr/include/ /usr/local/include/
-
-QMAKE_LIBDIR *=	/usr/local/lib/
-
 LIBS *= -larmadillo -lgsl -lgslcblas
 
 # ITK
 #----#
-itk3 {
-	# SI ITK_VERSION = itk3
-	#----------------------#
-	ITK_PATH	 =	/usr/local/include/InsightToolkit/
-	INCLUDEPATH	*=	$${ITK_PATH}/ \
-					$${ITK_PATH}/IO/ \
-					$${ITK_PATH}/Common/ \
-					$${ITK_PATH}/gdcm/src/ \
-					$${ITK_PATH}/Utilities/ \
-					$${ITK_PATH}/Utilities/vxl/vcl/ \
-					$${ITK_PATH}/Utilities/vxl/core/
+ITK_PATH	 =	/usr/local/include/ITK-$${ITK_NUMBER}/
+INCLUDEPATH	*=	$${ITK_PATH}/
 
-	LIBS *=	-lITKIO \
-			-litkgdcm \
-			-litkjpeg8 \
-			-litktiff \
-			-lITKMetaIO \
-			-lITKNrrdIO \
-			-litkpng \
-			-litkzlib \
-			-lITKDICOMParser \
-			-litkjpeg12 \
-			-litkjpeg16 \
-			-litkopenjpeg \
-			-lITKniftiio \
-			-lITKznz \
-			-lITKCommon \
-			-litksys \
-			-litkvnl_algo \
-			-litkv3p_netlib \
-			-litkvnl
-}
-else:itk4 {
-	# SI ITK_VERSION = itk4
-	#----------------------#
-	ITK_PATH	 =	/usr/local/include/ITK-$${ITK_NUMBER}/
-	INCLUDEPATH	*=	$${ITK_PATH}/
-
-	LIBS *= -lITKIOGDCM-$${ITK_NUMBER} \
-				-litkgdcmDICT-$${ITK_NUMBER} \
-				-litkgdcmMSFF-$${ITK_NUMBER} \
-					-litkgdcmIOD-$${ITK_NUMBER} \
-					-litkgdcmDSED-$${ITK_NUMBER} \
-						-litkzlib-$${ITK_NUMBER} \
-					-litkgdcmCommon-$${ITK_NUMBER} \
-					-litkgdcmuuid-$${ITK_NUMBER} \
-					-litkopenjpeg-$${ITK_NUMBER} \
-					-litkgdcmjpeg12-$${ITK_NUMBER} \
-					-litkgdcmjpeg16-$${ITK_NUMBER} \
-					-litkgdcmjpeg8-$${ITK_NUMBER} \
-				-lITKIOImageBase-$${ITK_NUMBER} \
-					-lITKCommon-$${ITK_NUMBER} \
-						-litksys-$${ITK_NUMBER} \
-						-litkvnl_algo-$${ITK_NUMBER} \
-						-litkv3p_netlib-$${ITK_NUMBER} \
-						-litkvnl-$${ITK_NUMBER} \
-				-lITKIOTIFF-$${ITK_NUMBER} \
-					-litktiff-$${ITK_NUMBER} \
-					-litkjpeg-$${ITK_NUMBER} \
-				-ldl \
-				-lexpat
-}
+LIBS *= -lITKIOGDCM-$${ITK_NUMBER} \
+		-litkgdcmDICT-$${ITK_NUMBER} \
+		-litkgdcmMSFF-$${ITK_NUMBER} \
+		-litkgdcmIOD-$${ITK_NUMBER} \
+		-litkgdcmDSED-$${ITK_NUMBER} \
+		-litkgdcmopenjp2-$${ITK_NUMBER} \
+		-litkgdcmcharls-$${ITK_NUMBER} \
+		-litkgdcmCommon-$${ITK_NUMBER} \
+		-litkgdcmuuid-$${ITK_NUMBER} \
+		-litkgdcmjpeg12-$${ITK_NUMBER} \
+		-litkgdcmjpeg16-$${ITK_NUMBER} \
+		-litkgdcmjpeg8-$${ITK_NUMBER} \
+		-lITKIOBruker-$${ITK_NUMBER} \
+		-lITKIOSiemens-$${ITK_NUMBER} \
+		-lITKIOIPL-$${ITK_NUMBER} \
+		-lITKIOJPEG-$${ITK_NUMBER} \
+		-lITKIOBMP-$${ITK_NUMBER} \
+		-lITKIOBioRad-$${ITK_NUMBER} \
+		-lITKIOGE-$${ITK_NUMBER} \
+		-lITKIOGIPL-$${ITK_NUMBER} \
+		-lITKIOMINC-$${ITK_NUMBER} \
+		-litkminc2-$${ITK_NUMBER} \
+		-lITKIOHDF5-$${ITK_NUMBER} \
+		-litkhdf5_cpp \
+		-litkhdf5 \
+		-lITKIOLSM-$${ITK_NUMBER} \
+		-lITKIOMRC-$${ITK_NUMBER} \
+		-lITKIONIFTI-$${ITK_NUMBER} \
+		-lITKniftiio-$${ITK_NUMBER} \
+		-lITKIONRRD-$${ITK_NUMBER} \
+		-lITKNrrdIO-$${ITK_NUMBER} \
+		-lITKIOPNG-$${ITK_NUMBER} \
+		-litkpng-$${ITK_NUMBER} \
+		-lITKIOStimulate-$${ITK_NUMBER} \
+		-lITKIOTIFF-$${ITK_NUMBER} \
+		-litktiff-$${ITK_NUMBER} \
+		-litkjpeg-$${ITK_NUMBER} \
+		-lITKIOVTK-$${ITK_NUMBER} \
+		-lITKIOMeta-$${ITK_NUMBER} \
+		-lITKMetaIO-$${ITK_NUMBER} \
+		-lITKIOImageBase-$${ITK_NUMBER} \
+		-lITKznz-$${ITK_NUMBER} \
+		-litkzlib-$${ITK_NUMBER} \
+		-lITKCommon-$${ITK_NUMBER} \
+		-litksys-$${ITK_NUMBER} \
+		-litkvnl_algo-$${ITK_NUMBER} \
+		-litkv3p_netlib-$${ITK_NUMBER} \
+		-litkvnl-$${ITK_NUMBER} \
+		-litkvcl-$${ITK_NUMBER} \
+		-lITKVNLInstantiation-$${ITK_NUMBER} \
+		-lITKStatistics-$${ITK_NUMBER} \
+		-litkdouble-conversion-$${ITK_NUMBER} \
+		-lITKLabelMap-$${ITK_NUMBER} \
+		-lITKEXPAT-$${ITK_NUMBER} \
+		-lITKTransform-$${ITK_NUMBER} \
+		-ldl \
+		-lexpat

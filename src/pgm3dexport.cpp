@@ -7,6 +7,7 @@
 #include <QFile>
 #include <QTextStream>
 #include <QDebug>
+#include <QDataStream>
 
 namespace Pgm3dExport
 {
