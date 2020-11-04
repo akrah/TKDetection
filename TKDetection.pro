@@ -124,7 +124,7 @@ LIBS *= -larmadillo -lgsl -lgslcblas
 
 # ITK
 #----#
-ITK_PATH	 =	/usr/local/include/ITK-$${ITK_NUMBER}/
+ITK_PATH	 =	/usr/local/include/ITK-$${ITK_NUMBER}/ /usr/include/ITK-$${ITK_NUMBER}/
 INCLUDEPATH	*=	$${ITK_PATH}/
 
 LIBS *= -lITKIOGDCM-$${ITK_NUMBER} \
