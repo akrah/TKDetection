@@ -130,17 +130,17 @@ ITK_PATH	 =	/usr/local/include/ITK-$${ITK_NUMBER}/ \
 INCLUDEPATH	*=	$${ITK_PATH}/
 
 LIBS *= -lITKIOGDCM-$${ITK_NUMBER} \
-		-litkgdcmDICT-$${ITK_NUMBER} \
-		-litkgdcmMSFF-$${ITK_NUMBER} \
-		-litkgdcmIOD-$${ITK_NUMBER} \
-		-litkgdcmDSED-$${ITK_NUMBER} \
-		-litkgdcmopenjp2-$${ITK_NUMBER} \
-		-litkgdcmcharls-$${ITK_NUMBER} \
-		-litkgdcmCommon-$${ITK_NUMBER} \
-		-litkgdcmuuid-$${ITK_NUMBER} \
-		-litkgdcmjpeg12-$${ITK_NUMBER} \
-		-litkgdcmjpeg16-$${ITK_NUMBER} \
-		-litkgdcmjpeg8-$${ITK_NUMBER} \
+		-lgdcmDICT \
+		-lgdcmMSFF \
+		-lgdcmIOD \
+		-lgdcmDSED \
+		-lgdcmopenjp2 \
+		-lgdcmcharls \
+		-lgdcmCommon \
+		-lgdcmuuid \
+		-lgdcmjpeg12 \
+		-lgdcmjpeg16 \
+		-lgdcmjpeg8 \
 		-lITKIOBruker-$${ITK_NUMBER} \
 		-lITKIOSiemens-$${ITK_NUMBER} \
 		-lITKIOIPL-$${ITK_NUMBER} \
@@ -150,28 +150,28 @@ LIBS *= -lITKIOGDCM-$${ITK_NUMBER} \
 		-lITKIOGE-$${ITK_NUMBER} \
 		-lITKIOGIPL-$${ITK_NUMBER} \
 		-lITKIOMINC-$${ITK_NUMBER} \
-		-litkminc2-$${ITK_NUMBER} \
+		-lminc2 \
 		-lITKIOHDF5-$${ITK_NUMBER} \
-		-litkhdf5_cpp \
-		-litkhdf5 \
+		-lhdf5_cpp \
+		-lhdf5 \
 		-lITKIOLSM-$${ITK_NUMBER} \
 		-lITKIOMRC-$${ITK_NUMBER} \
 		-lITKIONIFTI-$${ITK_NUMBER} \
-		-lITKniftiio-$${ITK_NUMBER} \
+		-lniftiio \
 		-lITKIONRRD-$${ITK_NUMBER} \
 		-lITKNrrdIO-$${ITK_NUMBER} \
 		-lITKIOPNG-$${ITK_NUMBER} \
-		-litkpng-$${ITK_NUMBER} \
+		-lpng \
 		-lITKIOStimulate-$${ITK_NUMBER} \
 		-lITKIOTIFF-$${ITK_NUMBER} \
-		-litktiff-$${ITK_NUMBER} \
-		-litkjpeg-$${ITK_NUMBER} \
+		-ltiff \
+		-ljpeg \
 		-lITKIOVTK-$${ITK_NUMBER} \
 		-lITKIOMeta-$${ITK_NUMBER} \
 		-lITKMetaIO-$${ITK_NUMBER} \
 		-lITKIOImageBase-$${ITK_NUMBER} \
-		-lITKznz-$${ITK_NUMBER} \
-		-litkzlib-$${ITK_NUMBER} \
+		-lznz \
+		-lzlib \
 		-lITKCommon-$${ITK_NUMBER} \
 		-litksys-$${ITK_NUMBER} \
 		-litkvnl_algo-$${ITK_NUMBER} \
@@ -180,9 +180,8 @@ LIBS *= -lITKIOGDCM-$${ITK_NUMBER} \
 		-litkvcl-$${ITK_NUMBER} \
 		-lITKVNLInstantiation-$${ITK_NUMBER} \
 		-lITKStatistics-$${ITK_NUMBER} \
-		-litkdouble-conversion-$${ITK_NUMBER} \
+		-ldouble-conversion \
 		-lITKLabelMap-$${ITK_NUMBER} \
-		-lITKEXPAT-$${ITK_NUMBER} \
 		-lITKTransform-$${ITK_NUMBER} \
 		-ldl \
 		-lexpat
