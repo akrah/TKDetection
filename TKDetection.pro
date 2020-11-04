@@ -134,10 +134,7 @@ LIBS *= -lITKIOGDCM-$${ITK_NUMBER} \
 		-lgdcmMSFF \
 		-lgdcmIOD \
 		-lgdcmDSED \
-		-lgdcmopenjp2 \
-		-lgdcmcharls \
 		-lgdcmCommon \
-		-lgdcmuuid \
 		-lgdcmjpeg12 \
 		-lgdcmjpeg16 \
 		-lgdcmjpeg8 \
@@ -152,8 +149,6 @@ LIBS *= -lITKIOGDCM-$${ITK_NUMBER} \
 		-lITKIOMINC-$${ITK_NUMBER} \
 		-lminc2 \
 		-lITKIOHDF5-$${ITK_NUMBER} \
-		-lhdf5_cpp \
-		-lhdf5 \
 		-lITKIOLSM-$${ITK_NUMBER} \
 		-lITKIOMRC-$${ITK_NUMBER} \
 		-lITKIONIFTI-$${ITK_NUMBER} \
@@ -171,7 +166,6 @@ LIBS *= -lITKIOGDCM-$${ITK_NUMBER} \
 		-lITKMetaIO-$${ITK_NUMBER} \
 		-lITKIOImageBase-$${ITK_NUMBER} \
 		-lznz \
-		-lzlib \
 		-lITKCommon-$${ITK_NUMBER} \
 		-litksys-$${ITK_NUMBER} \
 		-litkvnl_algo-$${ITK_NUMBER} \
